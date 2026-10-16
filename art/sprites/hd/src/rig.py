@@ -82,6 +82,11 @@ HEAD = part_rows("""
 """)
 NECK_AT = (5, 10)
 
+# Female head: lashed eye, hair down behind the ear.
+HEAD_F = [r for r in HEAD]
+HEAD_F[6] = ".oHh23oo3o.."
+HEAD_F[8] = ".ohh23332o.."
+
 PONYTAIL = part_rows("""
 ..ooo.
 .oHHHo
@@ -144,6 +149,21 @@ class Part:
     def set(self, xy, ch):
         self.px[(round(xy[0] - 0.5), round(xy[1] - 0.5))] = ch
 
+    def despeckle(self, keep="kKgeEGfo"):
+        """Replace lone shade pixels (unlike all 4 neighbours) with the
+        most common neighbour, so ramps form clean bands, not noise."""
+        fixed = dict(self.px)
+        for (x, y), ch in self.px.items():
+            if ch in keep:
+                continue
+            nb = [self.px.get(n) for n in
+                  ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1))]
+            nb = [c for c in nb if c is not None and c not in keep]
+            if len(nb) >= 3 and ch not in nb:
+                fixed[(x, y)] = max(set(nb), key=nb.count)
+        self.px = fixed
+        return self
+
     def outline(self):
         out = set()
         if not self.outlined:
@@ -197,7 +217,22 @@ def arm(shoulder, elbow, hand, far=False, band=True):
         p.capsule(lerp(elbow, hand, 0.68), lerp(elbow, hand, 0.82), 1.5, 1.5,
                   sh)                                                # wristband
     p.capsule(hand, hand, 1.6, 1.6, sk)                              # fist
+    p.despeckle()
+    hem(p)
     return p
+
+
+SHIRT = "DdML"
+SKIN = "1234"
+DARKER = {"L": "M", "M": "d", "d": "D", "D": "D", "W": "w", "w": "q", "q": "q"}
+
+
+def hem(p, cloth=SHIRT, skin=SKIN):
+    """Darken cloth pixels that touch skin: a sleeve or wristband edge."""
+    for (x, y), ch in list(p.px.items()):
+        if ch in cloth and any(p.px.get(n, ".") in skin for n in
+                               ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1))):
+            p.px[(x, y)] = DARKER[ch]
 
 
 def leg(hip, knee, ankle, toe_dir=(1, 0), far=False):
@@ -208,6 +243,7 @@ def leg(hip, knee, ankle, toe_dir=(1, 0), far=False):
     p.capsule(hip, knee, 2.55, 2.1, sk)
     p.capsule(lerp(knee, ankle, 0.72), ankle, 1.4, 1.4,
               "sock_far" if far else "sock")
+    p.despeckle()
     shoe(p, ankle, toe_dir, far)
     return p
 
@@ -251,9 +287,26 @@ def shoe(p, ankle, toe_dir, far):
 
 def torso(neck, hip):
     p = Part()
-    chest = lerp(neck, hip, 0.35)
-    p.capsule(chest, add(hip, (0, -1)), 4.4, 4.0, "shirt")
-    p.capsule(add(neck, (0, 3)), chest, 3.8, 4.4, "shirt")
+    chest = add(lerp(neck, hip, 0.38), (0.9, 0))   # chest forward, flat back
+    p.capsule(chest, add(hip, (0, -1)), 4.0, 3.9, "shirt")
+    p.capsule(add(neck, (0, 3)), chest, 3.7, 4.0, "shirt")
+    p.capsule(add(lerp(neck, hip, 0.45), (-1.0, 0)), add(hip, (-0.5, -1.5)),
+              3.0, 3.4, "shirt")                         # back, below the blades
+    p.despeckle()
+    for (x, y), ch in list(p.px.items()):
+        if (x, y + 1) not in p.px:
+            p.px[(x, y)] = DARKER[DARKER[ch]] if ch in "LM" else "D"
+        elif (x, y + 2) not in p.px and ch in "LM":
+            p.px[(x, y)] = DARKER[ch]
+    return p
+
+
+def collar(neck):
+    """Polo collar flaps either side of the neck, open V at the front."""
+    p = Part(outlined=False)
+    nx, ny = round(neck[0] - 0.5), round(neck[1] - 0.5)
+    p.blit(["LL.L",
+            ".LDL"], nx - 2, ny + 2)
     return p
 
 
@@ -262,6 +315,7 @@ def shorts(hip, knee_n, knee_f):
     p.capsule(add(hip, (-1, 0)), add(hip, (1, 0)), 4.0, 4.0, "shorts")
     p.capsule(hip, lerp(hip, knee_f, 0.5), 3.2, 2.8, "shorts_far")
     p.capsule(add(hip, (1, 0)), lerp(hip, knee_n, 0.5), 3.2, 2.8, "shorts")
+    p.despeckle()
     return p
 
 
@@ -293,12 +347,15 @@ def paddle(grip, angle_deg, face_up=True):
             q = (abs(u) / hl) ** 3 + (abs(v) / hw) ** 3
             if q > 1:
                 continue
-            if q > 0.52:
-                s = (px * LIGHT[0] + py * LIGHT[1]) / hl
-                ch = "E" if s > 0.35 else "e"
+            s = (px * LIGHT[0] + py * LIGHT[1]) / hl
+            if q > 0.55:
+                ch = "E" if s > 0.3 else "e"
+            elif q > 0.3 and s < -0.1:
+                ch = "p"
+            elif -1.2 < (u * 0.8 - v) - 1.6 < 0.7 and s > -0.2:
+                ch = "f"
             else:
-                s = (px * LIGHT[0] + py * LIGHT[1]) / hl
-                ch = "f" if s > 0.45 else ("p" if s < -0.15 else "P")
+                ch = "P"
             p.px[(x, y)] = ch
     return p
 
@@ -338,17 +395,19 @@ POSES = {
     "idle1": shift(IDLE, 0, 1, kn_n=(37, 47), an_n=(34, 54.5),
                    kn_f=(18.5, 47), an_f=(16, 54.5)),
     "run0": shift(RUN, 0, 1, el_f=(33, 34), ha_f=(38, 32),
+                  ha_n=(39, 35), paddle=(-66, "front"),
                   kn_n=(37, 45), an_n=(39, 54.5),
                   kn_f=(22, 46), an_f=(16, 50), toe_f=(1, 0.9)),
     "run1": shift(RUN, 0, 0, el_f=(30, 35), ha_f=(33, 38),
-                  kn_n=(30, 46), an_n=(28, 54.5),
-                  kn_f=(34, 43), an_f=(29, 49), toe_f=(1, 0.7)),
+                  kn_n=(30, 46), an_n=(28.5, 54.5),
+                  kn_f=(29, 46), an_f=(21, 48), toe_f=(1, 1.1)),
     "run2": shift(RUN, 0, 1, el_f=(26, 34), ha_f=(23, 38),
+                  ha_n=(41, 34), paddle=(-52, "front"),
                   kn_n=(22, 46), an_n=(16, 50), toe_n=(1, 0.9),
                   kn_f=(36, 45), an_f=(38, 54.5)),
     "run3": shift(RUN, 0, 0, el_f=(30, 35), ha_f=(33, 38),
-                  kn_n=(35, 43), an_n=(30, 49), toe_n=(1, 0.7),
-                  kn_f=(28, 46), an_f=(26, 54.5)),
+                  kn_n=(31, 46), an_n=(23, 48), toe_n=(1, 1.1),
+                  kn_f=(29, 46), an_f=(27.5, 54.5)),
     # Forehand: coil back, contact out front (level-02 lunge), finish high.
     "windup": dict(IDLE, neck=(28, 24), hip=(27, 37),
                    sh_n=(29, 29), el_n=(23, 33), ha_n=(18, 32),
@@ -419,8 +478,9 @@ def render(pose, female=False):
     c.draw(torso(P["neck"], P["hip"]))
     c.draw(neck_part(P["neck"]))
     head = Part(outlined=False)
-    head.blit(HEAD, hx, hy)
+    head.blit(HEAD_F if female else HEAD, hx, hy)
     c.draw(head)
+    c.draw(collar(P["neck"]))
     ang, layer = P["paddle"]
     pad = paddle(P["ha_n"], ang)
     if layer == "mid":

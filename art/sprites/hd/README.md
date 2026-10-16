@@ -22,7 +22,8 @@ and kept as a retro skin and reference.
 | `player_hd_<male/female>.aseprite` | Source with tags: idle, run, swing (windup→follow), toss, cheer. Blue palette |
 | `player_hd_<variant>_<team>.png` | Sheets, 704×64 (11 frames) |
 | `preview_compare.png` | Close-up: an HD sprite beside a concept player at the same pixel scale |
-| `archive_bighead/` | Earlier HD pass with an oversized head and thick body, kept for reference |
+| `archive_bighead/` | First HD pass (oversized head, thick body), kept for reference |
+| `archive_proportions/` | Second pass (concept proportions, before the polish pass), kept for reference |
 | `preview_scene.png` | Scale check: the four players on level-01 shrunk to native size, next to the concept's own players |
 | `preview_frames.png`, `preview_<variant>_<tag>.gif` | All frames per team, and the animations |
 
@@ -35,7 +36,12 @@ elbows, hands, knees, ankles, toe direction, paddle angle):
   left with 3–4 tone ramps. Far-side limbs use a darker ramp.
 - Each body part gets its own 1 px outline, so the near arm reads over the
   torso the way it does in the concepts.
-- The head (cap, hair, face) and the ponytail are hand-pixeled grids.
+- The head (cap, hair, face) and the ponytail are hand-pixeled grids. The
+  female head adds a lashed eye and hair falling behind the ear.
+- Cleanup passes: lone shade pixels are merged into their neighbours, the
+  shirt gets a hem band, sleeves and wristbands get a darker edge where they
+  meet skin, and a polo collar sits at the neck. The paddle is shaded flat,
+  with a rim light and one highlight streak.
 
 To add a pose (backhand, dink reach, overhead, dive…), add a joint dict to
 `POSES` and its name to `SLOTS`, then rebuild:
