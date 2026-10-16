@@ -1,0 +1,14 @@
+{
+  "_doc": "Paddle stats (docs/decisions/ADR-020-player-select.md). One 0-6 bar scale, baseline 3, every paddle spends the same budget. Each point away from 3 is 3/64 of the baseline tunable; the build fails past +/-15% or on an unequal budget. Order is the select-screen order; palette part paddle_<name>.json gives the colours.",
+  "baseline": 3,
+  "scale_max": 5,
+  "budget": 9,
+  "step_64ths": 3,
+  "standard": "blue",
+  "paddles": [
+    { "name": "wood", "power": 2, "control": 5, "speed": 2 },
+    { "name": "blue", "power": 3, "control": 3, "speed": 3 },
+    { "name": "red",  "power": 5, "control": 2, "speed": 2 },
+    { "name": "gold", "power": 2, "control": 2, "speed": 5 }
+  ]
+}

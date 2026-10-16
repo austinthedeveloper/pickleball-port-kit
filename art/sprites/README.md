@@ -1,0 +1,35 @@
+# Player sprites
+
+Character sprites for the port, styled after `art/concept/level-01.png`, the
+doubles mock, and the player select concepts.
+
+- 32×32 frames, facing right, feet on row 29, in the slot order of
+  `data/player_frames.json`: idle0–1, run0–3, windup, swing, follow, toss,
+  cheer. The ponytail accessory sits in a 12th cell (8×8, top-left) and lines
+  up with the existing per-frame `accessory` offsets.
+- Indexed, 16 colours, palette contract v2 (ADR-013). One drawing serves
+  every team. The sheets swap in `data/palettes/` parts: shared, skin_light,
+  team_*, and paddle (blue→blue, red→red, green→wood, gold→gold).
+
+| File | What |
+|---|---|
+| `player.aseprite` | Source with tagged animations (idle, run, swing, toss, cheer), blue palette |
+| `ponytail.aseprite` | ADR-014 accessory |
+| `player_<team>.png` | Indexed sheets, 384×32 (11 frames + ponytail cell) |
+| `preview_*.gif`, `preview_frames.png`, `preview_scene.png` | 8× animations, all teams male/female, on-court scale check |
+
+## Rebuilding
+
+The frames are composed from shared parts (head, torso, legs, arms, paddle) in
+`src/compose.py`, so a fix to the head shows up in every frame.
+
+```sh
+python3 art/sprites/src/compose.py          # -> src/player_frames.txt
+ASE="$HOME/Library/Application Support/Steam/steamapps/common/Aseprite/Aseprite.app/Contents/MacOS/aseprite"
+"$ASE" -b --script-param root=. --script art/sprites/src/build_player.lua
+"$ASE" -b --script-param root=. --script-param dir=art/sprites \
+  --script-param out=art/sprites/preview_scene.png --script art/sprites/src/scene.lua
+```
+
+Hand-polishing in Aseprite is fine too. Once you do, treat `player.aseprite`
+as the source and stop regenerating it.

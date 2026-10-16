@@ -1,0 +1,42 @@
+{
+  "comment": "Career mode (ADR-047). 'skins' name the skin tones of opponents.json in order; every skin is always available. 'hair' colours are 5-bit RGB (palette index 15); 'hats' are player_frames.json hats in HAT id order (CAP is the body's own cap, 0). A hair colour or hat with an 'unlock' is locked until that unlock's rule is met. 'unlocks' are checked after every finished match, in this order (bit n of a player's unlocked mask). Rules: WINS (matches won against the CPU), RALLY (longest rally), ACES (serves not returned), SHUTOUTS, STREAK (best win streak), BEAT (beat this ladder team), CLEARS (ladder clears), OPEN (open play games). Names fit 12 HUD cells; 'how' (the card's hint, after NEXT:) fits 18.",
+  "skins": ["LIGHT", "TAN", "DEEP", "PALE"],
+  "hair": [
+    ["BROWN", [12, 7, 4]],
+    ["BLACK", [4, 4, 5]],
+    ["BLONDE", [29, 24, 12]],
+    ["AUBURN", [20, 8, 4]],
+    ["GRAY", [20, 20, 21]],
+    ["BLUE", [6, 14, 30], "BLUE HAIR"],
+    ["PINK", [30, 12, 22], "PINK HAIR"],
+    ["GREEN", [8, 24, 10], "GREEN HAIR"],
+    ["PURPLE", [18, 8, 28], "PURPLE HAIR"],
+    ["GOLD", [31, 20, 2], "GOLD HAIR"]
+  ],
+  "hats": [
+    ["CAP"],
+    ["VISOR", "VISOR"],
+    ["HEADBAND", "HEADBAND"],
+    ["TRICORN", "TRICORN"],
+    ["BANDANA", "BANDANA"],
+    ["NONE"]
+  ],
+  "gear": {
+    "comment": "Stage 4 (ADR-047): a career player's hat moves one paddle stat point to another (power, control, speed), so the paddle budget holds and every pairing stays within ADR-015's 15% (checked). A stat can't pass 5: on a paddle that already maxes the stat a hat raises, the hat changes nothing. A hat not listed (CAP, NONE) changes nothing. CPUs' hats are looks only.",
+    "VISOR": {"control": 1, "power": -1},
+    "HEADBAND": {"speed": 1, "control": -1},
+    "TRICORN": {"power": 1, "control": -1},
+    "BANDANA": {"power": 1, "speed": -1}
+  },
+  "unlocks": [
+    {"name": "VISOR", "rule": "WINS", "value": 1, "how": "WIN A MATCH"},
+    {"name": "HEADBAND", "rule": "WINS", "value": 10, "how": "WIN 10 MATCHES"},
+    {"name": "BANDANA", "rule": "RALLY", "value": 20, "how": "A 20-SHOT RALLY"},
+    {"name": "TRICORN", "rule": "BEAT", "value": "PIRATES", "how": "BEAT THE PIRATES"},
+    {"name": "BLUE HAIR", "rule": "ACES", "value": 5, "how": "5 ACES"},
+    {"name": "PINK HAIR", "rule": "SHUTOUTS", "value": 1, "how": "A SHUTOUT"},
+    {"name": "GREEN HAIR", "rule": "OPEN", "value": 5, "how": "5 OPEN PLAY GAMES"},
+    {"name": "PURPLE HAIR", "rule": "STREAK", "value": 5, "how": "A 5-WIN STREAK"},
+    {"name": "GOLD HAIR", "rule": "CLEARS", "value": 1, "how": "CLEAR THE LADDER"}
+  ]
+}

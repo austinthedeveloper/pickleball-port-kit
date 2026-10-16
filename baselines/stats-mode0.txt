@@ -1,0 +1,11 @@
+Singles, regular bot, P1 late every 3rd/4th/5th; 60 matches each on MEDIUM
+  rung        bot wins       of   avg s
+  1 DAD             48       60    48.6
+  2 MARGE           32       60    50.1
+  3 BRAD            26       60    40.2
+  4 PETE            16       60    50.1
+  5 RAVEN           15       60    49.7
+  6 KAI              4       60    49.6
+  7 MAX              2       60    49.1
+  8 ACE              0       60    48.2
+  ladder order: yes

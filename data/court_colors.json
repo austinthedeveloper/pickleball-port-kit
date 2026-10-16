@@ -1,0 +1,77 @@
+{
+  "comment": "Court colour presets (ADR-022, kitchen ADR-027). Each part recolours entries of BG1 palette 2 (the ground). Index 0 is DEFAULT: the colours painted in court_scene.png. Other presets give a base colour; the generator derives the part's other entries by scaling it by the painted entries' brightness relative to the painted base.",
+  "min_line_contrast": 2.5,
+  "min_ball_contrast": 2.0,
+  "ball_color": [224, 232, 48],
+  "lava": [196, 64, 24],
+  "parts": {
+    "surface": {
+      "entries": [4, 15],
+      "presets": [
+        ["BLUE", [38, 92, 168]],
+        ["NAVY", [34, 52, 112]],
+        ["GREEN", [46, 122, 72]],
+        ["PURPLE", [96, 64, 140]],
+        ["CLAY", [176, 84, 52]],
+        ["SLATE", [78, 86, 98]],
+        ["RED", [150, 44, 52]],
+        ["PINK", [200, 64, 130]],
+        ["ORANGE", [196, 92, 28]],
+        ["BLACK", [28, 28, 36]],
+        ["AQUA", [20, 130, 140]]
+      ]
+    },
+    "kitchen": {
+      "comment": "ADR-027: SAME follows the surface's preset; the rest mirror the surface presets in order (checked), then extras.",
+      "entries": [12, 5],
+      "presets": [
+        ["SAME", null],
+        ["BLUE", [38, 92, 168]],
+        ["NAVY", [34, 52, 112]],
+        ["GREEN", [46, 122, 72]],
+        ["PURPLE", [96, 64, 140]],
+        ["CLAY", [176, 84, 52]],
+        ["SLATE", [78, 86, 98]],
+        ["RED", [150, 44, 52]],
+        ["PINK", [200, 64, 130]],
+        ["ORANGE", [196, 92, 28]],
+        ["BLACK", [28, 28, 36]],
+        ["AQUA", [20, 130, 140]],
+        ["LIME", [92, 150, 60]],
+        ["TEAL", [49, 140, 132]]
+      ]
+    },
+    "surround": {
+      "entries": [1, 2, 3, 13, 14],
+      "presets": [
+        ["GRASS", [86, 150, 70]],
+        ["CONCRETE", [160, 160, 152]],
+        ["SAND", [226, 204, 150]],
+        ["BRICK", [150, 70, 50]],
+        ["ASPHALT", [70, 72, 78]],
+        ["SKY", [110, 170, 210]],
+        ["SNOW", [236, 240, 246]],
+        ["CANDY", [230, 150, 190]],
+        ["AUTUMN", [200, 110, 40]]
+      ]
+    },
+    "lines": {
+      "entries": [6, 7],
+      "presets": [
+        ["WHITE", [255, 255, 255]],
+        ["YELLOW", [250, 222, 70]],
+        ["CYAN", [120, 240, 255]],
+        ["LIME", [190, 255, 90]]
+      ]
+    }
+  },
+  "times": {
+    "comment": "Night courts (ADR-045): the TIME row of the COURT page. DAY is the scene as painted. Other times scale each 5-bit channel (red, green, blue) of the venue's backdrop (BG1 palettes 3-7) and of the ground's dark entries by 'dark', and the ground's lit entries (the court under floodlights: surface, kitchen, lines, net) by 'lit'. 'ambience' names a venues.json ambience to play instead of the venue's own.",
+    "lit_entries": [4, 5, 6, 7, 9, 11, 12, 15],
+    "list": [
+      {"name": "DAY"},
+      {"name": "DUSK", "dark": [0.80, 0.62, 0.66], "lit": [0.98, 0.88, 0.80]},
+      {"name": "NIGHT", "dark": [0.22, 0.26, 0.42], "lit": [0.80, 0.86, 0.96], "ambience": "crickets"}
+    ]
+  }
+}

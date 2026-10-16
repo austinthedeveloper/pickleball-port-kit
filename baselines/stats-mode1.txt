@@ -1,0 +1,11 @@
+Doubles (P1 + CPU partner), regular bot, P1 late every 3rd/4th/5th; 60 matches each on MEDIUM
+  rung        bot wins       of   avg s
+  1 HENDERSON       59       60    35.9
+  2 SNOWBIRDS       57       60    48.2
+  3 GYM BROS        44       60    55.6
+  4 PIRATES         22       60    62.4
+  5 GOTH CLUB       18       60    71.7
+  6 SURF CREW        5       60    67.7
+  7 TWINS            2       60    67.2
+  8 CHAMPS           0       60    75.2
+  ladder order: yes

@@ -1,0 +1,15 @@
+{
+  "generator": "tools/generate_assets.py",
+  "policy": "generated assets are disposable and are not committed",
+  "outputs": {
+    "court.pic": { "budget_bytes": 16384, "vram_word_address": "0x1000" },
+    "court.map": { "expected_bytes": 2048, "vram_word_address": "0x0000" },
+    "court.pal": { "expected_bytes": 32, "cgram_palette": 1 },
+    "hud.pic": { "expected_bytes": 1536, "vram_word_address": "0x3000" },
+    "hud.map": { "expected_bytes": 2048, "vram_word_address": "0x0400" },
+    "hud.pal": { "expected_bytes": 8, "cgram_palette": 0 },
+    "player.pic": { "expected_bytes": 2048, "vram_word_address": "0x4000" },
+    "player.pal": { "expected_bytes": 32, "obj_palette": 0 }
+  }
+}
+

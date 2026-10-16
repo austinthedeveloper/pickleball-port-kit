@@ -1,0 +1,15 @@
+{
+  "comment": "Quips (GOOFY_IDEAS.md): after a lost point, sometimes, the side that lost it says a line on the point result. PG only: no cursing, no put-downs. Ladder teams have their own in opponents.json; 'player' is a human's side (1P, or 2P in versus), 'cpu' the default CPU. Four each, up to 28 HUD font characters.",
+  "player": [
+    "OOPS!",
+    "WHOOPS!",
+    "SO CLOSE!",
+    "MY BAD!"
+  ],
+  "cpu": [
+    "DRAT!",
+    "NOT AGAIN!",
+    "WHOOPSIE!",
+    "BEEP BOOP... OOPS."
+  ]
+}
