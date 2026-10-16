@@ -68,46 +68,39 @@ def part_rows(text):
 
 # Head facing right. Neck attach point: NECK_AT (col, row).
 HEAD = part_rows("""
-......ooooo..........
-....ooLLLMMoo........
-...oLLMMMMMMMo.......
-..oLLMMMMMMMMMo......
-..oLMMMMMMMMMMdo.....
-.oLMMMMMMMMMMMMdoooo.
-.oMMMMMMMMMMMMMMLLLLo
-.oddddddddddMMMMMMMMo
-.oHHHHd22222ooooooooo
-.oHHHh233333o33o.....
-.oHHh2123333o333o....
-.ohH2123333333334o...
-.ohH222333333332o....
-..oh22333333322o.....
-...o223333333o.......
-....oo2223333o.......
+...oooo.....
+..oLLMMo....
+.oLMMMMMo...
+.oMMMMMMdooo
+.oddddMMMMLo
+.oHHd22ooooo
+.oHh233o3o..
+.oh2133334o.
+.oh223332o..
+..o22332o...
+...oo223o...
 """)
-NECK_AT = (8, 15)
+NECK_AT = (5, 10)
 
 PONYTAIL = part_rows("""
-...ooo...
-..oHHHo..
-.oHiHho..
-.oHHhho..
-oHHhho...
-oHHho....
-ohhho....
-ohho.....
-.oo......
+..ooo.
+.oHHHo
+oHiHho
+oHHho.
+ohHo..
+ohho..
+.oo...
 """)
+
 PONY_FLY = part_rows("""
-.......ooo
-...oooHHHo
-.ooHHHiHho
-ohhHHHHHo.
-.oohhhoo..
-...oo.....
+....ooo
+.ooHHHo
+oHHiHho
+.ohhho.
+..oo...
 """)
-PONY_FLY_AT = (8, 2)
-PONY_AT = (7, 1)        # this ponytail pixel sits on the head's (2, 8)
+PONY_FLY_AT = (5, 2)
+PONY_AT = (4, 1)        # this ponytail pixel sits on the head's (2, 5)
 
 
 def mirror(rows):
@@ -197,13 +190,13 @@ def arm(shoulder, elbow, hand, far=False, band=True):
     p = Part()
     sk = "skin_far" if far else "skin"
     sh = "shirt_far" if far else "shirt"
-    p.capsule(elbow, hand, 1.7, 1.4, sk)
-    p.capsule(shoulder, elbow, 2.1, 1.8, sk)
-    p.capsule(shoulder, lerp(shoulder, elbow, 0.38), 2.7, 2.4, sh)  # sleeve
+    p.capsule(elbow, hand, 1.45, 1.25, sk)
+    p.capsule(shoulder, elbow, 1.75, 1.5, sk)
+    p.capsule(shoulder, lerp(shoulder, elbow, 0.42), 2.35, 2.1, sh)  # sleeve
     if band:
-        p.capsule(lerp(elbow, hand, 0.68), lerp(elbow, hand, 0.82), 1.9, 1.9,
+        p.capsule(lerp(elbow, hand, 0.68), lerp(elbow, hand, 0.82), 1.5, 1.5,
                   sh)                                                # wristband
-    p.capsule(hand, hand, 2.0, 2.0, sk)                              # fist
+    p.capsule(hand, hand, 1.6, 1.6, sk)                              # fist
     return p
 
 
@@ -211,9 +204,9 @@ def leg(hip, knee, ankle, toe_dir=(1, 0), far=False):
     """Thigh, calf, sock and shoe. toe_dir: unit-ish vector heel->toe."""
     p = Part()
     sk = "skin_far" if far else "skin"
-    p.capsule(knee, ankle, 2.2, 1.5, sk)
-    p.capsule(hip, knee, 2.9, 2.3, sk)
-    p.capsule(lerp(knee, ankle, 0.72), ankle, 1.7, 1.7,
+    p.capsule(knee, ankle, 1.95, 1.35, sk)
+    p.capsule(hip, knee, 2.55, 2.1, sk)
+    p.capsule(lerp(knee, ankle, 0.72), ankle, 1.4, 1.4,
               "sock_far" if far else "sock")
     shoe(p, ankle, toe_dir, far)
     return p
@@ -223,8 +216,8 @@ def shoe(p, ankle, toe_dir, far):
     tx, ty = toe_dir
     n = math.hypot(tx, ty)
     tx, ty = tx / n, ty / n
-    heel = (ankle[0] - tx * 1.2, ankle[1] + 1.4 - ty * 1.2)
-    toe = (ankle[0] + tx * 3.8, ankle[1] + 1.4 + ty * 3.8)
+    heel = (ankle[0] - tx * 1.0, ankle[1] + 1.6 - ty * 1.0)
+    toe = (ankle[0] + tx * 3.3, ankle[1] + 1.6 + ty * 3.3)
     nx, ny = -ty, tx                        # foot "down" normal when toe right
     if ny < 0:
         nx, ny = -nx, -ny
@@ -234,7 +227,7 @@ def shoe(p, ankle, toe_dir, far):
             dx, dy = toe[0] - heel[0], toe[1] - heel[1]
             L2 = dx * dx + dy * dy
             t = max(0.0, min(1.0, ((px - heel[0]) * dx + (py - heel[1]) * dy) / L2))
-            r = 2.0 - 0.4 * t
+            r = 1.75 - 0.35 * t
             cx, cy = heel[0] + t * dx, heel[1] + t * dy
             ox, oy = px - cx, py - cy
             if math.hypot(ox, oy) > r:
@@ -259,22 +252,22 @@ def shoe(p, ankle, toe_dir, far):
 def torso(neck, hip):
     p = Part()
     chest = lerp(neck, hip, 0.35)
-    p.capsule(chest, add(hip, (0, -1)), 5.2, 4.8, "shirt")
-    p.capsule(add(neck, (0, 4)), chest, 4.6, 5.2, "shirt")
+    p.capsule(chest, add(hip, (0, -1)), 4.4, 4.0, "shirt")
+    p.capsule(add(neck, (0, 3)), chest, 3.8, 4.4, "shirt")
     return p
 
 
 def shorts(hip, knee_n, knee_f):
     p = Part()
-    p.capsule(add(hip, (-1, 0)), add(hip, (1, 0)), 4.6, 4.6, "shorts")
-    p.capsule(hip, lerp(hip, knee_f, 0.5), 3.8, 3.3, "shorts_far")
-    p.capsule(add(hip, (1, 0)), lerp(hip, knee_n, 0.5), 3.8, 3.3, "shorts")
+    p.capsule(add(hip, (-1, 0)), add(hip, (1, 0)), 4.0, 4.0, "shorts")
+    p.capsule(hip, lerp(hip, knee_f, 0.5), 3.2, 2.8, "shorts_far")
+    p.capsule(add(hip, (1, 0)), lerp(hip, knee_n, 0.5), 3.2, 2.8, "shorts")
     return p
 
 
 def neck_part(neck):
     p = Part()
-    p.capsule(add(neck, (0, -2)), add(neck, (0, 1)), 1.9, 2.1, "skin")
+    p.capsule(add(neck, (0, -1)), add(neck, (0, 2)), 1.3, 1.5, "skin")
     return p
 
 
@@ -284,13 +277,13 @@ def paddle(grip, angle_deg, face_up=True):
     a = math.radians(angle_deg)
     ux, uy = math.cos(a), math.sin(a)          # along the paddle
     vx, vy = -uy, ux                           # across
-    handle_end = (grip[0] + ux * 3.5, grip[1] + uy * 3.5)
+    handle_end = (grip[0] + ux * 3.0, grip[1] + uy * 3.0)
     p.capsule((grip[0] - ux * 1.5, grip[1] - uy * 1.5), handle_end, 1.0, 1.0,
               "sock_far")
     for k, ch in list(p.px.items()):
         p.px[k] = "G"
-    center = (grip[0] + ux * 8.5, grip[1] + uy * 8.5)
-    hl, hw = 5.6, 4.4                          # half length, half width
+    center = (grip[0] + ux * 7.4, grip[1] + uy * 7.4)
+    hl, hw = 4.7, 3.8                          # half length, half width
     for y in range(int(center[1] - 10), int(center[1] + 11)):
         for x in range(int(center[0] - 10), int(center[0] + 11)):
             px, py = x + 0.5 - center[0], y + 0.5 - center[1]
@@ -327,11 +320,11 @@ def shift(pose, dx=0, dy=0, **override):
 
 
 IDLE = dict(
-    neck=(30, 23), hip=(26, 37),
+    neck=(31, 24), hip=(26, 38.5),
     sh_n=(31, 28), el_n=(33, 34), ha_n=(39, 35),
     sh_f=(28, 28), el_f=(30, 34), ha_f=(37, 36),
-    kn_n=(35, 45), an_n=(33, 54.5), toe_n=(1, 0),
-    kn_f=(20, 45), an_f=(17, 54.5), toe_f=(1, 0),
+    kn_n=(36.5, 46), an_n=(34, 54.5), toe_n=(1, 0),
+    kn_f=(19, 46), an_f=(16, 54.5), toe_f=(1, 0),
     paddle=(-62, "front"),
 )
 
@@ -342,8 +335,8 @@ RUN = dict(IDLE, neck=(33, 24), hip=(27, 37),
 
 POSES = {
     "idle0": IDLE,
-    "idle1": shift(IDLE, 0, 1, kn_n=(35.5, 46), an_n=(33, 54.5),
-                   kn_f=(19.5, 46), an_f=(17, 54.5)),
+    "idle1": shift(IDLE, 0, 1, kn_n=(37, 47), an_n=(34, 54.5),
+                   kn_f=(18.5, 47), an_f=(16, 54.5)),
     "run0": shift(RUN, 0, 1, el_f=(33, 34), ha_f=(38, 32),
                   kn_n=(37, 45), an_n=(39, 54.5),
                   kn_f=(22, 46), an_f=(16, 50), toe_f=(1, 0.9)),
@@ -395,9 +388,19 @@ def head_origin(neck):
     return (round(neck[0]) - NECK_AT[0], round(neck[1]) - NECK_AT[1])
 
 
+def proportions(pose):
+    """Pose joints were authored for a bigger head; raise the neck and
+    shoulders so the slimmer figure keeps its height."""
+    P = dict(pose)
+    P["neck"] = add(P["neck"], (0, -2))
+    for k in ("sh_n", "sh_f"):
+        P[k] = add(P[k], (0, -1.5))
+    return P
+
+
 def render(pose, female=False):
     c = Canvas()
-    P = pose
+    P = proportions(pose)
     hx, hy = head_origin(P["neck"])
 
     if P["paddle"][1] == "back":
@@ -407,9 +410,9 @@ def render(pose, female=False):
     if female:
         pt = Part(outlined=False)
         if P.get("pony") == "fly":
-            pt.blit(PONY_FLY, hx + 2 - PONY_FLY_AT[0], hy + 8 - PONY_FLY_AT[1])
+            pt.blit(PONY_FLY, hx + 2 - PONY_FLY_AT[0], hy + 5 - PONY_FLY_AT[1])
         else:
-            pt.blit(PONYTAIL, hx + 2 - PONY_AT[0], hy + 8 - PONY_AT[1])
+            pt.blit(PONYTAIL, hx + 2 - PONY_AT[0], hy + 5 - PONY_AT[1])
         c.draw(pt)
     c.draw(leg(add(P["hip"], (2, 0)), P["kn_n"], P["an_n"], P["toe_n"]))
     c.draw(shorts(P["hip"], P["kn_n"], P["kn_f"]))
@@ -426,7 +429,7 @@ def render(pose, female=False):
     if layer == "front":
         c.draw(pad)
         fist = Part()
-        fist.capsule(P["ha_n"], P["ha_n"], 2.0, 2.0, "skin")
+        fist.capsule(P["ha_n"], P["ha_n"], 1.6, 1.6, "skin")
         c.draw(fist)
     if c.clipped:
         print(f"warning: {c.clipped} pixels clipped")
