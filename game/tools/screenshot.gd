@@ -1,5 +1,5 @@
 ## Renders a screen for N frames and saves the viewport (needs a display):
-##   godot --path game -s res://tools/screenshot.gd -- <title|singles|doubles|demo> <venue> <frames> <out.png> [human]
+##   godot --path game -s res://tools/screenshot.gd -- <title|singles|doubles|demo|practice|practice_<zone>> <venue> <frames> <out.png> [human]
 ## "human" leaves P1 human (it serves on its own after the ready delay is
 ## not automatic, so the default makes P1 a bot for a moving picture).
 extends SceneTree
@@ -26,6 +26,14 @@ func _initialize() -> void:
 		var m := MatchView.new()
 		root.add_child(m)
 		var cfg := SimTypes.MatchConfig.doubles() if mode == "doubles" else SimTypes.MatchConfig.singles()
+		if mode.begins_with("practice"):
+			# practice_kitchen, practice_deep, ...: that RETURN TO zone.
+			var zone := 0
+			for z in Practice.ZONES:
+				if mode.ends_with("_" + Practice.zone_name(z).to_lower().split(" ")[0]):
+					zone = z
+			cfg = SimTypes.MatchConfig.practice_session([Practice.SHOT_MIX,
+				Practice.TARGET_RANDOM, Practice.RATE_NORMAL, zone], 12)
 		m.setup(cfg, venue, mode == "demo")
 		if mode != "demo" and not (a.size() > 4 and a[4] == "human"):
 			m.sim.p1_bot = true

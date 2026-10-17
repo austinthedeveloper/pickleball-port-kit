@@ -13,7 +13,7 @@ godot --path game                                    # play
 godot --headless --path game -s res://tests/golden.gd  # regenerate golden traces (play changes only)
 game/tools/sync_assets.sh                            # after rebuilding art/levels
 .venv/bin/python art/levels/tools/build.py           # rebuild the 960x540 art (needs .venv: numpy, pillow)
-godot --path game --resolution 960x540 -s res://tools/screenshot.gd -- <title|singles|doubles|demo> <park|lakeside|sunset> <frames> <out.png>
+godot --path game --resolution 960x540 -s res://tools/screenshot.gd -- <title|singles|doubles|demo|practice> <park|lakeside|sunset> <frames> <out.png>
 godot --headless --path game -s res://tools/point_log.gd -- doubles 2   # why each point ended
 ```
 

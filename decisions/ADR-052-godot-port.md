@@ -50,9 +50,25 @@ stream, at the 960×540 art density, through the art's court geometry.
   the KID/EASY slow ball and KID's swing assist, the demo, 2P versus,
   modifiers (ADR-033: BIG BALL, FAST BALL, WIN BY 2, LAVA), the save with
   migration (playbook §6; settings, records, ladder), the ladder
-  (ADR-023), story cards and quips (ADR-026/048), and the camera lean
-  with parallax (ADR-050/051, OFF by default).
-- **Not ported yet:** practice (ADR-028), open play (ADR-034), career
+  (ADR-023), story cards and quips (ADR-026/048), the camera lean
+  with parallax (ADR-050/051, OFF by default), and practice (ADR-028).
+- **Practice** (*amended 2026-10-16*): `sim/practice.gd` is practice.c in
+  its order (settings, the page editor, plan/aim/turn/feed, streaks,
+  zones). It stays pure: the saved drill and the zone's saved best come in
+  on the `MatchConfig` (`SaveGame.practice_config`), and leaving
+  (`practice_finish`) is `SaveGame.finish_practice`. `new_match` begins a
+  session instead of a serve and `game_update` runs it instead of the
+  phases, as game.c does; the crowd's every-fifth cheer is an
+  `EVENT_CROWD` event rather than an audio call. The title's last row,
+  PRACTICE, opens the page (SHOT, TARGET, RATE, RETURN TO, BEST STREAK;
+  B plays, Y backs out); the session uses the title's DIFFICULTY. There's
+  no Player Select in the port, so P1 plays the standard look and paddle.
+  The pause screen's B is MAIN MENU (saves the best, back to the title).
+  `art/levels` has no ball machine, so `view/practice_view.gd` draws one
+  (body, hopper of balls, wheels, a nozzle turning up/centre/down and
+  kicking back) and the zone's blinking corners. Save layout v3 adds the
+  drill and the bests; a v2 save carries everything over.
+- **Not ported yet:** open play (ADR-034), career
   (ADR-047), the close-call replay (ADR-041), night (ADR-045), the
   sitting-out watcher (ADR-042), opponents' own looks and hats (the 96 px
   sheets carry team colours; the role sheets make per-opponent palettes a
@@ -72,13 +88,17 @@ stream, at the 960×540 art density, through the art's court geometry.
 
 ## Verification
 
-`game/tools/test.sh` (headless: 82 tests, then an end-to-end input smoke
+`game/tools/test.sh` (headless: 90 tests, then an end-to-end input smoke
 that boots the real main scene and plays through the input map):
 
 - Ported C host tests: PHY-01..05, HIT-01/02, RUL-01..03, SCR-01, RST-01
   (20 rematches equal a fresh match), serve setup/boxes, the charged-serve
   sweep (every level, rising and falling, every aim, both teams and
-  boxes), shot types, paddle stats, doubles rotation and lane ownership.
+  boxes), shot types, paddle stats, doubles rotation and lane ownership,
+  and test_practice.c (settings and the editor; every shot to every target
+  lands where asked; the nozzle's turns and AT YOU; each zone's streak
+  and its own best; leaving saves). The bot's streaks equal the C's
+  exactly: 8 on MIX/RANDOM and 32 with the KID assist alone.
 - Balance: a stand-in that mistimes every 2nd shot wins 0/20, every 10th
   18/20 (the C build measured 1 and 19); bot wins by difficulty KID..HARD
   10/6/0/0 of 10; ladder first rung 8 vs last rung 0.
@@ -88,7 +108,8 @@ that boots the real main scene and plays through the input map):
   with the camera on); the painted court is the called court; every venue
   builds.
 - Save: blank, newer copy wins, torn copy falls back, sequence wrap, v1
-  migrates, a future layout is rejected. Ladder: a win advances and
+  migrates, a v2 image migrates to v3 (practice), a future layout is
+  rejected. Ladder: a win advances and
   offers the next rung. Story: lines fit the font; quips a third of the
   time, from the right side, never repeated. Modifiers: pace counts, the
   FAST arc (40 steps in 30 frames, same landing), BIG reach, WIN BY 2

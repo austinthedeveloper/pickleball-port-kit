@@ -178,6 +178,12 @@ class MatchConfig:
 	var points_to_win := K.POINTS_TO_WIN
 	var difficulty := K.DIFFICULTY_MEDIUM
 	var modifiers := 0                 # MOD_* bits (ADR-033)
+	## Practice (ADR-028): the ball machine instead of an opponent, with the
+	## saved settings (shot, target, rate, zone) and that zone's saved best.
+	var practice := 0
+	var practice_settings := [Practice.SHOT_MIX, Practice.TARGET_RANDOM,
+		Practice.RATE_NORMAL, Practice.ZONE_ANY]
+	var practice_best := 0
 
 	static func singles() -> MatchConfig:
 		return MatchConfig.new()
@@ -186,6 +192,15 @@ class MatchConfig:
 		var c := MatchConfig.new()
 		c.mode = K.MODE_DOUBLES
 		c.palette = [0, 3, 1, 2]       # blue + gold vs red + green (mock)
+		return c
+
+	## match_config_practice: singles with slot 2 inactive and no opponent.
+	static func practice_session(settings: Array, best: int) -> MatchConfig:
+		var c := MatchConfig.new()
+		c.palette = [0, -1, -1, -1]
+		c.practice = 1
+		c.practice_settings = settings.duplicate()
+		c.practice_best = best
 		return c
 
 	func slot_active(slot: int) -> bool:

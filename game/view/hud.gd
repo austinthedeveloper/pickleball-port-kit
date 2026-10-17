@@ -24,6 +24,7 @@ var _quip_text: BitmapText
 var _quip_frames := 0
 var _result_line: BitmapText
 var _card: Control
+var _practice_menu: Control
 
 
 func _panel(name: String, rect: Rect2) -> NinePatchRect:
@@ -69,14 +70,22 @@ func setup(v: MatchView) -> void:
 	var right_tint: Color = MatchView.TEAM_TINTS[cfg.palette[2]]
 	if cfg.opponent >= 0 and not cfg.human[2] and not view.demo:
 		right_tint = Story.team_color(cfg.opponent)
+	# Practice (ADR-028): P1 <streak>, the zone (PRACTICE on ANY), BEST <best>.
+	var practice: bool = cfg.practice != 0
+	if practice:
+		right_name = "BEST"
+		right_tint = Color("fbe46a")
 	var lw := 74 + BitmapText.measure("big", left_name)
 	var rw := 74 + BitmapText.measure("big", right_name)
 	var title := "DOUBLES" if doubles else "ARCADE RULES"
+	if practice:
+		var zone: int = Practice.practice_zone(int(cfg.practice_settings[Practice.ROW_ZONE]))
+		title = "PRACTICE" if zone == Practice.ZONE_ANY else Practice.zone_name(zone)
 	var tw := 40 + BitmapText.measure("big_gold", title)
 	var y := 14
 	var h := 40
 	var pan_l: String = ["blue", "red", "green", "gold"][cfg.palette[0]]
-	var pan_r: String = ["blue", "red", "green", "gold"][cfg.palette[2]]
+	var pan_r: String = "gold" if practice else ["blue", "red", "green", "gold"][cfg.palette[2]]
 	_panel(pan_l, Rect2(480 - tw / 2 - 18 - lw, y, lw, h))
 	_left_label = _text("big", left_name, Vector2(480 - tw / 2 - 18 - lw + 12, y + 8), 0, left_tint)
 	_left_score = _text("big", "0", Vector2(480 - tw / 2 - 18 - 14, y + 8), 1.0)
@@ -135,7 +144,15 @@ func setup(v: MatchView) -> void:
 	shade.size = Vector2(960, 540)
 	_paused.add_child(shade)
 	_text("big_gold", "PAUSED", Vector2(480, 240), 0.5, Color.WHITE, _paused)
-	_text("small", "START: RESUME", Vector2(480, 280), 0.5, Color.WHITE, _paused)
+	_text("small", "START: RESUME   B: MAIN MENU" if practice else "START: RESUME",
+		Vector2(480, 280), 0.5, Color.WHITE, _paused)
+	if practice:
+		_practice_menu = Control.new()
+		add_child(_practice_menu)
+		var mw := 40 + BitmapText.measure("small", "START: PAUSE")
+		var mp := _panel("title", Rect2(480 - mw / 2, 490, mw, 34))
+		mp.reparent(_practice_menu)
+		_text("small", "START: PAUSE", Vector2(480, 498), 0.5, Color.WHITE, _practice_menu)
 	refresh()
 
 
@@ -193,7 +210,8 @@ func refresh() -> void:
 	var s := view.sim
 	_left_score.text = str(s.team_score[0])
 	_right_score.text = str(s.team_score[1])
-	var mp := s.phase <= K.PHASE_LIVE and (s.match_point(0) or s.match_point(1))
+	var mp := s.phase <= K.PHASE_LIVE and (s.match_point(0) or s.match_point(1)) \
+		and not s.config.practice
 	_subtitle.visible = mp and not view.demo
 	var human_serving: bool = not view.demo and s.owners[s.server_index] == K.OWNER_HUMAN
 	_prompt.visible = human_serving and s.phase == K.PHASE_SERVE_SETUP \
@@ -208,6 +226,8 @@ func refresh() -> void:
 		_meter_fill.color = Color("e04040") if s.charge_level < K.SERVE_CHARGE_DUD \
 			else Color("f4c430").lerp(Color("60e060"), f)
 	_paused.visible = s.paused != 0
+	if _practice_menu:
+		_practice_menu.visible = s.paused == 0
 	if _point_banner_frames > 0:
 		_point_banner_frames -= 1
 	if _quip_frames > 0:

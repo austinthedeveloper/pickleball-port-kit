@@ -18,6 +18,7 @@ var ball := Ball.new()
 var intents: Array = []          # 4 x Intent, this frame's
 var owners := [K.OWNER_HUMAN, K.OWNER_NONE, K.OWNER_CPU, K.OWNER_NONE]
 var ai: SimAI
+var practice: Practice          ## the ball machine (ADR-028), in practice
 
 # GameState (game.h)
 var paused := 0
@@ -80,6 +81,7 @@ func _init(cfg: SimTypes.MatchConfig = null) -> void:
 		players.append(Player.new())
 		intents.append(Intent.new())
 	ai = SimAI.new(self)
+	practice = Practice.new(self)
 	new_match()
 
 
@@ -820,7 +822,10 @@ func new_match() -> void:
 	ball_steps = 0
 	events = []
 	_activate_players()
-	_begin_serve(0)
+	if config.practice:
+		practice.begin()            # ADR-028: no serve
+	else:
+		_begin_serve(0)
 	if attract:
 		ai.slots[0].late_period = K.ATTRACT_LATE_PERIOD
 
@@ -969,6 +974,9 @@ func game_update() -> void:
 		phase_timer += 1
 	players_update()
 	separate_teammates()
+	if config.practice:
+		practice.update()
+		return
 	match phase:
 		K.PHASE_SERVE_SETUP, K.PHASE_SERVE_TOSS:
 			serve_update()

@@ -3,14 +3,15 @@
 ## so a torn write loses only that write. Loading takes the newest valid
 ## copy, migrates it to the current layout, and writes both.
 ##
-## Layouts are frozen: v1 (settings only, the first port build) and v2
-## (records and the ladder). Every change adds a version and a migration
+## Layouts are frozen: v1 (settings only, the first port build), v2
+## (records and the ladder), and v3 (practice, ADR-028: its settings and
+## the best streaks). Every change adds a version and a migration
 ## and a test that loads the old image (playbook rule 4).
 class_name SaveGame
 extends RefCounted
 
 const MAGIC := "PB94"
-const VERSION := 2
+const VERSION := 3
 const FILES := ["save_a.json", "save_b.json"]
 
 ## Where saves live; tests point it elsewhere before the game starts.
@@ -23,10 +24,12 @@ var data: Dictionary = {}
 static func defaults() -> Dictionary:
 	return {
 		"settings": {"venue": 0, "difficulty": K.DIFFICULTY_MEDIUM, "points": 1,
-			"players": 1, "opponent": -2, "camera": 0, "mods": 0},
+			"players": 1, "opponent": -2, "camera": 0, "mods": 0,
+			"practice": Practice.DEFAULTS.duplicate()},
 		"records": {"singles_wins": 0, "singles_losses": 0, "doubles_wins": 0,
 			"doubles_losses": 0, "ladder_rung": 0, "ladder_clears": 0,
-			"longest_rally": 0},
+			"longest_rally": 0, "practice_best": 0,
+			"practice_zone_best": [0, 0, 0, 0]},
 	}
 
 
@@ -35,12 +38,18 @@ static func checksum(payload: String) -> int:
 
 
 ## v1 -> v2: records arrive (all zero, rung 0); settings carry over.
+## v2 -> v3: practice arrives (the default drill, bests at 0); the rest
+## carries over.
 static func migrate(version: int, d: Dictionary) -> Dictionary:
 	var out := d.duplicate(true)
 	if version < 2:
 		out["records"] = defaults()["records"].duplicate()
 		if not out.has("settings"):
 			out["settings"] = {}
+	if version < 3:
+		out["settings"]["practice"] = Practice.DEFAULTS.duplicate()
+		out["records"]["practice_best"] = 0
+		out["records"]["practice_zone_best"] = [0, 0, 0, 0]
 	var def := defaults()
 	for section in def:
 		if not out.has(section):
@@ -163,3 +172,46 @@ func advance_ladder(count: int) -> bool:
 		return true
 	r["ladder_rung"] = rung
 	return false
+
+
+# --- Practice (ADR-028) --------------------------------------------------------
+
+## The saved drill (shot, target, rate, zone), each made valid.
+func practice_settings() -> Array:
+	var saved: Variant = data["settings"].get("practice")
+	var values: Array = saved.duplicate() if typeof(saved) == TYPE_ARRAY and saved.size() == Practice.ROWS \
+		else Practice.DEFAULTS.duplicate()
+	Practice.Edit.new().begin(values)
+	return values
+
+
+## The saved best streak for a zone (ANY: the plain streak).
+func practice_saved_best(zone: int) -> int:
+	var r: Dictionary = data["records"]
+	zone = Practice.practice_zone(zone)
+	if zone == Practice.ZONE_ANY:
+		return int(r["practice_best"])
+	return int(r["practice_zone_best"][zone - 1])
+
+
+## Leaving practice (practice_finish): a new best streak for the session's
+## zone is saved. Returns true if it was.
+func finish_practice(zone: int, best: int) -> bool:
+	if best <= practice_saved_best(zone):
+		return false
+	zone = Practice.practice_zone(zone)
+	if zone == Practice.ZONE_ANY:
+		data["records"]["practice_best"] = best
+	else:
+		data["records"]["practice_zone_best"][zone - 1] = best
+	save_game()
+	return true
+
+
+## A practice session on the saved drill, with its zone's saved best.
+func practice_config(difficulty: int) -> SimTypes.MatchConfig:
+	var settings := practice_settings()
+	var cfg := SimTypes.MatchConfig.practice_session(settings,
+		practice_saved_best(settings[Practice.ROW_ZONE]))
+	cfg.difficulty = difficulty
+	return cfg

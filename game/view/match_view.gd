@@ -104,6 +104,9 @@ func _build() -> void:
 	add_child(_fx)
 	_build_players()
 	_build_ball()
+	if sim.config.practice and not demo:
+		_shadows.add_child(PracticeView.zone(sim.practice))
+		_actors.add_child(PracticeView.machine(sim.practice))
 	var post_meta: Dictionary = manifest["sprites"]["net_post"]
 	var post := Sprite2D.new()
 	post.texture = _tex(post_meta["file"])
@@ -232,6 +235,10 @@ func _physics_process(_delta: float) -> void:
 			it2 = null
 			GameControls.clear_latch()
 		human = [it, null, it2, null]
+		# Practice's pause menu: B leaves for the title (ADR-028/030).
+		if sim.config.practice and sim.paused and it.hit_pressed:
+			leave_practice()
+			return
 	sim.step(human)
 	for e in sim.drain_events():
 		_on_event(e)
@@ -265,6 +272,9 @@ func _on_event(e: Array) -> void:
 		K.EVENT_BOUNCE:
 			_spawn_fx("dust", at, 0)
 			_sfx.play("bounce")
+		K.EVENT_CROWD:
+			_sfx.play("applause")
+			_crowd_cheer = 90 if e[3] >= 13 else 50
 		K.EVENT_FAULT:
 			if e[3] == K.FAULT_NET:
 				_sfx.play("net")
@@ -301,6 +311,14 @@ func _on_match_over() -> void:
 	if ladder and won:
 		cleared = save.advance_ladder(Opponents.count())
 	save.save_game()
+
+
+## Leaving practice: a new best streak (for the session's zone) is saved
+## (main.c calls practice_finish), then back to the title.
+func leave_practice() -> void:
+	if save:
+		save.finish_practice(sim.practice.zone, sim.practice.best)
+	finished.emit(true)
 
 
 func _spawn_fx(kind: String, at: Vector2, start: int) -> void:

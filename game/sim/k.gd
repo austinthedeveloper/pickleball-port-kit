@@ -184,6 +184,9 @@ const EVENT_HIT := 2
 const EVENT_BOUNCE := 3
 const EVENT_FAULT := 4
 const EVENT_POINT := 5
+## audio_crowd (audio_events.h) as an event, so the sim stays silent:
+## practice's every-fifth-return cheer (ADR-028/029); detail = level.
+const EVENT_CROWD := 6
 
 # --- Match (match.h) ----------------------------------------------------------------------
 const MODE_SINGLES := 0

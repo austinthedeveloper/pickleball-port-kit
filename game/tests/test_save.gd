@@ -97,6 +97,32 @@ func test_v1_save_migrates() -> void:
 	eq(int(raw["version"]), SaveGame.VERSION, "now the current layout")
 
 
+## A v2 image (records and the ladder, before practice) loads as v3: all
+## of it carries over, practice arrives on the default drill at 0.
+func test_v2_save_migrates() -> void:
+	var s := _fresh()
+	var v2 := {"settings": {"venue": 2, "difficulty": K.DIFFICULTY_EASY, "points": 4,
+			"players": 1, "opponent": 3, "camera": 2, "mods": 1},
+		"records": {"singles_wins": 5, "singles_losses": 2, "doubles_wins": 1,
+			"doubles_losses": 0, "ladder_rung": 3, "ladder_clears": 1, "longest_rally": 17}}
+	_write_raw("save_b.json", _image(2, 40, v2))
+	s.load_game()
+	for k in v2["settings"]:
+		eq(s.data["settings"][k], v2["settings"][k], "setting %s carries over" % k)
+	for k in v2["records"]:
+		eq(s.data["records"][k], v2["records"][k], "record %s carries over" % k)
+	eq(s.data["settings"]["practice"], Practice.DEFAULTS, "the default drill")
+	eq(s.data["records"]["practice_best"], 0)
+	eq(s.data["records"]["practice_zone_best"], [0, 0, 0, 0])
+	var raw: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(DIR + "save_a.json"))
+	eq(int(raw["version"]), 3, "rewritten as v3")
+	var t := SaveGame.new()
+	t.dir = DIR
+	t.load_game()
+	eq(t.data, s.data, "and reloads the same")
+	eq(t.seq, 42)
+
+
 func test_future_version_is_rejected() -> void:
 	var s := _fresh()
 	_write_raw("save_a.json", _image(SaveGame.VERSION + 1, 3, {"settings": {"venue": 2}}))
