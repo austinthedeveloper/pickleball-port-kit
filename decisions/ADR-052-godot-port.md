@@ -51,12 +51,23 @@ stream, at the 960×540 art density, through the art's court geometry.
   modifiers (ADR-033: BIG BALL, FAST BALL, WIN BY 2, LAVA), the save with
   migration (playbook §6; settings, records, ladder), the ladder
   (ADR-023), story cards and quips (ADR-026/048), and the camera lean
-  with parallax (ADR-050/051, OFF by default).
+  with parallax (ADR-050/051, OFF by default), and ladder opponents'
+  own looks and hats (M4-OPP-04).
+- **Opponent looks** (display only). Ladder opponents on slots 2-3 draw
+  from the indexed role sheets through `view/palette_swap.gdshader`;
+  `PlayerLook` builds the palette from `opponents.json`'s 5-bit colours
+  (expanded as `v << 3 | v >> 2`) plus `palettes.json`'s base and the
+  member's paddle. The SNES roles have fewer steps than the 960x540
+  ones, so the deep shirt (D, the shadow darkened 38%), deep skin (1),
+  hair shadow and shine (h, i), bright shorts (W) and shoe shadow (K)
+  are derived. Hats are role overlay sheets like the cap, built in
+  `art/levels/tools/players.py` after the SNES hats: visor and headband
+  in the shoe accent, tricorn in hair with a white trim, bandana in the
+  shirt ramp; `hat: "hair"` draws none. Humans and the default CPU keep
+  the team-colour sheets.
 - **Not ported yet:** practice (ADR-028), open play (ADR-034), career
   (ADR-047), the close-call replay (ADR-041), night (ADR-045), the
-  sitting-out watcher (ADR-042), opponents' own looks and hats (the 96 px
-  sheets carry team colours; the role sheets make per-opponent palettes a
-  shader away).
+  sitting-out watcher (ADR-042).
 
 ## Rejected (and why)
 

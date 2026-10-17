@@ -1,0 +1,97 @@
+## A ladder opponent's look (M4-OPP-04): their colours from opponents.json
+## as a palette for the indexed role sheets, and their hat. Display only.
+class_name PlayerLook
+extends RefCounted
+
+const SHADER := preload("res://view/palette_swap.gdshader")
+const ROLE_COUNT := 32
+
+var variant := "male"
+var hat := "cap"                 ## "cap", a manifest roles hat, or "hair" (none)
+var palette := PackedColorArray()
+
+
+## The look of a slot, or null for the team-colour sheets: ladder
+## opponents on slots 2-3 (the same members config_for picks).
+static func for_slot(cfg: SimTypes.MatchConfig, slot: int, manifest: Dictionary) -> PlayerLook:
+	if cfg.opponent < 0 or cfg.opponent >= Opponents.count() or cfg.human[2] or slot < 2:
+		return null
+	var members: Array = Opponents.team(cfg.opponent)["players"]
+	var m: Dictionary = members[mini(slot - 2, members.size() - 1)]
+	return from_member(m, manifest)
+
+
+static func from_member(m: Dictionary, manifest: Dictionary) -> PlayerLook:
+	var look := PlayerLook.new()
+	look.variant = String(m.get("variant", "male"))
+	look.hat = String(m.get("hat", "cap"))
+	var roles: Dictionary = manifest["sprites"]["players"]["roles"]
+	var pals: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(
+		"res://assets/levels/" + String(roles["palettes"])))
+	look.palette = palette_for(m, String(roles["order"]), pals)
+	return look
+
+
+## Roles a pre-coloured sheet takes from palettes.json (base, the paddle)
+## and the rest from the member's 5-bit colours. The SNES roles have fewer
+## steps than the 960x540 ones, so the deep shirt (D), deep skin (1), hair
+## shadow and shine (h, i), bright shorts (W) and shoe shadow (K) are
+## derived from their neighbours.
+static func palette_for(m: Dictionary, order: String, pals: Dictionary) -> PackedColorArray:
+	var c := {".": Color.TRANSPARENT}
+	for src in [pals["base"], pals["paddles"].get(String(m.get("paddle", "blue")), pals["paddles"]["blue"])]:
+		for k in src:
+			c[k] = _rgb8(src[k])
+	var skin: Array = Opponents.skin(String(m.get("skin", "light")))
+	c["2"] = rgb5(skin[0])
+	c["3"] = rgb5(skin[1])
+	c["4"] = rgb5(skin[2])
+	c["1"] = c["2"].darkened(0.3)
+	var shirt: Array = m["shirt"]
+	c["d"] = rgb5(shirt[0])
+	c["M"] = rgb5(shirt[1])
+	c["L"] = rgb5(shirt[2])
+	c["D"] = c["d"].darkened(0.38)
+	var shorts: Array = m["shorts"]
+	c["q"] = rgb5(shorts[0])
+	c["w"] = rgb5(shorts[1])
+	c["W"] = c["w"].lerp(Color.WHITE, 0.5)
+	c["H"] = rgb5(m["hair"])
+	c["h"] = c["H"].darkened(0.4)
+	c["i"] = c["H"].lerp(Color.WHITE, 0.3)
+	c["k"] = rgb5(m["shoe"])
+	c["K"] = c["k"].darkened(0.28)
+	var out := PackedColorArray()
+	out.resize(ROLE_COUNT)
+	for i in order.length():
+		out[i] = c.get(order[i], Color.MAGENTA)
+	return out
+
+
+## A 5-bit SNES colour, expanded the way the PPU's DAC reads it (v << 3 | v >> 2).
+static func rgb5(v: Array) -> Color:
+	var r: int = v[0]
+	var g: int = v[1]
+	var b: int = v[2]
+	return Color8((r << 3) | (r >> 2), (g << 3) | (g >> 2), (b << 3) | (b >> 2))
+
+
+static func _rgb8(v: Array) -> Color:
+	return Color8(int(v[0]), int(v[1]), int(v[2]))
+
+
+## The role sheets (hat "" for bareheaded) and one material for both.
+func body_sheet(manifest: Dictionary) -> String:
+	return manifest["sprites"]["players"]["roles"]["files"][variant]["body"]
+
+
+func hat_sheet(manifest: Dictionary) -> String:
+	var files: Dictionary = manifest["sprites"]["players"]["roles"]["files"][variant]
+	return files.get(hat, "")
+
+
+func material() -> ShaderMaterial:
+	var mat := ShaderMaterial.new()
+	mat.shader = SHADER
+	mat.set_shader_parameter("palette", palette)
+	return mat

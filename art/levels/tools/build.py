@@ -73,22 +73,30 @@ def rows_index(rows):
 
 def build_players():
     frames = {}
+    hat_rows = {}
     for variant in ("male", "female"):
         fem = variant == "female"
         bare, capped = [], []
+        hats = {h: [] for h in PL.HATS}
         for name in PL.SLOTS:
-            b, clip_b = PL.render(PL.POSES[name], fem, with_cap=False)
-            c, clip_c = PL.render(PL.POSES[name], fem, with_cap=True)
+            b, clip_b = PL.render(PL.POSES[name], fem, hat=None)
+            c, clip_c = PL.render(PL.POSES[name], fem, hat="cap")
             assert not (clip_b or clip_c), f"{variant} {name} clipped"
             bare.append(b)
             capped.append(c)
+            for h in PL.HATS:
+                r, clip = PL.render(PL.POSES[name], fem, hat=h)
+                assert not clip, f"{variant} {name} {h} clipped"
+                hats[h].append(PL.cap_overlay(b, r))
         frames[variant] = (bare, capped)
+        hat_rows[variant] = hats
     sheets = {}
     n = len(PL.SLOTS)
     for variant, (bare, capped) in frames.items():
         caps = [PL.cap_overlay(b, c) for b, c in zip(bare, capped)]
         # indexed role sheets (palette swap in a shader) ...
-        for kind, rows_list in (("body", bare), ("cap", caps)):
+        for kind, rows_list in (("body", bare), ("cap", caps),
+                                *hat_rows[variant].items()):
             idx = np.zeros((PL.H, PL.W * n), np.uint8)
             for i, rows in enumerate(rows_list):
                 idx[:, i * PL.W:(i + 1) * PL.W] = rows_index(rows)
@@ -122,9 +130,14 @@ def build_players():
         "cap_doc": "The cap is an overlay sheet with the same frames: draw it "
                    "right after the body. Leave it off for bareheaded players "
                    "or swap in another hat.",
-        "roles": {"files": {v: {"body": f"sprites/players/roles/player_{v}_body.png",
-                                "cap": f"sprites/players/roles/player_{v}_cap.png"}
+        "roles": {"files": {v: {k: f"sprites/players/roles/player_{v}_{k}.png"
+                                for k in ("body", "cap", *PL.HATS)}
                             for v in ("male", "female")},
+                  "hats": ["cap", *PL.HATS],
+                  "hats_doc": "Hat overlays (role sheets only), drawn like the "
+                              "cap: visor and headband in the shoe accent "
+                              "(k, K), tricorn in hair with a white (Z) trim, "
+                              "bandana in the shirt ramp.",
                   "order": PL.ROLES,
                   "palettes": "palettes.json",
                   "doc": "Pixel value = index into 'order' (0 transparent). "

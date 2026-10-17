@@ -199,13 +199,29 @@
     "files": {
      "male": {
       "body": "sprites/players/roles/player_male_body.png",
-      "cap": "sprites/players/roles/player_male_cap.png"
+      "cap": "sprites/players/roles/player_male_cap.png",
+      "visor": "sprites/players/roles/player_male_visor.png",
+      "headband": "sprites/players/roles/player_male_headband.png",
+      "tricorn": "sprites/players/roles/player_male_tricorn.png",
+      "bandana": "sprites/players/roles/player_male_bandana.png"
      },
      "female": {
       "body": "sprites/players/roles/player_female_body.png",
-      "cap": "sprites/players/roles/player_female_cap.png"
+      "cap": "sprites/players/roles/player_female_cap.png",
+      "visor": "sprites/players/roles/player_female_visor.png",
+      "headband": "sprites/players/roles/player_female_headband.png",
+      "tricorn": "sprites/players/roles/player_female_tricorn.png",
+      "bandana": "sprites/players/roles/player_female_bandana.png"
      }
     },
+    "hats": [
+     "cap",
+     "visor",
+     "headband",
+     "tricorn",
+     "bandana"
+    ],
+    "hats_doc": "Hat overlays (role sheets only), drawn like the cap: visor and headband in the shoe accent (k, K), tricorn in hair with a white (Z) trim, bandana in the shirt ramp.",
     "order": ".o1234hHiDdMLqwWsSxXgkKpPfeEGZ",
     "palettes": "palettes.json",
     "doc": "Pixel value = index into 'order' (0 transparent). Build a palette from palettes.json: base + team + paddle + skin + hair; shoe accent k/K = team M/d."

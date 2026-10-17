@@ -146,3 +146,36 @@ func test_camera_leans_and_parallax() -> void:
 			check(absf((sky[0].position - sky[1]).x) <= absf((ground[0].position - ground[1]).x) + 1,
 				"the sky moves less than the ground")
 		view.queue_free()
+
+
+## M4-OPP-04: ladder opponents wear their own colours and hats (role
+## sheets through the palette swap); the human's side keeps its team sheet.
+func test_ladder_opponents_wear_their_looks() -> void:
+	var pirates := -1
+	for t in Opponents.count():
+		if Opponents.team(t)["players"][0]["hat"] == "tricorn":
+			pirates = t
+	check(pirates >= 0, "a team wears the tricorn")
+	var view := MatchView.new()
+	runner.root.add_child(view)
+	view.setup(TitleScreen.config_for(true, pirates, K.DIFFICULTY_MEDIUM, 11), "park", false)
+	view._physics_process(1.0 / 60.0)
+	check(view._players[0]["look"] == null, "P1 keeps the team sheet")
+	check(view._players[0]["body"].material == null, "no palette swap on P1")
+	var members: Array = Opponents.team(pirates)["players"]
+	for slot in [2, 3]:
+		var m: Dictionary = members[slot - 2]
+		var e: Dictionary = view._players[slot]
+		var body: Sprite2D = e["body"]
+		check(body.texture.resource_path.ends_with("roles/player_%s_body.png" % m["variant"]), "slot %d body" % slot)
+		check(e["cap"].texture.resource_path.ends_with("_%s.png" % m["hat"]), "slot %d wears the %s" % [slot, m["hat"]])
+		var pal: PackedColorArray = body.material.get_shader_parameter("palette")
+		var order: String = view.manifest["sprites"]["players"]["roles"]["order"]
+		eq(pal[order.find("M")], PlayerLook.rgb5(m["shirt"][1]), "slot %d shirt" % slot)
+		eq(pal[order.find("k")], PlayerLook.rgb5(m["shoe"]), "slot %d shoe accent" % slot)
+		check(not pal.has(Color.MAGENTA), "slot %d every role coloured" % slot)
+	view.queue_free()
+
+
+func test_rgb5_expands_like_the_dac() -> void:
+	eq(PlayerLook.rgb5([31, 0, 16]), Color8(255, 0, 132))

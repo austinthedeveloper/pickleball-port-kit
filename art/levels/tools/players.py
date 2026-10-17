@@ -30,6 +30,7 @@ RAMP = {
     "sock": ("S", "S", "s", "s"),
     "sock_far": ("S", "S", "S", "s"),
     "hair": ("h", "h", "H", "i"),
+    "accent": ("K", "K", "k", "k"),
 }
 
 
@@ -458,6 +459,84 @@ def head_parts(neck, female=False, pony="hang"):
     return head, cap, tail
 
 
+HATS = ("visor", "headband", "tricorn", "bandana")
+
+
+def hat_part(neck, kind):
+    """The other hats (art/sprites/bare/hats.aseprite), drawn where the cap
+    sits: visor and headband in the shoe accent (k, K), tricorn in hair with
+    a white trim, bandana in the shirt ramp. They only add pixels over the
+    bare head."""
+    nx, ny = neck
+    cx, cy = nx + 1, ny - 20
+    band_y = cy - 3
+    slope = lambda px: (cx - px) * 0.18          # the band dips at the back
+    lit = lambda px, py: -((px - cx) * LIGHT[0] + (py - cy) * LIGHT[1]) / 10
+    p = Part(outlined=True)
+
+    def in_dome(px, py, rx, ry, oy=0.0):
+        return ((px - cx) / rx) ** 2 + ((py - (cy + oy)) / ry) ** 2 <= 1
+
+    if kind in ("visor", "headband"):
+        rows = 3 if kind == "visor" else 2
+        for y in range(int(cy - 12), int(band_y + 4)):
+            for x in range(int(cx - 13), int(cx + 13)):
+                px, py = x + 0.5, y + 0.5
+                if not in_dome(px, py, 11.6, 10.8):
+                    continue
+                low = band_y + slope(px)
+                if low - rows < py <= low:
+                    p.px[(x, y)] = "K" if py > low - 1 else "k"
+        if kind == "visor":                       # the brim, like the cap's
+            for y in range(int(band_y - 2), int(band_y + 3)):
+                for x in range(int(cx + 7), int(cx + 19)):
+                    t = (x - (cx + 7)) / 12
+                    top = band_y - 1 + t * 1.5
+                    if top <= y + 0.5 <= top + 3.0 - t * 0.8:
+                        p.px[(x, y)] = "k" if y + 0.5 < top + 1 else "K"
+        else:                                     # knot tails at the back
+            knot = (cx - 11, band_y + slope(cx - 11) - 1)
+            p.capsule(knot, (knot[0] - 5, knot[1] + 3), 1.6, 1.0, "accent")
+            p.capsule(knot, (knot[0] - 3, knot[1] + 7), 1.6, 1.0, "accent")
+    elif kind == "tricorn":
+        for y in range(int(cy - 16), int(band_y + 1)):     # crown
+            for x in range(int(cx - 11), int(cx + 11)):
+                px, py = x + 0.5, y + 0.5
+                if in_dome(px, py, 10.2, 10.4, -3) and py <= band_y - 1:
+                    s = lit(px, py)
+                    p.px[(x, y)] = "i" if s < -0.45 else ("h" if s > 0.5 else "H")
+        for x in range(int(cx - 18), int(cx + 20)):        # brim, cocked up
+            t = (x + 0.5 - cx) / 18.5
+            top = band_y - 1.5 - 8 * t * t
+            bot = band_y + 2.2 - 4.5 * t * t
+            first = True
+            for y in range(int(top - 1), int(bot + 1)):
+                if top <= y + 0.5 <= bot:
+                    p.px[(x, y)] = "Z" if first else (
+                        "h" if y + 0.5 > bot - 1 else "H")
+                    first = False
+    elif kind == "bandana":
+        for y in range(int(cy - 12), int(band_y + 4)):
+            for x in range(int(cx - 13), int(cx + 12)):
+                px, py = x + 0.5, y + 0.5
+                if not in_dome(px, py, 11.4, 10.6) or py > band_y + 1 + slope(px):
+                    continue
+                s = lit(px, py)
+                ch = "L" if s < -0.45 else ("d" if s > 0.5 else "M")
+                if py > band_y + slope(px):
+                    ch = "d"                              # the rolled hem
+                elif ch == "M" and (x * 3 + y * 5) % 9 == 0:
+                    ch = "L"                              # spots
+                p.px[(x, y)] = ch
+        knot = (cx - 11, band_y + slope(cx - 11))
+        p.capsule(knot, knot, 2.2, 2.2, "shirt")
+        p.capsule(knot, (knot[0] - 6, knot[1] + 4), 1.8, 1.1, "shirt")
+        p.capsule(knot, (knot[0] - 3, knot[1] + 8), 1.8, 1.1, "shirt")
+    else:
+        raise ValueError(kind)
+    return p
+
+
 # --- Poses (the 48 px rig's, times S, plus the four new SNES poses) -----------
 
 def shift(pose, dx=0, dy=0, **override):
@@ -582,7 +661,8 @@ def scaled(pose):
     return P
 
 
-def render(pose, female=False, with_cap=True):
+def render(pose, female=False, hat="cap"):
+    """hat: None (bare), "cap", or one of HATS."""
     c = Canvas()
     P = scaled(pose)
     if P["paddle"][1] == "back":
@@ -597,8 +677,10 @@ def render(pose, female=False, with_cap=True):
     c.draw(torso(P["neck"], P["hip"]))
     c.draw(neck_part(P["neck"]))
     c.draw(head)
-    if with_cap:
+    if hat == "cap":
         c.draw(cap)
+    elif hat is not None:
+        c.draw(hat_part(P["neck"], hat))
     c.draw(collar(P["neck"]))
     ang, layer = P["paddle"]
     pad = paddle(P["ha_n"], ang)
@@ -616,6 +698,6 @@ def render(pose, female=False, with_cap=True):
 
 
 def cap_overlay(bare, capped):
-    """Cap layer = pixels where the capped frame differs from the bare one."""
+    """Hat layer = pixels where the hatted frame differs from the bare one."""
     return ["".join(c if c != b else "." for b, c in zip(rb, rc))
             for rb, rc in zip(bare, capped)]
