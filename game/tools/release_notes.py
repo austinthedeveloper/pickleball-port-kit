@@ -30,7 +30,7 @@ def tasks(text):
 
 def main():
     build = sys.argv[1] if len(sys.argv) > 1 else subprocess.run(
-        ["git", "-C", str(KIT), "describe", "--always", "--dirty"],
+        ["git", "-C", str(KIT), "describe", "--tags", "--always", "--dirty"],
         capture_output=True, text=True).stdout.strip()
     rows = tasks(SHEET.read_text())
     done = [r for r in rows if r[3]]

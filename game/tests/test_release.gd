@@ -8,7 +8,7 @@ extends TestSuite
 func test_build_id_matches_git_describe() -> void:
 	var out := []
 	var root := ProjectSettings.globalize_path("res://").path_join("..")
-	var code := OS.execute("git", ["-C", root, "describe", "--always", "--dirty"], out)
+	var code := OS.execute("git", ["-C", root, "describe", "--tags", "--always", "--dirty"], out)
 	if code != 0:
 		check(true, "no git here: nothing to compare")
 		return
@@ -17,7 +17,31 @@ func test_build_id_matches_git_describe() -> void:
 		"a checkout says DEV and asks git (even with an export's build_id.txt left over)")
 	var label := BuildInfo.label()
 	eq(label, label.to_upper(), "upper case for the bitmap font")
-	check(label.begins_with("BUILD "), label)
+	check(label.begins_with("V" + BuildInfo.version()), label)
+
+
+## One version everywhere (design/VERSIONING.md): project.godot, every
+## export preset, and the CHANGELOG's newest entry.
+func test_version_is_consistent() -> void:
+	var v := BuildInfo.version()
+	check(Array(v.split(".")).size() == 3 and Array(v.split(".")).all(func(p): return p.is_valid_int()),
+		"X.Y.Z: %s" % v)
+	var cfg := ConfigFile.new()
+	cfg.load("res://export_presets.cfg")
+	for sec in cfg.get_sections():
+		if not sec.ends_with(".options"):
+			continue
+		for key in ["application/version", "application/short_version"]:
+			if cfg.has_section_key(sec, key):
+				eq(cfg.get_value(sec, key), v, "%s %s" % [sec, key])
+		for key in ["application/file_version", "application/product_version"]:
+			if cfg.has_section_key(sec, key):
+				eq(cfg.get_value(sec, key), v + ".0", "%s %s" % [sec, key])
+	var log := FileAccess.get_file_as_string("res://CHANGELOG.md")
+	var m := RegEx.create_from_string("## \\[?(\\d+\\.\\d+\\.\\d+)").search(log)
+	check(m != null, "the CHANGELOG has a version entry")
+	if m:
+		eq(m.get_string(1), v, "the CHANGELOG's newest entry is this version")
 
 
 func test_title_shows_the_build() -> void:

@@ -1,6 +1,6 @@
 #!/bin/sh
 # Release exports (playbook 0.1, §9). Writes game/build_id.txt from
-# `git describe --always --dirty`, refusing a dirty tree, then exports each
+# `git describe --tags --always --dirty`, refusing a dirty tree, then exports each
 # preset in export_presets.cfg into build/. Without Godot's export
 # templates it says so and makes only the platform-free .pck (the export
 # check), then boots the .pck headless for 200 frames.
@@ -20,7 +20,7 @@ if ! git -C "$KIT" diff --quiet HEAD -- ; then
     echo "refused: the tree has uncommitted changes (commit, or pass --dev)"; exit 1
   fi
 fi
-id=$(git -C "$KIT" describe --always --dirty)
+id=$(git -C "$KIT" describe --tags --always --dirty)
 printf '%s\n' "$id" > build_id.txt
 echo "build $id"
 godot --headless --path . --import >/dev/null 2>&1

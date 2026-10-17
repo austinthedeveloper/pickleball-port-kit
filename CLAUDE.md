@@ -17,7 +17,11 @@ godot --path game --resolution 960x540 -s res://tools/screenshot.gd -- <title|si
 godot --headless --path game -s res://tools/point_log.gd -- doubles 2   # why each point ended
 game/tools/export.sh --check                         # .pck export + headless boot (refuses a dirty tree; --dev)
 python3 game/tools/release_notes.py                  # game/RELEASE_NOTES.md from the roadmap sheet
+python3 game/tools/version.py set X.Y.Z              # the version, everywhere (design/VERSIONING.md)
 ```
+
+Releases are versioned (semver, tags `vX.Y.Z`, `game/CHANGELOG.md`); the
+steps are in `design/VERSIONING.md`.
 
 `design/PORT_ROADMAP.md` is the milestone sheet (PORT-00..09, status and
 "For you" questions); keep it current with each branch.
