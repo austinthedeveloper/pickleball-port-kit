@@ -94,10 +94,26 @@ func _tick() -> void:
 					"back lands on the page's row")
 			if _frame == 60:
 				_title().pages["main"].select("singles")
-				_press("hit")              # SINGLES
+				_press("hit")              # SINGLES: Player Select
+			if _frame == 64:
+				_expect(_title().page == "select", "SINGLES opens Player Select")
+			if _frame == 70:
+				_press("move_down")        # to the colour row
+			if _frame == 74:
+				_press("move_right")       # RED
+			if _frame == 78:
+				_expect(_title().select.choice[0]["palette"] == PlayerSelect.PAL_RED, "Right picks RED")
+				_press("hit")              # to the paddle row
+			if _frame == 82:
+				_press("move_left")        # WOOD
+			if _frame == 86:
+				_press("hit")              # B on the paddle row confirms
 				_next(1)
 		1:
 			if _t == 6:
+				var m0 := _screen() as MatchView
+				_expect(m0 != null and m0.sim.config.palette[0] == PlayerSelect.PAL_RED
+					and m0.sim.players[0].paddle == Paddles.WOOD, "the choices reach the match")
 				_expect(_screen() is MatchView, "B on SINGLES starts a match")
 				var m: MatchView = _screen()
 				_expect(m.ladder and m.card_frames >= 0, "a ladder match opens on the intro card")

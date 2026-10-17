@@ -1,10 +1,13 @@
 ## A ladder opponent's look (M4-OPP-04): their colours from opponents.json
-## as a palette for the indexed role sheets, and their hat. Display only.
+## as a palette for the indexed role sheets, and their hat. Also a human's
+## team colours with a non-standard paddle (ADR-020: the paddle you pick
+## shows in your hands). Display only.
 class_name PlayerLook
 extends RefCounted
 
 const SHADER := preload("res://view/palette_swap.gdshader")
 const ROLE_COUNT := 32
+const TEAMS := ["blue", "red", "green", "gold"]
 
 var variant := "male"
 var hat := "cap"                 ## "cap", a manifest roles hat, or "hair" (none)
@@ -14,11 +17,43 @@ var palette := PackedColorArray()
 ## The look of a slot, or null for the team-colour sheets: ladder
 ## opponents on slots 2-3 (the same members config_for picks).
 static func for_slot(cfg: SimTypes.MatchConfig, slot: int, manifest: Dictionary) -> PlayerLook:
+	if cfg.human[slot] and cfg.palette[slot] >= 0 \
+			and not sheet_has_paddle(cfg.palette[slot], cfg.paddle[slot]):
+		return for_team(cfg.palette[slot], cfg.variant[slot], cfg.paddle[slot], manifest)
 	if cfg.opponent < 0 or cfg.opponent >= Opponents.count() or cfg.human[2] or slot < 2:
 		return null
 	var members: Array = Opponents.team(cfg.opponent)["players"]
 	var m: Dictionary = members[mini(slot - 2, members.size() - 1)]
 	return from_member(m, manifest)
+
+
+## The team-colour sheets hold the paddle in the shirt's colour (CPUs
+## keep them, KNOWN_ISSUES #37); a human's chosen paddle is drawn.
+static func sheet_has_paddle(team: int, paddle: int) -> bool:
+	return Paddles.NAMES[paddle] == TEAMS[team]
+
+
+## The team-colour sheets' look (light skin, brown hair, the cap) with any
+## paddle: base + team + paddle + skin + hair, shoe accent from the team.
+static func for_team(team: int, body_variant: int, paddle: int, manifest: Dictionary) -> PlayerLook:
+	var look := PlayerLook.new()
+	look.variant = "female" if body_variant == K.VARIANT_FEMALE else "male"
+	var roles: Dictionary = manifest["sprites"]["players"]["roles"]
+	var pals: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(
+		"res://assets/levels/" + String(roles["palettes"])))
+	var t: Dictionary = pals["teams"][TEAMS[team]]
+	var c := {".": Color.TRANSPARENT}
+	for src in [pals["base"], t, pals["paddles"][Paddles.NAMES[paddle]], pals["skins"]["light"],
+			pals["hairs"]["brown"]]:
+		for k in src:
+			c[k] = _rgb8(src[k])
+	c["k"] = _rgb8(t["M"])
+	c["K"] = _rgb8(t["d"])
+	var order := String(roles["order"])
+	look.palette.resize(ROLE_COUNT)
+	for i in order.length():
+		look.palette[i] = c.get(order[i], Color.MAGENTA)
+	return look
 
 
 static func from_member(m: Dictionary, manifest: Dictionary) -> PlayerLook:

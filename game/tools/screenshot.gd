@@ -25,7 +25,15 @@ func _initialize() -> void:
 		_view = TitleScreen.new()
 		root.add_child(_view)
 		if mode.begins_with("title_"):
-			_view.ready.connect(func(): _view.open_page(mode.substr(6)))
+			_view.ready.connect(func():
+				if mode == "title_select":
+					_view.open_select(false)
+					_view.select_input(PlayerSelect.PAD_DOWN)
+					_view.select_input(PlayerSelect.PAD_RIGHT)    # RED
+					_view.select_input(PlayerSelect.PAD_DOWN)
+					_view.select_input(PlayerSelect.PAD_LEFT)     # WOOD
+				else:
+					_view.open_page(mode.substr(6)))
 	else:
 		var m := MatchView.new()
 		root.add_child(m)

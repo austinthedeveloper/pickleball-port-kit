@@ -98,6 +98,16 @@ stream, at the 960×540 art density, through the art's court geometry.
   FULLSCREEN, SCALE (PIXEL = integer stretch, FILL = fractional). The
   pause menu is RESUME / RESTART / MAIN MENU on the same component;
   RESUME hands the sim its own Start, so pausing stays in the sim.
+- **Player Select** (PORT-04, ADR-020). `sim/select.gd` is select.c and
+  match_config_select; `TitleScreen.config_for` takes the 1P (and 2P)
+  choice, then the ladder team on slots 2-3. The team-colour sheets hold
+  a paddle in the shirt's colour, so a human whose paddle differs draws
+  through `PlayerLook.for_team` (the role sheets in the team palette:
+  light skin, brown hair, the cap, the chosen paddle); a test checks the
+  role sheet in that palette equals the colour sheet. The 1P choice is
+  saved (`settings.player`) and used for ladder rungs and practice.
+  2P's screen reads pad 2 (and P1's keys, so one keyboard can set up a
+  2P match).
 - **Not ported yet:** open play (ADR-034), career
   (ADR-047), the close-call replay (ADR-041), night (ADR-045), the
   sitting-out watcher (ADR-042).

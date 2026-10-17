@@ -41,6 +41,6 @@ func _on_start(cfg: SimTypes.MatchConfig, venue: String, ladder: bool) -> void:
 func _on_next_rung(prev: SimTypes.MatchConfig) -> void:
 	var rung: int = save.data["records"]["ladder_rung"]
 	var cfg := TitleScreen.config_for(prev.mode == K.MODE_DOUBLES, rung, prev.difficulty,
-		prev.points_to_win)
+		prev.points_to_win, TitleScreen.p1_choice)
 	cfg.modifiers = prev.modifiers
 	_on_start(cfg, TitleScreen.home_venue(rung), true)

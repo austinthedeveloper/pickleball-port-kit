@@ -125,7 +125,7 @@ feature/cld-godot-port                 (done: the playable port)
 
 ### 4. `feature/cld-player-select`: Player Select (ADR-020)
 
-- [ ] `PORT-04` Choose a shirt colour, male or female, and a paddle,
+- [x] `PORT-04` Choose a shirt colour, male or female, and a paddle,
   with POWER, CONTROL and SPEED bars, following the select concept art.
   Colours stay unique per match (ADR-010). 2P picks on its own pad.
   CPUs take the remaining colours.
@@ -133,8 +133,24 @@ feature/cld-godot-port                 (done: the playable port)
     defaults). A screenshot matches the concept's layout. The paddle
     actually changes play (a stats-harness check: the red paddle's shots
     fly sooner).
-  - Verified: —
-  - Status: Planned. It will be **Ready to test**.
+  - Verified: `sim/select.gd` is select.c (rows, B steps and confirms,
+    Start confirms, Y climbs back, 2P skips 1P's colour) plus
+    match_config_select (CPUs take the free colours in order, the
+    standard paddle, slots 1 and 3 female). `view/select_screen.gd`
+    follows the concept: portrait, four shirt thumbnails, four paddles
+    with POWER / CONTROL / SPEED bars. SINGLES and DOUBLES open it; 2P
+    picks next on pad 2. The last choice is saved and used for ladder
+    rungs and practice. A human's chosen paddle is drawn in hand
+    (`PlayerLook.for_team`). `test_select.gd` (7 tests): test_select.c
+    ported; unique colours over every 1P/2P pick in both modes; CPU
+    defaults; the paddle reaches the sim; in 6,000 frames of bot play the
+    red paddle's shots reach the bounce sooner than the standard's; the
+    role sheet in the team palette equals the colour sheet pixel for
+    pixel; the title's select flow. 119/119 plus the e2e (now through
+    Player Select: RED, WOOD, and both reach the match); golden traces
+    unchanged. Screenshot: the select screen against the concept.
+  - Status: **Ready to test**: pick a colour, body and paddle; try WOOD
+    vs RED for a few rallies. With a second pad, set PLAYERS to 2P VS.
 
 ### 5. `feature/cld-court-colors`: court colours (ADR-022, ADR-027)
 
@@ -217,6 +233,13 @@ the chain: each has a default I've gone with.
   Also: SINGLES and DOUBLES stay on MAIN, so the common case is one press;
   the rest of the old list moved to MATCH SETUP. The window options are
   untested on a real display here (headless has no window).
+
+- **PORT-04 Player Select:** CPUs still draw the colour sheets, so a
+  red CPU holds a red paddle while playing the standard (blue) paddle's
+  stats (KNOWN_ISSUES #37). I left it: it reads better than a blue
+  paddle on every shirt. Say if you'd rather CPUs show blue. The paddle
+  icons are drawn in code from the paddle palettes, since the art has no
+  paddle icons; real icons would be a small art task.
 
 ## If time runs short or long
 

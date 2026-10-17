@@ -2,7 +2,8 @@
 ## The menu is a tree of MenuPages (ADR-025/030): MAIN (SINGLES, DOUBLES,
 ## MATCH SETUP, PRACTICE, MODIFIERS, OPTIONS, RECORDS) opens the others.
 ## Up/Down pick a row, Left/Right change it, B/Start presses it, Y goes
-## back. PRACTICE opens the practice page (ADR-028's editor: SHOT, TARGET,
+## back. SINGLES and DOUBLES open Player Select (ADR-020; 2P picks next
+## on their own pad when PLAYERS is 2P VS), then the match. PRACTICE opens the practice page (ADR-028's editor: SHOT, TARGET,
 ## RATE, RETURN TO, and the BEST STREAK). Every page change swallows the
 ## press that made it (rule 9).
 class_name TitleScreen
@@ -36,6 +37,9 @@ static var fullscreen := false
 static var integer_scale := true
 ## The main page's cursor, kept across matches.
 static var main_cursor := 0
+## The last Player Select choices (PlayerSelect.new_choice; 1P's is saved).
+static var p1_choice := PlayerSelect.new_choice(PlayerSelect.PAL_BLUE, K.VARIANT_MALE, Paddles.STANDARD)
+static var p2_choice := PlayerSelect.new_choice(PlayerSelect.PAL_RED, K.VARIANT_MALE, Paddles.STANDARD)
 
 var _demo: MatchView
 var _ui: CanvasLayer
@@ -54,6 +58,11 @@ var _page_best: BitmapText
 var _page_arrow: Sprite2D
 var _edit := Practice.Edit.new()
 var _drill: Array = []
+var select := PlayerSelect.new()
+var select_screen: SelectScreen
+var _select_doubles := false
+var _header: Array = []          # the logo and record line (hidden on Player Select)
+var _pad2_prev := 0
 
 
 func _load_settings() -> void:
@@ -71,6 +80,10 @@ func _load_settings() -> void:
 	Sfx.setting = clampi(int(st.get("sound", 0)), 0, AudioMap.SOUND_NAMES.size() - 1)
 	fullscreen = int(st.get("fullscreen", 0)) != 0
 	integer_scale = int(st.get("integer_scale", 1)) != 0
+	var pl: Array = st.get("player", [0, 0, 1])
+	if pl.size() == 3:
+		p1_choice = PlayerSelect.new_choice(clampi(int(pl[0]), 0, 3), clampi(int(pl[1]), 0, 1),
+			clampi(int(pl[2]), 0, Paddles.NAMES.size() - 1))
 
 
 func _store_settings() -> void:
@@ -79,7 +92,8 @@ func _store_settings() -> void:
 	save.data["settings"].merge({"venue": venue_i, "difficulty": difficulty_i,
 		"points": points_i, "players": 2 if two_players else 1, "opponent": opponent_i,
 		"camera": camera_i, "mod_bits": mod_bits, "sound": Sfx.setting,
-		"fullscreen": 1 if fullscreen else 0, "integer_scale": 1 if integer_scale else 0}, true)
+		"fullscreen": 1 if fullscreen else 0, "integer_scale": 1 if integer_scale else 0,
+		"player": [p1_choice["palette"], p1_choice["variant"], p1_choice["paddle"]]}, true)
 
 
 ## Applies the window options (a no-op headless, where there's no window).
@@ -131,8 +145,12 @@ func _ready() -> void:
 	_record.position = Vector2(480, 156)
 	_record.tint = Color(0.8, 0.85, 0.95)
 	_ui.add_child(_record)
+	_header = [logo, sub, _record, keys]
 	_build_pages()
 	_build_page()
+	select_screen = SelectScreen.new().setup(select)
+	select_screen.visible = false
+	_ui.add_child(select_screen)
 	_sfx = Sfx.new()
 	add_child(_sfx)
 	_sfx.setup("", false)
@@ -153,8 +171,8 @@ func _add_page(id: String, title: String, rows: Array, help: String) -> void:
 func _build_pages() -> void:
 	var help := "B: SELECT   Y: BACK"
 	_add_page("main", "", [
-		{"id": "singles", "label": "SINGLES", "press": func(): _start(false)},
-		{"id": "doubles", "label": "DOUBLES", "press": func(): _start(true)},
+		{"id": "singles", "label": "SINGLES", "press": func(): open_select(false)},
+		{"id": "doubles", "label": "DOUBLES", "press": func(): open_select(true)},
 		{"id": "play", "label": "MATCH SETUP", "value": _play_summary,
 			"press": func(): open_page("play")},
 		{"id": "practice", "label": "PRACTICE", "press": _open_practice},
@@ -239,6 +257,10 @@ func _show(id: String) -> void:
 		pages[k].visible = k == id
 	if _page:
 		_page.visible = id == "practice"
+	if select_screen:
+		select_screen.visible = id == "select"
+	for n in _header:
+		n.visible = id != "select"
 	if pages.has(id):
 		pages[id].refresh()
 	_refresh()
@@ -268,6 +290,56 @@ func back() -> void:
 
 func page_open() -> bool:
 	return page == "practice"
+
+
+## SINGLES / DOUBLES: Player Select for 1P (on their last choice), then 2P.
+func open_select(doubles: bool) -> void:
+	_select_doubles = doubles
+	select.begin(K.MODE_DOUBLES if doubles else K.MODE_SINGLES, 2 if two_players else 1, p1_choice)
+	select.choice[1] = p2_choice.duplicate()
+	main_cursor = pages["main"].cursor
+	_show("select")
+	select_screen.refresh()
+	_lock = SWITCH_LOCK
+	GameControls.clear_latch()
+
+
+## One frame of Player Select; while 2P chooses, their pad drives it (and
+## P1's keys, so a single keyboard can still set up a 2P match).
+func select_input(pressed: int) -> void:
+	if pressed == 0:
+		return
+	var was := [select.row, select.current]
+	var result := select.input(pressed)
+	if result == PlayerSelect.BACK:
+		_show("main")
+		_lock = SWITCH_LOCK
+		GameControls.clear_latch()
+		_sfx.play("back")
+	elif result == PlayerSelect.DONE:
+		p1_choice = select.choice[0].duplicate()
+		if select.humans == 2:
+			p2_choice = select.choice[1].duplicate()
+		_start(_select_doubles)
+	else:
+		_sfx.play("confirm" if select.current != was[1] else "blip")
+		select_screen.refresh()
+
+
+## 2P's newly pressed buttons on pad 1 (the input map is P1's).
+func _pad2_pressed() -> int:
+	var held := 0
+	var dev := 1
+	if dev in Input.get_connected_joypads():
+		for pair in [[JOY_BUTTON_DPAD_UP, Practice.PAD_UP], [JOY_BUTTON_DPAD_DOWN, Practice.PAD_DOWN],
+				[JOY_BUTTON_DPAD_LEFT, Practice.PAD_LEFT], [JOY_BUTTON_DPAD_RIGHT, Practice.PAD_RIGHT],
+				[JOY_BUTTON_A, Practice.PAD_B], [JOY_BUTTON_X, Practice.PAD_Y],
+				[JOY_BUTTON_START, Practice.PAD_START]]:
+			if Input.is_joy_button_pressed(dev, pair[0]):
+				held |= pair[1]
+	var pressed := held & ~_pad2_prev
+	_pad2_prev = held
+	return pressed
 
 
 func _start(doubles: bool) -> void:
@@ -383,12 +455,18 @@ func _update_page(pressed: int) -> void:
 
 
 ## A practice session on the saved drill at the chosen difficulty.
+## P1 in their last Player Select choice.
 func practice_config() -> SimTypes.MatchConfig:
+	var cfg: SimTypes.MatchConfig
 	if save:
-		return save.practice_config(difficulty_i)
-	var cfg := SimTypes.MatchConfig.practice_session(_drill if _drill.size() == Practice.ROWS
-		else Practice.DEFAULTS, 0)
-	cfg.difficulty = difficulty_i
+		cfg = save.practice_config(difficulty_i)
+	else:
+		cfg = SimTypes.MatchConfig.practice_session(_drill if _drill.size() == Practice.ROWS
+			else Practice.DEFAULTS, 0)
+		cfg.difficulty = difficulty_i
+	cfg.palette[0] = p1_choice["palette"]
+	cfg.variant[0] = p1_choice["variant"]
+	cfg.paddle[0] = p1_choice["paddle"]
 	return cfg
 
 
@@ -431,19 +509,24 @@ static func home_venue(team: int) -> String:
 
 func config(doubles: bool) -> SimTypes.MatchConfig:
 	var opp := -1 if two_players else (_rung() if opponent_i == -2 else opponent_i)
-	var cfg := config_for(doubles, opp, difficulty_i, POINTS[points_i])
+	var cfg := config_for(doubles, opp, difficulty_i, POINTS[points_i], p1_choice,
+		p2_choice if two_players else {})
 	cfg.modifiers = mod_bits
-	if two_players:
-		cfg.human[2] = 1
 	return cfg
 
 
-## A match against a ladder team (or the default CPU, -1): their look's
-## body variant and paddle on slots 2-3 (match_config_opponent).
-static func config_for(doubles: bool, opponent: int, difficulty: int, points: int) -> SimTypes.MatchConfig:
-	var cfg := SimTypes.MatchConfig.doubles() if doubles else SimTypes.MatchConfig.singles()
+## A match from Player Select's choices (match_config_select: 1P, and 2P
+## on slot 2 if given) against a ladder team or the default CPU (-1):
+## their look's body variant and paddle on slots 2-3 (match_config_opponent).
+static func config_for(doubles: bool, opponent: int, difficulty: int, points: int,
+		p1: Dictionary = {}, p2: Dictionary = {}) -> SimTypes.MatchConfig:
+	var cfg := PlayerSelect.config_select(K.MODE_DOUBLES if doubles else K.MODE_SINGLES,
+		p1 if not p1.is_empty() else PlayerSelect.new_choice(PlayerSelect.PAL_BLUE,
+			K.VARIANT_MALE, Paddles.STANDARD), p2)
 	cfg.difficulty = difficulty
 	cfg.points_to_win = points
+	if not p2.is_empty():
+		return cfg
 	cfg.opponent = opponent
 	if opponent >= 0:
 		var members: Array = Opponents.team(opponent)["players"]
@@ -463,6 +546,11 @@ func _process(_delta: float) -> void:
 		return
 	if page == "practice":
 		_update_page(_pad_pressed())
+		return
+	if page == "select":
+		var pressed := _pad_pressed()
+		var p2 := _pad2_pressed()
+		select_input(pressed | (p2 if select.current == 1 else 0))
 		return
 	var p: MenuPage = pages[page]
 	if Input.is_action_just_pressed("move_up"):
