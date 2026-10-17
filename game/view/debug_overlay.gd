@@ -9,7 +9,7 @@ var view: MatchView
 var _label: Label
 
 
-func _ready() -> void:
+func _init() -> void:
 	z_index = 100
 	_label = Label.new()
 	_label.position = Vector2(8, 64)

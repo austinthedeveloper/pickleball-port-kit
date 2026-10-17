@@ -34,6 +34,6 @@ func setup(venue: String, quiet: bool) -> void:
 
 
 func play(name: String) -> void:
-	if _quiet or not _players.has(name):
+	if _quiet or not _players.has(name) or not is_inside_tree():
 		return
 	_players[name].play()

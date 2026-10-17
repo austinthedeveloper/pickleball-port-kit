@@ -10,6 +10,11 @@ var current := ""
 
 
 func _initialize() -> void:
+	# The input map (an autoload in the game) for suites that build views.
+	var controls = load("res://game_ui/controls.gd").new()
+	controls.name = "Controls"
+	root.add_child(controls)
+	controls._ready()
 	var filter := ""
 	var args := OS.get_cmdline_user_args()
 	if args.size() > 0:
