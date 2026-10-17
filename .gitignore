@@ -1,1 +1,3 @@
 .venv/
+game/.godot/
+*.import.tmp

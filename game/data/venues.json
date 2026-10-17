@@ -1,0 +1,35 @@
+{
+  "comment": "Venues (ADR-024). Each scene is a 256x224 court scene made by tools/art/prep_court_scene.py; the first is the base. Tiles in BG1 palette 2 (the court, lines, net, sand, fence) must be the same in every scene and are shared; each venue has its own backdrop tiles and palettes 3-7. 'ground' names the court colour presets (court_colors.json) a DEFAULT choice means at this venue. Names fit the 8-cell COURT page. 'ambience' is the venue's background loop (ADR-031): birds, gulls, crickets, jungle, space, or bubbles (ADR-046). 'watcher' is where the opponent's partner watches a singles match from (ADR-042): x and y of the feet (sitting: the seat), and sit or stand.",
+  "venues": [
+    {
+      "name": "PARK", "scene": "court_scene.png", "ambience": "birds",
+      "watcher": [194, 64, "sit"],
+      "ground": {"surface": "DEFAULT", "kitchen": "NAVY", "surround": "DEFAULT", "lines": "DEFAULT"}
+    },
+    {
+      "name": "LAKESIDE", "scene": "venue_lake.png", "ambience": "gulls",
+      "watcher": [204, 56, "sit"],
+      "ground": {"surface": "GREEN", "kitchen": "BLUE", "surround": "GRASS", "lines": "WHITE"}
+    },
+    {
+      "name": "SUNSET", "scene": "venue_sunset.png", "ambience": "crickets",
+      "watcher": [197, 74, "stand"],
+      "ground": {"surface": "DEFAULT", "kitchen": "CLAY", "surround": "BRICK", "lines": "DEFAULT"}
+    },
+    {
+      "name": "DINOSAUR", "scene": "venue_dinosaur.png", "ambience": "jungle",
+      "watcher": [200, 62, "stand"],
+      "ground": {"surface": "GREEN", "kitchen": "ORANGE", "surround": "GRASS", "lines": "WHITE"}
+    },
+    {
+      "name": "SPACE", "scene": "venue_space.png", "ambience": "space",
+      "watcher": [200, 62, "stand"],
+      "ground": {"surface": "NAVY", "kitchen": "PURPLE", "surround": "ASPHALT", "lines": "CYAN"}
+    },
+    {
+      "name": "UNDERSEA", "scene": "venue_undersea.png", "ambience": "bubbles",
+      "watcher": [200, 62, "stand"],
+      "ground": {"surface": "AQUA", "kitchen": "NAVY", "surround": "SAND", "lines": "WHITE"}
+    }
+  ]
+}

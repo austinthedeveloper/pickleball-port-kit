@@ -1,0 +1,38 @@
+; Engine configuration file.
+; Pickleball '94 port. Godot 4.7 (pinned in README; see docs/adr).
+
+config_version=5
+
+[application]
+
+config/name="Pickleball '94"
+config/description="Arcade pickleball, ported from the SNES game."
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.7")
+boot_splash/bg_color=Color(0.04, 0.06, 0.12, 1)
+
+[autoload]
+
+Controls="*res://game_ui/controls.gd"
+
+[display]
+
+window/size/viewport_width=960
+window/size/viewport_height=540
+window/size/window_width_override=1920
+window/size/window_height_override=1080
+window/stretch/mode="viewport"
+window/stretch/aspect="keep"
+window/stretch/scale_mode="integer"
+
+[physics]
+
+common/physics_ticks_per_second=60
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+2d/snap/snap_2d_transforms_to_pixel=true
+2d/snap/snap_2d_vertices_to_pixel=true

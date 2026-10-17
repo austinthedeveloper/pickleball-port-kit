@@ -1,0 +1,85 @@
+## CPU personalities (ADR-023) from data/opponents.json, plus the difficulty
+## adjustment (ADR-025, options.c). Data, not code: the ladder is rows of AI
+## knobs.
+class_name Opponents
+extends RefCounted
+
+const PATH := "res://data/opponents.json"
+
+static var _data: Dictionary = {}
+static var _default: SimTypes.AiStyle
+static var _partner: SimTypes.AiStyle
+static var _teams: Array = []      # [{team, venue, players: [{name, style: AiStyle, ...}]}]
+
+
+static func _load() -> void:
+	if not _data.is_empty():
+		return
+	var f := FileAccess.open(PATH, FileAccess.READ)
+	_data = JSON.parse_string(f.get_as_text())
+	_default = SimTypes.AiStyle.from_dict(_data["default_style"])
+	_partner = SimTypes.AiStyle.from_dict(_data["partner_style"])
+	for t in _data["opponents"]:
+		var players := []
+		for p in t["players"]:
+			var q: Dictionary = p.duplicate()
+			q["style_obj"] = SimTypes.AiStyle.from_dict(p["style"])
+			players.append(q)
+		var team: Dictionary = t.duplicate()
+		team["players"] = players
+		_teams.append(team)
+
+
+static func default_style() -> SimTypes.AiStyle:
+	_load()
+	return _default.copy()
+
+
+static func partner_style() -> SimTypes.AiStyle:
+	_load()
+	return _partner.copy()
+
+
+static func count() -> int:
+	_load()
+	return _teams.size()
+
+
+static func team(i: int) -> Dictionary:
+	_load()
+	return _teams[i]
+
+
+## The play style of a CPU slot (match.c match_slot_style): an opponent's
+## captain/partner on slots 2-3, the partner style for a CPU partnering a
+## human, else the default CPU.
+static func slot_style(cfg: SimTypes.MatchConfig, slot: int) -> SimTypes.AiStyle:
+	_load()
+	if cfg.opponent >= 0 and cfg.opponent < _teams.size() and slot >= 2:
+		var members: Array = _teams[cfg.opponent]["players"]
+		return members[mini(slot - 2, members.size() - 1)]["style_obj"]
+	if cfg.human[slot ^ 1] and not cfg.human[slot]:
+		return _partner
+	return _default
+
+
+## A CPU opposing the humans plays this much better or worse (options.c).
+static func apply_difficulty(s: SimTypes.AiStyle, difficulty: int) -> void:
+	var late := s.late_period
+	match difficulty:
+		K.DIFFICULTY_KID:
+			if late:
+				s.late_period = maxi(2, late / 3)
+			s.reaction += 10
+			s.speed = s.speed - 4 if s.speed > 16 else 12
+		K.DIFFICULTY_EASY:
+			if late:
+				s.late_period = maxi(2, late / 2)
+			s.reaction += 5
+			s.speed = s.speed - 2 if s.speed > 14 else 12
+		K.DIFFICULTY_HARD:
+			if late:
+				s.late_period = mini(30, late + late / 2 + 2)
+			s.reaction = s.reaction - 3 if s.reaction > 3 else 0
+			if s.speed < K.PLAYER_MAX_SPEED_FP:
+				s.speed += 1
