@@ -287,13 +287,15 @@ static func _slide(v: int, limit: int) -> int:
 	return total
 
 func _probe_in_reach() -> bool:
-	return Sim._within(px - reach_x, K.to_fp(K.HIT_REACH_X)) \
-		and Sim._within(py - reach_y, K.to_fp(K.HIT_REACH_Y)) \
-		and pz >= 0 and pz <= K.to_fp(K.HIT_REACH_Z)
+	var gw: int = sim.grow_fp
+	return Sim._within(px - reach_x, K.to_fp(K.HIT_REACH_X) + gw) \
+		and Sim._within(py - reach_y, K.to_fp(K.HIT_REACH_Y) + gw) \
+		and pz >= 0 and pz <= K.to_fp(K.HIT_REACH_Z) + gw
 
 func _probe_in_sweet() -> bool:
-	return Sim._within(px - reach_x, K.to_fp(K.HIT_SWEET_X)) \
-		and Sim._within(py - reach_y, K.to_fp(K.HIT_SWEET_Y))
+	var gw: int = sim.grow_fp
+	return Sim._within(px - reach_x, K.to_fp(K.HIT_SWEET_X) + gw) \
+		and Sim._within(py - reach_y, K.to_fp(K.HIT_SWEET_Y) + gw)
 
 ## R23: over the window's 7 steps the ball stays between where it is and
 ## 7 steps of velocity on: when that range misses the box, no step reaches.
@@ -325,8 +327,8 @@ func _swing_connects(p: Player) -> bool:
 		reach_x += _slide(p.vx_fp, Paddles.swing_limit(p.paddle))
 		reach_y += _slide(p.vy_fp, Paddles.swing_limit(p.paddle))
 	var paced: bool = sim.ball_paced
-	if not paced and (_window_misses(b.x_fp, b.vx_fp, reach_x, K.to_fp(K.HIT_REACH_X)) \
-			or _window_misses(b.y_fp, b.vy_fp, reach_y, K.to_fp(K.HIT_REACH_Y))):
+	if not paced and (_window_misses(b.x_fp, b.vx_fp, reach_x, K.to_fp(K.HIT_REACH_X) + sim.grow_fp) \
+			or _window_misses(b.y_fp, b.vy_fp, reach_y, K.to_fp(K.HIT_REACH_Y) + sim.grow_fp)):
 		return false
 	if not paced and (pz != 0 or pvz > 0):
 		var rise := 3 * pvz + 3 * K.BALL_GRAVITY_FP
@@ -408,7 +410,7 @@ func _plan_volley(p: Player, land_steps: int, lx: int) -> bool:
 	if t <= 0 or t >= land_steps:
 		return false
 	var z := b.z_fp + t * b.vz_fp + K.BALL_GRAVITY_FP * (t * (t - 1) / 2)
-	if z < K.AI_VOLLEY_MIN_Z or z > K.to_fp(K.HIT_REACH_Z) - K.to_fp(2):
+	if z < K.AI_VOLLEY_MIN_Z or z > K.to_fp(K.HIT_REACH_Z) + sim.grow_fp - K.to_fp(2):
 		return false
 	g.target_x = K.from_fp(x)
 	g.target_y = K.from_fp(b.y_fp + t * b.vy_fp)
@@ -436,6 +438,7 @@ func _plan_intercept(p: Player) -> void:
 			g.has_target = 1 if _owns_point(p, land_x, land_y, false) else 0
 		else:
 			g.has_target = 1 if _owns_point(p, K.from_fp(b.x_fp), K.from_fp(b.y_fp), false) else 0
+		_avoid_lava(p)
 		return
 	var steps: int
 	var lx: int
@@ -457,6 +460,9 @@ func _plan_intercept(p: Player) -> void:
 		land_x = lx
 		land_y = ly
 		land_impact_vz = impact_vz
+	# FAST BALL: N steps take at least N - N/4 - 1 frames (safe early-out).
+	if (sim.config.modifiers & K.MOD_FAST_BALL) and steps > 1:
+		steps -= (steps >> 2) + 1
 	g.predicted_frames = steps
 	g.predicted_land_x = lx
 	g.predicted_land_y = ly
@@ -477,7 +483,14 @@ func _plan_intercept(p: Player) -> void:
 		rise2 = _steps_inside(K.to_fp(lx), K.to_fp(ly), vx, vy, rise2)
 	g.target_x = lx + K.from_fp(vx * rise2) + behind
 	g.target_y = ly + K.from_fp(vy * rise2)
+	_avoid_lava(p)
 	g.has_target = 1 if _owns_point(p, lx, ly, false) else 0
+
+
+## LAVA: an intercept never asks a CPU into its own kitchen.
+func _avoid_lava(p: Player) -> void:
+	if sim.config.modifiers & K.MOD_LAVA:
+		g.target_x = Sim.lava_target(g.target_x, p.team)
 
 
 # --- Entry points -------------------------------------------------------------------------

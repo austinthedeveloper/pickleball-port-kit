@@ -177,7 +177,7 @@ class MatchConfig:
 	var opponent := -1                 # index into opponents.json, -1 = default CPU
 	var points_to_win := K.POINTS_TO_WIN
 	var difficulty := K.DIFFICULTY_MEDIUM
-	var win_by_2 := 0
+	var modifiers := 0                 # MOD_* bits (ADR-033)
 
 	static func singles() -> MatchConfig:
 		return MatchConfig.new()

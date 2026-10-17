@@ -193,6 +193,14 @@ const DIFFICULTY_EASY := 1
 const DIFFICULTY_MEDIUM := 2
 const DIFFICULTY_HARD := 3
 
+# --- Modifiers (modifiers.h, ADR-033) --------------------------------------
+const MOD_BIG_BALL := 1
+const MOD_FAST_BALL := 2
+const MOD_WIN_BY_2 := 4
+const MOD_LAVA := 8
+const MOD_BIG_REACH := 4
+const MOD_LAVA_MARGIN := 8
+
 # --- AI (ai.h) ---------------------------------------------------------------------------------
 const AI_PREDICT_MAX_STEPS := 60
 const AI_RECOVER_Y := 130

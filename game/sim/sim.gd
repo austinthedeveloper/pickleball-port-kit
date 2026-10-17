@@ -60,6 +60,8 @@ var ball_steps := 0             ## physics steps this match (AI cache)
 const BALL_CYCLE := 60
 const BALL_PACE_TICKS := BALL_CYCLE + 12
 var ball_paced := false
+## BIG BALL grows reach and sweet spot (collision.c g_hit_box).
+var grow_fp := 0
 var ball_pace: Array = []
 var ball_tick := 0
 var rally_start := 0
@@ -198,21 +200,21 @@ func ball_initialize() -> void:
 static func _within(d: int, half: int) -> bool:
 	return d >= -half and d <= half
 
-static func in_reach(p: Player, b: Ball) -> bool:
+static func in_reach(p: Player, b: Ball, grow: int = 0) -> bool:
 	if not p.active or not b.active or b.rally_state != K.BALL_RALLY_LIVE:
 		return false
-	if not _within(b.x_fp - p.x_fp, K.to_fp(K.HIT_REACH_X)):
+	if not _within(b.x_fp - p.x_fp, K.to_fp(K.HIT_REACH_X) + grow):
 		return false
-	if not _within(b.y_fp - p.y_fp, K.to_fp(K.HIT_REACH_Y)):
+	if not _within(b.y_fp - p.y_fp, K.to_fp(K.HIT_REACH_Y) + grow):
 		return false
-	return b.z_fp >= 0 and b.z_fp <= K.to_fp(K.HIT_REACH_Z)
+	return b.z_fp >= 0 and b.z_fp <= K.to_fp(K.HIT_REACH_Z) + grow
 
-static func in_sweet_spot(p: Player, b: Ball) -> bool:
-	return _within(b.x_fp - p.x_fp, K.to_fp(K.HIT_SWEET_X)) \
-		and _within(b.y_fp - p.y_fp, K.to_fp(K.HIT_SWEET_Y))
+static func in_sweet_spot(p: Player, b: Ball, grow: int = 0) -> bool:
+	return _within(b.x_fp - p.x_fp, K.to_fp(K.HIT_SWEET_X) + grow) \
+		and _within(b.y_fp - p.y_fp, K.to_fp(K.HIT_SWEET_Y) + grow)
 
 ## Target and flight for a rally shot (ADR-019).
-static func apply_targeted_shot(b: Ball, p: Player, intent: Intent) -> void:
+static func apply_targeted_shot(b: Ball, p: Player, intent: Intent, grow: int = 0) -> void:
 	var tx: int
 	var ty := K.HIT_TARGET_LANE_CENTER
 	var pace: int
@@ -251,7 +253,7 @@ static func apply_targeted_shot(b: Ball, p: Player, intent: Intent) -> void:
 			wide = K.HIT_DRIVE_STRETCH_WIDE
 			longer = K.HIT_DRIVE_STRETCH_LONG
 	pace = (pace * Paddles.power_mul(p.paddle)) >> 6
-	if not in_sweet_spot(p, b):
+	if not in_sweet_spot(p, b, grow):
 		wide = (wide * Paddles.control_mul(p.paddle)) >> 6
 		longer = (longer * Paddles.control_mul(p.paddle)) >> 6
 		if ty < K.HIT_TARGET_LANE_CENTER \
@@ -274,12 +276,12 @@ func resolve_player_hits() -> int:
 		# A team hits once (KNOWN_ISSUES #19).
 		if ball.last_hitter < K.MAX_PLAYERS and (ball.last_hitter >= 2) == (i >= 2):
 			continue
-		if not in_reach(p, ball):
+		if not in_reach(p, ball, grow_fp):
 			continue
 		p.contact_consumed = 1
 		ball.last_hitter = i
 		ball.bounce_count = 0
-		apply_targeted_shot(ball, p, intents[i])
+		apply_targeted_shot(ball, p, intents[i], grow_fp)
 		return i + 1
 	return 0
 
@@ -732,7 +734,8 @@ func set_phase(p: int) -> void:
 	phase_timer = 0
 
 func score_wins(score: int, other: int) -> bool:
-	return score >= config.points_to_win and (not config.win_by_2 or score >= other + 2)
+	return score >= config.points_to_win \
+		and (not (config.modifiers & K.MOD_WIN_BY_2) or score >= other + 2)
 
 func team_won(team: int) -> bool:
 	return score_wins(team_score[team], team_score[team ^ 1])
@@ -777,9 +780,11 @@ func _players_initialize() -> void:
 func _activate_players() -> void:
 	ball_tick = 0
 	ball_steps = 0
-	ball_paced = ball_per_cycle(config.difficulty) != BALL_CYCLE
+	ball_paced = (config.modifiers & K.MOD_FAST_BALL) != 0 \
+		or ball_per_cycle(config.difficulty) != BALL_CYCLE
 	if ball_paced:
-		ball_pace = make_ball_pace(config.difficulty)
+		ball_pace = make_ball_pace(config.difficulty, config.modifiers)
+	grow_fp = K.to_fp(K.MOD_BIG_REACH) if config.modifiers & K.MOD_BIG_BALL else 0
 	for i in K.MAX_PLAYERS:
 		var active := config.slot_active(i)
 		if i == 0:
@@ -840,17 +845,24 @@ static func ball_per_cycle(difficulty: int, percent: int = 100) -> int:
 	return (base * percent + 50) / 100
 
 ## Even spreading: a step each time the running share passes a cycle.
-static func make_ball_pace(difficulty: int) -> Array:
+## FAST BALL (ADR-033) adds a step on every 3rd tick.
+static func make_ball_pace(difficulty: int, modifiers: int = 0) -> Array:
 	var per := ball_per_cycle(difficulty)
 	var pace := []
 	var share := 0
+	var tick := 0
 	for i in BALL_PACE_TICKS:
 		var n := 0
 		share += per
 		while share >= BALL_CYCLE:
 			share -= BALL_CYCLE
 			n += 1
+		if (modifiers & K.MOD_FAST_BALL) and tick % 3 == 2:
+			n += 1
 		pace.append(n)
+		tick += 1
+		if tick >= BALL_CYCLE:
+			tick = 0
 	return pace
 
 ## Ball steps `frames` frames from now (0 = this frame): 0, 1, or 2.
@@ -870,7 +882,29 @@ func step_ball() -> int:
 		ball_tick = 0
 	return ev
 
+## LAVA (ADR-033): a ground point past your own kitchen line toward the
+## net, between the sidelines.
+static func in_kitchen(x_fp: int, y_fp: int, team: int) -> bool:
+	if y_fp < K.to_fp(K.COURT_SIDELINE_TOP) or y_fp > K.to_fp(K.COURT_SIDELINE_BOTTOM):
+		return false
+	if team:
+		return x_fp < K.to_fp(K.COURT_KITCHEN_RIGHT_X) and x_fp > K.to_fp(K.COURT_NET_X)
+	return x_fp > K.to_fp(K.COURT_KITCHEN_LEFT_X) and x_fp < K.to_fp(K.COURT_NET_X)
+
+## A CPU's target x moved behind its kitchen line.
+static func lava_target(x: int, team: int) -> int:
+	if team:
+		return maxi(x, K.COURT_KITCHEN_RIGHT_X + K.MOD_LAVA_MARGIN)
+	return mini(x, K.COURT_KITCHEN_LEFT_X - K.MOD_LAVA_MARGIN)
+
 func _update_live() -> void:
+	if config.modifiers & K.MOD_LAVA:
+		for p in players:
+			if p.active and in_kitchen(p.x_fp, p.y_fp, p.team):
+				resolve_point(p.team, K.FAULT_LAVA)
+				break
+		if phase != K.PHASE_LIVE:
+			return
 	var hit_player := 0
 	for p in players:
 		if p.state == K.STATE_ACTIVE:

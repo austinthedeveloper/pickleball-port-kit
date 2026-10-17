@@ -26,13 +26,23 @@ the way up for pace; a tap is the safe classic serve. F3 toggles the
 diagnostics overlay. 2P versus: set PLAYERS on the title and plug in a
 second pad.
 
+## The title menu
+
+SINGLES / DOUBLES start a match. VENUE (park, lakeside, sunset), VS
+(LADDER plays your saved rung at the team's home court, with their intro
+card; or the default CPU; or any team), DIFFICULTY (KID, EASY, MEDIUM,
+HARD), POINTS, MODS (BIG BALL, FAST BALL, WIN BY 2, LAVA, all four),
+PLAYERS (1P, 2P versus), CAMERA (off, or how far it leans). Settings,
+records, and the ladder are saved (`user://save_a.json`/`save_b.json`).
+
 ## Layout
 
 | Path | What |
 |---|---|
 | `sim/` | The deterministic simulation: `k.gd` constants, `types.gd` records, `sim.gd` (ball, collision, players, serve, rules, game, frame pipeline), `ai.gd` (the CPU), `opponents.gd`, `paddles.gd`. Pure: no Nodes, time, or randomness. |
 | `view/` | Presentation, read-only: `match_view.gd`, `hud.gd`, `court_view.gd` (world → screen), `bitmap_text.gd`, `sfx.gd`, `title_screen.gd`, `debug_overlay.gd`. |
-| `game_ui/controls.gd` | Input map (autoload) and P1/P2 intents. |
+| `meta/` | `save.gd` (two-copy save with migration), `story.gd` (cards, results, quips). |
+| `game_ui/controls.gd` | Input map (autoload), P1/P2 intents, tap latch. |
 | `tests/` | Headless runner and suites; `golden/` traces; `golden.gd` regenerates them. |
 | `tools/` | `test.sh`, `sync_assets.sh` (copies `art/levels/out` and the SFX in), `screenshot.gd`, `point_log.gd` (why each point ended). |
 | `assets/` | Synced art and audio (don't edit here; rebuild in `art/levels`). |

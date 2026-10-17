@@ -9,7 +9,10 @@ const VENUES := ["park", "lakeside", "sunset"]
 const VENUE_NAMES := ["PARK", "LAKESIDE", "SUNSET"]
 const DIFFICULTIES := ["KID", "EASY", "MEDIUM", "HARD"]
 const POINTS := [3, 5, 7, 9, 11, 15, 21]
-const ROWS := ["SINGLES", "DOUBLES", "VENUE", "VS", "DIFFICULTY", "POINTS", "PLAYERS", "CAMERA"]
+const ROWS := ["SINGLES", "DOUBLES", "VENUE", "VS", "DIFFICULTY", "POINTS", "MODS", "PLAYERS", "CAMERA"]
+const MODS := [[0, "NONE"], [K.MOD_BIG_BALL, "BIG BALL"], [K.MOD_FAST_BALL, "FAST BALL"],
+	[K.MOD_WIN_BY_2, "WIN BY 2"], [K.MOD_LAVA, "LAVA"], [15, "ALL FOUR"]]
+const ROW_H := 29
 const CAMERAS := [0, 50, 75, 100]
 
 static var venue_i := 0
@@ -20,6 +23,7 @@ static var opponent_i := -2
 static var cursor := 0
 static var two_players := false
 static var camera_i := 0
+static var mods_i := 0
 
 var _demo: MatchView
 var _ui: CanvasLayer
@@ -43,6 +47,7 @@ func _load_settings() -> void:
 	two_players = int(st["players"]) == 2
 	opponent_i = clampi(int(st["opponent"]), -2, Opponents.count() - 1)
 	camera_i = clampi(int(st.get("camera", 0)), 0, CAMERAS.size() - 1)
+	mods_i = clampi(int(st.get("mods", 0)), 0, MODS.size() - 1)
 
 
 func _store_settings() -> void:
@@ -50,7 +55,7 @@ func _store_settings() -> void:
 		return
 	save.data["settings"] = {"venue": venue_i, "difficulty": difficulty_i,
 		"points": points_i, "players": 2 if two_players else 1, "opponent": opponent_i,
-		"camera": camera_i}
+		"camera": camera_i, "mods": mods_i}
 
 
 func _ready() -> void:
@@ -82,19 +87,19 @@ func _ready() -> void:
 	for m in ["patch_margin_left", "patch_margin_top", "patch_margin_right", "patch_margin_bottom"]:
 		panel.set(m, 12)
 	panel.position = Vector2(300, 172)
-	panel.size = Vector2(360, 288)
+	panel.size = Vector2(360, 300)
 	_ui.add_child(panel)
 	for i in ROWS.size():
 		var label := BitmapText.new()
 		label.font = "small"
 		label.text = ROWS[i]
-		label.position = Vector2(340, 192 + i * 32)
+		label.position = Vector2(340, 190 + i * ROW_H)
 		_ui.add_child(label)
 		_rows.append(label)
 		var value := BitmapText.new()
 		value.font = "small"
 		value.align = 1.0
-		value.position = Vector2(624, 192 + i * 32)
+		value.position = Vector2(624, 190 + i * ROW_H)
 		value.tint = Color("fbe46a")
 		_ui.add_child(value)
 		_values.append(value)
@@ -145,9 +150,10 @@ func _refresh() -> void:
 	_values[3].text = _opponent_label()
 	_values[4].text = DIFFICULTIES[difficulty_i]
 	_values[5].text = str(POINTS[points_i])
-	_values[6].text = "2P VS" if two_players else "1P"
-	_values[7].text = "OFF" if camera_i == 0 else "%d%%" % CAMERAS[camera_i]
-	_arrow.position = Vector2(318, 192 + cursor * 32)
+	_values[6].text = MODS[mods_i][1]
+	_values[7].text = "2P VS" if two_players else "1P"
+	_values[8].text = "OFF" if camera_i == 0 else "%d%%" % CAMERAS[camera_i]
+	_arrow.position = Vector2(318, 190 + cursor * ROW_H)
 	for i in _rows.size():
 		_rows[i].tint = Color.WHITE if i == cursor else Color(0.7, 0.74, 0.85)
 	if save:
@@ -178,6 +184,7 @@ static func home_venue(team: int) -> String:
 func config(doubles: bool) -> SimTypes.MatchConfig:
 	var opp := -1 if two_players else (_rung() if opponent_i == -2 else opponent_i)
 	var cfg := config_for(doubles, opp, difficulty_i, POINTS[points_i])
+	cfg.modifiers = MODS[mods_i][0]
 	if two_players:
 		cfg.human[2] = 1
 	return cfg
@@ -238,8 +245,10 @@ func _process(_delta: float) -> void:
 			5:
 				points_i = clampi(points_i + dir, 0, POINTS.size() - 1)
 			6:
-				two_players = not two_players
+				mods_i = (mods_i + dir + MODS.size()) % MODS.size()
 			7:
+				two_players = not two_players
+			8:
 				camera_i = clampi(camera_i + dir, 0, CAMERAS.size() - 1)
 		moved = true
 	if moved:

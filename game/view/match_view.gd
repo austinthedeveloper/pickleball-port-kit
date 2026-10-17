@@ -87,6 +87,9 @@ func _build() -> void:
 		if layer["name"] == "stands":
 			_build_crowd(vm, z)
 			z += 1
+		if layer["name"] == "ground" and sim.config.modifiers & K.MOD_LAVA:
+			_build_lava(z)
+			z += 1
 		if layer["name"] == "net":
 			_shadows = Node2D.new()
 			_shadows.z_index = z
@@ -117,6 +120,28 @@ func _build() -> void:
 	_debug = DebugOverlay.new()
 	_debug.view = self
 	add_child(_debug)
+
+
+## LAVA (ADR-033): the kitchens glow, so the rule reads at a glance.
+var _lava: Array = []
+
+func _build_lava(z: int) -> void:
+	for side in [[K.COURT_KITCHEN_LEFT_X, K.COURT_NET_X], [K.COURT_NET_X, K.COURT_KITCHEN_RIGHT_X]]:
+		var poly := Polygon2D.new()
+		var pts := PackedVector2Array()
+		# inset a little so the painted lines stay crisp on top
+		var inset := [[3, 3], [-3, 3], [-3, -2], [3, -2]]
+		var k := 0
+		for c in [[side[0], K.COURT_SIDELINE_TOP], [side[1], K.COURT_SIDELINE_TOP],
+				[side[1], K.COURT_SIDELINE_BOTTOM], [side[0], K.COURT_SIDELINE_BOTTOM]]:
+			pts.append(CourtView.ground(K.to_fp(c[0]), K.to_fp(c[1])).round()
+				+ Vector2(inset[k][0], inset[k][1]))
+			k += 1
+		poly.polygon = pts
+		poly.color = Color(1.0, 0.36, 0.06, 0.78)
+		poly.z_index = z
+		add_child(poly)
+		_lava.append(poly)
 
 
 func _build_crowd(vm: Dictionary, z: int) -> void:
@@ -180,9 +205,13 @@ func _build_ball() -> void:
 	var fw: int = meta["frame_size"][0]
 	_ball_sprite.region_rect = Rect2(0, 0, fw, meta["frame_size"][1])
 	_ball_root.add_child(_ball_sprite)
+	if sim.config.modifiers & K.MOD_BIG_BALL:
+		_ball_sprite.scale = Vector2(2, 2)        # BIG BALL reads as big
 	_actors.add_child(_ball_root)
 	_ball_shadow = Sprite2D.new()
 	_ball_shadow.texture = _tex(manifest["sprites"]["ball_shadow"]["file"])
+	if sim.config.modifiers & K.MOD_BIG_BALL:
+		_ball_shadow.scale = Vector2(2, 1.6)
 	_shadows.add_child(_ball_shadow)
 
 
@@ -390,6 +419,8 @@ func _update_visuals() -> void:
 		_ball_frame = fmod(_ball_frame + speed / 80.0, 4.0)
 		var fw := _ball_sprite.region_rect.size.x
 		_ball_sprite.region_rect.position.x = int(_ball_frame) * fw
+	for poly in _lava:
+		poly.color.a = 0.74 + 0.08 * sin(Time.get_ticks_msec() / 260.0)
 	if _crowd_cheer > 0:
 		_crowd_cheer -= 1
 	for c in _crowd:

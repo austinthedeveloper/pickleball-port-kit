@@ -47,11 +47,16 @@ stream, at the 960×540 art density, through the art's court geometry.
   standard paddle is exactly the C constants.
 - **Ported:** singles, doubles (ADR-018 lanes and teamwork), shot types,
   the charged serve, paddle stats, opponent styles, difficulty including
-  the KID/EASY slow ball and KID's swing assist, the demo, 2P versus.
-- **Not ported yet:** modifiers (ADR-033), practice (ADR-028), open play
-  (ADR-034), career and save (ADR-021/047), story cards and quips
-  (ADR-026/048), close-call replay (ADR-041), night (ADR-045), camera and
-  parallax motion (ADR-050/051; the layers carry parallax factors).
+  the KID/EASY slow ball and KID's swing assist, the demo, 2P versus,
+  modifiers (ADR-033: BIG BALL, FAST BALL, WIN BY 2, LAVA), the save with
+  migration (playbook §6; settings, records, ladder), the ladder
+  (ADR-023), story cards and quips (ADR-026/048), and the camera lean
+  with parallax (ADR-050/051, OFF by default).
+- **Not ported yet:** practice (ADR-028), open play (ADR-034), career
+  (ADR-047), the close-call replay (ADR-041), night (ADR-045), the
+  sitting-out watcher (ADR-042), opponents' own looks and hats (the 96 px
+  sheets carry team colours; the role sheets make per-opponent palettes a
+  shader away).
 
 ## Rejected (and why)
 
@@ -67,7 +72,8 @@ stream, at the 960×540 art density, through the art's court geometry.
 
 ## Verification
 
-`game/tools/test.sh` (headless, 62 tests):
+`game/tools/test.sh` (headless: 82 tests, then an end-to-end input smoke
+that boots the real main scene and plays through the input map):
 
 - Ported C host tests: PHY-01..05, HIT-01/02, RUL-01..03, SCR-01, RST-01
   (20 rematches equal a fresh match), serve setup/boxes, the charged-serve
@@ -78,7 +84,14 @@ stream, at the 960×540 art density, through the art's court geometry.
   10/6/0/0 of 10; ladder first rung 8 vs last rung 0.
 - Golden traces: three scripted runs (singles demo, doubles demo, bot vs
   CPU) × 9000 frames, hashed per frame.
-- Presentation: the view's sim equals a bare sim for 1500 frames; the
-  painted court is the called court; every venue builds.
+- Presentation: the view's sim equals a bare sim for 1500 frames (and
+  with the camera on); the painted court is the called court; every venue
+  builds.
+- Save: blank, newer copy wins, torn copy falls back, sequence wrap, v1
+  migrates, a future layout is rejected. Ladder: a win advances and
+  offers the next rung. Story: lines fit the font; quips a third of the
+  time, from the right side, never repeated. Modifiers: pace counts, the
+  FAST arc (40 steps in 30 frames, same landing), BIG reach, WIN BY 2
+  through deuce, LAVA faults and no CPU in the lava.
 - Perf gate: worst case named (doubles, four CPUs, KID ball): 159 µs worst
   frame, 4% of a quarter-frame budget.
