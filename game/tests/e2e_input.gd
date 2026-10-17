@@ -53,60 +53,141 @@ func _screen() -> Node:
 	return _main.get_child(_main.get_child_count() - 1)
 
 
+var _t := 0                        # frames since the step began
+
+
+func _next(step: int) -> void:
+	_step = step
+	_t = 0
+
+
+func _title() -> TitleScreen:
+	return _screen() as TitleScreen
+
+
 func _tick() -> void:
 	_frame += 1
+	_t += 1
 	_release()
 	match _step:
 		0:
+			# the menu tree: MAIN -> OPTIONS, SOUND one right, Y back
 			if _frame == 30:
 				_expect(_screen() is TitleScreen, "boots to the title")
-				TitleScreen.cursor = 0
+				_expect(_title().page == "main", "the title opens on MAIN")
+				_title().pages["main"].select("options")
+				_press("hit")
+			if _frame == 34:
+				_expect(_title().page == "options", "B on OPTIONS opens the page")
+			if _frame == 40:
+				_expect(_title().pages["options"].current_id() == "camera",
+					"the opening press was swallowed (the cursor stayed on CAMERA)")
+				_press("move_down")
+			if _frame == 44:
+				_press("move_right")
+			if _frame == 48:
+				_expect(Sfx.setting == AudioMap.SOUND_NO_CROWD, "Right on SOUND sets NO CROWD")
+				_press("soft")
+			if _frame == 52:
+				_expect(_title().page == "main", "Y goes back to MAIN")
+				_expect(_title().pages["main"].current_id() == "options",
+					"back lands on the page's row")
+			if _frame == 60:
+				_title().pages["main"].select("singles")
 				_press("hit")              # SINGLES
-				_step = 1
+				_next(1)
 		1:
-			if _frame == 36:
+			if _t == 6:
 				_expect(_screen() is MatchView, "B on SINGLES starts a match")
 				var m: MatchView = _screen()
 				_expect(m.ladder and m.card_frames >= 0, "a ladder match opens on the intro card")
 				_expect(m.sim.phase == K.PHASE_SERVE_SETUP and m.sim.phase_timer == 0,
 					"the match waits under the card")
-			if _frame == 80:
+			if _t == 50:
 				_press("hit")              # close the card
-			if _frame == 84:
+			if _t == 54:
 				var m: MatchView = _screen()
 				_expect(m.card_frames < 0, "B closes the card")
-			if _frame == 110:
+			if _t == 80:
 				var m: MatchView = _screen()
 				_expect(m.sim.phase == K.PHASE_SERVE_SETUP, "the match opens on the serve")
 				_expect(m.sim.serve_requested == 0, "the closing press didn't serve (ADR-026)")
-				_step = 2
+				_next(2)
 		2:
 			var m: MatchView = _screen()
 			if m.sim.phase_timer >= K.SERVE_READY_FRAMES + 2 and _frame % 2 == 0:
 				_press("hit")              # tap B: the classic serve
-				_step = 3
+				_next(3)
 		3:
 			var m: MatchView = _screen()
 			if m.sim.phase == K.PHASE_LIVE:
 				_expect(m.sim.ball.last_hitter == 0, "P1's tap served")
 				_expect(m.sim.charge_power == K.SERVE_CHARGE_CLASSIC, "a tap is the classic serve")
-				_step = 4
+				_next(4)
 			elif _frame > 400:
 				_expect(false, "the serve went live")
-				_step = 5
+				_next(9)
 		4:
 			var m: MatchView = _screen()
 			if m.sim.phase == K.PHASE_POINT_RESULT:
 				_expect(true, "the rally ended in a point (%s)" % K.fault_word(m.sim.last_fault))
 				_press("start")
-				_step = 6
+				_next(5)
 			elif _frame > 3000:
 				_expect(false, "a point ended")
-				_step = 5
-		6:
-			var m: MatchView = _screen()
-			_expect(m.sim.paused == 0, "Start on a point result doesn't pause (only in play)")
-			_step = 5
+				_next(9)
 		5:
+			# (the sim allows a pause anywhere but the match result; checks
+			# wait 3 frames, since a press reaches the sim on the next tick)
+			var m: MatchView = _screen()
+			if _t == 3:
+				_expect(m.sim.paused != 0, "Start pauses on a point result too")
+				_press("start")            # START resumes
+			if _t == 6:
+				_expect(m.sim.paused == 0, "Start resumes")
+			if m.sim.phase == K.PHASE_SERVE_SETUP and _t > 6:
+				_press("start")
+				_next(6)
+			elif _t > 600:
+				_expect(false, "the next serve came")
+				_next(9)
+		6:
+			# the pause menu: Down to RESTART, B
+			var m: MatchView = _screen()
+			if _t == 3:
+				_expect(m.sim.paused != 0, "Start pauses")
+				_expect(m._hud.pause_menu.is_visible_in_tree(), "the pause menu shows")
+				_expect(m._hud.pause_menu.current_id() == "resume", "it opens on RESUME")
+				_press("move_down")
+			if _t == 6:
+				_expect(m._hud.pause_menu.current_id() == "restart", "Down moves to RESTART")
+				_press("hit")
+			if _t == 9:
+				_expect(m.sim.paused == 0, "RESTART unpauses")
+				_expect(m.sim.team_score == [0, 0] and m.sim.phase == K.PHASE_SERVE_SETUP,
+					"RESTART starts the match over")
+				_expect(m.sim.serve_requested == 0 and not m.sim.charge_charging,
+					"the RESTART press didn't serve")
+			if _t == 30:
+				_press("start")
+			if _t == 33:
+				_expect(m.sim.paused != 0 and m._hud.pause_menu.current_id() == "resume",
+					"a second pause opens on RESUME again")
+				_press("move_up")          # wraps to MAIN MENU
+			if _t == 36:
+				_expect(m._hud.pause_menu.current_id() == "menu", "Up wraps to MAIN MENU")
+				_press("hit")
+				_next(7)
+		7:
+			if _t == 4:
+				_expect(_screen() is TitleScreen, "MAIN MENU returns to the title")
+				_expect(_title().pages["main"].current_id() == "singles",
+					"the title remembers the row that started the match")
+				var s := SaveGame.new()
+				s.load_game()
+				_expect(int(s.data["settings"]["sound"]) == AudioMap.SOUND_NO_CROWD,
+					"the SOUND setting was saved (survives a restart)")
+				_next(9)
+		9:
 			print("\n%s" % ("e2e passed" if _fails == 0 else "e2e FAILED (%d)" % _fails))
 			quit(1 if _fails else 0)

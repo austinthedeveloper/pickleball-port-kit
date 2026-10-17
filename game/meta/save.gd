@@ -25,7 +25,11 @@ static func defaults() -> Dictionary:
 	return {
 		"settings": {"venue": 0, "difficulty": K.DIFFICULTY_MEDIUM, "points": 1,
 			"players": 1, "opponent": -2, "camera": 0, "mods": 0, "sound": 0,
-			"practice": Practice.DEFAULTS.duplicate()},
+			"practice": Practice.DEFAULTS.duplicate(),
+			# menus (PORT-03): modifiers as bits (-1: take the old "mods"
+			# preset), window options. New keys fill from these defaults on
+			# load, so no layout change.
+			"mod_bits": -1, "fullscreen": 0, "integer_scale": 1},
 		"records": {"singles_wins": 0, "singles_losses": 0, "doubles_wins": 0,
 			"doubles_losses": 0, "ladder_rung": 0, "ladder_clears": 0,
 			"longest_rally": 0, "practice_best": 0,

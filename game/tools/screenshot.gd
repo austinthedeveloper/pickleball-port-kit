@@ -1,8 +1,9 @@
 ## Renders a screen for N frames and saves the viewport (needs a display):
-##   godot --path game -s res://tools/screenshot.gd -- <title|singles|doubles|demo|practice|practice_<zone>> <venue> <frames> <out.png> [human] [opp=N]
+##   godot --path game -s res://tools/screenshot.gd -- <title|title_<page>|singles|doubles|demo|practice|practice_<zone>> <venue> <frames> <out.png> [human] [opp=N]
 ## "human" leaves P1 human (it serves on its own after the ready delay is
 ## not automatic, so the default makes P1 a bot for a moving picture).
-## "opp=N" plays ladder team N (0-based) in their looks.
+## "opp=N" plays ladder team N (0-based) in their looks. "title_options"
+## (any page id) opens that title page; "pause" pauses the match at the end.
 extends SceneTree
 
 var _frames := 0
@@ -19,10 +20,12 @@ func _initialize() -> void:
 	_out = a[3] if a.size() > 3 else "user://shot.png"
 	var controls = load("res://game_ui/controls.gd").new()
 	root.add_child(controls)
-	if mode == "title":
+	if mode.begins_with("title"):
 		TitleScreen.venue_i = maxi(0, TitleScreen.VENUES.find(venue))
 		_view = TitleScreen.new()
 		root.add_child(_view)
+		if mode.begins_with("title_"):
+			_view.ready.connect(func(): _view.open_page(mode.substr(6)))
 	else:
 		var m := MatchView.new()
 		root.add_child(m)
@@ -53,6 +56,8 @@ func _tick() -> void:
 		# the bot presses B to serve, like the test harness
 		_view.sim.intents[0].hit_pressed = 1
 		_view.sim.serve_requested = 1
+	if _frames == _target - 10 and _view is MatchView and "pause" in OS.get_cmdline_user_args():
+		_view.sim.paused = 1
 	if _frames >= _target:
 		var img := root.get_texture().get_image()
 		img.save_png(_out)

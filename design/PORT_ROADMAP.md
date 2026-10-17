@@ -97,7 +97,7 @@ feature/cld-godot-port                 (done: the playable port)
 
 ### 3. `feature/cld-menus`: the menu tree (ADR-025, ADR-030, playbook §7)
 
-- [ ] `PORT-03` A main menu with pages (PLAY, OPTIONS, MODIFIERS,
+- [x] `PORT-03` A main menu with pages (PLAY, OPTIONS, MODIFIERS,
   RECORDS) built on one reusable settings-row component, replacing
   today's one long title list. A pause menu (RESUME / RESTART / MAIN
   MENU). Every modal swallows its closing input (rule 9). Window options
@@ -105,8 +105,23 @@ feature/cld-godot-port                 (done: the playable port)
   - Accept: menu tests that jump to a page by name, not by counting
     presses (playbook §4.8). The end-to-end smoke is extended through
     pause, then RESTART, then MAIN MENU. Settings survive a restart.
-  - Verified: —
-  - Status: Planned. It will be **Ready to test** (navigation feel).
+  - Verified: `view/menu_page.gd`, one row component (id, label,
+    value, change, press) behind every page and the pause menu. MAIN:
+    SINGLES, DOUBLES, MATCH SETUP, PRACTICE, MODIFIERS (four toggles),
+    OPTIONS (CAMERA, SOUND, FULLSCREEN, SCALE), RECORDS; each sub-page ends
+    in BACK, and Y backs out. `test_menus.gd` (8 tests) opens every page by
+    name, changes rows by id, toggles modifiers into the match config,
+    reads an old save's MODS preset as bits, saves and reloads every
+    setting, and runs the pause rows (RESUME unpauses through the sim,
+    RESTART starts over without serving, MAIN MENU leaves). The e2e now
+    goes MAIN → OPTIONS → SOUND → back → SINGLES → card → serve → point →
+    pause → RESTART → pause → MAIN MENU, and checks the saved SOUND.
+    112/112 plus the e2e; golden traces unchanged. Screenshots: MAIN,
+    OPTIONS, the pause menu. The e2e had a false pass, now fixed
+    (KNOWN_ISSUES #36).
+  - Status: **Ready to test**: walk the menus with the keyboard and a
+    pad. Do the pages read well, is Y-to-back natural, and do FULLSCREEN
+    and SCALE behave on your display?
 
 ### 4. `feature/cld-player-select`: Player Select (ADR-020)
 
@@ -195,6 +210,13 @@ the chain: each has a default I've gone with.
   applause 6..15 of 15, ambience at -12 dB with the swell. Tell me
   anything too loud or too quiet. Pan is full width by court x; if it's
   too wide on headphones, I'll halve it.
+
+- **PORT-03 menus:** Start pauses on a point result as well as in play
+  (the sim always allowed it; an old smoke check said otherwise and was
+  wrong). Keep that, or should a pause only be possible during a rally?
+  Also: SINGLES and DOUBLES stay on MAIN, so the common case is one press;
+  the rest of the old list moved to MATCH SETUP. The window options are
+  untested on a real display here (headless has no window).
 
 ## If time runs short or long
 

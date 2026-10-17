@@ -249,9 +249,7 @@ func _physics_process(_delta: float) -> void:
 			it2 = null
 			GameControls.clear_latch()
 		human = [it, null, it2, null]
-		# Practice's pause menu: B leaves for the title (ADR-028/030).
-		if sim.config.practice and sim.paused and it.hit_pressed:
-			leave_practice()
+		if sim.paused and _pause_input(it):
 			return
 	sim.step(human)
 	for e in sim.drain_events():
@@ -271,6 +269,55 @@ func _physics_process(_delta: float) -> void:
 		finished.emit(true)
 		return
 	_update_visuals()
+
+
+## The pause menu (ADR-030): RESUME, RESTART (not in practice), MAIN MENU.
+func pause_rows() -> Array:
+	var rows := [{"id": "resume", "label": "RESUME", "press": func(): pause_choice = "resume"}]
+	if not sim.config.practice:
+		rows.append({"id": "restart", "label": "RESTART", "press": func(): pause_choice = "restart"})
+	rows.append({"id": "menu", "label": "MAIN MENU", "press": func(): pause_choice = "menu"})
+	return rows
+
+
+var pause_choice := ""
+
+## One paused frame: Up/Down move, B picks (Start still resumes, in the
+## sim). True when the frame is done (the sim doesn't step).
+func _pause_input(it: SimTypes.Intent) -> bool:
+	var menu: MenuPage = _hud.pause_menu
+	if Input.is_action_just_pressed("move_up"):
+		menu.move(-1)
+		_sfx.play("blip")
+	elif Input.is_action_just_pressed("move_down"):
+		menu.move(1)
+		_sfx.play("blip")
+	pause_choice = ""
+	if it.hit_pressed and not it.pause_pressed:
+		menu.press()
+	it.hit_pressed = 0              # a menu press is never a swing
+	match pause_choice:
+		"resume":
+			_sfx.play("back")
+			it.pause_pressed = 1         # the sim unpauses on its own Start
+		"restart":
+			_sfx.play("confirm")
+			sim.new_match()
+			_prev_phase = -1
+			input_lock = INPUT_LOCK_FRAMES   # the closing press doesn't serve
+			_hud.on_new_match()
+			_update_visuals()
+			return true
+		"menu":
+			_sfx.play("back")
+			if sim.config.practice:
+				leave_practice()
+			else:
+				finished.emit(true)
+			return true
+	if it.pause_pressed and pause_choice == "":
+		_sfx.play("back")
+	return false
 
 
 func _on_event(e: Array) -> void:

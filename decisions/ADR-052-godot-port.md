@@ -60,11 +60,11 @@ stream, at the 960×540 art density, through the art's court geometry.
   (`practice_finish`) is `SaveGame.finish_practice`. `new_match` begins a
   session instead of a serve and `game_update` runs it instead of the
   phases, as game.c does; the crowd's every-fifth cheer is an
-  `EVENT_CROWD` event rather than an audio call. The title's last row,
-  PRACTICE, opens the page (SHOT, TARGET, RATE, RETURN TO, BEST STREAK;
+  `EVENT_CROWD` event rather than an audio call. MAIN's PRACTICE row
+  opens the page (SHOT, TARGET, RATE, RETURN TO, BEST STREAK;
   B plays, Y backs out); the session uses the title's DIFFICULTY. There's
   no Player Select in the port, so P1 plays the standard look and paddle.
-  The pause screen's B is MAIN MENU (saves the best, back to the title).
+  The pause menu is RESUME / MAIN MENU (which saves the best).
   `art/levels` has no ball machine, so `view/practice_view.gd` draws one
   (body, hopper of balls, wheels, a nozzle turning up/centre/down and
   kicking back) and the zone's blinking corners. Save layout v3 adds the
@@ -81,6 +81,23 @@ stream, at the 960×540 art density, through the art's court geometry.
   in the shoe accent, tricorn in hair with a white trim, bandana in the
   shirt ramp; `hat: "hair"` draws none. Humans and the default CPU keep
   the team-colour sheets.
+- **Feel and sound** (display only, PORT-01/02). `view/feel.gd`: shake
+  on drives and put-aways, a trail on drive-pace balls, squash on the
+  bounce, a whoosh arc, plant dust, each switched in `Feel.ON`.
+  `view/audio_map.gd` is audio_events.c as a pure function (pitch by
+  shot, pan by court x, applause by rally); `view/sfx.gd` plays it and
+  runs the ambience (ADR-031). SOUND = ALL / NO CROWD / OFF.
+- **Menus** (PORT-03, ADR-025/030). `view/menu_page.gd` is the one
+  settings-row component: rows are dictionaries (id, label, value,
+  change, press) driven by move/change/press, so tests select rows by id.
+  The title is MAIN (SINGLES, DOUBLES, MATCH SETUP, PRACTICE, MODIFIERS,
+  OPTIONS, RECORDS) over sub-pages, each ending in BACK (Y too); a page
+  change locks menu input for 6 frames and clears the latch (rule 9).
+  MODIFIERS are four ON/OFF toggles saved as `mod_bits` (an older save's
+  `mods` preset is read as its bits). OPTIONS: CAMERA, SOUND,
+  FULLSCREEN, SCALE (PIXEL = integer stretch, FILL = fractional). The
+  pause menu is RESUME / RESTART / MAIN MENU on the same component;
+  RESUME hands the sim its own Start, so pausing stays in the sim.
 - **Not ported yet:** open play (ADR-034), career
   (ADR-047), the close-call replay (ADR-041), night (ADR-045), the
   sitting-out watcher (ADR-042).

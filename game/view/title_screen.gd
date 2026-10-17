@@ -1,7 +1,10 @@
-## Title: the logo and menu over a live CPU demo at the chosen venue.
-## Up/Down pick a row, Left/Right change it, B/Start on a PLAY row starts.
-## PRACTICE (the last row; Up from SINGLES wraps to it, ADR-028) opens the
-## practice page: SHOT, TARGET, RATE, RETURN TO, and the BEST STREAK.
+## Title: the logo and the menu over a live CPU demo at the chosen venue.
+## The menu is a tree of MenuPages (ADR-025/030): MAIN (SINGLES, DOUBLES,
+## MATCH SETUP, PRACTICE, MODIFIERS, OPTIONS, RECORDS) opens the others.
+## Up/Down pick a row, Left/Right change it, B/Start presses it, Y goes
+## back. PRACTICE opens the practice page (ADR-028's editor: SHOT, TARGET,
+## RATE, RETURN TO, and the BEST STREAK). Every page change swallows the
+## press that made it (rule 9).
 class_name TitleScreen
 extends Node2D
 
@@ -11,40 +14,44 @@ const VENUES := ["park", "lakeside", "sunset"]
 const VENUE_NAMES := ["PARK", "LAKESIDE", "SUNSET"]
 const DIFFICULTIES := ["KID", "EASY", "MEDIUM", "HARD"]
 const POINTS := [3, 5, 7, 9, 11, 15, 21]
-const ROWS := ["SINGLES", "DOUBLES", "VENUE", "VS", "DIFFICULTY", "POINTS", "MODS", "PLAYERS", "CAMERA",
-	"PRACTICE"]
-const ROW_PRACTICE := 9
 const PAGE_ROWS := ["SHOT", "TARGET", "RATE", "RETURN TO"]
+## The old single MODS row's presets (the save's "mods" before "mod_bits").
 const MODS := [[0, "NONE"], [K.MOD_BIG_BALL, "BIG BALL"], [K.MOD_FAST_BALL, "FAST BALL"],
 	[K.MOD_WIN_BY_2, "WIN BY 2"], [K.MOD_LAVA, "LAVA"], [15, "ALL FOUR"]]
-const ROW_H := 27
+const MOD_ROWS := [["big_ball", "BIG BALL", K.MOD_BIG_BALL], ["fast_ball", "FAST BALL", K.MOD_FAST_BALL],
+	["win_by_2", "WIN BY 2", K.MOD_WIN_BY_2], ["lava", "LAVA", K.MOD_LAVA]]
 const CAMERAS := [0, 50, 75, 100]
+const SWITCH_LOCK := 6           ## frames of no menu input after a page change
 
 static var venue_i := 0
 static var difficulty_i := K.DIFFICULTY_MEDIUM
 static var points_i := 1
 ## -2 = the ladder's current rung, -1 = the default CPU, else a team.
 static var opponent_i := -2
-static var cursor := 0
 static var two_players := false
 static var camera_i := 0
-static var mods_i := 0
+static var mod_bits := 0
+## Window options: fullscreen, and integer scaling (crisp) or fit (fills).
+static var fullscreen := false
+static var integer_scale := true
+## The main page's cursor, kept across matches.
+static var main_cursor := 0
 
 var _demo: MatchView
 var _ui: CanvasLayer
-var _rows: Array = []
-var _values: Array = []
-var _arrow: Sprite2D
 var _sfx: Sfx
 var _lock := 10
 var _demo_doubles := true
 var save: SaveGame
 var _record: BitmapText
+var pages := {}                  ## id -> MenuPage
+var page := "main"               ## the open page ("practice": the drill editor)
 ## The practice page (PracticeEdit), over the menu while open.
 var _page: Control
 var _page_values: Array = []
 var _page_rows: Array = []
 var _page_best: BitmapText
+var _page_arrow: Sprite2D
 var _edit := Practice.Edit.new()
 var _drill: Array = []
 
@@ -59,8 +66,11 @@ func _load_settings() -> void:
 	two_players = int(st["players"]) == 2
 	opponent_i = clampi(int(st["opponent"]), -2, Opponents.count() - 1)
 	camera_i = clampi(int(st.get("camera", 0)), 0, CAMERAS.size() - 1)
-	mods_i = clampi(int(st.get("mods", 0)), 0, MODS.size() - 1)
+	var bits := int(st.get("mod_bits", -1))
+	mod_bits = (bits & 15) if bits >= 0 else MODS[clampi(int(st.get("mods", 0)), 0, MODS.size() - 1)][0]
 	Sfx.setting = clampi(int(st.get("sound", 0)), 0, AudioMap.SOUND_NAMES.size() - 1)
+	fullscreen = int(st.get("fullscreen", 0)) != 0
+	integer_scale = int(st.get("integer_scale", 1)) != 0
 
 
 func _store_settings() -> void:
@@ -68,11 +78,24 @@ func _store_settings() -> void:
 		return
 	save.data["settings"].merge({"venue": venue_i, "difficulty": difficulty_i,
 		"points": points_i, "players": 2 if two_players else 1, "opponent": opponent_i,
-		"camera": camera_i, "mods": mods_i, "sound": Sfx.setting}, true)
+		"camera": camera_i, "mod_bits": mod_bits, "sound": Sfx.setting,
+		"fullscreen": 1 if fullscreen else 0, "integer_scale": 1 if integer_scale else 0}, true)
+
+
+## Applies the window options (a no-op headless, where there's no window).
+static func apply_window(win: Window) -> void:
+	if win == null or DisplayServer.get_name() == "headless":
+		return
+	win.content_scale_stretch = Window.CONTENT_SCALE_STRETCH_INTEGER if integer_scale \
+		else Window.CONTENT_SCALE_STRETCH_FRACTIONAL
+	var want := DisplayServer.WINDOW_MODE_FULLSCREEN if fullscreen else DisplayServer.WINDOW_MODE_WINDOWED
+	if DisplayServer.window_get_mode() != want:
+		DisplayServer.window_set_mode(want)
 
 
 func _ready() -> void:
 	_load_settings()
+	apply_window(get_window())
 	_start_demo()
 	_ui = CanvasLayer.new()
 	_ui.layer = 20
@@ -95,37 +118,6 @@ func _ready() -> void:
 	sub.align = 0.5
 	sub.position = Vector2(480, 136)
 	_ui.add_child(sub)
-	var panel := NinePatchRect.new()
-	panel.texture = load("res://assets/levels/ui/panel_title.png")
-	for m in ["patch_margin_left", "patch_margin_top", "patch_margin_right", "patch_margin_bottom"]:
-		panel.set(m, 12)
-	panel.position = Vector2(300, 172)
-	panel.size = Vector2(360, 300)
-	_ui.add_child(panel)
-	for i in ROWS.size():
-		var label := BitmapText.new()
-		label.font = "small"
-		label.text = ROWS[i]
-		label.position = Vector2(340, 190 + i * ROW_H)
-		_ui.add_child(label)
-		_rows.append(label)
-		var value := BitmapText.new()
-		value.font = "small"
-		value.align = 1.0
-		value.position = Vector2(624, 190 + i * ROW_H)
-		value.tint = Color("fbe46a")
-		_ui.add_child(value)
-		_values.append(value)
-	_arrow = Sprite2D.new()
-	_arrow.texture = load("res://assets/levels/ui/icon_ball.png")
-	_arrow.centered = false
-	_ui.add_child(_arrow)
-	var help := BitmapText.new()
-	help.font = "small"
-	help.text = "D-PAD CHOOSE   B START"
-	help.align = 0.5
-	help.position = Vector2(480, 488)
-	_ui.add_child(help)
 	var keys := BitmapText.new()
 	keys.font = "small"
 	keys.text = "MOVE: ARROWS  B: SPACE  A: K  Y: L  START: ENTER"
@@ -139,11 +131,151 @@ func _ready() -> void:
 	_record.position = Vector2(480, 156)
 	_record.tint = Color(0.8, 0.85, 0.95)
 	_ui.add_child(_record)
+	_build_pages()
 	_build_page()
 	_sfx = Sfx.new()
 	add_child(_sfx)
 	_sfx.setup("", false)
+	pages["main"].cursor = clampi(main_cursor, 0, pages["main"].rows.size() - 1)
+	_show("main")
+
+
+func _add_page(id: String, title: String, rows: Array, help: String) -> void:
+	if id != "main":
+		rows.append({"id": "back", "label": "BACK", "press": back})
+	var h := 46 + rows.size() * MenuPage.ROW_H + (46 if title != "" else 0)
+	var p := MenuPage.new().setup(id, title, rows, Rect2(300, 172, 360, maxi(h, 300)), help)
+	p.visible = false
+	_ui.add_child(p)
+	pages[id] = p
+
+
+func _build_pages() -> void:
+	var help := "B: SELECT   Y: BACK"
+	_add_page("main", "", [
+		{"id": "singles", "label": "SINGLES", "press": func(): _start(false)},
+		{"id": "doubles", "label": "DOUBLES", "press": func(): _start(true)},
+		{"id": "play", "label": "MATCH SETUP", "value": _play_summary,
+			"press": func(): open_page("play")},
+		{"id": "practice", "label": "PRACTICE", "press": _open_practice},
+		{"id": "modifiers", "label": "MODIFIERS", "value": _mods_label,
+			"press": func(): open_page("modifiers")},
+		{"id": "options", "label": "OPTIONS", "press": func(): open_page("options")},
+		{"id": "records", "label": "RECORDS", "press": func(): open_page("records")},
+	], "D-PAD CHOOSE   B START")
+	_add_page("play", "MATCH SETUP", [
+		{"id": "vs", "label": "VS", "value": _opponent_label, "change": _change_opponent},
+		{"id": "venue", "label": "VENUE", "value": func(): return VENUE_NAMES[venue_i],
+			"change": func(d): venue_i = (venue_i + d + VENUES.size()) % VENUES.size(); _start_demo()},
+		{"id": "difficulty", "label": "DIFFICULTY", "value": func(): return DIFFICULTIES[difficulty_i],
+			"change": func(d): difficulty_i = clampi(difficulty_i + d, 0, DIFFICULTIES.size() - 1)},
+		{"id": "points", "label": "POINTS", "value": func(): return str(POINTS[points_i]),
+			"change": func(d): points_i = clampi(points_i + d, 0, POINTS.size() - 1)},
+		{"id": "players", "label": "PLAYERS", "value": func(): return "2P VS" if two_players else "1P",
+			"change": func(_d): two_players = not two_players},
+	], help)
+	var mod_rows := []
+	for m in MOD_ROWS:
+		var bit: int = m[2]
+		mod_rows.append({"id": m[0], "label": m[1],
+			"value": func(): return "ON" if mod_bits & bit else "OFF",
+			"change": func(_d): mod_bits ^= bit})
+	_add_page("modifiers", "MODIFIERS", mod_rows, help)
+	_add_page("options", "OPTIONS", [
+		{"id": "camera", "label": "CAMERA",
+			"value": func(): return "OFF" if camera_i == 0 else "%d%%" % CAMERAS[camera_i],
+			"change": func(d): camera_i = clampi(camera_i + d, 0, CAMERAS.size() - 1)},
+		{"id": "sound", "label": "SOUND", "value": func(): return AudioMap.SOUND_NAMES[Sfx.setting],
+			"change": func(d): Sfx.setting = (Sfx.setting + d + 3) % 3},
+		{"id": "fullscreen", "label": "FULLSCREEN", "value": func(): return "ON" if fullscreen else "OFF",
+			"change": func(_d): fullscreen = not fullscreen; apply_window(get_window())},
+		{"id": "scale", "label": "SCALE", "value": func(): return "PIXEL" if integer_scale else "FILL",
+			"change": func(_d): integer_scale = not integer_scale; apply_window(get_window())},
+	], help)
+	_add_page("records", "RECORDS", [
+		{"id": "singles", "label": "SINGLES", "value": func(): return _wl("singles")},
+		{"id": "doubles", "label": "DOUBLES", "value": func(): return _wl("doubles")},
+		{"id": "ladder", "label": "LADDER", "value": func(): return "%d OF %d" % [_rung() + 1, Opponents.count()]},
+		{"id": "clears", "label": "CLEARS", "value": func(): return str(_rec("ladder_clears"))},
+		{"id": "rally", "label": "LONGEST RALLY", "value": func(): return str(_rec("longest_rally"))},
+		{"id": "streak", "label": "PRACTICE BEST", "value": func(): return str(_rec("practice_best"))},
+	], "Y: BACK")
+
+
+func _rec(key: String) -> int:
+	return int(save.data["records"][key]) if save else 0
+
+
+func _wl(mode: String) -> String:
+	return "%d-%d" % [_rec(mode + "_wins"), _rec(mode + "_losses")]
+
+
+func _play_summary() -> String:
+	return "%s  %d" % [DIFFICULTIES[difficulty_i], POINTS[points_i]]
+
+
+func _mods_label() -> String:
+	var on := MOD_ROWS.filter(func(m): return mod_bits & m[2])
+	if on.is_empty():
+		return "NONE"
+	return on[0][1] if on.size() == 1 else "%d ON" % on.size()
+
+
+func _change_opponent(dir: int) -> void:
+	opponent_i += dir
+	if opponent_i < -2:
+		opponent_i = Opponents.count() - 1
+	elif opponent_i >= Opponents.count():
+		opponent_i = -2
+	if opponent_i != -1:
+		venue_i = VENUES.find(home_venue(_rung() if opponent_i == -2 else opponent_i))
+		_start_demo()
+
+
+## Shows one page (or "practice", the drill editor) and hides the rest.
+func _show(id: String) -> void:
+	page = id
+	for k in pages:
+		pages[k].visible = k == id
+	if _page:
+		_page.visible = id == "practice"
+	if pages.has(id):
+		pages[id].refresh()
 	_refresh()
+
+
+## Opens a page by id; the press that opened it is swallowed (rule 9).
+func open_page(id: String) -> void:
+	if not pages.has(id):
+		return
+	_show(id)
+	_lock = SWITCH_LOCK
+	GameControls.clear_latch()
+
+
+## Y or BACK: a sub-page returns to MAIN, its cursor on the page's row.
+func back() -> void:
+	if page == "main":
+		return
+	var from := page
+	_show("main")
+	pages["main"].select(from)
+	_lock = SWITCH_LOCK
+	GameControls.clear_latch()
+	if _sfx:
+		_sfx.play("back")
+
+
+func page_open() -> bool:
+	return page == "practice"
+
+
+func _start(doubles: bool) -> void:
+	if _sfx:
+		_sfx.play("confirm")
+	_store_settings()
+	main_cursor = pages["main"].cursor
+	start_match.emit(config(doubles), VENUES[venue_i], opponent_i == -2 and not two_players)
 
 
 func _build_page() -> void:
@@ -189,17 +321,18 @@ func _build_page() -> void:
 	help.position = Vector2(480, 438)
 	help.tint = Color(0.75, 0.8, 0.9)
 	_page.add_child(help)
-	_ui.move_child(_arrow, -1)      # the cursor shows on the page too
+	_page_arrow = Sprite2D.new()
+	_page_arrow.texture = load("res://assets/levels/ui/icon_ball.png")
+	_page_arrow.centered = false
+	_page.add_child(_page_arrow)
 
 
-func page_open() -> bool:
-	return _page.visible
-
-
-func _open_page() -> void:
+func _open_practice() -> void:
 	_drill = save.practice_settings() if save else Practice.DEFAULTS.duplicate()
 	_edit.begin(_drill)
-	_page.visible = true
+	_show("practice")
+	_lock = SWITCH_LOCK
+	GameControls.clear_latch()
 	_refresh_page()
 
 
@@ -210,7 +343,7 @@ func _refresh_page() -> void:
 	_page_values[3].text = Practice.zone_name(_drill[3])
 	for i in _page_rows.size():
 		_page_rows[i].tint = Color.WHITE if i == _edit.row else Color(0.7, 0.74, 0.85)
-	_arrow.position = Vector2(318, 250 + _edit.row * 36)
+	_page_arrow.position = Vector2(318, 250 + _edit.row * 36)
 	var best := save.practice_saved_best(_drill[3]) if save else 0
 	_page_best.text = "BEST STREAK %d" % best
 
@@ -233,16 +366,16 @@ func _update_page(pressed: int) -> void:
 		return
 	var result := _edit.input(_drill, pressed)
 	if result == Practice.EDIT_CANCEL:
-		_page.visible = false
-		_lock = 6                   # the closing press isn't a menu press
-		_sfx.play("blip")
-		_refresh()
+		_show("main")
+		_lock = SWITCH_LOCK         # the closing press isn't a menu press
+		_sfx.play("back")
 		return
 	if result == Practice.EDIT_DONE:
 		_sfx.play("confirm")
 		_store_settings()
 		if save:
 			save.data["settings"]["practice"] = _drill.duplicate()
+		main_cursor = pages["main"].cursor
 		start_match.emit(practice_config(), VENUES[venue_i], false)
 		return
 	_sfx.play("blip")
@@ -271,19 +404,6 @@ func _start_demo() -> void:
 
 
 func _refresh() -> void:
-	_values[0].text = ""
-	_values[1].text = ""
-	_values[2].text = VENUE_NAMES[venue_i]
-	_values[3].text = _opponent_label()
-	_values[4].text = DIFFICULTIES[difficulty_i]
-	_values[5].text = str(POINTS[points_i])
-	_values[6].text = MODS[mods_i][1]
-	_values[7].text = "2P VS" if two_players else "1P"
-	_values[8].text = "OFF" if camera_i == 0 else "%d%%" % CAMERAS[camera_i]
-	_values[9].text = ""
-	_arrow.position = Vector2(318, 190 + cursor * ROW_H)
-	for i in _rows.size():
-		_rows[i].tint = Color.WHITE if i == cursor else Color(0.7, 0.74, 0.85)
 	if save:
 		var r: Dictionary = save.data["records"]
 		_record.text = "RECORD %d-%d   LADDER %d OF %d   CLEARS %d" % [
@@ -312,7 +432,7 @@ static func home_venue(team: int) -> String:
 func config(doubles: bool) -> SimTypes.MatchConfig:
 	var opp := -1 if two_players else (_rung() if opponent_i == -2 else opponent_i)
 	var cfg := config_for(doubles, opp, difficulty_i, POINTS[points_i])
-	cfg.modifiers = MODS[mods_i][0]
+	cfg.modifiers = mod_bits
 	if two_players:
 		cfg.human[2] = 1
 	return cfg
@@ -341,56 +461,29 @@ func _process(_delta: float) -> void:
 	if _lock > 0:
 		_lock -= 1
 		return
-	if _page.visible:
+	if page == "practice":
 		_update_page(_pad_pressed())
 		return
-	var moved := false
+	var p: MenuPage = pages[page]
 	if Input.is_action_just_pressed("move_up"):
-		cursor = (cursor + ROWS.size() - 1) % ROWS.size()
-		moved = true
+		p.move(-1)
+		_sfx.play("blip")
 	elif Input.is_action_just_pressed("move_down"):
-		cursor = (cursor + 1) % ROWS.size()
-		moved = true
+		p.move(1)
+		_sfx.play("blip")
 	var dir := 0
 	if Input.is_action_just_pressed("move_left"):
 		dir = -1
 	elif Input.is_action_just_pressed("move_right"):
 		dir = 1
-	if dir != 0:
-		match cursor:
-			2:
-				venue_i = (venue_i + dir + VENUES.size()) % VENUES.size()
-				_start_demo()
-			3:
-				opponent_i += dir
-				if opponent_i < -2:
-					opponent_i = Opponents.count() - 1
-				elif opponent_i >= Opponents.count():
-					opponent_i = -2
-				var team := _rung() if opponent_i == -2 else opponent_i
-				if opponent_i != -1:
-					venue_i = VENUES.find(home_venue(team))
-					_start_demo()
-			4:
-				difficulty_i = clampi(difficulty_i + dir, 0, DIFFICULTIES.size() - 1)
-			5:
-				points_i = clampi(points_i + dir, 0, POINTS.size() - 1)
-			6:
-				mods_i = (mods_i + dir + MODS.size()) % MODS.size()
-			7:
-				two_players = not two_players
-			8:
-				camera_i = clampi(camera_i + dir, 0, CAMERAS.size() - 1)
-		moved = true
-	if moved:
+	if dir != 0 and p.change(dir):
 		_sfx.play("blip")
 		_refresh()
-	if Input.is_action_just_pressed("hit") or Input.is_action_just_pressed("start"):
-		if cursor == ROW_PRACTICE:
-			_sfx.play("confirm")
-			_open_page()
-		elif cursor <= 1:
-			_sfx.play("confirm")
-			_store_settings()
-			start_match.emit(config(cursor == 1), VENUES[venue_i],
-				opponent_i == -2 and not two_players)
+	if Input.is_action_just_pressed("soft") and page != "main":
+		back()
+	elif Input.is_action_just_pressed("hit") or Input.is_action_just_pressed("start"):
+		var id := p.current_id()
+		if p.press():
+			if id not in ["singles", "doubles", "back"]:
+				_sfx.play("confirm")
+			_refresh()

@@ -1,6 +1,6 @@
 ## The match HUD (layout from the art manifest's hud_layout): score panels,
 ## the mode banner, MATCH POINT, the serve prompt and meter, the point and
-## match banners, and PAUSED. Reads the sim only.
+## match banners, and the pause menu. Reads the sim only.
 class_name Hud
 extends CanvasLayer
 
@@ -16,6 +16,7 @@ var _prompt: Control
 var _banner: BitmapText
 var _banner_sub: BitmapText
 var _paused: Control
+var pause_menu: MenuPage
 var _meter: Control
 var _meter_fill: ColorRect
 var _point_banner_frames := 0
@@ -143,9 +144,10 @@ func setup(v: MatchView) -> void:
 	shade.color = Color(0, 0, 0.08, 0.45)
 	shade.size = Vector2(960, 540)
 	_paused.add_child(shade)
-	_text("big_gold", "PAUSED", Vector2(480, 240), 0.5, Color.WHITE, _paused)
-	_text("small", "START: RESUME   B: MAIN MENU" if practice else "START: RESUME",
-		Vector2(480, 280), 0.5, Color.WHITE, _paused)
+	var rows := view.pause_rows()
+	var ph := 46 + 46 + rows.size() * MenuPage.ROW_H - 10
+	pause_menu = MenuPage.new().setup("pause", "PAUSED", rows, Rect2(330, 270 - ph / 2, 300, ph))
+	_paused.add_child(pause_menu)
 	if practice:
 		_practice_menu = Control.new()
 		add_child(_practice_menu)
@@ -225,6 +227,9 @@ func refresh() -> void:
 		_meter_fill.size.x = 50.0 * f
 		_meter_fill.color = Color("e04040") if s.charge_level < K.SERVE_CHARGE_DUD \
 			else Color("f4c430").lerp(Color("60e060"), f)
+	if s.paused != 0 and not _paused.visible:
+		pause_menu.cursor = 0          # every pause opens on RESUME
+		pause_menu.refresh()
 	_paused.visible = s.paused != 0
 	if _practice_menu:
 		_practice_menu.visible = s.paused == 0
