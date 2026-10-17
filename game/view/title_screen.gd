@@ -9,7 +9,8 @@ const VENUES := ["park", "lakeside", "sunset"]
 const VENUE_NAMES := ["PARK", "LAKESIDE", "SUNSET"]
 const DIFFICULTIES := ["KID", "EASY", "MEDIUM", "HARD"]
 const POINTS := [3, 5, 7, 9, 11, 15, 21]
-const ROWS := ["SINGLES", "DOUBLES", "VENUE", "OPPONENT", "DIFFICULTY", "POINTS", "PLAYERS"]
+const ROWS := ["SINGLES", "DOUBLES", "VENUE", "VS", "DIFFICULTY", "POINTS", "PLAYERS", "CAMERA"]
+const CAMERAS := [0, 50, 75, 100]
 
 static var venue_i := 0
 static var difficulty_i := K.DIFFICULTY_MEDIUM
@@ -18,6 +19,7 @@ static var points_i := 1
 static var opponent_i := -2
 static var cursor := 0
 static var two_players := false
+static var camera_i := 0
 
 var _demo: MatchView
 var _ui: CanvasLayer
@@ -40,13 +42,15 @@ func _load_settings() -> void:
 	points_i = clampi(int(st["points"]), 0, POINTS.size() - 1)
 	two_players = int(st["players"]) == 2
 	opponent_i = clampi(int(st["opponent"]), -2, Opponents.count() - 1)
+	camera_i = clampi(int(st.get("camera", 0)), 0, CAMERAS.size() - 1)
 
 
 func _store_settings() -> void:
 	if save == null:
 		return
 	save.data["settings"] = {"venue": venue_i, "difficulty": difficulty_i,
-		"points": points_i, "players": 2 if two_players else 1, "opponent": opponent_i}
+		"points": points_i, "players": 2 if two_players else 1, "opponent": opponent_i,
+		"camera": camera_i}
 
 
 func _ready() -> void:
@@ -77,20 +81,20 @@ func _ready() -> void:
 	panel.texture = load("res://assets/levels/ui/panel_title.png")
 	for m in ["patch_margin_left", "patch_margin_top", "patch_margin_right", "patch_margin_bottom"]:
 		panel.set(m, 12)
-	panel.position = Vector2(300, 182)
-	panel.size = Vector2(360, 258)
+	panel.position = Vector2(300, 172)
+	panel.size = Vector2(360, 288)
 	_ui.add_child(panel)
 	for i in ROWS.size():
 		var label := BitmapText.new()
 		label.font = "small"
 		label.text = ROWS[i]
-		label.position = Vector2(340, 204 + i * 32)
+		label.position = Vector2(340, 192 + i * 32)
 		_ui.add_child(label)
 		_rows.append(label)
 		var value := BitmapText.new()
 		value.font = "small"
 		value.align = 1.0
-		value.position = Vector2(624, 204 + i * 32)
+		value.position = Vector2(624, 192 + i * 32)
 		value.tint = Color("fbe46a")
 		_ui.add_child(value)
 		_values.append(value)
@@ -102,13 +106,13 @@ func _ready() -> void:
 	help.font = "small"
 	help.text = "D-PAD CHOOSE   B START"
 	help.align = 0.5
-	help.position = Vector2(480, 476)
+	help.position = Vector2(480, 488)
 	_ui.add_child(help)
 	var keys := BitmapText.new()
 	keys.font = "small"
 	keys.text = "MOVE: ARROWS  B: SPACE  A: K  Y: L  START: ENTER"
 	keys.align = 0.5
-	keys.position = Vector2(480, 504)
+	keys.position = Vector2(480, 512)
 	keys.tint = Color(0.75, 0.8, 0.9)
 	_ui.add_child(keys)
 	_record = BitmapText.new()
@@ -142,7 +146,8 @@ func _refresh() -> void:
 	_values[4].text = DIFFICULTIES[difficulty_i]
 	_values[5].text = str(POINTS[points_i])
 	_values[6].text = "2P VS" if two_players else "1P"
-	_arrow.position = Vector2(318, 204 + cursor * 32)
+	_values[7].text = "OFF" if camera_i == 0 else "%d%%" % CAMERAS[camera_i]
+	_arrow.position = Vector2(318, 192 + cursor * 32)
 	for i in _rows.size():
 		_rows[i].tint = Color.WHITE if i == cursor else Color(0.7, 0.74, 0.85)
 	if save:
@@ -234,6 +239,8 @@ func _process(_delta: float) -> void:
 				points_i = clampi(points_i + dir, 0, POINTS.size() - 1)
 			6:
 				two_players = not two_players
+			7:
+				camera_i = clampi(camera_i + dir, 0, CAMERAS.size() - 1)
 		moved = true
 	if moved:
 		_sfx.play("blip")

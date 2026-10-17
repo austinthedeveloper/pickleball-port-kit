@@ -116,3 +116,33 @@ func test_ladder_win_advances_and_offers_the_next_rung() -> void:
 	view._physics_process(1.0 / 60.0)
 	check(asked[0], "B after a ladder win asks for the next opponent")
 	view.queue_free()
+
+
+## ADR-050/051: with the camera on, the picture leans toward the ball and
+## the layers move at their parallax; off, nothing moves. Either way the
+## sim is untouched (the view's sim equals a bare one).
+func test_camera_leans_and_parallax() -> void:
+	for pct in [0, 100]:
+		var view := MatchView.new()
+		view.camera_percent = pct
+		runner.root.add_child(view)
+		view.setup(SimTypes.MatchConfig.singles(), "park", true)
+		var bare := Sim.new()
+		bare.start_attract()
+		var max_cam := 0.0
+		for f in 900:
+			view._physics_process(1.0 / 60.0)
+			bare.step()
+			bare.drain_events()
+			max_cam = maxf(max_cam, view.cam.length())
+		eq(view.sim.snapshot(), bare.snapshot(), "camera %d%% leaves the sim alone" % pct)
+		if pct == 0:
+			eq(max_cam, 0.0, "OFF never moves")
+		else:
+			check(max_cam > 4.0 and max_cam <= MatchView.CAM_MAX.length() + 0.01,
+				"ON leans within its limit (%.1f px)" % max_cam)
+			var sky: Array = view._layers[0]
+			var ground: Array = view._layers[3]
+			check(absf((sky[0].position - sky[1]).x) <= absf((ground[0].position - ground[1]).x) + 1,
+				"the sky moves less than the ground")
+		view.queue_free()

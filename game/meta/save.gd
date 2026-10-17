@@ -23,7 +23,7 @@ var data: Dictionary = {}
 static func defaults() -> Dictionary:
 	return {
 		"settings": {"venue": 0, "difficulty": K.DIFFICULTY_MEDIUM, "points": 1,
-			"players": 1, "opponent": -2},
+			"players": 1, "opponent": -2, "camera": 0},
 		"records": {"singles_wins": 0, "singles_losses": 0, "doubles_wins": 0,
 			"doubles_losses": 0, "ladder_rung": 0, "ladder_clears": 0,
 			"longest_rally": 0},

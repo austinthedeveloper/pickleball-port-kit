@@ -32,6 +32,13 @@ const CARD_MIN_FRAMES := 30
 const CARD_MAX_FRAMES := 300
 var _prev_phase := -1
 var cleared := false            ## this match cleared the ladder
+## Camera (ADR-050/051), display only: the picture leans toward the ball.
+## Percent of the full lean; 0 = OFF (the SNES default).
+var camera_percent := 0
+var cam := Vector2.ZERO
+var _layers: Array = []          # [Sprite2D, origin, parallax]
+## Full lean at this density: the SNES 8 x 4 px, times the court's scale.
+const CAM_MAX := Vector2(22, 10)
 
 var _actors: Node2D
 var _shadows: Node2D
@@ -75,6 +82,7 @@ func _build() -> void:
 		s.position = Vector2(layer["origin"][0], layer["origin"][1])
 		s.z_index = z
 		add_child(s)
+		_layers.append([s, s.position, float(layer["parallax"])])
 		z += 1
 		if layer["name"] == "stands":
 			_build_crowd(vm, z)
@@ -327,7 +335,30 @@ func _choose_swing(p: SimTypes.Player) -> String:
 	return "standard"
 
 
+## ADR-050: the target is a sixteenth of the ball's distance from the net
+## across the screen and an eighth of its distance from the centre line
+## (SNES px, capped 8 x 4), scaled by the setting; ease an eighth of the
+## way a frame, at most half a SNES pixel's worth.
+func _update_camera() -> void:
+	var target := Vector2.ZERO
+	if camera_percent > 0 and sim.ball.rally_state == K.BALL_RALLY_LIVE:
+		var dx := (sim.ball.x_fp / 16.0 - K.COURT_NET_X) / 16.0
+		var dy := (sim.ball.y_fp / 16.0 - K.COURT_CENTERLINE_Y) / 8.0
+		target = Vector2(clampf(dx, -8, 8) / 8.0 * CAM_MAX.x,
+			clampf(dy, -4, 4) / 4.0 * CAM_MAX.y) * camera_percent / 100.0
+	var step := (target - cam) / 8.0
+	var limit := CAM_MAX.x / 16.0
+	cam += step.limit_length(limit) if step.length() > 0.02 else target - cam
+	for l in _layers:
+		l[0].position = (l[1] - cam * l[2]).round()
+	var court_shift := (-cam).round()
+	_actors.position = court_shift
+	_shadows.position = court_shift
+	_fx.position = court_shift
+
+
 func _update_visuals() -> void:
+	_update_camera()
 	for i in K.MAX_PLAYERS:
 		var p: SimTypes.Player = sim.players[i]
 		var e: Dictionary = _players[i]

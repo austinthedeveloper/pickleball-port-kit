@@ -33,6 +33,7 @@ func _on_start(cfg: SimTypes.MatchConfig, venue: String, ladder: bool) -> void:
 	m.finished.connect(func(_to_title: bool): show_title())
 	m.next_rung.connect(_on_next_rung.bind(cfg))
 	_swap(m)
+	m.camera_percent = TitleScreen.CAMERAS[TitleScreen.camera_i]
 	m.setup(cfg, venue, false)
 
 
