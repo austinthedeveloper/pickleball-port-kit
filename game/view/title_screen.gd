@@ -10,7 +10,7 @@ extends Node2D
 
 signal start_match(cfg: SimTypes.MatchConfig, venue: String, ladder: bool)
 
-const SWITCH_LOCK := 6           ## frames of no menu input after a page change
+const SWITCH_LOCK := MenuPage.TRANSITION   ## no menu input while a page slides in
 
 ## The main page's cursor, kept across matches.
 static var main_cursor := 0
@@ -66,12 +66,8 @@ func _ready() -> void:
 	sub.align = 0.5
 	sub.position = Vector2(480, 136)
 	_ui.add_child(sub)
-	var keys := BitmapText.new()
-	keys.font = "small"
-	keys.text = "MOVE: ARROWS  B: SPACE  A: K  Y: L  START: ENTER"
-	keys.align = 0.5
-	keys.position = Vector2(480, 512)
-	keys.tint = Color(0.75, 0.8, 0.9)
+	var keys := PromptBar.new().setup([["dpad", "MOVE"], ["hit", "HIT"], ["drive", "DRIVE"],
+		["soft", "SOFT"], ["start", "PAUSE"]], Vector2(480, 518))
 	_ui.add_child(keys)
 	_record = BitmapText.new()
 	_record.font = "small"
@@ -102,20 +98,27 @@ func _ready() -> void:
 	_show("main")
 
 
-func _add_page(id: String, title: String, rows: Array, help: String,
+func _add_page(id: String, title: String, rows: Array, help: Array,
 		at := Rect2(300, 172, 360, 0)) -> void:
 	if id != "main":
 		rows.append({"id": "back", "label": "BACK", "press": back})
 	var h := 46 + rows.size() * MenuPage.ROW_H + (46 if title != "" else 0)
 	at.size.y = maxi(h, 300)
 	var p := MenuPage.new().setup(id, title, rows, at, help)
+	# the mouse: hover selects, click presses, wheel changes, right click backs
+	p.pressed.connect(func(row): _after_press(row))
+	p.changed.connect(func(_row):
+		_sfx.play("blip")
+		_refresh())
+	p.hovered.connect(func(_row): _sfx.play("blip"))
+	p.back_requested.connect(back)
 	p.visible = false
 	_ui.add_child(p)
 	pages[id] = p
 
 
 func _build_pages() -> void:
-	var help := "B: SELECT   Y: BACK"
+	var help := [["hit", "SELECT"], ["soft", "BACK"]]
 	_add_page("main", "", [
 		{"id": "singles", "label": "SINGLES", "press": func(): open_select(false)},
 		{"id": "doubles", "label": "DOUBLES", "press": func(): open_select(true)},
@@ -129,7 +132,7 @@ func _build_pages() -> void:
 			"press": func(): open_page("modifiers")},
 		{"id": "options", "label": "OPTIONS", "press": func(): open_page("options")},
 		{"id": "records", "label": "RECORDS", "press": func(): open_page("records")},
-	], "D-PAD CHOOSE   B START")
+	], [["hit", "SELECT"]])
 	_add_page("play", "MATCH SETUP", [
 		{"id": "vs", "label": "VS", "value": _opponent_label, "change": _change_opponent},
 		{"id": "difficulty", "label": "DIFFICULTY", "value": func(): return Settings.DIFFICULTIES[Settings.difficulty_i],
@@ -185,7 +188,14 @@ func _build_pages() -> void:
 			"change": func(d): vs_i = (vs_i + d + Opponents.count()) % Opponents.count()},
 		{"id": "erase", "label": "ERASE RECORDS", "value": func(): return "B AGAIN" if _erase_armed else "",
 			"press": _erase},
-	], "Y: BACK", Rect2(290, 96, 380, 0))
+	], [["soft", "BACK"]], Rect2(290, 96, 380, 0))
+
+
+## After a row was pressed (keys or the mouse): its sound, and the record line.
+func _after_press(id: String) -> void:
+	if id not in ["singles", "doubles", "back"]:
+		_sfx.play("confirm")
+	_refresh()
 
 
 func _rec(key: String) -> int:
@@ -267,6 +277,7 @@ func open_page(id: String) -> void:
 	if not pages.has(id):
 		return
 	_show(id)
+	pages[id].appear(1)
 	_lock = SWITCH_LOCK
 	GameControls.clear_latch()
 
@@ -278,6 +289,7 @@ func back() -> void:
 	var from := page
 	_show("main")
 	pages["main"].select(from)
+	pages["main"].appear(-1)
 	_lock = SWITCH_LOCK
 	GameControls.clear_latch()
 	if _sfx:
@@ -450,6 +462,4 @@ func _process(_delta: float) -> void:
 	elif Input.is_action_just_pressed("hit") or Input.is_action_just_pressed("start"):
 		var id := p.current_id()
 		if p.press():
-			if id not in ["singles", "doubles", "back"]:
-				_sfx.play("confirm")
-			_refresh()
+			_after_press(id)

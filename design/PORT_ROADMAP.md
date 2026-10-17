@@ -344,7 +344,7 @@ feature/cld-release        (pushed)
 
 ### 11. `feature/cld-modern-ui`: modern menus
 
-- [ ] `PORT-11` Menus that move: pages slide and fade, the cursor eases
+- [x] `PORT-11` Menus that move: pages slide and fade, the cursor eases
   between rows, a highlight bar replaces the ball icon, values tick
   with arrows. Fades between the title and a match. Button prompts
   follow the last device used (keyboard keys or pad glyphs). Mouse:
@@ -352,8 +352,30 @@ feature/cld-release        (pushed)
   - Accept: menu tests still select by id; new tests for the device
     switch, the mouse mapping and the transitions finishing; inputs
     during a transition are swallowed (rule 9).
-  - Verified: —
-  - Status: Planned. It will be **Ready to test** (the feel).
+  - Verified: `MenuPage` redone: a highlight bar that eases between rows
+    (the ball icon is gone), the selected label slides in a little,
+    arrows on rows you can change, a pop when a value changes, and pages
+    that slide and fade in over 8 frames (from the right going in, the
+    left coming back) while menu input waits. Mouse: hover selects, click
+    presses, the wheel changes, right click backs out (title pages and
+    the pause menu). `Prompts` / `PromptBar`: every help line is now
+    glyphs for the device touched last: key caps with the bound key on
+    the keyboard; on a pad the bound face button as the pad shows it
+    (Xbox letters, Nintendo letters, PlayStation shapes) or START / D-PAD.
+    Screens fade out and in (8 + 10 frames), the old screen frozen while
+    it fades. Also: the perf gate timed one run, so an OS hiccup could
+    fail it (6 ms once); it now keeps each frame's faster time over two
+    identical runs. `test_modern_ui.gd` (6 tests): device switching
+    (stick drift ignored, the mouse counts as keyboard), prompt labels for
+    every family, a bar redrawing on a device change, the mouse driving a
+    page, slides swallowing clicks and settling, the bar easing, the
+    value pop, the title waiting out a slide, and the fade swapping at
+    black. 149/149 plus the e2e (re-timed for the transitions); golden
+    traces unchanged. Screenshots: MAIN with key caps, OPTIONS with
+    PlayStation shapes, pause with Nintendo letters, Player Select with
+    Xbox.
+  - Status: **Ready to test**: try the menus with the mouse, then pick up
+    a pad mid-menu and watch the prompts switch.
 
 ### 12. `feature/cld-controls`: remapping and accessibility
 
@@ -443,6 +465,12 @@ the chain: each has a default I've gone with.
   are ad-hoc signed only, so Gatekeeper will need a right-click > Open.
   The version is 0.9.0 in the presets and `project.godot`; tell me what
   you want it to be.
+
+- **PORT-11 modern UI:** the prompts use the pad's own family (Xbox,
+  Nintendo, PlayStation by its reported name; unknown pads get Xbox
+  letters). The game still names the swing buttons by SNES role (hit,
+  drive, soft), so on an Xbox pad "hit" shows A. Fades are 8 frames out,
+  10 in. Say if any of it feels slow.
 
 ## If time runs short or long
 

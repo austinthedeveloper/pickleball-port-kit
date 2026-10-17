@@ -53,7 +53,37 @@ const LATCHED := ["hit", "drive", "soft", "start"]
 static var _latch := {}
 
 
+## The device the player touched last (prompts follow it): KEYBOARD
+## (keys and the mouse) or PAD, and that pad's id; `device_serial` counts
+## changes so a prompt can redraw.
+const KEYBOARD := 0
+const PAD := 1
+static var last_device := KEYBOARD
+static var last_pad := 0
+static var device_serial := 0
+## Counts input-map changes (a remap), so prompts redraw.
+static var binding_serial := 0
+
+
+static func note_device(event: InputEvent) -> void:
+	var dev := -1
+	if event is InputEventKey or event is InputEventMouseButton:
+		dev = KEYBOARD
+	elif event is InputEventJoypadButton:
+		dev = PAD
+	elif event is InputEventJoypadMotion and absf(event.axis_value) > 0.5:
+		dev = PAD
+	if dev < 0:
+		return
+	var pad := event.device if dev == PAD else last_pad
+	if dev != last_device or pad != last_pad:
+		last_device = dev
+		last_pad = pad
+		device_serial += 1
+
+
 func _input(event: InputEvent) -> void:
+	note_device(event)
 	if event.is_echo():
 		return
 	for a in LATCHED:

@@ -146,6 +146,11 @@ stream, at the 960×540 art density, through the art's court geometry.
   refuses uncommitted tracked changes, stamps `build_id.txt` from
   `git describe --always --dirty` (shown on the title), checks the
   platform-free `.pck` boots headless, then exports with the templates.
+- **Beyond the SNES** (phase 2, PORT-10..). `Settings` holds every
+  setting; the title only edits it. Menus ease, slide and take the
+  mouse (`MenuPage`); prompts follow the device and the live bindings
+  (`Prompts`, `PromptBar`); screens fade (`scenes/main.gd`). None of it
+  touches the sim.
 - **Not ported yet:** open play (ADR-034), career (ADR-047).
 
 ## Rejected (and why)

@@ -371,11 +371,12 @@ func _pause_input(it: SimTypes.Intent) -> bool:
 	elif Input.is_action_just_pressed("move_down"):
 		menu.move(1)
 		_sfx.play("blip")
-	pause_choice = ""
 	if it.hit_pressed and not it.pause_pressed:
 		menu.press()
 	it.hit_pressed = 0              # a menu press is never a swing
-	match pause_choice:
+	var choice := pause_choice      # set by a press: keys above, or a click
+	pause_choice = ""
+	match choice:
 		"resume":
 			_sfx.play("back")
 			it.pause_pressed = 1         # the sim unpauses on its own Start
@@ -398,7 +399,7 @@ func _pause_input(it: SimTypes.Intent) -> bool:
 			else:
 				finished.emit(true)
 			return true
-	if it.pause_pressed and pause_choice == "":
+	if it.pause_pressed and choice == "":
 		_sfx.play("back")
 	return false
 

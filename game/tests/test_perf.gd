@@ -8,16 +8,26 @@ const WORST_ALLOWED_US := FRAME_US / 4
 const MEAN_ALLOWED_US := 500
 
 
+## Times every frame on two identical runs (the sim is deterministic, so
+## both play the same frames) and keeps each frame's faster time: a slow
+## frame is slow both times, an OS preemption or GC pause doesn't strike
+## the same frame twice.
 func _measure(name: String, cfg: SimTypes.MatchConfig, frames: int) -> void:
-	var sim := Sim.new(cfg)
-	sim.start_attract()
+	var best := []
+	best.resize(frames)
+	best.fill(1 << 30)
+	for run in 2:
+		var sim := Sim.new(cfg)
+		sim.start_attract()
+		for f in frames:
+			var t := Time.get_ticks_usec()
+			sim.step()
+			var dt := Time.get_ticks_usec() - t
+			sim.drain_events()
+			best[f] = mini(best[f], dt)
 	var worst := 0
 	var total := 0
-	for f in frames:
-		var t := Time.get_ticks_usec()
-		sim.step()
-		var dt := Time.get_ticks_usec() - t
-		sim.drain_events()
+	for dt in best:
 		total += dt
 		worst = maxi(worst, dt)
 	var mean := total / frames

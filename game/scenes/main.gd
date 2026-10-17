@@ -4,18 +4,65 @@ extends Node
 
 var save := SaveGame.new()
 var _screen: Node
+## Fades between screens (PORT-11): out, swap, in. The old screen stops
+## during the fade out, so nothing it would do with input happens.
+const FADE_OUT := 8
+const FADE_IN := 10
+var _fader: ColorRect
+var _fade := 0                   ## frames left; out while _next is waiting
+var _next: Node
 
 
 func _ready() -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 100
+	add_child(layer)
+	_fader = ColorRect.new()
+	_fader.color = Color(0.02, 0.03, 0.08, 0.0)
+	_fader.size = Vector2(960, 540)
+	_fader.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(_fader)
 	save.load_game()
 	show_title()
 
 
 func _swap(n: Node) -> void:
+	if _screen == null:
+		_enter(n)
+		return
+	_screen.process_mode = Node.PROCESS_MODE_DISABLED
+	if _next:
+		_next.free()                 # a second swap during the fade replaces the first
+	_next = n
+	_fade = FADE_OUT
+
+
+func _enter(n: Node) -> void:
 	if _screen:
 		_screen.queue_free()
 	_screen = n
 	add_child(n)
+	_fade = FADE_IN
+	GameControls.clear_latch()
+
+
+func fading() -> bool:
+	return _fade > 0
+
+
+func _physics_process(_delta: float) -> void:
+	if _fade <= 0:
+		_fader.color.a = 0.0
+		return
+	_fade -= 1
+	if _next:
+		_fader.color.a = 1.0 - float(_fade) / FADE_OUT
+		if _fade == 0:
+			var n := _next
+			_next = null
+			_enter(n)
+	else:
+		_fader.color.a = float(_fade) / FADE_IN
 
 
 func show_title() -> void:

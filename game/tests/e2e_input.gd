@@ -84,38 +84,38 @@ func _tick() -> void:
 				_press("hit")
 			if _frame == 34:
 				_expect(_title().page == "options", "B on OPTIONS opens the page")
-			if _frame == 40:
+			if _frame == 46:
 				_expect(_title().pages["options"].current_id() == "camera",
 					"the opening press was swallowed (the cursor stayed on CAMERA)")
 				_press("move_down")
-			if _frame == 44:
+			if _frame == 50:
 				_press("move_right")
-			if _frame == 48:
+			if _frame == 54:
 				_expect(Sfx.setting == AudioMap.SOUND_NO_CROWD, "Right on SOUND sets NO CROWD")
 				_press("soft")
-			if _frame == 52:
+			if _frame == 64:
 				_expect(_title().page == "main", "Y goes back to MAIN")
 				_expect(_title().pages["main"].current_id() == "options",
 					"back lands on the page's row")
-			if _frame == 60:
+			if _frame == 72:
 				_title().pages["main"].select("singles")
 				_press("hit")              # SINGLES: Player Select
-			if _frame == 64:
+			if _frame == 84:
 				_expect(_title().page == "select", "SINGLES opens Player Select")
-			if _frame == 70:
+			if _frame == 90:
 				_press("move_down")        # to the colour row
-			if _frame == 74:
+			if _frame == 94:
 				_press("move_right")       # RED
-			if _frame == 78:
+			if _frame == 98:
 				_expect(_title().select.choice[0]["palette"] == PlayerSelect.PAL_RED, "Right picks RED")
 				_press("hit")              # to the paddle row
-			if _frame == 82:
+			if _frame == 102:
 				_press("move_left")        # WOOD
-			if _frame == 86:
+			if _frame == 106:
 				_press("hit")              # B on the paddle row confirms
 				_next(1)
 		1:
-			if _t == 6:
+			if _t == 16:
 				var m0 := _screen() as MatchView
 				_expect(m0 != null and m0.sim.config.palette[0] == PlayerSelect.PAL_RED
 					and m0.sim.players[0].paddle == Paddles.WOOD, "the choices reach the match")
@@ -124,12 +124,12 @@ func _tick() -> void:
 				_expect(m.ladder and m.card_frames >= 0, "a ladder match opens on the intro card")
 				_expect(m.sim.phase == K.PHASE_SERVE_SETUP and m.sim.phase_timer == 0,
 					"the match waits under the card")
-			if _t == 50:
+			if _t == 64:
 				_press("hit")              # close the card
-			if _t == 54:
+			if _t == 68:
 				var m: MatchView = _screen()
 				_expect(m.card_frames < 0, "B closes the card")
-			if _t == 80:
+			if _t == 94:
 				var m: MatchView = _screen()
 				_expect(m.sim.phase == K.PHASE_SERVE_SETUP, "the match opens on the serve")
 				_expect(m.sim.serve_requested == 0, "the closing press didn't serve (ADR-026)")
@@ -200,7 +200,7 @@ func _tick() -> void:
 				_press("hit")
 				_next(7)
 		7:
-			if _t == 4:
+			if _t == 16:
 				_expect(_screen() is TitleScreen, "MAIN MENU returns to the title")
 				_expect(_title().pages["main"].current_id() == "singles",
 					"the title remembers the row that started the match")

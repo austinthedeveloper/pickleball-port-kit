@@ -30,6 +30,7 @@ var _initials: Control           ## the initials card (ADR-040), built when need
 var _ini_letters: Array = []
 var _ini_line: BitmapText
 var _ini_under: ColorRect
+var _result_prompts: PromptBar   ## B / Start on the result screen
 
 
 func _panel(name: String, rect: Rect2) -> NinePatchRect:
@@ -140,6 +141,9 @@ func setup(v: MatchView) -> void:
 	add_child(_quip)
 	_quip_text = _text("small", "", Vector2(480, 320), 0.5, Color.WHITE, _quip)
 	_result_line = _text("small", "", Vector2(480, 316), 0.5)
+	_result_prompts = PromptBar.new().setup([["hit", "REMATCH"], ["start", "MENU"]], Vector2(480, 296))
+	_result_prompts.visible = false
+	add_child(_result_prompts)
 	if view.card_frames >= 0:
 		_build_card(cfg)
 	_paused = Control.new()
@@ -150,15 +154,16 @@ func setup(v: MatchView) -> void:
 	_paused.add_child(shade)
 	var rows := view.pause_rows()
 	var ph := 46 + 46 + rows.size() * MenuPage.ROW_H - 10
-	pause_menu = MenuPage.new().setup("pause", "PAUSED", rows, Rect2(330, 270 - ph / 2, 300, ph))
+	ph += 30
+	pause_menu = MenuPage.new().setup("pause", "PAUSED", rows, Rect2(300, 270 - ph / 2, 360, ph),
+		[["hit", "SELECT"], ["start", "RESUME"]])
 	_paused.add_child(pause_menu)
 	if practice:
 		_practice_menu = Control.new()
 		add_child(_practice_menu)
-		var mw := 40 + BitmapText.measure("small", "START: PAUSE")
-		var mp := _panel("title", Rect2(480 - mw / 2, 490, mw, 34))
+		var mp := _panel("title", Rect2(400, 488, 160, 38))
 		mp.reparent(_practice_menu)
-		_text("small", "START: PAUSE", Vector2(480, 498), 0.5, Color.WHITE, _practice_menu)
+		_practice_menu.add_child(PromptBar.new().setup([["start", "PAUSE"]], Vector2(480, 507)))
 	refresh()
 
 
@@ -182,7 +187,7 @@ func _build_card(cfg: SimTypes.MatchConfig) -> void:
 	p.reparent(_card)
 	_text("small", line, Vector2(480, 246), 0.5, Color.WHITE, _card)
 	_text("small", Story.rung_line(opp), Vector2(480, 296), 0.5, Color("fbe46a"), _card)
-	_text("small", "B: PLAY", Vector2(480, 330), 0.5, Color.WHITE, _card)
+	_card.add_child(PromptBar.new().setup([["hit", "PLAY"]], Vector2(480, 338)))
 
 
 func _refresh_initials() -> void:
@@ -213,7 +218,8 @@ func _refresh_initials() -> void:
 		_ini_under.size = Vector2(36, 5)
 		_ini_under.color = Color("fbe46a")
 		_initials.add_child(_ini_under)
-		_text("small", "UP DOWN  B NEXT  START OK", Vector2(480, 342), 0.5, Color(0.8, 0.85, 0.95), _initials)
+		_initials.add_child(PromptBar.new().setup([["dpad", "LETTER"], ["hit", "NEXT"], ["start", "OK"]],
+			Vector2(480, 352)))
 	_initials.visible = true
 	_ini_line.text = ini.records_line()
 	var t := ini.text()
@@ -281,6 +287,7 @@ func refresh() -> void:
 		_quip_frames -= 1
 	_quip.visible = _quip_frames > 0 and s.phase == K.PHASE_POINT_RESULT and view.close_call == null
 	_result_line.text = ""
+	_result_prompts.visible = false
 	_refresh_initials()
 	if view.initials.open:
 		_banner.text = ""
@@ -297,8 +304,11 @@ func refresh() -> void:
 			if view.cleared:
 				_banner.text = "CHAMPION!"
 			var ready := s.phase_timer >= K.POINT_RESULT_MIN_FRAMES
-			var next := "B: NEXT OPPONENT" if (view.ladder and you) else "B: REMATCH"
-			_banner_sub.text = (next + "   START: MENU") if ready else ""
+			var next := "NEXT OPPONENT" if (view.ladder and you) else "REMATCH"
+			_banner_sub.text = ""
+			_result_prompts.visible = ready
+			if ready and _result_prompts.items[0][1] != next:
+				_result_prompts.set_items([["hit", next], ["start", "MENU"]])
 			if vs_ladder:
 				_result_line.text = Story.result_line(cfg.opponent, you)
 				_result_line.tint = Story.team_color(cfg.opponent)
