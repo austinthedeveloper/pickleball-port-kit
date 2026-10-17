@@ -64,6 +64,11 @@ python3 game/tools/release_notes.py # game/RELEASE_NOTES.md from design/PORT_ROA
 .venv/bin/python game/tools/make_icon.py   # game/icon.png from the art
 ```
 
+Builds for each release are on the GitHub releases page, from v0.2.1.
+macOS builds are ad-hoc signed, not notarized: the first time, right-click
+the app and choose Open. The Web build needs to be served over HTTP (not
+opened as a file).
+
 `export.sh` refuses a tree with uncommitted changes (`--dev` allows it)
 and writes `build_id.txt` (`git describe --always --dirty`), which the
 title shows; from a checkout the title says `BUILD DEV <describe>`.

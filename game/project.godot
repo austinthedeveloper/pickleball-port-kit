@@ -10,7 +10,7 @@ config/description="Arcade pickleball, ported from the SNES game."
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.7")
 config/icon="res://icon.png"
-config/version="0.2.0"
+config/version="0.2.1"
 boot_splash/bg_color=Color(0.04, 0.06, 0.12, 1)
 
 [autoload]
@@ -32,6 +32,8 @@ window/stretch/scale_mode="integer"
 common/physics_ticks_per_second=60
 
 [rendering]
+
+textures/vram_compression/import_etc2_astc=true
 
 textures/canvas_textures/default_texture_filter=0
 renderer/rendering_method="gl_compatibility"

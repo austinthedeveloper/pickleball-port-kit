@@ -73,3 +73,5 @@ func test_icon_and_presets() -> void:
 	eq(platforms, ["Linux", "Web", "Windows Desktop", "macOS"])
 	eq(ProjectSettings.get_setting("rendering/renderer/rendering_method"), "gl_compatibility",
 		"the Compatibility renderer (Web needs it)")
+	check(ProjectSettings.get_setting("rendering/textures/vram_compression/import_etc2_astc", false),
+		"ETC2/ASTC import on: macOS universal (Apple Silicon) exports need it (v0.2.1)")

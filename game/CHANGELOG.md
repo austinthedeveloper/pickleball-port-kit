@@ -4,6 +4,16 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.2.1] - 2026-10-17
+
+The first release with downloadable builds: macOS (universal), Windows,
+Linux and Web. The game is the same as 0.2.0.
+
+### Fixed
+- macOS export: the project now imports ETC2/ASTC textures, which
+  universal and Apple Silicon builds need. The game's art is lossless, so
+  nothing looks different.
+
 ## [0.2.0] - 2026-10-17
 
 Multiplayer for up to four players.

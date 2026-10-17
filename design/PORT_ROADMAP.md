@@ -486,6 +486,10 @@ feature/cld-release        (pushed)
   since there are no export templates here yet).
 - **v0.2.0** (2026-10-17): PORT-16 multiplayer. Tag `v0.2.0`, on
   `feature/cld-release-0.2.0`; GitHub release published (source only).
+- **v0.2.1** (2026-10-17): the first release with builds (macOS, Windows,
+  Linux, Web). Godot's export templates are now installed here, and a
+  macOS export setting is fixed. Tag `v0.2.1`, on
+  `feature/cld-release-0.2.1`.
 
 ### 16. `feature/cld-multiplayer`: four players on controllers (asked for 2026-10-17)
 
@@ -566,10 +570,9 @@ the chain: each has a default I've gone with.
   because the best streak starts at 0 in the new layout. The SNES records
   page's L + R + X erase became an ERASE RECORDS row you press twice.
 
-- **PORT-09 release (a task for you):** install the Godot 4.7.2 export
-  templates (Editor > Manage Export Templates > Download, about 1 GB).
-  I didn't download them without asking. Then run
-  `game/tools/export.sh`; it builds all four into `build/`. macOS builds
+- **PORT-09 release:** the Godot 4.7.2 export templates are installed now
+  (downloaded with your OK on 2026-10-17 and checked against Godot's
+  SHA-512 sums). `game/tools/export.sh` builds all four into `build/`. macOS builds
   are ad-hoc signed only, so Gatekeeper will need a right-click > Open.
   The version is 0.9.0 in the presets and `project.godot`; tell me what
   you want it to be.
