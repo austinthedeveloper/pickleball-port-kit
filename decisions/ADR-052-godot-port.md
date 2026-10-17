@@ -126,9 +126,16 @@ stream, at the 960×540 art density, through the art's court geometry.
   2.45. Shadows draw grey on a court whose luminance is under 0.02
   (BLACK at any time), from the SNES rule in KNOWN_ISSUES #26. NIGHT's ambience is the
   venue whose `venues.json` loop is the time's (crickets: SUNSET).
-- **Not ported yet:** open play (ADR-034), career
-  (ADR-047), the close-call replay (ADR-041), the
-  sitting-out watcher (ADR-042).
+- **Close call and watcher** (PORT-07, ADR-041/042). `sim/replay.gd`
+  is replay.c; the view checks it when the phase becomes the point
+  result (game.c checks on that phase's first frame; the ball hasn't
+  moved between). The close-up crops the ground layer (with its court
+  material) at 3x instead of the SNES's generated tile blocks, so the
+  line keeps its perspective slant. The watcher is the partner's role
+  sheet at half size in their palette (the SNES used a park person in
+  the captain's palette for lack of a fifth OBJ palette); it hides the
+  spectator at the seat it takes.
+- **Not ported yet:** open play (ADR-034), career (ADR-047).
 
 ## Rejected (and why)
 

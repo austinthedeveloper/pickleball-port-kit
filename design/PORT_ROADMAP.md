@@ -205,15 +205,39 @@ feature/cld-godot-port                 (done: the playable port)
 
 ### 7. `feature/cld-watcher-replay`: the watcher (ADR-042) and close calls (ADR-041)
 
-- [ ] `PORT-07` In singles, the opponent's partner sits out at the
+- [x] `PORT-07` In singles, the opponent's partner sits out at the
   venue's watcher spot and cheers their side. A close out-call after a
   long rally freezes and shows a close-up of the bounce with a caption
   ("OUT BY A HAIR!").
   - Accept: a port of `test_replay.c`. The replay shows only for long
     rallies that land just out: never for short rallies, other faults or
     wide misses. Display-only, so the golden traces don't move.
-  - Verified: —
-  - Status: Planned. It will be **Ready to test**.
+  - Verified: `sim/replay.gd` is replay.c (pure). On the point result's
+    first frame the view checks the rally (8+ shots) and the landing
+    (6 inches or less past a line; the farther line past a corner) and
+    shows `view/close_call.gd`: the line and the ground beyond, cropped
+    from the venue's ground layer at 3x (so COURT colours and TIME
+    follow), the ball dropping in slow motion onto its spot with its
+    shadow and one small bounce, its edge as far past the line's edge as
+    it landed, and the caption (OUT BY A HAIR! / 1 INCH! / N INCHES!).
+    The quip waits. The watcher: in a singles ladder match the captain's
+    partner, in their own look at crowd size, takes the seat at the
+    venue's `watcher` spot (the top half when sitting), faces the court,
+    hops and cheers when their teammate wins a point or the match, and
+    darkens with the crowd at NIGHT. `test_replay.gd` (5 tests):
+    test_replay.c ported (each line and direction, a hair, a corner, and
+    none for a short rally, another fault, a wide miss, or no line); the
+    view's close-up (caption, the ball resting past the line, the quip
+    held back, gone after the point); the watcher only in singles ladder
+    matches (not doubles, the default CPU, the demo, practice, or 2P),
+    one seat taken at each venue, the cheer and hop, NIGHT; 1,500 frames
+    identical to a bare sim. 134/134 plus the e2e; golden traces
+    unchanged. Screenshots: the close-up at PARK, KIDDO watching at all
+    three venues.
+  - Status: **Ready to test**: play a singles ladder match (KIDDO watches
+    DAD). The close-up needs an 8-shot rally that lands just out, so it's
+    rare; `tools/screenshot.gd -- singles park 160 out.png closecall`
+    forces one if you want to look without waiting.
 
 ### 8. `feature/cld-records`: records and initials (ADR-021, ADR-040)
 
@@ -277,6 +301,12 @@ the chain: each has a default I've gone with.
   court, on a dark surround at NIGHT, are faint (KNOWN_ISSUES #38).
   There are no floodlight poles or light pools in the art; a lighting
   pass would be an art task.
+
+- **PORT-07 replay/watcher:** the close-up's baseline is slanted, because
+  it crops the real perspective ground rather than a flat SNES tile map.
+  I think it reads as "the real spot", but say if you'd prefer a flat,
+  square-on view. The watcher is the partner's match sprite at half size;
+  sitting shows the top half above the bench, as on the SNES.
 
 ## If time runs short or long
 

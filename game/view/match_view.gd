@@ -48,7 +48,7 @@ const CAM_MAX := Vector2(22, 10)
 var _actors: Node2D
 var _shadows: Node2D
 var _fx: Node2D
-var _crowd: Array = []           # [Sprite2D, base_region, person]
+var _crowd: Array = []           # [Sprite2D, person row, frame w, frame h, seat]
 var _crowd_cheer := 0
 var _players: Array = []         # per slot: {root, body, cap, shadow, choice, look}
 var _ball_root: Node2D
@@ -99,6 +99,8 @@ func _build() -> void:
 		z += 1
 		if layer["name"] == "stands":
 			_build_crowd(vm, z)
+			if watcher_wanted():
+				_build_watcher(z)
 			z += 1
 		if layer["name"] == "ground" and sim.config.modifiers & K.MOD_LAVA:
 			_build_lava(z)
@@ -148,6 +150,95 @@ func set_court(choice: Array) -> void:
 	if _ground:
 		_ground.material = CourtStyle.material(court, venue, manifest, time)
 	_tint_shadows()
+
+
+## The ground layer's top-left at rest (the close-up crops it).
+func _ground_origin() -> Vector2:
+	for l in _layers:
+		if l[0] == _ground:
+			return l[1]
+	return Vector2.ZERO
+
+
+# --- The close call (ADR-041) and the watcher (ADR-042) ------------------------------
+
+var close_call: CloseCall
+var watcher: Array = []          ## [body, cap] sprites, or empty
+var _watcher_spot := Vector2.ZERO
+var _watcher_sit := true
+var _watcher_cheer := 0
+const WATCHER_SCALE := 0.5          ## about the crowd sprites' size
+const WATCHER_HIP := 72          ## frame row of the hips: a sitting watcher shows the top
+
+
+## On the point result's first frame (game.c calls replay_check there).
+func _check_close_call() -> void:
+	if sim.config.practice:
+		return
+	var c := Replay.check(sim.ball.x_fp, sim.ball.y_fp, (sim.shot_serial - sim.rally_start) & 0xff,
+		sim.last_fault)
+	if c.is_empty():
+		return
+	close_call = CloseCall.new().setup(self, c)
+	_hud.add_child(close_call)
+	_hud.move_child(close_call, 0)
+
+
+func _end_close_call() -> void:
+	if close_call:
+		close_call.queue_free()
+		close_call = null
+
+
+## Singles against a ladder team: the captain's partner watches from the
+## venue's spot (not the demo, practice, or 2P; doubles has nobody out).
+func watcher_wanted() -> bool:
+	var cfg := sim.config
+	return not demo and cfg.mode == K.MODE_SINGLES and cfg.opponent >= 0 and not cfg.human[2] \
+		and not cfg.practice and Opponents.team(cfg.opponent)["players"].size() > 1 \
+		and manifest["venues"][venue].has("watcher")
+
+
+func _build_watcher(z: int) -> void:
+	var spot: Dictionary = manifest["venues"][venue]["watcher"]
+	_watcher_spot = Vector2(spot["x"], spot["y"])
+	_watcher_sit = spot["pose"] == "sit"
+	# the watcher takes the place of whoever sat at that seat
+	for c in _crowd:
+		if c[4].distance_to(_watcher_spot) <= 16.0:
+			c[0].visible = false
+	var look := PlayerLook.from_member(Opponents.team(sim.config.opponent)["players"][1], manifest)
+	var mat := look.material()
+	for sheet in [look.body_sheet(manifest), look.hat_sheet(manifest)]:
+		var s := Sprite2D.new()
+		s.texture = _tex(sheet) if sheet != "" else null
+		s.material = mat
+		s.centered = false
+		s.region_enabled = true
+		s.scale = Vector2(WATCHER_SCALE, WATCHER_SCALE)
+		s.flip_h = _watcher_spot.x > CourtView.CENTER_X      # facing the court
+		s.z_index = z
+		s.modulate = CourtStyle.time_scales(time)[0]
+		add_child(s)
+		watcher.append(s)
+	_update_watcher()
+
+
+func _update_watcher() -> void:
+	if watcher.is_empty():
+		return
+	if _watcher_cheer > 0:
+		_watcher_cheer -= 1
+	var winning := sim.phase == K.PHASE_MATCH_RESULT and sim.match_winner == 1
+	var cheer := _watcher_cheer > 0 or winning
+	var frame: int = SLOTS.find("cheer") if cheer else (sim.frame_count / 40) % 2
+	var hop := -absf(sin(sim.frame_count * 0.25)) * 7.0 if cheer else 0.0
+	var h: int = WATCHER_HIP if _watcher_sit else FRAME
+	var anchor_y: float = WATCHER_HIP if _watcher_sit else ANCHOR.y
+	for s in watcher:
+		s.region_rect = Rect2(frame * FRAME, 0, FRAME, h)
+		var ax: float = (FRAME - 1 - ANCHOR.x) if s.flip_h else ANCHOR.x
+		s.position = (_watcher_spot - Vector2(ax, anchor_y) * WATCHER_SCALE + Vector2(0, hop)).round()
 
 
 ## Shadows draw grey on a court too dark for them (CourtStyle.grey_shadows).
@@ -206,7 +297,7 @@ func _build_crowd(vm: Dictionary, z: int) -> void:
 		s.z_index = z
 		s.modulate = CourtStyle.time_scales(time)[0]      # the crowd sits in the dark
 		add_child(s)
-		_crowd.append([s, row, fw, fh])
+		_crowd.append([s, row, fw, fh, Vector2(seat["x"], seat["y"])])
 
 
 func _sheet(variant: String, team: String, cap: bool) -> Texture2D:
@@ -294,6 +385,10 @@ func _physics_process(_delta: float) -> void:
 	for e in sim.drain_events():
 		_on_event(e)
 	if sim.phase != _prev_phase:
+		if _prev_phase == K.PHASE_POINT_RESULT:
+			_end_close_call()
+		if sim.phase == K.PHASE_POINT_RESULT:
+			_check_close_call()
 		if sim.phase == K.PHASE_MATCH_RESULT:
 			_on_match_over()
 		_prev_phase = sim.phase
@@ -378,6 +473,8 @@ func _on_event(e: Array) -> void:
 			_crowd_cheer = 90 if e[3] >= 13 else 50
 		K.EVENT_POINT:
 			_crowd_cheer = 90
+			if e[3] == 1:
+				_watcher_cheer = 70          # their teammate won it
 			_hud.on_point(e[3])
 			var loser: int = 1 - e[3]
 			var line := story.quip(sim.config, loser, sim.frame_count)
@@ -546,5 +643,8 @@ func _update_visuals() -> void:
 	for c in _crowd:
 		var cheer: bool = _crowd_cheer > 0 and ((_crowd_cheer / 8 + c[1]) % 2 == 0)
 		c[0].region_rect = Rect2(c[2] if cheer else 0, c[1] * c[3], c[2], c[3])
+	_update_watcher()
+	if close_call:
+		close_call.update()
 	_hud.refresh()
 	_debug.refresh()

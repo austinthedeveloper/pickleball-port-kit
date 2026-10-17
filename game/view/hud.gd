@@ -237,7 +237,7 @@ func refresh() -> void:
 		_point_banner_frames -= 1
 	if _quip_frames > 0:
 		_quip_frames -= 1
-	_quip.visible = _quip_frames > 0 and s.phase == K.PHASE_POINT_RESULT
+	_quip.visible = _quip_frames > 0 and s.phase == K.PHASE_POINT_RESULT and view.close_call == null
 	_result_line.text = ""
 	if s.phase == K.PHASE_MATCH_RESULT:
 		var you := s.match_winner == 0

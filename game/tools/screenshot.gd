@@ -4,7 +4,8 @@
 ## not automatic, so the default makes P1 a bot for a moving picture).
 ## "opp=N" plays ladder team N (0-based) in their looks. "title_options"
 ## (any page id) opens that title page; "court=S,K,R,L" sets the court
-## colour presets; "time=N" DAY 0, DUSK 1, NIGHT 2; "pause" pauses the match at the end.
+## colour presets; "time=N" DAY 0, DUSK 1, NIGHT 2; "pause" pauses the match at the end;
+## "closecall" shows a forced close-up.
 extends SceneTree
 
 var _frames := 0
@@ -74,6 +75,16 @@ func _tick() -> void:
 		_view.sim.serve_requested = 1
 	if _frames == _target - 10 and _view is MatchView and "pause" in OS.get_cmdline_user_args():
 		_view.sim.paused = 1
+	if _frames == _target - 50 and _view is MatchView and "closecall" in OS.get_cmdline_user_args():
+		# a forced close call (display only): 1.25 px past the right baseline
+		var v: MatchView = _view
+		v.sim.ball.x_fp = K.to_fp(K.COURT_BASELINE_RIGHT) + 20
+		v.sim.ball.y_fp = K.to_fp(150)
+		v.close_call = CloseCall.new().setup(v, Replay.check(v.sim.ball.x_fp, v.sim.ball.y_fp,
+			Replay.MIN_SHOTS, K.FAULT_OUT))
+		v._hud.add_child(v.close_call)
+		for i in 70:                   # past the drop and the bounce
+			v.close_call.update()
 	if _frames >= _target:
 		var img := root.get_texture().get_image()
 		img.save_png(_out)
