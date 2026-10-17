@@ -124,6 +124,23 @@ static func match_config(doubles: bool, rung: int) -> SimTypes.MatchConfig:
 	return cfg
 
 
+## Your game in the park (ADR-034, main.c start_open_play_match): doubles
+## against the team drawn with you, with the captain next in line as your
+## partner (or 2P, on slot 1), the saved points and modifiers, at the
+## court's difficulty (KID keeps its assist). You play in your last Player
+## Select choice.
+static func open_play_config(op: OpenPlay) -> SimTypes.MatchConfig:
+	var cfg := config_for(true, op.opponent if op.opponent < OpenPlay.TEAMS else -1,
+		OpenPlay.court_difficulty(op.called, difficulty_i), POINTS[points_i], p1_choice)
+	if op.two_players:
+		cfg.human[1] = 1
+	else:
+		cfg.set_partner(op.partner if op.partner < OpenPlay.TEAMS else -1)
+	cfg.modifiers = mod_bits
+	cfg.open_play = 1
+	return cfg
+
+
 ## A match from Player Select's choices (match_config_select: 1P, and 2P
 ## on slot 2 if given) against a ladder team or the default CPU (-1):
 ## their look's body variant and paddle on slots 2-3 (match_config_opponent).

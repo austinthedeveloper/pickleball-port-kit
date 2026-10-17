@@ -17,6 +17,9 @@ var _toast: Control
 var _toast_text: BitmapText
 var _toast_frames := 0
 var _news_seen := GameControls.news_serial
+## Open play (ADR-034): the park waits here while you play; fresh each time
+## it's entered from the title.
+var park: OpenPlay
 
 
 func _ready() -> void:
@@ -104,7 +107,48 @@ func show_title() -> void:
 	var t := TitleScreen.new()
 	t.save = save
 	t.start_match.connect(_on_start)
+	t.open_park.connect(_on_open_park)
 	_swap(t)
+	park = null
+
+
+## OPEN PLAY on the title: a fresh park (2P along if PLAYERS is 2P).
+func _on_open_park(two_players: bool) -> void:
+	save.save_game()
+	park = OpenPlay.new()
+	park.begin(Time.get_ticks_usec() & 0xffff, two_players)
+	show_park(false)
+
+
+## The park, from the title or back from your game (`back`: show its
+## result) or the ball machine.
+func show_park(back: bool) -> void:
+	var v := ParkView.new().setup(park, save, back)
+	v.leave.connect(show_title)
+	v.play.connect(_on_park_match.bind(false))
+	v.practice.connect(_on_park_match.bind(true))
+	_swap(v)
+
+
+## Your game, or practice at the ball machine: B on the result (PARK on
+## practice's pause menu) comes back; MENU goes to the title.
+func _on_park_match(cfg: SimTypes.MatchConfig, is_practice: bool) -> void:
+	save.save_game()
+	var m := MatchView.new()
+	m.save = save
+	m.park = true
+	m.finished.connect(func(to_title: bool):
+		if to_title:
+			show_title()
+			return
+		if not is_practice:
+			park.return_from_match(m.sim.match_winner == 0, m.sim.team_score[0], m.sim.team_score[1])
+		show_park(not is_practice))
+	_swap(m)
+	m.camera.percent = Settings.CAMERAS[Settings.camera_i]
+	m.court = Settings.court.duplicate()
+	m.time = Settings.time_i
+	m.setup(cfg, "park", false)
 
 
 func _on_start(cfg: SimTypes.MatchConfig, venue: String, ladder: bool, pads: Array = [],

@@ -1,7 +1,8 @@
 ## Title: the logo and the menu over a live CPU demo at the chosen venue.
 ## The menu is a tree of MenuPages (ADR-025/030): MAIN opens MATCH SETUP,
 ## COURT, MODIFIERS, OPTIONS and RECORDS; SINGLES and DOUBLES open Player
-## Select (ADR-020), PRACTICE the drill editor (PracticePage, ADR-028).
+## Select (ADR-020), PRACTICE the drill editor (PracticePage, ADR-028),
+## OPEN PLAY the park (ParkView, ADR-034).
 ## Up/Down pick a row, Left/Right change it, B/Start press it, Y goes
 ## back; every page change swallows the press that made it (rule 9). The
 ## values themselves live in Settings.
@@ -12,6 +13,8 @@ extends Node2D
 ## `players`: each slot's player number (P1 = 0; -1 a CPU).
 signal start_match(cfg: SimTypes.MatchConfig, venue: String, ladder: bool, pads: Array,
 	players: Array)
+## OPEN PLAY (ADR-034): the park; 2P comes along when PLAYERS is 2P.
+signal open_park(two_players: bool)
 
 const SWITCH_LOCK := MenuPage.TRANSITION   ## no menu input while a page slides in
 
@@ -131,6 +134,8 @@ func _build_pages() -> void:
 	_add_page("main", "", [
 		{"id": "singles", "label": "SINGLES", "press": func(): open_select(false)},
 		{"id": "doubles", "label": "DOUBLES", "press": func(): open_select(true)},
+		{"id": "openplay", "label": "OPEN PLAY", "value": func(): return "THE PARK",
+			"press": _open_park},
 		{"id": "multiplayer", "label": "MULTIPLAYER", "value": func(): return "UP TO 4",
 			"press": open_lobby},
 		{"id": "play", "label": "MATCH SETUP", "value": _play_summary,
@@ -454,6 +459,12 @@ func _start(doubles: bool) -> void:
 	_store_settings()
 	main_cursor = pages["main"].cursor
 	start_match.emit(config(doubles), Settings.venue(), Settings.opponent_i == -2 and not Settings.two_players, [], [])
+
+
+func _open_park() -> void:
+	_store_settings()
+	main_cursor = pages["main"].cursor
+	open_park.emit(Settings.two_players)
 
 
 func _open_practice() -> void:

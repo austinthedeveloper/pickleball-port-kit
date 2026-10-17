@@ -25,6 +25,9 @@ var demo := false
 var input_lock := 0
 var save: SaveGame              ## records (null: none kept)
 var ladder := false             ## a ladder match: intro card, next rung
+## From the park (ADR-034): B on the result, or PARK on practice's pause
+## menu, goes back there (finished(false)).
+var park := false
 var story := Story.new()
 ## The intro card (ADR-026): the match waits under it, no sim, no AI.
 var card_frames := -1
@@ -410,15 +413,19 @@ func _physics_process(_delta: float) -> void:
 	elif not demo:
 		var it := GameControls.read_intent()
 		var it2: SimTypes.Intent = GameControls.read_pad_intent(GameControls.p2_pad) if sim.config.human[2] else null
+		# 2P partnering you in the park (ADR-034): slot 1, on their pad
+		var it1: SimTypes.Intent = GameControls.read_pad_intent(GameControls.p2_pad) \
+			if sim.config.human[1] and not sim.config.human[2] else null
 		if input_lock > 0:
 			input_lock -= 1
 			it = SimTypes.Intent.new()
+			it1 = null
 			it2 = null
 			GameControls.clear_latch()
 		_serve_assist(it)
 		if _pause_on_lost_pad():
 			it.pause_pressed = 1
-		human = [it, null, it2, null]
+		human = [it, it1, it2, null]
 		if sim.paused and _pause_input(it):
 			return
 	sim.step(human)
@@ -433,6 +440,9 @@ func _physics_process(_delta: float) -> void:
 			_on_match_over()
 		_prev_phase = sim.phase
 	if sim.rematch_requested:
+		if park:
+			finished.emit(false)             # ADR-034: back to the park
+			return
 		if ladder and sim.match_winner == 0:
 			next_rung.emit()
 			return
@@ -452,7 +462,8 @@ func pause_rows() -> Array:
 	var rows := [{"id": "resume", "label": "RESUME", "press": func(): pause_choice = "resume"}]
 	if not sim.config.practice:
 		rows.append({"id": "restart", "label": "RESTART", "press": func(): pause_choice = "restart"})
-	rows.append({"id": "menu", "label": "MAIN MENU", "press": func(): pause_choice = "menu"})
+	rows.append({"id": "menu", "label": "PARK" if park and sim.config.practice else "MAIN MENU",
+		"press": func(): pause_choice = "menu"})
 	return rows
 
 
@@ -568,11 +579,12 @@ func _on_match_over() -> void:
 
 
 ## Leaving practice: a new best streak (for the session's zone) is saved
-## (main.c calls practice_finish), then back to the title.
+## (main.c calls practice_finish), then back to the title, or to the park
+## for the ball machine's practice.
 func leave_practice() -> void:
 	if save:
 		save.finish_practice(sim.practice.zone, sim.practice.best)
-	finished.emit(true)
+	finished.emit(not park)
 
 
 func _spawn_fx(kind: String, at: Vector2, start: int) -> void:
