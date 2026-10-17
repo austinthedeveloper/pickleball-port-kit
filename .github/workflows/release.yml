@@ -1,0 +1,96 @@
+# A pushed version tag (vX.Y.Z) becomes a GitHub release with the four
+# builds: the tests run first (ci.yml), then game/tools/export.sh exports
+# every preset on the clean tagged tree, and the builds are packaged under
+# the same names as earlier releases and attached. The release is created
+# from the version's game/CHANGELOG.md entry if it doesn't exist yet; an
+# existing one keeps its text and gets the builds (replacing any of the
+# same name). Steps: design/VERSIONING.md.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    name: Export and publish
+    needs: test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # export.sh stamps the build ID from `git describe --tags`.
+          fetch-depth: 0
+
+      - name: The tag matches the project's version
+        run: |
+          v=$(python3 game/tools/version.py get)
+          if [ "$TAG" != "v$v" ]; then
+            echo "::error::tag $TAG but game/project.godot says $v (python3 game/tools/version.py set X.Y.Z)"
+            exit 1
+          fi
+          echo "VERSION=$v" >> "$GITHUB_ENV"
+          python3 game/tools/release_body.py "$v" > "$RUNNER_TEMP/release_body.md"
+
+      - uses: ./.github/actions/setup-godot
+        with:
+          templates: "true"
+
+      - name: Export every preset
+        run: |
+          game/tools/export.sh
+          id=$(cat game/build_id.txt)
+          if [ "$id" != "$TAG" ]; then
+            echo "::error::build ID is $id, not $TAG (is HEAD the tagged commit, with no later tag on it?)"
+            exit 1
+          fi
+
+      - name: Package
+        run: |
+          set -eu
+          dist="$PWD/build/dist"
+          n="Pickleball94-$VERSION"
+          mkdir -p "$dist"
+          cp build/macos/Pickleball94.zip "$dist/$n-macos.zip"
+          (cd build/windows && zip -X -q "$dist/$n-windows.zip" Pickleball94.exe)
+          chmod +x build/linux/Pickleball94.x86_64
+          tar -C build/linux -czf "$dist/$n-linux.tar.gz" Pickleball94.x86_64
+          (cd build/web && zip -X -q -r "$dist/$n-web.zip" .)
+          ls -l "$dist"
+          for f in "$dist"/*.zip; do unzip -tq "$f"; done
+          tar -tzf "$dist/$n-linux.tar.gz" >/dev/null
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Pickleball94-${{ env.VERSION }}
+          path: build/dist/*
+          retention-days: 14
+
+      - name: Publish the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "release $TAG exists: attaching the builds"
+            gh release upload "$TAG" build/dist/* --clobber
+          else
+            gh release create "$TAG" build/dist/* --verify-tag \
+              --title "Pickleball '94 (Godot port) $VERSION" \
+              --notes-file "$RUNNER_TEMP/release_body.md"
+          fi

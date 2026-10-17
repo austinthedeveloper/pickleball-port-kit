@@ -21,7 +21,11 @@ python3 game/tools/version.py set X.Y.Z              # the version, everywhere (
 ```
 
 Releases are versioned (semver, tags `vX.Y.Z`, `game/CHANGELOG.md`); the
-steps are in `design/VERSIONING.md`.
+steps are in `design/VERSIONING.md`. GitHub Actions runs `test.sh` on every
+push and pull request (`.github/workflows/ci.yml`); pushing a `vX.Y.Z` tag
+builds all four platforms and publishes them to the GitHub release
+(`release.yml`). Godot's version and SHA-512s are pinned in
+`.github/actions/setup-godot/action.yml`.
 
 `design/PORT_ROADMAP.md` is the milestone sheet (PORT-00..09, status and
 "For you" questions); keep it current with each branch.

@@ -1,0 +1,80 @@
+name: Set up Godot
+description: >
+  Installs the official Godot editor (Linux x86_64, run headless) as
+  `godot` on the PATH and, optionally, its export templates. Downloads are
+  checked against the SHA-512 pinned here and against the release's
+  SHA512-SUMS.txt.
+inputs:
+  templates:
+    description: Also install the export templates (about 1 GB unpacked).
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - name: Pinned version and hashes
+      shell: bash
+      run: |
+        # Change all three together when the project moves to a new Godot.
+        {
+          echo "GODOT_VERSION=4.7.2"
+          echo "GODOT_EDITOR_SHA512=9aa00f7a605200940bce3027a567b782f49bd8e940dd06ae9e987bd65aee1b1467edd56ed84fcdcbdd44354bf613bdbb4e5d2913e925850368e150c59ed54c65"
+          echo "GODOT_TEMPLATES_SHA512=ca4d71c4d7b81dfc15d1a98baa07534aa95b03fdda78a0075b06672e1648d2e5f40980c9adc28d23e1b92e732ee7bf3461997aa804af74ec2fcd7a93ccb84079"
+        } >> "$GITHUB_ENV"
+
+    - name: Cache downloads
+      uses: actions/cache@v6
+      with:
+        path: ${{ runner.temp }}/godot-dl
+        key: godot-${{ env.GODOT_VERSION }}-${{ inputs.templates }}-${{ env.GODOT_EDITOR_SHA512 }}
+
+    - name: Download and verify
+      shell: bash
+      env:
+        WANT_TEMPLATES: ${{ inputs.templates }}
+      run: |
+        set -euo pipefail
+        dl="$RUNNER_TEMP/godot-dl"
+        mkdir -p "$dl"
+        cd "$dl"
+        base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+        editor="Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+        templates="Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+        files=("$editor")
+        [ "$WANT_TEMPLATES" = "true" ] && files+=("$templates")
+        curl -fsSL --retry 3 -o SHA512-SUMS.txt "$base/SHA512-SUMS.txt"
+        for f in "${files[@]}"; do
+          [ -s "$f" ] || curl -fsSL --retry 3 -o "$f" "$base/$f"
+        done
+        # 1) The release's own sums file.
+        for f in "${files[@]}"; do
+          grep -E "  ${f}\$" SHA512-SUMS.txt
+        done | sha512sum -c -
+        # 2) The hashes pinned above (a changed upstream file fails here too).
+        echo "${GODOT_EDITOR_SHA512}  ${editor}" | sha512sum -c -
+        if [ "$WANT_TEMPLATES" = "true" ]; then
+          echo "${GODOT_TEMPLATES_SHA512}  ${templates}" | sha512sum -c -
+        fi
+
+    - name: Install
+      shell: bash
+      env:
+        WANT_TEMPLATES: ${{ inputs.templates }}
+      run: |
+        set -euo pipefail
+        dl="$RUNNER_TEMP/godot-dl"
+        bin="$RUNNER_TEMP/godot-bin"
+        mkdir -p "$bin"
+        unzip -q -o "$dl/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip" -d "$bin"
+        mv "$bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64" "$bin/godot"
+        chmod +x "$bin/godot"
+        echo "$bin" >> "$GITHUB_PATH"
+        if [ "$WANT_TEMPLATES" = "true" ]; then
+          # Where export.sh (and the editor) look on Linux.
+          dest="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          mkdir -p "$dest"
+          tmp="$RUNNER_TEMP/godot-tpz"
+          unzip -q -o "$dl/Godot_v${GODOT_VERSION}-stable_export_templates.tpz" -d "$tmp"
+          mv "$tmp"/templates/* "$dest"/
+          cat "$dest/version.txt"
+        fi
+        "$bin/godot" --version

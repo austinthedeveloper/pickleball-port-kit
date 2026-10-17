@@ -1,0 +1,41 @@
+# Every Godot test suite plus the end-to-end input smoke, headless on
+# Linux, with the same script as a local run (game/tools/test.sh fails on
+# any failed test or SCRIPT ERROR). The release workflow calls this too.
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer push to the same ref supersedes a running check. (Called from
+# the release workflow, github.workflow is the caller's name, so a release
+# never cancels a branch run or the other way round.)
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Godot tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Tags, so the build ID (git describe) reads as it does locally.
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup-godot
+
+      - name: Import the project
+        # test.sh imports too, silently; this one shows its log.
+        run: godot --headless --path game --import
+
+      - name: Tests (suites + e2e)
+        run: game/tools/test.sh
