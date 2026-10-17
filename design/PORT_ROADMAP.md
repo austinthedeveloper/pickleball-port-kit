@@ -490,6 +490,8 @@ feature/cld-release        (pushed)
   Linux, Web). Godot's export templates are now installed here, and a
   macOS export setting is fixed. Tag `v0.2.1`, on
   `feature/cld-release-0.2.1`.
+- **v0.3.0** (2026-10-17): PORT-17 open play. The first release built and
+  published by CI (tag `v0.3.0`, on `feature/cld-release-0.3.0`).
 
 ### 16. `feature/cld-multiplayer`: four players on controllers (asked for 2026-10-17)
 

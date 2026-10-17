@@ -4,6 +4,27 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.3.0] - 2026-10-17
+
+Open play: the park from the SNES game.
+
+### Added
+- OPEN PLAY on MAIN: walk around the park, put your paddle in a court's
+  rack, and when it's your turn the park calls you into a doubles game
+  with a ladder player as your partner. There are three courts at three
+  skill levels (UNDER 3.5, 3.5-4.5, 4.5+), games to 7, on your saved
+  points and modifiers. Win or lose, B takes you back to the park.
+- The clubhouse: a records board, the ball machine (practice on your
+  saved drill, with PARK on its pause menu to come back), and the teams
+  waiting on the bench.
+- 2P comes along as your partner (PLAYERS 2P, or Start on pad 2 in the
+  park).
+- Releases are now built and published by GitHub Actions when a version
+  is tagged; every push runs the tests.
+
+### Known
+- The park and clubhouse are drawn in code for now (KNOWN_ISSUES #40).
+
 ## [0.2.1] - 2026-10-17
 
 The first release with downloadable builds: macOS (universal), Windows,

@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.2.1`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.3.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-17 of 17 roadmap tasks are in.
+18 of 18 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -106,3 +106,9 @@ Status: **Ready to test**: plug in a controller (and pull it out mid-match), try
 MULTIPLAYER on MAIN opens a lobby. Up to four controllers join with A, each taking the first free player number (P1-P4) and a card: SIDE, SHIRT (unique), BODY, PADDLE. LB/RB switch SINGLES and DOUBLES. In doubles **the players choose their sides, and whoever shares a side is their partner**; an empty place on a side gets a CPU (free colour, standard paddle). A readies, B un-readies or leaves, and Menu starts once everyone is ready and the teams work. Every human plays on their own pad; anyone's Menu pauses and anyone's A works the pause menu; a P1-P4 tag floats over each player in their colour. Friends' matches leave the records alone. All pads are taken to be Xbox pads on the default layout for now (KNOWN_ISSUES #39).
 
 Status: **Ready to test**: needs two to four controllers. MAIN → MULTIPLAYER, A to join, pick sides, A to ready, Menu to start.
+
+## PORT-17: open play (ADR-034, the "long" candidate)
+
+OPEN PLAY on MAIN (the third row, as on the SNES) opens the park: three courts at three skill levels (UNDER 3.5 teal, 3.5-4.5 gold, 4.5+ red), each with a ladder game going to 7 and a paddle rack at its gate, and the clubhouse beside them. Walk with the D-pad (the fences and walls are solid); B at a rack stacks your paddle, takes it back, or moves it. When your paddle reaches the top at a changeover the park calls you ("YOUR GAME!", "WITH PETE VS GOTH CLUB") and starts a doubles match at the park against the team drawn, with the captain next in line as your partner (their look, paddle, and play style), at the court's difficulty (KID stays KID), on the saved points and modifiers: no intro card, no ladder change. B on the result goes back to the park ("YOU WON 5-3"), Start to the title. In the clubhouse: B at the records board turns its pages, B at the ball machine starts practice on the saved drill (PARK on its pause menu comes back), and the teams waiting sit on the bench. 2P comes along as your partner with PLAYERS 2P, or Start on pad 2 in the park.
+
+Status: **Ready to test**: MAIN → OPEN PLAY. Walk to a rack, B, and wait about 20 s; play the game; B on the result. Try the clubhouse board and ball machine. Look at the park art (drawn in code, KNOWN_ISSUES #40).
