@@ -37,6 +37,8 @@ static var fullscreen := false
 static var integer_scale := true
 ## The main page's cursor, kept across matches.
 static var main_cursor := 0
+## Court colours: [surface, kitchen, surround, lines] presets (CourtStyle).
+static var court: Array = CourtStyle.DEFAULTS.duplicate()
 ## The last Player Select choices (PlayerSelect.new_choice; 1P's is saved).
 static var p1_choice := PlayerSelect.new_choice(PlayerSelect.PAL_BLUE, K.VARIANT_MALE, Paddles.STANDARD)
 static var p2_choice := PlayerSelect.new_choice(PlayerSelect.PAL_RED, K.VARIANT_MALE, Paddles.STANDARD)
@@ -80,6 +82,11 @@ func _load_settings() -> void:
 	Sfx.setting = clampi(int(st.get("sound", 0)), 0, AudioMap.SOUND_NAMES.size() - 1)
 	fullscreen = int(st.get("fullscreen", 0)) != 0
 	integer_scale = int(st.get("integer_scale", 1)) != 0
+	var ct: Array = st.get("court", CourtStyle.DEFAULTS)
+	court = CourtStyle.DEFAULTS.duplicate()
+	for i in mini(ct.size(), 4):
+		var n := CourtStyle.count(CourtStyle.PARTS[i])
+		court[i] = int(ct[i]) if int(ct[i]) >= 0 and int(ct[i]) < n else 0
 	var pl: Array = st.get("player", [0, 0, 1])
 	if pl.size() == 3:
 		p1_choice = PlayerSelect.new_choice(clampi(int(pl[0]), 0, 3), clampi(int(pl[1]), 0, 1),
@@ -93,7 +100,8 @@ func _store_settings() -> void:
 		"points": points_i, "players": 2 if two_players else 1, "opponent": opponent_i,
 		"camera": camera_i, "mod_bits": mod_bits, "sound": Sfx.setting,
 		"fullscreen": 1 if fullscreen else 0, "integer_scale": 1 if integer_scale else 0,
-		"player": [p1_choice["palette"], p1_choice["variant"], p1_choice["paddle"]]}, true)
+		"player": [p1_choice["palette"], p1_choice["variant"], p1_choice["paddle"]],
+		"court": court.duplicate()}, true)
 
 
 ## Applies the window options (a no-op headless, where there's no window).
@@ -158,11 +166,13 @@ func _ready() -> void:
 	_show("main")
 
 
-func _add_page(id: String, title: String, rows: Array, help: String) -> void:
+func _add_page(id: String, title: String, rows: Array, help: String,
+		at := Rect2(300, 172, 360, 0)) -> void:
 	if id != "main":
 		rows.append({"id": "back", "label": "BACK", "press": back})
 	var h := 46 + rows.size() * MenuPage.ROW_H + (46 if title != "" else 0)
-	var p := MenuPage.new().setup(id, title, rows, Rect2(300, 172, 360, maxi(h, 300)), help)
+	at.size.y = maxi(h, 300)
+	var p := MenuPage.new().setup(id, title, rows, at, help)
 	p.visible = false
 	_ui.add_child(p)
 	pages[id] = p
@@ -176,6 +186,8 @@ func _build_pages() -> void:
 		{"id": "play", "label": "MATCH SETUP", "value": _play_summary,
 			"press": func(): open_page("play")},
 		{"id": "practice", "label": "PRACTICE", "press": _open_practice},
+		{"id": "court", "label": "COURT", "value": func(): return VENUE_NAMES[venue_i],
+			"press": func(): open_page("court")},
 		{"id": "modifiers", "label": "MODIFIERS", "value": _mods_label,
 			"press": func(): open_page("modifiers")},
 		{"id": "options", "label": "OPTIONS", "press": func(): open_page("options")},
@@ -183,8 +195,6 @@ func _build_pages() -> void:
 	], "D-PAD CHOOSE   B START")
 	_add_page("play", "MATCH SETUP", [
 		{"id": "vs", "label": "VS", "value": _opponent_label, "change": _change_opponent},
-		{"id": "venue", "label": "VENUE", "value": func(): return VENUE_NAMES[venue_i],
-			"change": func(d): venue_i = (venue_i + d + VENUES.size()) % VENUES.size(); _start_demo()},
 		{"id": "difficulty", "label": "DIFFICULTY", "value": func(): return DIFFICULTIES[difficulty_i],
 			"change": func(d): difficulty_i = clampi(difficulty_i + d, 0, DIFFICULTIES.size() - 1)},
 		{"id": "points", "label": "POINTS", "value": func(): return str(POINTS[points_i]),
@@ -192,6 +202,16 @@ func _build_pages() -> void:
 		{"id": "players", "label": "PLAYERS", "value": func(): return "2P VS" if two_players else "1P",
 			"change": func(_d): two_players = not two_players},
 	], help)
+	var court_rows := [{"id": "venue", "label": "VENUE", "value": func(): return VENUE_NAMES[venue_i],
+		"change": func(d): venue_i = (venue_i + d + VENUES.size()) % VENUES.size(); _start_demo()}]
+	for i in CourtStyle.PARTS.size():
+		var part: String = CourtStyle.PARTS[i]
+		court_rows.append({"id": part, "label": CourtStyle.PART_NAMES[i],
+			"value": func(): return CourtStyle.names(part)[court[i]],
+			"change": func(d):
+				court[i] = (court[i] + d + CourtStyle.count(part)) % CourtStyle.count(part)
+				_demo.set_court(court)})
+	_add_page("court", "COURT", court_rows, help, Rect2(590, 150, 350, 0))
 	var mod_rows := []
 	for m in MOD_ROWS:
 		var bit: int = m[2]
@@ -477,6 +497,7 @@ func _start_demo() -> void:
 	add_child(_demo)
 	move_child(_demo, 0)
 	var cfg := SimTypes.MatchConfig.doubles() if _demo_doubles else SimTypes.MatchConfig.singles()
+	_demo.court = court.duplicate()
 	_demo.setup(cfg, VENUES[venue_i], true)
 	_demo._hud.visible = false
 

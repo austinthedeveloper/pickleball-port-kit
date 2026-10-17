@@ -37,6 +37,9 @@ var cleared := false            ## this match cleared the ladder
 var camera_percent := 0
 var cam := Vector2.ZERO
 var _layers: Array = []          # [Sprite2D, origin, parallax]
+## Court colours (ADR-022/027): [surface, kitchen, surround, lines] presets.
+var court: Array = CourtStyle.DEFAULTS.duplicate()
+var _ground: Sprite2D
 ## Full lean at this density: the SNES 8 x 4 px, times the court's scale.
 const CAM_MAX := Vector2(22, 10)
 
@@ -84,6 +87,9 @@ func _build() -> void:
 		s.z_index = z
 		add_child(s)
 		_layers.append([s, s.position, float(layer["parallax"])])
+		if layer["name"] == "ground":
+			_ground = s
+			s.material = CourtStyle.material(court, venue, manifest)
 		z += 1
 		if layer["name"] == "stands":
 			_build_crowd(vm, z)
@@ -127,6 +133,13 @@ func _build() -> void:
 	_debug = DebugOverlay.new()
 	_debug.view = self
 	add_child(_debug)
+
+
+## Recolours the court (the title's COURT page previews on the demo).
+func set_court(choice: Array) -> void:
+	court = choice.duplicate()
+	if _ground:
+		_ground.material = CourtStyle.material(court, venue, manifest)
 
 
 ## LAVA (ADR-033): the kitchens glow, so the rule reads at a glance.

@@ -3,7 +3,8 @@
 ## "human" leaves P1 human (it serves on its own after the ready delay is
 ## not automatic, so the default makes P1 a bot for a moving picture).
 ## "opp=N" plays ladder team N (0-based) in their looks. "title_options"
-## (any page id) opens that title page; "pause" pauses the match at the end.
+## (any page id) opens that title page; "court=S,K,R,L" sets the court
+## colour presets; "pause" pauses the match at the end.
 extends SceneTree
 
 var _frames := 0
@@ -18,6 +19,9 @@ func _initialize() -> void:
 	var venue: String = a[1] if a.size() > 1 else "park"
 	_target = int(a[2]) if a.size() > 2 else 120
 	_out = a[3] if a.size() > 3 else "user://shot.png"
+	for arg in a.slice(4):
+		if arg.begins_with("court="):
+			TitleScreen.court = Array(arg.substr(6).split(",")).map(func(x): return int(x))
 	var controls = load("res://game_ui/controls.gd").new()
 	root.add_child(controls)
 	if mode.begins_with("title"):
@@ -50,6 +54,7 @@ func _initialize() -> void:
 			if arg.begins_with("opp="):
 				cfg = TitleScreen.config_for(mode == "doubles", int(arg.substr(4)),
 					cfg.difficulty, cfg.points_to_win)
+		m.court = TitleScreen.court.duplicate()
 		m.setup(cfg, venue, mode == "demo")
 		if mode != "demo" and not "human" in a.slice(4):
 			m.sim.p1_bot = true

@@ -154,15 +154,29 @@ feature/cld-godot-port                 (done: the playable port)
 
 ### 5. `feature/cld-court-colors`: court colours (ADR-022, ADR-027)
 
-- [ ] `PORT-05` A COURT page: VENUE plus SURFACE, KITCHEN (with SAME),
+- [x] `PORT-05` A COURT page: VENUE plus SURFACE, KITCHEN (with SAME),
   SURROUND and LINES presets from `court_colors.json`, previewed live
   behind the page. Recolouring uses the court mask's roles in a shader.
   - Accept: a contrast test: lines against the surface, and the ball
     against every surface, at `min_line_contrast` and
     `min_ball_contrast` (playbook §4.7). DEFAULT matches the painted
     ground pixel for pixel.
-  - Verified: —
-  - Status: Planned. It should be **Done**, since the tests cover it.
+  - Verified: `view/court_style.gd` + `court_style.gdshader`: each
+    ground pixel's mask role picks its part's preset, scaled by the
+    pixel's brightness against the venue's painted base (the SNES
+    generator's rule, per pixel), so the paint's texture and shading stay.
+    All DEFAULT draws the ground unshaded. MAIN's COURT row opens VENUE,
+    SURFACE, KITCHEN (SAME first), SURROUND, LINES, on the right so the
+    demo court recolours live beside it; saved. `test_court.gd` (5
+    tests): presets match the data and fit eight cells; DEFAULT is the
+    identity at every venue (and no shader); each preset touches only its
+    part (a SAME kitchen follows the surface); contrast at every venue for
+    every surface and kitchen against every line (worst 2.65, min 2.5) and
+    the ball (worst 2.68, min 2.0); the page, the save, and a bad index
+    loading as DEFAULT. 124/124 plus the e2e; golden traces unchanged.
+    Screenshots: the COURT page (BLUE / SLATE / CONCRETE / YELLOW), and
+    SUNSET in PINK / LIME / SNOW.
+  - Status: **Done**. (Have a look at a few combinations if you like.)
 
 ### 6. `feature/cld-night`: night courts (ADR-045)
 

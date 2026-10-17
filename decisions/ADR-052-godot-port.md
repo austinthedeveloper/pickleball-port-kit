@@ -108,6 +108,15 @@ stream, at the 960×540 art density, through the art's court geometry.
   saved (`settings.player`) and used for ladder rungs and practice.
   2P's screen reads pad 2 (and P1's keys, so one keyboard can set up a
   2P match).
+- **Court colours** (PORT-05, ADR-022/027). The HD ground has no
+  palette, so `view/court_style.gdshader` recolours by the court mask's
+  roles: a pixel becomes its part's preset scaled by its brightness
+  against the venue's painted base (the mean of the manifest ramp), the
+  per-pixel form of the SNES generator's rule. Choices are preset
+  indices per part (`settings.court`), 0 being DEFAULT (SAME for the
+  kitchen); all DEFAULT leaves the ground unshaded. VENUE moved from MATCH
+  SETUP to the COURT page with them. `data/court_colors.json` is copied
+  from the kit.
 - **Not ported yet:** open play (ADR-034), career
   (ADR-047), the close-call replay (ADR-041), night (ADR-045), the
   sitting-out watcher (ADR-042).

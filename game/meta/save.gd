@@ -30,7 +30,8 @@ static func defaults() -> Dictionary:
 			# preset), window options. New keys fill from these defaults on
 			# load, so no layout change.
 			"mod_bits": -1, "fullscreen": 0, "integer_scale": 1,
-			"player": [0, 0, Paddles.STANDARD]},  # Player Select: 1P colour, body, paddle
+			"player": [0, 0, Paddles.STANDARD],  # Player Select: 1P colour, body, paddle
+			"court": [0, 0, 0, 0]},  # COURT: surface, kitchen, surround, lines presets
 		"records": {"singles_wins": 0, "singles_losses": 0, "doubles_wins": 0,
 			"doubles_losses": 0, "ladder_rung": 0, "ladder_clears": 0,
 			"longest_rally": 0, "practice_best": 0,
