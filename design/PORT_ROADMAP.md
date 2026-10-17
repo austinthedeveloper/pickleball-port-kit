@@ -433,12 +433,22 @@ feature/cld-release        (pushed)
 
 ### 14. `feature/cld-hud-polish`: a livelier HUD
 
-- [ ] `PORT-14` Scores that pop when they change, a serve indicator
+- [x] `PORT-14` Scores that pop when they change, a serve indicator
   (who serves, and in doubles which server), a live rally counter for
   long rallies, and a MATCH POINT pulse.
   - Accept: HUD tests for each element's trigger; screenshots.
-  - Verified: —
-  - Status: Planned. It will be **Ready to test**.
+  - Verified: scores grow and flash gold for 14 frames when they go up
+    (not on a reset); a ball beside a score panel marks the serving side;
+    in doubles a marker in the server's team colour bobs over their head
+    while they set up and toss; a RALLY counter shows from the fifth shot
+    of a live rally and pops on each shot (not in the demo or practice);
+    MATCH POINT pulses. The serve prompt is a prompt bar now: the bound
+    button, "SERVE  HOLD FOR POWER". `test_hud.gd` (4 tests): each
+    element against its trigger and its absence. 162/162 plus the e2e;
+    golden traces unchanged. Screenshot: a doubles serve with the marker
+    and prompt.
+  - Status: **Ready to test**: play a doubles match and a long singles
+    rally.
 
 ## For you
 

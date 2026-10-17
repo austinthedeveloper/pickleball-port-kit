@@ -32,6 +32,21 @@ var _ini_line: BitmapText
 var _ini_under: ColorRect
 var _result_prompts: PromptBar   ## B / Start on the result screen
 var _stats_card: Control         ## the post-match stats (PORT-13), built when shown
+# PORT-14: scores pop when they change, a ball marks the serving side (and
+# a marker the server in doubles), a rally counter on long rallies, and
+# MATCH POINT pulses.
+const POP_FRAMES := 14
+const RALLY_SHOW := 5            ## shots before the rally counter shows
+var _prev_scores := [0, 0]
+var _score_pop := [0, 0]
+var _score_y := 0.0
+var _serve_icons: Array = []     ## [left, right] ball icons
+var _server_mark: Node2D
+var _rally: Control
+var _rally_text: BitmapText
+var _rally_pop := 0
+var _last_rally := 0
+var _frame := 0
 var _banner_y := 250.0
 var _result_y := 316.0
 
@@ -111,6 +126,26 @@ func setup(v: MatchView) -> void:
 			s.centered = false
 			s.position = Vector2(x, y + 13)
 			add_child(s)
+	_score_y = y + 8
+	var icon_tex: Texture2D = load(UI + "icon_ball.png")
+	for x in [480 - tw / 2 - 18 - lw - 22, 480 + tw / 2 + 18 + rw + 7]:
+		var ic := Sprite2D.new()
+		ic.texture = icon_tex
+		ic.centered = false
+		ic.position = Vector2(x, y + 13)
+		ic.visible = false
+		add_child(ic)
+		_serve_icons.append(ic)
+	_server_mark = Node2D.new()
+	_server_mark.draw.connect(_draw_server_mark)
+	_server_mark.visible = false
+	add_child(_server_mark)
+	_rally = Control.new()
+	_rally.visible = false
+	add_child(_rally)
+	var rp := _panel("sub", Rect2(410, 492, 140, 30))
+	rp.reparent(_rally)
+	_rally_text = _text("small", "", Vector2(480, 500), 0.5, Color("fbe46a"), _rally)
 	_subtitle = Control.new()
 	add_child(_subtitle)
 	var sw := 30 + BitmapText.measure("small", "MATCH POINT")
@@ -119,15 +154,9 @@ func setup(v: MatchView) -> void:
 	_text("small", "MATCH POINT", Vector2(480, y + h + 4), 0.5, Color.WHITE, _subtitle)
 	_prompt = Control.new()
 	add_child(_prompt)
-	var pw := 64 + BitmapText.measure("small", "PRESS    TO SERVE")
-	var pp := _panel("title", Rect2(480 - pw / 2, 490, pw, 34))
+	var pp := _panel("title", Rect2(282, 488, 396, 38))
 	pp.reparent(_prompt)
-	_text("small", "PRESS    TO SERVE", Vector2(480, 498), 0.5, Color.WHITE, _prompt)
-	var btn := Sprite2D.new()
-	btn.texture = load(UI + "button_B_red.png")
-	btn.position = Vector2(480 - BitmapText.measure("small", "PRESS    TO SERVE") / 2.0
-		+ BitmapText.measure("small", "PRESS ") + 14, 506)
-	_prompt.add_child(btn)
+	_prompt.add_child(PromptBar.new().setup([["hit", "SERVE  HOLD FOR POWER"]], Vector2(480, 507)))
 	_meter = Control.new()
 	add_child(_meter)
 	var frame := ColorRect.new()
@@ -273,6 +302,8 @@ func refresh() -> void:
 	var mp := s.phase <= K.PHASE_LIVE and (s.match_point(0) or s.match_point(1)) \
 		and not s.config.practice
 	_subtitle.visible = mp and not view.demo
+	_frame += 1
+	_refresh_live()
 	var human_serving: bool = not view.demo and s.owners[s.server_index] == K.OWNER_HUMAN
 	_prompt.visible = human_serving and s.phase == K.PHASE_SERVE_SETUP \
 		and s.phase_timer >= K.SERVE_READY_FRAMES and not s.charge_charging
@@ -335,6 +366,63 @@ func refresh() -> void:
 	else:
 		_banner.text = ""
 		_banner_sub.text = ""
+
+
+## PORT-14's live elements, once a frame.
+func _refresh_live() -> void:
+	var s := view.sim
+	# MATCH POINT pulses
+	var pulse := 0.5 + 0.5 * sin(_frame * 0.18)
+	_subtitle.modulate = Color(1, 1, 1, 0.7 + 0.3 * pulse)
+	# scores pop on a change
+	for t in 2:
+		if s.team_score[t] != _prev_scores[t]:
+			if s.team_score[t] > _prev_scores[t]:
+				_score_pop[t] = POP_FRAMES
+			_prev_scores[t] = s.team_score[t]
+		var label: BitmapText = _left_score if t == 0 else _right_score
+		if _score_pop[t] > 0:
+			_score_pop[t] -= 1
+		var k := float(_score_pop[t]) / POP_FRAMES
+		var sc := 1.0 + 0.6 * k
+		label.scale = Vector2(sc, sc)
+		label.position.y = _score_y - (sc - 1.0) * 10.0
+		label.tint = Color.WHITE.lerp(Color("fbe46a"), k)
+	# the serving side, and the server in doubles while they set up
+	var serving := s.phase <= K.PHASE_LIVE and not s.config.practice
+	for t in 2:
+		_serve_icons[t].visible = serving and s.serving_team == t
+	var mark := not view.demo and s.config.mode == K.MODE_DOUBLES \
+		and (s.phase == K.PHASE_SERVE_SETUP or s.phase == K.PHASE_SERVE_TOSS)
+	_server_mark.visible = mark
+	if mark:
+		var p: SimTypes.Player = s.players[s.server_index]
+		var head := CourtView.ground(p.x_fp, p.y_fp) - Vector2(0, 116) - view.camera.offset
+		_server_mark.position = (head + Vector2(0, -absf(sin(_frame * 0.15)) * 5.0)).round()
+		_server_mark.queue_redraw()
+	# the rally counter on a long rally, popping on each shot
+	var rally: int = (s.shot_serial - s.rally_start) & 0xff
+	var live := s.phase == K.PHASE_LIVE and rally >= RALLY_SHOW and not s.config.practice
+	_rally.visible = live and not view.demo
+	if rally != _last_rally:
+		_last_rally = rally
+		_rally_pop = 10 if live else 0
+	if _rally.visible:
+		_rally_text.text = "RALLY %d" % rally
+		if _rally_pop > 0:
+			_rally_pop -= 1
+		var rs := 1.0 + 0.35 * float(_rally_pop) / 10.0
+		_rally_text.scale = Vector2(rs, rs)
+		_rally_text.position.y = 500.0 - (rs - 1.0) * 8.0
+
+
+func _draw_server_mark() -> void:
+	var s := view.sim
+	var col := team_tint(MatchStats.team_of(s.server_index))
+	var pts := PackedVector2Array([Vector2(-13, -16), Vector2(13, -16), Vector2(0, 0)])
+	_server_mark.draw_colored_polygon(pts, Color(0.05, 0.06, 0.12))
+	var inner := PackedVector2Array([Vector2(-9, -13), Vector2(9, -13), Vector2(0, -3)])
+	_server_mark.draw_colored_polygon(inner, col)
 
 
 ## The stats card shows on a finished human match's result screen (not

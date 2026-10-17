@@ -44,8 +44,12 @@ python3 game/tools/release_notes.py                  # game/RELEASE_NOTES.md fro
   `SWITCH_LOCK` and clears the latch; the intro and initials cards set
   the lock as they close.
 - **Menus are MenuPages** (`view/menu_page.gd`): rows by id, driven by
-  move/change/press. Tests select rows by id (`page.select("sound")`),
-  never by counting presses (playbook §4.8).
+  move/change/press (keys, pad and mouse alike). Tests select rows by id
+  (`page.select("sound")`), never by counting presses (playbook §4.8).
+  Pages animate; call `settle()` in a test that needs the final state.
+- **Prompts, not button names in text**: help lines are `PromptBar`s of
+  `[action, "LABEL"]`, so they follow the device and any remap.
+- **Settings live in `Settings`** (`meta/settings.gd`), not on screens.
 - **The save is versioned** (`meta/save.gd`, layout v4). A new saved key
   with a harmless default can ride on `defaults()` (missing keys fill);
   a changed meaning needs a new version, a migration, and a test that

@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `7ea92f4-dirty`. Generated from `design/PORT_ROADMAP.md` by
+Build `45ceb3d-dirty`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-10 of 10 roadmap tasks are in.
+15 of 15 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -64,3 +64,33 @@ Status: **Done**. (A quick look: win a match and enter initials.)
 Export presets (macOS, Windows, Linux, Web). A build ID on the title (commit plus a dirty flag). An app icon from the art. A headless export check. Release notes generated from this sheet. `CLAUDE.md` refreshed.
 
 Status: **Ready to test**: the platform exports need Godot's export templates, which aren't installed here (see "For you"). Then run `game/tools/export.sh` and try a build.
+
+## PORT-10: organize the code
+
+Split the two big view files: the title's pages move to their own builders, and MatchView's camera, crowd and watcher become components. Retire leftovers (the old MODS presets list stays only as a save reader). Every gdscript warning fixed; the folder layout documented.
+
+Status: **Done**.
+
+## PORT-11: modern menus
+
+Menus that move: pages slide and fade, the cursor eases between rows, a highlight bar replaces the ball icon, values tick with arrows. Fades between the title and a match. Button prompts follow the last device used (keyboard keys or pad glyphs). Mouse: hover selects a row, click presses, wheel changes.
+
+Status: **Ready to test**: try the menus with the mouse, then pick up a pad mid-menu and watch the prompts switch.
+
+## PORT-12: remapping and accessibility
+
+A CONTROLS page: rebind every action for keyboard and pad, with conflict swaps and RESET, saved. ACCESSIBILITY: screen shake and flashes on/off, a bigger HUD text option, and a hold-to-charge serve assist.
+
+Status: **Ready to test**: remap a key and a pad button, play a point, and restart the game to see them kept. Try SERVE ASSIST.
+
+## PORT-13: post-match stats
+
+After the result: a stats card per side (points won on serve, winners by shot type, faults by kind, longest rally, average rally), collected from sim events, display only. Totals roll into the records.
+
+Status: **Ready to test**: finish a match and read the card.
+
+## PORT-14: a livelier HUD
+
+Scores that pop when they change, a serve indicator (who serves, and in doubles which server), a live rally counter for long rallies, and a MATCH POINT pulse.
+
+Status: **Ready to test**: play a doubles match and a long singles rally.
