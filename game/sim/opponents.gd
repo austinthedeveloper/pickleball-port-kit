@@ -50,6 +50,12 @@ static func team(i: int) -> Dictionary:
 	return _teams[i]
 
 
+## A named skin's three 5-bit colours (palette roles 2-4).
+static func skin(name: String) -> Array:
+	_load()
+	return _data["skins"].get(name, _data["skins"]["light"])
+
+
 ## The play style of a CPU slot (match.c match_slot_style): an opponent's
 ## captain/partner on slots 2-3, the partner style for a CPU partnering a
 ## human, else the default CPU.

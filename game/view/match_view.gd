@@ -45,7 +45,7 @@ var _shadows: Node2D
 var _fx: Node2D
 var _crowd: Array = []           # [Sprite2D, base_region, person]
 var _crowd_cheer := 0
-var _players: Array = []         # per slot: {root, body, cap, shadow, choice}
+var _players: Array = []         # per slot: {root, body, cap, shadow, choice, look}
 var _ball_root: Node2D
 var _ball_sprite: Sprite2D
 var _ball_shadow: Sprite2D
@@ -179,9 +179,18 @@ func _build_players() -> void:
 		var variant := "female" if sim.config.variant[i] == K.VARIANT_FEMALE else "male"
 		var root := Node2D.new()
 		var body := Sprite2D.new()
-		body.texture = _sheet(variant, team_name, false)
 		var cap := Sprite2D.new()
-		cap.texture = _sheet(variant, team_name, true)
+		var look := PlayerLook.for_slot(sim.config, i, manifest)
+		if look:
+			# a ladder opponent: role sheets in their colours, their hat
+			body.texture = _tex(look.body_sheet(manifest))
+			var hat := look.hat_sheet(manifest)
+			cap.texture = _tex(hat) if hat != "" else null
+			body.material = look.material()
+			cap.material = body.material
+		else:
+			body.texture = _sheet(variant, team_name, false)
+			cap.texture = _sheet(variant, team_name, true)
 		for s in [body, cap]:
 			s.centered = false
 			s.region_enabled = true
@@ -196,6 +205,7 @@ func _build_players() -> void:
 		entry["cap"] = cap
 		entry["shadow"] = shadow
 		entry["choice"] = "standard"
+		entry["look"] = look
 		_players.append(entry)
 
 
@@ -423,7 +433,10 @@ func _update_visuals() -> void:
 			s.region_rect = Rect2(idx * FRAME, 0, FRAME, FRAME)
 			s.flip_h = flip
 			s.offset = -Vector2((FRAME - 1 - ANCHOR.x) if flip else ANCHOR.x, ANCHOR.y)
-		e["body"].modulate = Color(1.8, 1.8, 1.8) if p.flash_timer > 0 else Color.WHITE
+		if e["look"]:
+			e["body"].material.set_shader_parameter("brighten", 1.8 if p.flash_timer > 0 else 1.0)
+		else:
+			e["body"].modulate = Color(1.8, 1.8, 1.8) if p.flash_timer > 0 else Color.WHITE
 	var b := sim.ball
 	var show := b.active != 0 and sim.phase != K.PHASE_MATCH_RESULT
 	_ball_root.visible = show

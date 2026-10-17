@@ -1,7 +1,8 @@
 ## Renders a screen for N frames and saves the viewport (needs a display):
-##   godot --path game -s res://tools/screenshot.gd -- <title|singles|doubles|demo|practice|practice_<zone>> <venue> <frames> <out.png> [human]
+##   godot --path game -s res://tools/screenshot.gd -- <title|singles|doubles|demo|practice|practice_<zone>> <venue> <frames> <out.png> [human] [opp=N]
 ## "human" leaves P1 human (it serves on its own after the ready delay is
 ## not automatic, so the default makes P1 a bot for a moving picture).
+## "opp=N" plays ladder team N (0-based) in their looks.
 extends SceneTree
 
 var _frames := 0
@@ -34,8 +35,12 @@ func _initialize() -> void:
 					zone = z
 			cfg = SimTypes.MatchConfig.practice_session([Practice.SHOT_MIX,
 				Practice.TARGET_RANDOM, Practice.RATE_NORMAL, zone], 12)
+		for arg in a.slice(4):
+			if arg.begins_with("opp="):
+				cfg = TitleScreen.config_for(mode == "doubles", int(arg.substr(4)),
+					cfg.difficulty, cfg.points_to_win)
 		m.setup(cfg, venue, mode == "demo")
-		if mode != "demo" and not (a.size() > 4 and a[4] == "human"):
+		if mode != "demo" and not "human" in a.slice(4):
 			m.sim.p1_bot = true
 		_view = m
 	process_frame.connect(_tick)

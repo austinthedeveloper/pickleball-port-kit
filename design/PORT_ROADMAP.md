@@ -43,14 +43,17 @@ feature/cld-godot-port                 (done: the playable port)
 
 ### 0. Merge the two running sessions
 
-- [ ] `PORT-00` Merge the practice-mode and opponent-looks branches into
+- [x] `PORT-00` Merge the practice-mode and opponent-looks branches into
   the chain's base. Each goes in only if its own tests pass. Conflicts
   get resolved, and both features are re-run together.
   - Accept: one branch with both features, with `test.sh` green.
-  - Verified: —
-  - Status: **Blocked on your OK** (merging is your call). Without it,
-    the chain starts from `feature/cld-godot-port` and those branches
-    stay apart.
+  - Verified: practice 90/90 and looks 84/84 (each with the e2e) on their
+    own branches. `feature/cld-godot-port` fast-forwarded to practice
+    (which also brought the roadmap commit), then looks merged in. The doc
+    conflicts (ADR-052, KNOWN_ISSUES #31-35, screenshot.gd) were resolved
+    keeping both sides. Combined: 92/92 plus the e2e. Screenshots: the
+    PIRATES in their looks, and practice with the machine.
+  - Status: **Done**.
 
 ### 1. `feature/cld-feel`: game feel (product brief "punchy")
 
