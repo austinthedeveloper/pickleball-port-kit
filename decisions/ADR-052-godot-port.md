@@ -117,8 +117,17 @@ stream, at the 960×540 art density, through the art's court geometry.
   kitchen); all DEFAULT leaves the ground unshaded. VENUE moved from MATCH
   SETUP to the COURT page with them. `data/court_colors.json` is copied
   from the kit.
+- **Night** (PORT-06, ADR-045). The time's channel scales go on the
+  layers as modulate (dark for the backdrop, stands, fence and front;
+  lit for the net), on the crowd sprites (dark), and in the ground shader
+  by mask role (lit for roles 3-8, dark for the surround). One
+  deviation: the lines take half the lit dimming, since the SNES's 5-bit
+  tables round YELLOW on LIME at NIGHT to 2.61 while float scales give
+  2.45. Shadows draw grey on a court whose luminance is under 0.02
+  (BLACK at any time), from the SNES rule in KNOWN_ISSUES #26. NIGHT's ambience is the
+  venue whose `venues.json` loop is the time's (crickets: SUNSET).
 - **Not ported yet:** open play (ADR-034), career
-  (ADR-047), the close-call replay (ADR-041), night (ADR-045), the
+  (ADR-047), the close-call replay (ADR-041), the
   sitting-out watcher (ADR-042).
 
 ## Rejected (and why)

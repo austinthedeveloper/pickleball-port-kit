@@ -35,6 +35,7 @@ func _on_start(cfg: SimTypes.MatchConfig, venue: String, ladder: bool) -> void:
 	_swap(m)
 	m.camera_percent = TitleScreen.CAMERAS[TitleScreen.camera_i]
 	m.court = TitleScreen.court.duplicate()
+	m.time = TitleScreen.time_i
 	m.setup(cfg, venue, false)
 
 

@@ -26,9 +26,11 @@ var _amb: AudioStreamPlayer
 var _amb_level := 0.0
 var _fade := 0.0
 var last: Array = []               ## the last sound played (for tests)
+var ambience_name := ""            ## whose ambience loop plays
 
 
-func setup(venue: String, quiet: bool) -> void:
+## `ambience` names the venue whose loop plays instead (NIGHT: crickets).
+func setup(venue: String, quiet: bool, ambience := "") -> void:
 	_quiet = quiet
 	for k in EFFECTS:
 		var list := []
@@ -43,9 +45,11 @@ func setup(venue: String, quiet: bool) -> void:
 			list.append(p)
 		_players[k] = list
 		_next[k] = 0
-	if AMBIENCE.has(venue):
+	var loop := ambience if AMBIENCE.has(ambience) else venue
+	if AMBIENCE.has(loop):
+		ambience_name = loop
 		_amb = AudioStreamPlayer.new()
-		var stream: AudioStreamWAV = load(DIR + AMBIENCE[venue] + ".wav")
+		var stream: AudioStreamWAV = load(DIR + AMBIENCE[loop] + ".wav")
 		stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
 		stream.loop_end = stream.get_length() * stream.mix_rate
 		_amb.stream = stream

@@ -39,6 +39,8 @@ var cam := Vector2.ZERO
 var _layers: Array = []          # [Sprite2D, origin, parallax]
 ## Court colours (ADR-022/027): [surface, kitchen, surround, lines] presets.
 var court: Array = CourtStyle.DEFAULTS.duplicate()
+## Time of day (ADR-045): CourtStyle.DAY, DUSK or NIGHT.
+var time := CourtStyle.DAY
 var _ground: Sprite2D
 ## Full lean at this density: the SNES 8 x 4 px, times the court's scale.
 const CAM_MAX := Vector2(22, 10)
@@ -87,9 +89,13 @@ func _build() -> void:
 		s.z_index = z
 		add_child(s)
 		_layers.append([s, s.position, float(layer["parallax"])])
+		var scales := CourtStyle.time_scales(time)
 		if layer["name"] == "ground":
 			_ground = s
-			s.material = CourtStyle.material(court, venue, manifest)
+			s.material = CourtStyle.material(court, venue, manifest, time)
+		else:
+			# the net is under the lights; the backdrop and the stands aren't
+			s.modulate = scales[1] if layer["name"] == "net" else scales[0]
 		z += 1
 		if layer["name"] == "stands":
 			_build_crowd(vm, z)
@@ -129,7 +135,8 @@ func _build() -> void:
 	_hud.setup(self)
 	_sfx = Sfx.new()
 	add_child(_sfx)
-	_sfx.setup(venue, demo)
+	_sfx.setup(venue, demo, CourtStyle.time_ambience(time))
+	_tint_shadows()
 	_debug = DebugOverlay.new()
 	_debug.view = self
 	add_child(_debug)
@@ -139,7 +146,24 @@ func _build() -> void:
 func set_court(choice: Array) -> void:
 	court = choice.duplicate()
 	if _ground:
-		_ground.material = CourtStyle.material(court, venue, manifest)
+		_ground.material = CourtStyle.material(court, venue, manifest, time)
+	_tint_shadows()
+
+
+## Shadows draw grey on a court too dark for them (CourtStyle.grey_shadows).
+var shadow_grey := false
+
+func _tint_shadows() -> void:
+	shadow_grey = CourtStyle.grey_shadows(court, venue, manifest, time)
+	var mat: ShaderMaterial = null
+	if shadow_grey:
+		mat = ShaderMaterial.new()
+		mat.shader = preload("res://view/shadow_tint.gdshader")
+		mat.set_shader_parameter("tint", CourtStyle.SHADOW_GREY)
+	for e in _players:
+		e["shadow"].material = mat
+	if _ball_shadow:
+		_ball_shadow.material = mat
 
 
 ## LAVA (ADR-033): the kitchens glow, so the rule reads at a glance.
@@ -158,7 +182,8 @@ func _build_lava(z: int) -> void:
 				+ Vector2(inset[k][0], inset[k][1]))
 			k += 1
 		poly.polygon = pts
-		poly.color = Color(1.0, 0.36, 0.06, 0.78)
+		poly.color = Color(1.0, 0.36, 0.06, 0.78) * CourtStyle.time_scales(time)[1]
+		poly.color.a = 0.78
 		poly.z_index = z
 		add_child(poly)
 		_lava.append(poly)
@@ -179,6 +204,7 @@ func _build_crowd(vm: Dictionary, z: int) -> void:
 		var anchor: Array = crowd["sit_anchor"] if seat["pose"] == "sit" else crowd["stand_anchor"]
 		s.position = Vector2(seat["x"] - anchor[0], seat["y"] - anchor[1])
 		s.z_index = z
+		s.modulate = CourtStyle.time_scales(time)[0]      # the crowd sits in the dark
 		add_child(s)
 		_crowd.append([s, row, fw, fh])
 

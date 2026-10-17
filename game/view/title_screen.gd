@@ -39,6 +39,7 @@ static var integer_scale := true
 static var main_cursor := 0
 ## Court colours: [surface, kitchen, surround, lines] presets (CourtStyle).
 static var court: Array = CourtStyle.DEFAULTS.duplicate()
+static var time_i := CourtStyle.DAY
 ## The last Player Select choices (PlayerSelect.new_choice; 1P's is saved).
 static var p1_choice := PlayerSelect.new_choice(PlayerSelect.PAL_BLUE, K.VARIANT_MALE, Paddles.STANDARD)
 static var p2_choice := PlayerSelect.new_choice(PlayerSelect.PAL_RED, K.VARIANT_MALE, Paddles.STANDARD)
@@ -87,6 +88,7 @@ func _load_settings() -> void:
 	for i in mini(ct.size(), 4):
 		var n := CourtStyle.count(CourtStyle.PARTS[i])
 		court[i] = int(ct[i]) if int(ct[i]) >= 0 and int(ct[i]) < n else 0
+	time_i = clampi(int(st.get("time", 0)), 0, CourtStyle.time_names().size() - 1)
 	var pl: Array = st.get("player", [0, 0, 1])
 	if pl.size() == 3:
 		p1_choice = PlayerSelect.new_choice(clampi(int(pl[0]), 0, 3), clampi(int(pl[1]), 0, 1),
@@ -101,7 +103,7 @@ func _store_settings() -> void:
 		"camera": camera_i, "mod_bits": mod_bits, "sound": Sfx.setting,
 		"fullscreen": 1 if fullscreen else 0, "integer_scale": 1 if integer_scale else 0,
 		"player": [p1_choice["palette"], p1_choice["variant"], p1_choice["paddle"]],
-		"court": court.duplicate()}, true)
+		"court": court.duplicate(), "time": time_i}, true)
 
 
 ## Applies the window options (a no-op headless, where there's no window).
@@ -186,7 +188,8 @@ func _build_pages() -> void:
 		{"id": "play", "label": "MATCH SETUP", "value": _play_summary,
 			"press": func(): open_page("play")},
 		{"id": "practice", "label": "PRACTICE", "press": _open_practice},
-		{"id": "court", "label": "COURT", "value": func(): return VENUE_NAMES[venue_i],
+		{"id": "court", "label": "COURT", "value": func(): return VENUE_NAMES[venue_i] + (
+			"" if time_i == 0 else " " + CourtStyle.time_names()[time_i]),
 			"press": func(): open_page("court")},
 		{"id": "modifiers", "label": "MODIFIERS", "value": _mods_label,
 			"press": func(): open_page("modifiers")},
@@ -203,7 +206,12 @@ func _build_pages() -> void:
 			"change": func(_d): two_players = not two_players},
 	], help)
 	var court_rows := [{"id": "venue", "label": "VENUE", "value": func(): return VENUE_NAMES[venue_i],
-		"change": func(d): venue_i = (venue_i + d + VENUES.size()) % VENUES.size(); _start_demo()}]
+		"change": func(d): venue_i = (venue_i + d + VENUES.size()) % VENUES.size(); _start_demo()},
+		{"id": "time", "label": "TIME", "value": func(): return CourtStyle.time_names()[time_i],
+			"change": func(d):
+				var n := CourtStyle.time_names().size()
+				time_i = (time_i + d + n) % n
+				_start_demo()}]
 	for i in CourtStyle.PARTS.size():
 		var part: String = CourtStyle.PARTS[i]
 		court_rows.append({"id": part, "label": CourtStyle.PART_NAMES[i],
@@ -498,6 +506,7 @@ func _start_demo() -> void:
 	move_child(_demo, 0)
 	var cfg := SimTypes.MatchConfig.doubles() if _demo_doubles else SimTypes.MatchConfig.singles()
 	_demo.court = court.duplicate()
+	_demo.time = time_i
 	_demo.setup(cfg, VENUES[venue_i], true)
 	_demo._hud.visible = false
 

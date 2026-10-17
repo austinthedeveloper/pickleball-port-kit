@@ -180,14 +180,28 @@ feature/cld-godot-port                 (done: the playable port)
 
 ### 6. `feature/cld-night`: night courts (ADR-045)
 
-- [ ] `PORT-06` TIME = DAY, DUSK or NIGHT. The backdrop darkens by the
+- [x] `PORT-06` TIME = DAY, DUSK or NIGHT. The backdrop darkens by the
   ADR's factors and the court stays lit under floodlights. The crowd
   dims and night ambience plays.
   - Accept: the contrast test extended to every time of day. A shadow
     stays visible on the darkest court (KNOWN_ISSUES #26's lesson).
     Screenshots of all three times at all three venues.
-  - Verified: —
-  - Status: Planned. It will be **Ready to test** (the look).
+  - Verified: TIME (DAY / DUSK / NIGHT) follows VENUE on the COURT page,
+    saved. The backdrop layers, the stands' crowd and the surround take
+    the time's dark scales (modulate, and the ground shader by mask
+    role); the court parts and the net take its lit scales; players,
+    ball and HUD keep their colours. NIGHT plays the crickets (SUNSET's
+    loop) at every venue. On a court too dark for a dark shadow (BLACK)
+    shadows draw grey (KNOWN_ISSUES #26's lesson). `test_night.gd` (5
+    tests): DAY changes nothing, no time brightens, NIGHT goes blue; line
+    and ball contrast for every court at every time and venue (worst
+    lines 2.65, ball 2.68, lines on LAVA 3.60); a shadow visible on every
+    court at every time (worst 1.22, min 1.2); the night view's layer
+    scales, crowd, players and crickets; the TIME row and save. 129/129
+    plus the e2e; golden traces unchanged. Screenshots: all three times
+    at all three venues, and BLACK at NIGHT with grey shadows.
+  - Status: **Ready to test**: COURT → TIME → NIGHT (and DUSK) at each
+    venue. Is NIGHT dark enough, too dark, or too blue?
 
 ### 7. `feature/cld-watcher-replay`: the watcher (ADR-042) and close calls (ADR-041)
 
@@ -254,6 +268,15 @@ the chain: each has a default I've gone with.
   paddle on every shirt. Say if you'd rather CPUs show blue. The paddle
   icons are drawn in code from the paddle palettes, since the art has no
   paddle icons; real icons would be a small art task.
+
+- **PORT-06 night:** one port-side deviation. YELLOW lines on a LIME
+  kitchen at NIGHT measured 2.45, under the 2.5 minimum. The SNES's
+  5-bit tables happen to round it up to 2.61, but the HD port scales in
+  float. So the lines take half the night's dimming ("they catch the
+  floodlights"), which puts the worst case at 2.65. Shadows off the
+  court, on a dark surround at NIGHT, are faint (KNOWN_ISSUES #38).
+  There are no floodlight poles or light pools in the art; a lighting
+  pass would be an art task.
 
 ## If time runs short or long
 
