@@ -478,6 +478,43 @@ feature/cld-release        (pushed)
   - Status: **Ready to test**: plug in a controller (and pull it out
     mid-match), try the menus with the stick, and feel the rumble.
 
+## Releases
+
+- **v0.1.0** (2026-10-17): PORT-00 to PORT-15, the first versioned
+  release (`game/CHANGELOG.md`, `design/VERSIONING.md`). Tag `v0.1.0`, on
+  `feature/cld-release-0.1.0`; GitHub release published (source only,
+  since there are no export templates here yet).
+
+### 16. `feature/cld-multiplayer`: four players on controllers (asked for 2026-10-17)
+
+- [x] `PORT-16` MULTIPLAYER on MAIN opens a lobby. Up to four
+  controllers join with A, each taking the first free player number
+  (P1-P4) and a card: SIDE, SHIRT (unique), BODY, PADDLE. LB/RB switch
+  SINGLES and DOUBLES. In doubles **the players choose their sides, and
+  whoever shares a side is their partner**; an empty place on a side gets a
+  CPU (free colour, standard paddle). A readies, B un-readies or leaves,
+  and Menu starts once everyone is ready and the teams work. Every human
+  plays on their own pad; anyone's Menu pauses and anyone's A works the
+  pause menu; a P1-P4 tag floats over each player in their colour. Friends'
+  matches leave the records alone. All pads are taken to be Xbox pads on
+  the default layout for now (KNOWN_ISSUES #39).
+  - Accept: lobby rule tests; the match config it builds; four humans in
+    the sim each moved only by their own intent; the view reading four
+    controllers, pausing on anyone's Menu, and the title's lobby end to
+    end.
+  - Verified: `meta/lobby.gd` (pure rules), `view/lobby_screen.gd`, the
+    pad layer in `game_ui/controls.gd` (pads read directly, with
+    `fake_pads` so tests can drive four controllers), multiplayer input in
+    `MatchView`, and tags in the HUD. One sim change: KID's swing assist
+    now covers slot 3 too (main.c assisted slots 0-2, since 2P sat on slot
+    2). No existing config has a human there, so the golden traces are
+    unchanged. Also: B now backs out of every menu on a pad (the Xbox
+    convention), as well as X. `test_multiplayer.gd` (7 tests). 176/176
+    plus the e2e. Screenshots: the lobby with three players, and a
+    four-player doubles match with the tags.
+  - Status: **Ready to test**: needs two to four controllers. MAIN →
+    MULTIPLAYER, A to join, pick sides, A to ready, Menu to start.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
@@ -549,6 +586,13 @@ the chain: each has a default I've gone with.
   their errors. With the CPU's style, most points end in errors, so
   winners stay low. Say if you want other rows (kitchen time, dinks,
   serve speed).
+
+- **PORT-16 multiplayer:** the keyboard can't join the lobby (it's
+  controllers only, as asked); it only backs out of an empty lobby.
+  Someone must be on the left side: the sim's slot 0 is always a human.
+  The CPUs in a multiplayer match use the MATCH SETUP difficulty. Friends'
+  matches don't touch the records or the ladder. Do you want stats-only
+  records per player number?
 
 ## If time runs short or long
 

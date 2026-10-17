@@ -216,7 +216,7 @@ func test_title_select_flow() -> void:
 	if not t.is_node_ready():
 		t._ready()
 	var started := []
-	t.start_match.connect(func(cfg, _v, _l): started.append(cfg))
+	t.start_match.connect(func(cfg, _v, _l, _p, _n): started.append(cfg))
 	t.pages["main"].select("doubles")
 	t.pages["main"].press()
 	eq(t.page, "select", "DOUBLES opens Player Select")

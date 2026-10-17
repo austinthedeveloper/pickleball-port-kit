@@ -151,6 +151,15 @@ stream, at the 960×540 art density, through the art's court geometry.
   mouse (`MenuPage`); prompts follow the device and the live bindings
   (`Prompts`, `PromptBar`); screens fade (`scenes/main.gd`). None of it
   touches the sim.
+- **Multiplayer** (PORT-16, past the SNES's 2P and its deferred
+  Multitap, M4-MP-01). The sim already took a human on any slot (owners
+  come from `MatchConfig.human`; a CPU partner switches to the
+  human-partner style). Slot 0 stays a human, so the lobby requires
+  someone on the left. KID's swing assist extends to slot 3. The lobby
+  maps sides to slots: the left on 0-1 and the right on 2-3, in
+  player-number order. Each human slot's intent is read straight from its
+  pad (`GameControls.read_pad_intent`); the pause reaches the sim through
+  slot 0.
 - **Not ported yet:** open play (ADR-034), career (ADR-047).
 
 ## Rejected (and why)

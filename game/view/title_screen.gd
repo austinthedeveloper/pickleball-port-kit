@@ -8,7 +8,10 @@
 class_name TitleScreen
 extends Node2D
 
-signal start_match(cfg: SimTypes.MatchConfig, venue: String, ladder: bool)
+## `pads`: each slot's controller in a multiplayer match ([] otherwise);
+## `players`: each slot's player number (P1 = 0; -1 a CPU).
+signal start_match(cfg: SimTypes.MatchConfig, venue: String, ladder: bool, pads: Array,
+	players: Array)
 
 const SWITCH_LOCK := MenuPage.TRANSITION   ## no menu input while a page slides in
 
@@ -31,6 +34,9 @@ var _select_doubles := false
 var _header: Array = []          # the logo and record line (hidden on Player Select)
 var _pad2_prev := 0
 var build_label: BitmapText
+## MULTIPLAYER (PORT-16): the lobby and its screen.
+var lobby := Lobby.new()
+var lobby_screen: LobbyScreen
 
 
 func _load_settings() -> void:
@@ -85,6 +91,9 @@ func _ready() -> void:
 	build_label = build
 	_header = [logo, sub, _record, keys]
 	_build_pages()
+	lobby_screen = LobbyScreen.new().setup(lobby)
+	lobby_screen.visible = false
+	_ui.add_child(lobby_screen)
 	practice_page = PracticePage.new()
 	practice_page.visible = false
 	_ui.add_child(practice_page)
@@ -118,10 +127,12 @@ func _add_page(id: String, title: String, rows: Array, help: Array,
 
 
 func _build_pages() -> void:
-	var help := [["hit", "SELECT"], ["soft", "BACK"]]
+	var help := [["hit", "SELECT"], ["back", "BACK"]]
 	_add_page("main", "", [
 		{"id": "singles", "label": "SINGLES", "press": func(): open_select(false)},
 		{"id": "doubles", "label": "DOUBLES", "press": func(): open_select(true)},
+		{"id": "multiplayer", "label": "MULTIPLAYER", "value": func(): return "UP TO 4",
+			"press": open_lobby},
 		{"id": "play", "label": "MATCH SETUP", "value": _play_summary,
 			"press": func(): open_page("play")},
 		{"id": "practice", "label": "PRACTICE", "press": _open_practice},
@@ -203,7 +214,7 @@ func _build_pages() -> void:
 	control_rows.append({"id": "reset", "label": "RESET DEFAULTS", "press": func():
 		Bindings.reset()
 		_store_settings()})
-	_add_page("controls", "CONTROLS", control_rows, [["hit", "REBIND"], ["soft", "BACK"]],
+	_add_page("controls", "CONTROLS", control_rows, [["hit", "REBIND"], ["back", "BACK"]],
 		Rect2(250, 70, 460, 0))
 	_add_page("records", "RECORDS", [
 		{"id": "singles", "label": "SINGLES", "value": func(): return _wl("singles")},
@@ -220,7 +231,7 @@ func _build_pages() -> void:
 			"change": func(d): vs_i = (vs_i + d + Opponents.count()) % Opponents.count()},
 		{"id": "erase", "label": "ERASE RECORDS", "value": func(): return "B AGAIN" if _erase_armed else "",
 			"press": _erase},
-	], [["soft", "BACK"]], Rect2(290, 46, 380, 0))
+	], [["back", "BACK"]], Rect2(290, 46, 380, 0))
 
 
 ## After a row was pressed (keys or the mouse): its sound, and the record line.
@@ -297,7 +308,9 @@ func _show(id: String) -> void:
 	if select_screen:
 		select_screen.visible = id == "select"
 	for n in _header:
-		n.visible = not id in ["select", "records", "controls"]
+		n.visible = not id in ["select", "records", "controls", "lobby"]
+	if lobby_screen:
+		lobby_screen.visible = id == "lobby"
 	_erase_armed = false
 	if pages.has(id):
 		pages[id].refresh()
@@ -382,12 +395,65 @@ func _pad2_pressed() -> int:
 	return pressed
 
 
+## MULTIPLAYER: a fresh lobby every time (pads may have changed).
+func open_lobby() -> void:
+	lobby = Lobby.new()
+	lobby.mode = K.MODE_DOUBLES
+	lobby_screen.lobby = lobby
+	main_cursor = pages["main"].cursor
+	_show("lobby")
+	_lock = SWITCH_LOCK
+	GameControls.clear_latch()
+	for dev in GameControls.connected_pads():
+		GameControls.pad_menu_bits(dev)  # a button already down isn't a press
+
+
+## One frame of the lobby: every connected pad's presses; the keyboard
+## can only leave (L or Esc) while nobody has joined.
+func _update_lobby() -> void:
+	for dev in GameControls.connected_pads():
+		var bits: int = GameControls.pad_menu_bits(dev)[0]
+		if bits == 0:
+			continue
+		var before := lobby.joined().size()
+		var result := lobby.input(dev, bits)
+		if result == Lobby.START:
+			start_lobby_match()
+			return
+		if result == Lobby.LEAVE:
+			_leave_lobby()
+			return
+		_sfx.play("confirm" if lobby.joined().size() > before else "blip")
+	if lobby.joined().is_empty() and (Input.is_action_just_pressed("soft")
+			or Input.is_action_just_pressed("start") or Input.is_action_just_pressed("drive")):
+		_leave_lobby()
+
+
+func _leave_lobby() -> void:
+	_show("main")
+	pages["main"].select("multiplayer")
+	pages["main"].appear(-1)
+	_lock = SWITCH_LOCK
+	GameControls.clear_latch()
+	_sfx.play("back")
+
+
+## Everyone's ready: the lobby's match at the chosen court, with the match
+## settings (difficulty for the CPUs, points, modifiers).
+func start_lobby_match() -> void:
+	_sfx.play("confirm")
+	_store_settings()
+	var cfg := lobby.match_config(Settings.difficulty_i, Settings.POINTS[Settings.points_i],
+		Settings.mod_bits)
+	start_match.emit(cfg, Settings.venue(), false, lobby.slot_pads(), lobby.slot_players())
+
+
 func _start(doubles: bool) -> void:
 	if _sfx:
 		_sfx.play("confirm")
 	_store_settings()
 	main_cursor = pages["main"].cursor
-	start_match.emit(config(doubles), Settings.venue(), Settings.opponent_i == -2 and not Settings.two_players)
+	start_match.emit(config(doubles), Settings.venue(), Settings.opponent_i == -2 and not Settings.two_players, [], [])
 
 
 func _open_practice() -> void:
@@ -411,7 +477,7 @@ func _update_practice(pressed: int) -> void:
 		_sfx.play("confirm")
 		_store_settings()
 		main_cursor = pages["main"].cursor
-		start_match.emit(practice_page.config(), Settings.venue(), false)
+		start_match.emit(practice_page.config(), Settings.venue(), false, [], [])
 	else:
 		_sfx.play("blip")
 
@@ -506,6 +572,9 @@ func _process(_delta: float) -> void:
 	if page == "practice":
 		_update_practice(GameControls.pad_bits()[0])
 		return
+	if page == "lobby":
+		_update_lobby()
+		return
 	if page == "select":
 		var pressed: int = GameControls.pad_bits()[0]
 		var p2 := _pad2_pressed()
@@ -526,7 +595,8 @@ func _process(_delta: float) -> void:
 	if dir != 0 and p.change(dir):
 		_sfx.play("blip")
 		_refresh()
-	if Input.is_action_just_pressed("soft") and page != "main":
+	if (Input.is_action_just_pressed("soft") or Input.is_action_just_pressed("drive")) \
+			and page != "main":
 		back()
 	elif Input.is_action_just_pressed("hit") or Input.is_action_just_pressed("start"):
 		var id := p.current_id()

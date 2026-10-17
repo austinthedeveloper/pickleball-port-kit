@@ -4,6 +4,17 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [Unreleased]
+
+### Added
+- MULTIPLAYER: up to four players on controllers. A lobby to join, pick
+  sides (partners in doubles), shirts, bodies and paddles; CPUs fill
+  doubles; P1-P4 tags in the match.
+
+### Changed
+- B backs out of menus on a controller (the Xbox convention).
+- All controllers are treated as Xbox pads for now (KNOWN_ISSUES #39).
+
 ## [0.1.0] - 2026-10-17
 
 The first versioned release: the SNES game ported to Godot 4.7 at

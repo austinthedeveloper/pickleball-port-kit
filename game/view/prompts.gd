@@ -47,16 +47,26 @@ static func first_button(action: String) -> int:
 ## How to draw the prompt for an action ("dpad" is the four moves):
 ## {kind: "key" | "face" | "pill" | "menu" | "view" | "dpad", text,
 ## color, dir (dpad: -1 all, else 0 up, 1 down, 2 left, 3 right)}.
+## Pad-only prompts (the lobby is controllers only): always the button.
+const PAD_ONLY := {"pad_a": JOY_BUTTON_A, "pad_b": JOY_BUTTON_B, "pad_x": JOY_BUTTON_X,
+	"pad_menu": JOY_BUTTON_START, "lb": JOY_BUTTON_LEFT_SHOULDER, "rb": JOY_BUTTON_RIGHT_SHOULDER}
+
 static func glyph(action: String, device := -1) -> Dictionary:
+	if PAD_ONLY.has(action):
+		return button_glyph(PAD_ONLY[action])
 	if device < 0:
 		device = GameControls.last_device
 	if device == GameControls.KEYBOARD:
 		if action == "dpad":
 			return {"kind": "key", "text": "ARROWS"}
+		if action == "back":
+			action = "soft"                  # L on the keyboard
 		var k := first_key(action)
 		return {"kind": "key", "text": key_name(k) if k else "?"}
 	if action == "dpad":
 		return {"kind": "dpad", "text": "", "dir": -1}
+	if action == "back":
+		action = "drive"                 # B backs out on a pad
 	return button_glyph(first_button(action))
 
 

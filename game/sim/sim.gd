@@ -1021,7 +1021,9 @@ func step(human: Array = []) -> void:
 		else:
 			ai.hold_intent(0, intents[0])
 	elif config.difficulty == K.DIFFICULTY_KID:
-		for slot in [0, 1, 2]:
+		# main.c assists slots 0-2 (2P sat on slot 2); multiplayer (PORT-16)
+		# can put a human on slot 3 too
+		for slot in [0, 1, 2, 3]:
 			if owners[slot] == K.OWNER_HUMAN and players[slot].active \
 					and ai.assist_swing(slot):
 				intents[slot].hit_pressed = 1

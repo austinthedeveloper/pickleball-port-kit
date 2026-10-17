@@ -29,7 +29,7 @@ func _init() -> void:
 		_labels.append(_text("small", ROWS[i], Vector2(340, 250 + i * ROW_H), 0.0, Color.WHITE))
 		_values.append(_text("small", "", Vector2(624, 250 + i * ROW_H), 1.0, Color("fbe46a")))
 	_best = _text("small", "", Vector2(480, 404), 0.5, Color.WHITE)
-	add_child(PromptBar.new().setup([["hit", "PLAY"], ["soft", "BACK"]], Vector2(480, 446)))
+	add_child(PromptBar.new().setup([["hit", "PLAY"], ["back", "BACK"]], Vector2(480, 446)))
 	_arrow = Sprite2D.new()
 	_arrow.texture = load("res://assets/levels/ui/icon_ball.png")
 	_arrow.centered = false

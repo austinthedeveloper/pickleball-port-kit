@@ -107,11 +107,14 @@ func show_title() -> void:
 	_swap(t)
 
 
-func _on_start(cfg: SimTypes.MatchConfig, venue: String, ladder: bool) -> void:
+func _on_start(cfg: SimTypes.MatchConfig, venue: String, ladder: bool, pads: Array = [],
+		players: Array = []) -> void:
 	save.save_game()
 	var m := MatchView.new()
 	m.save = save
 	m.ladder = ladder
+	m.slot_pads = pads.duplicate()       # multiplayer: each human slot's controller
+	m.slot_players = players.duplicate()
 	m.finished.connect(func(_to_title: bool): show_title())
 	m.next_rung.connect(_on_next_rung.bind(cfg))
 	_swap(m)

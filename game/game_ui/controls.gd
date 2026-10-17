@@ -127,6 +127,14 @@ static func rumble(player: int, weak: float, strong: float, seconds: float) -> v
 	Input.start_joy_vibration(dev, weak, strong, seconds)
 
 
+## Rumble one controller by id (multiplayer).
+static func rumble_device(dev: int, weak: float, strong: float, seconds: float) -> void:
+	if not Settings.vibration or dev < 0:
+		return
+	last_rumble = [dev, weak, strong, seconds]
+	Input.start_joy_vibration(dev, weak, strong, seconds)
+
+
 static func _on_joy_connection(device: int, connected: bool) -> void:
 	pad_news = ["CONNECTED" if connected else "DISCONNECTED", device]
 	news_serial += 1
@@ -225,8 +233,9 @@ static func pad_bits() -> Array:
 	var held := 0
 	for pair in [["move_up", Practice.PAD_UP], ["move_down", Practice.PAD_DOWN],
 			["move_left", Practice.PAD_LEFT], ["move_right", Practice.PAD_RIGHT],
-			["hit", Practice.PAD_B], ["drive", PAD_A], ["soft", Practice.PAD_Y],
+			["hit", Practice.PAD_B], ["drive", PAD_A | Practice.PAD_Y], ["soft", Practice.PAD_Y],
 			["start", Practice.PAD_START]]:
+		# drive (B on a pad) is also back (Y), the Xbox menus' convention
 		if Input.is_action_just_pressed(pair[0]):
 			pressed |= pair[1]
 		if Input.is_action_pressed(pair[0]):
@@ -260,29 +269,61 @@ static func read_intent() -> SimTypes.Intent:
 	return it
 
 
-## 2P (ADR-020): a second gamepad's intent, read directly so the input map
-## (keyboard + pad 0) stays P1's.
+## Reading pads directly (2P, and multiplayer's four pads; PORT-16). For
+## now every pad is taken to be an Xbox pad on its default layout: A hit,
+## B drive, X soft, Menu pause, D-pad or left stick to move. Remaps apply
+## to P1's input map only (design/KNOWN_ISSUES.md #39).
+##
+## Tests and the e2e can stand in fake pads: `fake_pads` maps a device id
+## to {"buttons": [JOY_BUTTON_*...], "x": axis, "y": axis}; while it isn't
+## empty, the real pads are ignored.
+static var fake_pads := {}
+
+
+static func connected_pads() -> Array:
+	if not fake_pads.is_empty():
+		var ids := fake_pads.keys()
+		ids.sort()
+		return ids
+	return Input.get_connected_joypads()
+
+
+static func joy_button(device: int, b: int) -> bool:
+	if not fake_pads.is_empty():
+		return fake_pads.has(device) and b in fake_pads[device].get("buttons", [])
+	return Input.is_joy_button_pressed(device, b)
+
+
+static func joy_axis(device: int, axis: int) -> float:
+	if not fake_pads.is_empty():
+		if not fake_pads.has(device):
+			return 0.0
+		return float(fake_pads[device].get("x" if axis == JOY_AXIS_LEFT_X else "y", 0.0))
+	return Input.get_joy_axis(device, axis)
+
+
 static var _pad_prev := {}
 
+## A pad's intent this frame (2P and multiplayer). Menu is the pause.
 static func read_pad_intent(device: int) -> SimTypes.Intent:
 	var it := SimTypes.Intent.new()
-	if not device in Input.get_connected_joypads():
+	if not device in connected_pads():
 		return it
-	var ax := Input.get_joy_axis(device, JOY_AXIS_LEFT_X)
-	var ay := Input.get_joy_axis(device, JOY_AXIS_LEFT_Y)
-	if Input.is_joy_button_pressed(device, JOY_BUTTON_DPAD_LEFT) or ax < -0.4:
+	var ax := joy_axis(device, JOY_AXIS_LEFT_X)
+	var ay := joy_axis(device, JOY_AXIS_LEFT_Y)
+	if joy_button(device, JOY_BUTTON_DPAD_LEFT) or ax < -0.4:
 		it.move_x = -1
-	elif Input.is_joy_button_pressed(device, JOY_BUTTON_DPAD_RIGHT) or ax > 0.4:
+	elif joy_button(device, JOY_BUTTON_DPAD_RIGHT) or ax > 0.4:
 		it.move_x = 1
-	if Input.is_joy_button_pressed(device, JOY_BUTTON_DPAD_UP) or ay < -0.4:
+	if joy_button(device, JOY_BUTTON_DPAD_UP) or ay < -0.4:
 		it.move_y = -1
-	elif Input.is_joy_button_pressed(device, JOY_BUTTON_DPAD_DOWN) or ay > 0.4:
+	elif joy_button(device, JOY_BUTTON_DPAD_DOWN) or ay > 0.4:
 		it.move_y = 1
 	it.aim_x = it.move_x
 	it.aim_y = it.move_y
 	var held := {}
-	for b in [JOY_BUTTON_A, JOY_BUTTON_B, JOY_BUTTON_X]:
-		held[b] = Input.is_joy_button_pressed(device, b)
+	for b in [JOY_BUTTON_A, JOY_BUTTON_B, JOY_BUTTON_X, JOY_BUTTON_START]:
+		held[b] = joy_button(device, b)
 	var prev: Dictionary = _pad_prev.get(device, {})
 	var pressed := {}
 	for b in held:
@@ -294,4 +335,36 @@ static func read_pad_intent(device: int) -> SimTypes.Intent:
 		it.shot = K.SHOT_DRIVE
 	elif pressed[JOY_BUTTON_X]:
 		it.shot = K.SHOT_SOFT
+	it.pause_pressed = 1 if pressed[JOY_BUTTON_START] else 0
 	return it
+
+
+## A pad's menu presses as SNES pad bits (like pad_bits), plus LB / RB:
+## [newly pressed, held]. Its own edge memory, apart from the intents'.
+const PAD_L := 0x0020
+const PAD_R := 0x0010
+static var _menu_prev := {}
+
+static func pad_menu_bits(device: int) -> Array:
+	var held := 0
+	if device in connected_pads():
+		var ax := joy_axis(device, JOY_AXIS_LEFT_X)
+		var ay := joy_axis(device, JOY_AXIS_LEFT_Y)
+		for pair in [[JOY_BUTTON_DPAD_UP, Practice.PAD_UP], [JOY_BUTTON_DPAD_DOWN, Practice.PAD_DOWN],
+				[JOY_BUTTON_DPAD_LEFT, Practice.PAD_LEFT], [JOY_BUTTON_DPAD_RIGHT, Practice.PAD_RIGHT],
+				[JOY_BUTTON_A, Practice.PAD_B], [JOY_BUTTON_B, PAD_A | Practice.PAD_Y], [JOY_BUTTON_X, Practice.PAD_Y],
+				[JOY_BUTTON_START, Practice.PAD_START], [JOY_BUTTON_LEFT_SHOULDER, PAD_L],
+				[JOY_BUTTON_RIGHT_SHOULDER, PAD_R]]:
+			if joy_button(device, pair[0]):
+				held |= pair[1]
+		if ay < -0.5:
+			held |= Practice.PAD_UP
+		elif ay > 0.5:
+			held |= Practice.PAD_DOWN
+		if ax < -0.5:
+			held |= Practice.PAD_LEFT
+		elif ax > 0.5:
+			held |= Practice.PAD_RIGHT
+	var pressed := held & ~int(_menu_prev.get(device, 0))
+	_menu_prev[device] = held
+	return [pressed, held]

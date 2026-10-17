@@ -7,7 +7,8 @@
 ## colour presets; "time=N" DAY 0, DUSK 1, NIGHT 2;
 ## "pad" shows the controller prompts; "pause" pauses the match at the end;
 ## "closecall" shows a forced close-up; "initials" the initials card;
-## "result" plays a bot match and ends it (the stats card).
+## "result" plays a bot match and ends it (the stats card); "mp4" four
+## humans on fake pads (doubles); title_lobby a lobby with three players.
 extends SceneTree
 
 var _frames := 0
@@ -37,7 +38,20 @@ func _initialize() -> void:
 		root.add_child(_view)
 		if mode.begins_with("title_"):
 			_view.ready.connect(func():
-				if mode == "title_select":
+				if mode == "title_lobby":
+					# three fake pads: P1 ready on the left, P2 picking, P3 on the right
+					GameControls.fake_pads = {0: {"buttons": []}, 1: {"buttons": []}, 2: {"buttons": []}}
+					_view.open_lobby()
+					var l: Lobby = _view.lobby
+					l.join(0)
+					l.join(1)
+					l.join(2)
+					l.cards[0]["ready"] = true
+					l.cards[1]["row"] = Lobby.ROW_PADDLE
+					l.cards[1]["paddle"] = Paddles.RED
+					l.cards[1]["variant"] = K.VARIANT_FEMALE
+					l.cards[2]["palette"] = 3
+				elif mode == "title_select":
 					_view.open_select(false)
 					_view.select_input(PlayerSelect.PAD_DOWN)
 					_view.select_input(PlayerSelect.PAD_RIGHT)    # RED
@@ -57,6 +71,16 @@ func _initialize() -> void:
 					zone = z
 			cfg = SimTypes.MatchConfig.practice_session([Practice.SHOT_MIX,
 				Practice.TARGET_RANDOM, Practice.RATE_NORMAL, zone], 12)
+		if "mp4" in a.slice(4):
+			# four humans (fake pads), tags over each
+			GameControls.fake_pads = {0: {"buttons": []}, 1: {"buttons": []}, 2: {"buttons": []},
+				3: {"buttons": []}}
+			var l := Lobby.new()
+			for d in 4:
+				l.join(d)
+			cfg = l.match_config(K.DIFFICULTY_MEDIUM, 11, 0)
+			m.slot_pads = l.slot_pads()
+			m.slot_players = l.slot_players()
 		for arg in a.slice(4):
 			if arg.begins_with("opp="):
 				cfg = Settings.config_for(mode == "doubles", int(arg.substr(4)),

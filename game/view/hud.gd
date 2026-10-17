@@ -47,6 +47,8 @@ var _rally_text: BitmapText
 var _rally_pop := 0
 var _last_rally := 0
 var _frame := 0
+## Multiplayer (PORT-16): a P1..P4 tag over each human, in their colour.
+var _tags: Array = []            ## [slot, Node2D]
 var _banner_y := 250.0
 var _result_y := 316.0
 
@@ -90,6 +92,9 @@ func setup(v: MatchView) -> void:
 		left_name = "CPU" if not doubles else left_name
 	if cfg.opponent >= 0 and not cfg.human[2] and not view.demo:
 		right_name = Story.card_name(cfg.opponent, doubles)
+	if view.multiplayer() and not doubles:
+		left_name = _player_name(0)
+		right_name = _player_name(2)
 	var left_tint: Color = MatchView.TEAM_TINTS[cfg.palette[0]]
 	var right_tint: Color = MatchView.TEAM_TINTS[cfg.palette[2]]
 	if cfg.opponent >= 0 and not cfg.human[2] and not view.demo:
@@ -146,6 +151,13 @@ func setup(v: MatchView) -> void:
 	var rp := _panel("sub", Rect2(410, 492, 140, 30))
 	rp.reparent(_rally)
 	_rally_text = _text("small", "", Vector2(480, 500), 0.5, Color("fbe46a"), _rally)
+	if view.multiplayer():
+		for slot in K.MAX_PLAYERS:
+			if _player_of(slot) >= 0:
+				var tag := Node2D.new()
+				tag.draw.connect(_draw_tag.bind(tag, _player_of(slot)))
+				add_child(tag)
+				_tags.append([slot, tag])
 	_subtitle = Control.new()
 	add_child(_subtitle)
 	var sw := 30 + BitmapText.measure("small", "MATCH POINT")
@@ -156,7 +168,9 @@ func setup(v: MatchView) -> void:
 	add_child(_prompt)
 	var pp := _panel("title", Rect2(282, 488, 396, 38))
 	pp.reparent(_prompt)
-	_prompt.add_child(PromptBar.new().setup([["hit", "SERVE  HOLD FOR POWER"]], Vector2(480, 507)))
+	# multiplayer is controllers only: the pad's A, whatever was touched last
+	_prompt.add_child(PromptBar.new().setup([["pad_a" if view.multiplayer() else "hit",
+		"SERVE  HOLD FOR POWER"]], Vector2(480, 507)))
 	_meter = Control.new()
 	add_child(_meter)
 	var frame := ColorRect.new()
@@ -368,9 +382,40 @@ func refresh() -> void:
 		_banner_sub.text = ""
 
 
+func _player_of(slot: int) -> int:
+	return view.slot_players[slot] if slot < view.slot_players.size() else -1
+
+
+func _player_name(slot: int) -> String:
+	var n := _player_of(slot)
+	return "P%d" % (n + 1) if n >= 0 else "CPU"
+
+
+func _draw_tag(n: Node2D, player: int) -> void:
+	var col: Color = LobbyScreen.PLAYER_TINTS[player]
+	var r := Rect2(-17, -12, 34, 20)
+	n.draw_rect(r.grow(2), Color(0.05, 0.06, 0.12))
+	n.draw_rect(r, col.darkened(0.35))
+	n.draw_colored_polygon(PackedVector2Array([Vector2(-5, 10), Vector2(5, 10), Vector2(0, 16)]),
+		Color(0.05, 0.06, 0.12))
+	var f := BitmapText.load_font("small")
+	var text := "P%d" % (player + 1)
+	var x := -BitmapText.measure("small", text) / 2.0
+	for ch in text:
+		var g: Dictionary = f["glyphs"].get(ch, f["glyphs"][" "])
+		n.draw_texture_rect_region(f["texture"], Rect2(x, -9, g["w"], g["h"]),
+			Rect2(g["x"], g["y"], g["w"], g["h"]))
+		x += int(g["advance"]) - 1
+
+
 ## PORT-14's live elements, once a frame.
 func _refresh_live() -> void:
 	var s := view.sim
+	for t in _tags:
+		var p: SimTypes.Player = s.players[t[0]]
+		var node: Node2D = t[1]
+		node.visible = p.active != 0 and s.phase != K.PHASE_MATCH_RESULT
+		node.position = (CourtView.ground(p.x_fp, p.y_fp) - Vector2(0, 138) - view.camera.offset).round()
 	# MATCH POINT pulses
 	var pulse := 0.5 + 0.5 * sin(_frame * 0.18)
 	_subtitle.modulate = Color(1, 1, 1, 0.7 + 0.3 * pulse)

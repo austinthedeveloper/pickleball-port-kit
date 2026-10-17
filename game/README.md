@@ -22,7 +22,14 @@ game/tools/test.sh           # all tests, headless
 | Pause; on the result, back to the title | Enter / Esc | Menu |
 
 Any controller works (Xbox, PlayStation, Switch Pro, most others), on
-the Xbox layout; the game always shows Xbox buttons. Plug in or pull out
+the Xbox layout; the game always shows Xbox buttons. For now every pad
+is treated as an Xbox pad; other types and their own glyphs are a later
+job (`design/KNOWN_ISSUES.md` #39).
+
+**MULTIPLAYER** (on MAIN): up to four players, one controller each.
+Press A to join, pick a SIDE (in doubles your partner is whoever shares
+your side; an empty place goes to a CPU), SHIRT, BODY and PADDLE, press A
+when ready, and Menu to start. LB and RB switch singles and doubles. Plug in or pull out
 a pad at any time (a match pauses if one drops). CONTROLS (in OPTIONS)
 remaps keys and buttons; VIBRATION is in ACCESSIBILITY.
 

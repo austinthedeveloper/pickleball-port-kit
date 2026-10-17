@@ -91,7 +91,7 @@ func setup(s: PlayerSelect) -> SelectScreen:
 	_overlay.draw.connect(_draw_overlay)
 	_panel(Rect2(40, 476, 880, 50))
 	add_child(PromptBar.new().setup([["dpad", "CHOOSE"], ["hit", "CONFIRM"], ["start", "PLAY"],
-		["soft", "BACK"]], Vector2(480, 501)))
+		["back", "BACK"]], Vector2(480, 501)))
 	_arrow = Sprite2D.new()
 	_arrow.texture = load("res://assets/levels/ui/icon_ball.png")
 	_arrow.centered = false

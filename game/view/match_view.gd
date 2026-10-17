@@ -297,16 +297,60 @@ func _build_ball() -> void:
 func _rumble_hit(slot: int, shot: int) -> void:
 	if demo or sim.config.human[slot] == 0:
 		return
-	var player := 0 if slot == 0 else 1
+	var strength: Array = {K.SHOT_DRIVE: [0.3, 0.7, 0.12], K.SHOT_SOFT: [0.2, 0.0, 0.06]}.get(
+		shot, [0.35, 0.25, 0.08])
+	if multiplayer():
+		GameControls.rumble_device(slot_pads[slot], strength[0], strength[1], strength[2])
+		return
 	if slot != 0 and slot != 2:
 		return
-	match shot:
-		K.SHOT_DRIVE:
-			GameControls.rumble(player, 0.3, 0.7, 0.12)
-		K.SHOT_SOFT:
-			GameControls.rumble(player, 0.2, 0.0, 0.06)
-		_:
-			GameControls.rumble(player, 0.35, 0.25, 0.08)
+	GameControls.rumble(0 if slot == 0 else 1, strength[0], strength[1], strength[2])
+
+
+# --- Multiplayer (PORT-16) ----------------------------------------------------------
+
+## Each slot's controller in a multiplayer match (-1: a CPU or empty);
+## empty = not multiplayer (P1 on the input map, 2P on its pad).
+var slot_pads: Array = []
+## Each slot's player number (0..3 for P1..P4; -1 for a CPU), for the tags.
+var slot_players: Array = []
+
+
+func multiplayer() -> bool:
+	return not slot_pads.is_empty()
+
+
+## Every human slot's intent from its own pad. Any player's Menu pauses
+## (the sim reads the pause on slot 0), and while paused any pad drives
+## the pause menu. Empty when the pause menu took the frame.
+func _multiplayer_intents() -> Array:
+	var human := [null, null, null, null]
+	var menu := SimTypes.Intent.new()        # the pause menu: anyone's presses
+	for s in K.MAX_PLAYERS:
+		var dev: int = slot_pads[s] if s < slot_pads.size() else -1
+		if dev < 0 or not sim.config.human[s]:
+			continue
+		var it := GameControls.read_pad_intent(dev)
+		menu.hit_pressed |= it.hit_pressed
+		menu.pause_pressed |= it.pause_pressed
+		human[s] = it
+	if input_lock > 0:
+		input_lock -= 1
+		for s in K.MAX_PLAYERS:
+			if human[s] != null:
+				human[s] = SimTypes.Intent.new()
+		menu = SimTypes.Intent.new()
+	if human[0] == null:
+		human[0] = SimTypes.Intent.new()
+	if _pause_on_lost_pad():
+		menu.pause_pressed = 1
+	human[0].pause_pressed = menu.pause_pressed
+	if sim.paused:
+		menu.pause_pressed = human[0].pause_pressed
+		if _pause_input(menu):
+			return []
+		human[0].pause_pressed = menu.pause_pressed
+	return human
 
 
 ## A controller dropping out mid-match pauses it (the pause menu waits
@@ -359,7 +403,11 @@ func _physics_process(_delta: float) -> void:
 		_update_visuals()
 		return
 	var human := []
-	if not demo:
+	if not demo and multiplayer():
+		human = _multiplayer_intents()
+		if human.is_empty():
+			return
+	elif not demo:
 		var it := GameControls.read_intent()
 		var it2: SimTypes.Intent = GameControls.read_pad_intent(GameControls.p2_pad) if sim.config.human[2] else null
 		if input_lock > 0:
@@ -484,7 +532,8 @@ func _on_event(e: Array) -> void:
 			if line != "":
 				_hud.show_quip(line, _hud.team_tint(loser))
 			if save and not demo:
-				save.record_rally(rally)
+				if not multiplayer():
+					save.record_rally(rally)
 
 
 func _update_card() -> void:
@@ -504,6 +553,10 @@ func _on_match_over() -> void:
 	if demo or save == null:
 		return
 	var won := sim.match_winner == 0
+	if multiplayer():
+		save.drop_new_records()          # friends' matches don't touch the records
+		save.save_game()
+		return
 	if not sim.config.human[2]:
 		save.record_match(sim.config.mode == K.MODE_DOUBLES, won, sim.config.opponent,
 			sim.team_score[1] if won else -1)
