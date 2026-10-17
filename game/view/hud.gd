@@ -360,7 +360,7 @@ func refresh() -> void:
 			if view.cleared:
 				_banner.text = "CHAMPION!"
 			var ready := s.phase_timer >= K.POINT_RESULT_MIN_FRAMES
-			var next := "NEXT OPPONENT" if (view.ladder and you) else "REMATCH"
+			var next := "PARK" if view.park else ("NEXT OPPONENT" if (view.ladder and you) else "REMATCH")
 			_banner_sub.text = ""
 			_result_prompts.visible = ready
 			if ready and _result_prompts.items[0][1] != next:

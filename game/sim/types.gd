@@ -184,6 +184,11 @@ class MatchConfig:
 	var practice_settings := [Practice.SHOT_MIX, Practice.TARGET_RANDOM,
 		Practice.RATE_NORMAL, Practice.ZONE_ANY]
 	var practice_best := 0
+	## Open play (ADR-034): a game from the park's stack (no ladder change,
+	## back to the park after), and `partner`, a ladder team whose captain
+	## plays slot 1 (-1: the default CPU).
+	var open_play := 0
+	var partner := -1
 
 	static func singles() -> MatchConfig:
 		return MatchConfig.new()
@@ -202,6 +207,17 @@ class MatchConfig:
 		c.practice_settings = settings.duplicate()
 		c.practice_best = best
 		return c
+
+	## match_config_partner: slot 1 is the team's captain (their body and
+	## paddle; match_slot_style and the look follow `partner`). A human on
+	## slot 1 keeps their own.
+	func set_partner(team: int) -> void:
+		partner = team if team >= 0 and team < Opponents.count() else -1
+		if partner < 0 or human[1]:
+			return
+		var m: Dictionary = Opponents.team(team)["players"][0]
+		variant[1] = K.VARIANT_FEMALE if m.get("variant", "male") == "female" else K.VARIANT_MALE
+		paddle[1] = maxi(0, Paddles.NAMES.find(m.get("paddle", "blue")))
 
 	func slot_active(slot: int) -> bool:
 		return palette[slot] >= 0

@@ -521,6 +521,48 @@ feature/cld-release        (pushed)
   - Status: **Ready to test**: needs two to four controllers. MAIN →
     MULTIPLAYER, A to join, pick sides, A to ready, Menu to start.
 
+### 17. `feature/cld-open-play`: open play (ADR-034, the "long" candidate)
+
+- [x] `PORT-17` OPEN PLAY on MAIN (the third row, as on the SNES) opens
+  the park: three courts at three skill levels (UNDER 3.5 teal, 3.5-4.5
+  gold, 4.5+ red), each with a ladder game going to 7 and a paddle rack at
+  its gate, and the clubhouse beside them. Walk with the D-pad (the fences
+  and walls are solid); B at a rack stacks your paddle, takes it back, or
+  moves it. When your paddle reaches the top at a changeover the park
+  calls you ("YOUR GAME!", "WITH PETE VS GOTH CLUB") and starts a doubles
+  match at the park against the team drawn, with the captain next in line
+  as your partner (their look, paddle, and play style), at the court's
+  difficulty (KID stays KID), on the saved points and modifiers: no intro
+  card, no ladder change. B on the result goes back to the park ("YOU WON
+  5-3"), Start to the title. In the clubhouse: B at the records board
+  turns its pages, B at the ball machine starts practice on the saved
+  drill (PARK on its pause menu comes back), and the teams waiting sit on
+  the bench. 2P comes along as your partner with PLAYERS 2P, or Start on
+  pad 2 in the park.
+  - Accept: test_open_play.c and test_opponents.c's test_partner ported
+    and passing; the park view only reads the park; MAIN reaches the
+    park, the call starts the match, B on its result comes back; the
+    golden traces unchanged; screenshots of the park.
+  - Verified: `sim/open_play.gd` (open_play.c in order, ints, its own
+    xorshift16), `view/park_view.gd` (render_park.c: the panel's lines
+    as text + `PromptBar`), `MatchConfig.partner`/`open_play`,
+    `Settings.open_play_config`, the park kept in `scenes/main.gd`.
+    `test_open_play.gd` (15 tests): the C's levels, start, walking and
+    sliding, stacking, your turn (called after 21 s, as the C's "about
+    20"), the 20-minute soak (45/46/48 games by court, every team only at
+    its level and in exactly one place), 2P, the clubhouse, the partner;
+    plus the config, the panel's lines (and that the font has every
+    glyph), the view vs a bare park over 3,000 frames, MAIN → park → game
+    → park → title, and the ball machine's round trip. `MenuPage.ROW_H`
+    30 → 28 so ten MAIN rows clear the prompt bar. No save change.
+    191/191 plus the e2e; golden traces unchanged. Screenshots: the park
+    (stacked on court 2), the clubhouse with a records page, the call,
+    a park game with PETE partnering, and MAIN with OPEN PLAY.
+  - Status: **Ready to test**: MAIN → OPEN PLAY. Walk to a rack, B,
+    and wait about 20 s; play the game; B on the result. Try the
+    clubhouse board and ball machine. Look at the park art (drawn in
+    code, KNOWN_ISSUES #40).
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
@@ -599,12 +641,20 @@ the chain: each has a default I've gone with.
   matches don't touch the records or the ladder. Do you want stats-only
   records per player number?
 
+- **PORT-17 open play:** the park is drawn in code (there's no park art
+  in `art/levels`), and its people are the match sprites at a third of
+  their size, so their faces still show. You walk it in your last Player
+  Select choice. Court 1 reads UNDER 3.5 because the bitmap font has no
+  `<` (a glyph would be a small art task). Your park games count in the
+  doubles record and the VS row for that team. Say if the park should be
+  bigger (a 3x zoom would scroll more, like the SNES's two screens).
+
 ## If time runs short or long
 
 - **Short:** 7 and 8 can swap with 9, so the release prep never gets
   squeezed out.
-- **Long:** open play (ADR-034) is the next candidate. The playbook
-  rates it an expensive wildcard, so it would get its own branch and
-  ADR.
+- **Long:** open play (ADR-034) was the next candidate, rated an
+  expensive wildcard; it got its own branch (PORT-17,
+  `feature/cld-open-play`) and an ADR-052 amendment.
 - **Out of scope for this run:** career (ADR-047), with a reason
   recorded in `design/IDEAS.md`.

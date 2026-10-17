@@ -19,7 +19,7 @@ signal changed(id: String)        ## the wheel changed a row
 signal hovered(id: String)        ## the mouse moved the selection
 signal back_requested             ## a right click
 
-const ROW_H := 30
+const ROW_H := 28
 const DIM := Color(0.7, 0.74, 0.85)
 const VALUE := Color("fbe46a")
 const BAR := Color(0.98, 0.86, 0.36, 0.22)

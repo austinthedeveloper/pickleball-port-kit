@@ -263,3 +263,10 @@ frame over the singles demo.
 - No wandering people. The bigger park (`M4-OPEN-05`) is the clubhouse
   above; there are still three courts.
 - 2P has no sprite of their own in the park.
+
+## The Godot port
+
+*Amended 2026-10-17 (PORT-17):* ported to the Godot game as
+`game/sim/open_play.gd` with its host tests; the port-side choices (art
+drawn in code, prompts, the UNDER 3.5 label, you in your Player Select
+look) are in ADR-052's "Open play".

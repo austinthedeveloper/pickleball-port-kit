@@ -160,7 +160,40 @@ stream, at the 960×540 art density, through the art's court geometry.
   player-number order. Each human slot's intent is read straight from its
   pad (`GameControls.read_pad_intent`); the pause reaches the sim through
   slot 0.
-- **Not ported yet:** open play (ADR-034), career (ADR-047).
+- **Open play** (PORT-17, *amended 2026-10-17*): `sim/open_play.gd` is
+  open_play.c in order (the park's stacks, games, walking, clubhouse;
+  its own xorshift16 on a seed), and `tests/test_open_play.gd` ports
+  test_open_play.c and test_opponents.c's test_partner. `MatchConfig`
+  gains `open_play` and `partner` (`set_partner` is
+  match_config_partner): the captain plays slot 1 in their look
+  (`PlayerLook.for_slot`) and style (`Opponents.slot_style`); every other
+  mode leaves it -1, so the golden traces don't move.
+  `Settings.open_play_config` is start_open_play_match. `view/park_view.gd`
+  is render_park.c: it runs the park at 60 Hz and only reads it apart
+  from the input it passes on (`test_view_never_writes_to_the_park`).
+  `scenes/main.gd` keeps the park while you play, as main.c does; the
+  park is fresh from the title. Port-side choices:
+  - The park is drawn in code at 2x (no park art in `art/levels`), so
+    almost all of it fits and the view scrolls 32 px. The people are the
+    match sprites, small, in each member's own look (captain and
+    partner); you walk in your last Player Select choice (the SNES uses
+    the career player's palette, and career isn't ported).
+  - None of the SNES's budget limits apply: the court-1 people stay
+    drawn in the clubhouse view, and the panel changes in one frame.
+  - The panel's lines are text plus a `PromptBar` ("OPEN PLAY" + START
+    EXIT, "COURT 2" + B STACK YOUR PADDLE), not "@" glyphs in the text.
+    The bitmap font has no `<`, so court 1's label reads UNDER 3.5 (the
+    sim's `court_level_name` keeps "<3.5").
+  - OPEN PLAY is MAIN's third row, as on the SNES. `MenuPage.ROW_H` went
+    from 30 to 28 so ten rows clear the title's prompt bar.
+  - 2P: PLAYERS 2P brings 2P into the park (the SNES's Start on the
+    title), and Start on pad 2 joins or leaves there; 2P plays slot 1 on
+    their pad (`MatchView` reads it when slot 1 is human and slot 2
+    isn't). As on the SNES, no 2P sprite walks the park.
+  - Records count your game as a doubles game against the CPU, including
+    the VS row for the team you played; the ladder doesn't move. No save
+    change: the park isn't saved.
+- **Not ported yet:** career (ADR-047).
 
 ## Rejected (and why)
 
@@ -176,7 +209,7 @@ stream, at the 960×540 art density, through the art's court geometry.
 
 ## Verification
 
-`game/tools/test.sh` (headless: 90 tests, then an end-to-end input smoke
+`game/tools/test.sh` (headless: 191 tests, then an end-to-end input smoke
 that boots the real main scene and plays through the input map):
 
 - Ported C host tests: PHY-01..05, HIT-01/02, RUL-01..03, SCR-01, RST-01

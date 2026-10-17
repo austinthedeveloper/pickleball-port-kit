@@ -9,6 +9,9 @@
 ## "closecall" shows a forced close-up; "initials" the initials card;
 ## "result" plays a bot match and ends it (the stats card); "mp4" four
 ## humans on fake pads (doubles); title_lobby a lobby with three players.
+## "park" the open play park (ADR-034), you stacked at court 2's rack;
+## "park_house" in the clubhouse at the records board; "park_call" your
+## game called. "partner=N" puts ladder team N's captain on slot 1.
 extends SceneTree
 
 var _frames := 0
@@ -32,7 +35,30 @@ func _initialize() -> void:
 			Settings.court = Array(arg.substr(6).split(",")).map(func(x): return int(x))
 	var controls = load("res://game_ui/controls.gd").new()
 	root.add_child(controls)
-	if mode.begins_with("title"):
+	if mode.begins_with("park"):
+		var op := OpenPlay.new()
+		op.begin(4242, false)
+		for f in 400:                       # the games get going
+			op.update(0, 0, false)
+		op.x_fp = K.to_fp(OpenPlay.rack_x(1))
+		op.y_fp = K.to_fp(OpenPlay.RACK_Y + 2)
+		op.update(0, 0, true)
+		if mode == "park_house":
+			op.x_fp = K.to_fp(OpenPlay.BOARD_X + 4)
+			op.y_fp = K.to_fp(OpenPlay.BOARD_Y + 6)
+			op.update(0, 0, true)
+		elif mode == "park_call":
+			op.x_fp = K.to_fp(OpenPlay.START_X + 20)
+			op.y_fp = K.to_fp(OpenPlay.START_Y)
+			while op.called == OpenPlay.NONE:
+				op.update(0, 0, false)
+		elif mode == "park":
+			op.x_fp = K.to_fp(OpenPlay.rack_x(1) + 30)
+			op.y_fp = K.to_fp(OpenPlay.RACK_Y + 14)
+		var pv := ParkView.new().setup(op, null, false)
+		root.add_child(pv)
+		_view = pv
+	elif mode.begins_with("title"):
 		Settings.venue_i = maxi(0, Settings.VENUES.find(venue))
 		_view = TitleScreen.new()
 		root.add_child(_view)
@@ -85,6 +111,9 @@ func _initialize() -> void:
 			if arg.begins_with("opp="):
 				cfg = Settings.config_for(mode == "doubles", int(arg.substr(4)),
 					cfg.difficulty, cfg.points_to_win)
+		for arg in a.slice(4):
+			if arg.begins_with("partner="):
+				cfg.set_partner(int(arg.substr(8)))
 		m.court = Settings.court.duplicate()
 		m.time = Settings.time_i
 		m.setup(cfg, venue, mode == "demo")

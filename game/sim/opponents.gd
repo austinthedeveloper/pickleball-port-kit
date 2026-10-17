@@ -57,10 +57,13 @@ static func skin(name: String) -> Array:
 
 
 ## The play style of a CPU slot (match.c match_slot_style): an opponent's
-## captain/partner on slots 2-3, the partner style for a CPU partnering a
-## human, else the default CPU.
+## captain/partner on slots 2-3, an open play partner's captain on slot 1
+## (ADR-034), the partner style for a CPU partnering a human, else the
+## default CPU.
 static func slot_style(cfg: SimTypes.MatchConfig, slot: int) -> SimTypes.AiStyle:
 	_load()
+	if slot == 1 and cfg.partner >= 0 and cfg.partner < _teams.size():
+		return _teams[cfg.partner]["players"][0]["style_obj"]
 	if cfg.opponent >= 0 and cfg.opponent < _teams.size() and slot >= 2:
 		var members: Array = _teams[cfg.opponent]["players"]
 		return members[mini(slot - 2, members.size() - 1)]["style_obj"]

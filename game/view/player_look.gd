@@ -15,11 +15,14 @@ var palette := PackedColorArray()
 
 
 ## The look of a slot, or null for the team-colour sheets: ladder
-## opponents on slots 2-3 (the same members config_for picks).
+## opponents on slots 2-3 (the same members config_for picks), and an
+## open play partner's captain on slot 1 (ADR-034).
 static func for_slot(cfg: SimTypes.MatchConfig, slot: int, manifest: Dictionary) -> PlayerLook:
 	if cfg.human[slot] and cfg.palette[slot] >= 0 \
 			and not sheet_has_paddle(cfg.palette[slot], cfg.paddle[slot]):
 		return for_team(cfg.palette[slot], cfg.variant[slot], cfg.paddle[slot], manifest)
+	if slot == 1 and not cfg.human[1] and cfg.partner >= 0 and cfg.partner < Opponents.count():
+		return from_member(Opponents.team(cfg.partner)["players"][0], manifest)
 	if cfg.opponent < 0 or cfg.opponent >= Opponents.count() or cfg.human[2] or slot < 2:
 		return null
 	var members: Array = Opponents.team(cfg.opponent)["players"]
