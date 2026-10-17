@@ -57,14 +57,22 @@ feature/cld-godot-port                 (done: the playable port)
 
 ### 1. `feature/cld-feel`: game feel (product brief "punchy")
 
-- [ ] `PORT-01` Contact punch: a short screen shake on drives and
+- [x] `PORT-01` Contact punch: a short screen shake on drives and
   put-aways, a ball trail on fast shots, squash on the bounce, a swing
   whoosh frame on the paddle, and dust when a player plants.
   - Accept: everything is display-only and the golden traces don't move.
     Each effect has a switch in the code, so one can be dropped if it's
     too much.
-  - Verified: —
-  - Status: Planned. It will be **Ready to test**: feel needs your hands.
+  - Verified: `view/feel.gd`, with each effect switched in `Feel.ON`.
+    `test_feel.gd`: a drive shakes and settles, a standard low shot
+    doesn't, the bounce squashes and restores, the trail follows only
+    drive-pace balls, and the whoosh shows on the first contact frame
+    and fades. 1,200 frames with everything on leave the sim identical to
+    a bare one. 97/97 plus the e2e; golden traces unchanged. The arc and
+    trail were checked in a forced-draw screenshot.
+  - Status: **Ready to test**: play a few rallies. Hit drives (K), and
+    lob high to get a put-away back. Do the shake, trail and arc feel
+    right, or too much?
 
 ### 2. `feature/cld-audio`: sound (ADR-029, ADR-031)
 
@@ -162,6 +170,17 @@ feature/cld-godot-port                 (done: the playable port)
     and a dirty tree is refused.
   - Verified: —
   - Status: Planned. It will be **Ready to test**: you run a build.
+
+## For you
+
+Questions and things to try, added as the run goes. Nothing here blocks
+the chain: each has a default I've gone with.
+
+- **PORT-01 feel:** does the shake feel right? It's 3 px on drives and
+  4 px on put-aways, over 8-10 frames. The trail shows only on drives (a
+  deep standard shot is just under its speed threshold), and the CPUs
+  drive only on put-aways, so you'll mostly see it on your own drives
+  (K). Default: as built. Any effect can be switched off in `Feel.ON`.
 
 ## If time runs short or long
 

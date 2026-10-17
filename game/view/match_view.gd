@@ -53,6 +53,7 @@ var _ball_frame := 0.0
 var _hud: Hud
 var _sfx: Sfx
 var _debug: DebugOverlay
+var feel: Feel
 
 
 func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void:
@@ -104,6 +105,9 @@ func _build() -> void:
 	add_child(_fx)
 	_build_players()
 	_build_ball()
+	feel = Feel.new()
+	_fx.add_child(feel)
+	feel.setup(self)
 	if sim.config.practice and not demo:
 		_shadows.add_child(PracticeView.zone(sim.practice))
 		_actors.add_child(PracticeView.machine(sim.practice))
@@ -270,6 +274,7 @@ func _physics_process(_delta: float) -> void:
 
 
 func _on_event(e: Array) -> void:
+	feel.on_event(e)
 	var kind: int = e[0]
 	var at := CourtView.ground(K.to_fp(e[1]), K.to_fp(e[2]))
 	match kind:
@@ -450,6 +455,7 @@ func _update_visuals() -> void:
 		_ball_frame = fmod(_ball_frame + speed / 80.0, 4.0)
 		var fw := _ball_sprite.region_rect.size.x
 		_ball_sprite.region_rect.position.x = int(_ball_frame) * fw
+	feel.update()
 	for poly in _lava:
 		poly.color.a = 0.74 + 0.08 * sin(Time.get_ticks_msec() / 260.0)
 	if _crowd_cheer > 0:
