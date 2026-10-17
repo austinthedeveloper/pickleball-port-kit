@@ -61,9 +61,9 @@ title shows; from a checkout the title says `BUILD DEV <describe>`.
 | Path | What |
 |---|---|
 | `sim/` | The deterministic simulation: `k.gd` constants, `types.gd` records, `sim.gd` (ball, collision, players, serve, rules, game, frame pipeline), `ai.gd` (the CPU), `practice.gd` (the ball machine), `select.gd` (Player Select), `replay.gd` (close calls), `opponents.gd`, `paddles.gd`. Pure: no Nodes, time, or randomness. |
-| `view/` | Presentation, read-only: `match_view.gd`, `hud.gd`, `court_view.gd` (world → screen), `menu_page.gd` (every menu page), `title_screen.gd`, `select_screen.gd`, `court_style.gd` (+ shader: court colours, time of day), `close_call.gd`, `feel.gd`, `audio_map.gd`/`sfx.gd`, `player_look.gd` (+ palette shader), `practice_view.gd`, `bitmap_text.gd`, `debug_overlay.gd`. |
-| `meta/` | `save.gd` (two-copy save with migration, layout v4), `story.gd` (cards, results, quips), `initials.gd` (the record initials card), `build_info.gd`. |
-| `game_ui/controls.gd` | Input map (autoload), P1/P2 intents, tap latch. |
+| `view/` | Presentation, read-only: `match_view.gd`, `hud.gd`, `court_view.gd` (world → screen), `menu_page.gd` (every menu page), `title_screen.gd`, `practice_page.gd`, `select_screen.gd`, `crowd.gd`, `watcher.gd`, `camera_lean.gd`, `court_style.gd` (+ shader: court colours, time of day), `close_call.gd`, `feel.gd`, `audio_map.gd`/`sfx.gd`, `player_look.gd` (+ palette shader), `practice_view.gd`, `bitmap_text.gd`, `debug_overlay.gd`. |
+| `meta/` | `save.gd` (two-copy save with migration, layout v4), `story.gd` (cards, results, quips), `initials.gd` (the record initials card), `settings.gd` (every setting, load/store, match config), `build_info.gd`. |
+| `game_ui/controls.gd` | Input map (autoload), P1/P2 intents, tap latch, SNES pad bits for menus. |
 | `tests/` | Headless runner and suites; `golden/` traces; `golden.gd` regenerates them. |
 | `tools/` | `test.sh`, `export.sh`, `release_notes.py`, `make_icon.py`, `sync_assets.sh` (copies `art/levels/out` and the SFX in), `screenshot.gd` (title pages, matches, `court=`, `time=`, `pause`, `closecall`, `initials`), `point_log.gd` (why each point ended). |
 | `assets/` | Synced art and audio (don't edit here; rebuild in `art/levels`). |

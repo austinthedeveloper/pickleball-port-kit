@@ -167,7 +167,7 @@ func test_card_after_a_finished_match_only() -> void:
 	var view := MatchView.new()
 	view.save = s
 	runner.root.add_child(view)
-	view.setup(TitleScreen.config_for(false, 2, K.DIFFICULTY_MEDIUM, 5), "park", false)
+	view.setup(Settings.config_for(false, 2, K.DIFFICULTY_MEDIUM, 5), "park", false)
 	_finish(view, 0)
 	eq(view.sim.phase, K.PHASE_MATCH_RESULT)
 	check(view.initials.open, "a win (a first best streak) asks for initials")

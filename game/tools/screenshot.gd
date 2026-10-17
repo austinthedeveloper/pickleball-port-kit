@@ -22,13 +22,13 @@ func _initialize() -> void:
 	_out = a[3] if a.size() > 3 else "user://shot.png"
 	for arg in a.slice(4):
 		if arg.begins_with("time="):
-			TitleScreen.time_i = int(arg.substr(5))
+			Settings.time_i = int(arg.substr(5))
 		if arg.begins_with("court="):
-			TitleScreen.court = Array(arg.substr(6).split(",")).map(func(x): return int(x))
+			Settings.court = Array(arg.substr(6).split(",")).map(func(x): return int(x))
 	var controls = load("res://game_ui/controls.gd").new()
 	root.add_child(controls)
 	if mode.begins_with("title"):
-		TitleScreen.venue_i = maxi(0, TitleScreen.VENUES.find(venue))
+		Settings.venue_i = maxi(0, Settings.VENUES.find(venue))
 		_view = TitleScreen.new()
 		root.add_child(_view)
 		if mode.begins_with("title_"):
@@ -55,10 +55,10 @@ func _initialize() -> void:
 				Practice.TARGET_RANDOM, Practice.RATE_NORMAL, zone], 12)
 		for arg in a.slice(4):
 			if arg.begins_with("opp="):
-				cfg = TitleScreen.config_for(mode == "doubles", int(arg.substr(4)),
+				cfg = Settings.config_for(mode == "doubles", int(arg.substr(4)),
 					cfg.difficulty, cfg.points_to_win)
-		m.court = TitleScreen.court.duplicate()
-		m.time = TitleScreen.time_i
+		m.court = Settings.court.duplicate()
+		m.time = Settings.time_i
 		m.setup(cfg, venue, mode == "demo")
 		if mode != "demo" and not "human" in a.slice(4):
 			m.sim.p1_bot = true

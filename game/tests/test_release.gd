@@ -13,11 +13,8 @@ func test_build_id_matches_git_describe() -> void:
 		check(true, "no git here: nothing to compare")
 		return
 	eq(BuildInfo.from_git(), String(out[0]).strip_edges(), "the checkout's describe string")
-	if FileAccess.file_exists(BuildInfo.FILE):
-		eq(BuildInfo.id(), FileAccess.get_file_as_string(BuildInfo.FILE).strip_edges(),
-			"an export's written ID wins")
-	else:
-		eq(BuildInfo.id(), "DEV " + BuildInfo.from_git(), "a checkout says DEV")
+	eq(BuildInfo.id(), "DEV " + BuildInfo.from_git(),
+		"a checkout says DEV and asks git (even with an export's build_id.txt left over)")
 	var label := BuildInfo.label()
 	eq(label, label.to_upper(), "upper case for the bitmap font")
 	check(label.begins_with("BUILD "), label)

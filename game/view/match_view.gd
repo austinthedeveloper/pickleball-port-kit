@@ -32,24 +32,20 @@ const CARD_MIN_FRAMES := 30
 const CARD_MAX_FRAMES := 300
 var _prev_phase := -1
 var cleared := false            ## this match cleared the ladder
-## Camera (ADR-050/051), display only: the picture leans toward the ball.
-## Percent of the full lean; 0 = OFF (the SNES default).
-var camera_percent := 0
-var cam := Vector2.ZERO
+## Camera (ADR-050/051): the lean toward the ball (CameraLean).
+var camera := CameraLean.new()
 var _layers: Array = []          # [Sprite2D, origin, parallax]
 ## Court colours (ADR-022/027): [surface, kitchen, surround, lines] presets.
 var court: Array = CourtStyle.DEFAULTS.duplicate()
 ## Time of day (ADR-045): CourtStyle.DAY, DUSK or NIGHT.
 var time := CourtStyle.DAY
 var _ground: Sprite2D
-## Full lean at this density: the SNES 8 x 4 px, times the court's scale.
-const CAM_MAX := Vector2(22, 10)
 
 var _actors: Node2D
 var _shadows: Node2D
 var _fx: Node2D
-var _crowd: Array = []           # [Sprite2D, person row, frame w, frame h, seat]
-var _crowd_cheer := 0
+var crowd: Crowd
+var watcher: Watcher             ## the partner sitting out, or null
 var _players: Array = []         # per slot: {root, body, cap, shadow, choice, look}
 var _ball_root: Node2D
 var _ball_sprite: Sprite2D
@@ -98,9 +94,16 @@ func _build() -> void:
 			s.modulate = scales[1] if layer["name"] == "net" else scales[0]
 		z += 1
 		if layer["name"] == "stands":
-			_build_crowd(vm, z)
-			if watcher_wanted():
-				_build_watcher(z)
+			var dark: Color = CourtStyle.time_scales(time)[0]       # they sit in the dark
+			crowd = Crowd.new().setup(manifest, venue, dark)
+			crowd.z_index = z
+			add_child(crowd)
+			if Watcher.wanted(sim.config, demo, manifest, venue):
+				watcher = Watcher.new().setup(sim.config, manifest, venue, dark)
+				watcher.z_index = z
+				add_child(watcher)
+				crowd.vacate(watcher.spot)
+				watcher.update(sim)
 			z += 1
 		if layer["name"] == "ground" and sim.config.modifiers & K.MOD_LAVA:
 			_build_lava(z)
@@ -163,12 +166,6 @@ func _ground_origin() -> Vector2:
 # --- The close call (ADR-041) and the watcher (ADR-042) ------------------------------
 
 var close_call: CloseCall
-var watcher: Array = []          ## [body, cap] sprites, or empty
-var _watcher_spot := Vector2.ZERO
-var _watcher_sit := true
-var _watcher_cheer := 0
-const WATCHER_SCALE := 0.5          ## about the crowd sprites' size
-const WATCHER_HIP := 72          ## frame row of the hips: a sitting watcher shows the top
 
 
 ## On the point result's first frame (game.c calls replay_check there).
@@ -188,57 +185,6 @@ func _end_close_call() -> void:
 	if close_call:
 		close_call.queue_free()
 		close_call = null
-
-
-## Singles against a ladder team: the captain's partner watches from the
-## venue's spot (not the demo, practice, or 2P; doubles has nobody out).
-func watcher_wanted() -> bool:
-	var cfg := sim.config
-	return not demo and cfg.mode == K.MODE_SINGLES and cfg.opponent >= 0 and not cfg.human[2] \
-		and not cfg.practice and Opponents.team(cfg.opponent)["players"].size() > 1 \
-		and manifest["venues"][venue].has("watcher")
-
-
-func _build_watcher(z: int) -> void:
-	var spot: Dictionary = manifest["venues"][venue]["watcher"]
-	_watcher_spot = Vector2(spot["x"], spot["y"])
-	_watcher_sit = spot["pose"] == "sit"
-	# the watcher takes the place of whoever sat at that seat
-	for c in _crowd:
-		if c[4].distance_to(_watcher_spot) <= 16.0:
-			c[0].visible = false
-	var look := PlayerLook.from_member(Opponents.team(sim.config.opponent)["players"][1], manifest)
-	var mat := look.material()
-	for sheet in [look.body_sheet(manifest), look.hat_sheet(manifest)]:
-		var s := Sprite2D.new()
-		s.texture = _tex(sheet) if sheet != "" else null
-		s.material = mat
-		s.centered = false
-		s.region_enabled = true
-		s.scale = Vector2(WATCHER_SCALE, WATCHER_SCALE)
-		s.flip_h = _watcher_spot.x > CourtView.CENTER_X      # facing the court
-		s.z_index = z
-		s.modulate = CourtStyle.time_scales(time)[0]
-		add_child(s)
-		watcher.append(s)
-	_update_watcher()
-
-
-func _update_watcher() -> void:
-	if watcher.is_empty():
-		return
-	if _watcher_cheer > 0:
-		_watcher_cheer -= 1
-	var winning := sim.phase == K.PHASE_MATCH_RESULT and sim.match_winner == 1
-	var cheer := _watcher_cheer > 0 or winning
-	var frame: int = SLOTS.find("cheer") if cheer else (sim.frame_count / 40) % 2
-	var hop := -absf(sin(sim.frame_count * 0.25)) * 7.0 if cheer else 0.0
-	var h: int = WATCHER_HIP if _watcher_sit else FRAME
-	var anchor_y: float = WATCHER_HIP if _watcher_sit else ANCHOR.y
-	for s in watcher:
-		s.region_rect = Rect2(frame * FRAME, 0, FRAME, h)
-		var ax: float = (FRAME - 1 - ANCHOR.x) if s.flip_h else ANCHOR.x
-		s.position = (_watcher_spot - Vector2(ax, anchor_y) * WATCHER_SCALE + Vector2(0, hop)).round()
 
 
 ## Shadows draw grey on a court too dark for them (CourtStyle.grey_shadows).
@@ -278,26 +224,6 @@ func _build_lava(z: int) -> void:
 		poly.z_index = z
 		add_child(poly)
 		_lava.append(poly)
-
-
-func _build_crowd(vm: Dictionary, z: int) -> void:
-	var crowd: Dictionary = manifest["sprites"]["crowd"]
-	var tex := _tex(crowd["file"])
-	var fw: int = crowd["frame_size"][0]
-	var fh: int = crowd["frame_size"][1]
-	for seat in vm["seats"]:
-		var s := Sprite2D.new()
-		s.texture = tex
-		s.centered = false
-		s.region_enabled = true
-		var row: int = seat["person"]
-		s.region_rect = Rect2(0, row * fh, fw, fh)
-		var anchor: Array = crowd["sit_anchor"] if seat["pose"] == "sit" else crowd["stand_anchor"]
-		s.position = Vector2(seat["x"] - anchor[0], seat["y"] - anchor[1])
-		s.z_index = z
-		s.modulate = CourtStyle.time_scales(time)[0]      # the crowd sits in the dark
-		add_child(s)
-		_crowd.append([s, row, fw, fh, Vector2(seat["x"], seat["y"])])
 
 
 func _sheet(variant: String, team: String, cap: bool) -> Texture2D:
@@ -368,23 +294,8 @@ func _build_ball() -> void:
 var initials := Initials.new()
 
 
-## SNES pad bits from the input map: [newly pressed, held].
-static func pad_bits() -> Array:
-	var pressed := 0
-	var held := 0
-	for pair in [["move_up", Initials.PAD_UP], ["move_down", Initials.PAD_DOWN],
-			["move_left", Initials.PAD_LEFT], ["move_right", Initials.PAD_RIGHT],
-			["hit", Initials.PAD_B], ["drive", Initials.PAD_A], ["soft", Initials.PAD_Y],
-			["start", Initials.PAD_START]]:
-		if Input.is_action_just_pressed(pair[0]):
-			pressed |= pair[1]
-		if Input.is_action_pressed(pair[0]):
-			held |= pair[1]
-	return [pressed, held]
-
-
 func _update_initials() -> void:
-	var bits := pad_bits()
+	var bits := GameControls.pad_bits()
 	if not initials.update(bits[0], bits[1]):
 		save.save_game()
 		input_lock = INPUT_LOCK_FRAMES      # the closing press doesn't rematch
@@ -508,11 +419,11 @@ func _on_event(e: Array) -> void:
 		K.EVENT_BOUNCE:
 			_spawn_fx("dust", at, 0)
 		K.EVENT_CROWD:
-			_crowd_cheer = 90 if e[3] >= 13 else 50
+			crowd.cheer(90 if e[3] >= 13 else 50)
 		K.EVENT_POINT:
-			_crowd_cheer = 90
-			if e[3] == 1:
-				_watcher_cheer = 70          # their teammate won it
+			crowd.cheer(90)
+			if watcher and e[3] == 1:
+				watcher.cheer(70)            # their teammate won it
 			_hud.on_point(e[3])
 			var loser: int = 1 - e[3]
 			var line := story.quip(sim.config, loser, sim.frame_count)
@@ -617,20 +528,8 @@ func _choose_swing(p: SimTypes.Player) -> String:
 	return "standard"
 
 
-## ADR-050: the target is a sixteenth of the ball's distance from the net
-## across the screen and an eighth of its distance from the centre line
-## (SNES px, capped 8 x 4), scaled by the setting; ease an eighth of the
-## way a frame, at most half a SNES pixel's worth.
 func _update_camera() -> void:
-	var target := Vector2.ZERO
-	if camera_percent > 0 and sim.ball.rally_state == K.BALL_RALLY_LIVE:
-		var dx := (sim.ball.x_fp / 16.0 - K.COURT_NET_X) / 16.0
-		var dy := (sim.ball.y_fp / 16.0 - K.COURT_CENTERLINE_Y) / 8.0
-		target = Vector2(clampf(dx, -8, 8) / 8.0 * CAM_MAX.x,
-			clampf(dy, -4, 4) / 4.0 * CAM_MAX.y) * camera_percent / 100.0
-	var step := (target - cam) / 8.0
-	var limit := CAM_MAX.x / 16.0
-	cam += step.limit_length(limit) if step.length() > 0.02 else target - cam
+	var cam := camera.update(sim.ball)
 	for l in _layers:
 		l[0].position = (l[1] - cam * l[2]).round()
 	var court_shift := (-cam).round()
@@ -680,12 +579,9 @@ func _update_visuals() -> void:
 		sim.match_point(0) or sim.match_point(1), 1.0 / 60.0)
 	for poly in _lava:
 		poly.color.a = 0.74 + 0.08 * sin(Time.get_ticks_msec() / 260.0)
-	if _crowd_cheer > 0:
-		_crowd_cheer -= 1
-	for c in _crowd:
-		var cheer: bool = _crowd_cheer > 0 and ((_crowd_cheer / 8 + c[1]) % 2 == 0)
-		c[0].region_rect = Rect2(c[2] if cheer else 0, c[1] * c[3], c[2], c[3])
-	_update_watcher()
+	crowd.update()
+	if watcher:
+		watcher.update(sim)
 	if close_call:
 		close_call.update()
 	_hud.refresh()

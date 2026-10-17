@@ -127,14 +127,14 @@ func test_colours_unique_and_cpu_defaults() -> void:
 
 func test_choice_reaches_the_sim_and_ladder() -> void:
 	var p1 := PlayerSelect.new_choice(PlayerSelect.PAL_GOLD, K.VARIANT_FEMALE, Paddles.RED)
-	var cfg := TitleScreen.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5, p1)
+	var cfg := Settings.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5, p1)
 	var sim := Sim.new(cfg)
 	eq(sim.players[0].paddle, Paddles.RED, "the paddle reaches the sim")
 	eq(sim.players[0].variant, K.VARIANT_FEMALE)
 	eq(cfg.opponent, 0, "still the ladder team")
 	var members: Array = Opponents.team(0)["players"]
 	eq(cfg.paddle[2], Paddles.NAMES.find(members[0]["paddle"]), "their captain's paddle")
-	var pv := TitleScreen.config_for(true, 3, K.DIFFICULTY_MEDIUM, 5, p1,
+	var pv := Settings.config_for(true, 3, K.DIFFICULTY_MEDIUM, 5, p1,
 		PlayerSelect.new_choice(PlayerSelect.PAL_BLUE, K.VARIANT_MALE, Paddles.WOOD))
 	eq(pv.opponent, -1, "2P versus has no ladder team")
 	eq(pv.human[2], 1)
@@ -152,7 +152,7 @@ func test_red_paddle_flies_sooner_in_play() -> void:
 
 
 func _flight(paddle: int) -> Array:
-	var cfg := TitleScreen.config_for(false, -1, K.DIFFICULTY_MEDIUM, 21,
+	var cfg := Settings.config_for(false, -1, K.DIFFICULTY_MEDIUM, 21,
 		PlayerSelect.new_choice(PlayerSelect.PAL_BLUE, K.VARIANT_MALE, paddle))
 	var sim := Sim.new(cfg)
 	sim.p1_bot = true
@@ -208,9 +208,9 @@ func test_team_look_matches_the_colour_sheet() -> void:
 
 
 func test_title_select_flow() -> void:
-	var kept := [TitleScreen.p1_choice.duplicate(), TitleScreen.two_players, TitleScreen.opponent_i]
-	TitleScreen.two_players = false
-	TitleScreen.opponent_i = -1
+	var kept := [Settings.p1_choice.duplicate(), Settings.two_players, Settings.opponent_i]
+	Settings.two_players = false
+	Settings.opponent_i = -1
 	var t := TitleScreen.new()
 	runner.root.add_child(t)
 	if not t.is_node_ready():
@@ -234,13 +234,13 @@ func test_title_select_flow() -> void:
 	eq(cfg.mode, K.MODE_DOUBLES)
 	eq([cfg.palette[0], cfg.paddle[0]], [PlayerSelect.PAL_GOLD, Paddles.RED])
 	check(PlayerSelect.palettes_unique(cfg), "unique colours")
-	eq(TitleScreen.p1_choice["palette"], PlayerSelect.PAL_GOLD, "remembered for next time")
+	eq(Settings.p1_choice["palette"], PlayerSelect.PAL_GOLD, "remembered for next time")
 	t.open_select(false)
 	eq(t.select.choice[0]["paddle"], Paddles.RED, "the screen opens on the last choice")
 	var pc := t.practice_config()
 	eq([pc.palette[0], pc.paddle[0], pc.practice], [PlayerSelect.PAL_GOLD, Paddles.RED, 1],
 		"practice plays in the last choice")
 	t.free()
-	TitleScreen.p1_choice = kept[0]
-	TitleScreen.two_players = kept[1]
-	TitleScreen.opponent_i = kept[2]
+	Settings.p1_choice = kept[0]
+	Settings.two_players = kept[1]
+	Settings.opponent_i = kept[2]

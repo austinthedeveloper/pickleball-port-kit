@@ -72,49 +72,49 @@ func test_close_up_in_the_view() -> void:
 
 func test_watcher_only_in_singles_ladder() -> void:
 	var cases := [
-		[TitleScreen.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5), false, true, "singles vs a ladder team"],
-		[TitleScreen.config_for(true, 0, K.DIFFICULTY_MEDIUM, 5), false, false, "doubles"],
-		[TitleScreen.config_for(false, -1, K.DIFFICULTY_MEDIUM, 5), false, false, "the default CPU"],
-		[TitleScreen.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5), true, false, "the demo"],
+		[Settings.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5), false, true, "singles vs a ladder team"],
+		[Settings.config_for(true, 0, K.DIFFICULTY_MEDIUM, 5), false, false, "doubles"],
+		[Settings.config_for(false, -1, K.DIFFICULTY_MEDIUM, 5), false, false, "the default CPU"],
+		[Settings.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5), true, false, "the demo"],
 		[SimTypes.MatchConfig.practice_session(Practice.DEFAULTS, 0), false, false, "practice"],
 	]
-	var pv := TitleScreen.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5, {},
+	var pv := Settings.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5, {},
 		PlayerSelect.new_choice(PlayerSelect.PAL_RED, K.VARIANT_MALE, Paddles.STANDARD))
 	cases.append([pv, false, false, "2P"])
 	for c in cases:
 		var v := _view(c[0], "park", c[1])
-		eq(v.watcher.size() > 0, c[2], c[3])
+		eq(v.watcher != null, c[2], c[3])
 		v.free()
 
 
 func test_watcher_takes_a_seat_and_cheers() -> void:
-	for venue in TitleScreen.VENUES:
-		var v := _view(TitleScreen.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5), venue)
-		var hidden := v._crowd.filter(func(c): return not c[0].visible).size()
+	for venue in Settings.VENUES:
+		var v := _view(Settings.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5), venue)
+		var hidden := v.crowd.people.filter(func(c): return not c[0].visible).size()
 		eq(hidden, 1, "%s: the watcher takes one spectator's seat" % venue)
 		var spot: Dictionary = v.manifest["venues"][venue]["watcher"]
 		check(Rect2(0, 0, 960, 540).has_point(Vector2(spot["x"], spot["y"])), "%s: on screen" % venue)
 		v.free()
-	var v := _view(TitleScreen.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5))
-	var rest: Vector2 = v.watcher[0].position
+	var v := _view(Settings.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5))
+	var rest: Vector2 = v.watcher.sprites[0].position
 	v._on_event([K.EVENT_POINT, 128, 130, 0])
-	check(v._watcher_cheer == 0, "the other side's point: no cheer")
+	check(v.watcher.cheer_frames == 0, "the other side's point: no cheer")
 	v._on_event([K.EVENT_POINT, 128, 130, 1])
-	check(v._watcher_cheer > 0, "their teammate's point: a cheer")
+	check(v.watcher.cheer_frames > 0, "their teammate's point: a cheer")
 	var cheer_region: float = MatchView.SLOTS.find("cheer") * MatchView.FRAME
 	var hopped := false
 	for i in 20:
 		v.sim.frame_count += 1
-		v._update_watcher()
-		hopped = hopped or v.watcher[0].position.y < rest.y
-	eq(v.watcher[0].region_rect.position.x, cheer_region, "the cheer frame")
+		v.watcher.update(v.sim)
+		hopped = hopped or v.watcher.sprites[0].position.y < rest.y
+	eq(v.watcher.sprites[0].region_rect.position.x, cheer_region, "the cheer frame")
 	check(hopped, "and a hop")
 	v.free()
 	var night := MatchView.new()
 	night.time = CourtStyle.NIGHT
 	runner.root.add_child(night)
-	night.setup(TitleScreen.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5), "park", false)
-	eq(night.watcher[0].modulate, CourtStyle.time_scales(CourtStyle.NIGHT)[0],
+	night.setup(Settings.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5), "park", false)
+	eq(night.watcher.sprites[0].modulate, CourtStyle.time_scales(CourtStyle.NIGHT)[0],
 		"at NIGHT the watcher sits in the dark with the crowd (KNOWN_ISSUES #24)")
 	night.free()
 
@@ -122,10 +122,10 @@ func test_watcher_takes_a_seat_and_cheers() -> void:
 ## Display only: a singles ladder match with the watcher and close-up
 ## hooks runs exactly like a bare sim.
 func test_display_only() -> void:
-	var cfg := TitleScreen.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5)
+	var cfg := Settings.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5)
 	var v := _view(cfg)
 	v.sim.p1_bot = true
-	var bare := Sim.new(TitleScreen.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5))
+	var bare := Sim.new(Settings.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5))
 	bare.p1_bot = true
 	var calls := 0
 	for f in 1500:

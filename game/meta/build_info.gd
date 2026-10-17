@@ -10,10 +10,12 @@ const FILE := "res://build_id.txt"
 
 
 static func id() -> String:
+	var git := from_git()
+	if git != "":
+		return "DEV " + git          # a checkout: a leftover build_id.txt would be stale
 	if FileAccess.file_exists(FILE):
 		return FileAccess.get_file_as_string(FILE).strip_edges()
-	var git := from_git()
-	return "DEV " + git if git != "" else "DEV"
+	return "DEV"
 
 
 ## The checkout's describe string, or "" without git (an export).

@@ -20,7 +20,7 @@ const PAD_UP := Practice.PAD_UP
 const PAD_DOWN := Practice.PAD_DOWN
 const PAD_LEFT := Practice.PAD_LEFT
 const PAD_RIGHT := Practice.PAD_RIGHT
-const PAD_A := 0x0080            ## the SNES pad bit (the practice editor has no A)
+const PAD_A := GameControls.PAD_A
 
 ## The initials entered last this session: the next card starts there.
 static var last := "AAA"

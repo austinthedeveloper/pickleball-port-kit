@@ -146,7 +146,7 @@ func test_lava_rule() -> void:
 ## No CPU walks into the lava over ladder matches (MOD-01).
 func test_no_cpu_in_the_lava() -> void:
 	for opp in [0, 3, Opponents.count() - 1]:
-		var cfg := TitleScreen.config_for(false, opp, K.DIFFICULTY_MEDIUM, 5)
+		var cfg := Settings.config_for(false, opp, K.DIFFICULTY_MEDIUM, 5)
 		cfg.modifiers = K.MOD_LAVA
 		var sim := Sim.new(cfg)
 		sim.p1_bot = true

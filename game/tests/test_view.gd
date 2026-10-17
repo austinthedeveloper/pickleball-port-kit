@@ -65,9 +65,9 @@ func test_every_venue_builds() -> void:
 
 
 func test_title_config_takes_the_opponent() -> void:
-	TitleScreen.opponent_i = 0
-	TitleScreen.difficulty_i = K.DIFFICULTY_HARD
-	TitleScreen.points_i = 3
+	Settings.opponent_i = 0
+	Settings.difficulty_i = K.DIFFICULTY_HARD
+	Settings.points_i = 3
 	var t := TitleScreen.new()
 	var cfg := t.config(true)
 	eq(cfg.opponent, 0)
@@ -78,9 +78,9 @@ func test_title_config_takes_the_opponent() -> void:
 	var sim := Sim.new(cfg)
 	eq(sim.ai.styles[2].late_period, Opponents.team(0)["players"][0]["style_obj"].late_period
 		+ Opponents.team(0)["players"][0]["style_obj"].late_period / 2 + 2, "HARD tightens the captain")
-	TitleScreen.opponent_i = -1
-	TitleScreen.difficulty_i = K.DIFFICULTY_MEDIUM
-	TitleScreen.points_i = 1
+	Settings.opponent_i = -1
+	Settings.difficulty_i = K.DIFFICULTY_MEDIUM
+	Settings.points_i = 1
 	t.free()
 
 
@@ -97,7 +97,7 @@ func test_ladder_win_advances_and_offers_the_next_rung() -> void:
 	view.save = save
 	view.ladder = true
 	runner.root.add_child(view)
-	view.setup(TitleScreen.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5), "park", false)
+	view.setup(Settings.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5), "park", false)
 	check(view.card_frames >= 0, "ladder match opens on the card")
 	view.card_frames = -1
 	var asked := [false]
@@ -129,7 +129,7 @@ func test_ladder_win_advances_and_offers_the_next_rung() -> void:
 func test_camera_leans_and_parallax() -> void:
 	for pct in [0, 100]:
 		var view := MatchView.new()
-		view.camera_percent = pct
+		view.camera.percent = pct
 		runner.root.add_child(view)
 		view.setup(SimTypes.MatchConfig.singles(), "park", true)
 		var bare := Sim.new()
@@ -139,12 +139,12 @@ func test_camera_leans_and_parallax() -> void:
 			view._physics_process(1.0 / 60.0)
 			bare.step()
 			bare.drain_events()
-			max_cam = maxf(max_cam, view.cam.length())
+			max_cam = maxf(max_cam, view.camera.offset.length())
 		eq(view.sim.snapshot(), bare.snapshot(), "camera %d%% leaves the sim alone" % pct)
 		if pct == 0:
 			eq(max_cam, 0.0, "OFF never moves")
 		else:
-			check(max_cam > 4.0 and max_cam <= MatchView.CAM_MAX.length() + 0.01,
+			check(max_cam > 4.0 and max_cam <= CameraLean.MAX.length() + 0.01,
 				"ON leans within its limit (%.1f px)" % max_cam)
 			var sky: Array = view._layers[0]
 			var ground: Array = view._layers[3]
@@ -163,7 +163,7 @@ func test_ladder_opponents_wear_their_looks() -> void:
 	check(pirates >= 0, "a team wears the tricorn")
 	var view := MatchView.new()
 	runner.root.add_child(view)
-	view.setup(TitleScreen.config_for(true, pirates, K.DIFFICULTY_MEDIUM, 11), "park", false)
+	view.setup(Settings.config_for(true, pirates, K.DIFFICULTY_MEDIUM, 11), "park", false)
 	view._physics_process(1.0 / 60.0)
 	check(view._players[0]["look"] == null, "P1 keeps the team sheet")
 	check(view._players[0]["body"].material == null, "no palette swap on P1")

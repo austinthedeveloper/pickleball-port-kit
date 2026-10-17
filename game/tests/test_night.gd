@@ -41,7 +41,7 @@ func test_contrast_at_every_time() -> void:
 	var worst := [99.0, 99.0, 99.0]
 	for t in 3:
 		var lit: Color = CourtStyle.time_scales(t)[1]
-		for venue in TitleScreen.VENUES:
+		for venue in Settings.VENUES:
 			for part in ["surface", "kitchen"]:
 				for gi in CourtStyle.count(part):
 					var choice := [0, 0, 0, 0]
@@ -73,7 +73,7 @@ func test_shadow_visible_on_every_court() -> void:
 	var worst := 99.0
 	var worst_at := ""
 	for t in 3:
-		for venue in TitleScreen.VENUES:
+		for venue in Settings.VENUES:
 			for part in ["surface", "kitchen"]:
 				for gi in CourtStyle.count(part):
 					var choice := [0, 0, 0, 0]
@@ -117,21 +117,21 @@ func test_night_view() -> void:
 	var mat: ShaderMaterial = view._ground.material
 	check(mat != null and mat.get_shader_parameter("lit") == Vector3(sc[1].r, sc[1].g, sc[1].b),
 		"the court is under the lights")
-	check(view._crowd.all(func(c): return c[0].modulate == sc[0]), "the crowd dims")
+	check(view.crowd.people.all(func(c): return c[0].modulate == sc[0]), "the crowd dims")
 	check(view._players.all(func(e): return e["root"].modulate == Color.WHITE), "players keep their colours")
 	eq(view._sfx.ambience_name, "sunset", "the crickets at NIGHT")
 	view.free()
 
 
 func test_time_row_and_save() -> void:
-	var kept := TitleScreen.time_i
+	var kept := Settings.time_i
 	var save := SaveGame.new()
 	save.dir = "user://test_night/"
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(save.dir))
 	for f in SaveGame.FILES:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(save.dir + f))
 	save.load_game()
-	TitleScreen.time_i = 0
+	Settings.time_i = 0
 	var t := TitleScreen.new()
 	t.save = save
 	runner.root.add_child(t)
@@ -148,4 +148,4 @@ func test_time_row_and_save() -> void:
 	t._store_settings()
 	eq(int(save.data["settings"]["time"]), CourtStyle.NIGHT, "saved")
 	t.free()
-	TitleScreen.time_i = kept
+	Settings.time_i = kept

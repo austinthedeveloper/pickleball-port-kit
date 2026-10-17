@@ -30,7 +30,7 @@ func test_presets_match_the_data() -> void:
 
 func test_default_is_the_paint_pixel_for_pixel() -> void:
 	var m := _manifest()
-	for venue in TitleScreen.VENUES:
+	for venue in Settings.VENUES:
 		check(CourtStyle.material(CourtStyle.DEFAULTS, venue, m) == null,
 			"%s: all DEFAULT leaves the ground layer unshaded" % venue)
 		var targets := CourtStyle.role_targets(CourtStyle.DEFAULTS, venue, m)
@@ -88,7 +88,7 @@ func test_lines_and_ball_stay_readable() -> void:
 	var ball := Color8(d["ball_color"][0], d["ball_color"][1], d["ball_color"][2])
 	var worst_line := 99.0
 	var worst_ball := 99.0
-	for venue in TitleScreen.VENUES:
+	for venue in Settings.VENUES:
 		for ground_part in ["surface", "kitchen"]:
 			for gi in CourtStyle.count(ground_part):
 				var choice := [0, 0, 0, 0]
@@ -109,7 +109,7 @@ func test_lines_and_ball_stay_readable() -> void:
 
 
 func test_court_page_and_save() -> void:
-	var kept: Array = TitleScreen.court.duplicate()
+	var kept: Array = Settings.court.duplicate()
 	var save := SaveGame.new()
 	save.dir = "user://test_court/"
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(save.dir))
@@ -135,7 +135,7 @@ func test_court_page_and_save() -> void:
 	t._store_settings()
 	save.save_game()
 	t.free()
-	TitleScreen.court = CourtStyle.DEFAULTS.duplicate()
+	Settings.court = CourtStyle.DEFAULTS.duplicate()
 	var s2 := SaveGame.new()
 	s2.dir = save.dir
 	s2.load_game()
@@ -145,6 +145,6 @@ func test_court_page_and_save() -> void:
 	runner.root.add_child(t2)
 	if not t2.is_node_ready():
 		t2._ready()
-	eq(TitleScreen.court, [1, 0, 0, CourtStyle.count("lines") - 1], "saved, and a bad index loads as DEFAULT")
+	eq(Settings.court, [1, 0, 0, CourtStyle.count("lines") - 1], "saved, and a bad index loads as DEFAULT")
 	t2.free()
-	TitleScreen.court = kept
+	Settings.court = kept

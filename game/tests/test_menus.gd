@@ -7,23 +7,23 @@ var _kept := []
 
 
 func _keep() -> void:
-	_kept = [TitleScreen.venue_i, TitleScreen.difficulty_i, TitleScreen.points_i,
-		TitleScreen.opponent_i, TitleScreen.two_players, TitleScreen.camera_i,
-		TitleScreen.mod_bits, TitleScreen.fullscreen, TitleScreen.integer_scale,
+	_kept = [Settings.venue_i, Settings.difficulty_i, Settings.points_i,
+		Settings.opponent_i, Settings.two_players, Settings.camera_i,
+		Settings.mod_bits, Settings.fullscreen, Settings.integer_scale,
 		TitleScreen.main_cursor, Sfx.setting]
 
 
 func _restore() -> void:
 	var k := _kept
-	TitleScreen.venue_i = k[0]
-	TitleScreen.difficulty_i = k[1]
-	TitleScreen.points_i = k[2]
-	TitleScreen.opponent_i = k[3]
-	TitleScreen.two_players = k[4]
-	TitleScreen.camera_i = k[5]
-	TitleScreen.mod_bits = k[6]
-	TitleScreen.fullscreen = k[7]
-	TitleScreen.integer_scale = k[8]
+	Settings.venue_i = k[0]
+	Settings.difficulty_i = k[1]
+	Settings.points_i = k[2]
+	Settings.opponent_i = k[3]
+	Settings.two_players = k[4]
+	Settings.camera_i = k[5]
+	Settings.mod_bits = k[6]
+	Settings.fullscreen = k[7]
+	Settings.integer_scale = k[8]
 	TitleScreen.main_cursor = k[9]
 	Sfx.setting = k[10]
 
@@ -109,15 +109,15 @@ func test_options_rows_change_their_settings() -> void:
 	o.change(1)
 	o.change(1)
 	eq(Sfx.setting, AudioMap.SOUND_ALL, "SOUND wraps")
-	TitleScreen.camera_i = 0
+	Settings.camera_i = 0
 	o.select("camera")
 	o.change(1)
 	eq(o.value_of("camera"), "50%")
-	TitleScreen.fullscreen = false
+	Settings.fullscreen = false
 	o.select("fullscreen")
 	o.press()
 	eq(o.value_of("fullscreen"), "ON")
-	TitleScreen.integer_scale = true
+	Settings.integer_scale = true
 	o.select("scale")
 	o.change(-1)
 	eq(o.value_of("scale"), "FILL")
@@ -128,9 +128,9 @@ func test_options_rows_change_their_settings() -> void:
 func test_modifiers_page_sets_bits() -> void:
 	_keep()
 	var t := _title(_save())
-	TitleScreen.mod_bits = 0
-	TitleScreen.two_players = false
-	TitleScreen.opponent_i = -1
+	Settings.mod_bits = 0
+	Settings.two_players = false
+	Settings.opponent_i = -1
 	t.open_page("modifiers")
 	var m: MenuPage = t.pages["modifiers"]
 	m.select("lava")
@@ -141,7 +141,7 @@ func test_modifiers_page_sets_bits() -> void:
 	eq(t.config(false).modifiers, K.MOD_LAVA | K.MOD_BIG_BALL, "the toggles reach the match")
 	eq(t.pages["main"].value_of("modifiers"), "2 ON")
 	m.change(-1)
-	eq(TitleScreen.mod_bits, K.MOD_LAVA, "a second change turns it off")
+	eq(Settings.mod_bits, K.MOD_LAVA, "a second change turns it off")
 	t.free()
 	_restore()
 
@@ -150,31 +150,31 @@ func test_settings_survive_a_restart() -> void:
 	_keep()
 	var s := _save()
 	var t := _title(s)
-	TitleScreen.venue_i = 2
-	TitleScreen.difficulty_i = K.DIFFICULTY_HARD
-	TitleScreen.camera_i = 3
-	TitleScreen.mod_bits = K.MOD_FAST_BALL | K.MOD_WIN_BY_2
-	TitleScreen.fullscreen = true
-	TitleScreen.integer_scale = false
+	Settings.venue_i = 2
+	Settings.difficulty_i = K.DIFFICULTY_HARD
+	Settings.camera_i = 3
+	Settings.mod_bits = K.MOD_FAST_BALL | K.MOD_WIN_BY_2
+	Settings.fullscreen = true
+	Settings.integer_scale = false
 	Sfx.setting = AudioMap.SOUND_OFF
 	t._store_settings()
 	s.save_game()
 	t.free()
 	# a fresh start: everything back to defaults, then loaded
-	TitleScreen.venue_i = 0
-	TitleScreen.difficulty_i = 0
-	TitleScreen.camera_i = 0
-	TitleScreen.mod_bits = 0
-	TitleScreen.fullscreen = false
-	TitleScreen.integer_scale = true
+	Settings.venue_i = 0
+	Settings.difficulty_i = 0
+	Settings.camera_i = 0
+	Settings.mod_bits = 0
+	Settings.fullscreen = false
+	Settings.integer_scale = true
 	Sfx.setting = 0
 	var s2 := SaveGame.new()
 	s2.dir = DIR
 	s2.load_game()
 	var t2 := _title(s2)
-	eq([TitleScreen.venue_i, TitleScreen.difficulty_i, TitleScreen.camera_i, TitleScreen.mod_bits],
+	eq([Settings.venue_i, Settings.difficulty_i, Settings.camera_i, Settings.mod_bits],
 		[2, K.DIFFICULTY_HARD, 3, K.MOD_FAST_BALL | K.MOD_WIN_BY_2], "match settings")
-	check(TitleScreen.fullscreen and not TitleScreen.integer_scale, "window options")
+	check(Settings.fullscreen and not Settings.integer_scale, "window options")
 	eq(Sfx.setting, AudioMap.SOUND_OFF, "sound")
 	t2.free()
 	_restore()
@@ -187,12 +187,12 @@ func test_old_mods_preset_becomes_bits() -> void:
 	s.data["settings"].erase("mod_bits")
 	s.data["settings"]["mods"] = 5                 # ALL FOUR
 	var t := _title(s)
-	eq(TitleScreen.mod_bits, 15)
+	eq(Settings.mod_bits, 15)
 	t.free()
 	s.data["settings"]["mod_bits"] = -1
 	s.data["settings"]["mods"] = 4                 # LAVA
 	t = _title(s)
-	eq(TitleScreen.mod_bits, K.MOD_LAVA, "-1 (the default) also reads the preset")
+	eq(Settings.mod_bits, K.MOD_LAVA, "-1 (the default) also reads the preset")
 	t.free()
 	_restore()
 

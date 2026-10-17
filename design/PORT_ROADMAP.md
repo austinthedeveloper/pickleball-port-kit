@@ -301,6 +301,92 @@ feature/cld-godot-port                 (done: the playable port)
     templates, which aren't installed here (see "For you"). Then run
     `game/tools/export.sh` and try a build.
 
+## Phase 2: beyond the SNES (started 2026-10-17)
+
+The port is feature-complete against the SNES. Phase 2 cleans up and then
+designs past the 16-bit limits: smooth motion, mouse and device-aware
+prompts, remapping, stats. The chain continues from
+`feature/cld-release`. The sim and the golden traces stay untouched
+unless a branch says otherwise.
+
+```
+feature/cld-release        (pushed)
+ 10 feature/cld-cleanup
+ 11 feature/cld-modern-ui
+ 12 feature/cld-controls
+ 13 feature/cld-match-stats
+ 14 feature/cld-hud-polish
+```
+
+### 10. `feature/cld-cleanup`: organize the code
+
+- [x] `PORT-10` Split the two big view files: the title's pages move to
+  their own builders, and MatchView's camera, crowd and watcher become
+  components. Retire leftovers (the old MODS presets list stays only as
+  a save reader). Every gdscript warning fixed; the folder layout
+  documented.
+  - Accept: no behaviour change (tests and golden traces unchanged, the
+    e2e passes); the files are smaller and named for what they do.
+  - Verified: `meta/settings.gd` (`Settings`) now owns every setting,
+    loading and storing them, the window options and the match config;
+    the title only edits it (650 to 456 lines). `PracticePage` takes the
+    drill editor out of the title. MatchView's crowd, watcher and camera
+    lean are components (`Crowd`, `Watcher`, `CameraLean`; 692 to 588
+    lines). `GameControls.pad_bits()` replaces two copies of the pad-bit
+    reader. The old MODS presets survive only as `OLD_MOD_PRESETS`, to
+    read old saves. Two fixes on the way: the e2e was flaky (two physics
+    ticks in one frame could flush a press and its release together); it
+    now runs one tick per frame and passed six runs in a row. And a
+    leftover `build_id.txt` from an export made a checkout show a stale
+    build ID; checkouts now always ask git. 143/143 plus the e2e; golden
+    traces unchanged; screenshots match.
+  - Status: **Done**.
+
+### 11. `feature/cld-modern-ui`: modern menus
+
+- [ ] `PORT-11` Menus that move: pages slide and fade, the cursor eases
+  between rows, a highlight bar replaces the ball icon, values tick
+  with arrows. Fades between the title and a match. Button prompts
+  follow the last device used (keyboard keys or pad glyphs). Mouse:
+  hover selects a row, click presses, wheel changes.
+  - Accept: menu tests still select by id; new tests for the device
+    switch, the mouse mapping and the transitions finishing; inputs
+    during a transition are swallowed (rule 9).
+  - Verified: —
+  - Status: Planned. It will be **Ready to test** (the feel).
+
+### 12. `feature/cld-controls`: remapping and accessibility
+
+- [ ] `PORT-12` A CONTROLS page: rebind every action for keyboard and
+  pad, with conflict swaps and RESET, saved. ACCESSIBILITY: screen shake
+  and flashes on/off, a bigger HUD text option, and a hold-to-charge
+  serve assist.
+  - Accept: rebinding tests (a rebind reaches the input map, a conflict
+    swaps, reset restores, the save keeps it); every option checked
+    against its effect.
+  - Verified: —
+  - Status: Planned. It will be **Ready to test**.
+
+### 13. `feature/cld-match-stats`: post-match stats
+
+- [ ] `PORT-13` After the result: a stats card per side (points won on
+  serve, winners by shot type, faults by kind, longest rally, average
+  rally), collected from sim events, display only. Totals roll into the
+  records.
+  - Accept: stats tests against scripted points; a side-by-side run
+    proves it display only.
+  - Verified: —
+  - Status: Planned. It will be **Ready to test**.
+
+### 14. `feature/cld-hud-polish`: a livelier HUD
+
+- [ ] `PORT-14` Scores that pop when they change, a serve indicator
+  (who serves, and in doubles which server), a live rally counter for
+  long rallies, and a MATCH POINT pulse.
+  - Accept: HUD tests for each element's trigger; screenshots.
+  - Verified: —
+  - Status: Planned. It will be **Ready to test**.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks

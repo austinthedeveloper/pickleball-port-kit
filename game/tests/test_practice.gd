@@ -251,7 +251,7 @@ func test_exit() -> void:
 	eq(save.data["records"]["practice_best"], 7, "the best is saved")
 	eq(_reload().data["records"]["practice_best"], 7, "and written")
 	view.queue_free()
-	check(TitleScreen.config_for(false, -1, K.DIFFICULTY_MEDIUM, 5).practice == 0,
+	check(Settings.config_for(false, -1, K.DIFFICULTY_MEDIUM, 5).practice == 0,
 		"a match after it isn't practice")
 
 

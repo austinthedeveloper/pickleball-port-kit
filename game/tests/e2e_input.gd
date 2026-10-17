@@ -11,6 +11,11 @@ var _held := ""
 
 
 func _initialize() -> void:
+	# one physics tick per frame: input events flush once a frame, so two
+	# ticks in one frame could flush a press and its release together
+	# (the press lost, the e2e flaky)
+	Engine.max_physics_steps_per_frame = 1
+	Engine.physics_jitter_fix = 0.0
 	# a scratch save, so the run never touches the player's
 	SaveGame.default_dir = "user://e2e/"
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(SaveGame.default_dir))

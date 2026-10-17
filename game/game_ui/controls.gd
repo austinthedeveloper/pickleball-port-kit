@@ -74,6 +74,24 @@ static func clear_latch() -> void:
 	_latch.clear()
 
 
+## Menus and cards read SNES pad bits (Practice.PAD_*; A is 0x0080):
+## [newly pressed, held] from the input map.
+const PAD_A := 0x0080
+
+static func pad_bits() -> Array:
+	var pressed := 0
+	var held := 0
+	for pair in [["move_up", Practice.PAD_UP], ["move_down", Practice.PAD_DOWN],
+			["move_left", Practice.PAD_LEFT], ["move_right", Practice.PAD_RIGHT],
+			["hit", Practice.PAD_B], ["drive", PAD_A], ["soft", Practice.PAD_Y],
+			["start", Practice.PAD_START]]:
+		if Input.is_action_just_pressed(pair[0]):
+			pressed |= pair[1]
+		if Input.is_action_pressed(pair[0]):
+			held |= pair[1]
+	return [pressed, held]
+
+
 static func read_intent() -> SimTypes.Intent:
 	var it := SimTypes.Intent.new()
 	if Input.is_action_pressed("move_left"):
