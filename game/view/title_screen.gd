@@ -3,7 +3,7 @@
 class_name TitleScreen
 extends Node2D
 
-signal start_match(cfg: SimTypes.MatchConfig, venue: String)
+signal start_match(cfg: SimTypes.MatchConfig, venue: String, ladder: bool)
 
 const VENUES := ["park", "lakeside", "sunset"]
 const VENUE_NAMES := ["PARK", "LAKESIDE", "SUNSET"]
@@ -14,7 +14,8 @@ const ROWS := ["SINGLES", "DOUBLES", "VENUE", "OPPONENT", "DIFFICULTY", "POINTS"
 static var venue_i := 0
 static var difficulty_i := K.DIFFICULTY_MEDIUM
 static var points_i := 1
-static var opponent_i := -1
+## -2 = the ladder's current rung, -1 = the default CPU, else a team.
+static var opponent_i := -2
 static var cursor := 0
 static var two_players := false
 
@@ -26,9 +27,30 @@ var _arrow: Sprite2D
 var _sfx: Sfx
 var _lock := 10
 var _demo_doubles := true
+var save: SaveGame
+var _record: BitmapText
+
+
+func _load_settings() -> void:
+	if save == null:
+		return
+	var st: Dictionary = save.data["settings"]
+	venue_i = clampi(int(st["venue"]), 0, VENUES.size() - 1)
+	difficulty_i = clampi(int(st["difficulty"]), 0, DIFFICULTIES.size() - 1)
+	points_i = clampi(int(st["points"]), 0, POINTS.size() - 1)
+	two_players = int(st["players"]) == 2
+	opponent_i = clampi(int(st["opponent"]), -2, Opponents.count() - 1)
+
+
+func _store_settings() -> void:
+	if save == null:
+		return
+	save.data["settings"] = {"venue": venue_i, "difficulty": difficulty_i,
+		"points": points_i, "players": 2 if two_players else 1, "opponent": opponent_i}
 
 
 func _ready() -> void:
+	_load_settings()
 	_start_demo()
 	_ui = CanvasLayer.new()
 	_ui.layer = 20
@@ -89,6 +111,12 @@ func _ready() -> void:
 	keys.position = Vector2(480, 504)
 	keys.tint = Color(0.75, 0.8, 0.9)
 	_ui.add_child(keys)
+	_record = BitmapText.new()
+	_record.font = "small"
+	_record.align = 0.5
+	_record.position = Vector2(480, 156)
+	_record.tint = Color(0.8, 0.85, 0.95)
+	_ui.add_child(_record)
 	_sfx = Sfx.new()
 	add_child(_sfx)
 	_sfx.setup("", false)
@@ -110,24 +138,55 @@ func _refresh() -> void:
 	_values[0].text = ""
 	_values[1].text = ""
 	_values[2].text = VENUE_NAMES[venue_i]
-	_values[3].text = "CPU" if opponent_i < 0 else Opponents.team(opponent_i)["team"]
+	_values[3].text = _opponent_label()
 	_values[4].text = DIFFICULTIES[difficulty_i]
 	_values[5].text = str(POINTS[points_i])
 	_values[6].text = "2P VS" if two_players else "1P"
 	_arrow.position = Vector2(318, 204 + cursor * 32)
 	for i in _rows.size():
 		_rows[i].tint = Color.WHITE if i == cursor else Color(0.7, 0.74, 0.85)
+	if save:
+		var r: Dictionary = save.data["records"]
+		_record.text = "RECORD %d-%d   LADDER %d OF %d   CLEARS %d" % [
+			int(r["singles_wins"]) + int(r["doubles_wins"]),
+			int(r["singles_losses"]) + int(r["doubles_losses"]),
+			int(r["ladder_rung"]) + 1, Opponents.count(), int(r["ladder_clears"])]
+
+
+func _rung() -> int:
+	return int(save.data["records"]["ladder_rung"]) if save else 0
+
+
+func _opponent_label() -> String:
+	if opponent_i == -2:
+		return "LADDER: " + String(Opponents.team(_rung())["team"])
+	if opponent_i == -1:
+		return "CPU"
+	return String(Opponents.team(opponent_i)["team"])
+
+
+static func home_venue(team: int) -> String:
+	var home: String = String(Opponents.team(team).get("venue", "PARK")).to_lower()
+	return home if home in VENUES else VENUES[0]
 
 
 func config(doubles: bool) -> SimTypes.MatchConfig:
-	var cfg := SimTypes.MatchConfig.doubles() if doubles else SimTypes.MatchConfig.singles()
-	cfg.difficulty = difficulty_i
-	cfg.points_to_win = POINTS[points_i]
-	cfg.opponent = -1 if two_players else opponent_i
+	var opp := -1 if two_players else (_rung() if opponent_i == -2 else opponent_i)
+	var cfg := config_for(doubles, opp, difficulty_i, POINTS[points_i])
 	if two_players:
 		cfg.human[2] = 1
-	elif opponent_i >= 0:
-		var members: Array = Opponents.team(opponent_i)["players"]
+	return cfg
+
+
+## A match against a ladder team (or the default CPU, -1): their look's
+## body variant and paddle on slots 2-3 (match_config_opponent).
+static func config_for(doubles: bool, opponent: int, difficulty: int, points: int) -> SimTypes.MatchConfig:
+	var cfg := SimTypes.MatchConfig.doubles() if doubles else SimTypes.MatchConfig.singles()
+	cfg.difficulty = difficulty
+	cfg.points_to_win = points
+	cfg.opponent = opponent
+	if opponent >= 0:
+		var members: Array = Opponents.team(opponent)["players"]
 		for slot in [2, 3]:
 			var m: Dictionary = members[mini(slot - 2, members.size() - 1)]
 			cfg.variant[slot] = K.VARIANT_FEMALE if m.get("variant", "male") == "female" else K.VARIANT_MALE
@@ -161,15 +220,14 @@ func _process(_delta: float) -> void:
 				_start_demo()
 			3:
 				opponent_i += dir
-				if opponent_i < -1:
+				if opponent_i < -2:
 					opponent_i = Opponents.count() - 1
 				elif opponent_i >= Opponents.count():
-					opponent_i = -1
-				if opponent_i >= 0:
-					var home: String = String(Opponents.team(opponent_i).get("venue", "PARK")).to_lower()
-					if home in VENUES:
-						venue_i = VENUES.find(home)
-						_start_demo()
+					opponent_i = -2
+				var team := _rung() if opponent_i == -2 else opponent_i
+				if opponent_i != -1:
+					venue_i = VENUES.find(home_venue(team))
+					_start_demo()
 			4:
 				difficulty_i = clampi(difficulty_i + dir, 0, DIFFICULTIES.size() - 1)
 			5:
@@ -183,4 +241,6 @@ func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("hit") or Input.is_action_just_pressed("start"):
 		if cursor <= 1:
 			_sfx.play("confirm")
-			start_match.emit(config(cursor == 1), VENUES[venue_i])
+			_store_settings()
+			start_match.emit(config(cursor == 1), VENUES[venue_i],
+				opponent_i == -2 and not two_players)

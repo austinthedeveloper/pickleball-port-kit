@@ -82,3 +82,37 @@ func test_title_config_takes_the_opponent() -> void:
 	TitleScreen.difficulty_i = K.DIFFICULTY_MEDIUM
 	TitleScreen.points_i = 1
 	t.free()
+
+
+## ADR-023 through the real view: a ladder win records the match, moves
+## the save's rung on, and B asks for the next opponent (not a rematch).
+func test_ladder_win_advances_and_offers_the_next_rung() -> void:
+	var save := SaveGame.new()
+	save.dir = "user://test_view_save/"
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(save.dir))
+	for f in SaveGame.FILES:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(save.dir + f))
+	save.load_game()
+	var view := MatchView.new()
+	view.save = save
+	view.ladder = true
+	runner.root.add_child(view)
+	view.setup(TitleScreen.config_for(false, 0, K.DIFFICULTY_MEDIUM, 5), "park", false)
+	check(view.card_frames >= 0, "ladder match opens on the card")
+	view.card_frames = -1
+	var asked := [false]
+	view.next_rung.connect(func(): asked[0] = true)
+	var sim := view.sim
+	sim.team_score[0] = 4
+	sim.phase = K.PHASE_LIVE
+	sim.ball.rally_state = K.BALL_RALLY_LIVE
+	sim.resolve_point(1, K.FAULT_OUT)
+	for f in K.POINT_RESULT_FRAMES + 5:
+		view._physics_process(1.0 / 60.0)
+	eq(sim.phase, K.PHASE_MATCH_RESULT, "match over")
+	eq(save.data["records"]["singles_wins"], 1, "the win is recorded")
+	eq(save.data["records"]["ladder_rung"], 1, "on to the next rung")
+	sim.rematch_requested = true
+	view._physics_process(1.0 / 60.0)
+	check(asked[0], "B after a ladder win asks for the next opponent")
+	view.queue_free()

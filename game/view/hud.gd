@@ -19,6 +19,11 @@ var _paused: Control
 var _meter: Control
 var _meter_fill: ColorRect
 var _point_banner_frames := 0
+var _quip: Control
+var _quip_text: BitmapText
+var _quip_frames := 0
+var _result_line: BitmapText
+var _card: Control
 
 
 func _panel(name: String, rect: Rect2) -> NinePatchRect:
@@ -58,8 +63,12 @@ func setup(v: MatchView) -> void:
 		right_name = MatchView.TEAM_NAMES[cfg.palette[2]]
 	if view.demo:
 		left_name = "CPU" if not doubles else left_name
+	if cfg.opponent >= 0 and not cfg.human[2] and not view.demo:
+		right_name = Story.card_name(cfg.opponent, doubles)
 	var left_tint: Color = MatchView.TEAM_TINTS[cfg.palette[0]]
 	var right_tint: Color = MatchView.TEAM_TINTS[cfg.palette[2]]
+	if cfg.opponent >= 0 and not cfg.human[2] and not view.demo:
+		right_tint = Story.team_color(cfg.opponent)
 	var lw := 74 + BitmapText.measure("big", left_name)
 	var rw := 74 + BitmapText.measure("big", right_name)
 	var title := "DOUBLES" if doubles else "ARCADE RULES"
@@ -113,6 +122,12 @@ func setup(v: MatchView) -> void:
 	_meter.add_child(_meter_fill)
 	_banner = _text("big_gold", "", Vector2(480, 250), 0.5)
 	_banner_sub = _text("small", "", Vector2(480, 288), 0.5)
+	_quip = Control.new()
+	add_child(_quip)
+	_quip_text = _text("small", "", Vector2(480, 320), 0.5, Color.WHITE, _quip)
+	_result_line = _text("small", "", Vector2(480, 316), 0.5)
+	if view.card_frames >= 0:
+		_build_card(cfg)
 	_paused = Control.new()
 	add_child(_paused)
 	var shade := ColorRect.new()
@@ -122,6 +137,48 @@ func setup(v: MatchView) -> void:
 	_text("big_gold", "PAUSED", Vector2(480, 240), 0.5, Color.WHITE, _paused)
 	_text("small", "START: RESUME", Vector2(480, 280), 0.5, Color.WHITE, _paused)
 	refresh()
+
+
+func _build_card(cfg: SimTypes.MatchConfig) -> void:
+	var opp := cfg.opponent
+	var doubles := cfg.mode == K.MODE_DOUBLES
+	_card = Control.new()
+	add_child(_card)
+	var shade := ColorRect.new()
+	shade.color = Color(0, 0.02, 0.08, 0.5)
+	shade.size = Vector2(960, 540)
+	_card.add_child(shade)
+	var name := Story.card_name(opp, doubles)
+	_text("big_gold", "", Vector2.ZERO, 0, Color.WHITE, _card)
+	var title := _text("big", name, Vector2(480, 170), 0.5, Story.team_color(opp), _card)
+	title.scale = Vector2(2, 2)
+	title.position.x = 480
+	var line := Story.intro_line(opp)
+	var w := 40 + BitmapText.measure("small", line)
+	var p := _panel("title", Rect2(480 - w / 2, 236, w, 36))
+	p.reparent(_card)
+	_text("small", line, Vector2(480, 246), 0.5, Color.WHITE, _card)
+	_text("small", Story.rung_line(opp), Vector2(480, 296), 0.5, Color("fbe46a"), _card)
+	_text("small", "B: PLAY", Vector2(480, 330), 0.5, Color.WHITE, _card)
+
+
+func close_card() -> void:
+	if _card:
+		_card.queue_free()
+		_card = null
+
+
+func team_tint(team: int) -> Color:
+	var cfg := view.sim.config
+	if team == 1 and cfg.opponent >= 0 and not cfg.human[2]:
+		return Story.team_color(cfg.opponent)
+	return MatchView.TEAM_TINTS[cfg.palette[team * 2]]
+
+
+func show_quip(line: String, tint: Color) -> void:
+	_quip_text.text = line
+	_quip_text.tint = tint
+	_quip_frames = 80
 
 
 func on_point(winner: int) -> void:
@@ -153,14 +210,33 @@ func refresh() -> void:
 	_paused.visible = s.paused != 0
 	if _point_banner_frames > 0:
 		_point_banner_frames -= 1
+	if _quip_frames > 0:
+		_quip_frames -= 1
+	_quip.visible = _quip_frames > 0 and s.phase == K.PHASE_POINT_RESULT
+	_result_line.text = ""
 	if s.phase == K.PHASE_MATCH_RESULT:
 		var you := s.match_winner == 0
 		if view.demo:
 			_banner.text = "%s WINS" % _team_label(s.match_winner)
 			_banner_sub.text = ""
 		else:
+			var cfg := s.config
+			var vs_ladder: bool = cfg.opponent >= 0 and not cfg.human[2]
 			_banner.text = "YOU WIN!" if you else "%s WINS" % _team_label(s.match_winner)
-			_banner_sub.text = "B: REMATCH   START: MENU" if s.phase_timer >= K.POINT_RESULT_MIN_FRAMES else ""
+			if view.cleared:
+				_banner.text = "CHAMPION!"
+			var ready := s.phase_timer >= K.POINT_RESULT_MIN_FRAMES
+			var next := "B: NEXT OPPONENT" if (view.ladder and you) else "B: REMATCH"
+			_banner_sub.text = (next + "   START: MENU") if ready else ""
+			if vs_ladder:
+				_result_line.text = Story.result_line(cfg.opponent, you)
+				_result_line.tint = Story.team_color(cfg.opponent)
+				if view.cleared:
+					_result_line.text = "LADDER CLEARED!"
+					_result_line.tint = Color("fbe46a")
+				elif view.ladder and you and view.save:
+					_result_line.text += "  NEXT UP: " + String(Opponents.team(
+						int(view.save.data["records"]["ladder_rung"]))["team"])
 	elif s.phase == K.PHASE_POINT_RESULT and _point_banner_frames > 0:
 		_banner.text = K.fault_word(s.last_fault)
 		_banner_sub.text = "%s SCORES" % _team_label(s.point_winner)
@@ -171,6 +247,8 @@ func refresh() -> void:
 
 func _team_label(team: int) -> String:
 	var cfg := view.sim.config
+	if team == 1 and cfg.opponent >= 0 and not cfg.human[2]:
+		return Story.card_name(cfg.opponent, cfg.mode == K.MODE_DOUBLES)
 	if cfg.mode == K.MODE_DOUBLES:
 		return MatchView.TEAM_NAMES[cfg.palette[team * 2]]
 	if team == 0:

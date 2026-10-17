@@ -5,6 +5,7 @@ class_name MatchView
 extends Node2D
 
 signal finished(to_title: bool)
+signal next_rung
 
 const LEVELS := "res://assets/levels/"
 const TEAM_NAMES := ["BLUE", "RED", "GREEN", "GOLD"]
@@ -22,6 +23,15 @@ var venue := "park"
 var manifest: Dictionary
 var demo := false
 var input_lock := 0
+var save: SaveGame              ## records (null: none kept)
+var ladder := false             ## a ladder match: intro card, next rung
+var story := Story.new()
+## The intro card (ADR-026): the match waits under it, no sim, no AI.
+var card_frames := -1
+const CARD_MIN_FRAMES := 30
+const CARD_MAX_FRAMES := 300
+var _prev_phase := -1
+var cleared := false            ## this match cleared the ladder
 
 var _actors: Node2D
 var _shadows: Node2D
@@ -46,6 +56,8 @@ func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void
 	if demo:
 		sim.start_attract()
 	input_lock = INPUT_LOCK_FRAMES
+	if ladder and cfg.opponent >= 0 and not cfg.human[2]:
+		card_frames = 0
 	_build()
 
 
@@ -169,6 +181,10 @@ func _build_ball() -> void:
 # --- Frame ------------------------------------------------------------------------
 
 func _physics_process(_delta: float) -> void:
+	if card_frames >= 0:
+		_update_card()
+		_update_visuals()
+		return
 	var human := []
 	if not demo:
 		var it := GameControls.read_intent()
@@ -182,7 +198,14 @@ func _physics_process(_delta: float) -> void:
 	sim.step(human)
 	for e in sim.drain_events():
 		_on_event(e)
+	if sim.phase != _prev_phase:
+		if sim.phase == K.PHASE_MATCH_RESULT:
+			_on_match_over()
+		_prev_phase = sim.phase
 	if sim.rematch_requested:
+		if ladder and sim.match_winner == 0:
+			next_rung.emit()
+			return
 		sim.new_match()
 		input_lock = INPUT_LOCK_FRAMES
 		_hud.on_new_match()
@@ -213,6 +236,34 @@ func _on_event(e: Array) -> void:
 			_sfx.play("applause")
 			_crowd_cheer = 90
 			_hud.on_point(e[3])
+			var loser: int = 1 - e[3]
+			var line := story.quip(sim.config, loser, sim.frame_count)
+			if line != "":
+				_hud.show_quip(line, _hud.team_tint(loser))
+			if save and not demo:
+				save.record_rally((sim.shot_serial - sim.rally_start) & 0xff)
+
+
+func _update_card() -> void:
+	card_frames += 1
+	var it := GameControls.read_intent()
+	if card_frames >= CARD_MAX_FRAMES or (card_frames >= CARD_MIN_FRAMES
+			and (it.hit_pressed or it.pause_pressed)):
+		card_frames = -1
+		input_lock = INPUT_LOCK_FRAMES      # the closing press doesn't serve
+		_hud.close_card()
+
+
+## Records at the match's end (a safe point to write, playbook §6), and the
+## ladder (ADR-023): a win moves to the next rung; beating the last clears.
+func _on_match_over() -> void:
+	if demo or save == null or sim.config.human[2]:
+		return
+	var won := sim.match_winner == 0
+	save.record_match(sim.config.mode == K.MODE_DOUBLES, won)
+	if ladder and won:
+		cleared = save.advance_ladder(Opponents.count())
+	save.save_game()
 
 
 func _spawn_fx(kind: String, at: Vector2, start: int) -> void:

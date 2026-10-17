@@ -1,10 +1,13 @@
-## Top level: title <-> match.
+## Top level: title <-> match, with the save loaded once and written at
+## safe points (leaving the title, a match's end).
 extends Node
 
+var save := SaveGame.new()
 var _screen: Node
 
 
 func _ready() -> void:
+	save.load_game()
 	show_title()
 
 
@@ -17,12 +20,25 @@ func _swap(n: Node) -> void:
 
 func show_title() -> void:
 	var t := TitleScreen.new()
+	t.save = save
 	t.start_match.connect(_on_start)
 	_swap(t)
 
 
-func _on_start(cfg: SimTypes.MatchConfig, venue: String) -> void:
+func _on_start(cfg: SimTypes.MatchConfig, venue: String, ladder: bool) -> void:
+	save.save_game()
 	var m := MatchView.new()
+	m.save = save
+	m.ladder = ladder
 	m.finished.connect(func(_to_title: bool): show_title())
+	m.next_rung.connect(_on_next_rung.bind(cfg))
 	_swap(m)
 	m.setup(cfg, venue, false)
+
+
+## A ladder win: the next opponent, at their home court, with their card.
+func _on_next_rung(prev: SimTypes.MatchConfig) -> void:
+	var rung: int = save.data["records"]["ladder_rung"]
+	var cfg := TitleScreen.config_for(prev.mode == K.MODE_DOUBLES, rung, prev.difficulty,
+		prev.points_to_win)
+	_on_start(cfg, TitleScreen.home_venue(rung), true)

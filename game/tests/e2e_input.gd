@@ -11,6 +11,11 @@ var _held := ""
 
 
 func _initialize() -> void:
+	# a scratch save, so the run never touches the player's
+	SaveGame.default_dir = "user://e2e/"
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(SaveGame.default_dir))
+	for f in SaveGame.FILES:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(SaveGame.default_dir + f))
 	var controls = load("res://game_ui/controls.gd").new()
 	controls.name = "Controls"
 	root.add_child(controls)
@@ -62,8 +67,18 @@ func _tick() -> void:
 			if _frame == 36:
 				_expect(_screen() is MatchView, "B on SINGLES starts a match")
 				var m: MatchView = _screen()
+				_expect(m.ladder and m.card_frames >= 0, "a ladder match opens on the intro card")
+				_expect(m.sim.phase == K.PHASE_SERVE_SETUP and m.sim.phase_timer == 0,
+					"the match waits under the card")
+			if _frame == 80:
+				_press("hit")              # close the card
+			if _frame == 84:
+				var m: MatchView = _screen()
+				_expect(m.card_frames < 0, "B closes the card")
+			if _frame == 110:
+				var m: MatchView = _screen()
 				_expect(m.sim.phase == K.PHASE_SERVE_SETUP, "the match opens on the serve")
-				_expect(m.sim.serve_requested == 0, "the starting press didn't serve (rule 9)")
+				_expect(m.sim.serve_requested == 0, "the closing press didn't serve (ADR-026)")
 				_step = 2
 		2:
 			var m: MatchView = _screen()
