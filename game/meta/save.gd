@@ -50,7 +50,9 @@ static func defaults() -> Dictionary:
 			"longest_rally": 0, "practice_best": 0,
 			"practice_zone_best": [0, 0, 0, 0],
 			"streak": 0, "best_streak": 0, "shutouts": 0,
-			"vs": _vs_zero()},
+			"vs": _vs_zero(),
+			# PORT-13: totals from the match stats (new keys fill in on load)
+			"points_won": 0, "points_lost": 0, "aces": 0, "winners": 0},
 		## who holds a record ("" = nobody, shown ---)
 		"initials": {"best_streak": "", "longest_rally": ""},
 	}
@@ -210,6 +212,15 @@ func record_match(doubles: bool, won: bool, opponent := -1, points_against := -1
 	else:
 		r["streak"] = 0
 		streak_held = false
+
+
+## A finished match's stats into the running totals (P1's side).
+func record_stats(st: MatchStats) -> void:
+	var r: Dictionary = data["records"]
+	r["points_won"] = int(r["points_won"]) + int(st.teams[0]["points"])
+	r["points_lost"] = int(r["points_lost"]) + int(st.teams[1]["points"])
+	r["aces"] = int(r["aces"]) + int(st.teams[0]["aces"])
+	r["winners"] = int(r["winners"]) + st.winners(0)
 
 
 ## A rally longer than the record: it's the record now, and its initials

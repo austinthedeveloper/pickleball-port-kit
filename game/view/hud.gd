@@ -31,6 +31,9 @@ var _ini_letters: Array = []
 var _ini_line: BitmapText
 var _ini_under: ColorRect
 var _result_prompts: PromptBar   ## B / Start on the result screen
+var _stats_card: Control         ## the post-match stats (PORT-13), built when shown
+var _banner_y := 250.0
+var _result_y := 316.0
 
 
 func _panel(name: String, rect: Rect2) -> NinePatchRect:
@@ -296,6 +299,7 @@ func refresh() -> void:
 	_result_line.text = ""
 	_result_prompts.visible = false
 	_refresh_initials()
+	_refresh_stats()
 	if view.initials.open:
 		_banner.text = ""
 		_banner_sub.text = ""
@@ -331,6 +335,58 @@ func refresh() -> void:
 	else:
 		_banner.text = ""
 		_banner_sub.text = ""
+
+
+## The stats card shows on a finished human match's result screen (not
+## the demo, practice, or under the initials card); the banner and the
+## result line move up over it, the prompts below it.
+func stats_shown() -> bool:
+	var s := view.sim
+	return s.phase == K.PHASE_MATCH_RESULT and not view.demo and not s.config.practice \
+		and not view.initials.open
+
+
+func _refresh_stats() -> void:
+	var show := stats_shown()
+	if show and _stats_card == null:
+		_build_stats()
+	if _stats_card:
+		_stats_card.visible = show
+	_banner.position.y = 96.0 if show else _banner_y
+	_result_line.position.y = 142.0 if show else _result_y
+	_result_prompts.position.y = 486.0 if show else 296.0
+
+
+func _build_stats() -> void:
+	var st: MatchStats = view.stats
+	_stats_card = Control.new()
+	add_child(_stats_card)
+	move_child(_stats_card, 0)       # under the banner and the prompts
+	var shade := ColorRect.new()
+	shade.color = Color(0.02, 0.03, 0.08, 0.45)
+	shade.size = Vector2(960, 540)
+	_stats_card.add_child(shade)
+	var p := _panel("title", Rect2(230, 170, 500, 290))
+	p.reparent(_stats_card)
+	var cols := [560.0, 670.0]
+	for t in 2:
+		_text("small", _team_label(t), Vector2(cols[t], 188), 0.5, team_tint(t), _stats_card)
+	var rows := st.rows()
+	for i in rows.size():
+		var y := 222.0 + i * 28.0
+		_text("small", rows[i][0], Vector2(258, y), 0.0, Color(0.8, 0.84, 0.95), _stats_card)
+		for t in 2:
+			var won: bool = rows[i][0] == "POINTS" and view.sim.match_winner == t
+			_text("small", rows[i][t + 1], Vector2(cols[t], y), 0.5,
+				Color("fbe46a") if won else Color.WHITE, _stats_card)
+	_text("small", st.rally_line(), Vector2(480, 222.0 + rows.size() * 28.0 + 6), 0.5,
+		Color("fbe46a"), _stats_card)
+
+
+func on_rematch() -> void:
+	if _stats_card:
+		_stats_card.queue_free()
+		_stats_card = null
 
 
 func _team_label(team: int) -> String:

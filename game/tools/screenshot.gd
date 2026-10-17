@@ -6,7 +6,8 @@
 ## (any page id) opens that title page; "court=S,K,R,L" sets the court
 ## colour presets; "time=N" DAY 0, DUSK 1, NIGHT 2;
 ## "pad" / "ps" / "switch" show that pad family's prompts; "pause" pauses the match at the end;
-## "closecall" shows a forced close-up; "initials" the initials card.
+## "closecall" shows a forced close-up; "initials" the initials card;
+## "result" plays a bot match and ends it (the stats card).
 extends SceneTree
 
 var _frames := 0
@@ -101,6 +102,23 @@ func _tick() -> void:
 		v.initials.begin(v.save)
 		v.initials.letters = [0, 1, 4]
 		v.initials.cursor = 2
+	if _frames == 2 and _view is MatchView and "result" in OS.get_cmdline_user_args():
+		# play ~70 s of bot match, then end it (P1 wins): the stats card
+		var v: MatchView = _view
+		for f in 4200:
+			if v.sim.phase == K.PHASE_SERVE_SETUP and v.sim.server_index == 0:
+				v.sim.serve_requested = 1
+			v._physics_process(1.0 / 60.0)
+			if v.sim.phase == K.PHASE_MATCH_RESULT:
+				break
+		if v.sim.phase != K.PHASE_MATCH_RESULT:
+			v.sim.team_score[0] = maxi(v.sim.team_score[0], v.sim.config.points_to_win - 1)
+			v.sim.team_score[1] = mini(v.sim.team_score[1], v.sim.team_score[0] - 1)
+			v.sim.phase = K.PHASE_LIVE
+			v.sim.ball.rally_state = K.BALL_RALLY_LIVE
+			v.sim.resolve_point(1, K.FAULT_OUT)
+		for f in K.POINT_RESULT_FRAMES + 40:
+			v._physics_process(1.0 / 60.0)
 	if _frames >= _target:
 		var img := root.get_texture().get_image()
 		img.save_png(_out)

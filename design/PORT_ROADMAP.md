@@ -410,14 +410,26 @@ feature/cld-release        (pushed)
 
 ### 13. `feature/cld-match-stats`: post-match stats
 
-- [ ] `PORT-13` After the result: a stats card per side (points won on
+- [x] `PORT-13` After the result: a stats card per side (points won on
   serve, winners by shot type, faults by kind, longest rally, average
   rally), collected from sim events, display only. Totals roll into the
   records.
   - Accept: stats tests against scripted points; a side-by-side run
     proves it display only.
-  - Verified: —
-  - Status: Planned. It will be **Ready to test**.
+  - Verified: `meta/match_stats.gd` collects from the events: points,
+    serve points won, aces (an unreturned serve), winners (never
+    returned) by the winning shot, errors (faults) by kind, shots,
+    drives, and every rally's length. The result screen shows a stats
+    card (after the initials card, never in the demo or practice) with
+    the banner moved up over it and the prompts below; a rematch clears
+    it. P1's points won and lost, aces and winners roll into the records
+    (two new RECORDS rows). `test_stats.gd` (4 tests): scripted points
+    (a drive winner, an ace, an error, serve points, the rows); a whole
+    bot match adding up (points equal the score, a rally per point, every
+    shot counted); the card's timing and the totals; 1,500 doubles frames
+    with stats on identical to a bare sim. 158/158 plus the e2e; golden
+    traces unchanged. Screenshots: singles at SUNSET and doubles at PARK.
+  - Status: **Ready to test**: finish a match and read the card.
 
 ### 14. `feature/cld-hud-polish`: a livelier HUD
 
@@ -495,6 +507,12 @@ the chain: each has a default I've gone with.
   second keys (arrows, J, Esc) stay unless a rebind takes them. 2P's pad
   keeps the default layout. SERVE ASSIST lets go at 24 of 30, which is
   strong but not the fastest; tell me if it should aim higher.
+
+- **PORT-13 stats:** a "winner" here is a ball the other side never got
+  back (it bounced twice); points won on the other side's fault count as
+  their errors. With the CPU's style, most points end in errors, so
+  winners stay low. Say if you want other rows (kitchen time, dinks,
+  serve speed).
 
 ## If time runs short or long
 

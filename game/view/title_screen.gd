@@ -204,6 +204,8 @@ func _build_pages() -> void:
 		{"id": "doubles", "label": "DOUBLES", "value": func(): return _wl("doubles")},
 		{"id": "streak", "label": "BEST STREAK", "value": func(): return _held("best_streak")},
 		{"id": "rally", "label": "LONGEST RALLY", "value": func(): return _held("longest_rally")},
+		{"id": "points", "label": "POINTS", "value": func(): return "%d-%d" % [_rec("points_won"), _rec("points_lost")]},
+		{"id": "aces", "label": "ACES  WINNERS", "value": func(): return "%d  %d" % [_rec("aces"), _rec("winners")]},
 		{"id": "shutouts", "label": "SHUTOUTS", "value": func(): return str(_rec("shutouts"))},
 		{"id": "ladder", "label": "LADDER", "value": func(): return "%d OF %d  CLEARS %d" % [
 			_rung() + 1, Opponents.count(), _rec("ladder_clears")]},
@@ -212,7 +214,7 @@ func _build_pages() -> void:
 			"change": func(d): vs_i = (vs_i + d + Opponents.count()) % Opponents.count()},
 		{"id": "erase", "label": "ERASE RECORDS", "value": func(): return "B AGAIN" if _erase_armed else "",
 			"press": _erase},
-	], [["soft", "BACK"]], Rect2(290, 96, 380, 0))
+	], [["soft", "BACK"]], Rect2(290, 46, 380, 0))
 
 
 ## After a row was pressed (keys or the mouse): its sound, and the record line.

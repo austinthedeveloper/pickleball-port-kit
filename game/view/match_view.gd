@@ -55,6 +55,8 @@ var _hud: Hud
 var _sfx: Sfx
 var _debug: DebugOverlay
 var feel: Feel
+## This match's stats (PORT-13), from the events; display only.
+var stats := MatchStats.new()
 
 
 func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void:
@@ -358,6 +360,8 @@ func _physics_process(_delta: float) -> void:
 			return
 		sim.new_match()
 		input_lock = INPUT_LOCK_FRAMES
+		stats = MatchStats.new()
+		_hud.on_rematch()
 		_hud.on_new_match()
 	elif sim.title_requested:
 		finished.emit(true)
@@ -402,6 +406,8 @@ func _pause_input(it: SimTypes.Intent) -> bool:
 			sim.new_match()
 			_prev_phase = -1
 			input_lock = INPUT_LOCK_FRAMES   # the closing press doesn't serve
+			stats = MatchStats.new()
+			_hud.on_rematch()
 			_hud.on_new_match()
 			_update_visuals()
 			return true
@@ -421,6 +427,7 @@ func _pause_input(it: SimTypes.Intent) -> bool:
 
 func _on_event(e: Array) -> void:
 	feel.on_event(e)
+	stats.on_event(e)
 	var kind: int = e[0]
 	var at := CourtView.ground(K.to_fp(e[1]), K.to_fp(e[2]))
 	var rally: int = (sim.shot_serial - sim.rally_start) & 0xff
@@ -471,6 +478,7 @@ func _on_match_over() -> void:
 			sim.team_score[1] if won else -1)
 		if ladder and won:
 			cleared = save.advance_ladder(Opponents.count())
+		save.record_stats(stats)
 	save.save_game()
 	initials.begin(save)
 
