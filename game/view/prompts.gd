@@ -84,13 +84,27 @@ static func glyph(action: String, device := -1, pad := -1, fam := -1) -> Diction
 	if b == JOY_BUTTON_BACK:
 		return {"kind": "pill", "text": "SELECT"}
 	if not FACE.has(b):
-		return {"kind": "pill", "text": "?"}
+		return {"kind": "pill", "text": button_name(b, fam if fam >= 0 else family(pad))}
 	var f := fam if fam >= 0 else family(pad)
 	var i: int = FACE[b]
 	if f == PLAYSTATION:
 		return {"kind": "face", "text": "", "shape": SHAPES[i], "color": PS_COLORS[i]}
 	return {"kind": "face", "text": LETTERS[f][i], "color": XBOX_COLORS[i] if f == XBOX
 		else Color("c8c8d8")}
+
+
+## A non-face pad button's name for a pill, as the pad family labels it.
+static func button_name(b: int, f: int) -> String:
+	var dpad := {JOY_BUTTON_DPAD_UP: "D-UP", JOY_BUTTON_DPAD_DOWN: "D-DOWN",
+		JOY_BUTTON_DPAD_LEFT: "D-LEFT", JOY_BUTTON_DPAD_RIGHT: "D-RIGHT"}
+	if dpad.has(b):
+		return dpad[b]
+	var shoulders := [["LB", "RB", "LS", "RS"], ["L", "R", "L-STICK", "R-STICK"], ["L1", "R1", "L3", "R3"]]
+	var at := [JOY_BUTTON_LEFT_SHOULDER, JOY_BUTTON_RIGHT_SHOULDER, JOY_BUTTON_LEFT_STICK,
+		JOY_BUTTON_RIGHT_STICK].find(b)
+	if at >= 0:
+		return shoulders[f][at]
+	return "BUTTON %d" % b
 
 
 ## Plain text for a prompt, for tests and logs: "SPACE", "A", "CROSS".

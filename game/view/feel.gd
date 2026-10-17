@@ -40,7 +40,7 @@ func on_event(e: Array) -> void:
 	match e[0]:
 		K.EVENT_HIT:
 			var shot: int = e[3] >> 4
-			if ON["shake"]:
+			if ON["shake"] and Settings.shake:
 				if view.sim.ball.z_fp >= K.to_fp(PUTAWAY_Z) or (shot == K.SHOT_DRIVE
 						and view.sim.ball.z_fp >= K.to_fp(PUTAWAY_Z - 4)):
 					_shake(SHAKE_PUTAWAY)

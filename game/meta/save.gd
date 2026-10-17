@@ -42,7 +42,9 @@ static func defaults() -> Dictionary:
 			"mod_bits": -1, "fullscreen": 0, "integer_scale": 1,
 			"player": [0, 0, Paddles.STANDARD],  # Player Select: 1P colour, body, paddle
 			"court": [0, 0, 0, 0],  # COURT: surface, kitchen, surround, lines presets
-			"time": 0},  # COURT TIME: DAY, DUSK, NIGHT (ADR-045)
+			"time": 0,  # COURT TIME: DAY, DUSK, NIGHT (ADR-045)
+			# PORT-12: accessibility, and remapped controls ({} = defaults)
+			"shake": 1, "flash": 1, "hud_large": 0, "serve_assist": 0, "bindings": {}},
 		"records": {"singles_wins": 0, "singles_losses": 0, "doubles_wins": 0,
 			"doubles_losses": 0, "ladder_rung": 0, "ladder_clears": 0,
 			"longest_rally": 0, "practice_best": 0,

@@ -290,6 +290,20 @@ func _build_ball() -> void:
 
 # --- Frame ------------------------------------------------------------------------
 
+## SERVE ASSIST (PORT-12, an input aid, not a rule change): while P1
+## holds B on the charged serve, the press lets go by itself on the way up
+## at a strong charge, so holding is enough for a good serve.
+const SERVE_ASSIST_LEVEL := 24
+
+func _serve_assist(it: SimTypes.Intent) -> void:
+	if not Settings.serve_assist or not it.hit_held or not sim.charge_charging:
+		return
+	var server: SimTypes.Player = sim.players[sim.server_index]
+	if server.logical_input_slot == 0 and sim.charge_rising \
+			and sim.charge_level >= SERVE_ASSIST_LEVEL:
+		it.hit_held = 0
+
+
 ## The initials card (ADR-040): the match waits under it like the intro card.
 var initials := Initials.new()
 
@@ -323,6 +337,7 @@ func _physics_process(_delta: float) -> void:
 			it = SimTypes.Intent.new()
 			it2 = null
 			GameControls.clear_latch()
+		_serve_assist(it)
 		human = [it, null, it2, null]
 		if sim.paused and _pause_input(it):
 			return
@@ -558,10 +573,11 @@ func _update_visuals() -> void:
 			s.region_rect = Rect2(idx * FRAME, 0, FRAME, FRAME)
 			s.flip_h = flip
 			s.offset = -Vector2((FRAME - 1 - ANCHOR.x) if flip else ANCHOR.x, ANCHOR.y)
+		var flash := p.flash_timer > 0 and Settings.flashes     # FLASHES off: no white
 		if e["look"]:
-			e["body"].material.set_shader_parameter("brighten", 1.8 if p.flash_timer > 0 else 1.0)
+			e["body"].material.set_shader_parameter("brighten", 1.8 if flash else 1.0)
 		else:
-			e["body"].modulate = Color(1.8, 1.8, 1.8) if p.flash_timer > 0 else Color.WHITE
+			e["body"].modulate = Color(1.8, 1.8, 1.8) if flash else Color.WHITE
 	var b := sim.ball
 	var show := b.active != 0 and sim.phase != K.PHASE_MATCH_RESULT
 	_ball_root.visible = show

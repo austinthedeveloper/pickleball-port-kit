@@ -379,15 +379,34 @@ feature/cld-release        (pushed)
 
 ### 12. `feature/cld-controls`: remapping and accessibility
 
-- [ ] `PORT-12` A CONTROLS page: rebind every action for keyboard and
+- [x] `PORT-12` A CONTROLS page: rebind every action for keyboard and
   pad, with conflict swaps and RESET, saved. ACCESSIBILITY: screen shake
   and flashes on/off, a bigger HUD text option, and a hold-to-charge
   serve assist.
   - Accept: rebinding tests (a rebind reaches the input map, a conflict
     swaps, reset restores, the save keeps it); every option checked
     against its effect.
-  - Verified: —
-  - Status: Planned. It will be **Ready to test**.
+  - Verified: `game_ui/bindings.gd`: P1's main key and pad button per
+    action (HIT, DRIVE, SOFT, START, the four moves), applied to the input
+    map (the sticks stay on the moves), saved in `settings.bindings`. A
+    rebind that takes another action's key or button swaps it over, so
+    nothing is left unbound. OPTIONS gains CONTROLS (B on a row, then
+    press the key or button; Esc cancels; RESET DEFAULTS) and
+    ACCESSIBILITY: SCREEN SHAKE, FLASHES (the white hit flash), HUD TEXT
+    (LARGE scales the banners, quips and result line 1.5x) and SERVE
+    ASSIST (holding B lets go by itself at 24 of 30 on the way up; an
+    input aid, the sim's rules unchanged). Pad prompts now name D-pad,
+    shoulder and stick buttons per family. `test_controls.gd` (5 tests):
+    a rebind reaching the map and the prompts, conflicts swapping keys and
+    buttons with every action still bound, reset, the save keeping
+    remaps, malformed saves loading defaults, the page listening (key,
+    pad, Esc, reset, swallowed press), and each accessibility option
+    against its effect (shake, flash, large text, the assist serving
+    strong where plain holding never serves). 154/154 plus the e2e;
+    golden traces unchanged. Screenshots: CONTROLS (Xbox and Nintendo)
+    and ACCESSIBILITY.
+  - Status: **Ready to test**: remap a key and a pad button, play a
+    point, and restart the game to see them kept. Try SERVE ASSIST.
 
 ### 13. `feature/cld-match-stats`: post-match stats
 
@@ -471,6 +490,11 @@ the chain: each has a default I've gone with.
   letters). The game still names the swing buttons by SNES role (hit,
   drive, soft), so on an Xbox pad "hit" shows A. Fades are 8 frames out,
   10 in. Say if any of it feels slow.
+
+- **PORT-12 controls:** only P1's main key per action is remappable; the
+  second keys (arrows, J, Esc) stay unless a rebind takes them. 2P's pad
+  keeps the default layout. SERVE ASSIST lets go at 24 of 30, which is
+  strong but not the fastest; tell me if it should aim higher.
 
 ## If time runs short or long
 

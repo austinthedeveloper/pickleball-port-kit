@@ -34,6 +34,12 @@ static var time_i := CourtStyle.DAY
 ## The last Player Select choices (PlayerSelect.new_choice; 1P's is saved).
 static var p1_choice := PlayerSelect.new_choice(PlayerSelect.PAL_BLUE, K.VARIANT_MALE, Paddles.STANDARD)
 static var p2_choice := PlayerSelect.new_choice(PlayerSelect.PAL_RED, K.VARIANT_MALE, Paddles.STANDARD)
+## Accessibility (PORT-12): screen shake, the white hit flashes, a larger
+## HUD text, and the serve assist (holding B releases a strong serve).
+static var shake := true
+static var flashes := true
+static var hud_large := false
+static var serve_assist := false
 
 
 ## Reads the save's settings, each made valid.
@@ -59,6 +65,11 @@ static func load_from(save: SaveGame) -> void:
 		var n := CourtStyle.count(CourtStyle.PARTS[i])
 		court[i] = int(ct[i]) if int(ct[i]) >= 0 and int(ct[i]) < n else 0
 	time_i = clampi(int(st.get("time", 0)), 0, CourtStyle.time_names().size() - 1)
+	shake = int(st.get("shake", 1)) != 0
+	flashes = int(st.get("flash", 1)) != 0
+	hud_large = int(st.get("hud_large", 0)) != 0
+	serve_assist = int(st.get("serve_assist", 0)) != 0
+	Bindings.from_save(st.get("bindings", {}))
 	var pl: Array = st.get("player", [0, 0, 1])
 	if pl.size() == 3:
 		p1_choice = PlayerSelect.new_choice(clampi(int(pl[0]), 0, 3), clampi(int(pl[1]), 0, 1),
@@ -73,7 +84,10 @@ static func store_to(save: SaveGame) -> void:
 		"camera": camera_i, "mod_bits": mod_bits, "sound": Sfx.setting,
 		"fullscreen": 1 if fullscreen else 0, "integer_scale": 1 if integer_scale else 0,
 		"player": [p1_choice["palette"], p1_choice["variant"], p1_choice["paddle"]],
-		"court": court.duplicate(), "time": time_i}, true)
+		"court": court.duplicate(), "time": time_i,
+		"shake": 1 if shake else 0, "flash": 1 if flashes else 0,
+		"hud_large": 1 if hud_large else 0, "serve_assist": 1 if serve_assist else 0,
+		"bindings": Bindings.to_save()}, true)
 
 
 ## Applies the window options (a no-op headless, where there's no window).

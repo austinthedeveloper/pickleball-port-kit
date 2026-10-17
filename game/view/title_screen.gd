@@ -174,7 +174,31 @@ func _build_pages() -> void:
 			"change": func(_d): Settings.fullscreen = not Settings.fullscreen; Settings.apply_window(get_window())},
 		{"id": "scale", "label": "SCALE", "value": func(): return "PIXEL" if Settings.integer_scale else "FILL",
 			"change": func(_d): Settings.integer_scale = not Settings.integer_scale; Settings.apply_window(get_window())},
+		{"id": "controls", "label": "CONTROLS", "press": func(): open_page("controls")},
+		{"id": "access", "label": "ACCESSIBILITY", "press": func(): open_page("access")},
 	], help)
+	var onoff := func(on: bool) -> String: return "ON" if on else "OFF"
+	_add_page("access", "ACCESSIBILITY", [
+		{"id": "shake", "label": "SCREEN SHAKE", "value": func(): return onoff.call(Settings.shake),
+			"change": func(_d): Settings.shake = not Settings.shake},
+		{"id": "flashes", "label": "FLASHES", "value": func(): return onoff.call(Settings.flashes),
+			"change": func(_d): Settings.flashes = not Settings.flashes},
+		{"id": "hud", "label": "HUD TEXT", "value": func(): return "LARGE" if Settings.hud_large else "NORMAL",
+			"change": func(_d): Settings.hud_large = not Settings.hud_large},
+		{"id": "assist", "label": "SERVE ASSIST", "value": func(): return onoff.call(Settings.serve_assist),
+			"change": func(_d): Settings.serve_assist = not Settings.serve_assist},
+	], help, Rect2(280, 172, 400, 0))
+	var control_rows := []
+	for a in Bindings.ACTIONS:
+		var action: String = a
+		control_rows.append({"id": action, "label": Bindings.NAMES[action],
+			"value": func(): return "PRESS A KEY OR BUTTON" if listening == action else Bindings.describe(action),
+			"press": func(): listen(action)})
+	control_rows.append({"id": "reset", "label": "RESET DEFAULTS", "press": func():
+		Bindings.reset()
+		_store_settings()})
+	_add_page("controls", "CONTROLS", control_rows, [["hit", "REBIND"], ["soft", "BACK"]],
+		Rect2(250, 70, 460, 0))
 	_add_page("records", "RECORDS", [
 		{"id": "singles", "label": "SINGLES", "value": func(): return _wl("singles")},
 		{"id": "doubles", "label": "DOUBLES", "value": func(): return _wl("doubles")},
@@ -265,7 +289,7 @@ func _show(id: String) -> void:
 	if select_screen:
 		select_screen.visible = id == "select"
 	for n in _header:
-		n.visible = id != "select" and id != "records"
+		n.visible = not id in ["select", "records", "controls"]
 	_erase_armed = false
 	if pages.has(id):
 		pages[id].refresh()
@@ -427,12 +451,49 @@ func config(doubles: bool) -> SimTypes.MatchConfig:
 	return Settings.match_config(doubles, _rung())
 
 
+## CONTROLS: the action waiting for its new key or button ("" = none).
+var listening := ""
+
+
+func listen(action: String) -> void:
+	listening = action
+	pages["controls"].refresh()
+
+
+## While listening, the next key or pad button press rebinds the action
+## (Esc cancels) and is swallowed (rule 9).
+func _input(event: InputEvent) -> void:
+	if listening == "" or not event.is_pressed() or event.is_echo():
+		return
+	var done := false
+	if event is InputEventKey:
+		var code: int = event.physical_keycode if event.physical_keycode else event.keycode
+		if code != KEY_ESCAPE:
+			Bindings.rebind_key(listening, code)
+		done = true
+	elif event is InputEventJoypadButton:
+		Bindings.rebind_pad(listening, event.button_index)
+		done = true
+	if done:
+		if is_inside_tree():
+			get_viewport().set_input_as_handled()
+		listening = ""
+		_store_settings()
+		_lock = SWITCH_LOCK
+		GameControls.clear_latch()
+		pages["controls"].refresh()
+		if _sfx:
+			_sfx.play("confirm")
+
+
 func _process(_delta: float) -> void:
 	if _demo.sim.phase == K.PHASE_MATCH_RESULT and _demo.sim.phase_timer >= K.ATTRACT_RESULT_FRAMES - 1:
 		_demo_doubles = not _demo_doubles
 		_start_demo()
 	if _lock > 0:
 		_lock -= 1
+		return
+	if listening != "":
 		return
 	if page == "practice":
 		_update_practice(GameControls.pad_bits()[0])

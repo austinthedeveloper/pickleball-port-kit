@@ -141,6 +141,13 @@ func setup(v: MatchView) -> void:
 	add_child(_quip)
 	_quip_text = _text("small", "", Vector2(480, 320), 0.5, Color.WHITE, _quip)
 	_result_line = _text("small", "", Vector2(480, 316), 0.5)
+	if Settings.hud_large:
+		# HUD TEXT LARGE (PORT-12): the banners, quips and lines grow
+		for t in [_banner, _banner_sub, _quip_text, _result_line]:
+			t.scale = Vector2(1.5, 1.5)
+		_banner_sub.position.y += 12
+		_quip_text.position.y += 22
+		_result_line.position.y += 22
 	_result_prompts = PromptBar.new().setup([["hit", "REMATCH"], ["start", "MENU"]], Vector2(480, 296))
 	_result_prompts.visible = false
 	add_child(_result_prompts)
