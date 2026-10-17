@@ -86,3 +86,32 @@ func test_cpu_is_beatable_but_not_trivial() -> void:
 	print("    bot wins of 20: mistimes every 2nd shot %d, every 10th %d" % [novice, strong])
 	check(novice <= 5, "a sloppy player mostly loses (%d/20)" % novice)
 	check(strong >= 15, "a sharp player mostly wins (%d/20)" % strong)
+
+
+## ADR-025: KID's ball takes 2 steps in 3, EASY's 3 in 4, evenly spread;
+## MEDIUM steps every frame (so the golden traces don't move).
+func test_slow_ball_pace() -> void:
+	eq(Sim.ball_per_cycle(K.DIFFICULTY_KID), 40)
+	eq(Sim.ball_per_cycle(K.DIFFICULTY_EASY), 45)
+	eq(Sim.ball_per_cycle(K.DIFFICULTY_MEDIUM), 60)
+	var kid := Sim.make_ball_pace(K.DIFFICULTY_KID)
+	var total := 0
+	for i in 60:
+		total += kid[i]
+		check(kid[i] <= 1, "never two steps on one frame")
+	eq(total, 40, "40 steps a cycle")
+	var cfg := SimTypes.MatchConfig.singles()
+	cfg.difficulty = K.DIFFICULTY_MEDIUM
+	check(not Sim.new(cfg).ball_paced, "MEDIUM is unpaced")
+
+
+## On every difficulty a CPU-vs-CPU match still finishes (the paced swing
+## lookahead finds contacts), and KID's human assist returns balls.
+func test_every_difficulty_finishes() -> void:
+	for d in [K.DIFFICULTY_KID, K.DIFFICULTY_EASY, K.DIFFICULTY_HARD]:
+		var cfg := SimTypes.MatchConfig.singles()
+		cfg.difficulty = d
+		var sim := Sim.new(cfg)
+		var r := _play_match(sim, 4, 1)
+		check(r[0] < 60 * 60 * 10, "difficulty %d finishes" % d)
+		print("    difficulty %d: %.1f s, %d-%d" % [d, r[0] / 60.0, r[1], r[2]])

@@ -35,6 +35,7 @@ var _ball_shadow: Sprite2D
 var _ball_frame := 0.0
 var _hud: Hud
 var _sfx: Sfx
+var _debug: DebugOverlay
 
 
 func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void:
@@ -93,6 +94,9 @@ func _build() -> void:
 	_sfx = Sfx.new()
 	add_child(_sfx)
 	_sfx.setup(venue, demo)
+	_debug = DebugOverlay.new()
+	_debug.view = self
+	add_child(_debug)
 
 
 func _build_crowd(vm: Dictionary, z: int) -> void:
@@ -168,10 +172,12 @@ func _physics_process(_delta: float) -> void:
 	var human := []
 	if not demo:
 		var it := GameControls.read_intent()
+		var it2: SimTypes.Intent = GameControls.read_pad_intent(1) if sim.config.human[2] else null
 		if input_lock > 0:
 			input_lock -= 1
 			it = SimTypes.Intent.new()
-		human = [it, null, null, null]
+			it2 = null
+		human = [it, null, it2, null]
 	sim.step(human)
 	for e in sim.drain_events():
 		_on_event(e)
@@ -307,3 +313,4 @@ func _update_visuals() -> void:
 		var cheer: bool = _crowd_cheer > 0 and ((_crowd_cheer / 8 + c[1]) % 2 == 0)
 		c[0].region_rect = Rect2(c[2] if cheer else 0, c[1] * c[3], c[2], c[3])
 	_hud.refresh()
+	_debug.refresh()

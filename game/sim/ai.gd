@@ -268,6 +268,14 @@ func probe_step() -> void:
 			pvy = 0
 			pvz = 0
 
+## The probe through frame `frame`'s ball steps (one at a steady pace).
+func _probe_frame(frame: int) -> void:
+	if not sim.ball_paced:
+		probe_step()
+		return
+	for n in sim.steps_ahead(frame):
+		probe_step()
+
 ## How far a player slides after pressing swing (ADR-038 footwork).
 static func _slide(v: int, limit: int) -> int:
 	v = Sim._approach_zero(v)
@@ -316,10 +324,11 @@ func _swing_connects(p: Player) -> bool:
 	if style.footwork:
 		reach_x += _slide(p.vx_fp, Paddles.swing_limit(p.paddle))
 		reach_y += _slide(p.vy_fp, Paddles.swing_limit(p.paddle))
-	if _window_misses(b.x_fp, b.vx_fp, reach_x, K.to_fp(K.HIT_REACH_X)) \
-			or _window_misses(b.y_fp, b.vy_fp, reach_y, K.to_fp(K.HIT_REACH_Y)):
+	var paced: bool = sim.ball_paced
+	if not paced and (_window_misses(b.x_fp, b.vx_fp, reach_x, K.to_fp(K.HIT_REACH_X)) \
+			or _window_misses(b.y_fp, b.vy_fp, reach_y, K.to_fp(K.HIT_REACH_Y))):
 		return false
-	if pz != 0 or pvz > 0:
+	if not paced and (pz != 0 or pvz > 0):
 		var rise := 3 * pvz + 3 * K.BALL_GRAVITY_FP
 		if pz + rise > 0:
 			pz += rise
@@ -327,9 +336,23 @@ func _swing_connects(p: Player) -> bool:
 			px += 3 * pvx
 			py += 3 * pvy
 			step = K.PLAYER_WINDUP_FRAMES
+	elif paced and (pz != 0 or pvz > 0):
+		# The paced steps of frames 0-2, airborne, are one exact block.
+		var n: int = sim.steps_ahead(0) + sim.steps_ahead(1) + sim.steps_ahead(2)
+		var rise2 := 0
+		var fall := 0
+		for k in n:
+			rise2 += pvz + fall
+			fall += K.BALL_GRAVITY_FP
+		if pz + rise2 > 0:
+			pz += rise2
+			pvz += fall
+			px += n * pvx
+			py += n * pvy
+			step = K.PLAYER_WINDUP_FRAMES
 	var last := K.PLAYER_WINDUP_FRAMES + K.PLAYER_ACTIVE_FRAMES
 	while step <= last:
-		probe_step()
+		_probe_frame(step - 1)
 		if step < K.PLAYER_WINDUP_FRAMES:
 			step += 1
 			continue
@@ -354,12 +377,12 @@ func _swing_connects(p: Player) -> bool:
 			if not partner_human:
 				return false
 			while step < last:
-				probe_step()
+				_probe_frame(step)
 				step += 1
 			return (px > reach_x if p.team else px < reach_x) \
 				and not Sim.contains_ground_fp(px, py)
 		while step < last:
-			probe_step()
+			_probe_frame(step)
 			step += 1
 		return not _probe_in_reach()
 	return false

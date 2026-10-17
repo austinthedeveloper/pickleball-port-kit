@@ -159,6 +159,7 @@ def park() -> Venue:
 
 def lakeside() -> Venue:
     v = Venue("lakeside")
+    v.stands_behind_fence = True
     S = Layer()
     sky_gradient(S, [(0, "3f86e0"), (0.5, "5c9ef0"), (1, "a9cdf2")],
                  y0=-24, y1=110)

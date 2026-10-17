@@ -9,13 +9,14 @@ const VENUES := ["park", "lakeside", "sunset"]
 const VENUE_NAMES := ["PARK", "LAKESIDE", "SUNSET"]
 const DIFFICULTIES := ["KID", "EASY", "MEDIUM", "HARD"]
 const POINTS := [3, 5, 7, 9, 11, 15, 21]
-const ROWS := ["SINGLES", "DOUBLES", "VENUE", "OPPONENT", "DIFFICULTY", "POINTS"]
+const ROWS := ["SINGLES", "DOUBLES", "VENUE", "OPPONENT", "DIFFICULTY", "POINTS", "PLAYERS"]
 
 static var venue_i := 0
 static var difficulty_i := K.DIFFICULTY_MEDIUM
 static var points_i := 1
 static var opponent_i := -1
 static var cursor := 0
+static var two_players := false
 
 var _demo: MatchView
 var _ui: CanvasLayer
@@ -55,7 +56,7 @@ func _ready() -> void:
 	for m in ["patch_margin_left", "patch_margin_top", "patch_margin_right", "patch_margin_bottom"]:
 		panel.set(m, 12)
 	panel.position = Vector2(300, 182)
-	panel.size = Vector2(360, 228)
+	panel.size = Vector2(360, 258)
 	_ui.add_child(panel)
 	for i in ROWS.size():
 		var label := BitmapText.new()
@@ -79,13 +80,13 @@ func _ready() -> void:
 	help.font = "small"
 	help.text = "D-PAD CHOOSE   B START"
 	help.align = 0.5
-	help.position = Vector2(480, 470)
+	help.position = Vector2(480, 476)
 	_ui.add_child(help)
 	var keys := BitmapText.new()
 	keys.font = "small"
 	keys.text = "MOVE: ARROWS  B: SPACE  A: K  Y: L  START: ENTER"
 	keys.align = 0.5
-	keys.position = Vector2(480, 500)
+	keys.position = Vector2(480, 504)
 	keys.tint = Color(0.75, 0.8, 0.9)
 	_ui.add_child(keys)
 	_sfx = Sfx.new()
@@ -112,6 +113,7 @@ func _refresh() -> void:
 	_values[3].text = "CPU" if opponent_i < 0 else Opponents.team(opponent_i)["team"]
 	_values[4].text = DIFFICULTIES[difficulty_i]
 	_values[5].text = str(POINTS[points_i])
+	_values[6].text = "2P VS" if two_players else "1P"
 	_arrow.position = Vector2(318, 204 + cursor * 32)
 	for i in _rows.size():
 		_rows[i].tint = Color.WHITE if i == cursor else Color(0.7, 0.74, 0.85)
@@ -121,8 +123,10 @@ func config(doubles: bool) -> SimTypes.MatchConfig:
 	var cfg := SimTypes.MatchConfig.doubles() if doubles else SimTypes.MatchConfig.singles()
 	cfg.difficulty = difficulty_i
 	cfg.points_to_win = POINTS[points_i]
-	cfg.opponent = opponent_i
-	if opponent_i >= 0:
+	cfg.opponent = -1 if two_players else opponent_i
+	if two_players:
+		cfg.human[2] = 1
+	elif opponent_i >= 0:
 		var members: Array = Opponents.team(opponent_i)["players"]
 		for slot in [2, 3]:
 			var m: Dictionary = members[mini(slot - 2, members.size() - 1)]
@@ -170,6 +174,8 @@ func _process(_delta: float) -> void:
 				difficulty_i = clampi(difficulty_i + dir, 0, DIFFICULTIES.size() - 1)
 			5:
 				points_i = clampi(points_i + dir, 0, POINTS.size() - 1)
+			6:
+				two_players = not two_players
 		moved = true
 	if moved:
 		_sfx.play("blip")

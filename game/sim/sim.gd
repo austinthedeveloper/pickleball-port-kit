@@ -54,6 +54,14 @@ var attract := 0                ## slot 0 driven by the AI (demo)
 var p1_bot := false
 var loop_count := 0             ## main.c g_loop_count (u16)
 var ball_steps := 0             ## physics steps this match (AI cache)
+## Ball pace (ADR-025): KID and EASY play a slower ball by skipping steps
+## evenly over a 60-frame cycle; the table runs 12 ticks past the cycle
+## for the CPUs' swing lookahead. MEDIUM/HARD step every frame.
+const BALL_CYCLE := 60
+const BALL_PACE_TICKS := BALL_CYCLE + 12
+var ball_paced := false
+var ball_pace: Array = []
+var ball_tick := 0
 var rally_start := 0
 var last_rally_length := 0
 var events: Array = []          ## [kind, x, y, detail] since last drain
@@ -767,6 +775,11 @@ func _players_initialize() -> void:
 	place(players[0], K.PLAYER_SPAWN_X, K.PLAYER_SPAWN_Y)
 
 func _activate_players() -> void:
+	ball_tick = 0
+	ball_steps = 0
+	ball_paced = ball_per_cycle(config.difficulty) != BALL_CYCLE
+	if ball_paced:
+		ball_pace = make_ball_pace(config.difficulty)
 	for i in K.MAX_PLAYERS:
 		var active := config.slot_active(i)
 		if i == 0:
@@ -818,9 +831,44 @@ func contact(slot: int) -> void:
 	hit_stop = K.HIT_STOP_FRAMES
 	emit(K.EVENT_HIT, K.from_fp(ball.x_fp), K.from_fp(ball.y_fp), slot | (p.shot_type << 4))
 
+static func ball_per_cycle(difficulty: int, percent: int = 100) -> int:
+	var base := BALL_CYCLE
+	if difficulty == K.DIFFICULTY_KID:
+		base = BALL_CYCLE * 2 / 3
+	elif difficulty == K.DIFFICULTY_EASY:
+		base = BALL_CYCLE * 3 / 4
+	return (base * percent + 50) / 100
+
+## Even spreading: a step each time the running share passes a cycle.
+static func make_ball_pace(difficulty: int) -> Array:
+	var per := ball_per_cycle(difficulty)
+	var pace := []
+	var share := 0
+	for i in BALL_PACE_TICKS:
+		var n := 0
+		share += per
+		while share >= BALL_CYCLE:
+			share -= BALL_CYCLE
+			n += 1
+		pace.append(n)
+	return pace
+
+## Ball steps `frames` frames from now (0 = this frame): 0, 1, or 2.
+func steps_ahead(frames: int) -> int:
+	return ball_pace[ball_tick + frames]
+
 func step_ball() -> int:
-	ball_steps += 1
-	return simulate_step(ball)
+	if not ball_paced:
+		ball_steps += 1
+		return simulate_step(ball)
+	var ev := 0
+	for n in steps_ahead(0):
+		ball_steps += 1
+		ev |= simulate_step(ball)
+	ball_tick += 1
+	if ball_tick >= BALL_CYCLE:
+		ball_tick = 0
+	return ev
 
 func _update_live() -> void:
 	var hit_player := 0

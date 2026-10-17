@@ -72,3 +72,40 @@ static func read_intent() -> SimTypes.Intent:
 		it.shot = K.SHOT_SOFT
 	it.pause_pressed = 1 if Input.is_action_just_pressed("start") else 0
 	return it
+
+
+## 2P (ADR-020): a second gamepad's intent, read directly so the input map
+## (keyboard + pad 0) stays P1's.
+static var _pad_prev := {}
+
+static func read_pad_intent(device: int) -> SimTypes.Intent:
+	var it := SimTypes.Intent.new()
+	if not device in Input.get_connected_joypads():
+		return it
+	var ax := Input.get_joy_axis(device, JOY_AXIS_LEFT_X)
+	var ay := Input.get_joy_axis(device, JOY_AXIS_LEFT_Y)
+	if Input.is_joy_button_pressed(device, JOY_BUTTON_DPAD_LEFT) or ax < -0.4:
+		it.move_x = -1
+	elif Input.is_joy_button_pressed(device, JOY_BUTTON_DPAD_RIGHT) or ax > 0.4:
+		it.move_x = 1
+	if Input.is_joy_button_pressed(device, JOY_BUTTON_DPAD_UP) or ay < -0.4:
+		it.move_y = -1
+	elif Input.is_joy_button_pressed(device, JOY_BUTTON_DPAD_DOWN) or ay > 0.4:
+		it.move_y = 1
+	it.aim_x = it.move_x
+	it.aim_y = it.move_y
+	var held := {}
+	for b in [JOY_BUTTON_A, JOY_BUTTON_B, JOY_BUTTON_X]:
+		held[b] = Input.is_joy_button_pressed(device, b)
+	var prev: Dictionary = _pad_prev.get(device, {})
+	var pressed := {}
+	for b in held:
+		pressed[b] = held[b] and not prev.get(b, false)
+	_pad_prev[device] = held
+	it.hit_pressed = 1 if (pressed[JOY_BUTTON_A] or pressed[JOY_BUTTON_B] or pressed[JOY_BUTTON_X]) else 0
+	it.hit_held = 1 if (held[JOY_BUTTON_A] or held[JOY_BUTTON_B] or held[JOY_BUTTON_X]) else 0
+	if pressed[JOY_BUTTON_B]:
+		it.shot = K.SHOT_DRIVE
+	elif pressed[JOY_BUTTON_X]:
+		it.shot = K.SHOT_SOFT
+	return it

@@ -865,8 +865,8 @@
      ]
     },
     {
-     "name": "fence",
-     "file": "venues/lakeside/fence.png",
+     "name": "stands",
+     "file": "venues/lakeside/stands.png",
      "parallax": 1.0,
      "z": 4,
      "origin": [
@@ -879,8 +879,8 @@
      ]
     },
     {
-     "name": "stands",
-     "file": "venues/lakeside/stands.png",
+     "name": "fence",
+     "file": "venues/lakeside/fence.png",
      "parallax": 1.0,
      "z": 5,
      "origin": [

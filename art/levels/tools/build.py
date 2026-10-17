@@ -245,7 +245,12 @@ def build_venue(name, crowd_rows):
     net = Layer()
     C.net(net)
     v.layers.append(("net", net, 1.0))
-    v.layers.sort(key=lambda t: ORDER.index(t[0]))
+    order = list(ORDER)
+    if getattr(v, "stands_behind_fence", False):
+        # lakeside: the spectators sit outside the court, behind the fence
+        i, j = order.index("fence"), order.index("stands")
+        order[i], order[j] = order[j], order[i]
+    v.layers.sort(key=lambda t: order.index(t[0]))
     layers = []
     for z, (lname, L, par) in enumerate(v.layers):
         rel = save(L.a, f"venues/{name}/{lname}.png")
