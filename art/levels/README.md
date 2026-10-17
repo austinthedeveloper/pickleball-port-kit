@@ -92,8 +92,10 @@ python3 -m venv .venv && .venv/bin/pip install -r art/levels/tools/requirements.
 
 ## Not done yet
 
-- **Polish:** the art is generated and hasn't had a hand pass. Faces,
-  hands, the crowd and the foliage would all benefit from one in Aseprite.
+- **Polish:** the art is generated and hasn't had a hand pass. Hands, the
+  crowd and the foliage would benefit from one in Aseprite. Leave the
+  player faces as they are: the long-chinned "so ugly they're awesome" look
+  is approved and part of the style.
 - **Night:** ADR-045's night times aren't baked. The backdrop layers are
   separate, so an engine tint (dark for the backdrop, lit for the court)
   covers it.
