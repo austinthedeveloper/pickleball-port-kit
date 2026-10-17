@@ -1,0 +1,47 @@
+# CLAUDE.md
+
+Pickleball '94 port kit: the SNES game's docs, data, C reference sim, art,
+and the Godot 4.7 port in `game/`. Branch per change with the
+`feature/cld-` prefix; never commit to `main` (the human reviews and
+merges).
+
+## Commands
+
+```sh
+game/tools/test.sh                                   # all Godot tests, headless (must pass)
+godot --path game                                    # play
+godot --headless --path game -s res://tests/golden.gd  # regenerate golden traces (play changes only)
+game/tools/sync_assets.sh                            # after rebuilding art/levels
+.venv/bin/python art/levels/tools/build.py           # rebuild the 960x540 art (needs .venv: numpy, pillow)
+godot --path game --resolution 960x540 -s res://tools/screenshot.gd -- <title|singles|doubles|demo> <park|lakeside|sunset> <frames> <out.png>
+godot --headless --path game -s res://tools/point_log.gd -- doubles 2   # why each point ended
+```
+
+## Rules of the code (game/)
+
+- **The sim is pure and exact.** `game/sim/` uses ints only (12.4 fixed
+  point), no Nodes, no time, no randomness. Mask u8/u16 state where the C
+  wraps (`& 0xff`, `& 0xffff`). GDScript `/` on ints truncates like C;
+  `>>` floors, like the C's arithmetic shift.
+- **The sim follows the C reference.** `reference/snes-src/src` is the
+  source of truth for rules and AI; keep functions in the same order and
+  shape so they diff against it. Behaviour changes need an ADR.
+- **Presentation never writes to the sim** (`test_view_never_writes_to_the_sim`).
+  Display choices (animation variants, effects, crowd) live in `game/view/`.
+- **CPU schedule = shipped schedule.** `Sim.step()` runs the CPUs as
+  main.c does (doubles lane covers every 4th frame); tests use `step()`,
+  not ad hoc AI calls, unless porting a C test that did otherwise.
+- **Typed GDScript.** `:=` can't infer from Array elements or untyped
+  ternaries: annotate (`var x: int = arr[i]`). `Projection` is a built-in
+  type name; the world→screen helper is `CourtView`.
+- **Modals swallow their closing input** (playbook rule 9): a new match
+  ignores input for `INPUT_LOCK_FRAMES`.
+- **The bitmap fonts** have caps, digits, and `!?.,:-'/%+ ` only.
+
+## Before calling it done
+
+1. `game/tools/test.sh` passes (golden traces unchanged unless the change
+   is meant to alter play, with the reason in the commit).
+2. Look at a screenshot of anything visual.
+3. Update `design/KNOWN_ISSUES.md` for new defects and the ADR for
+   decisions.

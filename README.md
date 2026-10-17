@@ -6,6 +6,12 @@ browser TypeScript). Copied from the SNES repo at commit `a7e6a90`
 remains the source of truth for the SNES game, and this folder can become
 the new repo (`git init` here).
 
+## The Godot port
+
+`game/` is the modern port (Godot 4.7, 960×540): the SNES sim ported
+integer-exact, with headless tests, golden traces, and a stats harness.
+Start with `game/README.md`, `CLAUDE.md`, and `decisions/ADR-052-godot-port.md`.
+
 ## Read first
 
 1. `design/NEXT_GAME_PLAYBOOK.md`: lessons and build order. Rule 1 is to

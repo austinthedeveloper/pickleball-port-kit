@@ -177,6 +177,7 @@ func _physics_process(_delta: float) -> void:
 			input_lock -= 1
 			it = SimTypes.Intent.new()
 			it2 = null
+			GameControls.clear_latch()
 		human = [it, null, it2, null]
 	sim.step(human)
 	for e in sim.drain_events():

@@ -46,8 +46,34 @@ func _ready() -> void:
 		InputMap.action_add_event(pair[0], m)
 
 
+## Presses latched from input events until the next sim step reads them,
+## so a tap shorter than a physics tick (fast frames, high refresh) is
+## never lost.
+const LATCHED := ["hit", "drive", "soft", "start"]
+static var _latch := {}
+
+
+func _input(event: InputEvent) -> void:
+	if event.is_echo():
+		return
+	for a in LATCHED:
+		if event.is_action_pressed(a):
+			_latch[a] = true
+
+
+static func _pressed(action: String) -> bool:
+	var p: bool = _latch.get(action, false) or Input.is_action_just_pressed(action)
+	_latch.erase(action)
+	return p
+
+
 ## P1's intent for this frame from the input map (input_state.c
 ## build_intent): D-pad moves and aims; B/A/Y swing with their shot type.
+## Drops latched presses (a screen change: rule 9).
+static func clear_latch() -> void:
+	_latch.clear()
+
+
 static func read_intent() -> SimTypes.Intent:
 	var it := SimTypes.Intent.new()
 	if Input.is_action_pressed("move_left"):
@@ -60,9 +86,9 @@ static func read_intent() -> SimTypes.Intent:
 		it.move_y = 1
 	it.aim_x = it.move_x
 	it.aim_y = it.move_y
-	var b := Input.is_action_just_pressed("hit")
-	var a := Input.is_action_just_pressed("drive")
-	var y := Input.is_action_just_pressed("soft")
+	var b := _pressed("hit")
+	var a := _pressed("drive")
+	var y := _pressed("soft")
 	it.hit_pressed = 1 if (a or b or y) else 0
 	it.hit_held = 1 if (Input.is_action_pressed("hit") or Input.is_action_pressed("drive")
 		or Input.is_action_pressed("soft")) else 0
@@ -70,7 +96,7 @@ static func read_intent() -> SimTypes.Intent:
 		it.shot = K.SHOT_DRIVE
 	elif y:
 		it.shot = K.SHOT_SOFT
-	it.pause_pressed = 1 if Input.is_action_just_pressed("start") else 0
+	it.pause_pressed = 1 if _pressed("start") else 0
 	return it
 
 
