@@ -115,7 +115,7 @@ func test_v2_save_migrates() -> void:
 	eq(s.data["records"]["practice_best"], 0)
 	eq(s.data["records"]["practice_zone_best"], [0, 0, 0, 0])
 	var raw: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(DIR + "save_a.json"))
-	eq(int(raw["version"]), 3, "rewritten as v3")
+	eq(int(raw["version"]), SaveGame.VERSION, "rewritten as the current layout")
 	var t := SaveGame.new()
 	t.dir = DIR
 	t.load_game()

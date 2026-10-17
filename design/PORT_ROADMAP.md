@@ -241,16 +241,36 @@ feature/cld-godot-port                 (done: the playable port)
 
 ### 8. `feature/cld-records`: records and initials (ADR-021, ADR-040)
 
-- [ ] `PORT-08` A RECORDS page: wins and losses by mode, the longest
+- [x] `PORT-08` A RECORDS page: wins and losses by mode, the longest
   rally, ladder clears, the best practice streak, and a record against
   each opponent. Initials on a new record, with an arcade keyboard, a
   30-frame input lockout and only on a finished match. The save goes to
-  layout v3 with a migration.
-  - Accept: save tests for the v2 to v3 migration and the initials rules
+  layout v4 with a migration (practice took v3).
+  - Accept: save tests for the v3 to v4 migration and the initials rules
     (from `test_save.c`), and the record tests ported. Records never
     count in the demo.
-  - Verified: —
-  - Status: Planned. It should be **Done**, plus a quick look.
+  - Verified: save layout **v4** (practice had already taken v3): the
+    win streak and best streak, shutouts, wins and losses against each
+    ladder team, and who holds the best streak and the longest rally;
+    v3 migrates with everything kept and nobody holding a record.
+    `meta/initials.gd` is story.c's initials card (A-Z wrapping, held
+    Up/Down repeating after 16 frames then every 4, B/A/Right next, Y/Left
+    back, Start saves, nothing but Up/Down for 30 frames, the letters
+    shown kept after 30 seconds, starting from the session's last
+    initials). A finished match that beat a record opens it before the
+    result screen, with the match waiting under it; RESTART and MAIN
+    MENU drop the request but keep the number; a run extends its own
+    streak record without asking again. RECORDS shows SINGLES, DOUBLES,
+    BEST STREAK and LONGEST RALLY (holder, then count, --- for nobody),
+    SHUTOUTS, LADDER with clears, PRACTICE BEST, VS (Left/Right through
+    the teams), and ERASE RECORDS (press B twice; settings stay).
+    `test_records.gd` (7 tests): the v3 to v4 migration; test_save.c's
+    initials rules; test_story.c's card rules; the card after a finished
+    match only (vs and shutouts recorded, the sim waiting, RESTART
+    dropping the request); 6,000 demo frames recording nothing; the page.
+    141/141 plus the e2e; golden traces unchanged. Screenshots: the
+    initials card and the RECORDS page.
+  - Status: **Done**. (A quick look: win a match and enter initials.)
 
 ### 9. `feature/cld-release`: release prep (playbook 0.1, §9)
 
@@ -307,6 +327,10 @@ the chain: each has a default I've gone with.
   I think it reads as "the real spot", but say if you'd prefer a flat,
   square-on view. The watcher is the partner's match sprite at half size;
   sitting shows the top half above the bench, as on the SNES.
+
+- **PORT-08 records:** your first win on this build asks for initials,
+  because the best streak starts at 0 in the new layout. The SNES records
+  page's L + R + X erase became an ERASE RECORDS row you press twice.
 
 ## If time runs short or long
 

@@ -364,7 +364,41 @@ func _build_ball() -> void:
 
 # --- Frame ------------------------------------------------------------------------
 
+## The initials card (ADR-040): the match waits under it like the intro card.
+var initials := Initials.new()
+
+
+## SNES pad bits from the input map: [newly pressed, held].
+static func pad_bits() -> Array:
+	var pressed := 0
+	var held := 0
+	for pair in [["move_up", Initials.PAD_UP], ["move_down", Initials.PAD_DOWN],
+			["move_left", Initials.PAD_LEFT], ["move_right", Initials.PAD_RIGHT],
+			["hit", Initials.PAD_B], ["drive", Initials.PAD_A], ["soft", Initials.PAD_Y],
+			["start", Initials.PAD_START]]:
+		if Input.is_action_just_pressed(pair[0]):
+			pressed |= pair[1]
+		if Input.is_action_pressed(pair[0]):
+			held |= pair[1]
+	return [pressed, held]
+
+
+func _update_initials() -> void:
+	var bits := pad_bits()
+	if not initials.update(bits[0], bits[1]):
+		save.save_game()
+		input_lock = INPUT_LOCK_FRAMES      # the closing press doesn't rematch
+		GameControls.clear_latch()
+		_sfx.play("confirm")
+	elif bits[0]:
+		_sfx.play("blip")
+
+
 func _physics_process(_delta: float) -> void:
+	if initials.open:
+		_update_initials()
+		_update_visuals()
+		return
 	if card_frames >= 0:
 		_update_card()
 		_update_visuals()
@@ -436,6 +470,8 @@ func _pause_input(it: SimTypes.Intent) -> bool:
 			it.pause_pressed = 1         # the sim unpauses on its own Start
 		"restart":
 			_sfx.play("confirm")
+			if save:
+				save.drop_new_records()          # only a finished match asks
 			sim.new_match()
 			_prev_phase = -1
 			input_lock = INPUT_LOCK_FRAMES   # the closing press doesn't serve
@@ -444,6 +480,8 @@ func _pause_input(it: SimTypes.Intent) -> bool:
 			return true
 		"menu":
 			_sfx.play("back")
+			if save:
+				save.drop_new_records()
 			if sim.config.practice:
 				leave_practice()
 			else:
@@ -496,14 +534,18 @@ func _update_card() -> void:
 
 ## Records at the match's end (a safe point to write, playbook §6), and the
 ## ladder (ADR-023): a win moves to the next rung; beating the last clears.
+## A record beaten (the rally, in 2P too) asks for initials (ADR-040).
 func _on_match_over() -> void:
-	if demo or save == null or sim.config.human[2]:
+	if demo or save == null:
 		return
 	var won := sim.match_winner == 0
-	save.record_match(sim.config.mode == K.MODE_DOUBLES, won)
-	if ladder and won:
-		cleared = save.advance_ladder(Opponents.count())
+	if not sim.config.human[2]:
+		save.record_match(sim.config.mode == K.MODE_DOUBLES, won, sim.config.opponent,
+			sim.team_score[1] if won else -1)
+		if ladder and won:
+			cleared = save.advance_ladder(Opponents.count())
 	save.save_game()
+	initials.begin(save)
 
 
 ## Leaving practice: a new best streak (for the session's zone) is saved

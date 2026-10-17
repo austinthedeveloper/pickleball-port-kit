@@ -5,7 +5,7 @@
 ## "opp=N" plays ladder team N (0-based) in their looks. "title_options"
 ## (any page id) opens that title page; "court=S,K,R,L" sets the court
 ## colour presets; "time=N" DAY 0, DUSK 1, NIGHT 2; "pause" pauses the match at the end;
-## "closecall" shows a forced close-up.
+## "closecall" shows a forced close-up; "initials" the initials card.
 extends SceneTree
 
 var _frames := 0
@@ -85,6 +85,17 @@ func _tick() -> void:
 		v._hud.add_child(v.close_call)
 		for i in 70:                   # past the drop and the bounce
 			v.close_call.update()
+	if _frames == _target - 20 and _view is MatchView and "initials" in OS.get_cmdline_user_args():
+		# the initials card over a forced record (nothing is written)
+		var v: MatchView = _view
+		v.save = SaveGame.new()
+		v.save.data = SaveGame.defaults()
+		v.save.data["records"]["best_streak"] = 5
+		v.save.data["records"]["longest_rally"] = 14
+		v.save.new_records = SaveGame.NEW_STREAK | SaveGame.NEW_RALLY
+		v.initials.begin(v.save)
+		v.initials.letters = [0, 1, 4]
+		v.initials.cursor = 2
 	if _frames >= _target:
 		var img := root.get_texture().get_image()
 		img.save_png(_out)

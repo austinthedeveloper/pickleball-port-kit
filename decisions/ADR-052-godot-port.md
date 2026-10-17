@@ -135,6 +135,12 @@ stream, at the 960×540 art density, through the art's court geometry.
   sheet at half size in their palette (the SNES used a park person in
   the captain's palette for lack of a fifth OBJ palette); it hides the
   spectator at the seat it takes.
+- **Records and initials** (PORT-08, ADR-021/040). Save layout v4 adds
+  the streaks, shutouts, `vs` (wins and losses per ladder team) and
+  `initials`; `new_records` and `streak_held` are session-only, as the
+  SNES keeps them in WRAM. `meta/initials.gd` is story.c's card, driven
+  by SNES pad bits; the view waits under it as under the intro card. The
+  ERASE RECORDS row (two presses) stands in for L + R + X.
 - **Not ported yet:** open play (ADR-034), career (ADR-047).
 
 ## Rejected (and why)

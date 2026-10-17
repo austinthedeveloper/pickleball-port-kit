@@ -26,6 +26,10 @@ var _quip_frames := 0
 var _result_line: BitmapText
 var _card: Control
 var _practice_menu: Control
+var _initials: Control           ## the initials card (ADR-040), built when needed
+var _ini_letters: Array = []
+var _ini_line: BitmapText
+var _ini_under: ColorRect
 
 
 func _panel(name: String, rect: Rect2) -> NinePatchRect:
@@ -181,6 +185,44 @@ func _build_card(cfg: SimTypes.MatchConfig) -> void:
 	_text("small", "B: PLAY", Vector2(480, 330), 0.5, Color.WHITE, _card)
 
 
+func _refresh_initials() -> void:
+	var ini: Initials = view.initials
+	if not ini.open:
+		if _initials:
+			_initials.visible = false
+		return
+	if _initials == null:
+		_initials = Control.new()
+		add_child(_initials)
+		var shade := ColorRect.new()
+		shade.color = Color(0, 0.02, 0.08, 0.55)
+		shade.size = Vector2(960, 540)
+		_initials.add_child(shade)
+		var p := _panel("title", Rect2(300, 140, 360, 250))
+		p.reparent(_initials)
+		var title := _text("big_gold", "NEW RECORD!", Vector2(480, 160), 0.5, Color.WHITE, _initials)
+		title.scale = Vector2(1.5, 1.5)
+		title.position.x = 480
+		_ini_line = _text("small", "", Vector2(480, 214), 0.5, Color("fbe46a"), _initials)
+		for i in 3:
+			var l := _text("big", "", Vector2(420 + i * 60, 252), 0.5, Color.WHITE, _initials)
+			l.scale = Vector2(2, 2)
+			l.position.x = 420 + i * 60
+			_ini_letters.append(l)
+		_ini_under = ColorRect.new()
+		_ini_under.size = Vector2(36, 5)
+		_ini_under.color = Color("fbe46a")
+		_initials.add_child(_ini_under)
+		_text("small", "UP DOWN  B NEXT  START OK", Vector2(480, 342), 0.5, Color(0.8, 0.85, 0.95), _initials)
+	_initials.visible = true
+	_ini_line.text = ini.records_line()
+	var t := ini.text()
+	for i in 3:
+		_ini_letters[i].text = t[i]
+		_ini_letters[i].tint = Color.WHITE if i == ini.cursor else Color(0.7, 0.74, 0.85)
+	_ini_under.position = Vector2(402 + ini.cursor * 60, 310)
+
+
 func close_card() -> void:
 	if _card:
 		_card.queue_free()
@@ -239,7 +281,11 @@ func refresh() -> void:
 		_quip_frames -= 1
 	_quip.visible = _quip_frames > 0 and s.phase == K.PHASE_POINT_RESULT and view.close_call == null
 	_result_line.text = ""
-	if s.phase == K.PHASE_MATCH_RESULT:
+	_refresh_initials()
+	if view.initials.open:
+		_banner.text = ""
+		_banner_sub.text = ""
+	elif s.phase == K.PHASE_MATCH_RESULT:
 		var you := s.match_winner == 0
 		if view.demo:
 			_banner.text = "%s WINS" % _team_label(s.match_winner)

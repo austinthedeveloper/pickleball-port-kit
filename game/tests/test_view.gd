@@ -112,6 +112,11 @@ func test_ladder_win_advances_and_offers_the_next_rung() -> void:
 	eq(sim.phase, K.PHASE_MATCH_RESULT, "match over")
 	eq(save.data["records"]["singles_wins"], 1, "the win is recorded")
 	eq(save.data["records"]["ladder_rung"], 1, "on to the next rung")
+	check(view.initials.open, "a first win is a new best streak: the initials card")
+	for f in Initials.MIN_FRAMES:
+		view.initials.update(0, 0)
+	check(not view.initials.update(Initials.PAD_START, 0), "Start enters them")
+	eq(save.data["initials"]["best_streak"], "AAA")
 	sim.rematch_requested = true
 	view._physics_process(1.0 / 60.0)
 	check(asked[0], "B after a ladder win asks for the next opponent")

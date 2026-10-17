@@ -4,14 +4,20 @@
 ## copy, migrates it to the current layout, and writes both.
 ##
 ## Layouts are frozen: v1 (settings only, the first port build), v2
-## (records and the ladder), and v3 (practice, ADR-028: its settings and
-## the best streaks). Every change adds a version and a migration
+## (records and the ladder), v3 (practice, ADR-028: its settings and
+## the best streaks), and v4 (PORT-08: the win streak, shutouts, the
+## record against each opponent, and record initials, ADR-040). Every change adds a version and a migration
 ## and a test that loads the old image (playbook rule 4).
 class_name SaveGame
 extends RefCounted
 
 const MAGIC := "PB94"
-const VERSION := 3
+const VERSION := 4
+## Records beaten by the match in progress (save_new_records: session
+## only, never saved). ADR-040.
+const NEW_STREAK := 1
+const NEW_RALLY := 2
+const INITIALS := 3
 const FILES := ["save_a.json", "save_b.json"]
 
 ## Where saves live; tests point it elsewhere before the game starts.
@@ -19,6 +25,10 @@ static var default_dir := "user://"
 var dir := default_dir
 var seq := 0
 var data: Dictionary = {}
+var new_records := 0
+## The best streak was claimed during the current, unbroken run: the next
+## wins extend it under the same initials without asking (session only).
+var streak_held := false
 
 
 static func defaults() -> Dictionary:
@@ -36,8 +46,20 @@ static func defaults() -> Dictionary:
 		"records": {"singles_wins": 0, "singles_losses": 0, "doubles_wins": 0,
 			"doubles_losses": 0, "ladder_rung": 0, "ladder_clears": 0,
 			"longest_rally": 0, "practice_best": 0,
-			"practice_zone_best": [0, 0, 0, 0]},
+			"practice_zone_best": [0, 0, 0, 0],
+			"streak": 0, "best_streak": 0, "shutouts": 0,
+			"vs": _vs_zero()},
+		## who holds a record ("" = nobody, shown ---)
+		"initials": {"best_streak": "", "longest_rally": ""},
 	}
+
+
+## Wins and losses against each ladder team: [[w, l], ...].
+static func _vs_zero() -> Array:
+	var out := []
+	for i in Opponents.count():
+		out.append([0, 0])
+	return out
 
 
 static func checksum(payload: String) -> int:
@@ -47,6 +69,8 @@ static func checksum(payload: String) -> int:
 ## v1 -> v2: records arrive (all zero, rung 0); settings carry over.
 ## v2 -> v3: practice arrives (the default drill, bests at 0); the rest
 ## carries over.
+## v3 -> v4: the streaks, shutouts and per-opponent records start at 0
+## and nobody holds a record until it is beaten again (as ADR-040's v8).
 static func migrate(version: int, d: Dictionary) -> Dictionary:
 	var out := d.duplicate(true)
 	if version < 2:
@@ -57,6 +81,12 @@ static func migrate(version: int, d: Dictionary) -> Dictionary:
 		out["settings"]["practice"] = Practice.DEFAULTS.duplicate()
 		out["records"]["practice_best"] = 0
 		out["records"]["practice_zone_best"] = [0, 0, 0, 0]
+	if version < 4:
+		out["records"]["streak"] = 0
+		out["records"]["best_streak"] = 0
+		out["records"]["shutouts"] = 0
+		out["records"]["vs"] = _vs_zero()
+		out["initials"] = defaults()["initials"].duplicate()
 	var def := defaults()
 	for section in def:
 		if not out.has(section):
@@ -154,18 +184,65 @@ func _older_file() -> String:
 
 # --- Records ---------------------------------------------------------------
 
-func record_match(doubles: bool, won: bool) -> void:
+## A finished match against the CPU (save_record_match): wins and losses
+## by mode and against the opponent, the win streak (a new best clears
+## its initials and asks for them, unless this run already holds it),
+## and shutouts. 2P matches count only the rally (record_rally).
+func record_match(doubles: bool, won: bool, opponent := -1, points_against := -1) -> void:
 	var r: Dictionary = data["records"]
 	var key := ("doubles_" if doubles else "singles_") + ("wins" if won else "losses")
 	r[key] = int(r[key]) + 1
+	if opponent >= 0 and opponent < r["vs"].size():
+		r["vs"][opponent][0 if won else 1] += 1
+	if won:
+		r["streak"] = int(r["streak"]) + 1
+		if int(r["streak"]) > int(r["best_streak"]):
+			r["best_streak"] = r["streak"]
+			# extending one's own record keeps its initials
+			if not streak_held or data["initials"]["best_streak"] == "":
+				data["initials"]["best_streak"] = ""
+				new_records |= NEW_STREAK
+				streak_held = true
+		if points_against == 0:
+			r["shutouts"] = int(r["shutouts"]) + 1
+	else:
+		r["streak"] = 0
+		streak_held = false
 
 
+## A rally longer than the record: it's the record now, and its initials
+## clear until entered. Returns true if it was.
 func record_rally(length: int) -> bool:
 	var r: Dictionary = data["records"]
 	if length > int(r["longest_rally"]):
 		r["longest_rally"] = length
+		data["initials"]["longest_rally"] = ""
+		new_records |= NEW_RALLY
 		return true
 	return false
+
+
+## The initials for every record this match beat (save_set_initials).
+func set_initials(letters: String) -> void:
+	if new_records & NEW_STREAK:
+		data["initials"]["best_streak"] = letters
+	if new_records & NEW_RALLY:
+		data["initials"]["longest_rally"] = letters
+	new_records = 0
+
+
+## A match left early (RESTART, MAIN MENU) keeps its numbers but asks for
+## no initials.
+func drop_new_records() -> void:
+	new_records = 0
+
+
+## Erases the records (and who holds them); the settings stay.
+func erase_records() -> void:
+	data["records"] = defaults()["records"]
+	data["initials"] = defaults()["initials"]
+	new_records = 0
+	streak_held = false
 
 
 ## A ladder win moves to the next rung; beating the last clears the ladder

@@ -241,15 +241,48 @@ func _build_pages() -> void:
 	_add_page("records", "RECORDS", [
 		{"id": "singles", "label": "SINGLES", "value": func(): return _wl("singles")},
 		{"id": "doubles", "label": "DOUBLES", "value": func(): return _wl("doubles")},
-		{"id": "ladder", "label": "LADDER", "value": func(): return "%d OF %d" % [_rung() + 1, Opponents.count()]},
-		{"id": "clears", "label": "CLEARS", "value": func(): return str(_rec("ladder_clears"))},
-		{"id": "rally", "label": "LONGEST RALLY", "value": func(): return str(_rec("longest_rally"))},
-		{"id": "streak", "label": "PRACTICE BEST", "value": func(): return str(_rec("practice_best"))},
-	], "Y: BACK")
+		{"id": "streak", "label": "BEST STREAK", "value": func(): return _held("best_streak")},
+		{"id": "rally", "label": "LONGEST RALLY", "value": func(): return _held("longest_rally")},
+		{"id": "shutouts", "label": "SHUTOUTS", "value": func(): return str(_rec("shutouts"))},
+		{"id": "ladder", "label": "LADDER", "value": func(): return "%d OF %d  CLEARS %d" % [
+			_rung() + 1, Opponents.count(), _rec("ladder_clears")]},
+		{"id": "practice", "label": "PRACTICE BEST", "value": func(): return str(_rec("practice_best"))},
+		{"id": "vs", "label": "VS", "value": _vs_label,
+			"change": func(d): vs_i = (vs_i + d + Opponents.count()) % Opponents.count()},
+		{"id": "erase", "label": "ERASE RECORDS", "value": func(): return "B AGAIN" if _erase_armed else "",
+			"press": _erase},
+	], "Y: BACK", Rect2(290, 96, 380, 0))
 
 
 func _rec(key: String) -> int:
 	return int(save.data["records"][key]) if save else 0
+
+
+## A named record (ADR-040): who holds it (--- for nobody) and the count.
+func _held(key: String) -> String:
+	var who: String = String(save.data["initials"].get(key, "")) if save else ""
+	return "%s %d" % [who if who != "" else "---", _rec(key)]
+
+
+var vs_i := 0
+var _erase_armed := false
+
+func _vs_label() -> String:
+	var r: Array = save.data["records"]["vs"][vs_i] if save else [0, 0]
+	return "%s %d-%d" % [String(Opponents.team(vs_i)["team"]), int(r[0]), int(r[1])]
+
+
+## ERASE RECORDS: the first press arms, the second erases (the settings
+## stay, as ADR-021's erase).
+func _erase() -> void:
+	if not _erase_armed:
+		_erase_armed = true
+		return
+	_erase_armed = false
+	if save:
+		save.erase_records()
+		save.save_game()
+	_refresh()
 
 
 func _wl(mode: String) -> String:
@@ -288,7 +321,8 @@ func _show(id: String) -> void:
 	if select_screen:
 		select_screen.visible = id == "select"
 	for n in _header:
-		n.visible = id != "select"
+		n.visible = id != "select" and id != "records"
+	_erase_armed = false
 	if pages.has(id):
 		pages[id].refresh()
 	_refresh()
