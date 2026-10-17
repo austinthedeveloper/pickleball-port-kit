@@ -1,6 +1,7 @@
 ## Input map, built at startup so project.godot stays readable. SNES layout
 ## on a keyboard and any gamepad: B = standard hit (Space/J, pad south),
 ## A = drive (K, pad east), Y = soft shot (L, pad west), Start = Enter.
+class_name GameControls
 extends Node
 
 const ACTIONS := {

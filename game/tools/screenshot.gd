@@ -1,0 +1,47 @@
+## Renders a screen for N frames and saves the viewport (needs a display):
+##   godot --path game -s res://tools/screenshot.gd -- <title|singles|doubles|demo> <venue> <frames> <out.png> [human]
+## "human" leaves P1 human (it serves on its own after the ready delay is
+## not automatic, so the default makes P1 a bot for a moving picture).
+extends SceneTree
+
+var _frames := 0
+var _target := 120
+var _out := "user://shot.png"
+var _view: Node
+
+
+func _initialize() -> void:
+	var a := OS.get_cmdline_user_args()
+	var mode: String = a[0] if a.size() > 0 else "singles"
+	var venue: String = a[1] if a.size() > 1 else "park"
+	_target = int(a[2]) if a.size() > 2 else 120
+	_out = a[3] if a.size() > 3 else "user://shot.png"
+	var controls = load("res://game_ui/controls.gd").new()
+	root.add_child(controls)
+	if mode == "title":
+		TitleScreen.venue_i = maxi(0, TitleScreen.VENUES.find(venue))
+		_view = TitleScreen.new()
+		root.add_child(_view)
+	else:
+		var m := MatchView.new()
+		root.add_child(m)
+		var cfg := SimTypes.MatchConfig.doubles() if mode == "doubles" else SimTypes.MatchConfig.singles()
+		m.setup(cfg, venue, mode == "demo")
+		if mode != "demo" and not (a.size() > 4 and a[4] == "human"):
+			m.sim.p1_bot = true
+		_view = m
+	process_frame.connect(_tick)
+
+
+func _tick() -> void:
+	_frames += 1
+	if _view is MatchView and _view.sim.p1_bot and _view.sim.phase == K.PHASE_SERVE_SETUP \
+			and _view.sim.server_index == 0 and _frames % 32 == 0:
+		# the bot presses B to serve, like the test harness
+		_view.sim.intents[0].hit_pressed = 1
+		_view.sim.serve_requested = 1
+	if _frames >= _target:
+		var img := root.get_texture().get_image()
+		img.save_png(_out)
+		print("saved ", _out, " ", img.get_size())
+		quit()
