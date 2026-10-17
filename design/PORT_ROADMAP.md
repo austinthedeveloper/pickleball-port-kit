@@ -268,20 +268,38 @@ feature/cld-godot-port                 (done: the playable port)
     initials rules; test_story.c's card rules; the card after a finished
     match only (vs and shutouts recorded, the sim waiting, RESTART
     dropping the request); 6,000 demo frames recording nothing; the page.
-    141/141 plus the e2e; golden traces unchanged. Screenshots: the
+    140/140 plus the e2e; golden traces unchanged. Screenshots: the
     initials card and the RECORDS page.
   - Status: **Done**. (A quick look: win a match and enter initials.)
 
 ### 9. `feature/cld-release`: release prep (playbook 0.1, §9)
 
-- [ ] `PORT-09` Export presets (macOS, Windows, Linux, Web). A build ID
+- [x] `PORT-09` Export presets (macOS, Windows, Linux, Web). A build ID
   on the title (commit plus a dirty flag). An app icon from the art. A
   headless export check. Release notes generated from this sheet.
   `CLAUDE.md` refreshed.
   - Accept: exports build headless. The build ID matches `git describe`,
     and a dirty tree is refused.
-  - Verified: —
-  - Status: Planned. It will be **Ready to test**: you run a build.
+  - Verified: `game/export_presets.cfg` (macOS universal, Windows,
+    Linux, Web; tests and tools left out, `build_id.txt` carried, into
+    `build/`). `tools/export.sh` refuses uncommitted changes (checked:
+    "refused" on the dirty tree before this commit), writes
+    `build_id.txt` from `git describe --always --dirty`, exports the
+    `.pck` headless and boots it for 200 frames (no export templates
+    needed), then exports each preset when templates are installed.
+    `meta/build_info.gd`: the title's top right shows `BUILD <id>`, or
+    `BUILD DEV <describe>` from a checkout. `game/icon.png` from P1's
+    head in the art (`tools/make_icon.py`), set as the project icon.
+    `tools/release_notes.py` writes `game/RELEASE_NOTES.md` from this
+    sheet. CLAUDE.md and the README refreshed. `test_release.gd` (3
+    tests): the build ID matches `git describe` (and DEV in a checkout),
+    the title shows it, the icon is 256 px and set, and the four presets
+    leave out tests and tools, carry the ID, and export into `build/`.
+    143/143 plus the e2e; golden traces unchanged; `export.sh --check`
+    passes on the committed tree.
+  - Status: **Ready to test**: the platform exports need Godot's export
+    templates, which aren't installed here (see "For you"). Then run
+    `game/tools/export.sh` and try a build.
 
 ## For you
 
@@ -331,6 +349,14 @@ the chain: each has a default I've gone with.
 - **PORT-08 records:** your first win on this build asks for initials,
   because the best streak starts at 0 in the new layout. The SNES records
   page's L + R + X erase became an ERASE RECORDS row you press twice.
+
+- **PORT-09 release (a task for you):** install the Godot 4.7.2 export
+  templates (Editor > Manage Export Templates > Download, about 1 GB).
+  I didn't download them without asking. Then run
+  `game/tools/export.sh`; it builds all four into `build/`. macOS builds
+  are ad-hoc signed only, so Gatekeeper will need a right-click > Open.
+  The version is 0.9.0 in the presets and `project.godot`; tell me what
+  you want it to be.
 
 ## If time runs short or long
 

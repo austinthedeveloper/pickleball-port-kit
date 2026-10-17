@@ -141,6 +141,11 @@ stream, at the 960×540 art density, through the art's court geometry.
   SNES keeps them in WRAM. `meta/initials.gd` is story.c's card, driven
   by SNES pad bits; the view waits under it as under the intro card. The
   ERASE RECORDS row (two presses) stands in for L + R + X.
+- **Release** (PORT-09). Export presets for macOS, Windows, Linux and
+  Web (the Compatibility renderer, which Web needs). `tools/export.sh`
+  refuses uncommitted tracked changes, stamps `build_id.txt` from
+  `git describe --always --dirty` (shown on the title), checks the
+  platform-free `.pck` boots headless, then exports with the templates.
 - **Not ported yet:** open play (ADR-034), career (ADR-047).
 
 ## Rejected (and why)

@@ -66,6 +66,7 @@ var select_screen: SelectScreen
 var _select_doubles := false
 var _header: Array = []          # the logo and record line (hidden on Player Select)
 var _pad2_prev := 0
+var build_label: BitmapText
 
 
 func _load_settings() -> void:
@@ -155,6 +156,14 @@ func _ready() -> void:
 	_record.position = Vector2(480, 156)
 	_record.tint = Color(0.8, 0.85, 0.95)
 	_ui.add_child(_record)
+	var build := BitmapText.new()
+	build.font = "small"
+	build.text = BuildInfo.label()
+	build.align = 1.0
+	build.position = Vector2(950, 6)
+	build.tint = Color(0.75, 0.8, 0.9, 0.7)
+	_ui.add_child(build)
+	build_label = build
 	_header = [logo, sub, _record, keys]
 	_build_pages()
 	_build_page()

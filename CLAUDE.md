@@ -15,7 +15,12 @@ game/tools/sync_assets.sh                            # after rebuilding art/leve
 .venv/bin/python art/levels/tools/build.py           # rebuild the 960x540 art (needs .venv: numpy, pillow)
 godot --path game --resolution 960x540 -s res://tools/screenshot.gd -- <title|singles|doubles|demo|practice> <park|lakeside|sunset> <frames> <out.png>
 godot --headless --path game -s res://tools/point_log.gd -- doubles 2   # why each point ended
+game/tools/export.sh --check                         # .pck export + headless boot (refuses a dirty tree; --dev)
+python3 game/tools/release_notes.py                  # game/RELEASE_NOTES.md from the roadmap sheet
 ```
+
+`design/PORT_ROADMAP.md` is the milestone sheet (PORT-00..09, status and
+"For you" questions); keep it current with each branch.
 
 ## Rules of the code (game/)
 
@@ -35,7 +40,19 @@ godot --headless --path game -s res://tools/point_log.gd -- doubles 2   # why ea
   ternaries: annotate (`var x: int = arr[i]`). `Projection` is a built-in
   type name; the world→screen helper is `CourtView`.
 - **Modals swallow their closing input** (playbook rule 9): a new match
-  ignores input for `INPUT_LOCK_FRAMES`.
+  ignores input for `INPUT_LOCK_FRAMES`; a menu page change locks for
+  `SWITCH_LOCK` and clears the latch; the intro and initials cards set
+  the lock as they close.
+- **Menus are MenuPages** (`view/menu_page.gd`): rows by id, driven by
+  move/change/press. Tests select rows by id (`page.select("sound")`),
+  never by counting presses (playbook §4.8).
+- **The save is versioned** (`meta/save.gd`, layout v4). A new saved key
+  with a harmless default can ride on `defaults()` (missing keys fill);
+  a changed meaning needs a new version, a migration, and a test that
+  loads the old image.
+- **Display-only features prove it**: a test that runs the view and a
+  bare sim side by side and compares snapshots (see `test_feel.gd`,
+  `test_replay.gd`).
 - **The bitmap fonts** have caps, digits, and `!?.,:-'/%+ ` only.
 
 ## Before calling it done

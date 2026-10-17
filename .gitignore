@@ -1,3 +1,5 @@
 .venv/
 game/.godot/
 *.import.tmp
+build/
+game/build_id.txt
