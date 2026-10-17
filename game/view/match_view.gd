@@ -277,25 +277,20 @@ func _on_event(e: Array) -> void:
 	feel.on_event(e)
 	var kind: int = e[0]
 	var at := CourtView.ground(K.to_fp(e[1]), K.to_fp(e[2]))
+	var rally: int = (sim.shot_serial - sim.rally_start) & 0xff
+	var match_won := kind == K.EVENT_POINT and sim.team_won(e[3])
+	_sfx.event(e, rally, match_won)
 	match kind:
 		K.EVENT_HIT, K.EVENT_SERVE:
 			var slot: int = e[3] & 15
 			var lead := -14.0 if sim.players[slot].team else 14.0
 			_spawn_fx("spark", CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp)
 				+ Vector2(lead, 0), 1 if (e[3] >> 4) == K.SHOT_DRIVE else 0)
-			_sfx.play("hit")
 		K.EVENT_BOUNCE:
 			_spawn_fx("dust", at, 0)
-			_sfx.play("bounce")
 		K.EVENT_CROWD:
-			_sfx.play("applause")
 			_crowd_cheer = 90 if e[3] >= 13 else 50
-		K.EVENT_FAULT:
-			if e[3] == K.FAULT_NET:
-				_sfx.play("net")
 		K.EVENT_POINT:
-			_sfx.play("whistle")
-			_sfx.play("applause")
 			_crowd_cheer = 90
 			_hud.on_point(e[3])
 			var loser: int = 1 - e[3]
@@ -303,7 +298,7 @@ func _on_event(e: Array) -> void:
 			if line != "":
 				_hud.show_quip(line, _hud.team_tint(loser))
 			if save and not demo:
-				save.record_rally((sim.shot_serial - sim.rally_start) & 0xff)
+				save.record_rally(rally)
 
 
 func _update_card() -> void:
@@ -456,6 +451,8 @@ func _update_visuals() -> void:
 		var fw := _ball_sprite.region_rect.size.x
 		_ball_sprite.region_rect.position.x = int(_ball_frame) * fw
 	feel.update()
+	_sfx.update_ambience(sim.phase == K.PHASE_LIVE, (sim.shot_serial - sim.rally_start) & 0xff,
+		sim.match_point(0) or sim.match_point(1), 1.0 / 60.0)
 	for poly in _lava:
 		poly.color.a = 0.74 + 0.08 * sin(Time.get_ticks_msec() / 260.0)
 	if _crowd_cheer > 0:

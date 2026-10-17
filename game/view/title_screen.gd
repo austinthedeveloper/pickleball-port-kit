@@ -60,6 +60,7 @@ func _load_settings() -> void:
 	opponent_i = clampi(int(st["opponent"]), -2, Opponents.count() - 1)
 	camera_i = clampi(int(st.get("camera", 0)), 0, CAMERAS.size() - 1)
 	mods_i = clampi(int(st.get("mods", 0)), 0, MODS.size() - 1)
+	Sfx.setting = clampi(int(st.get("sound", 0)), 0, AudioMap.SOUND_NAMES.size() - 1)
 
 
 func _store_settings() -> void:
@@ -67,7 +68,7 @@ func _store_settings() -> void:
 		return
 	save.data["settings"].merge({"venue": venue_i, "difficulty": difficulty_i,
 		"points": points_i, "players": 2 if two_players else 1, "opponent": opponent_i,
-		"camera": camera_i, "mods": mods_i}, true)
+		"camera": camera_i, "mods": mods_i, "sound": Sfx.setting}, true)
 
 
 func _ready() -> void:

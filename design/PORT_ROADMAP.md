@@ -76,15 +76,24 @@ feature/cld-godot-port                 (done: the playable port)
 
 ### 2. `feature/cld-audio`: sound (ADR-029, ADR-031)
 
-- [ ] `PORT-02` Hits pitched by shot type. Hits, bounces and the net
+- [x] `PORT-02` Hits pitched by shot type. Hits, bounces and the net
   panned by court x. A crowd that swells with the rally's length and
   hushes on match point. Applause sized to the point. Ambience fades at
   scene changes. A SOUND setting (ALL / NO CROWD / OFF), saved.
   - Accept: an event-to-sound test like `test_audio.c` (shot to pitch,
     x to pan, rally to crowd level, OFF means silent). Nothing plays
     during the title demo except ambience.
-  - Verified: —
-  - Status: Planned. It will be **Ready to test** (the mix levels).
+  - Verified: `view/audio_map.gd` maps events to sounds and is pure.
+    `view/sfx.gd` plays them on panned 2D players (three voices per
+    effect) and runs the ambience: fade-in, rally swell, match-point hush.
+    `test_audio.gd`: effects per event, pitch by shot, pan by x, quieter
+    later bounces, applause 6..13 by rally and 15 for the match winner,
+    NO CROWD and OFF, the demo silent while a match makes sounds.
+    104/104 plus the e2e; golden traces unchanged. SOUND is in the save
+    and loaded at start; its menu row lands with PORT-03's OPTIONS page.
+  - Status: **Ready to test**: listen to the mix. Are hits, bounces and
+    the whistle balanced? Is the applause too loud? Is the ambience swell
+    on long rallies noticeable but not distracting?
 
 ### 3. `feature/cld-menus`: the menu tree (ADR-025, ADR-030, playbook §7)
 
@@ -181,6 +190,11 @@ the chain: each has a default I've gone with.
   deep standard shot is just under its speed threshold), and the CPUs
   drive only on put-aways, so you'll mostly see it on your own drives
   (K). Default: as built. Any effect can be switched off in `Feel.ON`.
+
+- **PORT-02 audio:** the mix levels are my guesses: hits at about -2 dB,
+  applause 6..15 of 15, ambience at -12 dB with the swell. Tell me
+  anything too loud or too quiet. Pan is full width by court x; if it's
+  too wide on headphones, I'll halve it.
 
 ## If time runs short or long
 
