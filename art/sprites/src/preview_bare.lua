@@ -56,9 +56,9 @@ for i, o in ipairs(offs) do
   end
 end
 
--- idle0 wearing each hat (cap, visor, headband, tricorn, bandana)
+-- idle0 wearing each hat, in hats_<team>.png order
 local idle = Image(sheet, Rectangle(0, 0, CELL, CELL))
-for k = 0, 4 do
+for k = 0, math.floor(hats.width / 16) - 1 do
   local dx = PAD + k * (CELL + PAD)
   local dy = PAD + 3 * (CELL + PAD)
   canvas:drawImage(idle, Point(dx, dy))

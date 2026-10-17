@@ -11,7 +11,8 @@
 --   player_bare_<team>.png 512x32: 15 frames, then the ponytail in a 32x32
 --                          cell (top-left)
 --   cap_<team>.png         16x8 cap cell
---   hats_<team>.png        80x8: cap, visor, headband, tricorn, bandana
+--   hats_<team>.png        192x8: cap, visor, headband, tricorn, bandana,
+--                          beanie, backcap, bucket, crown, whirly, chef, viking
 
 local root = app.params.root or "."
 local out = app.params.out or (root .. "/art/sprites/bare")
@@ -21,7 +22,8 @@ local W, H = 32, 32
 local SLOTS = { "idle0", "idle1", "run0", "run1", "run2", "run3",
                 "windup", "swing", "follow", "toss", "cheer",
                 "overhead_windup", "overhead_contact", "reach", "scoop" }
-local HATS = { "cap", "visor", "headband", "tricorn", "bandana" }
+local HATS = { "cap", "visor", "headband", "tricorn", "bandana",
+  "beanie", "backcap", "bucket", "crown", "whirly", "chef", "viking" }
 local TEAMS = { "blue", "red", "green", "gold" }
 local TEAM_PADDLE = { blue = "blue", red = "red", green = "wood", gold = "gold" }
 local KEY = {
