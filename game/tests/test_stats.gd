@@ -43,7 +43,7 @@ func test_scripted_points() -> void:
 	var rows := st.rows()
 	eq(rows[0], ["POINTS", "2", "1"])
 	eq(rows[1], ["SERVE WON", "2/2", "1/1"])
-	eq(rows[3][1], "2  STANDARD", "winners, by the most common shot")
+	eq(rows[3][1], "2 STD", "winners, by the most common shot")
 	eq(st.rally_line(), "LONGEST RALLY 3   AVERAGE 2.0")
 
 

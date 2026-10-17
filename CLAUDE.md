@@ -66,6 +66,10 @@ builds all four platforms and publishes them to the GitHub release
   bare sim side by side and compares snapshots (see `test_feel.gd`,
   `test_replay.gd`).
 - **The bitmap fonts** have caps, digits, and `!?.,:-'/%+ ` only.
+- **Text never collides** (`tests/test_layout.gd`): no two visible texts
+  overlap, none leaves the screen, and text in a panel stays clear of its
+  frame, with every value of every row tried. A new screen or state gets
+  a case there.
 
 ## Before calling it done
 

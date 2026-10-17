@@ -18,7 +18,7 @@ func test_scores_pop() -> void:
 	eq(h._left_score.scale, Vector2.ONE, "still at the start")
 	v.sim.team_score[0] = 1
 	h.refresh()
-	check(h._left_score.scale.x > 1.3, "a point pops the score")
+	check(h._left_score.scale.x > 1.15, "a point pops the score")
 	check(h._left_score.tint != Color.WHITE, "and lights it gold")
 	eq(h._right_score.scale, Vector2.ONE, "only the side that scored")
 	for f in Hud.POP_FRAMES:

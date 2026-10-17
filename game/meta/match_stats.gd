@@ -7,7 +7,7 @@
 class_name MatchStats
 extends RefCounted
 
-const SHOT_NAMES := ["STANDARD", "DRIVE", "SOFT"]
+const SHOT_NAMES := ["STD", "DRIVE", "SOFT"]
 
 var teams: Array = [_team(), _team()]
 var rallies: Array = []
@@ -121,7 +121,7 @@ func rows() -> Array:
 		for i in 3:
 			if w[i] > w[best]:
 				best = i
-		return "%d" % winners(t) if winners(t) == 0 else "%d  %s" % [winners(t), SHOT_NAMES[best]]
+		return "%d" % winners(t) if winners(t) == 0 else "%d %s" % [winners(t), SHOT_NAMES[best]]
 	return [
 		["POINTS", str(teams[0]["points"]), str(teams[1]["points"])],
 		["SERVE WON", serve.call(0), serve.call(1)],

@@ -150,6 +150,9 @@ func refresh() -> void:
 		values[3].text = PlayerSelect.PADDLE_NAMES[card["paddle"]]
 		for r in Lobby.ROWS:
 			c["labels"][r].tint = Color.WHITE if r == card["row"] and not card["ready"] else DIM
+			# a ready card shows READY in place of its rows
+			c["labels"][r].visible = not card["ready"]
+			c["values"][r].visible = not card["ready"]
 		c["bar"].visible = not card["ready"]
 		c["bar"].position = Vector2(card_x(i) + 10, CARD_Y + 171 + card["row"] * 28)
 		c["ready"].visible = card["ready"]

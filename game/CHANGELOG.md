@@ -4,6 +4,15 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [Unreleased]
+
+### Fixed
+- Crowded and overlapping text: the title's header and menu panel, BODY
+  and FEMALE on Player Select, two-digit scores against the team name,
+  the COURT page against the record line, a READY lobby card over its
+  rows, and prompt bars wider than their panels (pause, initials,
+  practice). A layout test now checks every screen for overlaps.
+
 ## [0.3.0] - 2026-10-17
 
 Open play: the park from the SNES game.

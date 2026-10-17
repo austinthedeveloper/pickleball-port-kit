@@ -104,8 +104,11 @@ func setup(v: MatchView) -> void:
 	if practice:
 		right_name = "BEST"
 		right_tint = Color("fbe46a")
-	var lw := 74 + BitmapText.measure("big", left_name)
-	var rw := 74 + BitmapText.measure("big", right_name)
+	# a score panel: the name, then a box wide enough for two digits (and
+	# their pop) so a score of 10+ never reaches the name
+	var dig := BitmapText.measure("big", "00") + 8
+	var lw := 12 + BitmapText.measure("big", left_name) + 14 + dig + 10
+	var rw := 12 + BitmapText.measure("big", right_name) + 14 + dig + 10
 	var title := "DOUBLES" if doubles else "ARCADE RULES"
 	if practice:
 		var zone: int = Practice.practice_zone(int(cfg.practice_settings[Practice.ROW_ZONE]))
@@ -117,10 +120,10 @@ func setup(v: MatchView) -> void:
 	var pan_r: String = "gold" if practice else ["blue", "red", "green", "gold"][cfg.palette[2]]
 	_panel(pan_l, Rect2(480 - tw / 2 - 18 - lw, y, lw, h))
 	_left_label = _text("big", left_name, Vector2(480 - tw / 2 - 18 - lw + 12, y + 8), 0, left_tint)
-	_left_score = _text("big", "0", Vector2(480 - tw / 2 - 18 - 14, y + 8), 1.0)
+	_left_score = _text("big", "0", Vector2(480 - tw / 2 - 18 - 10 - dig / 2.0, y + 8), 0.5)
 	_panel(pan_r, Rect2(480 + tw / 2 + 18, y, rw, h))
 	_right_label = _text("big", right_name, Vector2(480 + tw / 2 + 18 + 12, y + 8), 0, right_tint)
-	_right_score = _text("big", "0", Vector2(480 + tw / 2 + 18 + rw - 14, y + 8), 1.0)
+	_right_score = _text("big", "0", Vector2(480 + tw / 2 + 18 + rw - 10 - dig / 2.0, y + 8), 0.5)
 	_panel("doubles" if doubles else "title", Rect2(480 - tw / 2, y, tw, h))
 	_text("big_gold", title, Vector2(480, y + 8), 0.5)
 	if doubles:
@@ -161,7 +164,7 @@ func setup(v: MatchView) -> void:
 	_subtitle = Control.new()
 	add_child(_subtitle)
 	var sw := 30 + BitmapText.measure("small", "MATCH POINT")
-	var sp := _panel("sub", Rect2(480 - sw / 2, y + h - 2, sw, 26))
+	var sp := _panel("sub", Rect2(480 - sw / 2, y + h - 2, sw, 29))
 	sp.reparent(_subtitle)
 	_text("small", "MATCH POINT", Vector2(480, y + h + 4), 0.5, Color.WHITE, _subtitle)
 	_prompt = Control.new()
@@ -208,13 +211,13 @@ func setup(v: MatchView) -> void:
 	var rows := view.pause_rows()
 	var ph := 46 + 46 + rows.size() * MenuPage.ROW_H - 10
 	ph += 30
-	pause_menu = MenuPage.new().setup("pause", "PAUSED", rows, Rect2(300, 270 - ph / 2, 360, ph),
+	pause_menu = MenuPage.new().setup("pause", "PAUSED", rows, Rect2(270, 270 - ph / 2, 420, ph),
 		[["hit", "SELECT"], ["start", "RESUME"]])
 	_paused.add_child(pause_menu)
 	if practice:
 		_practice_menu = Control.new()
 		add_child(_practice_menu)
-		var mp := _panel("title", Rect2(400, 488, 160, 38))
+		var mp := _panel("title", Rect2(380, 488, 200, 38))
 		mp.reparent(_practice_menu)
 		_practice_menu.add_child(PromptBar.new().setup([["start", "PAUSE"]], Vector2(480, 507)))
 	refresh()
@@ -256,7 +259,7 @@ func _refresh_initials() -> void:
 		shade.color = Color(0, 0.02, 0.08, 0.55)
 		shade.size = Vector2(960, 540)
 		_initials.add_child(shade)
-		var p := _panel("title", Rect2(300, 140, 360, 250))
+		var p := _panel("title", Rect2(220, 140, 520, 250))
 		p.reparent(_initials)
 		var title := _text("big_gold", "NEW RECORD!", Vector2(480, 160), 0.5, Color.WHITE, _initials)
 		title.scale = Vector2(1.5, 1.5)
@@ -429,9 +432,9 @@ func _refresh_live() -> void:
 		if _score_pop[t] > 0:
 			_score_pop[t] -= 1
 		var k := float(_score_pop[t]) / POP_FRAMES
-		var sc := 1.0 + 0.6 * k
+		var sc := 1.0 + 0.2 * k          # stays inside its panel
 		label.scale = Vector2(sc, sc)
-		label.position.y = _score_y - (sc - 1.0) * 10.0
+		label.position.y = _score_y - (sc - 1.0) * 29.0   # bottom fixed: grows up
 		label.tint = Color.WHITE.lerp(Color("fbe46a"), k)
 	# the serving side, and the server in doubles while they set up
 	var serving := s.phase <= K.PHASE_LIVE and not s.config.practice
@@ -499,9 +502,9 @@ func _build_stats() -> void:
 	shade.color = Color(0.02, 0.03, 0.08, 0.45)
 	shade.size = Vector2(960, 540)
 	_stats_card.add_child(shade)
-	var p := _panel("title", Rect2(230, 170, 500, 290))
+	var p := _panel("title", Rect2(210, 170, 540, 290))
 	p.reparent(_stats_card)
-	var cols := [560.0, 670.0]
+	var cols := [545.0, 665.0]
 	for t in 2:
 		_text("small", _team_label(t), Vector2(cols[t], 188), 0.5, team_tint(t), _stats_card)
 	var rows := st.rows()

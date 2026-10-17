@@ -65,7 +65,7 @@ func _ready() -> void:
 	logo.font = "big_gold"
 	logo.text = "PICKLEBALL '94"
 	logo.align = 0.5
-	logo.position = Vector2(480, 70)
+	logo.position = Vector2(480, 30)
 	logo.scale = Vector2(2, 2)
 	logo.position.x = 480
 	_ui.add_child(logo)
@@ -73,7 +73,7 @@ func _ready() -> void:
 	sub.font = "small"
 	sub.text = "ARCADE PICKLEBALL"
 	sub.align = 0.5
-	sub.position = Vector2(480, 136)
+	sub.position = Vector2(480, 94)
 	_ui.add_child(sub)
 	var keys := PromptBar.new().setup([["dpad", "MOVE"], ["hit", "HIT"], ["drive", "DRIVE"],
 		["soft", "SOFT"], ["start", "PAUSE"]], Vector2(480, 518))
@@ -81,7 +81,7 @@ func _ready() -> void:
 	_record = BitmapText.new()
 	_record.font = "small"
 	_record.align = 0.5
-	_record.position = Vector2(480, 156)
+	_record.position = Vector2(480, 118)
 	_record.tint = Color(0.8, 0.85, 0.95)
 	_ui.add_child(_record)
 	var build := BitmapText.new()
@@ -92,7 +92,7 @@ func _ready() -> void:
 	build.tint = Color(0.75, 0.8, 0.9, 0.7)
 	_ui.add_child(build)
 	build_label = build
-	_header = [logo, sub, _record, keys]
+	_header = [logo, sub, _record, keys, build]
 	_build_pages()
 	lobby_screen = LobbyScreen.new().setup(lobby)
 	lobby_screen.visible = false
@@ -114,7 +114,8 @@ func _add_page(id: String, title: String, rows: Array, help: Array,
 		at := Rect2(300, 172, 360, 0)) -> void:
 	if id != "main":
 		rows.append({"id": "back", "label": "BACK", "press": back})
-	var h := 46 + rows.size() * MenuPage.ROW_H + (46 if title != "" else 0)
+	# top pad, the rows, then a footer that keeps the prompt bar clear of them
+	var h := 18 + rows.size() * MenuPage.ROW_H + 52 + (46 if title != "" else 0)
 	at.size.y = maxi(h, 300)
 	var p := MenuPage.new().setup(id, title, rows, at, help)
 	# the mouse: hover selects, click presses, wheel changes, right click backs
@@ -148,7 +149,7 @@ func _build_pages() -> void:
 			"press": func(): open_page("modifiers")},
 		{"id": "options", "label": "OPTIONS", "press": func(): open_page("options")},
 		{"id": "records", "label": "RECORDS", "press": func(): open_page("records")},
-	], [["hit", "SELECT"]])
+	], [["hit", "SELECT"]], Rect2(300, 146, 360, 0))
 	_add_page("play", "MATCH SETUP", [
 		{"id": "vs", "label": "VS", "value": _opponent_label, "change": _change_opponent},
 		{"id": "difficulty", "label": "DIFFICULTY", "value": func(): return Settings.DIFFICULTIES[Settings.difficulty_i],

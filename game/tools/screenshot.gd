@@ -5,7 +5,7 @@
 ## "opp=N" plays ladder team N (0-based) in their looks. "title_options"
 ## (any page id) opens that title page; "court=S,K,R,L" sets the court
 ## colour presets; "time=N" DAY 0, DUSK 1, NIGHT 2;
-## "pad" shows the controller prompts; "pause" pauses the match at the end;
+## "pad" shows the controller prompts; "save" a save with records (title); "pause" pauses the match at the end;
 ## "closecall" shows a forced close-up; "initials" the initials card;
 ## "result" plays a bot match and ends it (the stats card); "mp4" four
 ## humans on fake pads (doubles); title_lobby a lobby with three players.
@@ -61,6 +61,15 @@ func _initialize() -> void:
 	elif mode.begins_with("title"):
 		Settings.venue_i = maxi(0, Settings.VENUES.find(venue))
 		_view = TitleScreen.new()
+		if "save" in a.slice(4):
+			# a scratch save with records, so the RECORD line shows
+			var sv := SaveGame.new()
+			sv.dir = "user://shot_save/"
+			DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(sv.dir))
+			sv.data = SaveGame.defaults()
+			sv.data["records"]["singles_wins"] = 12
+			sv.data["records"]["singles_losses"] = 7
+			_view.save = sv
 		root.add_child(_view)
 		if mode.begins_with("title_"):
 			_view.ready.connect(func():
@@ -83,6 +92,8 @@ func _initialize() -> void:
 					_view.select_input(PlayerSelect.PAD_RIGHT)    # RED
 					_view.select_input(PlayerSelect.PAD_DOWN)
 					_view.select_input(PlayerSelect.PAD_LEFT)     # WOOD
+					_view.select.choice[0]["variant"] = K.VARIANT_FEMALE
+					_view.select_screen.refresh()
 				else:
 					_view.open_page(mode.substr(6)))
 	else:
@@ -170,6 +181,8 @@ func _tick() -> void:
 			v.sim.resolve_point(1, K.FAULT_OUT)
 		for f in K.POINT_RESULT_FRAMES + 40:
 			v._physics_process(1.0 / 60.0)
+	if _frames == _target - 3 and _view is MatchView and "score10" in OS.get_cmdline_user_args():
+		_view.sim.team_score = [10, 10]
 	if _frames >= _target:
 		var img := root.get_texture().get_image()
 		img.save_png(_out)

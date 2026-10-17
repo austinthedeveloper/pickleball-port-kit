@@ -50,7 +50,7 @@ func setup(s: PlayerSelect) -> SelectScreen:
 	court.size = Vector2(LEFT.size.x - 24, 222)
 	add_child(court)
 	_who = _text("small", "", LEFT.position + Vector2(24, 22), 0.0, GOLD)
-	_variant_label = _text("small", "BODY", LEFT.position + Vector2(LEFT.size.x - 160, 22), 0.0, DIM)
+	_variant_label = _text("small", "BODY", LEFT.position + Vector2(LEFT.size.x - 210, 22), 0.0, DIM)
 	_variant = _text("small", "", LEFT.position + Vector2(LEFT.size.x - 24, 22), 1.0, GOLD)
 	for k in 2:
 		var spr := _sprite()
