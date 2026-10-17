@@ -1,0 +1,233 @@
+{
+ "hat_offset": [
+  4,
+  -4
+ ],
+ "frames": [
+  {
+   "frame": "idle0",
+   "accessory": [
+    5,
+    5
+   ],
+   "head": [
+    10,
+    3
+   ],
+   "hat": [
+    9,
+    1
+   ]
+  },
+  {
+   "frame": "idle1",
+   "accessory": [
+    5,
+    6
+   ],
+   "head": [
+    10,
+    4
+   ],
+   "hat": [
+    9,
+    2
+   ]
+  },
+  {
+   "frame": "run0",
+   "accessory": [
+    5,
+    6
+   ],
+   "head": [
+    10,
+    4
+   ],
+   "hat": [
+    9,
+    2
+   ]
+  },
+  {
+   "frame": "run1",
+   "accessory": [
+    5,
+    7
+   ],
+   "head": [
+    10,
+    5
+   ],
+   "hat": [
+    9,
+    3
+   ]
+  },
+  {
+   "frame": "run2",
+   "accessory": [
+    5,
+    6
+   ],
+   "head": [
+    10,
+    4
+   ],
+   "hat": [
+    9,
+    2
+   ]
+  },
+  {
+   "frame": "run3",
+   "accessory": [
+    5,
+    7
+   ],
+   "head": [
+    10,
+    5
+   ],
+   "hat": [
+    9,
+    3
+   ]
+  },
+  {
+   "frame": "windup",
+   "accessory": [
+    4,
+    6
+   ],
+   "head": [
+    9,
+    4
+   ],
+   "hat": [
+    8,
+    2
+   ]
+  },
+  {
+   "frame": "swing",
+   "accessory": [
+    6,
+    5
+   ],
+   "head": [
+    11,
+    3
+   ],
+   "hat": [
+    10,
+    1
+   ]
+  },
+  {
+   "frame": "follow",
+   "accessory": [
+    6,
+    5
+   ],
+   "head": [
+    11,
+    3
+   ],
+   "hat": [
+    10,
+    1
+   ]
+  },
+  {
+   "frame": "toss",
+   "accessory": [
+    5,
+    5
+   ],
+   "head": [
+    10,
+    3
+   ],
+   "hat": [
+    9,
+    1
+   ]
+  },
+  {
+   "frame": "cheer",
+   "accessory": [
+    4,
+    8
+   ],
+   "head": [
+    9,
+    6
+   ],
+   "hat": [
+    8,
+    4
+   ]
+  },
+  {
+   "frame": "overhead_windup",
+   "accessory": [
+    6,
+    4
+   ],
+   "head": [
+    11,
+    2
+   ],
+   "hat": [
+    10,
+    0
+   ]
+  },
+  {
+   "frame": "overhead_contact",
+   "accessory": [
+    5,
+    5
+   ],
+   "head": [
+    10,
+    3
+   ],
+   "hat": [
+    9,
+    1
+   ]
+  },
+  {
+   "frame": "reach",
+   "accessory": [
+    3,
+    7
+   ],
+   "head": [
+    8,
+    5
+   ],
+   "hat": [
+    7,
+    3
+   ]
+  },
+  {
+   "frame": "scoop",
+   "accessory": [
+    4,
+    8
+   ],
+   "head": [
+    9,
+    6
+   ],
+   "hat": [
+    8,
+    4
+   ]
+  }
+ ]
+}

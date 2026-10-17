@@ -7,6 +7,7 @@ redrawn. Keys are palette contract v2 roles (see player_frames.txt header).
 
     python3 art/sprites/src/compose.py
 """
+import json
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -77,6 +78,34 @@ PONYTAIL = part("""
 orrro...
 orro....
 .oo.....
+""")
+
+# Bareheaded head: same origin and face as HEAD, short hair (15 + outline)
+# hugging the skull so a 16x8 hat cell can sit over it.
+HEAD_BARE = part("""
+...............
+...ooooo.......
+..orrrrrro.....
+.orrrrrrrro....
+orrrrrrrrcco...
+orrbbcccccco...
+orrbacccocco...
+orrbbccccccco..
+.orbbcccccbo...
+..oaabbbbbo....
+""")
+
+# Ponytail for the bare head: tied at the back of the crown, hangs down-left.
+# Same 8x8 cell and per-frame offset as PONYTAIL.
+PONYTAIL_BARE = part("""
+........
+....ooo.
+...orrro
+..orrrro
+.orrrro.
+.orrro..
+orrro...
+.ooo....
 """)
 
 # --- Paddles ----------------------------------------------------------------
@@ -285,9 +314,128 @@ LEGS_SQUAT = part("""
 """)
 
 
+# --- New-pose parts (bareheaded set) ----------------------------------------
+
+# Near arm folded back over the shoulder, fist behind the head (overhead
+# windup). Origin = head origin + (-4, 3).
+ARM_COCKED = part("""
+ooo............
+occo...........
+occo...........
+.obo...........
+.obo...........
+.obo...........
+.obboooooooooo.
+.oobbbbbbbbDMMo
+...oooooooooooo
+""")
+
+# Far arm pointing up at the ball (overhead windup), behind the head.
+ARM_POINT_FAR = part("""
+..........ooo
+.........oabo
+........oabo.
+.......oabo..
+......oabo...
+.....oabo....
+....oDDo.....
+....oDo......
+""")
+
+# Near arm straight up and forward to the paddle (overhead contact).
+ARM_OVER = part("""
+......ooo.
+.....obcco
+.....obcco
+....obco..
+...obco...
+..obco....
+.oMMo.....
+.oDMo.....
+..oo......
+""")
+
+# Far arm down and back for balance, behind the torso.
+ARM_BACK_FAR = part("""
+.....oDo
+....oDDo
+...oabo.
+..oabo..
+.oabo...
+oaao....
+.oo.....
+""")
+
+# Near arm reaching down and forward to a low paddle (reach, scoop).
+ARM_DOWN = part("""
+oMo....
+oDMo...
+.obbo..
+..obco.
+...obco
+...obcco
+...occco
+....ooo.
+""")
+
+# Paddle head down-right, grip up-left (reach).
+PADDLE_DOWN = PADDLE_DIAG[::-1]
+
+# Paddle flat and face-open near the ground, grip at the left (scoop).
+PADDLE_OPEN = part("""
+.....oooo..
+...ooePPeo.
+oooePPPppeo
+oeeePPpppeo
+oooeepppeeo
+....ooooo..
+""")
+
+# Longer reach down to a paddle near the ground (scoop).
+ARM_DOWN_LONG = part("""
+oMo.....
+oDMo....
+.obbo...
+..obbo..
+...obco.
+....obco
+....obcco
+....occco
+.....ooo.
+""")
+
+# Wide lunge: near leg bent deep forward, far leg straight back (reach).
+LEGS_REACH = part("""
+.......oqwwwwwwwwwwwo....
+.....ooqqwwwwwwwwwwwwo...
+...ooqqqwwwwwoowwwwwwbco.
+..oaabooo.......oobbbbcco
+.oaabo............oobcco.
+oaabo..............ohhhho
+oxxo..............oxMxxxxo
+oqqo..............oqqqqqqo
+.oo................oooooo.
+""")
+
+# Overhead stance: side-on, weight on the back foot.
+LEGS_SIDE = part("""
+......oqwwwwwwwwwwwo....
+.....oqqwwwwwwwwwwwwo...
+....oqqwwwwwoqwwwwwwqo..
+...oqqwwwo....oqwwwwo...
+..oaabbo.......obbcco...
+..oaabo........obbcco...
+.oaabo..........obbcco..
+.ohhho..........ohhhho..
+oxMxxxo........oxMxxxxo.
+oqqqqqqo.......oqqqqqqqo
+.oooooo.........ooooooo.
+""")
+
+
 # --- Frames -----------------------------------------------------------------
 
-def frame(acc, legs, near=(), far=(), legs_dx=-6):
+def frame(acc, legs, near=(), far=(), legs_dx=-6, head=None):
     """acc: ponytail offset from player_frames.json (sets head and torso).
 
     near/far: (part, dx, dy) relative to the head origin; far parts go
@@ -297,36 +445,149 @@ def frame(acc, legs, near=(), far=(), legs_dx=-6):
     legs_y = FOOT_ROW + 1 - len(legs)
     out = [(p, hx + dx, hy + dy) for p, dx, dy in far]
     out += [(legs, hx + legs_dx, legs_y), (TORSO, hx + 1, hy + 9),
-            (HEAD, hx, hy)]
+            (head or HEAD, hx, hy)]
     out += [(p, hx + dx, hy + dy) for p, dx, dy in near]
     return out
 
 
 READY = ((PADDLE_UP, 14, 3), (ARM_READY, 10, 10))
 
-FRAMES = {
-    "idle0": frame((5, 5), LEGS_READY, READY),
-    "idle1": frame((5, 6), LEGS_LOW, READY),
-    "run0": frame((5, 6), LEGS_RUN_A, READY, legs_dx=-5),
-    "run1": frame((5, 7), LEGS_RUN_B, READY, legs_dx=-5),
-    "run2": frame((5, 6), LEGS_RUN_C, READY, legs_dx=-5),
-    "run3": frame((5, 7), LEGS_RUN_D, READY, legs_dx=-5),
-    "windup": frame((4, 6), LEGS_LOW,
-                    ((PADDLE_LEFT, -9, 9), (ARM_BACK, 1, 10))),
-    "swing": frame((6, 5), LEGS_LUNGE,
-                   ((PADDLE_UP, 14, 1), (ARM_REACH, 9, 10)), legs_dx=-7),
-    "follow": frame((6, 5), LEGS_LUNGE,
-                    ((PADDLE_DIAG, 11, -3), (ARM_UP, 9, 4)), legs_dx=-7),
-    "toss": frame((5, 5), LEGS_READY,
-                  ((PADDLE_LOW_BACK, -6, 15), (ARM_LOW_BACK, 4, 10)),
-                  far=((ARM_TOSS_FAR, 9, 8),)),
-    "cheer": frame((4, 8), LEGS_SQUAT,
-                   ((PADDLE_DIAG, 13, -6), (ARM_UP, 11, 3)),
-                   far=((ARM_UP_FAR, -5, 0),), legs_dx=-5),
+# name -> (accessory offset, frame() keyword arguments)
+SPECS = {
+    "idle0": ((5, 5), dict(legs=LEGS_READY, near=READY)),
+    "idle1": ((5, 6), dict(legs=LEGS_LOW, near=READY)),
+    "run0": ((5, 6), dict(legs=LEGS_RUN_A, near=READY, legs_dx=-5)),
+    "run1": ((5, 7), dict(legs=LEGS_RUN_B, near=READY, legs_dx=-5)),
+    "run2": ((5, 6), dict(legs=LEGS_RUN_C, near=READY, legs_dx=-5)),
+    "run3": ((5, 7), dict(legs=LEGS_RUN_D, near=READY, legs_dx=-5)),
+    "windup": ((4, 6), dict(legs=LEGS_LOW,
+                            near=((PADDLE_LEFT, -9, 9), (ARM_BACK, 1, 10)))),
+    "swing": ((6, 5), dict(legs=LEGS_LUNGE, legs_dx=-7,
+                           near=((PADDLE_UP, 14, 1), (ARM_REACH, 9, 10)))),
+    "follow": ((6, 5), dict(legs=LEGS_LUNGE, legs_dx=-7,
+                            near=((PADDLE_DIAG, 11, -3), (ARM_UP, 9, 4)))),
+    "toss": ((5, 5), dict(legs=LEGS_READY,
+                          near=((PADDLE_LOW_BACK, -6, 15),
+                                (ARM_LOW_BACK, 4, 10)),
+                          far=((ARM_TOSS_FAR, 9, 8),))),
+    "cheer": ((4, 8), dict(legs=LEGS_SQUAT, legs_dx=-5,
+                           near=((PADDLE_DIAG, 13, -6), (ARM_UP, 11, 3)),
+                           far=((ARM_UP_FAR, -5, 0),))),
+    # New poses (bareheaded set only).
+    "overhead_windup": ((6, 4), dict(legs=LEGS_SIDE, legs_dx=-8,
+                                     near=((ARM_COCKED, -4, 3),),
+                                     far=((PADDLE_LOW_BACK, -11, 4),
+                                          (ARM_POINT_FAR, 4, -1)))),
+    "overhead_contact": ((5, 5), dict(legs=LEGS_LUNGE, legs_dx=-7,
+                                      near=((PADDLE_UP, 13, -3),
+                                            (ARM_OVER, 9, 3)),
+                                      far=((ARM_BACK_FAR, 1, 11),))),
+    "reach": ((3, 7), dict(legs=LEGS_REACH, legs_dx=-7,
+                           near=((PADDLE_DOWN, 14, 15), (ARM_DOWN, 10, 10)),
+                           far=((ARM_BACK_FAR, 0, 10),))),
+    "scoop": ((4, 8), dict(legs=LEGS_SQUAT, legs_dx=-5,
+                           near=((PADDLE_OPEN, 12, 14), (ARM_DOWN_LONG, 8, 10)))),
 }
 
 SLOTS = ["idle0", "idle1", "run0", "run1", "run2", "run3",
          "windup", "swing", "follow", "toss", "cheer"]
+NEW_POSES = ["overhead_windup", "overhead_contact", "reach", "scoop"]
+
+# Hats sit at the accessory offset plus HAT_OFFSET (player_frames.json),
+# which is the head origin plus (-1, -2).
+HAT_OFFSET = (4, -4)
+HAT_W, HAT_H = 16, 8
+
+
+def capped_frame(name):
+    acc, kw = SPECS[name]
+    return frame(acc, **kw)
+
+
+def bare_frame(name):
+    acc, kw = SPECS[name]
+    return frame(acc, head=HEAD_BARE, **kw)
+
+
+def head_only(head):
+    """The head alone in a frame-sized grid at idle0's head origin."""
+    return render([(head, 10, 3)])
+
+
+def derive_cap():
+    """Cap cell: every pixel where the capped head differs from the bare
+    head, plus the rest of the cap (its colours and the outline around
+    them) so the cell reads as a whole cap on its own. Laid over the bare
+    head it reproduces the capped head exactly."""
+    capped, bare = head_only(HEAD), head_only(HEAD_BARE)
+    cx, cy = 10 - 1, 3 - 2
+    cloth = set("DML")
+
+    def near_cloth(x, y):
+        return any(capped[y + dy][x + dx] in cloth
+                   for dx in (-1, 0, 1) for dy in (-1, 0, 1)
+                   if 0 <= x + dx < W and 0 <= y + dy < H)
+
+    cell = [["."] * HAT_W for _ in range(HAT_H)]
+    for y in range(H):
+        for x in range(W):
+            c = capped[y][x]
+            keep = c != bare[y][x] or c in cloth or (c == "o" and near_cloth(x, y))
+            if keep and c != ".":
+                assert c != "." or bare[y][x] == ".", f"bare head shows at {x},{y}"
+                assert 0 <= x - cx < HAT_W and 0 <= y - cy < HAT_H, (x, y)
+                cell[y - cy][x - cx] = c
+            elif c != bare[y][x]:
+                raise SystemExit(f"bare head shows at {x},{y}")
+    return ["".join(r) for r in cell]
+
+
+# The other hats, redrawn for the bare head (owner's palette, same roles as
+# the SNES hats: visor/headband in the shoe accent, tricorn in hair colour
+# with white trim, bandana in the shirt ramp).
+HATS = {
+    "visor": part("""
+................
+................
+................
+................
+............oooo
+.oxxxxxxxxxxxxxo
+.oooooooooooxxxo
+............ooo.
+"""),
+    "headband": part("""
+................
+................
+................
+................
+................
+.oxxxxxxxxxxo...
+oxoxxxxxxxxxo...
+oxooooooooooo...
+"""),
+    "tricorn": part("""
+................
+.....ooooo......
+....orrrrro.....
+o..orrrrrrro..o.
+ohorrrrrrrrroho.
+.ohhrrrrrrrrhho.
+..ohhhhhhhhhhho.
+...oooooooooo...
+"""),
+    "bandana": part("""
+................
+................
+....ooooo.......
+...oMMLMMoo.....
+..oMMMMMMMMo....
+oDoMLMMMLMMMo...
+oDDoooooooooo...
+.oo.............
+"""),
+}
+HAT_ORDER = ["cap", "visor", "headband", "tricorn", "bandana"]
 
 
 def render(placements, w=W, h=H):
@@ -340,19 +601,80 @@ def render(placements, w=W, h=H):
                 if 0 <= gx < w and 0 <= gy < h:
                     grid[gy][gx] = ch
                 else:
-                    print(f"clipped pixel at {gx},{gy}")
+                    raise SystemExit(f"pixel outside the frame at {gx},{gy}")
     return ["".join(r) for r in grid]
 
 
+def overlay(rows, cell, x0, y0):
+    g = [list(r) for r in rows]
+    for y, row in enumerate(cell):
+        for x, ch in enumerate(row):
+            if ch != "." and 0 <= x0 + x < W and 0 <= y0 + y < H:
+                g[y0 + y][x0 + x] = ch
+    return ["".join(r) for r in g]
+
+
+def check():
+    """Bare frames match the capped ones from the neck down, and the cap
+    cell over each bare frame gives back the capped frame (except where the
+    paddle or an arm crosses the cap, which the hat now covers)."""
+    report = []
+    cap = derive_cap()
+    for name in SLOTS:
+        acc = SPECS[name][0]
+        capped, bare = render(capped_frame(name)), render(bare_frame(name))
+        hy = acc[1] - 2
+        for y in range(hy + 6, H):          # head rows 6+ (eyes down) unchanged
+            assert capped[y] == bare[y], f"{name}: row {y} changed"
+        hx0, hy0 = acc[0] + HAT_OFFSET[0], acc[1] + HAT_OFFSET[1]
+        diff = [(x, y) for y in range(H) for x in range(W)
+                if overlay(bare, cap, hx0, hy0)[y][x] != capped[y][x]]
+        report.append((name, diff))
+    return report
+
+
+def offsets():
+    rows = []
+    for name in SLOTS + NEW_POSES:
+        acc = SPECS[name][0]
+        rows.append({"frame": name, "accessory": list(acc),
+                     "head": [acc[0] + 5, acc[1] - 2],
+                     "hat": [acc[0] + HAT_OFFSET[0], acc[1] + HAT_OFFSET[1]]})
+    return rows
+
+
+def write_block(out, name, rows):
+    out.append(f"== {name}")
+    out.extend(rows)
+
+
 def main():
+    # The original capped set, unchanged.
     out = [HEADER]
     for name in SLOTS:
-        out.append(f"== {name}")
-        out.extend(render(FRAMES[name]))
+        write_block(out, name, render(capped_frame(name)))
     out.append("# Ponytail accessory (ADR-014), 8x8, behind the body.")
-    out.append("== ponytail")
-    out.extend(PONYTAIL)
+    write_block(out, "ponytail", PONYTAIL)
     (HERE / "player_frames.txt").write_text("\n".join(out) + "\n")
+
+    # Bareheaded set: 11 frames, 4 new poses, ponytail, hats.
+    out = [HEADER.replace("Player body frames", "Bareheaded player frames")]
+    for name in SLOTS + NEW_POSES:
+        write_block(out, name, render(bare_frame(name)))
+    out.append("# Ponytail for the bare head, 8x8, behind the body.")
+    write_block(out, "ponytail", PONYTAIL_BARE)
+    out.append("# Hats, 16x8, at the accessory offset + (4, -4), in front.")
+    hats = dict(HATS, cap=derive_cap())
+    for name in HAT_ORDER:
+        assert len(hats[name]) == HAT_H and all(len(r) == HAT_W for r in hats[name]), name
+        write_block(out, "hat_" + name, hats[name])
+    (HERE / "player_frames_bare.txt").write_text("\n".join(out) + "\n")
+    (HERE / "offsets_bare.json").write_text(json.dumps(
+        {"hat_offset": list(HAT_OFFSET), "frames": offsets()}, indent=1) + "\n")
+
+    for name, diff in check():
+        if diff:
+            print(f"cap overlay differs on {name}: {len(diff)} px {diff[:6]}")
 
 
 if __name__ == "__main__":
