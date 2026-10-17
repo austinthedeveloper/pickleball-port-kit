@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.1.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.2.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-16 of 16 roadmap tasks are in.
+17 of 17 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -100,3 +100,9 @@ Status: **Ready to test**: play a doubles match and a long singles rally.
 The standard approach most games take. Any pad Godot's SDL mappings know (Xbox, PlayStation, Switch Pro, most generic pads) is read on the Xbox layout, and **everything shown uses Xbox buttons**: A, B, X and Y in their colours, LB/RB/LS/RS, the Menu and View buttons, and a drawn D-pad. In one-player any connected pad drives P1, so you just pick one up. With 2P on, the first pad is P1's and the second P2's; with one pad, P1 plays on the keyboard and P2 on the pad. Pads can be plugged and unplugged at any time; a toast says CONTROLLER CONNECTED or DISCONNECTED, and losing one mid-match pauses it. Holding a stick or the D-pad in a menu repeats (300 ms, then every 85 ms, in real time). Rumble on your own contact (a drive harder, a soft shot barely), with VIBRATION in ACCESSIBILITY.
 
 Status: **Ready to test**: plug in a controller (and pull it out mid-match), try the menus with the stick, and feel the rumble.
+
+## PORT-16: four players on controllers (asked for 2026-10-17)
+
+MULTIPLAYER on MAIN opens a lobby. Up to four controllers join with A, each taking the first free player number (P1-P4) and a card: SIDE, SHIRT (unique), BODY, PADDLE. LB/RB switch SINGLES and DOUBLES. In doubles **the players choose their sides, and whoever shares a side is their partner**; an empty place on a side gets a CPU (free colour, standard paddle). A readies, B un-readies or leaves, and Menu starts once everyone is ready and the teams work. Every human plays on their own pad; anyone's Menu pauses and anyone's A works the pause menu; a P1-P4 tag floats over each player in their colour. Friends' matches leave the records alone. All pads are taken to be Xbox pads on the default layout for now (KNOWN_ISSUES #39).
+
+Status: **Ready to test**: needs two to four controllers. MAIN → MULTIPLAYER, A to join, pick sides, A to ready, Menu to start.

@@ -4,7 +4,9 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
-## [Unreleased]
+## [0.2.0] - 2026-10-17
+
+Multiplayer for up to four players.
 
 ### Added
 - MULTIPLAYER: up to four players on controllers. A lobby to join, pick

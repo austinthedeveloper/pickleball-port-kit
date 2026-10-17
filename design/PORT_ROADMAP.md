@@ -484,6 +484,8 @@ feature/cld-release        (pushed)
   release (`game/CHANGELOG.md`, `design/VERSIONING.md`). Tag `v0.1.0`, on
   `feature/cld-release-0.1.0`; GitHub release published (source only,
   since there are no export templates here yet).
+- **v0.2.0** (2026-10-17): PORT-16 multiplayer. Tag `v0.2.0`, on
+  `feature/cld-release-0.2.0`; GitHub release published (source only).
 
 ### 16. `feature/cld-multiplayer`: four players on controllers (asked for 2026-10-17)
 
