@@ -292,6 +292,34 @@ func _build_ball() -> void:
 
 # --- Frame ------------------------------------------------------------------------
 
+## Rumble on a human's contact (PORT-15): a drive kicks harder, a soft
+## shot barely; never in the demo.
+func _rumble_hit(slot: int, shot: int) -> void:
+	if demo or sim.config.human[slot] == 0:
+		return
+	var player := 0 if slot == 0 else 1
+	if slot != 0 and slot != 2:
+		return
+	match shot:
+		K.SHOT_DRIVE:
+			GameControls.rumble(player, 0.3, 0.7, 0.12)
+		K.SHOT_SOFT:
+			GameControls.rumble(player, 0.2, 0.0, 0.06)
+		_:
+			GameControls.rumble(player, 0.35, 0.25, 0.08)
+
+
+## A controller dropping out mid-match pauses it (the pause menu waits
+## for the player to come back), as most games do.
+var _lost_seen := GameControls.lost_serial
+
+func _pause_on_lost_pad() -> bool:
+	if GameControls.lost_serial == _lost_seen:
+		return false
+	_lost_seen = GameControls.lost_serial
+	return not sim.paused and sim.phase != K.PHASE_MATCH_RESULT and not initials.open
+
+
 ## SERVE ASSIST (PORT-12, an input aid, not a rule change): while P1
 ## holds B on the charged serve, the press lets go by itself on the way up
 ## at a strong charge, so holding is enough for a good serve.
@@ -333,13 +361,15 @@ func _physics_process(_delta: float) -> void:
 	var human := []
 	if not demo:
 		var it := GameControls.read_intent()
-		var it2: SimTypes.Intent = GameControls.read_pad_intent(1) if sim.config.human[2] else null
+		var it2: SimTypes.Intent = GameControls.read_pad_intent(GameControls.p2_pad) if sim.config.human[2] else null
 		if input_lock > 0:
 			input_lock -= 1
 			it = SimTypes.Intent.new()
 			it2 = null
 			GameControls.clear_latch()
 		_serve_assist(it)
+		if _pause_on_lost_pad():
+			it.pause_pressed = 1
 		human = [it, null, it2, null]
 		if sim.paused and _pause_input(it):
 			return
@@ -384,10 +414,10 @@ var pause_choice := ""
 ## sim). True when the frame is done (the sim doesn't step).
 func _pause_input(it: SimTypes.Intent) -> bool:
 	var menu: MenuPage = _hud.pause_menu
-	if Input.is_action_just_pressed("move_up"):
+	if GameControls.menu_pressed("move_up"):
 		menu.move(-1)
 		_sfx.play("blip")
-	elif Input.is_action_just_pressed("move_down"):
+	elif GameControls.menu_pressed("move_down"):
 		menu.move(1)
 		_sfx.play("blip")
 	if it.hit_pressed and not it.pause_pressed:
@@ -436,6 +466,7 @@ func _on_event(e: Array) -> void:
 	match kind:
 		K.EVENT_HIT, K.EVENT_SERVE:
 			var slot: int = e[3] & 15
+			_rumble_hit(slot, e[3] >> 4 if kind == K.EVENT_HIT else K.SHOT_STANDARD)
 			var lead := -14.0 if sim.players[slot].team else 14.0
 			_spawn_fx("spark", CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp)
 				+ Vector2(lead, 0), 1 if (e[3] >> 4) == K.SHOT_DRIVE else 0)

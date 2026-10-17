@@ -140,7 +140,9 @@ func _build_pages() -> void:
 		{"id": "points", "label": "POINTS", "value": func(): return str(Settings.POINTS[Settings.points_i]),
 			"change": func(d): Settings.points_i = clampi(Settings.points_i + d, 0, Settings.POINTS.size() - 1)},
 		{"id": "players", "label": "PLAYERS", "value": func(): return "2P VS" if Settings.two_players else "1P",
-			"change": func(_d): Settings.two_players = not Settings.two_players},
+			"change": func(_d):
+				Settings.two_players = not Settings.two_players
+				GameControls.refresh_pads()},
 	], help)
 	var court_rows := [{"id": "venue", "label": "VENUE", "value": func(): return Settings.VENUE_NAMES[Settings.venue_i],
 		"change": func(d): Settings.venue_i = (Settings.venue_i + d + Settings.VENUES.size()) % Settings.VENUES.size(); _start_demo()},
@@ -187,6 +189,10 @@ func _build_pages() -> void:
 			"change": func(_d): Settings.hud_large = not Settings.hud_large},
 		{"id": "assist", "label": "SERVE ASSIST", "value": func(): return onoff.call(Settings.serve_assist),
 			"change": func(_d): Settings.serve_assist = not Settings.serve_assist},
+		{"id": "vibration", "label": "VIBRATION", "value": func(): return onoff.call(Settings.vibration),
+			"change": func(_d):
+				Settings.vibration = not Settings.vibration
+				GameControls.rumble(0, 0.4, 0.4, 0.15)},       # a taste of it
 	], help, Rect2(280, 172, 400, 0))
 	var control_rows := []
 	for a in Bindings.ACTIONS:
@@ -363,8 +369,8 @@ func select_input(pressed: int) -> void:
 ## 2P's newly pressed buttons on pad 1 (the input map is P1's).
 func _pad2_pressed() -> int:
 	var held := 0
-	var dev := 1
-	if dev in Input.get_connected_joypads():
+	var dev := GameControls.p2_pad
+	if dev >= 0 and dev in Input.get_connected_joypads():
 		for pair in [[JOY_BUTTON_DPAD_UP, Practice.PAD_UP], [JOY_BUTTON_DPAD_DOWN, Practice.PAD_DOWN],
 				[JOY_BUTTON_DPAD_LEFT, Practice.PAD_LEFT], [JOY_BUTTON_DPAD_RIGHT, Practice.PAD_RIGHT],
 				[JOY_BUTTON_A, Practice.PAD_B], [JOY_BUTTON_X, Practice.PAD_Y],
@@ -506,16 +512,16 @@ func _process(_delta: float) -> void:
 		select_input(pressed | (p2 if select.current == 1 else 0))
 		return
 	var p: MenuPage = pages[page]
-	if Input.is_action_just_pressed("move_up"):
+	if GameControls.menu_pressed("move_up"):
 		p.move(-1)
 		_sfx.play("blip")
-	elif Input.is_action_just_pressed("move_down"):
+	elif GameControls.menu_pressed("move_down"):
 		p.move(1)
 		_sfx.play("blip")
 	var dir := 0
-	if Input.is_action_just_pressed("move_left"):
+	if GameControls.menu_pressed("move_left"):
 		dir = -1
-	elif Input.is_action_just_pressed("move_right"):
+	elif GameControls.menu_pressed("move_right"):
 		dir = 1
 	if dir != 0 and p.change(dir):
 		_sfx.play("blip")

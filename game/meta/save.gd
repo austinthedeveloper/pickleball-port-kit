@@ -44,7 +44,8 @@ static func defaults() -> Dictionary:
 			"court": [0, 0, 0, 0],  # COURT: surface, kitchen, surround, lines presets
 			"time": 0,  # COURT TIME: DAY, DUSK, NIGHT (ADR-045)
 			# PORT-12: accessibility, and remapped controls ({} = defaults)
-			"shake": 1, "flash": 1, "hud_large": 0, "serve_assist": 0, "bindings": {}},
+			"shake": 1, "flash": 1, "hud_large": 0, "serve_assist": 0, "bindings": {},
+			"vibration": 1},  # PORT-15: controller rumble
 		"records": {"singles_wins": 0, "singles_losses": 0, "doubles_wins": 0,
 			"doubles_losses": 0, "ladder_rung": 0, "ladder_clears": 0,
 			"longest_rally": 0, "practice_best": 0,

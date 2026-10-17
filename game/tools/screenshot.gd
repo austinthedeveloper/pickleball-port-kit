@@ -5,7 +5,7 @@
 ## "opp=N" plays ladder team N (0-based) in their looks. "title_options"
 ## (any page id) opens that title page; "court=S,K,R,L" sets the court
 ## colour presets; "time=N" DAY 0, DUSK 1, NIGHT 2;
-## "pad" / "ps" / "switch" show that pad family's prompts; "pause" pauses the match at the end;
+## "pad" shows the controller prompts; "pause" pauses the match at the end;
 ## "closecall" shows a forced close-up; "initials" the initials card;
 ## "result" plays a bot match and ends it (the stats card).
 extends SceneTree
@@ -23,10 +23,8 @@ func _initialize() -> void:
 	_target = int(a[2]) if a.size() > 2 else 120
 	_out = a[3] if a.size() > 3 else "user://shot.png"
 	for arg in a.slice(4):
-		if arg in ["pad", "ps", "switch"]:
+		if arg == "pad":
 			GameControls.last_device = GameControls.PAD
-			Prompts.force_family = {"pad": Prompts.XBOX, "ps": Prompts.PLAYSTATION,
-				"switch": Prompts.NINTENDO}[arg]
 		if arg.begins_with("time="):
 			Settings.time_i = int(arg.substr(5))
 		if arg.begins_with("court="):

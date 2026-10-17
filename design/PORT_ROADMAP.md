@@ -450,6 +450,34 @@ feature/cld-release        (pushed)
   - Status: **Ready to test**: play a doubles match and a long singles
     rally.
 
+### 15. `feature/cld-controller`: controller support (asked for 2026-10-17)
+
+- [x] `PORT-15` The standard approach most games take. Any pad Godot's
+  SDL mappings know (Xbox, PlayStation, Switch Pro, most generic pads) is
+  read on the Xbox layout, and **everything shown uses Xbox buttons**:
+  A, B, X and Y in their colours, LB/RB/LS/RS, the Menu and View buttons,
+  and a drawn D-pad. In one-player any connected pad drives P1, so you
+  just pick one up. With 2P on, the first pad is P1's and the second P2's;
+  with one pad, P1 plays on the keyboard and P2 on the pad. Pads can be
+  plugged and unplugged at any time; a toast says CONTROLLER CONNECTED or
+  DISCONNECTED, and losing one mid-match pauses it. Holding a stick or
+  the D-pad in a menu repeats (300 ms, then every 85 ms, in real time).
+  Rumble on your own contact (a drive harder, a soft shot barely), with
+  VIBRATION in ACCESSIBILITY.
+  - Accept: tests for pad assignment and the input map following it,
+    hot-plug news, menu repeat timing, a lost pad pausing (not the
+    demo), the toast, rumble only for a human's shots on a pad and only
+    with VIBRATION on.
+  - Verified: `test_controller.gd` (6 tests) as above, plus the prompt
+    tests now checking Xbox glyphs for every pad. One fix along the way:
+    the first menu repeat counted frames, which raced on fast refresh
+    rates, so it now runs on the clock. 168/168 plus the e2e; golden traces
+    unchanged. Screenshots: CONTROLS, pause and the title's prompt bar on
+    a pad. No physical controller here, so rumble and hot-plug are tested
+    through their code paths only.
+  - Status: **Ready to test**: plug in a controller (and pull it out
+    mid-match), try the menus with the stick, and feel the rumble.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
@@ -507,9 +535,7 @@ the chain: each has a default I've gone with.
   The version is 0.9.0 in the presets and `project.godot`; tell me what
   you want it to be.
 
-- **PORT-11 modern UI:** the prompts use the pad's own family (Xbox,
-  Nintendo, PlayStation by its reported name; unknown pads get Xbox
-  letters). The game still names the swing buttons by SNES role (hit,
+- **PORT-11 modern UI:** (since PORT-15, every pad shows Xbox buttons.) The game still names the swing buttons by SNES role (hit,
   drive, soft), so on an Xbox pad "hit" shows A. Fades are 8 frames out,
   10 in. Say if any of it feels slow.
 

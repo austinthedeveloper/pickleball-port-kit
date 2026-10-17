@@ -1,6 +1,11 @@
 ## Input map, built at startup so project.godot stays readable. SNES layout
 ## on a keyboard and any gamepad: B = standard hit (Space/J, pad south),
 ## A = drive (K, pad east), Y = soft shot (L, pad west), Start = Enter.
+## Controllers (PORT-15): Godot's SDL mappings put every pad (Xbox,
+## PlayStation, Switch, generic) on the Xbox layout, so one binding fits
+## all. In one-player any pad drives P1; with 2P on and two pads the first
+## is P1's and the second P2's (one pad: P1 on the keyboard, P2 the pad).
+## Pads can come and go at any time.
 class_name GameControls
 extends Node
 
@@ -26,7 +31,113 @@ const PAD_BUTTONS := {
 }
 
 
+## The pad each player uses: -1 = any pad (P1 in one-player), NO_PAD =
+## none (the keyboard only).
+const NO_PAD := -2
+static var p1_pad := -1
+static var p2_pad := NO_PAD
+## Connection news for a toast: ["CONNECTED" | "DISCONNECTED", device], and
+## a counter; `lost_serial` counts disconnects only (a match pauses).
+static var pad_news: Array = []
+static var news_serial := 0
+static var lost_serial := 0
+
+
+## Who plays on which pad, from the connected pads (sorted by id).
+static func assign_pads(connected: Array, two_players: bool) -> void:
+	var pads := connected.duplicate()
+	pads.sort()
+	if two_players and pads.size() >= 2:
+		p1_pad = pads[0]
+		p2_pad = pads[1]
+	elif two_players and pads.size() == 1:
+		p1_pad = NO_PAD
+		p2_pad = pads[0]
+	else:
+		p1_pad = -1
+		p2_pad = NO_PAD
+	apply_devices()
+
+
+## Re-reads the connected pads (and 2P) and re-targets P1's pad events.
+static func refresh_pads() -> void:
+	assign_pads(Input.get_connected_joypads(), Settings.two_players)
+
+
+## The device P1's pad events listen on (a pad id, -1 for all, or one no
+## pad has when P1 is on the keyboard).
+static func p1_device() -> int:
+	return 99 if p1_pad == NO_PAD else p1_pad
+
+
+static func apply_devices() -> void:
+	for action in ACTIONS:
+		if not InputMap.has_action(action):
+			continue
+		for e in InputMap.action_get_events(action):
+			if e is InputEventJoypadButton or e is InputEventJoypadMotion:
+				InputMap.action_erase_event(action, e)
+				var copy: InputEvent = e.duplicate()
+				copy.device = p1_device()
+				InputMap.action_add_event(action, copy)
+	binding_serial += 1
+
+
+## Menu navigation: a press, or a held direction repeating (a stick or
+## D-pad held down scrolls), like most games' menus. In real time, so the
+## speed is the same at any frame rate. Call once a frame per action.
+const REPEAT_DELAY_MS := 300
+const REPEAT_EVERY_MS := 85
+static var _held := {}           ## action -> the next repeat's time (ms)
+
+static func menu_pressed(action: String) -> bool:
+	return repeat_step(_held, action, Input.is_action_just_pressed(action),
+		Input.is_action_pressed(action), Time.get_ticks_msec())
+
+
+## The repeat rule on its own (tests drive the clock): true on a press, then
+## after REPEAT_DELAY_MS of holding, every REPEAT_EVERY_MS.
+static func repeat_step(state: Dictionary, action: String, just: bool, held: bool, now: int) -> bool:
+	if just:
+		state[action] = now + REPEAT_DELAY_MS
+		return true
+	if held and state.has(action):
+		if now >= int(state[action]):
+			state[action] = int(state[action]) + REPEAT_EVERY_MS
+			return true
+		return false
+	state.erase(action)
+	return false
+
+
+## Rumble (VIBRATION in ACCESSIBILITY): on a player's pad, or the pad in
+## hand when P1 plays on any pad. `last_rumble` keeps the last request
+## ([device, weak, strong, seconds]) for tests.
+static var last_rumble: Array = []
+
+static func rumble(player: int, weak: float, strong: float, seconds: float) -> void:
+	if not Settings.vibration:
+		return
+	var dev := p1_pad if player == 0 else p2_pad
+	if player == 0 and dev == -1:
+		dev = last_pad if last_device == PAD else NO_PAD
+	if dev < 0:
+		return
+	last_rumble = [dev, weak, strong, seconds]
+	Input.start_joy_vibration(dev, weak, strong, seconds)
+
+
+static func _on_joy_connection(device: int, connected: bool) -> void:
+	pad_news = ["CONNECTED" if connected else "DISCONNECTED", device]
+	news_serial += 1
+	if not connected:
+		lost_serial += 1
+	refresh_pads()
+
+
 func _ready() -> void:
+	if not Input.joy_connection_changed.is_connected(_on_joy_connection):
+		Input.joy_connection_changed.connect(_on_joy_connection)
 	for action in ACTIONS:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action, 0.4)
@@ -44,6 +155,7 @@ func _ready() -> void:
 		m.axis = pair[1]
 		m.axis_value = pair[2]
 		InputMap.action_add_event(pair[0], m)
+	assign_pads(Input.get_connected_joypads(), false)
 
 
 ## Presses latched from input events until the next sim step reads them,

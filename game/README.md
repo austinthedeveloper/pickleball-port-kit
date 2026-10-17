@@ -13,18 +13,23 @@ game/tools/test.sh           # all tests, headless
 
 ## Controls
 
-| SNES | Keyboard | Gamepad |
+| Action | Keyboard | Controller (shown as Xbox) |
 |---|---|---|
-| D-pad (move, aim at contact) | Arrows / WASD | D-pad or left stick |
-| B: standard hit, serve | Space or J | South (A/Cross) |
-| A: drive | K | East (B/Circle) |
-| Y: soft (lob; dink aimed away from the net) | L | West (X/Square) |
-| Start: pause; on the result, back to the title | Enter / Esc | Start |
+| Move, aim at contact | Arrows / WASD | D-pad or left stick |
+| Hit (standard), serve | Space or J | A |
+| Drive | K | B |
+| Soft (lob; dink aimed away from the net) | L | X |
+| Pause; on the result, back to the title | Enter / Esc | Menu |
+
+Any controller works (Xbox, PlayStation, Switch Pro, most others), on
+the Xbox layout; the game always shows Xbox buttons. Plug in or pull out
+a pad at any time (a match pauses if one drops). CONTROLS (in OPTIONS)
+remaps keys and buttons; VIBRATION is in ACCESSIBILITY.
 
 Hold a swing button at the serve for the charged serve (ADR-044): let go on
 the way up for pace; a tap is the safe classic serve. F3 toggles the
-diagnostics overlay. 2P versus: set PLAYERS on the title and plug in a
-second pad.
+diagnostics overlay. 2P versus: set PLAYERS on the title; with two pads
+the first is P1's, with one pad P1 plays on the keyboard.
 
 ## The title menu
 

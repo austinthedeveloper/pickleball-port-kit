@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `45ceb3d-dirty`. Generated from `design/PORT_ROADMAP.md` by
+Build `19d45d9-dirty`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-15 of 15 roadmap tasks are in.
+16 of 16 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -94,3 +94,9 @@ Status: **Ready to test**: finish a match and read the card.
 Scores that pop when they change, a serve indicator (who serves, and in doubles which server), a live rally counter for long rallies, and a MATCH POINT pulse.
 
 Status: **Ready to test**: play a doubles match and a long singles rally.
+
+## PORT-15: controller support (asked for 2026-10-17)
+
+The standard approach most games take. Any pad Godot's SDL mappings know (Xbox, PlayStation, Switch Pro, most generic pads) is read on the Xbox layout, and **everything shown uses Xbox buttons**: A, B, X and Y in their colours, LB/RB/LS/RS, the Menu and View buttons, and a drawn D-pad. In one-player any connected pad drives P1, so you just pick one up. With 2P on, the first pad is P1's and the second P2's; with one pad, P1 plays on the keyboard and P2 on the pad. Pads can be plugged and unplugged at any time; a toast says CONTROLLER CONNECTED or DISCONNECTED, and losing one mid-match pauses it. Holding a stick or the D-pad in a menu repeats (300 ms, then every 85 ms, in real time). Rumble on your own contact (a drive harder, a soft shot barely), with VIBRATION in ACCESSIBILITY.
+
+Status: **Ready to test**: plug in a controller (and pull it out mid-match), try the menus with the stick, and feel the rumble.

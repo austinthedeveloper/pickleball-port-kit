@@ -35,7 +35,7 @@ func test_device_switch() -> void:
 	GameControls.last_pad = kept[1]
 
 
-func test_prompts_follow_device_and_family() -> void:
+func test_prompts_follow_the_device() -> void:
 	var KB := GameControls.KEYBOARD
 	var PAD := GameControls.PAD
 	eq(Prompts.label("hit", KB), "SPACE", "B is Space")
@@ -43,19 +43,16 @@ func test_prompts_follow_device_and_family() -> void:
 	eq(Prompts.label("soft", KB), "L")
 	eq(Prompts.label("start", KB), "ENTER")
 	eq(Prompts.label("dpad", KB), "ARROWS")
-	eq(Prompts.label("hit", PAD, 0, Prompts.XBOX), "A", "Xbox: south is A")
-	eq(Prompts.label("drive", PAD, 0, Prompts.XBOX), "B")
-	eq(Prompts.label("soft", PAD, 0, Prompts.XBOX), "X")
-	eq(Prompts.label("hit", PAD, 0, Prompts.NINTENDO), "B", "Nintendo: south is B, as on the SNES")
-	eq(Prompts.label("soft", PAD, 0, Prompts.NINTENDO), "Y")
-	eq(Prompts.label("hit", PAD, 0, Prompts.PLAYSTATION), "CROSS", "PlayStation: shapes")
-	eq(Prompts.label("drive", PAD, 0, Prompts.PLAYSTATION), "CIRCLE")
-	eq(Prompts.label("start", PAD), "START")
+	# any pad shows the Xbox layout (PORT-15)
+	eq(Prompts.label("hit", PAD), "A", "south is A")
+	eq(Prompts.label("drive", PAD), "B")
+	eq(Prompts.label("soft", PAD), "X")
+	eq(Prompts.label("start", PAD), "MENU", "Start is the Menu button")
 	eq(Prompts.label("dpad", PAD), "D-PAD")
-	eq(Prompts.family_for_name("DualSense Wireless Controller"), Prompts.PLAYSTATION)
-	eq(Prompts.family_for_name("Nintendo Switch Pro Controller"), Prompts.NINTENDO)
-	eq(Prompts.family_for_name("Xbox Series Controller"), Prompts.XBOX)
-	eq(Prompts.family_for_name("Generic USB Gamepad"), Prompts.XBOX, "unknown pads: Xbox letters")
+	eq(Prompts.label("move_up", PAD), "D-UP")
+	eq(Prompts.glyph_text(Prompts.button_glyph(JOY_BUTTON_BACK)), "VIEW")
+	eq(Prompts.glyph_text(Prompts.button_glyph(JOY_BUTTON_LEFT_SHOULDER)), "LB")
+	eq(Prompts.button_glyph(JOY_BUTTON_Y)["text"], "Y")
 
 
 func test_prompt_bar_redraws_on_a_device_change() -> void:

@@ -11,6 +11,12 @@ const FADE_IN := 10
 var _fader: ColorRect
 var _fade := 0                   ## frames left; out while _next is waiting
 var _next: Node
+## A toast when a controller connects or drops (PORT-15).
+const TOAST_FRAMES := 150
+var _toast: Control
+var _toast_text: BitmapText
+var _toast_frames := 0
+var _news_seen := GameControls.news_serial
 
 
 func _ready() -> void:
@@ -22,6 +28,21 @@ func _ready() -> void:
 	_fader.size = Vector2(960, 540)
 	_fader.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.add_child(_fader)
+	_toast = Control.new()
+	_toast.visible = false
+	layer.add_child(_toast)
+	var panel := NinePatchRect.new()
+	panel.texture = load("res://assets/levels/ui/panel_title.png")
+	for m in ["patch_margin_left", "patch_margin_top", "patch_margin_right", "patch_margin_bottom"]:
+		panel.set(m, 12)
+	panel.position = Vector2(330, 460)
+	panel.size = Vector2(300, 38)
+	_toast.add_child(panel)
+	_toast_text = BitmapText.new()
+	_toast_text.font = "small"
+	_toast_text.align = 0.5
+	_toast_text.position = Vector2(480, 470)
+	_toast.add_child(_toast_text)
 	save.load_game()
 	show_title()
 
@@ -50,7 +71,21 @@ func fading() -> bool:
 	return _fade > 0
 
 
+func _update_toast() -> void:
+	if _news_seen != GameControls.news_serial:
+		_news_seen = GameControls.news_serial
+		var news: Array = GameControls.pad_news
+		_toast_text.text = "CONTROLLER " + String(news[0])
+		_toast_text.tint = Color("60e060") if news[0] == "CONNECTED" else Color("ff7060")
+		_toast_frames = TOAST_FRAMES
+	if _toast_frames > 0:
+		_toast_frames -= 1
+	_toast.visible = _toast_frames > 0
+	_toast.modulate.a = clampf(_toast_frames / 20.0, 0.0, 1.0)
+
+
 func _physics_process(_delta: float) -> void:
+	_update_toast()
 	if _fade <= 0:
 		_fader.color.a = 0.0
 		return

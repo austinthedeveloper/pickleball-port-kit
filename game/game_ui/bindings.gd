@@ -35,6 +35,7 @@ static func apply() -> void:
 			InputMap.action_add_event(a, k)
 		var b := InputEventJoypadButton.new()
 		b.button_index = current[a]["pad"]
+		b.device = GameControls.p1_device()
 		InputMap.action_add_event(a, b)
 	GameControls.binding_serial += 1
 
@@ -91,9 +92,7 @@ static func is_default() -> bool:
 static func describe(action: String) -> String:
 	var keys: Array = current[action]["keys"]
 	var k := Prompts.key_name(keys[0]) if not keys.is_empty() else "-"
-	var g := Prompts.glyph(action, GameControls.PAD)
-	var p: String = g["text"] if g["text"] != "" else String(g.get("shape", "")).to_upper()
-	return "%s / %s" % [k, p]
+	return "%s / %s" % [k, Prompts.label(action, GameControls.PAD)]
 
 
 static func to_save() -> Dictionary:

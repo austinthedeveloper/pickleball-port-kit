@@ -40,6 +40,8 @@ static var shake := true
 static var flashes := true
 static var hud_large := false
 static var serve_assist := false
+## Controller rumble on hits (PORT-15).
+static var vibration := true
 
 
 ## Reads the save's settings, each made valid.
@@ -69,7 +71,9 @@ static func load_from(save: SaveGame) -> void:
 	flashes = int(st.get("flash", 1)) != 0
 	hud_large = int(st.get("hud_large", 0)) != 0
 	serve_assist = int(st.get("serve_assist", 0)) != 0
+	vibration = int(st.get("vibration", 1)) != 0
 	Bindings.from_save(st.get("bindings", {}))
+	GameControls.refresh_pads()
 	var pl: Array = st.get("player", [0, 0, 1])
 	if pl.size() == 3:
 		p1_choice = PlayerSelect.new_choice(clampi(int(pl[0]), 0, 3), clampi(int(pl[1]), 0, 1),
@@ -87,6 +91,7 @@ static func store_to(save: SaveGame) -> void:
 		"court": court.duplicate(), "time": time_i,
 		"shake": 1 if shake else 0, "flash": 1 if flashes else 0,
 		"hud_large": 1 if hud_large else 0, "serve_assist": 1 if serve_assist else 0,
+		"vibration": 1 if vibration else 0,
 		"bindings": Bindings.to_save()}, true)
 
 
