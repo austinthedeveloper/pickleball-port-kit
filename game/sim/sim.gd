@@ -31,6 +31,8 @@ var required_bounce := K.REQUIRED_BOUNCE_NONE
 var serving_team := 0
 var match_winner := K.NO_TEAM
 var hit_stop := 0
+## The last rally contact was before the ball bounced (ADR-055, the kitchen).
+var contact_volley := 0
 var shot_serial := 0            # u8
 var frame_count := 0            # u16
 
@@ -333,6 +335,7 @@ func resolve_player_hits() -> int:
 			continue
 		p.contact_consumed = 1
 		ball.last_hitter = i
+		contact_volley = 1 if ball.bounce_count == 0 else 0
 		ball.bounce_count = 0
 		# a swing at a falling ball overhead is a smash (ADR-053)
 		if p.shot_type != K.SHOT_SOFT and ball.vz_fp < 0 \
@@ -738,14 +741,17 @@ func resolve_point(losing_team: int, fault: int) -> void:
 func rules_process_player_hit(slot: int) -> void:
 	if phase != K.PHASE_LIVE or slot >= K.MAX_PLAYERS:
 		return
-	if required_bounce == K.REQUIRED_BOUNCE_NONE:
-		return
 	var team: int = players[slot].team
 	if required_bounce == K.REQUIRED_BOUNCE_SERVE:
 		resolve_point(team, K.FAULT_EARLY_VOLLEY)
 		return
-	if team == _server_team():
+	if required_bounce == K.REQUIRED_BOUNCE_RETURN and team == _server_team():
 		resolve_point(team, K.FAULT_EARLY_VOLLEY)
+		return
+	# ADR-055, port-only: a legal volley still can't be made from inside
+	# your own kitchen.
+	if contact_volley and in_kitchen(players[slot].x_fp, players[slot].y_fp, team):
+		resolve_point(team, K.FAULT_KITCHEN)
 
 func rules_process_ball_events(ev: int) -> void:
 	if phase == K.PHASE_SERVE_FAULT:

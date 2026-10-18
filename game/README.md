@@ -33,6 +33,8 @@ when ready, and Menu to start. LB and RB switch singles and doubles. Plug in or 
 a pad at any time (a match pauses if one drops). CONTROLS (in OPTIONS)
 remaps keys and buttons; VIBRATION is in ACCESSIBILITY.
 
+No volleys from inside your own kitchen (ADR-055): stand in it all you
+like, but let the ball bounce there or you lose the point (KITCHEN!).
 Swing at a high, falling ball (a lob you get under) with HIT or DRIVE
 for an **overhead smash** (ADR-053): fast and steep; SOFT still blocks it.
 Hold a swing button at the serve for the charged serve (ADR-044): let go on

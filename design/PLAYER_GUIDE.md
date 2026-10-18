@@ -281,7 +281,7 @@ These are simplified rules; the HUD says **ARCADE RULES**.
 - Two-bounce rule: the serve must bounce before it's returned, and the return must bounce before the server's side hits it. After that, volleys are allowed.
 - A ball that lands out, hits the net, or bounces twice on a side ends the rally against the responsible side.
 - Lines are in.
-- Kitchen foot faults are not called.
+- No volleys from the kitchen: you can stand in it, but a ball hit out of the air from inside your own kitchen loses the point (KITCHEN!). Let it bounce, or step back first.
 - Doubles: each player covers a lane (you play the bottom half of your side,
   your partner the top). Your CPU partner leaves balls in your lane to you;
   the opponents spread their shots across both lanes. The serving side alternates which partner serves
@@ -293,7 +293,7 @@ These are simplified rules; the HUD says **ARCADE RULES**.
 |---|---|
 | OUT! | The shot landed outside the court. |
 | NET! | The shot didn't clear the net. |
-| KITCHEN! | The serve landed in the non-volley zone. |
+| KITCHEN! | The serve landed in the non-volley zone, or someone volleyed from inside their own kitchen. |
 | FAULT! | The serve landed in the wrong service box. |
 | 2 BOUNCES | The receiving side failed to return the ball. |
 | VOLLEY! | The ball was hit before a required bounce. |

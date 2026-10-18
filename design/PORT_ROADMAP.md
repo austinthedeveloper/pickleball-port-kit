@@ -52,6 +52,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-23 | A cleanup round | `feature/cld-cleanup-2` | Done |
 | PORT-24 | The overhead | `feature/cld-overhead` | Ready to test |
 | PORT-25 | The tournament | `feature/cld-tournament` | Ready to test |
+| PORT-26 | The kitchen rule | `feature/cld-kitchen-rule` | Ready to test |
 
 ## Releases
 
@@ -177,6 +178,25 @@ feature/cld-release-0.6.0   (v0.6.0)
     draw, in the semi, out in doubles, champions, and the title.
   - Status: **Ready to test**: TOURNAMENT on MAIN. Is the road's ramp
     right (SNOWBIRDS first), and do upsets feel too common or too rare?
+
+### 26. `feature/cld-kitchen-rule`: no volleys from the kitchen (reported 2026-10-18)
+
+- [x] `PORT-26` A volley from inside your own kitchen loses the point,
+  KITCHEN! (ADR-055; the SNES left it out as "ARCADE RULES"). Standing in
+  it, or hitting a ball that bounced there, stays legal. The two-bounce
+  rule's VOLLEY! comes first. The CPUs never volley from their kitchen
+  (they step back or let it bounce). Manual, guide and README updated.
+  - Accept: tests for the rule and its edges; the CPUs proven through
+    `Sim.step()`; golden traces and the stats harness unchanged.
+  - Verified: `test_kitchen.gd` (a volley from either kitchen faults with
+    KITCHEN! to the other side; a bounced ball in the kitchen, a volley
+    from behind the line, and the other side's player are fine; while
+    the return must bounce, a receiver's kitchen volley is KITCHEN! and
+    a server's early one VOLLEY!; four net-rushing doubles matches, 64
+    volleys, no kitchen fault; TWINS put in their kitchen don't volley
+    from it, and without the AI check they do and lose the point).
+    258/258 plus the e2e; golden traces unchanged.
+  - Status: **Ready to test**: stand in your kitchen and try to volley.
 
 ## For you
 

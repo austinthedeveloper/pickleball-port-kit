@@ -187,7 +187,7 @@ The net divides the court in half. On each side, the **kitchen** (the non-volley
 4. **Ending a rally.** A ball that lands out, hits the net, or bounces twice on one side loses the point for the side responsible.
 5. **Winning.** The first side to reach the target score wins (5 by default; change it in OPTIONS).
 
-Kitchen foot faults are not called, unless you turn on the LAVA modifier.
+**The kitchen.** You may stand in your kitchen, but you can't volley from it: hit a ball out of the air there and you lose the point (**KITCHEN!**). Let it bounce first, or step back behind the line. With the LAVA modifier, just stepping in loses the point.
 
 ### Doubles
 
@@ -201,7 +201,7 @@ When a rally ends, a banner tells you why.
 | --- | --- |
 | OUT! | The shot landed outside the court. |
 | NET! | The shot didn't clear the net. |
-| KITCHEN! | The serve landed in the kitchen. |
+| KITCHEN! | The serve landed in the kitchen, or a player volleyed from inside their own kitchen. |
 | FAULT! | The serve landed in the wrong service box. |
 | 2 BOUNCES | The receiving side failed to return the ball. |
 | VOLLEY! | The ball was hit before a required bounce. |

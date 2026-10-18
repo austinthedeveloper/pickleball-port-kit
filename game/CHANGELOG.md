@@ -4,6 +4,13 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [Unreleased]
+
+### Fixed
+- **The kitchen rule:** you can no longer volley from inside your own
+  kitchen. Stand in it as much as you like, but a ball hit out of the air
+  from there loses the point (KITCHEN!). The CPUs play by it too.
+
 ## [0.7.0] - 2026-10-18
 
 The overhead smash, a tournament, and a cleanup round.

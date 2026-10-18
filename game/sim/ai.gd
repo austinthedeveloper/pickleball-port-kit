@@ -363,6 +363,9 @@ func _swing_connects(p: Player) -> bool:
 			continue
 		contact_z = pz
 		contact_volley = pbounces == 0
+		# ADR-055: never a volley from inside the kitchen; let it bounce
+		if pbounces == 0 and Sim.in_kitchen(reach_x, reach_y, p.team):
+			return false
 		if pbounces == 0 and (not volleys or pz < K.AI_VOLLEY_MIN_Z \
 				or not Sim.contains_ground_fp(K.to_fp(g.predicted_land_x),
 					K.to_fp(g.predicted_land_y))):
@@ -400,6 +403,8 @@ func _may_come_in(team: int) -> bool:
 
 func _plan_volley(p: Player, land_steps: int, lx: int) -> bool:
 	var b: Ball = sim.ball
+	if Sim.in_kitchen(p.x_fp, p.y_fp, p.team):
+		return false                   # ADR-055: from the kitchen, wait for the bounce
 	var x := p.x_fp
 	var pxx := K.from_fp(x)
 	var bx := K.from_fp(b.x_fp)

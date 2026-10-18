@@ -130,7 +130,7 @@ The POC favors a complete match loop over tournament fidelity.
 6. The two-bounce rule is enforced: the serve and return must each bounce once before volleys are legal.
 7. After those two required bounces, one bounce is allowed on each side.
 8. A second bounce, net contact, or out ball loses the rally for the last hitter’s side.
-9. Non-volley-zone foot faults are **not** simulated in the POC. The kitchen lines and short-ball behavior remain visible.
+9. Non-volley-zone foot faults are **not** simulated in the POC. The kitchen lines and short-ball behavior remain visible. (The Godot port calls a volley from inside your own kitchen: ADR-055.)
 10. The point winner serves next. Press B after the result banner to begin.
 
 UI must label this mode “ARCADE RULES” so the simplifications are explicit.
