@@ -116,6 +116,7 @@ func show_title() -> void:
 	t.open_park.connect(_on_open_park)
 	t.open_tournament.connect(show_bracket)
 	t.open_couch_cup.connect(_on_couch_cup)
+	t.open_lesson.connect(show_lesson)
 	_swap(t)
 	park = null
 
@@ -230,3 +231,27 @@ func _on_tournament_match(cfg: SimTypes.MatchConfig, venue: String, pads: Array 
 	m.court = Settings.court.duplicate()
 	m.time = Settings.time_i
 	m.setup(cfg, venue, false)
+
+
+## HOW TO PLAY (PORT-30): lesson `i`, then the next, to the end (then the
+## title). Each finished lesson is saved; MAIN MENU on the pause menu leaves.
+func show_lesson(i: int) -> void:
+	save.save_game()
+	var m := MatchView.new()
+	m.lesson = Tutorial.new(i)
+	m.finished.connect(func(to_title: bool):
+		if to_title:
+			show_title()
+			return
+		save.finish_lesson(i)
+		save.save_game()
+		if i + 1 < Tutorial.LESSONS.size():
+			show_lesson(i + 1)
+		else:
+			show_title())
+	_swap(m)
+	m.camera.percent = Settings.CAMERAS[Settings.camera_i]
+	m.court = Settings.court.duplicate()
+	m.time = Settings.time_i
+	m.setup(m.lesson.config(Settings.p1_choice), "park", false)
+

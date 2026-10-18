@@ -56,6 +56,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-27 | Cleanup round 3 | `feature/cld-cleanup-3` | Done |
 | PORT-28 | Controller glyphs | `feature/cld-pad-glyphs` | Ready to test |
 | PORT-29 | The couch cup | `feature/cld-couch-cup` | Ready to test |
+| PORT-30 | How to play | `feature/cld-tutorial` | Ready to test |
 
 ## Releases
 
@@ -259,6 +260,32 @@ feature/cld-release-0.6.0   (v0.6.0)
     Screenshots: a doubles and a singles cup bracket.
   - Status: **Ready to test**: MULTIPLAYER, RB twice, join with two pads.
 
+### 30. `feature/cld-tutorial`: HOW TO PLAY (chosen 2026-10-18)
+
+- [x] `PORT-30` Six lessons (`meta/tutorial.gd`, `view/tutorial_view.gd`),
+  each a real sim with one goal read from its events: RALLY (the ball
+  machine at you: 3 returns), SHOTS (a DRIVE and a SOFT landed), SMASH (the
+  machine lobs: 1 smash in), SERVE (vs a KID CPU: 2 in), TWO BOUNCES (2
+  rallies past the rule), THE KITCHEN (2 volleys from behind the line).
+  A card first (the match waits, its press doesn't swing), then a banner
+  with the progress and advice after a miss (VOLLEY!, KITCHEN!, a serve
+  fault, a missed lob), LESSON DONE!, and the next. MAIN's PRACTICE opens
+  a page: HOW TO PLAY (from the first lesson not done), LESSON (any one),
+  BALL MACHINE. MAIN's PRACTICE row says HOW TO PLAY until one's done.
+  Lessons record nothing but themselves (`records.lessons`, a bit each).
+  - Verified: `test_tutorial.gd` (each lesson's sim and look; the machine
+    lessons' counting by shot; the match lessons' goals and advice; the
+    card holding the match; TWO BOUNCES played through by the bot to
+    LESSON DONE! and the next; a lesson only reads the sim; the save and
+    an older one; main's loop through two lessons and out; the lob can be
+    smashed, 9 of 200 spot and timing tries; RALLY was also played by the
+    bot, done in 552 frames), `test_layout.test_tutorial` (every card,
+    banner with advice, and LESSON DONE!, on keys and a PlayStation pad;
+    the PRACTICE page), `test_menus` (PRACTICE, BALL MACHINE, and back).
+    278/278 plus the e2e; golden traces unchanged. Screenshots: the RALLY
+    and SMASH cards, THE KITCHEN's banner with advice, the PRACTICE page.
+  - Status: **Ready to test**: PRACTICE > HOW TO PLAY. Is SMASH too hard?
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
@@ -308,4 +335,11 @@ the chain: each has a default I've gone with.
   meet before the semis (four: before the semis either). A cup uses MATCH
   SETUP's difficulty and points like the lobby's matches. Say if you'd
   rather draw humans at random.
+
+- **PORT-30 how to play:** the SMASH lesson is the hard one: the overhead
+  window (a ball 20-24 px up, falling) is short against a steep lob, so a
+  scripted player finds it on 9 of 200 tries. The card says where to
+  stand and when; the goal is one smash. If it's still too fiddly, the
+  machine's lob could come down flatter in that lesson, or the overhead
+  line could drop a little (a sim change, ADR-053).
 

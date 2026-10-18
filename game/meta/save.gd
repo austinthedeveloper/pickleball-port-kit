@@ -61,7 +61,9 @@ static func defaults() -> Dictionary:
 			"points_won": 0, "points_lost": 0, "aces": 0, "winners": 0,
 			# PORT-25: tournaments finished, won, and the best finish (0 none,
 			# 1 quarterfinal .. 4 champion)
-			"cup_runs": 0, "cups": 0, "cup_best": 0},
+			"cup_runs": 0, "cups": 0, "cup_best": 0,
+			# PORT-30: HOW TO PLAY's lessons done, one bit each
+			"lessons": 0},
 		## who holds a record ("" = nobody, shown ---)
 		"initials": {"best_streak": "", "longest_rally": ""},
 		## the three career players and the active one (ADR-047, v5)
@@ -230,6 +232,28 @@ func record_cup(finish: String) -> void:
 	if place == 4:
 		r["cups"] = int(r["cups"]) + 1
 	r["cup_best"] = maxi(int(r["cup_best"]), place)
+
+
+## A HOW TO PLAY lesson finished (PORT-30).
+func finish_lesson(i: int) -> void:
+	var r: Dictionary = data["records"]
+	r["lessons"] = int(r["lessons"]) | (1 << i)
+
+
+func lessons_done() -> int:
+	var n := 0
+	for i in Tutorial.LESSONS.size():
+		if int(data["records"]["lessons"]) & (1 << i):
+			n += 1
+	return n
+
+
+## The first lesson not yet done (0 when all are).
+func next_lesson() -> int:
+	for i in Tutorial.LESSONS.size():
+		if not (int(data["records"]["lessons"]) & (1 << i)):
+			return i
+	return 0
 
 
 # --- Records ---------------------------------------------------------------

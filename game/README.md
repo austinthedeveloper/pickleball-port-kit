@@ -56,8 +56,10 @@ stack and play when your turn comes. **MULTIPLAYER**: the four-pad lobby
 ladder teams, each match at the opponent's home court, between matches the
 bracket. **MATCH SETUP**: VS (LADDER plays your saved rung at the team's
 home court, with their intro card; the default CPU; or any team),
-DIFFICULTY, POINTS, PLAYERS (1P, 2P versus). **PRACTICE** (ADR-028): the
-ball machine feeds a drill (SHOT, TARGET, RATE, RETURN TO) and counts
+DIFFICULTY, POINTS, PLAYERS (1P, 2P versus). **PRACTICE**: **HOW TO PLAY** (PORT-30), six short lessons (rally,
+shots, the smash, the serve, the two-bounce rule, the kitchen), each a
+real match or ball-machine drill with one goal; and the **BALL MACHINE**
+(ADR-028), which feeds a drill (SHOT, TARGET, RATE, RETURN TO) and counts
 your return streak. **COURT**: VENUE (PARK, LAKESIDE, SUNSET, DINOSAUR,
 SPACE, UNDERSEA), TIME (DAY, DUSK, NIGHT), SURFACE, KITCHEN, SURROUND,
 LINES, previewed on the demo. **MODIFIERS**: BIG BALL, FAST BALL, WIN BY
@@ -94,9 +96,9 @@ title shows; from a checkout the title says `BUILD DEV <describe>`.
 |---|---|
 | `sim/` | The deterministic simulation: `k.gd` constants, `types.gd` records, `sim.gd` (ball, collision, players, serve, rules, game, frame pipeline), `ai.gd` (the CPU), `practice.gd` (the ball machine), `select.gd` (Player Select), `replay.gd` (close calls), `open_play.gd` (the park's courts and stacks), `career.gd` (career stats and unlocks), `opponents.gd`, `paddles.gd`. Pure: no Nodes, time, or randomness. |
 | `view/` match | `match_view.gd` (one match: the scene, the frame, events) with `match_actors.gd` (people, ball, sparks), `match_input.gd` (intents, pause menu) and `match_end.gd` (records, the initials and UNLOCKED! cards), `court_view.gd` (world → screen), `court_style.gd` (+ shader: court colours, time of day), `hud.gd`, `crowd.gd`, `watcher.gd`, `camera_lean.gd`, `close_call.gd`, `feel.gd`, `player_look.gd` (+ palette shader), `practice_view.gd`, `debug_overlay.gd`. |
-| `view/` menus | `title_screen.gd` (the title and its pages), `title_career.gd` (the CAREER pages), `menu_page.gd` (every menu page), `bracket_screen.gd` (the tournament), `select_screen.gd` (Player Select), `lobby_screen.gd` (multiplayer), `practice_page.gd`, `career_keyboard.gd`, `career_preview.gd`, `park_view.gd` (open play), `prompts.gd`/`prompt_bar.gd` (device-aware button prompts), `ui_kit.gd` (panels and text), `bitmap_text.gd`. |
+| `view/` menus | `title_screen.gd` (the title and its pages), `title_career.gd` (the CAREER pages), `menu_page.gd` (every menu page), `bracket_screen.gd` (the tournament), `select_screen.gd` (Player Select), `lobby_screen.gd` (multiplayer), `practice_page.gd`, `tutorial_view.gd` (a lesson's card and banner), `career_keyboard.gd`, `career_preview.gd`, `park_view.gd` (open play), `prompts.gd`/`prompt_bar.gd` (device-aware button prompts), `ui_kit.gd` (panels and text), `bitmap_text.gd`. |
 | `view/` sound | `audio_map.gd`/`sfx.gd` (effects and ambience), `music.gd` (the soundtrack: crossfades, stingers, ducking). |
-| `meta/` | `save.gd` (two-copy save with migration, layout v5), `settings.gd` (every setting, load/store, match config), `story.gd` (cards, results, quips), `initials.gd` (the record initials card), `career_page.gd` (CAREER's input logic), `lobby.gd` (the multiplayer lobby's logic), `match_stats.gd` (post-match stats), `tournament.gd` (the bracket's logic), `build_info.gd`. |
+| `meta/` | `save.gd` (two-copy save with migration, layout v5), `settings.gd` (every setting, load/store, match config), `story.gd` (cards, results, quips), `initials.gd` (the record initials card), `career_page.gd` (CAREER's input logic), `lobby.gd` (the multiplayer lobby's logic), `match_stats.gd` (post-match stats), `tournament.gd` (the bracket's logic), `tutorial.gd` (HOW TO PLAY's lessons), `build_info.gd`. |
 | `game_ui/` | `controls.gd` (input map autoload, P1..P4 intents, tap latch, SNES pad bits for menus), `bindings.gd` (remapping). |
 | `tests/` | Headless runner and suites; `golden/` traces; `golden.gd` regenerates them. |
 | `tools/` | `test.sh`, `export.sh`, `version.py`, `release_notes.py`, `make_icon.py`, `sync_assets.sh` (copies `art/levels/out` and the audio in), `screenshot.gd` (title pages, matches, `court=`, `time=`, `pause`, `closecall`, `initials`, `result`, `smash`, `bracket`, `bracket_semi`, `bracket_out`, `bracket_won`), `point_log.gd` (why each point ended), `contact_probe.gd` (contact heights and smashes over bot matches). |

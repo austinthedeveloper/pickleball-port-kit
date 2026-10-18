@@ -107,7 +107,12 @@ func test_every_page_opens_by_name_and_backs_out() -> void:
 	eq(t.pages["main"].current_id(), "career", "the cursor lands on CAREER")
 	t.pages["main"].select("practice")
 	t.pages["main"].press()
-	check(t.page_open() and t.page == "practice", "PRACTICE opens the drill editor")
+	eq(t.page, "learn", "PRACTICE opens its page (PORT-30)")
+	t.pages["learn"].select("machine")
+	t.pages["learn"].press()
+	check(t.page_open() and t.page == "practice", "BALL MACHINE opens the drill editor")
+	t._update_practice(Practice.PAD_Y)
+	eq(t.page, "learn", "backing out of the drill editor: PRACTICE's page")
 	t.free()
 	_restore()
 

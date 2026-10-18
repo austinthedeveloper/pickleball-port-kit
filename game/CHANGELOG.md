@@ -12,6 +12,10 @@ Pickleball '94, the Godot port. Versions follow
   their B, A, Y, X, + and -. Picked from the pad's name; CONTROLS has a
   BUTTON ICONS row to choose one by hand.
 
+- **HOW TO PLAY** (under PRACTICE): six short lessons, each one goal in a
+  real rally: returning the ball, drives and soft shots, the smash, the
+  serve, the two-bounce rule and the kitchen. They pick up where you left
+  off, and MAIN points new players to them.
 - The **COUCH CUP**: in MULTIPLAYER, LB / RB now reach SINGLES CUP and
   DOUBLES CUP. Everyone enters the bracket (each player, or each side in
   doubles), CPU teams fill it out, and you meet each other as late as the

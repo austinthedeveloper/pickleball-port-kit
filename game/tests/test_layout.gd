@@ -494,3 +494,38 @@ func test_couch_cup() -> void:
 			b._ready()
 		check_layout(b, "couch bracket %s" % state)
 		b.free()
+
+
+## PORT-30: every lesson's card, its banner with advice up, and LESSON
+## DONE!, on the keyboard and a PlayStation pad (the widest prompts).
+func test_tutorial() -> void:
+	var kept := [GameControls.last_device, Settings.pad_glyphs]
+	for dev in [GameControls.KEYBOARD, GameControls.PAD]:
+		GameControls.last_device = dev
+		Settings.pad_glyphs = 2
+		GameControls.device_serial += 1
+		for i in Tutorial.LESSONS.size():
+			var v := MatchView.new()
+			v.lesson = Tutorial.new(i)
+			runner.root.add_child(v)
+			v.setup(v.lesson.config({}), "park", false)
+			var lv := v.lesson_view
+			check_layout(v, "lesson %d card (device %d)" % [i, dev])
+			lv.card_frames = -1
+			v.lesson.progress = 1
+			v.lesson.message = "SERVE CORNER TO CORNER, PAST THE KITCHEN."
+			lv.refresh()
+			v._hud.refresh()
+			check_layout(v, "lesson %d playing, with advice" % i)
+			v.lesson.done = true
+			lv.update_done()
+			check_layout(v, "lesson %d done" % i)
+			v.free()
+	var t := _title()
+	t.open_page("learn")
+	t.pages["learn"].settle()
+	check_layout(t, "title PRACTICE page")
+	t.free()
+	GameControls.last_device = kept[0]
+	Settings.pad_glyphs = kept[1]
+	GameControls.device_serial += 1

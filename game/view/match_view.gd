@@ -29,6 +29,11 @@ var ladder := false             ## a ladder match: intro card, next rung
 ## bracket, and B on the result goes back to it (finished(false)).
 var tournament := false
 var cup_key := "bracket"        ## the save's bracket: "bracket", or the couch cup's (PORT-29)
+## HOW TO PLAY (PORT-30): the lesson this match is, or null; its overlay.
+## A lesson finishes with finished(false); its match never ends (a
+## finished one starts again) and nothing is recorded (save is null).
+var lesson: Tutorial
+var lesson_view: TutorialView
 ## From the park (ADR-034): B on the result, or PARK on practice's pause
 ## menu, goes back there (finished(false)).
 var park := false
@@ -181,6 +186,9 @@ func _build() -> void:
 	_hud = Hud.new()
 	add_child(_hud)
 	_hud.setup(self)
+	if lesson:
+		lesson_view = TutorialView.new().setup(self)
+		_hud.add_child(lesson_view)
 	_sfx = Sfx.new()
 	add_child(_sfx)
 	_sfx.setup(venue, demo, CourtStyle.time_ambience(time))
@@ -313,12 +321,29 @@ func _physics_process(_delta: float) -> void:
 		_update_card()
 		_update_visuals()
 		return
+	if lesson_view and lesson_view.blocking():
+		var it := GameControls.read_intent()
+		lesson_view.update_card(it.hit_pressed != 0 or it.pause_pressed != 0)
+		_update_visuals()
+		return
+	if lesson and lesson.done:
+		if lesson_view.update_done():
+			finished.emit(false)             # the next lesson
+			return
+		_update_visuals()
+		return
 	var human: Variant = input.read()
 	if human == null:
 		return                           # the pause menu took the frame
 	sim.step(human)
-	for e in sim.drain_events():
+	var events := sim.drain_events()
+	for e in events:
 		_on_event(e)
+	if lesson:
+		lesson.observe(sim, events)
+		lesson_view.refresh()
+		if sim.phase == K.PHASE_MATCH_RESULT:
+			sim.new_match()                  # a lesson's match goes on
 	if sim.phase != _prev_phase:
 		if _prev_phase == K.PHASE_POINT_RESULT:
 			_end_close_call()

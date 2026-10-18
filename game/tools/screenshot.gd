@@ -94,6 +94,19 @@ func _initialize() -> void:
 		var pv := ParkView.new().setup(op, _career_save() if "career" in a.slice(4) else null, false)
 		root.add_child(pv)
 		_view = pv
+	elif mode.begins_with("lesson"):
+		# PORT-30: lesson<N> (the card) or lesson<N>_play (the banner, advice up)
+		var m := MatchView.new()
+		m.lesson = Tutorial.new(int(mode.substr(6, 1)))
+		root.add_child(m)
+		m.setup(m.lesson.config({}), venue, false)
+		if mode.ends_with("_play"):
+			m.lesson_view.card_frames = -1
+			m.lesson.progress = 1
+			m.lesson.message = "NO VOLLEYS FROM THE KITCHEN: STEP BACK."
+			m.lesson.message_frames = 9999
+			m.lesson_view.refresh()
+		_view = m
 	elif mode.begins_with("bracket"):
 		# PORT-25: bracket (a fresh draw), bracket_semi (your quarterfinal
 		# won), bracket_out (out in the semifinal), bracket_won (champions)

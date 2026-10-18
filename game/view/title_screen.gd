@@ -18,6 +18,7 @@ signal start_match(cfg: SimTypes.MatchConfig, venue: String, ladder: bool, pads:
 signal open_park(two_players: bool)
 signal open_tournament          ## PORT-25: the bracket
 signal open_couch_cup(entries: Array, doubles: bool)   ## PORT-29: the lobby's cup
+signal open_lesson(index: int)  ## PORT-30: HOW TO PLAY from this lesson on
 
 const SWITCH_LOCK := MenuPage.TRANSITION   ## no menu input while a page slides in
 
@@ -167,7 +168,8 @@ func _build_pages() -> void:
 		{"id": "tournament", "label": "TOURNAMENT", "value": _cup_label, "press": _open_tournament},
 		{"id": "play", "label": "MATCH SETUP", "value": _play_summary,
 			"press": func(): open_page("play")},
-		{"id": "practice", "label": "PRACTICE", "press": _open_practice},
+		{"id": "practice", "label": "PRACTICE", "value": _learn_label,
+			"press": func(): open_page("learn")},
 		{"id": "court", "label": "COURT", "value": func(): return Settings.VENUE_NAMES[Settings.venue_i] + (
 			"" if Settings.time_i == 0 else " " + CourtStyle.time_names()[Settings.time_i]),
 			"press": func(): open_page("court")},
@@ -209,6 +211,17 @@ func _build_pages() -> void:
 			"value": func(): return "ON" if Settings.mod_bits & bit else "OFF",
 			"change": func(_d): Settings.mod_bits ^= bit})
 	_add_page("modifiers", "MODIFIERS", mod_rows, help)
+	# PORT-30: HOW TO PLAY's lessons, and the ball machine
+	_add_page("learn", "PRACTICE", [
+		{"id": "lessons", "label": "HOW TO PLAY", "value": func(): return "%d/%d" % [
+			save.lessons_done() if save else 0, Tutorial.LESSONS.size()],
+			"press": func(): _start_lesson(save.next_lesson() if save else 0)},
+		{"id": "lesson", "label": "LESSON", "value": func(): return "%d %s" % [lesson_i + 1,
+			Tutorial.LESSONS[lesson_i]["title"]],
+			"change": func(d): lesson_i = (lesson_i + d + Tutorial.LESSONS.size()) % Tutorial.LESSONS.size(),
+			"press": func(): _start_lesson(lesson_i)},
+		{"id": "machine", "label": "BALL MACHINE", "press": _open_practice},
+	], help)
 	_add_page("options", "OPTIONS", [
 		{"id": "camera", "label": "CAMERA",
 			"value": func(): return "OFF" if Settings.camera_i == 0 else "%d%%" % Settings.CAMERAS[Settings.camera_i],
@@ -571,6 +584,22 @@ func _open_park() -> void:
 	open_park.emit(Settings.two_players)
 
 
+## PRACTICE's value on MAIN: an invitation until a lesson's been done.
+func _learn_label() -> String:
+	return "HOW TO PLAY" if save == null or save.lessons_done() == 0 else ""
+
+
+var lesson_i := 0                ## PRACTICE's LESSON row
+
+
+func _start_lesson(i: int) -> void:
+	if _sfx:
+		_sfx.play("confirm")
+	_store_settings()
+	main_cursor = pages["main"].cursor
+	open_lesson.emit(i)
+
+
 func _open_practice() -> void:
 	practice_page.open(save)
 	_show("practice")
@@ -585,7 +614,7 @@ func _update_practice(pressed: int) -> void:
 		return
 	var result := practice_page.input(pressed)
 	if result == Practice.EDIT_CANCEL:
-		_show("main")
+		_show("learn")              # back to PRACTICE's page (PORT-30)
 		_lock = SWITCH_LOCK         # the closing press isn't a menu press
 		_sfx.play("back")
 	elif result == Practice.EDIT_DONE:
