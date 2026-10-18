@@ -247,7 +247,13 @@ func _build_pages() -> void:
 			"change": func(_d): Settings.integer_scale = not Settings.integer_scale; Settings.apply_window(get_window())},
 		{"id": "controls", "label": "CONTROLS", "press": func(): open_page("controls")},
 		{"id": "access", "label": "ACCESSIBILITY", "press": func(): open_page("access")},
-	], help, Rect2(300, 146, 360, 0))
+		# PORT-32: the in-game updater
+		{"id": "updates", "label": "UPDATES", "value": func():
+			return Updater.instance.label() if Updater.instance else "DEV BUILD",
+			"press": func():
+				if Updater.instance:
+					Updater.instance.press()},
+	], [], Rect2(300, 146, 360, 0))
 	var onoff := func(on: bool) -> String: return "ON" if on else "OFF"
 	_add_page("access", "ACCESSIBILITY", [
 		{"id": "shake", "label": "SCREEN SHAKE", "value": func(): return onoff.call(Settings.shake),
@@ -658,10 +664,22 @@ func _start_demo() -> void:
 func _refresh() -> void:
 	if save:
 		var r: Dictionary = save.data["records"]
-		_record.text = "RECORD %d-%d   LADDER %d OF %d   CLEARS %d" % [
+		_record_text = "RECORD %d-%d   LADDER %d OF %d   CLEARS %d" % [
 			int(r["singles_wins"]) + int(r["doubles_wins"]),
 			int(r["singles_losses"]) + int(r["doubles_losses"]),
 			int(r["ladder_rung"]) + 1, Opponents.count(), int(r["ladder_clears"])]
+	_refresh_record()
+
+
+var _record_text := ""
+
+
+## The line under the logo: the updater's news while there is some
+## (PORT-32), else the record.
+func _refresh_record() -> void:
+	var news: String = Updater.instance.notice() if Updater.instance else ""
+	_record.text = news if news != "" else _record_text
+	_record.tint = Color("fbe46a") if news != "" else Color(0.8, 0.85, 0.95)
 
 
 func _rung() -> int:
@@ -728,6 +746,10 @@ func _process(_delta: float) -> void:
 	# a window-mode change in _ready can run a frame before the demo exists
 	if _demo == null or _demo.sim == null:
 		return
+	_refresh_record()
+	if page == "options" and Updater.instance and Updater.instance.state == Updater.DOWNLOADING \
+			and Engine.get_process_frames() % 10 == 0:
+		pages["options"].refresh()       # the download's percentage
 	if _demo.sim.phase == K.PHASE_MATCH_RESULT and _demo.sim.phase_timer >= K.ATTRACT_RESULT_FRAMES - 1:
 		_demo_doubles = not _demo_doubles
 		_start_demo()

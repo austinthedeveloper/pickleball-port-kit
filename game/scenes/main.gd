@@ -54,6 +54,7 @@ func _ready() -> void:
 	add_child(music)
 	save.load_game()
 	show_title()
+	Updater.mark_good()                # PORT-32: an updated launch reached the title
 
 
 func _swap(n: Node) -> void:

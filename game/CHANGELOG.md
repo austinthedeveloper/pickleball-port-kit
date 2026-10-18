@@ -4,6 +4,18 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [Unreleased]
+
+### Added
+- **Updates in the game**: when a new version is out, the title says so,
+  and OPTIONS > UPDATES downloads just the game (about 23 MB) and restarts
+  on it. This is the last version you need to download by hand (desktop
+  builds; the Web build is always the newest).
+
+### Fixed
+- ONLINE's address had an invisible cursor while typing (the font has no
+  underscore); it's a blinking slash now.
+
 ## [0.8.1] - 2026-10-18
 
 A fix for online play's HOST screen.

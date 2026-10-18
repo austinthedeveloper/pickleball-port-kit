@@ -63,6 +63,11 @@ func _initialize() -> void:
 	for arg in a.slice(4):
 		if arg == "pad":
 			GameControls.last_device = GameControls.PAD
+		if arg.begins_with("update="):          # PORT-32: a stand-in updater in this state
+			var u := Updater.new()
+			Updater.instance = u
+			u.state = int(arg.substr(7))
+			u.latest = "0.9.0"
 		if arg.begins_with("icons="):           # PORT-28: 1 XBOX, 2 PLAYSTATION, 3 NINTENDO
 			Settings.pad_glyphs = int(arg.substr(6))
 		if arg.begins_with("time="):

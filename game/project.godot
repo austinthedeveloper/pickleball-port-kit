@@ -7,15 +7,13 @@ config_version=5
 
 config/name="Pickleball '94"
 config/description="Arcade pickleball, ported from the SNES game."
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://scenes/boot.tscn"
 config/features=PackedStringArray("4.7")
 config/icon="res://icon.png"
 config/version="0.8.1"
+config/update_repo="austinthedeveloper/pickleball-port-kit"
 boot_splash/bg_color=Color(0.04, 0.06, 0.12, 1)
 
-[autoload]
-
-Controls="*res://game_ui/controls.gd"
 
 [display]
 

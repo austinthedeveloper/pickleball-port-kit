@@ -69,6 +69,13 @@ func check_layout(root: Node, where: String) -> void:
 				_fail("%s: \"%s\" %s crosses a panel's edge %s" % [where, ts[i].text,
 					r.position.round(), pr], ts[i].text + "|edge")
 				break
+		# every character has a glyph (the fonts: caps, digits, !?.,:-'/%+)
+		var chars := String(BitmapText.load_font(ts[i].font)["chars"])
+		for c in ts[i].text:
+			if c != " " and not chars.contains(c):
+				_fail("%s: \"%s\" has a character the font can't draw: '%s'" % [where, ts[i].text, c],
+					ts[i].text + "|glyph")
+				break
 		if not SCREEN.grow(SLACK).encloses(r):
 			_fail("%s: \"%s\" leaves the screen at %s" % [where, ts[i].text, r], ts[i].text)
 		for j in range(i + 1, ts.size()):
@@ -595,3 +602,23 @@ func test_online() -> void:
 		v._hud.refresh()
 		check_layout(v, "online, press again to leave (host %s)" % host)
 		v.free()
+
+
+## PORT-32: OPTIONS with UPDATES in every state (the longest version), and
+## the title's line under the logo with every notice.
+func test_updater() -> void:
+	var u := Updater.new()
+	Updater.instance = u
+	u.latest = "10.10.10"
+	u.error = "THE DOWNLOAD WAS DAMAGED: TRY AGAIN"
+	var t := _title()
+	t.open_page("options")
+	t.pages["options"].settle()
+	for st in range(Updater.OFF, Updater.FAILED + 1):
+		u.state = st
+		t.pages["options"].refresh()
+		t._refresh_record()
+		check_layout(t, "updater state %d: %s / %s" % [st, u.label(), u.notice()])
+	t.free()
+	Updater.instance = null
+	u.free()

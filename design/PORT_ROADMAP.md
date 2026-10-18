@@ -58,6 +58,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-29 | The couch cup | `feature/cld-couch-cup` | Ready to test |
 | PORT-30 | How to play | `feature/cld-tutorial` | Ready to test |
 | PORT-31 | Online play | `feature/cld-online` | Ready to test |
+| PORT-32 | The in-game updater | `feature/cld-updater` | Ready to test |
 
 ## Releases
 
@@ -316,6 +317,26 @@ feature/cld-release-0.6.0   (v0.6.0)
     reachable ones, labelled (KNOWN_ISSUES #55).
   - Status: **Ready to test**: with a friend. Start on the same Wi-Fi, then
     over Tailscale.
+
+### 32. `feature/cld-updater`: updates in the game (asked for 2026-10-18)
+
+- [x] `PORT-32` OPTIONS > UPDATES (ADR-057): a check of GitHub's latest
+  release at start, the news on the title, a download of just the game's
+  .pck (checked against the release's SHA-256), and RESTART onto it. The
+  boot scene (`scenes/boot.gd`, now the main scene) loads a newer
+  downloaded pack before anything else, then adds the input map and the
+  updater (no longer autoloads) and the title; a start that never reaches
+  the title is skipped next time. CI publishes the .pck and its manifest
+  (`tools/update_manifest.py`) with each release. The layout test now
+  also fails on a character the font can't draw (it found ONLINE's
+  invisible typing cursor).
+  - Verified: `test_updater.gd` (7 tests), `test_layout.test_updater`; by
+    hand, an exported 0.8.1 macOS app started a 0.9.9 pack (a class only
+    in the update ran, the version said 0.9.9, the title cleared the
+    mark) and fell back from a damaged one. 298/298 plus the e2e; golden
+    traces unchanged.
+  - Status: **Ready to test**: after 0.9.0, the next release (0.9.1) is
+    the first real update. Not tried on Windows or Linux.
 
 ## For you
 

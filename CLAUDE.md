@@ -72,7 +72,11 @@ keep it current with each branch. Finished tasks, in full, live in
 - **Display-only features prove it**: a test that runs the view and a
   bare sim side by side and compares snapshots (see `test_feel.gd`,
   `test_replay.gd`).
-- **The bitmap fonts** have caps, digits, and `!?.,:-'/%+ ` only.
+- **The bitmap fonts** have caps, digits, and `!?.,:-'/%+ ` only. `test_layout` fails on any other character.
+- **`scenes/boot.gd` is the first scene and the one file an update can't
+  replace** (ADR-057): keep it tiny, load no game script in it before
+  the pack. There are no autoloads: boot adds the Controls and Updates
+  nodes. Tests load `scenes/main.tscn` directly.
 - **Text never collides** (`tests/test_layout.gd`): no two visible texts
   overlap, none leaves the screen, and text in a panel stays clear of its
   frame, with every value of every row tried. A new screen or state gets

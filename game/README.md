@@ -46,6 +46,13 @@ the way up for pace; a tap is the safe classic serve. F3 toggles the
 diagnostics overlay. 2P versus: set PLAYERS on the title; with two pads
 the first is P1's, with one pad P1 plays on the keyboard.
 
+## Updates
+
+From 0.9.0 the game keeps itself up to date: when a new version is out,
+the title says so, and OPTIONS > UPDATES downloads it (about 23 MB) and
+restarts on it. Only the desktop builds do this; a release that changes
+Godot itself sends you to the releases page instead (ADR-057).
+
 ## Playing online
 
 MAIN > MULTIPLAYER > **ONLINE**: 1 vs 1 singles with a friend (ADR-056).
@@ -126,7 +133,8 @@ title shows; from a checkout the title says `BUILD DEV <describe>`.
 | `view/` menus | `title_screen.gd` (the title and its pages), `title_career.gd` (the CAREER pages), `menu_page.gd` (every menu page), `bracket_screen.gd` (the tournament), `select_screen.gd` (Player Select), `lobby_screen.gd` (multiplayer), `practice_page.gd`, `tutorial_view.gd` (a lesson's card and banner), `career_keyboard.gd`, `online_screen.gd` (host and join), `career_preview.gd`, `park_view.gd` (open play), `prompts.gd`/`prompt_bar.gd` (device-aware button prompts), `ui_kit.gd` (panels and text), `bitmap_text.gd`. |
 | `view/` sound | `audio_map.gd`/`sfx.gd` (effects and ambience), `music.gd` (the soundtrack: crossfades, stingers, ducking). |
 | `net/` | Online play (ADR-056): `lockstep.gd` (inputs and the desync check), `online_session.gd` (the handshake and the match's inputs), `net_link.gd` with `enet_link.gd` (UDP) and `loopback_link.gd` (tests). |
-| `meta/` | `save.gd` (two-copy save with migration, layout v5), `settings.gd` (every setting, load/store, match config), `story.gd` (cards, results, quips), `initials.gd` (the record initials card), `career_page.gd` (CAREER's input logic), `lobby.gd` (the multiplayer lobby's logic), `match_stats.gd` (post-match stats), `tournament.gd` (the bracket's logic), `tutorial.gd` (HOW TO PLAY's lessons), `build_info.gd`. |
+| `scenes/` | `boot.gd` (the first scene: loads a downloaded update's pack, then starts the game; ADR-057), `main.gd` (title, park, matches and the screens between). |
+| `meta/` | `save.gd` (two-copy save with migration, layout v5), `settings.gd` (every setting, load/store, match config), `story.gd` (cards, results, quips), `initials.gd` (the record initials card), `career_page.gd` (CAREER's input logic), `lobby.gd` (the multiplayer lobby's logic), `match_stats.gd` (post-match stats), `tournament.gd` (the bracket's logic), `tutorial.gd` (HOW TO PLAY's lessons), `updater.gd` (the in-game updater), `build_info.gd`. |
 | `game_ui/` | `controls.gd` (input map autoload, P1..P4 intents, tap latch, SNES pad bits for menus), `bindings.gd` (remapping). |
 | `tests/` | Headless runner and suites; `golden/` traces; `golden.gd` regenerates them. |
 | `tools/` | `test.sh`, `export.sh`, `version.py`, `release_notes.py`, `make_icon.py`, `sync_assets.sh` (copies `art/levels/out` and the audio in), `screenshot.gd` (title pages, matches, `court=`, `time=`, `pause`, `closecall`, `initials`, `result`, `smash`, `bracket`, `bracket_semi`, `bracket_out`, `bracket_won`), `point_log.gd` (why each point ended), `contact_probe.gd` (contact heights and smashes over bot matches). |

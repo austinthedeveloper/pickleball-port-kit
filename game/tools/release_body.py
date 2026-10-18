@@ -14,6 +14,7 @@ DOWNLOADS = """### Downloads
 - **Windows** (64-bit): `Pickleball94-{v}-windows.zip`.
 - **Linux** (x86_64): `Pickleball94-{v}-linux.tar.gz`. Mark it executable if needed (`chmod +x`).
 - **Web**: `Pickleball94-{v}-web.zip`. It must be served over HTTP (e.g. `python3 -m http.server` in the unzipped folder); it won't run opened as a file.
+- `Pickleball94-{v}.pck` and `.json` are for the in-game updater (OPTIONS > UPDATES); you don't need them.
 """
 
 

@@ -1,5 +1,6 @@
 # A pushed version tag (vX.Y.Z) becomes a GitHub release with the four
-# builds: the tests run first (ci.yml), then game/tools/export.sh exports
+# builds, and the game's .pck with its manifest for the in-game updater
+# (ADR-057): the tests run first (ci.yml), then game/tools/export.sh exports
 # every preset on the clean tagged tree, and the builds are packaged under
 # the same names as earlier releases and attached. The release is created
 # from the version's game/CHANGELOG.md entry if it doesn't exist yet; an
@@ -71,6 +72,11 @@ jobs:
           chmod +x build/linux/Pickleball94.x86_64
           tar -C build/linux -czf "$dist/$n-linux.tar.gz" Pickleball94.x86_64
           (cd build/web && zip -X -q -r "$dist/$n-web.zip" .)
+          # the in-game updater's (ADR-057): the game's pack, and a manifest
+          # with its engine and checksum
+          cp build/pck/Pickleball94.pck "$dist/$n.pck"
+          python3 game/tools/update_manifest.py "$VERSION" "$dist/$n.pck" > "$dist/$n.json"
+          cat "$dist/$n.json"
           ls -l "$dist"
           for f in "$dist"/*.zip; do unzip -tq "$f"; done
           tar -tzf "$dist/$n-linux.tar.gz" >/dev/null

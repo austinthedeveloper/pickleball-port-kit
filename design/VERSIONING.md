@@ -47,6 +47,22 @@ python3 game/tools/version.py set 0.2.0
 Builds by hand still work: `game/tools/export.sh` with Godot's export
 templates installed (without them, `--check` verifies the pack).
 
+## Updates in the game (ADR-057)
+
+From 0.9.0 each release also carries `Pickleball94-X.Y.Z.pck` and its
+`.json` manifest, which OPTIONS > UPDATES downloads. An update is only the
+game's pack, so a release whose players need a **full download** instead
+is one that:
+
+- changes Godot's version (the manifest's `engine` differs, and the game
+  sends players to the releases page by itself), or
+- changes a `project.godot` setting other than the version (the window,
+  rendering, a new autoload): the pack can't change those. Say so in the
+  CHANGELOG entry ("download this one in full").
+
+`game/scenes/boot.gd` is the one file an update can't replace: change it
+only in a release that asks for a full download.
+
 ## CI
 
 `.github/workflows/ci.yml` runs `game/tools/test.sh` (every suite and the

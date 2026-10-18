@@ -95,7 +95,7 @@ func _host_value() -> String:
 
 func _address_value() -> String:
 	if editing:
-		return address + ("_" if (_frame / 20) % 2 == 0 else " ")
+		return address + ("/" if (_frame / 20) % 2 == 0 else " ")   # the cursor (the font has no _)
 	return address if address != "" else "TYPE IT"
 
 
