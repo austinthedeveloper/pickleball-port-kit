@@ -85,6 +85,9 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.7.0** (2026-10-18): PORT-23 the cleanup round, PORT-24 the
   overhead, PORT-25 the tournament (tag `v0.7.0`, on
   `feature/cld-release-0.7.0`).
+- **v0.8.0** (2026-10-18): PORT-26 the kitchen rule, PORT-27 cleanup round
+  3, PORT-28 controller glyphs, PORT-29 the couch cup, PORT-30 how to
+  play, PORT-31 online play (tag `v0.8.0`, on `feature/cld-release-0.8.0`).
 
 ## Phase 3 (started 2026-10-18)
 

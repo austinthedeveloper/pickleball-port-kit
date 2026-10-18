@@ -4,7 +4,10 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
-## [Unreleased]
+## [0.8.0] - 2026-10-18
+
+Online play, a tutorial, the couch cup, your controller's own buttons, and
+the kitchen rule.
 
 ### Added
 - **ONLINE play** (MULTIPLAYER > ONLINE): 1 vs 1 singles with a friend.

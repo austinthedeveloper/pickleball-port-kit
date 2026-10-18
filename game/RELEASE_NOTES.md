@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.7.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.8.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-26 of 26 roadmap tasks are in.
+32 of 32 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -160,3 +160,39 @@ Status: **Ready to test**: get under a lob (practice: SHOT LOB) and swing with H
 TOURNAMENT on MAIN (ADR-054): an eight-entry knockout, you as top seed and seven ladder teams (the warm-up HENDERSON sits out), QUARTERFINAL, SEMIFINAL, FINAL, each match at the opponent's home court with their intro card. The bracket screen (`view/bracket_screen.gd`) shows the draw, scores, connectors and the champion; START / MODE / BACK before it starts, PLAY / FORFEIT (twice) / BACK during, NEW TOURNAMENT after. The other matches are decided from the tournament's seed (the higher rung usually wins) and appear one at a time when you come back. The result screen says BRACKET, and OUT AS SEMIFINALIST or CHAMPION! when it ends. Saved: the bracket in play, and cups in the records (RECORDS: SHUTOUTS CUPS). MAIN's footer prompt went (the key legend says HIT) to make room for the row.
 
 Status: **Ready to test**: TOURNAMENT on MAIN. Is the road's ramp right (SNOWBIRDS first), and do upsets feel too common or too rare?
+
+## PORT-26: no volleys from the kitchen (reported 2026-10-18)
+
+A volley from inside your own kitchen loses the point, KITCHEN! (ADR-055; the SNES left it out as "ARCADE RULES"). Standing in it, or hitting a ball that bounced there, stays legal. The two-bounce rule's VOLLEY! comes first. The CPUs never volley from their kitchen (they step back or let it bounce). Manual, guide and README updated.
+
+Status: **Ready to test**: stand in your kitchen and try to volley.
+
+## PORT-27: split the match view (chosen 2026-10-18)
+
+`view/match_view.gd` (about 800 lines) loses three parts, each a RefCounted holding the view, as the title's CAREER pages did: `match_actors.gd` (the people and ball: sprites, frames, the swing choice, sparks, SMASH!), `match_input.gd` (each slot's intents, multiplayer pads, the input lock, SERVE ASSIST, a dropped pad, the pause menu) and `match_end.gd` (records, ladder, bracket and career at the result; the initials and UNLOCKED! cards). The view keeps the scene, the frame and the events (471 lines) and thin wrappers for what the HUD, tools and tests use.
+
+Status: **Done**.
+
+## PORT-28: each pad's own buttons (chosen 2026-10-18)
+
+Prompts draw the pad family's buttons (`view/prompts.gd`): Xbox (as before, and any unknown pad), PlayStation (cross, circle, square, triangle drawn as shapes; L1 R1 L3 R3, OPTIONS, CREATE) and Nintendo (B A Y X by position, since Godot maps pads by position; L R, + and -, all grey). The family comes from the last pad's name (`Prompts.family_of`), or BUTTON ICONS on CONTROLS (AUTO, XBOX, PLAYSTATION, NINTENDO; saved, a new key with a default). Display only: the bindings don't change.
+
+Status: **Ready to test**: plug in a PlayStation or Switch pad. Does it pick the right icons? Is your pad's name one I don't know?
+
+## PORT-29: the couch cup (chosen 2026-10-18)
+
+A multiplayer tournament (ADR-054 amendment): the lobby's LB / RB step through SINGLES, DOUBLES, SINGLES CUP and DOUBLES CUP; a cup enters each player (singles) or side (doubles) in an eight-entry bracket as its top seeds, in separate quarters, with CPU teams from the ladder's top. Human against CPU at the team's court; human against human on their own pads. A round's CPU matches wait for its human matches. The bracket screen says COUCH CUP, names the entries in their shirt colours, and PLAY sends each human slot's pad. Its own save slot; never in the records. The HUD now names a multiplayer side by its players.
+
+Status: **Ready to test**: MULTIPLAYER, RB twice, join with two pads.
+
+## PORT-30: HOW TO PLAY (chosen 2026-10-18)
+
+Six lessons (`meta/tutorial.gd`, `view/tutorial_view.gd`), each a real sim with one goal read from its events: RALLY (the ball machine at you: 3 returns), SHOTS (a DRIVE and a SOFT landed), SMASH (the machine lobs: 1 smash in), SERVE (vs a KID CPU: 2 in), TWO BOUNCES (2 rallies past the rule), THE KITCHEN (2 volleys from behind the line). A card first (the match waits, its press doesn't swing), then a banner with the progress and advice after a miss (VOLLEY!, KITCHEN!, a serve fault, a missed lob), LESSON DONE!, and the next. MAIN's PRACTICE opens a page: HOW TO PLAY (from the first lesson not done), LESSON (any one), BALL MACHINE. MAIN's PRACTICE row says HOW TO PLAY until one's done. Lessons record nothing but themselves (`records.lessons`, a bit each).
+
+Status: **Ready to test**: PRACTICE > HOW TO PLAY. Is SMASH too hard?
+
+## PORT-31: online play (asked for 2026-10-18)
+
+1 vs 1 singles over the internet by address (ADR-056, your choices: direct connections, singles first). MULTIPLAYER opens a page: LOCAL (the lobby) or ONLINE (`view/online_screen.gd`: HOST A MATCH, ADDRESS, JOIN). ENet on UDP 24994; HELLO with the versions and looks; the host's START sends the match; lockstep over the exact sim with an input delay fitted to the measured round trip, a wait when an input is late, a hash every 2 s against desyncs. Menu leaves (twice in play), the host rematches, nothing recorded. README: how to connect (same Wi-Fi, Tailscale, or a forwarded port).
+
+Status: **Ready to test**: with a friend. Start on the same Wi-Fi, then over Tailscale.
