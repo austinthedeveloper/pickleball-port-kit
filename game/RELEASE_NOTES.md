@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.4.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.5.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-19 of 19 roadmap tasks are in.
+20 of 20 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -118,3 +118,9 @@ Status: **Ready to test**: MAIN → OPEN PLAY. Walk to a rack, B, and wait about
 Every effect and ambience loop remade without the SNES's limits by `audio/hd-sfx/make_sfx.py` (numpy, fixed seeds; see its README). Shots have their own samples instead of a pitched one; hits and bounces have variants played round-robin with a little pitch spread. The SNES set stays in `audio/snes-sfx`.
 
 Status: **Done**: you listened and they sound good (2026-10-17).
+
+## PORT-19: the park, modernised (asked for 2026-10-17)
+
+The open-play park, taking the old screen as a wireframe: a 3/4 view from about a second storey, twice as close, the camera following you (a little ahead as you walk; framing the room inside the clubhouse). Art by `art/park/build_park.py` with the venue pixel kit: the ground (striped grass, a concrete walkway with spurs, the courts in their level colours, the clubhouse floor, baked shadows) and upright sprites sorted with the people by depth (chain-link fences, sliced where they run into the picture; nets; racks with the waiting paddles; benches; lamps; trees; the clubhouse's walls and roof). The roof fades away and the front wall ghosts while you're inside; a tree's canopy fades when you walk behind it. HUD: OPEN PLAY and EXIT top left, a COURTS panel top right (level, score or NEXT/YOU, +N waiting), and the message and prompts at the bottom. The park sim is untouched.
+
+Status: **Done**: you looked and approved it (2026-10-17).

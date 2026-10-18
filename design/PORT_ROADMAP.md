@@ -496,6 +496,8 @@ feature/cld-release        (pushed)
   over every screen (tag `v0.3.1`, on `feature/cld-release-0.3.1`).
 - **v0.4.0** (2026-10-17): PORT-18 HD sound (tag `v0.4.0`, on
   `feature/cld-release-0.4.0`).
+- **v0.5.0** (2026-10-17): PORT-19 the park, modernised (tag `v0.5.0`, on
+  `feature/cld-release-0.5.0`).
 
 ### 16. `feature/cld-multiplayer`: four players on controllers (asked for 2026-10-17)
 
@@ -606,8 +608,7 @@ feature/cld-release        (pushed)
     old text up for a frame (fixed in `PromptBar`). 197/197 plus the e2e;
     golden traces unchanged. Screenshots: the walkway by court 2, the
     call, and the clubhouse.
-  - Status: **Ready to test**: MAIN → OPEN PLAY. Walk the park, stack at
-    a rack, walk into the clubhouse.
+  - Status: **Done**: you looked and approved it (2026-10-17).
 
 ## For you
 
