@@ -189,6 +189,11 @@ class MatchConfig:
 	## plays slot 1 (-1: the default CPU).
 	var open_play := 0
 	var partner := -1
+	## ADR-047: slot 0 wears the active career player (their skin, hair, and
+	## hat, and the hat's gear on their paddle). `career` is that player at
+	## the match's start (a copy; the sim reads only its hat).
+	var career_p1 := 0
+	var career: Career.Player = null
 
 	static func singles() -> MatchConfig:
 		return MatchConfig.new()
@@ -218,6 +223,29 @@ class MatchConfig:
 		var m: Dictionary = Opponents.team(team)["players"][0]
 		variant[1] = K.VARIANT_FEMALE if m.get("variant", "male") == "female" else K.VARIANT_MALE
 		paddle[1] = maxi(0, Paddles.NAMES.find(m.get("paddle", "blue")))
+
+	## match_config_career_p1: slot 0 in the career player's saved body,
+	## shirt, and paddle (open play and the ball machine have no Player
+	## Select); a slot that had that shirt colour takes slot 0's old one
+	## (ADR-010). No player: nothing changes.
+	func set_career_p1(player: Career.Player) -> void:
+		if player == null:
+			return
+		var old: int = palette[0]
+		career_p1 = 1
+		career = player.copy()
+		variant[0] = player.variant
+		paddle[0] = player.paddle
+		for slot in range(1, K.MAX_PLAYERS):
+			if palette[slot] == player.shirt:
+				palette[slot] = old
+		palette[0] = player.shirt
+
+	## select_apply's half (ADR-047): 1P plays as the career player (skin,
+	## hair, hat) in this match's Player Select choice.
+	func set_career(player: Career.Player) -> void:
+		career_p1 = 1 if player != null else 0
+		career = player.copy() if player != null else null
 
 	func slot_active(slot: int) -> bool:
 		return palette[slot] >= 0

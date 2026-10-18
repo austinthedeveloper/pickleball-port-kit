@@ -800,6 +800,10 @@ func _activate_players() -> void:
 		p.max_speed_fp = K.PLAYER_MAX_SPEED_FP
 		p.variant = config.variant[i]
 		p.paddle = config.paddle[i]
+		# ADR-047 stage 4: a career player's hat shifts their paddle's
+		# stats (the paddle tables hold every pairing).
+		if i == 0 and config.career_p1 and config.career:
+			p.paddle = Paddles.profile(config.paddle[0], config.career.hat)
 		if p.cpu_controlled:
 			var style: SimTypes.AiStyle = Opponents.slot_style(config, i).copy()
 			if config.difficulty != K.DIFFICULTY_MEDIUM \
