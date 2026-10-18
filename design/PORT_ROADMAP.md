@@ -91,6 +91,9 @@ status in the same commit. The finished tasks, in full, are in
   play, PORT-31 online play (tag `v0.8.0`, on `feature/cld-release-0.8.0`).
 - **v0.8.1** (2026-10-18): the HOST screen offers only reachable addresses
   (KNOWN_ISSUES #55; tag `v0.8.1`, on `feature/cld-release-0.8.1`).
+- **v0.9.0** (2026-10-18): PORT-32 the in-game updater; the first release
+  with the .pck and manifest it downloads (tag `v0.9.0`, on
+  `feature/cld-release-0.9.0`).
 
 ## Phase 3 (started 2026-10-18)
 

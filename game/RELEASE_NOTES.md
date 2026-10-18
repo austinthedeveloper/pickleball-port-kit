@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.8.1`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.9.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-32 of 32 roadmap tasks are in.
+33 of 33 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -196,3 +196,9 @@ Status: **Ready to test**: PRACTICE > HOW TO PLAY. Is SMASH too hard?
 1 vs 1 singles over the internet by address (ADR-056, your choices: direct connections, singles first). MULTIPLAYER opens a page: LOCAL (the lobby) or ONLINE (`view/online_screen.gd`: HOST A MATCH, ADDRESS, JOIN). ENet on UDP 24994; HELLO with the versions and looks; the host's START sends the match; lockstep over the exact sim with an input delay fitted to the measured round trip, a wait when an input is late, a hash every 2 s against desyncs. Menu leaves (twice in play), the host rematches, nothing recorded. README: how to connect (same Wi-Fi, Tailscale, or a forwarded port).
 
 Status: **Ready to test**: with a friend. Start on the same Wi-Fi, then over Tailscale.
+
+## PORT-32: updates in the game (asked for 2026-10-18)
+
+OPTIONS > UPDATES (ADR-057): a check of GitHub's latest release at start, the news on the title, a download of just the game's .pck (checked against the release's SHA-256), and RESTART onto it. The boot scene (`scenes/boot.gd`, now the main scene) loads a newer downloaded pack before anything else, then adds the input map and the updater (no longer autoloads) and the title; a start that never reaches the title is skipped next time. CI publishes the .pck and its manifest (`tools/update_manifest.py`) with each release. The layout test now also fails on a character the font can't draw (it found ONLINE's invisible typing cursor).
+
+Status: **Ready to test**: after 0.9.0, the next release (0.9.1) is the first real update. Not tried on Windows or Linux.
