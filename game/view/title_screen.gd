@@ -46,7 +46,6 @@ var lobby_screen: LobbyScreen
 var career_page := CareerPage.new()
 var career_keyboard: CareerKeyboard
 var career_preview: CareerPreview
-var _delete_armed := false
 var _spare_career := Career.new()      ## no save (some tests): nobody
 
 
@@ -246,7 +245,7 @@ func _build_pages() -> void:
 		_store_settings()})
 	_add_page("controls", "CONTROLS", control_rows, [["hit", "REBIND"], ["back", "BACK"]],
 		Rect2(250, 70, 460, 0))
-	_build_career_pages()
+	career.build_pages()
 	_add_page("records", "RECORDS", [
 		{"id": "singles", "label": "SINGLES", "value": func(): return _wl("singles")},
 		{"id": "doubles", "label": "DOUBLES", "value": func(): return _wl("doubles")},
@@ -265,202 +264,36 @@ func _build_pages() -> void:
 	], [["back", "BACK"]], Rect2(290, 46, 380, 0))
 
 
-# --- CAREER (ADR-047) ---------------------------------------------------------------
+# --- CAREER (ADR-047): view/title_career.gd -------------------------------------------
+
+var career: TitleCareer:
+	get:
+		if _career_c == null:
+			_career_c = TitleCareer.new(self)    # also before _ready (some tests)
+		return _career_c
+var _career_c: TitleCareer
+
 
 func _career() -> Career:
-	return save.career if save else _spare_career
-
-
-## The player on the card and the editor.
-func _cp() -> Career.Player:
-	return _career().players[career_page.slot]
+	return career.career()
 
 
 func _career_label() -> String:
-	var me := _career().active_player()
-	return me.shown_name() if me else "NO PLAYER"
+	return career.label()
 
 
-func _build_career_pages() -> void:
-	var slot_rows := []
-	for i in Career.SLOTS:
-		var slot := i
-		slot_rows.append({"id": "slot%d" % slot,
-			"label": func(): return _career().players[slot].shown_name() if _career().players[slot].used else "NEW PLAYER",
-			"value": func(): return _slot_value(slot), "press": func(): _career_row(slot)})
-	slot_rows.append({"id": "nobody", "label": "NO PLAYER",
-		"value": func(): return "ACTIVE" if _career().active_player() == null else "",
-		"press": func(): _career_row(CareerPage.ROW_NOBODY)})
-	slot_rows.append({"id": "records", "label": "RECORDS", "press": func(): _career_row(CareerPage.ROW_RECORDS)})
-	_add_page("career", "CAREER", slot_rows, [["hit", "OPEN"], ["back", "BACK"]], Rect2(240, 140, 480, 0))
-	_add_page("career_card", "PLAYER", [
-		{"id": "singles", "label": "SINGLES", "value": func(): return "%d-%d" % [_cp().wins[0], _cp().losses[0]]},
-		{"id": "doubles", "label": "DOUBLES", "value": func(): return "%d-%d" % [_cp().wins[1], _cp().losses[1]]},
-		{"id": "aces", "label": "ACES", "value": func(): return str(_cp().aces)},
-		{"id": "shutouts", "label": "SHUTOUTS", "value": func(): return str(_cp().shutouts)},
-		{"id": "streak", "label": "BEST STREAK", "value": func(): return str(_cp().best_streak)},
-		{"id": "rally", "label": "LONGEST RALLY", "value": func(): return str(_cp().longest_rally)},
-		{"id": "unlocks", "label": "UNLOCKS",
-			"value": func(): return "%d/%d" % [Career.unlock_count(_cp()), Career.unlocks()]},
-		{"id": "next", "label": func(): return "NEXT UNLOCK" if _next() < Career.unlocks() else "ALL UNLOCKED!",
-			"value": func(): return Career.unlock_names[_next()] if _next() < Career.unlocks() else ""},
-		{"id": "how", "label": func(): return "  " + Career.unlock_how[_next()] if _next() < Career.unlocks() else ""},
-		{"id": "edit", "label": "EDIT", "press": func(): _career_input(CareerPage.PAD_B)},
-		{"id": "delete", "label": "DELETE PLAYER", "value": func(): return "B AGAIN" if _delete_armed else "",
-			"press": _career_delete},
-	], [["hit", "SELECT"], ["back", "BACK"]], Rect2(380, 46, 500, 0))
-	var edit_rows := [{"id": "name", "label": "NAME", "value": func(): return _cp().shown_name(),
-		"press": func(): _career_edit_row(CareerPage.EDIT_NAME, CareerPage.PAD_B)}]
-	var looks := [["body", "BODY", CareerPage.EDIT_BODY], ["skin", "SKIN", CareerPage.EDIT_SKIN],
-		["hair", "HAIR", CareerPage.EDIT_HAIR], ["shirt", "SHIRT", CareerPage.EDIT_SHIRT],
-		["hat", "HAT", CareerPage.EDIT_HAT], ["paddle", "PADDLE", CareerPage.EDIT_PADDLE]]
-	for l in looks:
-		var r: int = l[2]
-		edit_rows.append({"id": l[0], "label": l[1], "value": func(): return _look_name(r),
-			"change": func(d): _career_edit_row(r, CareerPage.PAD_RIGHT if d > 0 else CareerPage.PAD_LEFT)})
-	edit_rows.append({"id": "gear", "label": "GEAR", "value": _gear_text})
-	edit_rows.append({"id": "keep", "label": "KEEP", "press": func(): _career_input(CareerPage.PAD_START)})
-	_add_page("career_edit", "EDIT PLAYER", edit_rows, [["start", "KEEP"], ["back", "CANCEL"]],
-		Rect2(380, 46, 500, 0))
-
-
-func _slot_value(slot: int) -> String:
-	var p: Career.Player = _career().players[slot]
-	if not p.used:
-		return ""
-	return ("ACTIVE  " if _career().active == slot else "") + "%d WINS" % (p.wins[0] + p.wins[1])
-
-
-func _next() -> int:
-	return Career.next_unlock(_cp())
-
-
-## A look row's value as a name (hud_career_look_name).
-func _look_name(r: int) -> String:
-	var v := CareerPage.look_value(_cp(), r)
-	match r:
-		CareerPage.EDIT_BODY:
-			return Career.body_name(v)
-		CareerPage.EDIT_SKIN:
-			return Career.skin_names[v % Career.skins()]
-		CareerPage.EDIT_HAIR:
-			return Career.hair_names[v % Career.hairs()]
-		CareerPage.EDIT_SHIRT:
-			return Career.shirt_name(v)
-		CareerPage.EDIT_HAT:
-			return Career.hat_names[v % Career.hats()]
-	return Career.paddle_name(v)
-
-
-## The editor's gear line (stage 4): the paddle's stats with the hat.
-func _gear_text() -> String:
-	var st := Paddles.stats(Paddles.profile(_cp().paddle, _cp().hat))
-	return "PWR %d  CTL %d  SPD %d" % [st[0], st[1], st[2]]
-
-
-## The title's CAREER entry: the page opens on the active player (or NO
-## PLAYER).
 func open_career() -> void:
-	career_page.begin(_career())
-	main_cursor = pages["main"].cursor
-	_career_sync(true)
+	career.open()
 
 
-## A SLOTS row pressed (keys or the mouse).
-func _career_row(r: int) -> void:
-	career_page.row = r
-	_career_input(CareerPage.PAD_B)
-
-
-## An EDIT row's Left/Right or B.
-func _career_edit_row(r: int, bits: int) -> void:
-	career_page.row = r
-	_career_input(bits)
-
-
-## DELETE PLAYER on the card: the first press arms, the second deletes
-## (for the SNES's L+R+X).
-func _career_delete() -> void:
-	if not _delete_armed:
-		_delete_armed = true
-		return
-	_delete_armed = false
-	if career_page.delete_player() == CareerPage.SAVE and save:
-		save.save_game()
-	_career_sync(true, -1)
-
-
-## One press into the CAREER page's logic; SAVE writes, CLOSE goes back
-## to MAIN, and a new view shows its page.
 func _career_input(bits: int) -> void:
-	var was := _career_page_id()
-	var result := career_page.input(bits)
-	if result == CareerPage.SAVE and save:
-		save.save_game()
-	if result == CareerPage.CLOSE:
-		_back_to_main("career")
-		return
-	var now := _career_page_id()
-	_career_sync(now != was, 1 if _career_depth(now) > _career_depth(was) else -1)
+	career.input(bits)
 
 
-func _career_page_id() -> String:
-	match career_page.view:
-		CareerPage.VIEW_CARD:
-			return "career_card"
-		CareerPage.VIEW_EDIT:
-			return "career_name" if career_page.naming else "career_edit"
-		CareerPage.VIEW_RECORDS:
-			return "records"
-	return "career"
-
-
-static func _career_depth(id: String) -> int:
-	return ["career", "career_card", "career_edit", "career_name"].find(id) if id != "records" else 1
-
-
-## Shows the page for the CAREER view (sliding in when it changed) with
-## the logic's row selected, and the portrait and keyboard up to date.
-func _career_sync(changed: bool, dir := 1) -> void:
-	var id := _career_page_id()
-	if changed:
-		_show(id)
-		if pages.has(id):
-			pages[id].appear(dir)
-		_lock = SWITCH_LOCK
-		GameControls.clear_latch()
-	match career_page.view:
-		CareerPage.VIEW_SLOTS:
-			var r := career_page.row
-			pages["career"].select("slot%d" % r if r < Career.SLOTS else
-				("nobody" if r == CareerPage.ROW_NOBODY else "records"))
-		CareerPage.VIEW_CARD:
-			pages["career_card"].set_title(_cp().shown_name())
-			if changed:
-				pages["career_card"].select("edit")
-		CareerPage.VIEW_EDIT:
-			pages["career_edit"].select(["name", "body", "skin", "hair", "shirt", "hat", "paddle"][career_page.row])
-		CareerPage.VIEW_RECORDS:
-			if changed:
-				pages["records"].select("singles")
-	career_preview.show_player(_cp() if id != "career" and id != "records" else null)
-	career_page.look_changed = false
-	career_keyboard.refresh()
-	if pages.has(id):
-		pages[id].refresh()
-	pages["main"].refresh()
-
-
-## Back to MAIN with the cursor on a row (Y from CAREER's slots).
 func _back_to_main(row: String) -> void:
-	_show("main")
-	pages["main"].select(row)
-	pages["main"].appear(-1)
-	_lock = SWITCH_LOCK
-	GameControls.clear_latch()
+	career.back_to_main(row)
 
 
-## After a row was pressed (keys or the mouse): its sound, and the record line.
 func _after_press(id: String) -> void:
 	if id not in ["singles", "doubles", "back"]:
 		_sfx.play("confirm")
@@ -536,7 +369,7 @@ func _show(id: String) -> void:
 	if career_preview:
 		career_preview.visible = id in ["career_card", "career_edit", "career_name"]
 	if id != "career_card":
-		_delete_armed = false
+		career.delete_armed = false
 	if select_screen:
 		select_screen.visible = id == "select"
 	for n in _header:
