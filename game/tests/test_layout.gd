@@ -398,3 +398,45 @@ func test_tournament() -> void:
 	title.pages["main"].refresh()
 	check_layout(title, "title main, QF on TOURNAMENT")
 	title.free()
+
+
+## PORT-28: on a pad, every family's prompts (PlayStation's OPTIONS and
+## CREATE pills are the widest) on the screens that show them: every title
+## page, the lobby, a match's HUD (the serve prompt, the pause menu), and
+## the bracket.
+func test_pad_families() -> void:
+	var kept := [GameControls.last_device, Settings.pad_glyphs]
+	GameControls.last_device = GameControls.PAD
+	for fam in range(1, Prompts.FAMILIES.size()):
+		Settings.pad_glyphs = fam
+		GameControls.device_serial += 1
+		var name: String = Prompts.FAMILY_NAMES[fam]
+		var t := _title()
+		for id in t.pages:
+			t._show(id)
+			t.pages[id].settle()
+			check_layout(t, "%s: title %s" % [name, id])
+		t.free()
+		GameControls.fake_pads = {0: {}, 1: {}}
+		var tl := _title()
+		tl.open_lobby()
+		tl.lobby.join(0)
+		tl.lobby_screen.refresh()
+		check_layout(tl, "%s: lobby" % name)
+		tl.free()
+		GameControls.fake_pads = {}
+		var v := _view(SimTypes.MatchConfig.singles())
+		check_layout(v, "%s: the serve" % name)
+		v.sim.paused = 1
+		v._hud.refresh()
+		check_layout(v, "%s: paused" % name)
+		v.free()
+		var b := BracketScreen.new().setup(_save(), false)
+		runner.root.add_child(b)
+		if not b.is_node_ready():
+			b._ready()
+		check_layout(b, "%s: bracket" % name)
+		b.free()
+	GameControls.last_device = kept[0]
+	Settings.pad_glyphs = kept[1]
+	GameControls.device_serial += 1

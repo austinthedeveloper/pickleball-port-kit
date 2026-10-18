@@ -21,10 +21,12 @@ game/tools/test.sh           # all tests, headless
 | Soft (lob; dink aimed away from the net) | L | X |
 | Pause; on the result, back to the title | Enter / Esc | Menu |
 
-Any controller works (Xbox, PlayStation, Switch Pro, most others), on
-the Xbox layout; the game always shows Xbox buttons. For now every pad
-is treated as an Xbox pad; other types and their own glyphs are a later
-job (`design/KNOWN_ISSUES.md` #39).
+Any controller works (Xbox, PlayStation, Switch Pro, most others), by
+button position: the south button hits, east drives, west is soft. The
+prompts show your pad's own buttons (PORT-28): Xbox letters, PlayStation
+shapes, or Nintendo letters, from the pad's name; BUTTON ICONS on
+CONTROLS picks one if your pad isn't recognised. Per-player remaps are
+still a later job (`design/KNOWN_ISSUES.md` #39).
 
 **MULTIPLAYER** (on MAIN): up to four players, one controller each.
 Press A to join, pick a SIDE (in doubles your partner is whoever shares

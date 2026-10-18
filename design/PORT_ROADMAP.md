@@ -54,6 +54,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-25 | The tournament | `feature/cld-tournament` | Ready to test |
 | PORT-26 | The kitchen rule | `feature/cld-kitchen-rule` | Ready to test |
 | PORT-27 | Cleanup round 3 | `feature/cld-cleanup-3` | Done |
+| PORT-28 | Controller glyphs | `feature/cld-pad-glyphs` | Ready to test |
 
 ## Releases
 
@@ -213,6 +214,26 @@ feature/cld-release-0.6.0   (v0.6.0)
   - Verified: 258/258 plus the e2e, golden traces unchanged, the leak
     test still at its bound; a screenshot of a doubles smash unchanged.
   - Status: **Done**.
+
+### 28. `feature/cld-pad-glyphs`: each pad's own buttons (chosen 2026-10-18)
+
+- [x] `PORT-28` Prompts draw the pad family's buttons (`view/prompts.gd`):
+  Xbox (as before, and any unknown pad), PlayStation (cross, circle,
+  square, triangle drawn as shapes; L1 R1 L3 R3, OPTIONS, CREATE) and
+  Nintendo (B A Y X by position, since Godot maps pads by position; L R,
+  + and -, all grey). The family comes from the last pad's name
+  (`Prompts.family_of`), or BUTTON ICONS on CONTROLS (AUTO, XBOX,
+  PLAYSTATION, NINTENDO; saved, a new key with a default). Display only:
+  the bindings don't change.
+  - Verified: `test_controller.test_pad_families` (names to families,
+    each family's faces, shoulders, Start and Back, the forced setting, the
+    keyboard unaffected), `test_controller.test_button_icons_row` (by row
+    id, saved), `test_layout.test_pad_families` (every title page, the
+    lobby, the serve and pause HUD, and the bracket, in each family).
+    Screenshots: the title and lobby on PlayStation, the title and OPTIONS
+    on Nintendo.
+  - Status: **Ready to test**: plug in a PlayStation or Switch pad. Does
+    it pick the right icons? Is your pad's name one I don't know?
 
 ## For you
 

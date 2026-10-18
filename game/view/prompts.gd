@@ -1,9 +1,12 @@
 ## Button prompts that follow the device in hand (PORT-11): on a keyboard
-## the action's bound key in a key cap; on any pad the bound button as
-## the Xbox layout shows it (PORT-15: A B X Y in their colours, LB RB LS
-## RS, the Menu and View buttons, the D-pad), since every pad is mapped to
-## that layout. Bindings come from the live input map, so a remap shows
-## at once.
+## the action's bound key in a key cap; on a pad the bound button as that
+## pad's family labels it (PORT-28): Xbox (A B X Y in their colours, LB RB
+## LS RS, Menu and View, the default and any unknown pad), PlayStation
+## (cross, circle, square, triangle; L1 R1 L3 R3, OPTIONS and CREATE) or
+## Nintendo (B A Y X by position, since Godot maps every pad by position:
+## the south button is JOY_BUTTON_A; L R, + and -). The family comes from
+## the pad's name, or BUTTON ICONS on CONTROLS. Bindings come from the live
+## input map, so a remap shows at once.
 class_name Prompts
 extends RefCounted
 
@@ -14,6 +17,47 @@ const DPAD := {JOY_BUTTON_DPAD_UP: 0, JOY_BUTTON_DPAD_DOWN: 1, JOY_BUTTON_DPAD_L
 	JOY_BUTTON_DPAD_RIGHT: 3}
 const NAMED := {JOY_BUTTON_LEFT_SHOULDER: "LB", JOY_BUTTON_RIGHT_SHOULDER: "RB",
 	JOY_BUTTON_LEFT_STICK: "LS", JOY_BUTTON_RIGHT_STICK: "RS"}
+
+const XBOX := "xbox"
+const PLAYSTATION := "playstation"
+const NINTENDO := "nintendo"
+## BUTTON ICONS (Settings.pad_glyphs): AUTO, then each family.
+const FAMILIES := ["", XBOX, PLAYSTATION, NINTENDO]
+const FAMILY_NAMES := ["AUTO", "XBOX", "PLAYSTATION", "NINTENDO"]
+## PlayStation faces by position: the shape and its colour.
+const PS_FACE := {JOY_BUTTON_A: ["cross", Color("7fa8ff")], JOY_BUTTON_B: ["circle", Color("ff6a6a")],
+	JOY_BUTTON_X: ["square", Color("f08ad0")], JOY_BUTTON_Y: ["triangle", Color("5fd6a8")]}
+const PS_NAMED := {JOY_BUTTON_LEFT_SHOULDER: "L1", JOY_BUTTON_RIGHT_SHOULDER: "R1",
+	JOY_BUTTON_LEFT_STICK: "L3", JOY_BUTTON_RIGHT_STICK: "R3"}
+## Nintendo faces by position (south B, east A, west Y, north X), one grey.
+const NIN_FACE := {JOY_BUTTON_A: "B", JOY_BUTTON_B: "A", JOY_BUTTON_X: "Y", JOY_BUTTON_Y: "X"}
+const NIN_NAMED := {JOY_BUTTON_LEFT_SHOULDER: "L", JOY_BUTTON_RIGHT_SHOULDER: "R",
+	JOY_BUTTON_LEFT_STICK: "LS", JOY_BUTTON_RIGHT_STICK: "RS"}
+const NIN_GREY := Color(0.78, 0.8, 0.86)
+
+
+## A pad's family from the name its driver reports (SDL's names: "PS5
+## Controller", "Nintendo Switch Pro Controller", "Xbox Series
+## Controller"...). Anything unknown is drawn as an Xbox pad.
+static func family_of(pad_name: String) -> String:
+	var n := pad_name.to_lower()
+	for k in ["playstation", "dualsense", "dualshock", "ps3", "ps4", "ps5", "sony"]:
+		if k in n:
+			return PLAYSTATION
+	for k in ["nintendo", "switch", "joy-con", "joycon", "pro controller", "wii u", "gamecube"]:
+		if k in n:
+			return NINTENDO
+	return XBOX
+
+
+## The family to draw now: BUTTON ICONS if set, else the last pad touched.
+static func family() -> String:
+	var forced: String = FAMILIES[clampi(Settings.pad_glyphs, 0, FAMILIES.size() - 1)]
+	if forced != "":
+		return forced
+	if GameControls.last_pad >= 0:
+		return family_of(Input.get_joy_name(GameControls.last_pad))
+	return XBOX
 
 
 ## A key's name for a cap, from its physical code.
@@ -70,7 +114,27 @@ static func glyph(action: String, device := -1) -> Dictionary:
 	return button_glyph(first_button(action))
 
 
-static func button_glyph(b: int) -> Dictionary:
+static func button_glyph(b: int, fam := "") -> Dictionary:
+	if fam == "":
+		fam = family()
+	if fam == PLAYSTATION:
+		if PS_FACE.has(b):
+			return {"kind": "face", "text": "", "shape": PS_FACE[b][0], "color": PS_FACE[b][1]}
+		if PS_NAMED.has(b):
+			return {"kind": "pill", "text": PS_NAMED[b]}
+		if b == JOY_BUTTON_START:
+			return {"kind": "pill", "text": "OPTIONS"}
+		if b == JOY_BUTTON_BACK:
+			return {"kind": "pill", "text": "CREATE"}
+	elif fam == NINTENDO:
+		if NIN_FACE.has(b):
+			return {"kind": "face", "text": NIN_FACE[b], "color": NIN_GREY}
+		if NIN_NAMED.has(b):
+			return {"kind": "pill", "text": NIN_NAMED[b]}
+		if b == JOY_BUTTON_START:
+			return {"kind": "face", "text": "+", "color": NIN_GREY}
+		if b == JOY_BUTTON_BACK:
+			return {"kind": "face", "text": "-", "color": NIN_GREY}
 	if FACE.has(b):
 		return {"kind": "face", "text": FACE[b][0], "color": FACE[b][1]}
 	if DPAD.has(b):
@@ -91,6 +155,8 @@ static func label(action: String, device := -1) -> String:
 
 
 static func glyph_text(g: Dictionary) -> String:
+	if g.has("shape"):
+		return String(g["shape"]).to_upper()
 	match g["kind"]:
 		"menu":
 			return "MENU"

@@ -244,6 +244,11 @@ func _build_pages() -> void:
 		control_rows.append({"id": action, "label": Bindings.NAMES[action],
 			"value": func(): return "PRESS A KEY OR BUTTON" if listening == action else Bindings.describe(action),
 			"press": func(): listen(action)})
+	control_rows.append({"id": "icons", "label": "BUTTON ICONS",
+		"value": func(): return Prompts.FAMILY_NAMES[Settings.pad_glyphs],
+		"change": func(d):
+			Settings.pad_glyphs = (Settings.pad_glyphs + d + Prompts.FAMILIES.size()) % Prompts.FAMILIES.size()
+			GameControls.device_serial += 1})        # every prompt bar redraws
 	control_rows.append({"id": "reset", "label": "RESET DEFAULTS", "press": func():
 		Bindings.reset()
 		_store_settings()})

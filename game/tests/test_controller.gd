@@ -156,3 +156,72 @@ func test_rumble() -> void:
 	eq(GameControls.last_rumble, [], "not when playing on the keyboard")
 	v.free()
 	_restore()
+
+
+## PORT-28: each pad family's glyphs. The family comes from the pad's name
+## (unknown pads are Xbox), or BUTTON ICONS forces one; Nintendo labels go
+## by position (the south button, JOY_BUTTON_A, is B).
+func test_pad_families() -> void:
+	eq(Prompts.family_of("PS5 Controller"), Prompts.PLAYSTATION)
+	eq(Prompts.family_of("Sony DualSense Wireless Controller"), Prompts.PLAYSTATION)
+	eq(Prompts.family_of("PS4 Controller"), Prompts.PLAYSTATION)
+	eq(Prompts.family_of("Nintendo Switch Pro Controller"), Prompts.NINTENDO)
+	eq(Prompts.family_of("Joy-Con (L/R)"), Prompts.NINTENDO)
+	eq(Prompts.family_of("Xbox Series Controller"), Prompts.XBOX)
+	eq(Prompts.family_of("8BitDo SN30 Pro"), Prompts.XBOX, "an unknown pad: Xbox")
+	eq(Prompts.family_of(""), Prompts.XBOX)
+	var ps := Prompts.PLAYSTATION
+	eq(Prompts.button_glyph(JOY_BUTTON_A, ps)["shape"], "cross", "south: cross")
+	eq(Prompts.button_glyph(JOY_BUTTON_B, ps)["shape"], "circle")
+	eq(Prompts.button_glyph(JOY_BUTTON_X, ps)["shape"], "square")
+	eq(Prompts.button_glyph(JOY_BUTTON_Y, ps)["shape"], "triangle")
+	eq(Prompts.glyph_text(Prompts.button_glyph(JOY_BUTTON_START, ps)), "OPTIONS")
+	eq(Prompts.glyph_text(Prompts.button_glyph(JOY_BUTTON_LEFT_SHOULDER, ps)), "L1")
+	eq(Prompts.glyph_text(Prompts.button_glyph(JOY_BUTTON_A, ps)), "CROSS", "as text")
+	var nin := Prompts.NINTENDO
+	eq(Prompts.glyph_text(Prompts.button_glyph(JOY_BUTTON_A, nin)), "B", "Switch: south is B")
+	eq(Prompts.glyph_text(Prompts.button_glyph(JOY_BUTTON_B, nin)), "A", "east is A")
+	eq(Prompts.glyph_text(Prompts.button_glyph(JOY_BUTTON_START, nin)), "+")
+	eq(Prompts.glyph_text(Prompts.button_glyph(JOY_BUTTON_RIGHT_SHOULDER, nin)), "R")
+	eq(Prompts.glyph_text(Prompts.button_glyph(JOY_BUTTON_A, Prompts.XBOX)), "A")
+	# BUTTON ICONS forces a family, and the prompts follow it
+	var kept := Settings.pad_glyphs
+	Settings.pad_glyphs = Prompts.FAMILIES.find(ps)
+	eq(Prompts.label("hit", GameControls.PAD), "CROSS", "hit on a forced PlayStation pad")
+	Settings.pad_glyphs = Prompts.FAMILIES.find(nin)
+	eq(Prompts.label("drive", GameControls.PAD), "A", "drive (east) on a Switch pad")
+	eq(Prompts.label("hit", GameControls.KEYBOARD), "SPACE", "the keyboard doesn't care")
+	Settings.pad_glyphs = kept
+
+
+## BUTTON ICONS on CONTROLS, by row id, saved.
+func test_button_icons_row() -> void:
+	var dir := "user://test_glyphs/"
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(dir))
+	for f in SaveGame.FILES:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(dir + f))
+	var s := SaveGame.new()
+	s.dir = dir
+	s.load_game()
+	var kept := Settings.pad_glyphs
+	var t := TitleScreen.new()
+	t.save = s
+	runner.root.add_child(t)
+	if not t.is_node_ready():
+		t._ready()
+	var c: MenuPage = t.pages["controls"]
+	check(c.select("icons"), "BUTTON ICONS is on CONTROLS")
+	eq(c.value_of("icons"), "AUTO")
+	c.change(1)
+	c.change(1)
+	eq(c.value_of("icons"), "PLAYSTATION")
+	t._store_settings()
+	s.save_game()
+	t.free()
+	Settings.pad_glyphs = 0
+	var s2 := SaveGame.new()
+	s2.dir = dir
+	s2.load_game()
+	Settings.load_from(s2)
+	eq(Settings.pad_glyphs, 2, "saved")
+	Settings.pad_glyphs = kept

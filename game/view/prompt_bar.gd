@@ -89,6 +89,8 @@ func _draw() -> void:
 		match g["kind"]:
 			"face":
 				_round_button(c, g["color"])
+				if g.has("shape"):
+					_shape(c, g["shape"], g["color"])
 			"menu":
 				_round_button(c, Color(0.85, 0.87, 0.95))
 				for i in 3:
@@ -112,6 +114,23 @@ func _round_button(c: Vector2, col: Color) -> void:
 	draw_circle(c, H / 2.0, Color(0.08, 0.09, 0.16))
 	draw_circle(c, H / 2.0 - 2.0, col.darkened(0.55))
 	draw_arc(c, H / 2.0 - 2.0, 0, TAU, 20, col, 2.0)
+
+
+## A PlayStation face's shape, in its colour (the font has no such glyphs).
+func _shape(c: Vector2, shape: String, col: Color) -> void:
+	var s := 4.5
+	match shape:
+		"cross":
+			draw_line(c + Vector2(-s, -s), c + Vector2(s, s), col, 2.0)
+			draw_line(c + Vector2(-s, s), c + Vector2(s, -s), col, 2.0)
+		"circle":
+			draw_arc(c, s, 0, TAU, 16, col, 2.0)
+		"square":
+			draw_rect(Rect2(c - Vector2(s, s) * 0.9, Vector2(s, s) * 1.8), col, false, 2.0)
+		"triangle":
+			var pts := PackedVector2Array([c + Vector2(0, -s), c + Vector2(s, s * 0.75),
+				c + Vector2(-s, s * 0.75), c + Vector2(0, -s)])
+			draw_polyline(pts, col, 2.0)
 
 
 ## A D-pad cross; one arm lit for a single direction.

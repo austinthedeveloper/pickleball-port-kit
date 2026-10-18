@@ -63,6 +63,8 @@ func _initialize() -> void:
 	for arg in a.slice(4):
 		if arg == "pad":
 			GameControls.last_device = GameControls.PAD
+		if arg.begins_with("icons="):           # PORT-28: 1 XBOX, 2 PLAYSTATION, 3 NINTENDO
+			Settings.pad_glyphs = int(arg.substr(6))
 		if arg.begins_with("time="):
 			Settings.time_i = int(arg.substr(5))
 		if arg.begins_with("court="):

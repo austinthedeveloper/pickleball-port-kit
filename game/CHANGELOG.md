@@ -6,6 +6,12 @@ Pickleball '94, the Godot port. Versions follow
 
 ## [Unreleased]
 
+### Added
+- **Your controller's own buttons** in every prompt: PlayStation pads show
+  the cross, circle, square and triangle (and L1, R1, OPTIONS), Switch pads
+  their B, A, Y, X, + and -. Picked from the pad's name; CONTROLS has a
+  BUTTON ICONS row to choose one by hand.
+
 ### Fixed
 - **The kitchen rule:** you can no longer volley from inside your own
   kitchen. Stand in it as much as you like, but a ball hit out of the air
