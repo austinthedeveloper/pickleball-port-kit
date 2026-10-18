@@ -67,7 +67,7 @@ static func defaults() -> Dictionary:
 		## the three career players and the active one (ADR-047, v5)
 		"career": Career.new().to_dict(),
 		## the tournament in play (PORT-25; {} = none), filled in on load
-		"tournament": {"bracket": {}},
+		"tournament": {"bracket": {}, "couch": {}},   # PORT-29: the couch cup's
 	}
 
 
@@ -208,13 +208,14 @@ func _older_file() -> String:
 
 # --- Tournament (PORT-25) ---------------------------------------------------
 
-## The tournament in play, or null.
-func tournament() -> Tournament:
-	return Tournament.from_dict(data["tournament"]["bracket"])
+## The tournament in play, or null: the solo one, or the couch cup's
+## (`key` "couch", PORT-29).
+func tournament(key := "bracket") -> Tournament:
+	return Tournament.from_dict(data["tournament"].get(key, {}))
 
 
-func store_tournament(t: Tournament) -> void:
-	data["tournament"]["bracket"] = t.to_dict() if t else {}
+func store_tournament(t: Tournament, key := "bracket") -> void:
+	data["tournament"][key] = t.to_dict() if t else {}
 
 
 const CUP_FINISHES := ["", "QUARTERFINALIST", "SEMIFINALIST", "FINALIST"]

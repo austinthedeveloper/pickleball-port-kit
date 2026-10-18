@@ -31,7 +31,7 @@ func test_the_draw() -> void:
 	var n := Opponents.count()
 	eq(t.draw[1], 1, "seed 8, the weakest left, is your first opponent")
 	eq(t.draw[6], n - 1, "the strongest is seed 2, in the other half")
-	eq(t.next_match(), {"round": 0, "match": 0, "opponent": 1})
+	eq(t.next_match(), {"round": 0, "match": 0, "left": Tournament.YOU, "right": 1, "opponent": 1})
 	eq(Tournament.entry_name(t.draw[0]), "YOU")
 	eq(t.finish(), "", "still in it")
 

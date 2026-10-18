@@ -12,7 +12,14 @@ Pickleball '94, the Godot port. Versions follow
   their B, A, Y, X, + and -. Picked from the pad's name; CONTROLS has a
   BUTTON ICONS row to choose one by hand.
 
+- The **COUCH CUP**: in MULTIPLAYER, LB / RB now reach SINGLES CUP and
+  DOUBLES CUP. Everyone enters the bracket (each player, or each side in
+  doubles), CPU teams fill it out, and you meet each other as late as the
+  draw allows.
+
 ### Fixed
+- In multiplayer, the score panel names each side by its players (P3,
+  P1 + P4); singles always said P1 and 2P before.
 - **The kitchen rule:** you can no longer volley from inside your own
   kitchen. Stand in it as much as you like, but a ball hit out of the air
   from there loses the point (KITCHEN!). The CPUs play by it too.

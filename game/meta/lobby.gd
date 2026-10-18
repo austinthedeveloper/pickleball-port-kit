@@ -7,6 +7,10 @@
 ## an empty place on a side goes to a CPU. Menu starts once everyone is
 ## ready and the teams work: two or more players, someone on the left (the
 ## sim's slot 0 is always a human), and in singles one on each side.
+##
+## The couch cup (PORT-29): LB / RB step through SINGLES, DOUBLES, SINGLES
+## CUP and DOUBLES CUP. In a cup the lobby's players enter a tournament
+## (Tournament.humans): in singles each player, in doubles each side.
 class_name Lobby
 extends RefCounted
 
@@ -27,6 +31,54 @@ const START := 1
 const LEAVE := 2                 ## nobody joined and B: back to the title
 
 var mode := K.MODE_DOUBLES
+var cup := false                 ## the couch cup (PORT-29)
+const MODE_NAMES := ["SINGLES", "DOUBLES", "SINGLES CUP", "DOUBLES CUP"]
+
+
+## 0..3 in MODE_NAMES' order.
+func mode_index() -> int:
+	return (1 if mode == K.MODE_DOUBLES else 0) + (2 if cup else 0)
+
+
+func mode_name() -> String:
+	return MODE_NAMES[mode_index()]
+
+
+## LB / RB: the previous or next of the four.
+func step_mode(dir: int) -> void:
+	var i := clampi(mode_index() + dir, 0, MODE_NAMES.size() - 1)
+	cup = i >= 2
+	set_mode(K.MODE_DOUBLES if i % 2 == 1 else K.MODE_SINGLES)
+
+
+## The cup's entries: in singles each player, in doubles each side (with a
+## CPU partner for a lone player). [{name, cards: [{device, palette,
+## variant, paddle, number}]}], in player-number order.
+func entries() -> Array:
+	var out := []
+	var groups := []
+	if mode == K.MODE_SINGLES:
+		for i in MAX:
+			if cards[i] != null:
+				groups.append([i])
+	else:
+		for side in [LEFT, RIGHT]:
+			var g := []
+			for i in MAX:
+				if cards[i] != null and cards[i]["side"] == side:
+					g.append(i)
+			if not g.is_empty():
+				groups.append(g)
+	for g in groups:
+		var names := []
+		var cs := []
+		for i in g:
+			names.append("P%d" % (i + 1))
+			var c: Dictionary = cards[i]
+			cs.append({"device": c["device"], "palette": c["palette"], "variant": c["variant"],
+				"paddle": c["paddle"], "number": i})
+		out.append({"name": " + ".join(names), "cards": cs})
+	return out
 ## One card per player number (index 0..3 = P1..P4), or null:
 ## {device, side, palette, variant, paddle, row, ready}
 var cards: Array = [null, null, null, null]
@@ -123,10 +175,12 @@ func blocker() -> String:
 	var players := joined()
 	if players.size() < 2:
 		return "WAITING FOR PLAYERS"
-	if mode == K.MODE_SINGLES and players.size() > 2:
+	if mode == K.MODE_SINGLES and players.size() > 2 and not cup:
 		return "SINGLES IS TWO PLAYERS"
 	if players.any(func(c): return not c["ready"]):
 		return "WAITING FOR READY"
+	if cup:
+		return ""                        # every player (or side) is an entry
 	if side_count(LEFT) == 0:
 		return "SOMEONE TAKE THE LEFT SIDE"
 	if mode == K.MODE_SINGLES and (side_count(LEFT) != 1 or side_count(RIGHT) != 1):
@@ -151,10 +205,10 @@ func input(device: int, pressed: int) -> int:
 	if pressed & Practice.PAD_START and c["ready"]:
 		return START if blocker() == "" else STAY
 	if pressed & GameControls.PAD_L:
-		set_mode(K.MODE_SINGLES)
+		step_mode(-1)
 		return STAY
 	if pressed & GameControls.PAD_R:
-		set_mode(K.MODE_DOUBLES)
+		step_mode(1)
 		return STAY
 	if pressed & BACK:
 		if c["ready"]:

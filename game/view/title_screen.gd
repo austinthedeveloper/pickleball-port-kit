@@ -17,6 +17,7 @@ signal start_match(cfg: SimTypes.MatchConfig, venue: String, ladder: bool, pads:
 ## OPEN PLAY (ADR-034): the park; 2P comes along when PLAYERS is 2P.
 signal open_park(two_players: bool)
 signal open_tournament          ## PORT-25: the bracket
+signal open_couch_cup(entries: Array, doubles: bool)   ## PORT-29: the lobby's cup
 
 const SWITCH_LOCK := MenuPage.TRANSITION   ## no menu input while a page slides in
 
@@ -531,6 +532,9 @@ func _leave_lobby() -> void:
 func start_lobby_match() -> void:
 	_sfx.play("confirm")
 	_store_settings()
+	if lobby.cup:
+		open_couch_cup.emit(lobby.entries(), lobby.mode == K.MODE_DOUBLES)
+		return
 	var cfg := lobby.match_config(Settings.difficulty_i, Settings.POINTS[Settings.points_i],
 		Settings.mod_bits)
 	start_match.emit(cfg, Settings.venue(), false, lobby.slot_pads(), lobby.slot_players())

@@ -68,6 +68,8 @@ func on_match_over() -> void:
 		return
 	var won := v.sim.match_winner == 0
 	if v.multiplayer():
+		if v.tournament:
+			record_tournament(won)         # PORT-29: the couch cup's bracket
 		v.save.drop_new_records()          # friends' matches don't touch the records
 		v.save.save_game()
 		return
@@ -93,10 +95,12 @@ func on_match_over() -> void:
 ## PORT-25: the bracket takes this result (and decides the round's other
 ## matches); a tournament over for you goes in the records.
 func record_tournament(won: bool) -> void:
-	var t := v.save.tournament()
+	var t := v.save.tournament(v.cup_key)
 	if t == null or t.next_match().is_empty():
 		return
-	t.record(won, v.sim.team_score[0], v.sim.team_score[1])
-	v.save.store_tournament(t)
+	t.record_left(won, v.sim.team_score[0], v.sim.team_score[1])
+	v.save.store_tournament(t, v.cup_key)
+	if t.couch():
+		return                             # friends' cups don't go in the records
 	cup_finish = t.finish()
 	v.save.record_cup(cup_finish)

@@ -121,7 +121,7 @@ func _process(_delta: float) -> void:
 func refresh() -> void:
 	if lobby == null:
 		return
-	_mode.text = "SINGLES" if lobby.mode == K.MODE_SINGLES else "DOUBLES"
+	_mode.text = lobby.mode_name()
 	for i in Lobby.MAX:
 		var c: Dictionary = _cards[i]
 		var card: Variant = lobby.cards[i]
@@ -179,6 +179,10 @@ func _teams_line() -> String:
 		return "CPU" if lobby.mode == K.MODE_DOUBLES else ""
 	if lobby.joined().is_empty():
 		return "UP TO FOUR PLAYERS, ONE CONTROLLER EACH"
+	if lobby.cup:                        # PORT-29: the cup's entries
+		var names: Array = lobby.entries().map(func(e): return e["name"])
+		return ("ENTRIES  " if lobby.mode == K.MODE_SINGLES else "TEAMS  ") + "   ".join(names) \
+			+ "  + CPU TEAMS"
 	if lobby.mode == K.MODE_SINGLES:
 		return "LEFT  %s     RIGHT  %s" % [name.call(0) if slots[0] >= 0 else "-", name.call(2) if slots[2] >= 0 else "-"]
 	return "LEFT  %s + %s     RIGHT  %s + %s" % [name.call(0), name.call(1), name.call(2), name.call(3)]

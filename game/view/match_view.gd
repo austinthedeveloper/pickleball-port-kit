@@ -28,6 +28,7 @@ var ladder := false             ## a ladder match: intro card, next rung
 ## A tournament match (PORT-25): the intro card, the result recorded in the
 ## bracket, and B on the result goes back to it (finished(false)).
 var tournament := false
+var cup_key := "bracket"        ## the save's bracket: "bracket", or the couch cup's (PORT-29)
 ## From the park (ADR-034): B on the result, or PARK on practice's pause
 ## menu, goes back there (finished(false)).
 var park := false

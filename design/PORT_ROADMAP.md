@@ -55,6 +55,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-26 | The kitchen rule | `feature/cld-kitchen-rule` | Ready to test |
 | PORT-27 | Cleanup round 3 | `feature/cld-cleanup-3` | Done |
 | PORT-28 | Controller glyphs | `feature/cld-pad-glyphs` | Ready to test |
+| PORT-29 | The couch cup | `feature/cld-couch-cup` | Ready to test |
 
 ## Releases
 
@@ -235,6 +236,29 @@ feature/cld-release-0.6.0   (v0.6.0)
   - Status: **Ready to test**: plug in a PlayStation or Switch pad. Does
     it pick the right icons? Is your pad's name one I don't know?
 
+### 29. `feature/cld-couch-cup`: the couch cup (chosen 2026-10-18)
+
+- [x] `PORT-29` A multiplayer tournament (ADR-054 amendment): the lobby's
+  LB / RB step through SINGLES, DOUBLES, SINGLES CUP and DOUBLES CUP; a
+  cup enters each player (singles) or side (doubles) in an eight-entry
+  bracket as its top seeds, in separate quarters, with CPU teams from the
+  ladder's top. Human against CPU at the team's court; human against human
+  on their own pads. A round's CPU matches wait for its human matches. The
+  bracket screen says COUCH CUP, names the entries in their shirt colours,
+  and PLAY sends each human slot's pad. Its own save slot; never in the
+  records. The HUD now names a multiplayer side by its players.
+  - Verified: `test_couch_cup.gd` (the lobby's four modes and its entries;
+    four humans in four quarters; CPU matches waiting; P1 against P2 in a
+    final on two pads; a doubles team against a CPU team at their court,
+    and P3 alone with a CPU partner; both out and the rest playing out;
+    the save slots apart and round-tripping; a match's end through the
+    view recording the cup and not the records; the bracket screen by row
+    id), `test_layout.test_couch_cup` (the lobby in both cup modes, the
+    bracket fresh, in play and over, three couch match HUDs at 20-20),
+    `test_multiplayer` (LB / RB stepping). Solo brackets unchanged.
+    Screenshots: a doubles and a singles cup bracket.
+  - Status: **Ready to test**: MULTIPLAYER, RB twice, join with two pads.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
@@ -278,4 +302,10 @@ the chain: each has a default I've gone with.
   the ladder, not played (ADR-054 says why). Matches use MATCH SETUP's
   points; finals could be longer (to 15 or win by 2) if you want them to
   feel bigger. No 2P/multiplayer tournament yet.
+
+- **PORT-29 couch cup:** the humans are the top seeds, so with four of
+  you the CPU teams in the draw are the four strongest. Two of you can't
+  meet before the semis (four: before the semis either). A cup uses MATCH
+  SETUP's difficulty and points like the lobby's matches. Say if you'd
+  rather draw humans at random.
 

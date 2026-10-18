@@ -15,6 +15,14 @@
 ## results: [winner, winner's points, loser's points], or [] while
 ## unplayed. Your matches are recorded from the real match; the round's
 ## other matches are decided when you finish yours.
+##
+## The couch cup (PORT-29): up to four human entries from the multiplayer
+## lobby (`humans`: in singles each player, in doubles each side, a CPU
+## partner filling an empty place), entries -1 to -4. They take the top
+## seeds, so they land in different quarters and meet as late as they
+## can; CPU teams from the ladder's top fill the rest. A round's CPU
+## matches are decided once its human matches are played. Solo, the one
+## human is YOU (-1), the save's player.
 class_name Tournament
 extends RefCounted
 
@@ -34,18 +42,25 @@ var points := 11
 var draw: Array = []                 ## SIZE entries: a team index or YOU
 var results: Array = []              ## per round, per match: [] or [winner, w_points, l_points]
 var seen := 0                        ## decided matches the bracket has shown (it reveals the rest)
+## The couch cup's human entries (PORT-29), [] solo: per entry
+## {"name": "P1" or "P1 + P3", "cards": [lobby cards: device, palette, variant, paddle, number]}.
+var humans: Array = []
 var _rng := 1
 
 
 ## A new tournament. `seed` decides the CPU matches.
-static func create(seed_value: int, is_doubles: bool, diff: int, to_win: int) -> Tournament:
+static func create(seed_value: int, is_doubles: bool, diff: int, to_win: int,
+		human_entries: Array = []) -> Tournament:
 	var t := Tournament.new()
 	t.seed = seed_value & 0x7fffffff
 	t._rng = t.seed if t.seed else 1
 	t.doubles = is_doubles
 	t.difficulty = diff
 	t.points = to_win
-	var seeds := [YOU]                   # seed 1
+	t.humans = human_entries.duplicate(true)
+	var seeds := []
+	for h in maxi(1, t.humans.size()):  # the top seeds; solo, YOU is seed 1
+		seeds.append(human(h))
 	for i in range(Opponents.count() - 1, -1, -1):
 		if i != SITS_OUT and seeds.size() < SIZE:
 			seeds.append(i)
@@ -57,6 +72,19 @@ static func create(seed_value: int, is_doubles: bool, diff: int, to_win: int) ->
 			round.append([])
 		t.results.append(round)
 	return t
+
+
+## Human entry h's code in the draw: -1 (YOU, or P1's entry) to -4.
+static func human(h: int) -> int:
+	return -1 - h
+
+
+static func is_human(e: Variant) -> bool:
+	return e != null and int(e) < 0
+
+
+func couch() -> bool:
+	return not humans.is_empty()
 
 
 static func matches_in(round: int) -> int:
@@ -72,35 +100,57 @@ func entrants(round: int, m: int) -> Array:
 	return [a[0] if not a.is_empty() else null, b[0] if not b.is_empty() else null]
 
 
-## Your next match: {round, match, opponent}, or {} if you're out or it's over.
+## The next match with a human in it: {round, match, left, right,
+## opponent}, or {} when none is left. `left` takes the sim's slots 0 and
+## 1, so it's always a human (the top entry when both are); solo,
+## `opponent` is YOU's.
 func next_match() -> Dictionary:
 	for r in ROUNDS:
 		for m in matches_in(r):
 			var e := entrants(r, m)
-			if YOU in e and results[r][m].is_empty():
-				return {"round": r, "match": m, "opponent": e[1] if e[0] == YOU else e[0]}
+			if e[0] == null or e[1] == null or not results[r][m].is_empty():
+				continue
+			if is_human(e[0]) or is_human(e[1]):
+				var left: int = int(e[0]) if is_human(e[0]) else int(e[1])
+				var right: int = int(e[1]) if left == int(e[0]) else int(e[0])
+				return {"round": r, "match": m, "left": left, "right": right,
+					"opponent": right if left == YOU else left}
 	return {}
 
 
-## Your result, from the real match; then the round's other matches. If you
-## lost, the rest of the tournament plays out.
+## Your result, from the real match (solo); then the round's other matches.
+## If you lost, the rest of the tournament plays out.
 func record(won: bool, your_points: int, their_points: int) -> void:
+	record_left(won, your_points, their_points)
+
+
+## The next match's result from the left side's view (slots 0 and 1).
+func record_left(left_won: bool, left_points: int, right_points: int) -> void:
 	var nm := next_match()
 	if nm.is_empty():
 		return
-	var r: int = nm["round"]
-	var w: int = YOU if won else int(nm["opponent"])
-	results[r][nm["match"]] = [w, maxi(your_points, their_points), mini(your_points, their_points)]
-	_decide_round(r)
-	if not won:                          # the next round's CPU matches wait for yours
-		for later in range(r + 1, ROUNDS):
-			_decide_round(later)
+	var w: int = int(nm["left"]) if left_won else int(nm["right"])
+	results[nm["round"]][nm["match"]] = [w, maxi(left_points, right_points), mini(left_points, right_points)]
+	_settle()
+
+
+## Decides each round's CPU matches once its human matches are played;
+## with no human left, everything plays out.
+func _settle() -> void:
+	for r in ROUNDS:
+		for m in matches_in(r):
+			var e := entrants(r, m)
+			if results[r][m].is_empty() and e[0] != null and e[1] != null \
+					and (is_human(e[0]) or is_human(e[1])):
+				return                       # a human match still to play
+		_decide_round(r)
 
 
 func _decide_round(r: int) -> void:
 	for m in matches_in(r):
 		var e := entrants(r, m)
-		if results[r][m].is_empty() and e[0] != null and e[1] != null and not (YOU in e):
+		if results[r][m].is_empty() and e[0] != null and e[1] != null \
+				and not is_human(e[0]) and not is_human(e[1]):
 			results[r][m] = _cpu_match(int(e[0]), int(e[1]))
 
 
@@ -161,6 +211,22 @@ static func entry_name(e: Variant) -> String:
 	return String(Opponents.team(int(e))["team"])
 
 
+## An entry's name: a team's, YOU, or a couch entry's ("P2", "P1 + P3").
+func name_of(e: Variant) -> String:
+	if is_human(e) and couch():
+		var h := -1 - int(e)
+		return String(humans[h]["name"]) if h < humans.size() else "?"
+	return entry_name(e)
+
+
+## A couch entry's colour: its first player's shirt (PlayerSelect.PAL_*).
+func palette_of(e: Variant) -> int:
+	if not (is_human(e) and couch()):
+		return -1
+	var cards: Array = humans[-1 - int(e)]["cards"]
+	return int(cards[0]["palette"]) if not cards.is_empty() else -1
+
+
 ## The match config for your next match: Settings.config_for against the
 ## opponent with the tournament's mode, difficulty and points.
 func match_config(p1: Dictionary, modifiers: int) -> SimTypes.MatchConfig:
@@ -170,9 +236,39 @@ func match_config(p1: Dictionary, modifiers: int) -> SimTypes.MatchConfig:
 	return cfg
 
 
+## The couch cup's next match (PORT-29): {cfg, pads, players, venue}. Each
+## human entry's players on their side as the lobby would place them (a
+## CPU partner in an empty doubles place); a CPU team on the right in its
+## look, at its home court. Two human entries play at `venue`.
+func couch_match(modifiers: int, venue: String) -> Dictionary:
+	var nm := next_match()
+	var lobby := Lobby.new()
+	lobby.mode = K.MODE_DOUBLES if doubles else K.MODE_SINGLES
+	for pair in [[Lobby.LEFT, nm["left"]], [Lobby.RIGHT, nm["right"]]]:
+		if not is_human(pair[1]):
+			continue
+		for c in humans[-1 - int(pair[1])]["cards"]:
+			lobby.cards[int(c["number"])] = {"device": c["device"], "side": pair[0],
+				"palette": c["palette"], "variant": c["variant"], "paddle": c["paddle"],
+				"row": 0, "ready": true}
+	var cfg := lobby.match_config(difficulty, points, modifiers)
+	var right: int = nm["right"]
+	if not is_human(right):
+		var ref := Settings.config_for(doubles, right, difficulty, points)
+		for s in ([2, 3] if doubles else [2]):
+			cfg.human[s] = 0
+			cfg.palette[s] = ref.palette[s]
+			cfg.variant[s] = ref.variant[s]
+			cfg.paddle[s] = ref.paddle[s]
+		cfg.opponent = right
+		venue = Settings.home_venue(right)
+	return {"cfg": cfg, "pads": lobby.slot_pads(), "players": lobby.slot_players(), "venue": venue}
+
+
 func to_dict() -> Dictionary:
 	return {"seed": seed, "doubles": int(doubles), "difficulty": difficulty, "points": points,
-		"draw": draw.duplicate(), "results": results.duplicate(true), "rng": _rng, "seen": seen}
+		"draw": draw.duplicate(), "results": results.duplicate(true), "rng": _rng, "seen": seen,
+		"humans": humans.duplicate(true)}
 
 
 static func from_dict(d: Dictionary) -> Tournament:
@@ -195,4 +291,12 @@ static func from_dict(d: Dictionary) -> Tournament:
 		t.results.append(rr)
 	t._rng = int(d.get("rng", t.seed))
 	t.seen = int(d.get("seen", 0))
+	for h in d.get("humans", []):
+		var cards := []
+		for c in h["cards"]:
+			var card := {}
+			for k in c:
+				card[k] = int(c[k])           # JSON's floats back to ints
+			cards.append(card)
+		t.humans.append({"name": String(h["name"]), "cards": cards})
 	return t

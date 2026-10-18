@@ -440,3 +440,57 @@ func test_pad_families() -> void:
 	GameControls.last_device = kept[0]
 	Settings.pad_glyphs = kept[1]
 	GameControls.device_serial += 1
+
+
+## PORT-29: the lobby in both cup modes with four players, and the couch
+## bracket (doubles teams' names) fresh, in play and over.
+func test_couch_cup() -> void:
+	GameControls.fake_pads = {0: {}, 1: {}, 2: {}, 3: {}}
+	var t := _title()
+	t.open_lobby()
+	for d in 4:
+		t.lobby.join(d)
+	for mode in [K.MODE_SINGLES, K.MODE_DOUBLES]:
+		t.lobby.cup = true
+		t.lobby.set_mode(mode)
+		t.lobby_screen.refresh()
+		check_layout(t, "lobby %s" % t.lobby.mode_name())
+	var entries := t.lobby.entries()
+	t.free()
+	# a couch match's HUD: P1 + P2 against P3 + P4, and a team against a CPU team
+	var hc := Tournament.create(8, true, K.DIFFICULTY_MEDIUM, 21, entries)
+	for i in 3:
+		var cm := hc.couch_match(0, "park")
+		var v := MatchView.new()
+		v.save = _save()
+		v.slot_pads = cm["pads"]
+		v.slot_players = cm["players"]
+		runner.root.add_child(v)
+		v.setup(cm["cfg"], cm["venue"], false)
+		v.card_frames = -1
+		v._hud.close_card()
+		v.sim.team_score = [20, 20]
+		v._hud.refresh()
+		check_layout(v, "couch match %s: %s vs %s" % [i, v._hud._team_label(0), v._hud._team_label(1)])
+		if i == 0:
+			eq(v._hud._team_label(0), "P1 + P2", "a side by its players")
+		v.free()
+		hc.record_left(true, 21, 3)
+	GameControls.fake_pads = {}
+	for state in ["fresh", "semi", "over"]:
+		var s := _save()
+		var cup := Tournament.create(8, true, K.DIFFICULTY_MEDIUM, 21, entries)
+		if state != "fresh":
+			cup.record_left(true, 21, 19)
+			cup.record_left(true, 21, 19)
+		if state == "over":
+			cup.record_left(true, 23, 21)
+			cup.record_left(false, 19, 21)
+		cup.seen = 99
+		s.store_tournament(cup, "couch")
+		var b := BracketScreen.new().setup(s, false, true)
+		runner.root.add_child(b)
+		if not b.is_node_ready():
+			b._ready()
+		check_layout(b, "couch bracket %s" % state)
+		b.free()

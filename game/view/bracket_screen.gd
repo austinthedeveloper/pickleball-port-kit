@@ -10,6 +10,8 @@ class_name BracketScreen
 extends Node2D
 
 signal play(cfg: SimTypes.MatchConfig, venue: String)   ## your next match
+## The couch cup's next match (PORT-29): each human slot's pad and number.
+signal play_couch(cfg: SimTypes.MatchConfig, venue: String, pads: Array, players: Array)
 signal leave                                            ## BACK: the title
 
 const LOCK := MenuPage.TRANSITION      ## the press that opened it isn't a menu press
@@ -41,12 +43,13 @@ var _sub: BitmapText
 var _champ_name: BitmapText
 var _champ_title: BitmapText
 var _champ_box: NinePatchRect
-var _carry_doubles := false
+var couch := false                     ## the couch cup's bracket (PORT-29)
 
 
-func setup(game_save: SaveGame, reveal := false) -> BracketScreen:
+func setup(game_save: SaveGame, reveal := false, is_couch := false) -> BracketScreen:
 	save = game_save
-	var saved := save.tournament() if save else null
+	couch = is_couch
+	var saved := save.tournament(key()) if save else null
 	if saved:
 		t = saved
 		started = true
@@ -60,6 +63,10 @@ func music_track() -> String:
 	return "title"
 
 
+func key() -> String:
+	return "couch" if couch else "bracket"
+
+
 func _fresh(doubles: bool) -> Tournament:
 	return Tournament.create(Time.get_ticks_usec(), doubles, Settings.difficulty_i,
 		Settings.POINTS[Settings.points_i])
@@ -70,7 +77,7 @@ func _ready() -> void:
 	_ui = CanvasLayer.new()
 	add_child(_ui)
 	UiKit.panel(Rect2(290, 6, 380, 80), _ui)
-	UiKit.text("big_gold", "TOURNAMENT", Vector2(480, 16), 0.5, Color.WHITE, _ui)
+	UiKit.text("big_gold", "COUCH CUP" if couch else "TOURNAMENT", Vector2(480, 16), 0.5, Color.WHITE, _ui)
 	_sub = UiKit.text("small", "", Vector2(480, 56), 0.5, DIM, _ui)
 	UiKit.panel(Rect2(20, 92, 920, 282), _ui)
 	_lines = Node2D.new()
@@ -94,8 +101,8 @@ func _ready() -> void:
 func _backdrop() -> void:
 	var venue := "park"
 	var nm := t.next_match()
-	if not nm.is_empty():
-		venue = Settings.home_venue(int(nm["opponent"]))
+	if not nm.is_empty() and not Tournament.is_human(nm["right"]):
+		venue = Settings.home_venue(int(nm["right"]))
 	for layer in ["far", "ground", "fence"]:
 		var path := "res://assets/levels/venues/%s/%s.png" % [venue, layer]
 		if not ResourceLoader.exists(path):
@@ -134,6 +141,8 @@ func _in_play() -> bool:
 func _play_label() -> String:
 	if _in_play():
 		return "PLAY"
+	if couch:
+		return "DONE"                    # a new cup starts in the lobby
 	return "NEW TOURNAMENT" if started else "START"
 
 
@@ -142,6 +151,8 @@ func _play_value() -> String:
 	if nm.is_empty():
 		return ""
 	var r: int = nm["round"]
+	if couch:
+		return "%s VS %s" % [t.name_of(nm["left"]), t.name_of(nm["right"])]   # the round shows above
 	return "%s VS %s" % [Tournament.ROUND_SHORT[r], Tournament.entry_name(nm["opponent"])]
 
 
@@ -152,8 +163,8 @@ func _mode_value() -> String:
 
 
 func _change_mode(_dir: int) -> void:
-	if _in_play():
-		return
+	if _in_play() or couch:
+		return                           # the cup's mode came from the lobby
 	t = _fresh(not t.doubles)
 	started = false
 	shown = 0
@@ -167,14 +178,18 @@ func _press_mode() -> void:
 	if not forfeit_armed:
 		forfeit_armed = true
 		return
-	# a forfeit: your next match goes to them, and the rest plays out
-	t.record(false, 0, t.points)
-	save.record_cup(t.finish())
+	# a forfeit: the next match goes to the right side, and play goes on
+	t.record_left(false, 0, t.points)
+	if not couch:
+		save.record_cup(t.finish())
 	_store()
 	forfeit_armed = false
 
 
 func _press_play() -> void:
+	if couch and not _in_play():
+		_leave()                         # DONE
+		return
 	if started and not _in_play():
 		t = _fresh(t.doubles)            # NEW TOURNAMENT
 		started = false
@@ -185,6 +200,10 @@ func _press_play() -> void:
 		started = true
 		_store()
 	_sfx.play("confirm")
+	if couch:
+		var cm := t.couch_match(Settings.mod_bits, Settings.venue())
+		play_couch.emit(cm["cfg"], cm["venue"], cm["pads"], cm["players"])
+		return
 	var nm := t.next_match()
 	play.emit(match_config(), Settings.home_venue(int(nm["opponent"])))
 
@@ -206,7 +225,7 @@ func _store() -> void:
 	if save == null:
 		return
 	t.seen = shown
-	save.store_tournament(t)
+	save.store_tournament(t, key())
 	save.save_game()
 
 
@@ -270,8 +289,11 @@ func _refresh() -> void:
 	_champ_title.position.y = cy - 28
 	_champ_name.position.y = cy + 4
 	_champ_title.text = "CHAMPIONS" if t.doubles else "CHAMPION"
-	_champ_name.text = Tournament.entry_name(champ) if champ != null else "?"
-	_champ_name.tint = YOU_TINT if champ != null and int(champ) == Tournament.YOU else Color.WHITE
+	_champ_name.text = t.name_of(champ) if champ != null else "?"
+	_champ_name.tint = Color.WHITE
+	if Tournament.is_human(champ):
+		var cp := t.palette_of(champ)
+		_champ_name.tint = MatchView.TEAM_TINTS[cp] if cp >= 0 else YOU_TINT
 	_lines.queue_redraw()
 	if page:
 		page.refresh()
@@ -293,11 +315,14 @@ func _entry(rect: Rect2, who: Variant, res: Array, show_result: bool) -> void:
 	var box := ColorRect.new()
 	box.position = rect.position
 	box.size = rect.size
-	var you := who != null and int(who) == Tournament.YOU
+	var you := Tournament.is_human(who)
 	box.color = Color(0.16, 0.24, 0.5, 0.85) if you else Color(0.05, 0.07, 0.14, 0.8)
 	_board.add_child(box)
-	var name := Tournament.entry_name(who) if who != null else "---"
-	var tint := YOU_TINT if you else Color.WHITE
+	var name := t.name_of(who) if who != null else "---"
+	var tint := Color.WHITE
+	if you:
+		var pal := t.palette_of(who)
+		tint = MatchView.TEAM_TINTS[pal] if pal >= 0 else YOU_TINT
 	var score := ""
 	if show_result and who != null:
 		var won := int(res[0]) == int(who)
@@ -308,7 +333,7 @@ func _entry(rect: Rect2, who: Variant, res: Array, show_result: bool) -> void:
 			tint = GOLD
 	elif who == null:
 		tint = DIM
-	if you and save and save.career.active_player() != null:
+	if you and not couch and save and save.career.active_player() != null:
 		name = save.career.active_player().shown_name()
 	UiKit.text("small", name, rect.position + Vector2(8, 4), 0.0, tint, _board)
 	if score != "":
@@ -345,7 +370,7 @@ func _process(_delta: float) -> void:
 				_store()
 				if t.over():
 					_sfx.play("confirm")
-					if t.champion() == Tournament.YOU:
+					if Tournament.is_human(t.champion()):
 						Music.sting("cleared")
 			_refresh()
 	if _lock > 0:

@@ -100,7 +100,14 @@ func _initialize() -> void:
 		var sv := SaveGame.new()
 		sv.data = SaveGame.defaults()
 		sv.career = Career.from_dict(sv.data["career"])
-		var tour := Tournament.create(1994, "doubles" in a.slice(4), K.DIFFICULTY_MEDIUM, 11)
+		var couch := "couch" in a.slice(4)    # PORT-29: P1 + P2 and P3 + P4 (doubles), or four players
+		var lob := Lobby.new()
+		for d in 4:
+			lob.join(d)
+		lob.cup = true
+		lob.set_mode(K.MODE_DOUBLES if "doubles" in a.slice(4) else K.MODE_SINGLES)
+		var tour := Tournament.create(1994, "doubles" in a.slice(4), K.DIFFICULTY_MEDIUM, 11,
+			lob.entries() if couch else [])
 		if mode != "bracket":
 			tour.record(true, 11, 6)
 		if mode == "bracket_out":
@@ -108,10 +115,10 @@ func _initialize() -> void:
 		elif mode == "bracket_won":
 			tour.record(true, 11, 9)
 			tour.record(true, 12, 10)
-		if mode != "bracket":
+		if mode != "bracket" or couch:
 			tour.seen = 99
-			sv.store_tournament(tour)
-		var bs := BracketScreen.new().setup(sv, false)
+			sv.store_tournament(tour, "couch" if couch else "bracket")
+		var bs := BracketScreen.new().setup(sv, false, couch)
 		bs.save = null                      # nothing written
 		root.add_child(bs)
 		_view = bs

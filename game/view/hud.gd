@@ -564,6 +564,14 @@ func _team_label(team: int) -> String:
 	var cfg := view.sim.config
 	if team == 1 and cfg.opponent >= 0 and not cfg.human[2]:
 		return Story.card_name(cfg.opponent, cfg.mode == K.MODE_DOUBLES)
+	if view.multiplayer():
+		# PORT-29: a side by its players ("P3", "P1 + P4"); a CPU side by colour
+		var names := []
+		for s in [team * 2, team * 2 + 1]:
+			if s < view.slot_players.size() and int(view.slot_players[s]) >= 0:
+				names.append("P%d" % (int(view.slot_players[s]) + 1))
+		if not names.is_empty():
+			return " + ".join(names)
 	if cfg.mode == K.MODE_DOUBLES:
 		return MatchView.TEAM_NAMES[cfg.palette[team * 2]]
 	if team == 0:

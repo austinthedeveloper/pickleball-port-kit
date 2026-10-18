@@ -204,9 +204,12 @@ func test_lobby_on_the_title() -> void:
 		_hold(dev, [])
 		t._update_lobby()
 	tap.call(30, [JOY_BUTTON_A])
+	tap.call(30, [JOY_BUTTON_RIGHT_SHOULDER])
+	eq(t.lobby.mode_name(), "SINGLES CUP", "RB steps on (PORT-29)")
+	tap.call(30, [JOY_BUTTON_LEFT_SHOULDER])
+	eq(t.lobby.mode_name(), "DOUBLES", "LB steps back")
 	tap.call(31, [JOY_BUTTON_A])
 	eq(t.lobby.joined().size(), 2, "two pads joined")
-	tap.call(31, [JOY_BUTTON_RIGHT_SHOULDER])
 	tap.call(31, [JOY_BUTTON_DPAD_RIGHT])       # P2 to the right side
 	tap.call(30, [JOY_BUTTON_A])
 	tap.call(31, [JOY_BUTTON_A])

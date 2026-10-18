@@ -47,4 +47,28 @@ reads like a real draw: the favourites usually go through.
 
 - Tournament matches count as ordinary CPU matches: the career, the
   records and the VS row, but not the ladder's rung.
-- No 2P or multiplayer tournament yet (KNOWN_ISSUES #50).
+- 2P versus has no tournament; the couch cup (below) is the multiplayer one.
+
+## Amendment: the couch cup (PORT-29, 2026-10-18)
+
+The multiplayer lobby's LB / RB now step through SINGLES, DOUBLES,
+SINGLES CUP and DOUBLES CUP. A cup's entries are the lobby's players: in
+singles each player, in doubles each side (a lone player gets a CPU
+partner). They take the top seeds, so up to four land in four different
+quarters and meet as late as the draw allows; CPU teams from the ladder's
+top fill the rest (with four entries: CHAMPS, TWINS, SURF CREW, GOTH CLUB).
+
+- A human entry against a CPU team plays it at the team's home court with
+  its intro card; two human entries play each other on their own pads at
+  the COURT setting. The sim's slot 0 is always a human, so the human (or
+  the upper entry) takes the left.
+- A round's CPU matches are decided once all its human matches are
+  played; with every human out, the rest plays out. Solo, this is the
+  same order as before, so solo brackets are unchanged.
+- The cup has its own save slot (`tournament.couch`), so it never
+  replaces your solo bracket, and like other friends' matches it never
+  touches the records, the ladder or a career. A new cup in the lobby
+  replaces the last one.
+- In a multiplayer match the HUD names a side by its players ("P3",
+  "P1 + P4"); before, singles always said P1 and 2P.
+

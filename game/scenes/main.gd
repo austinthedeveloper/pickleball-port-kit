@@ -115,6 +115,7 @@ func show_title() -> void:
 	t.start_match.connect(_on_start)
 	t.open_park.connect(_on_open_park)
 	t.open_tournament.connect(show_bracket)
+	t.open_couch_cup.connect(_on_couch_cup)
 	_swap(t)
 	park = null
 
@@ -189,26 +190,41 @@ func _on_next_rung(prev: SimTypes.MatchConfig) -> void:
 
 ## The tournament's bracket (PORT-25), from the title or back from a match
 ## (`reveal`: the new results appear one at a time).
-func show_bracket(reveal := false) -> void:
+func show_bracket(reveal := false, couch := false) -> void:
 	save.save_game()
-	var b := BracketScreen.new().setup(save, reveal)
+	var b := BracketScreen.new().setup(save, reveal, couch)
 	b.leave.connect(show_title)
 	b.play.connect(_on_tournament_match)
+	b.play_couch.connect(func(cfg, venue, pads, players):
+		_on_tournament_match(cfg, venue, pads, players, true))
 	_swap(b)
+
+
+## The lobby's couch cup (PORT-29): a new bracket for its entries, with
+## the MATCH SETUP difficulty and points, replacing any cup before it.
+func _on_couch_cup(entries: Array, doubles: bool) -> void:
+	var t := Tournament.create(Time.get_ticks_usec(), doubles, Settings.difficulty_i,
+		Settings.POINTS[Settings.points_i], entries)
+	save.store_tournament(t, "couch")
+	show_bracket(false, true)
 
 
 ## A tournament match at the opponent's home court: the match records its
 ## result in the bracket; B on the result comes back to it, MENU to the title.
-func _on_tournament_match(cfg: SimTypes.MatchConfig, venue: String) -> void:
+func _on_tournament_match(cfg: SimTypes.MatchConfig, venue: String, pads: Array = [],
+		players: Array = [], couch := false) -> void:
 	save.save_game()
 	var m := MatchView.new()
 	m.save = save
 	m.tournament = true
+	m.cup_key = "couch" if couch else "bracket"
+	m.slot_pads = pads.duplicate()       # the couch cup: each human slot's controller
+	m.slot_players = players.duplicate()
 	m.finished.connect(func(to_title: bool):
 		if to_title:
 			show_title()
 		else:
-			show_bracket(true))
+			show_bracket(true, couch))
 	_swap(m)
 	m.camera.percent = Settings.CAMERAS[Settings.camera_i]
 	m.court = Settings.court.duplicate()

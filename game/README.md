@@ -31,7 +31,9 @@ still a later job (`design/KNOWN_ISSUES.md` #39).
 **MULTIPLAYER** (on MAIN): up to four players, one controller each.
 Press A to join, pick a SIDE (in doubles your partner is whoever shares
 your side; an empty place goes to a CPU), SHIRT, BODY and PADDLE, press A
-when ready, and Menu to start. LB and RB switch singles and doubles. Plug in or pull out
+when ready, and Menu to start. LB and RB step through SINGLES, DOUBLES, SINGLES CUP and DOUBLES CUP:
+a **cup** enters everyone (each player, or each side in doubles) in a
+tournament bracket with CPU teams filling it out (PORT-29). Plug in or pull out
 a pad at any time (a match pauses if one drops). CONTROLS (in OPTIONS)
 remaps keys and buttons; VIBRATION is in ACCESSIBILITY.
 
