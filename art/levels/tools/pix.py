@@ -397,3 +397,55 @@ def stamp_text(layer: Layer, text, x, y, rgb, scale=1, spacing=1, bold=False):
 
 def text_width(text, scale=1, spacing=1):
     return len(text) * (5 + spacing) * scale - spacing * scale
+
+
+# -- Pixel sprites ------------------------------------------------------------
+
+def sprite(layer: Layer, rows, x, y, pal, scale=1, flip=False, outline=None):
+    """Stamp a hand-drawn sprite: rows of characters, each a key of pal
+    ('.' or ' ' is clear). (x, y) is the screen pixel of the top-left;
+    returns the painted mask. outline: a 1 px outline colour around it."""
+    m = np.zeros((layer.h, layer.w), bool)
+    w = max(len(r) for r in rows)
+    for r, row in enumerate(rows):
+        row = row.ljust(w, ".")
+        if flip:
+            row = row[::-1]
+        for c, ch in enumerate(row):
+            if ch in ". ":
+                continue
+            p = layer.rect_mask(x + c * scale, y + r * scale,
+                                x + (c + 1) * scale, y + (r + 1) * scale)
+            layer.fill(p, pal[ch])
+            m |= p
+    if outline is not None:
+        layer.outline(outline, m)
+    return m
+
+
+def shift(m: np.ndarray, dx: int, dy: int) -> np.ndarray:
+    """m moved by (dx, dy) pixels; what moves in from the edge is clear."""
+    out = np.zeros_like(m)
+    h, w = m.shape
+    ys, yd = (slice(0, h - dy), slice(dy, h)) if dy >= 0 else \
+        (slice(-dy, h), slice(0, h + dy))
+    xs, xd = (slice(0, w - dx), slice(dx, w)) if dx >= 0 else \
+        (slice(-dx, w), slice(0, w + dx))
+    out[yd, xd] = m[ys, xs]
+    return out
+
+
+def solid(layer: Layer, m: np.ndarray, rmp, outline=None, rim=2):
+    """A lit solid (props, creatures): base colour, a lit rim toward the
+    upper left, a shaded rim toward the lower right. rmp: shadow, base,
+    light, highlight (3 colours: no highlight)."""
+    layer.fill(m, rmp[1])
+    shade = m & ~shift(m, -rim, -rim - 1)          # far from the light
+    layer.fill(shade, rmp[0])
+    lit = m & ~shift(m, rim, rim) & ~shade
+    layer.fill(lit, rmp[2])
+    if len(rmp) > 3:
+        layer.fill(m & ~shift(m, 1, 1) & ~shade, rmp[3])
+    if outline is not None:
+        layer.outline(outline, m)
+    return m

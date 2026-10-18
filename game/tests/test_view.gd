@@ -54,7 +54,7 @@ func test_view_never_writes_to_the_sim() -> void:
 
 
 func test_every_venue_builds() -> void:
-	for venue in ["park", "lakeside", "sunset"]:
+	for venue in Settings.VENUES:
 		var view := MatchView.new()
 		runner.root.add_child(view)
 		view.setup(SimTypes.MatchConfig.singles(), venue, false)

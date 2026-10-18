@@ -11,7 +11,9 @@ describes every file, position, anchor, animation and layer order.
   players keep the mocks' proportions. The extra width extends the scenery
   at the sides.
 - **Venues:** `park` (level-01, Riverdale Park, day), `lakeside`
-  (level-02), `sunset` (level-03, doubles).
+  (level-02), `sunset` (level-03, doubles), and ADR-046's `dinosaur`,
+  `space` and `undersea` (no level mocks: drawn from the SNES mocks'
+  themes, `art/concept/court_top_*.png`).
 
 `out/previews/<venue>_vs_mock.png` shows each level rebuilt from these
 assets (HUD, players, crowd, ball) beside its mock.
@@ -84,7 +86,8 @@ python3 -m venv .venv && .venv/bin/pip install -r art/levels/tools/requirements.
 | `tools/build.py` | Everything, plus the previews |
 | `tools/pix.py` | The drawing kit: aliased shapes, ramps, foliage, chain-link, outlines |
 | `tools/scenery.py` | The props |
-| `tools/venues.py` | The three venues, positioned from the mocks via `M()` |
+| `tools/venues.py` | The six venues, positioned from the mocks via `M()` |
+| `tools/critters.py` | The fun venues' onlookers: dinosaurs, aliens, astronauts, sea creatures |
 | `tools/court.py` | Geometry, court mask and net |
 | `tools/players.py` | The players |
 | `tools/crowd.py` | The spectators |
@@ -99,6 +102,4 @@ python3 -m venv .venv && .venv/bin/pip install -r art/levels/tools/requirements.
 - **Night:** ADR-045's night times aren't baked. The backdrop layers are
   separate, so an engine tint (dark for the backdrop, lit for the court)
   covers it.
-- **Other venues:** dinosaur, space and undersea aren't in the level mocks,
-  so they aren't built.
 - **Font:** uppercase only, like the SNES HUD font.

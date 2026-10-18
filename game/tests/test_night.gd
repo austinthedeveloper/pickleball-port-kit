@@ -123,6 +123,27 @@ func test_night_view() -> void:
 	view.free()
 
 
+## Every venue at NIGHT and DUSK (ADR-046's three too): the backdrop and
+## the onlookers dim, the court is lit, the crickets play at NIGHT.
+func test_every_venue_at_night() -> void:
+	for venue in Settings.VENUES:
+		for t in [CourtStyle.DUSK, CourtStyle.NIGHT]:
+			var view := MatchView.new()
+			view.time = t
+			runner.root.add_child(view)
+			view.setup(SimTypes.MatchConfig.singles(), venue, false)
+			var sc := CourtStyle.time_scales(t)
+			var dim := view._layers.filter(func(l): return l[0] != view._ground \
+				and not String(l[0].texture.resource_path).ends_with("net.png"))
+			check(dim.size() >= 6 and dim.all(func(l): return l[0].modulate == sc[0]),
+				"%s t%d: the backdrop takes the dark scale" % [venue, t])
+			check(view._ground.material is ShaderMaterial, "%s t%d: the court under the lights" % [venue, t])
+			check(view.crowd.people.all(func(c): return c[0].modulate == sc[0]), "%s t%d: the crowd dims" % [venue, t])
+			eq(view._sfx.ambience_name, "sunset" if t == CourtStyle.NIGHT else venue,
+				"%s t%d: the ambience" % [venue, t])
+			view.free()
+
+
 func test_time_row_and_save() -> void:
 	var kept := Settings.time_i
 	var save := SaveGame.new()

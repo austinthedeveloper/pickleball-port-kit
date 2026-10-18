@@ -206,6 +206,15 @@ stream, at the 960×540 art density, through the art's court geometry.
   4x across, 3x down. Upright sprites are y-sorted with the people, by
   their foot; fences and walls that run into the picture are cut into
   depth slices. The sim and its tests are untouched.
+- **The fun venues** (PORT-20). DINOSAUR, SPACE and UNDERSEA (ADR-046)
+  are drawn by the level pipeline like the other three
+  (`art/levels/tools/venues.py`, creatures in `critters.py`), from the
+  SNES mocks' themes rather than a level mock. Their ground paints the
+  venues.json presets, so DEFAULT means what it meant on the SNES there
+  (PARK, LAKESIDE and SUNSET keep their level mocks' paint). The
+  onlookers stand behind the fence (the stands draw before it, as at
+  LAKESIDE). Night and the ambience need nothing new: the backdrop takes
+  the time's dark scales, and NIGHT's crickets play everywhere (ADR-045).
 - **Not ported yet:** career (ADR-047).
 
 ## Rejected (and why)

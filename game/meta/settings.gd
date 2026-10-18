@@ -5,8 +5,9 @@
 class_name Settings
 extends RefCounted
 
-const VENUES := ["park", "lakeside", "sunset"]
-const VENUE_NAMES := ["PARK", "LAKESIDE", "SUNSET"]
+## data/venues.json's six, in its order (ADR-024, the fun three ADR-046).
+const VENUES := ["park", "lakeside", "sunset", "dinosaur", "space", "undersea"]
+const VENUE_NAMES := ["PARK", "LAKESIDE", "SUNSET", "DINOSAUR", "SPACE", "UNDERSEA"]
 const DIFFICULTIES := ["KID", "EASY", "MEDIUM", "HARD"]
 const POINTS := [3, 5, 7, 9, 11, 15, 21]
 const CAMERAS := [0, 50, 75, 100]

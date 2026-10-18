@@ -610,6 +610,44 @@ feature/cld-release        (pushed)
     call, and the clubhouse.
   - Status: **Done**: you looked and approved it (2026-10-17).
 
+### 20. `feature/cld-fun-venues`: DINOSAUR, SPACE and UNDERSEA (asked for 2026-10-17)
+
+- [x] `PORT-20` The SNES's other three venues (ADR-046), drawn at
+  960x540 by the level pipeline in the levels' style and manifest format:
+  each has the eight parallax layers, the court mask, its venues.json
+  default court (DINOSAUR GREEN / ORANGE / GRASS / WHITE, SPACE NAVY /
+  PURPLE / ASPHALT / CYAN, UNDERSEA AQUA / NAVY / SAND / WHITE), four
+  standing spectators, and a watcher spot behind the fence. DINOSAUR: a
+  sunset jungle, palms, a volcano with lava and smoke, a long-neck over the
+  trees, pterodactyls; a stegosaurus, raptors, a triceratops and a T. rex
+  over a wooden palisade. SPACE: stars, a nebula, Earth, Saturn, a moon,
+  a dome, a rocket on its gantry; aliens and astronauts behind a lit
+  chain-link fence. UNDERSEA: light shafts and bubbles, a shipwreck, fish,
+  jellyfish, a turtle, kelp and coral; an octopus, crabs, a pufferfish, a
+  seahorse and a starfish along a rope fence. The creatures are shapes lit
+  by `pix.solid` (`art/levels/tools/critters.py`). In the game: the COURT
+  page's VENUE cycles all six, the ladder's GYM BROS, GOTH CLUB and SURF
+  CREW play at home there (VS sets the venue), the venues' own ambience
+  loops play by day, and every TIME works (NIGHT plays the crickets, as on
+  the SNES).
+  - Accept: all six venues playable and selectable; the existing three
+    venues' art byte-identical; the court-colour, night and layout tests
+    cover the new venues; golden traces unchanged.
+  - Verified: the park, lakeside and sunset layers rebuild byte-identical
+    (the player and crowd sheets that flip under KNOWN_ISSUES #35 were
+    kept as committed). New tests: `test_court` (the fun venues paint their
+    venues.json presets), `test_night` (every venue at DUSK and NIGHT: the
+    backdrop and crowd dim, the court lit, the ambience),
+    `test_audio` (every venue has and plays its loop), `test_layout`
+    (a singles HUD at every venue and time, vs the home team with the
+    watcher out), `test_view` (every venue builds); the existing contrast
+    and watcher tests now loop over six venues, which caught a dim CYAN
+    line paint at SPACE (fixed: the paint is the preset). 201/201 plus the
+    e2e; golden traces unchanged. Screenshots: each venue at DAY and
+    NIGHT in a ladder singles match, and the COURT page at UNDERSEA.
+  - Status: **Ready to test**: COURT → VENUE → DINOSAUR, SPACE or
+    UNDERSEA (or VS GYM BROS, GOTH CLUB, SURF CREW), at DAY and NIGHT.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
@@ -700,6 +738,13 @@ the chain: each has a default I've gone with.
   and looking at spectrograms. Tell me which sounds are off (too bright,
   too quiet, too long, wrong character) and I'll retune them in
   `make_sfx.py`. The mix trims are in `Sfx.TRIM_DB`.
+
+- **PORT-20 fun venues:** the art is generated, like the other levels,
+  with no hand pass. Say if a creature should be bigger, or if the
+  onlookers should be creatures only (four people stand among them, so the
+  watcher has company). At NIGHT the crickets play at SPACE and UNDERSEA
+  too, as ADR-045 has it; each venue could keep its own loop at night
+  instead.
 
 ## If time runs short or long
 
