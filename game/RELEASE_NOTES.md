@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.3.1`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.4.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-18 of 18 roadmap tasks are in.
+19 of 19 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -112,3 +112,9 @@ Status: **Ready to test**: needs two to four controllers. MAIN → MULTIPLAYER, 
 OPEN PLAY on MAIN (the third row, as on the SNES) opens the park: three courts at three skill levels (UNDER 3.5 teal, 3.5-4.5 gold, 4.5+ red), each with a ladder game going to 7 and a paddle rack at its gate, and the clubhouse beside them. Walk with the D-pad (the fences and walls are solid); B at a rack stacks your paddle, takes it back, or moves it. When your paddle reaches the top at a changeover the park calls you ("YOUR GAME!", "WITH PETE VS GOTH CLUB") and starts a doubles match at the park against the team drawn, with the captain next in line as your partner (their look, paddle, and play style), at the court's difficulty (KID stays KID), on the saved points and modifiers: no intro card, no ladder change. B on the result goes back to the park ("YOU WON 5-3"), Start to the title. In the clubhouse: B at the records board turns its pages, B at the ball machine starts practice on the saved drill (PARK on its pause menu comes back), and the teams waiting sit on the bench. 2P comes along as your partner with PLAYERS 2P, or Start on pad 2 in the park.
 
 Status: **Ready to test**: MAIN → OPEN PLAY. Walk to a rack, B, and wait about 20 s; play the game; B on the result. Try the clubhouse board and ball machine. Look at the park art (drawn in code, KNOWN_ISSUES #40).
+
+## PORT-18: HD sounds (asked for 2026-10-17)
+
+Every effect and ambience loop remade without the SNES's limits by `audio/hd-sfx/make_sfx.py` (numpy, fixed seeds; see its README). Shots have their own samples instead of a pitched one; hits and bounces have variants played round-robin with a little pitch spread. The SNES set stays in `audio/snes-sfx`.
+
+Status: **Done**: you listened and they sound good (2026-10-17).

@@ -494,6 +494,8 @@ feature/cld-release        (pushed)
   published by CI (tag `v0.3.0`, on `feature/cld-release-0.3.0`).
 - **v0.3.1** (2026-10-17): text and layout fixes, with a layout test
   over every screen (tag `v0.3.1`, on `feature/cld-release-0.3.1`).
+- **v0.4.0** (2026-10-17): PORT-18 HD sound (tag `v0.4.0`, on
+  `feature/cld-release-0.4.0`).
 
 ### 16. `feature/cld-multiplayer`: four players on controllers (asked for 2026-10-17)
 
@@ -581,9 +583,7 @@ feature/cld-release        (pushed)
     `test_audio.gd`: the sound per shot, and every named effect having its
     samples. 197/197 plus the e2e; a windowed match plays with no audio
     errors.
-  - Status: **Ready to test**: nobody has listened yet. Play a rally,
-    lose a point to the net, win one, and sit on the title at each venue
-    and at NIGHT.
+  - Status: **Done**: you listened and they sound good (2026-10-17).
 
 ## For you
 

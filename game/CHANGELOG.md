@@ -4,7 +4,9 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
-## [Unreleased]
+## [0.4.0] - 2026-10-17
+
+HD sound.
 
 ### Changed
 - Every sound remade in HD (48 kHz, stereo where it counts) without the
