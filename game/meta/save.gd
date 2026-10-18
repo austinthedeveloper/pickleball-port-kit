@@ -6,13 +6,14 @@
 ## Layouts are frozen: v1 (settings only, the first port build), v2
 ## (records and the ladder), v3 (practice, ADR-028: its settings and
 ## the best streaks), and v4 (PORT-08: the win streak, shutouts, the
-## record against each opponent, and record initials, ADR-040). Every change adds a version and a migration
+## record against each opponent, and record initials, ADR-040), and v5
+## (PORT-21: the career players, ADR-047). Every change adds a version and a migration
 ## and a test that loads the old image (playbook rule 4).
 class_name SaveGame
 extends RefCounted
 
 const MAGIC := "PB94"
-const VERSION := 4
+const VERSION := 5
 ## Records beaten by the match in progress (save_new_records: session
 ## only, never saved). ADR-040.
 const NEW_STREAK := 1
@@ -29,6 +30,8 @@ var new_records := 0
 ## The best streak was claimed during the current, unbroken run: the next
 ## wins extend it under the same initials without asking (session only).
 var streak_held := false
+## The career players (ADR-047), kept in data["career"] when written.
+var career := Career.new()
 
 
 static func defaults() -> Dictionary:
@@ -57,6 +60,8 @@ static func defaults() -> Dictionary:
 			"points_won": 0, "points_lost": 0, "aces": 0, "winners": 0},
 		## who holds a record ("" = nobody, shown ---)
 		"initials": {"best_streak": "", "longest_rally": ""},
+		## the three career players and the active one (ADR-047, v5)
+		"career": Career.new().to_dict(),
 	}
 
 
@@ -77,6 +82,8 @@ static func checksum(payload: String) -> int:
 ## carries over.
 ## v3 -> v4: the streaks, shutouts and per-opponent records start at 0
 ## and nobody holds a record until it is beaten again (as ADR-040's v8).
+## v4 -> v5: everything carries over; no career players yet, nobody
+## active (as the SNES layout 11 -> 12).
 static func migrate(version: int, d: Dictionary) -> Dictionary:
 	var out := d.duplicate(true)
 	if version < 2:
@@ -93,6 +100,8 @@ static func migrate(version: int, d: Dictionary) -> Dictionary:
 		out["records"]["shutouts"] = 0
 		out["records"]["vs"] = _vs_zero()
 		out["initials"] = defaults()["initials"].duplicate()
+	if version < 5:
+		out["career"] = Career.new().to_dict()
 	var def := defaults()
 	for section in def:
 		if not out.has(section):
@@ -153,10 +162,12 @@ func load_game() -> void:
 	if best == null:
 		seq = 0
 		data = defaults()
+		career = Career.from_dict(data["career"])
 		return
 	seq = int(best["seq"])
 	var v := int(best["version"])
 	data = migrate(v, best["data"])
+	career = Career.from_dict(data["career"])
 	if v != VERSION:
 		save_game()
 		save_game()
@@ -169,6 +180,7 @@ static func _newer(a: int, b: int) -> bool:
 
 func save_game() -> void:
 	seq = (seq + 1) & 0xffff
+	data["career"] = career.to_dict()
 	var payload := JSON.stringify(data, "", true)
 	var body := {"magic": MAGIC, "version": VERSION, "seq": seq,
 		"checksum": checksum(payload), "payload": payload}

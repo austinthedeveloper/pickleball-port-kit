@@ -176,8 +176,8 @@ stream, at the 960×540 art density, through the art's court geometry.
   - The park is drawn in code at 2x (no park art in `art/levels`), so
     almost all of it fits and the view scrolls 32 px. The people are the
     match sprites, small, in each member's own look (captain and
-    partner); you walk in your last Player Select choice (the SNES uses
-    the career player's palette, and career isn't ported).
+    partner); you walk in your last Player Select choice, or as the
+    active career player since PORT-21 (as the SNES).
   - None of the SNES's budget limits apply: the court-1 people stay
     drawn in the clubhouse view, and the panel changes in one frame.
   - The panel's lines are text plus a `PromptBar` ("OPEN PLAY" + START
@@ -232,6 +232,48 @@ stream, at the 960×540 art density, through the art's court geometry.
   only: nothing reads the sim but the result, so golden traces are
   unchanged. The ambience stays under the music in matches.
 - **Not ported yet:** career (ADR-047).
+
+- **Career** (PORT-21, ADR-047 stages 1-4). `sim/career.gd` is career.c
+  in order (`Career`, with `Career.Player` for `CareerPlayer`; ints and
+  the name string; data from `data/career.json`, the SNES asset build's
+  source) and `meta/career_page.gd` is career_page.c's pure input logic;
+  both C host tests are ported in `tests/test_career.gd`. Where it
+  differs:
+  - **The sim stays pure.** The SNES sim read `g_save` (the active
+    player's hat for the gear) and called the career hooks from
+    game.c. Here `MatchConfig` carries `career_p1` and a copy of the
+    player (`set_career`, `set_career_p1` = match_config_career_p1), the
+    sim reads only its hat (`Paddles.profile`, the paddle tables with
+    every hat), and `MatchView` records points and matches from the
+    events, under the records' rules plus "not multiplayer". No golden
+    trace changes: without a player, nothing differs.
+  - **Save layout v5** (the port's numbering; the SNES's 12): the three
+    players and the active one as `data["career"]`, kept in
+    `SaveGame.career` and written with every save. v4 migrates whole with
+    no players. RECORDS' erase leaves the players alone.
+  - **The page is MenuPages.** The SNES drew four views on the title
+    menu's tiles; here CAREER (the old RECORDS row on MAIN) opens a slots
+    page, a card, and the editor, whose rows press into `CareerPage`
+    (so the C tests and the row-id tests drive the same logic), plus
+    the old records page from the slots. L+R+X to delete became a
+    DELETE PLAYER row pressed twice (as PORT-08's ERASE RECORDS). The
+    keyboard is its own panel (`view/career_keyboard.gd`; the mouse types
+    too). The gear line is a GEAR row.
+  - **The preview is a portrait.** The SNES stopped the title demo and
+    stood its P1 at the baseline in the look; here a panel beside the
+    card and the editor holds a big idle portrait of the player
+    (`view/career_preview.gd`), so the menu never covers it, and the demo
+    keeps playing behind.
+  - **Looks:** `PlayerLook.for_career` = career_compose_with on the HD
+    role sheets: the team's shirt and shorts, the career skin ramp
+    (opponents.json's 5-bit skins) and hair (career.json's 5-bit
+    colour, its shade and shine derived as for ladder members), the
+    paddle, and the hat sheet (NONE is bareheaded). Player Select's
+    portrait wears the hat too (on the SNES it was fixed art).
+  - **HUD:** 1P's panel reads the whole name (the SNES's fit four
+    letters). The UNLOCKED! card fits 30 letters before "+n" (24).
+  - Title practice uses the player's saved look too (the SNES reached
+    practice through Player Select).
 
 ## Rejected (and why)
 

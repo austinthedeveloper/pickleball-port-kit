@@ -28,6 +28,9 @@ var _bars: Array = []            # per stat: [label, segs...]
 var _arrow: Sprite2D
 var _frame := 0
 var _overlay: Control           ## the paddles and the cursor brackets, over the panels
+## ADR-047: the active career player (null: none). 1P's portrait and
+## thumbnails take their skin, hair and hat, and 1P's bars their hat's gear.
+var career: Career.Player
 
 
 func setup(s: PlayerSelect) -> SelectScreen:
@@ -145,6 +148,19 @@ func _set_sheet(spr: Sprite2D, team: int, variant: int, cap: bool, paddle := -1)
 	spr.material = look.material()
 
 
+## The career player's look in a colour and paddle on a sprite (the body
+## sheet, or the hat's; bareheaded, the hat sprite is empty).
+func _set_career(spr: Sprite2D, team: int, variant: int, cap: bool, paddle: int) -> void:
+	var look := PlayerLook.for_career(career, team, variant, paddle, manifest)
+	var file := look.hat_sheet(manifest) if cap else look.body_sheet(manifest)
+	spr.texture = load(MatchView.LEVELS + file) if file != "" else null
+	spr.material = look.material()
+
+
+func _career_shown() -> bool:
+	return career != null and sel.current == 0
+
+
 func _process(_delta: float) -> void:
 	_frame += 1
 	var idle := (_frame / 18) % 2
@@ -161,20 +177,32 @@ func refresh() -> void:
 	sel.changed = false
 	var c: Dictionary = sel.current_choice()
 	_who.text = "%dP SELECT" % (sel.current + 1)
+	if _career_shown():
+		_who.text = "1P  " + career.shown_name()
 	_variant.text = "MALE" if c["variant"] == K.VARIANT_MALE else "FEMALE"
-	_set_sheet(_portrait[0], c["palette"], c["variant"], false, c["paddle"])
-	_set_sheet(_portrait[1], c["palette"], c["variant"], true, c["paddle"])
+	if _career_shown():
+		_set_career(_portrait[0], c["palette"], c["variant"], false, c["paddle"])
+		_set_career(_portrait[1], c["palette"], c["variant"], true, c["paddle"])
+	else:
+		_set_sheet(_portrait[0], c["palette"], c["variant"], false, c["paddle"])
+		_set_sheet(_portrait[1], c["palette"], c["variant"], true, c["paddle"])
 	for i in _thumbs.size():
 		var t: Array = _thumbs[i]
 		var taken := sel.colour_taken(i)
-		_set_sheet(t[0], i, c["variant"], false)
-		_set_sheet(t[1], i, c["variant"], true)
+		if _career_shown():
+			_set_career(t[0], i, c["variant"], false, c["paddle"])
+			_set_career(t[1], i, c["variant"], true, c["paddle"])
+		else:
+			_set_sheet(t[0], i, c["variant"], false)
+			_set_sheet(t[1], i, c["variant"], true)
 		t[2].text = "1P" if taken else PlayerSelect.COLOUR_NAMES[i]
 		var picked: bool = c["palette"] == i
 		t[2].tint = GOLD if picked else (DIM if taken else Color.WHITE)
 		for spr in [t[0], t[1]]:
 			spr.modulate = Color(1, 1, 1, 0.35) if taken else Color.WHITE
-	var stats: Array = Paddles.STATS[c["paddle"]]
+	# ADR-047 stage 4: 1P's bars with their career hat's gear.
+	var stats: Array = Paddles.stats(Paddles.profile(c["paddle"], career.hat)) \
+		if _career_shown() else Paddles.STATS[c["paddle"]]
 	for i in _bars.size():
 		for k in SEG:
 			_bars[i][k + 1].color = GOLD if k < stats[i] else Color(0.12, 0.14, 0.28)

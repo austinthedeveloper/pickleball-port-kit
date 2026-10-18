@@ -77,7 +77,7 @@ func input(pressed: int) -> int:
 
 
 ## A practice session on the drill at the chosen difficulty, P1 in their
-## last Player Select choice.
+## last Player Select choice (or as the career player, ADR-047).
 func config() -> SimTypes.MatchConfig:
 	var cfg: SimTypes.MatchConfig
 	if save:
@@ -89,4 +89,6 @@ func config() -> SimTypes.MatchConfig:
 	cfg.palette[0] = Settings.p1_choice["palette"]
 	cfg.variant[0] = Settings.p1_choice["variant"]
 	cfg.paddle[0] = Settings.p1_choice["paddle"]
+	if save:
+		cfg.set_career_p1(save.career.active_player())
 	return cfg

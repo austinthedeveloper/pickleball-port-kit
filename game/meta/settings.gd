@@ -119,9 +119,10 @@ static func home_venue(team: int) -> String:
 
 
 ## The match the settings describe; `rung` is the ladder's current team.
-static func match_config(doubles: bool, rung: int) -> SimTypes.MatchConfig:
+## `p1`: 1P's choice when it isn't the saved one (a career player's).
+static func match_config(doubles: bool, rung: int, p1: Dictionary = {}) -> SimTypes.MatchConfig:
 	var opp := -1 if two_players else (rung if opponent_i == -2 else opponent_i)
-	var cfg := config_for(doubles, opp, difficulty_i, POINTS[points_i], p1_choice,
+	var cfg := config_for(doubles, opp, difficulty_i, POINTS[points_i], p1 if not p1.is_empty() else p1_choice,
 		p2_choice if two_players else {})
 	cfg.modifiers = mod_bits
 	return cfg
@@ -131,8 +132,9 @@ static func match_config(doubles: bool, rung: int) -> SimTypes.MatchConfig:
 ## against the team drawn with you, with the captain next in line as your
 ## partner (or 2P, on slot 1), the saved points and modifiers, at the
 ## court's difficulty (KID keeps its assist). You play in your last Player
-## Select choice.
-static func open_play_config(op: OpenPlay) -> SimTypes.MatchConfig:
+## Select choice, or as the active career player in their saved look
+## (ADR-047, match_config_career_p1).
+static func open_play_config(op: OpenPlay, career: Career.Player = null) -> SimTypes.MatchConfig:
 	var cfg := config_for(true, op.opponent if op.opponent < OpenPlay.TEAMS else -1,
 		OpenPlay.court_difficulty(op.called, difficulty_i), POINTS[points_i], p1_choice)
 	if op.two_players:
@@ -141,6 +143,7 @@ static func open_play_config(op: OpenPlay) -> SimTypes.MatchConfig:
 		cfg.set_partner(op.partner if op.partner < OpenPlay.TEAMS else -1)
 	cfg.modifiers = mod_bits
 	cfg.open_play = 1
+	cfg.set_career_p1(career)
 	return cfg
 
 

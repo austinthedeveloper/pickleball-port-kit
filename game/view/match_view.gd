@@ -401,9 +401,46 @@ func _update_initials() -> void:
 		_sfx.play("blip")
 
 
+## The UNLOCKED! card (ADR-047, story.c's STORY_CARD_UNLOCK): after the
+## initials card, the career unlocks the match just earned; B, A or Start
+## closes it after UNLOCK_MIN_FRAMES, or it goes by itself.
+const UNLOCK_MIN_FRAMES := 30
+const UNLOCK_FRAMES := 300
+var unlock_frames := -1
+
+
+func unlock_open() -> bool:
+	return unlock_frames >= 0 and not initials.open
+
+
+func _update_unlock() -> void:
+	unlock_frames += 1
+	var pressed: int = GameControls.pad_bits()[0]
+	if unlock_frames >= UNLOCK_FRAMES or (unlock_frames >= UNLOCK_MIN_FRAMES
+			and pressed & (Practice.PAD_B | GameControls.PAD_A | Practice.PAD_START)):
+		unlock_frames = -1
+		if save:
+			save.career.new_unlocks = 0
+		input_lock = INPUT_LOCK_FRAMES      # the closing press doesn't rematch
+		GameControls.clear_latch()
+		_sfx.play("confirm")
+
+
+## A career match (ADR-047): 1P's points and the result count for the
+## active career player against the CPU, outside the demo, practice and
+## multiplayer (as the records).
+func career_counts() -> bool:
+	return save != null and not demo and not multiplayer() and not sim.config.human[2] \
+		and not sim.config.practice
+
+
 func _physics_process(_delta: float) -> void:
 	if initials.open:
 		_update_initials()
+		_update_visuals()
+		return
+	if unlock_frames >= 0:
+		_update_unlock()
 		_update_visuals()
 		return
 	if card_frames >= 0:
@@ -456,6 +493,8 @@ func _physics_process(_delta: float) -> void:
 			return
 		sim.new_match()
 		Music.cue(music_track())             # the loop again after the stinger
+		if save:
+			save.career.new_unlocks = 0      # game_new_match clears them
 		input_lock = INPUT_LOCK_FRAMES
 		stats = MatchStats.new()
 		_hud.on_rematch()
@@ -501,6 +540,7 @@ func _pause_input(it: SimTypes.Intent) -> bool:
 			_sfx.play("confirm")
 			if save:
 				save.drop_new_records()          # only a finished match asks
+				save.career.new_unlocks = 0
 			sim.new_match()
 			_prev_phase = -1
 			input_lock = INPUT_LOCK_FRAMES   # the closing press doesn't serve
@@ -554,6 +594,10 @@ func _on_event(e: Array) -> void:
 			if save and not demo:
 				if not multiplayer():
 					save.record_rally(rally)
+			# ADR-047: the active career player's point (against the CPU);
+			# the server is still the rally's (the next serve isn't set up).
+			if career_counts():
+				save.career.record_point(rally, e[3] == 0, sim.server_index == 0)
 
 
 func _update_card() -> void:
@@ -578,6 +622,10 @@ func _on_match_over() -> void:
 		save.save_game()
 		return
 	if not sim.config.human[2]:
+		# ADR-047: before record_match, whose write keeps both.
+		if career_counts():
+			save.career.record_match(sim.config.mode, won, sim.team_score[1],
+				sim.config.opponent, sim.config.open_play != 0)
 		save.record_match(sim.config.mode == K.MODE_DOUBLES, won, sim.config.opponent,
 			sim.team_score[1] if won else -1)
 		if ladder and won:
@@ -585,6 +633,9 @@ func _on_match_over() -> void:
 		save.record_stats(stats)
 	save.save_game()
 	initials.begin(save)
+	# then what the career player unlocked (after the initials, if any)
+	if save.career.new_unlocks:
+		unlock_frames = 0
 
 
 ## Leaving practice: a new best streak (for the session's zone) is saved

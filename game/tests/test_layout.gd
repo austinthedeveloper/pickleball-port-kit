@@ -247,6 +247,94 @@ func test_hud() -> void:
 	p.free()
 
 
+## CAREER (ADR-047): the slots, the card, the editor with every value of
+## every row, the name keyboard at every length and key, the widest
+## names and numbers, and the HUD and UNLOCKED! card of a career match.
+func test_career_screens() -> void:
+	var s := _save()
+	for i in Career.SLOTS:
+		s.career.create(i, ["WWWWWWWW", "MMMMMMMM", "W-M W-M"][i])
+		var p: Career.Player = s.career.players[i]
+		for k in ["points_won", "aces", "shutouts", "best_streak", "longest_rally"]:
+			p.set(k, Career.COUNTER_MAX)
+		p.wins = [Career.COUNTER_MAX, Career.COUNTER_MAX]
+		p.losses = [Career.COUNTER_MAX, Career.COUNTER_MAX]
+	s.career.select(0)
+	var t := TitleScreen.new()
+	t.save = s
+	runner.root.add_child(t)
+	if not t.is_node_ready():
+		t._ready()
+	t.open_career()
+	t.pages["career"].settle()
+	check_layout(t, "career slots")
+	s.career.select(Career.NONE)
+	t.pages["career"].refresh()
+	check_layout(t, "career slots, nobody")
+	s.career.players[2].used = 0
+	t.pages["career"].refresh()
+	check_layout(t, "career slots, a new one")
+	s.career.select(0)
+	t.pages["career"].select("slot0")
+	t.pages["career"].press()
+	var card: MenuPage = t.pages["career_card"]
+	card.settle()
+	# every unlock count, the next one's hint (the longest), and all
+	var p0: Career.Player = s.career.players[0]
+	for n in Career.unlocks() + 1:
+		p0.unlocked = (1 << n) - 1
+		t.career_preview.show_player(p0)
+		card.refresh()
+		check_layout(t, "career card, %d unlocked" % n)
+	card.select("delete")
+	card.press()
+	check_layout(t, "career card, delete armed")
+	p0.unlocked = 0x1ff
+	card.select("edit")
+	card.press()
+	var edit: MenuPage = t.pages["career_edit"]
+	edit.settle()
+	for row in edit.rows:
+		if not row.has("change"):
+			continue
+		edit.select(row["id"])
+		for k in 12:
+			edit.change(1)
+			edit.settle()
+			check_layout(t, "career edit %s = %s" % [row["id"], edit.value_of(row["id"])])
+	edit.select("name")
+	edit.press()
+	eq(t.page, "career_name", "typing")
+	var page := t.career_page
+	for length in Career.NAME + 1:
+		page.cursor = length
+		p0.name = ("WWWWWWWW".substr(0, length) + "        ").substr(0, Career.NAME)
+		for k in CareerPage.KEYS:
+			page.pick_key(k)
+			t.career_keyboard.refresh()
+			check_layout(t, "career name %d, key %d" % [length, k])
+	t.free()
+	# the match: the name on the panel, and the unlocks card at its widest
+	for doubles in [false, true]:
+		var cfg := Settings.config_for(doubles, 7, K.DIFFICULTY_MEDIUM, 11)
+		cfg.set_career(s.career.players[0])
+		var v := _view(cfg)
+		v.sim.team_score = [10, 10]
+		v._hud.refresh()
+		check_layout(v, "hud career %s" % ("doubles" if doubles else "singles"))
+		v.save.career = s.career
+		v.save.career.new_unlocks = 0x1ff
+		v.sim.phase = K.PHASE_MATCH_RESULT
+		v.sim.match_winner = 0
+		v.unlock_frames = 0
+		v._hud.refresh()
+		check_layout(v, "hud unlocked card")
+		v.save.career.new_unlocks = 1 << 8
+		v._hud.refresh()
+		check_layout(v, "hud unlocked card, one")
+		v.free()
+
+
 func test_park() -> void:
 	var park := OpenPlay.new()
 	park.begin(1234, false)
