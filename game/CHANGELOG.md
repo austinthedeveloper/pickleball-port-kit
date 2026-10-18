@@ -4,6 +4,14 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [Unreleased]
+
+### Fixed
+- ONLINE's HOST screen listed addresses nobody else can reach (a virtual
+  network adapter's: WSL, Hyper-V, VirtualBox, Docker). It now shows only
+  the home network's, labelled SAME WI-FI, and a Tailscale address,
+  labelled TAILSCALE.
+
 ## [0.8.0] - 2026-10-18
 
 Online play, a tutorial, the couch cup, your controller's own buttons, and

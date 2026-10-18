@@ -60,10 +60,11 @@ build can't).
 
 How the friend reaches the host:
 
-- **Same Wi-Fi:** use the address the host's screen shows (192.168...).
+- **Same Wi-Fi:** use the SAME WI-FI address the host's screen shows.
 - **Over the internet, easiest:** both install [Tailscale](https://tailscale.com)
-  (free), sign in, and join the same network; use the host's Tailscale
-  address (100.x.y.z). No router changes.
+  (free), sign in, and join the same network; use the host's TAILSCALE
+  address (100.x.y.z), which the screen shows once Tailscale is on. No
+  router changes.
 - **Over the internet, without a VPN:** the host forwards **UDP port
   24994** on their router to their computer, and the friend uses the
   host's public address.

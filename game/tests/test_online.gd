@@ -417,3 +417,28 @@ func test_main_opens_online() -> void:
 	check(main._screen is TitleScreen, "BACK: the title")
 	main.free()
 	SaveGame.default_dir = kept
+
+
+## The HOST screen offers only addresses a friend can reach, labelled:
+## the home network's and Tailscale's, never a virtual adapter's.
+func test_the_addresses_offered() -> void:
+	var windows := [
+		{"name": "{A1}", "friendly": "vEthernet (WSL)", "addresses": ["172.28.80.1"]},
+		{"name": "{B2}", "friendly": "Wi-Fi", "addresses": ["192.168.1.40", "fe80::1"]},
+		{"name": "{C3}", "friendly": "VirtualBox Host-Only Network", "addresses": ["192.168.56.1"]},
+		{"name": "{D4}", "friendly": "Tailscale", "addresses": ["100.101.12.7"]},
+		{"name": "{E5}", "friendly": "Loopback Pseudo-Interface 1", "addresses": ["127.0.0.1"]},
+	]
+	eq(OnlineScreen.pick_addresses(windows), [["SAME WI-FI", "192.168.1.40"], ["TAILSCALE", "100.101.12.7"]],
+		"Windows: Wi-Fi and Tailscale, not WSL or VirtualBox")
+	var mac := [
+		{"name": "en0", "friendly": "en0", "addresses": ["192.168.1.198"]},
+		{"name": "utun4", "friendly": "utun4", "addresses": ["100.70.1.2"]},
+		{"name": "bridge100", "friendly": "bridge100", "addresses": ["192.168.64.1"]},
+	]
+	eq(OnlineScreen.pick_addresses(mac), [["SAME WI-FI", "192.168.1.198"], ["TAILSCALE", "100.70.1.2"]],
+		"macOS: en0 and Tailscale's utun, not a VM bridge")
+	eq(OnlineScreen.address_kind("172.20.0.5", "ethernet eth0"), "SAME WI-FI", "a real 172.16/12 network")
+	eq(OnlineScreen.address_kind("172.17.0.1", "docker0"), "", "Docker's")
+	eq(OnlineScreen.address_kind("10.0.0.12", "wlan0"), "SAME WI-FI")
+	eq(OnlineScreen.pick_addresses([]), [], "none")

@@ -308,6 +308,10 @@ feature/cld-release-0.6.0   (v0.6.0)
     over ENet, main's flow), `test_layout.test_online`, `test_multiplayer`
     (LOCAL). Golden traces unchanged. Screenshots: ONLINE idle, hosting,
     connected; the MULTIPLAYER page. Not verified: two real machines.
+  - Played (2026-10-18): two computers on the same Wi-Fi connected and
+    played with no lag noticed. The second address the host showed was a
+    virtual adapter's and couldn't be joined; the screen now offers only
+    reachable ones, labelled (KNOWN_ISSUES #55).
   - Status: **Ready to test**: with a friend. Start on the same Wi-Fi, then
     over Tailscale.
 

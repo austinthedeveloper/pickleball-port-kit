@@ -208,16 +208,61 @@ func _leave() -> void:
 
 # --- The info panel -----------------------------------------------------------
 
-## This machine's addresses worth telling a friend: the LAN's and a VPN's
-## (Tailscale's 100.64/10), IPv4, not loopback or link-local.
+## This machine's addresses worth telling a friend, labelled: [[kind,
+## address]] with kind "SAME WI-FI" (the home network) or "TAILSCALE".
+## Virtual adapters (WSL, Hyper-V, VirtualBox, VMware, Docker, bridges)
+## are left out: nobody else can reach them. The LAN's first.
 static func my_addresses() -> Array:
-	var out := []
-	for a in IP.get_local_addresses():
-		if ":" in a or a.begins_with("127.") or a.begins_with("169.254."):
-			continue
-		out.append(a)
-	out.sort_custom(func(x, y): return (0 if x.begins_with("192.168.") else 1) < (0 if y.begins_with("192.168.") else 1))
-	return out.slice(0, 2)
+	return pick_addresses(IP.get_local_interfaces())
+
+
+## The same from a list of interfaces ({name, friendly, addresses}), for
+## tests.
+static func pick_addresses(interfaces: Array) -> Array:
+	var lan := []
+	var vpn := []
+	for i in interfaces:
+		var name := (String(i.get("friendly", "")) + " " + String(i.get("name", ""))).to_lower()
+		for a in i.get("addresses", []):
+			var kind := address_kind(String(a), name)
+			if kind == "TAILSCALE":
+				vpn.append([kind, a])
+			elif kind != "":
+				lan.append([kind, a])
+	return (lan.slice(0, 1) + vpn.slice(0, 1))
+
+
+const VIRTUAL := ["vethernet", "wsl", "hyper-v", "virtualbox", "vbox", "vmware", "vmnet",
+	"docker", "veth", "br-", "bridge", "npcap", "loopback", "utun", "awdl", "llw"]
+const PHYSICAL := ["wi-fi", "wifi", "wlan", "ethernet", "eth", "en0", "en1", "wlp", "enp", "eno"]
+
+
+## How a friend would reach an address on an interface (`name`, lowercase):
+## "SAME WI-FI", "TAILSCALE", or "" (don't offer it).
+static func address_kind(a: String, name: String) -> String:
+	if ":" in a or a.begins_with("127.") or a.begins_with("169.254.") or a.begins_with("0."):
+		return ""
+	var o := a.split(".")
+	if o.size() != 4:
+		return ""
+	var b0 := int(o[0])
+	var b1 := int(o[1])
+	if b0 == 100 and b1 >= 64 and b1 < 128 or "tailscale" in name:
+		return "TAILSCALE"
+	for v in VIRTUAL:
+		if v in name:
+			return ""
+	if b0 == 192 and b1 == 168 and int(o[2]) == 56:
+		return ""                        # VirtualBox's host-only network
+	if b0 == 172 and b1 >= 16 and b1 < 32:
+		# WSL and Docker live here; a real network can too
+		for ph in PHYSICAL:
+			if ph in name:
+				return "SAME WI-FI"
+		return ""
+	if b0 == 10 or (b0 == 192 and b1 == 168):
+		return "SAME WI-FI"
+	return ""
 
 
 func info() -> Array:
@@ -232,8 +277,12 @@ func info() -> Array:
 	if st == OnlineSession.WAITING:
 		if session.host:
 			var mine := my_addresses()
-			return ["WAITING FOR YOUR FRIEND, PORT %d." % ENetLink.PORT,
-				"YOUR ADDRESS: " + ("   ".join(mine) if not mine.is_empty() else "?"), ""]
+			var lines := ["WAITING FOR YOUR FRIEND, PORT %d." % ENetLink.PORT, "", ""]
+			for k in mine.size():
+				lines[k + 1] = "%s: %s" % mine[k]
+			if mine.is_empty():
+				lines[1] = "NO NETWORK FOUND: IS WI-FI ON?"
+			return lines
 		return ["CALLING " + address + "...", "", ""]
 	if st == OnlineSession.CONNECTED:
 		var them := String(session.peer_hello.get("name", ""))
