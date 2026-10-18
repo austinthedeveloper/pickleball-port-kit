@@ -4,6 +4,31 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [Unreleased]
+
+### Added
+- **Career** (ADR-047): MAIN's RECORDS row is now CAREER.
+  - **Players:** three save slots, each a named player with a look,
+    lifetime stats and unlocks. Name them on an arcade keyboard and dress
+    them (body, skin, hair, shirt, hat, paddle) beside a big portrait.
+  - **Playing as them:** the active player is 1P. Player Select starts on
+    their look, the score panel shows their name, and open play, the ball
+    machine and the park's walker use their saved look.
+  - **Stats:** matches against the CPU count (W-L by mode, aces,
+    shutouts, best streak, longest rally); the card shows them and the
+    next unlock.
+  - **Unlocks:** four hats and five hair colours, earned by wins, rallies,
+    aces, shutouts, streaks, beating the PIRATES, open play and clearing
+    the ladder. An UNLOCKED! card follows the match that earns them.
+  - **Gear:** a hat moves one paddle stat point to another (the editor's
+    GEAR row and Player Select's bars show it).
+  - NO PLAYER plays exactly as before; the records are behind CAREER's
+    RECORDS row.
+
+### Changed
+- The save moves to layout v5 (the career players); a v4 save carries
+  over with no players.
+
 ## [0.5.0] - 2026-10-17
 
 The park, modernised.

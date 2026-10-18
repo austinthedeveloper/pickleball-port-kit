@@ -462,3 +462,220 @@ func test_page_card_helpers() -> void:
 	eq(Career.next_unlock(p), Career.unlocks(), "all")
 	eq(Career.paddle_name(0), "WOOD", "paddle name")
 	eq(Career.body_name(1), "FEMALE", "body name")
+
+
+# --- In the game (stage 3) -------------------------------------------------------------
+
+func _finish(view: MatchView, winner: int) -> void:
+	var sim := view.sim
+	sim.team_score[winner] = sim.config.points_to_win - 1
+	sim.phase = K.PHASE_LIVE
+	sim.ball.rally_state = K.BALL_RALLY_LIVE
+	sim.resolve_point(1 - winner, K.FAULT_OUT)     # the faulting team
+	for f in K.POINT_RESULT_FRAMES + 5:
+		view._physics_process(1.0 / 60.0)
+
+
+func _career_view(s: SaveGame, cfg: SimTypes.MatchConfig, demo := false) -> MatchView:
+	var v := MatchView.new()
+	v.save = s
+	runner.root.add_child(v)
+	v.setup(cfg, "park", demo)
+	return v
+
+
+## A shutout of the PIRATES as a career player: the stats, the unlocks,
+## the name on the HUD, and the UNLOCKED! card after the initials card.
+func test_match_records_and_unlock_card() -> void:
+	var s := _fresh_save()
+	s.career.create(0, "ACE")
+	var cfg := Settings.config_for(false, _team("PIRATES"), K.DIFFICULTY_MEDIUM, 5)
+	cfg.set_career(s.career.active_player())
+	var v := _career_view(s, cfg)
+	eq(v._hud._left_label.text, "ACE", "the name on 1P's panel")
+	check(v._players[0]["look"] != null and v._players[0]["look"].hat == "cap", "slot 0 in the career look")
+	_finish(v, 0)
+	var p := s.career.active_player()
+	eq(p.wins[K.MODE_SINGLES], 1, "a career win")
+	check(p.shutouts == 1 and p.beaten[_team("PIRATES")] == 1, "a shutout of the PIRATES")
+	eq(p.points_won, 1, "the last point counted")
+	var earned := (1 << _unlock_bit("VISOR")) | (1 << _unlock_bit("TRICORN")) | (1 << _unlock_bit("PINK HAIR"))
+	eq(s.career.new_unlocks, earned, "three unlocks")
+	var t := SaveGame.new()
+	t.dir = DIR
+	t.load_game()
+	eq(t.career.active_player().wins[K.MODE_SINGLES], 1, "written with the match")
+	# the initials card first (a first best streak), then the unlocks
+	check(v.initials.open and not v.unlock_open(), "initials first")
+	v.initials._save()
+	v._physics_process(1.0 / 60.0)
+	check(v.unlock_open(), "then UNLOCKED!")
+	v._hud.refresh()
+	check(v._hud._unlock.visible and v._hud._banner.text == "", "the card, not the result")
+	eq(v._hud._unlock_line.text, "VISOR, TRICORN, PINK HAIR", "what was earned")
+	var frame := v.sim.frame_count
+	for f in MatchView.UNLOCK_FRAMES - 2:
+		v._physics_process(1.0 / 60.0)
+	eq(v.sim.frame_count, frame, "the match waits under it")
+	check(v.unlock_open(), "for five seconds")
+	v._physics_process(1.0 / 60.0)
+	check(not v.unlock_open() and s.career.new_unlocks == 0, "then it goes by itself")
+	v.free()
+
+
+## Nothing counts with nobody active, in a 2P match, or in the demo.
+func test_only_career_matches_count() -> void:
+	var s := _fresh_save()
+	s.career.create(0, "ACE")
+	s.career.select(Career.NONE)
+	var v := _career_view(s, Settings.config_for(false, -1, K.DIFFICULTY_MEDIUM, 5))
+	_finish(v, 0)
+	eq(s.career.players[0].wins, [0, 0], "nobody active")
+	v.free()
+	s.career.select(0)
+	var versus := Settings.config_for(false, -1, K.DIFFICULTY_MEDIUM, 5, Settings.p1_choice,
+		PlayerSelect.new_choice(PlayerSelect.PAL_RED, K.VARIANT_MALE, Paddles.STANDARD))
+	versus.set_career(s.career.active_player())
+	v = _career_view(s, versus)
+	_finish(v, 0)
+	eq(s.career.players[0].wins, [0, 0], "2P on the other team")
+	v.free()
+	v = _career_view(s, SimTypes.MatchConfig.singles(), true)
+	for f in 3000:
+		v._physics_process(1.0 / 60.0)
+	eq(s.career.players[0].points_won + s.career.players[0].points_lost, 0, "not the demo")
+	v.free()
+
+
+## Display only (CLAUDE.md): a career match in the view runs exactly like a
+## bare sim with the same config (the hat's gear is in both).
+func test_display_only() -> void:
+	var c := Career.new()
+	c.create(0, "ACE")
+	c.active_player().hat = 1
+	c.active_player().hair = 3
+	var cfg := Settings.config_for(false, 1, K.DIFFICULTY_MEDIUM, 5)
+	cfg.set_career(c.active_player())
+	var v := _career_view(null, cfg)
+	v.sim.p1_bot = true
+	var bare := Sim.new(cfg)
+	bare.p1_bot = true
+	for f in 1500:
+		v._physics_process(1.0 / 60.0)
+		bare.step([SimTypes.Intent.new(), null, null, null])
+		bare.drain_events()
+		if v.sim.snapshot() != bare.snapshot():
+			runner.fail("diverged at frame %d" % f)
+			break
+	eq(v.sim.snapshot(), bare.snapshot(), "1500 frames match a bare sim")
+	v.free()
+
+
+func _title(s: SaveGame) -> TitleScreen:
+	var t := TitleScreen.new()
+	t.save = s
+	runner.root.add_child(t)
+	if not t.is_node_ready():
+		t._ready()
+	return t
+
+
+## The title's CAREER entry by row ids: a new player named on the keyboard,
+## dressed, kept (a save), then Player Select and the match as them.
+func test_title_career_flow() -> void:
+	var kept: Dictionary = Settings.p1_choice.duplicate()
+	var s := _fresh_save()
+	var t := _title(s)
+	eq(t.pages["main"].value_of("career"), "NO PLAYER", "nobody yet")
+	t.pages["main"].select("career")
+	t.pages["main"].press()
+	eq(t.page, "career", "the slots")
+	eq(t.pages["career"].current_id(), "nobody", "opens on NO PLAYER")
+	t.pages["career"].select("slot1")
+	t.pages["career"].press()
+	eq(t.page, "career_name", "a new player types a name first")
+	check(t.career_keyboard.visible and t.career_preview.visible, "the keyboard and the portrait")
+	for k in [CareerPage.PAD_B, CareerPage.PAD_RIGHT, CareerPage.PAD_RIGHT, CareerPage.PAD_B]:
+		t._career_input(k)                      # A, then C
+	t._career_input(CareerPage.PAD_START)
+	eq(t.page, "career_edit", "on to the look")
+	eq(t.pages["career_edit"].current_id(), "body", "on BODY")
+	t.pages["career_edit"].select("shirt")
+	t.pages["career_edit"].change(1)
+	eq(t.pages["career_edit"].value_of("shirt"), "RED", "the shirt")
+	eq(t.pages["career_edit"].value_of("gear"), "PWR 3  CTL 3  SPD 3", "the plain paddle")
+	t.pages["career_edit"].select("hat")
+	t.pages["career_edit"].change(1)
+	eq(t.pages["career_edit"].value_of("hat"), "NONE", "the locked hats skipped")
+	t.pages["career_edit"].select("keep")
+	t.pages["career_edit"].press()
+	eq(t.page, "career_card", "kept: the card")
+	eq(t.pages["career_card"].value_of("next"), "VISOR", "the next unlock")
+	var disk := SaveGame.new()
+	disk.dir = DIR
+	disk.load_game()
+	eq(disk.career.players[1].name, "AC      ", "saved")
+	eq(disk.career.players[1].shirt, PlayerSelect.PAL_RED, "with the look")
+	eq(disk.career.active, 1, "and active")
+	t.back()
+	eq(t.page, "career", "Y: the slots")
+	eq(t.pages["career"].current_id(), "slot1", "on the player")
+	t.back()
+	eq(t.page, "main", "Y again: MAIN")
+	eq(t.pages["main"].value_of("career"), "AC", "MAIN shows the player")
+	t.open_select(false)
+	eq(t.select.choice[0]["palette"], PlayerSelect.PAL_RED, "Player Select starts on them")
+	check(t.select_screen.career != null, "in their look")
+	var cfg := t.config(false)
+	check(cfg.career_p1 == 1 and cfg.career.name == "AC      ", "the match is theirs")
+	eq(Settings.p1_choice, kept, "the saved choice is left alone")
+	t.free()
+
+
+## Deleting from the card takes two presses, and an edit cancelled with Y
+## puts the look back.
+func test_title_delete_and_cancel() -> void:
+	var s := _fresh_save()
+	s.career.create(0, "MAX")
+	var t := _title(s)
+	t.open_career()
+	t.pages["career"].press()                    # on MAX: the card
+	eq(t.page, "career_card")
+	t.pages["career_card"].select("edit")
+	t.pages["career_card"].press()
+	eq(t.page, "career_edit", "editing")
+	t.pages["career_edit"].select("skin")
+	t.pages["career_edit"].change(1)
+	eq(s.career.players[0].skin, 1, "changed")
+	t.back()
+	eq(t.page, "career_card", "Y: back to the card")
+	eq(s.career.players[0].skin, 0, "the look put back")
+	t.pages["career_card"].select("delete")
+	t.pages["career_card"].press()
+	eq(s.career.players[0].used, 1, "one press only arms")
+	eq(t.pages["career_card"].value_of("delete"), "B AGAIN")
+	t.pages["career_card"].press()
+	eq(s.career.players[0].used, 0, "the second deletes")
+	eq(t.page, "career", "back to the slots")
+	t.free()
+
+
+func test_park_and_practice_wear_the_player() -> void:
+	var s := _fresh_save()
+	s.career.create(0, "ACE")
+	s.career.active_player().shirt = PlayerSelect.PAL_GOLD
+	var op := OpenPlay.new()
+	op.begin(1234, false)
+	var cfg := Settings.open_play_config(op, s.career.active_player())
+	check(cfg.career_p1 == 1 and cfg.palette[0] == PlayerSelect.PAL_GOLD, "open play as the player")
+	check(PlayerSelect.palettes_unique(cfg), "colours unique")
+	var view := ParkView.new()
+	runner.root.add_child(view)
+	view.setup(op, s, false)
+	check(view._you["body"].material != null, "the park sprite wears the player's palette")
+	view.free()
+	var page := PracticePage.new()
+	page.save = s
+	var pc := page.config()
+	check(pc.career_p1 == 1 and pc.palette[0] == PlayerSelect.PAL_GOLD, "practice as the player")
+	page.free()

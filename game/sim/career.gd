@@ -124,6 +124,9 @@ class Player:
 	var paddle := Paddles.STANDARD
 	var beaten := [0, 0, 0, 0, 0, 0, 0, 0]   ## wins over each ladder team
 
+	func _init() -> void:
+		Career._load()           # the tables, before anything reads them
+
 	const KEYS := ["wins", "losses", "points_won", "points_lost", "aces", "shutouts",
 		"streak", "best_streak", "longest_rally", "ladder_clears", "open_play", "unlocked",
 		"used", "name", "variant", "skin", "hair", "shirt", "hat", "paddle", "beaten"]
@@ -185,6 +188,7 @@ var new_unlocks := 0
 
 
 func _init() -> void:
+	_load()
 	for i in SLOTS:
 		players.append(Player.new())
 

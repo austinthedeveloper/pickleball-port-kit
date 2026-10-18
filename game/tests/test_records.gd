@@ -44,7 +44,7 @@ func test_v3_save_migrates_to_v4() -> void:
 	eq(t.data["records"]["vs"].size(), Opponents.count(), "a record against each opponent")
 	eq(t.data["initials"], {"best_streak": "", "longest_rally": ""}, "nobody holds a record yet")
 	var raw: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(DIR + "save_b.json"))
-	eq(int(raw["version"]), 4, "rewritten as v4")
+	eq(int(raw["version"]), SaveGame.VERSION, "rewritten as the current layout")
 
 
 func test_initials_rules() -> void:   # test_save.c test_initials

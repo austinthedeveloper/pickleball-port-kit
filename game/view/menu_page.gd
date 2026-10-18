@@ -3,7 +3,7 @@
 ## row. Every settings screen is built from it: the title's pages and the
 ## pause menu. A row is a Dictionary:
 ##   id     String, unique on the page (tests select rows by it, §4.8)
-##   label  String
+##   label  String, or Callable -> String (a label that changes, refreshed)
 ##   value  Callable -> String (optional: the yellow right-hand column)
 ##   change Callable(dir: int) (optional: Left/Right; arrows show on it)
 ##   press  Callable (optional: B/Start; without one, B steps change(+1))
@@ -43,6 +43,7 @@ var _anim := 0                   ## frames left of the transition
 var _anim_dir := 1
 var _overlay: Node2D             ## the arrows, over the values
 var _bar: Node2D                 ## the highlight bar, under the labels
+var _title: BitmapText
 
 
 func setup(id: String, title: String, page_rows: Array, rect := Rect2(300, 172, 360, 300),
@@ -71,11 +72,12 @@ func setup(id: String, title: String, page_rows: Array, rect := Rect2(300, 172, 
 		t.align = 0.5
 		t.position = Vector2(area.get_center().x, area.position.y + 16)
 		add_child(t)
+		_title = t
 		_top += 46
 	for i in rows.size():
 		var label := BitmapText.new()
 		label.font = "small"
-		label.text = rows[i]["label"]
+		label.text = _label(i)
 		label.position = Vector2(area.position.x + 36, _top + i * ROW_H)
 		add_child(label)
 		_labels.append(label)
@@ -105,6 +107,17 @@ func setup(id: String, title: String, page_rows: Array, rect := Rect2(300, 172, 
 	refresh()
 	settle()
 	return self
+
+
+func _label(i: int) -> String:
+	var l: Variant = rows[i]["label"]
+	return l.call() if l is Callable else String(l)
+
+
+## A page built with a title can change it (a player's name).
+func set_title(text: String) -> void:
+	if _title:
+		_title.text = text
 
 
 func index_of(id: String) -> int:
@@ -163,6 +176,7 @@ func press() -> bool:
 
 func refresh() -> void:
 	for i in rows.size():
+		_labels[i].text = _label(i)
 		_labels[i].tint = Color.WHITE if i == cursor else DIM
 		_values[i].text = rows[i]["value"].call() if rows[i].has("value") else ""
 	_overlay.queue_redraw()

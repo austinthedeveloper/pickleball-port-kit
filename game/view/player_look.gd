@@ -18,6 +18,8 @@ var palette := PackedColorArray()
 ## opponents on slots 2-3 (the same members config_for picks), and an
 ## open play partner's captain on slot 1 (ADR-034).
 static func for_slot(cfg: SimTypes.MatchConfig, slot: int, manifest: Dictionary) -> PlayerLook:
+	if slot == 0 and cfg.career_p1 and cfg.career and cfg.palette[0] >= 0:
+		return for_career(cfg.career, cfg.palette[0], cfg.variant[0], cfg.paddle[0], manifest)
 	if cfg.human[slot] and cfg.palette[slot] >= 0 \
 			and not sheet_has_paddle(cfg.palette[slot], cfg.paddle[slot]):
 		return for_team(cfg.palette[slot], cfg.variant[slot], cfg.paddle[slot], manifest)
@@ -56,6 +58,34 @@ static func for_team(team: int, body_variant: int, paddle: int, manifest: Dictio
 	look.palette.resize(ROLE_COUNT)
 	for i in order.length():
 		look.palette[i] = c.get(order[i], Color.MAGENTA)
+	return look
+
+
+## A career player (ADR-047, career_compose_with): their skin ramp and
+## hair, in a team colour's shirt and shorts (one match's Player Select
+## choice, or their saved one) with a paddle, and their hat. Hair and
+## skin are 5-bit (career.json, opponents.json's skins), widened as
+## palette_for widens a ladder member's.
+static func for_career(player: Career.Player, shirt: int, body_variant: int, paddle: int,
+		manifest: Dictionary) -> PlayerLook:
+	var look := for_team(shirt, body_variant, paddle, manifest)
+	var roles: Dictionary = manifest["sprites"]["players"]["roles"]
+	var order := String(roles["order"])
+	var c := {}
+	var skin: Array = Opponents.skin(String(Career.skin_names[player.skin]).to_lower())
+	c["2"] = rgb5(skin[0])
+	c["3"] = rgb5(skin[1])
+	c["4"] = rgb5(skin[2])
+	c["1"] = c["2"].darkened(0.3)
+	c["H"] = rgb5(Career.hair_rgb5[player.hair])
+	c["h"] = c["H"].darkened(0.4)
+	c["i"] = c["H"].lerp(Color.WHITE, 0.3)
+	for k in c:
+		var i := order.find(k)
+		if i >= 0:
+			look.palette[i] = c[k]
+	var hat: String = String(Career.hat_names[player.hat]).to_lower()
+	look.hat = "hair" if hat == "none" else hat
 	return look
 
 

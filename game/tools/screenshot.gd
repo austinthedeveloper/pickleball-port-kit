@@ -12,12 +12,45 @@
 ## "park" the open play park (ADR-034), you stacked at court 2's rack;
 ## "park_house" in the clubhouse at the records board; "park_call" your
 ## game called. "partner=N" puts ladder team N's captain on slot 1.
+## "career" (ADR-047) plays as a scratch career player (ACE: green, pink
+## hair, a visor) in a match, the park, or on title_career,
+## title_career_card, title_career_edit and title_career_name; "unlock"
+## shows the UNLOCKED! card at the end of a match.
 extends SceneTree
 
 var _frames := 0
 var _target := 120
 var _out := "user://shot.png"
 var _view: Node
+
+
+## A scratch save with a career player (nothing is written).
+static func _career_save() -> SaveGame:
+	var sv := SaveGame.new()
+	sv.dir = "user://shot_save/"
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(sv.dir))
+	sv.data = SaveGame.defaults()
+	sv.career = Career.new()
+	sv.career.create(0, "ACE")
+	sv.career.create(2, "GRANDPA")
+	var p: Career.Player = sv.career.players[0]
+	p.unlocked = (1 << 0) | (1 << 5) | (1 << 3)        # VISOR, PINK HAIR, TRICORN
+	p.hair = 6
+	p.hat = 1
+	p.skin = 1
+	p.shirt = PlayerSelect.PAL_GREEN
+	p.variant = K.VARIANT_FEMALE
+	p.paddle = Paddles.RED
+	p.wins = [23, 9]
+	p.losses = [11, 6]
+	p.aces = 14
+	p.shutouts = 2
+	p.best_streak = 4
+	p.longest_rally = 17
+	p.beaten[3] = 1
+	sv.career.players[2].wins = [3, 0]
+	sv.career.select(0)
+	return sv
 
 
 func _initialize() -> void:
@@ -55,7 +88,7 @@ func _initialize() -> void:
 		elif mode == "park":
 			op.x_fp = K.to_fp(OpenPlay.rack_x(1) + 30)
 			op.y_fp = K.to_fp(OpenPlay.RACK_Y + 14)
-		var pv := ParkView.new().setup(op, null, false)
+		var pv := ParkView.new().setup(op, _career_save() if "career" in a.slice(4) else null, false)
 		root.add_child(pv)
 		_view = pv
 	elif mode.begins_with("title"):
@@ -70,6 +103,8 @@ func _initialize() -> void:
 			sv.data["records"]["singles_wins"] = 12
 			sv.data["records"]["singles_losses"] = 7
 			_view.save = sv
+		if mode.begins_with("title_career") or "career" in a.slice(4):
+			_view.save = _career_save()
 		root.add_child(_view)
 		if mode.begins_with("title_"):
 			_view.ready.connect(func():
@@ -94,6 +129,20 @@ func _initialize() -> void:
 					_view.select_input(PlayerSelect.PAD_LEFT)     # WOOD
 					_view.select.choice[0]["variant"] = K.VARIANT_FEMALE
 					_view.select_screen.refresh()
+				elif mode.begins_with("title_career"):
+					var t: TitleScreen = _view
+					t.open_career()
+					if mode != "title_career":
+						t.pages["career"].press()                  # ACE: the card
+					if mode in ["title_career_edit", "title_career_name"]:
+						t.pages["career_card"].select("edit")
+						t.pages["career_card"].press()
+						t.pages["career_edit"].select("hat")
+					if mode == "title_career_name":
+						t.pages["career_edit"].select("name")
+						t.pages["career_edit"].press()
+						t.career_page.pick_key(14)
+						t.career_keyboard.refresh()
 				else:
 					_view.open_page(mode.substr(6)))
 	else:
@@ -125,6 +174,15 @@ func _initialize() -> void:
 		for arg in a.slice(4):
 			if arg.begins_with("partner="):
 				cfg.set_partner(int(arg.substr(8)))
+		if "career" in a.slice(4):
+			m.save = _career_save()
+			cfg.set_career(m.save.career.active_player())
+			cfg.palette[0] = PlayerSelect.PAL_GREEN
+			cfg.paddle[0] = Paddles.RED
+			cfg.variant[0] = K.VARIANT_FEMALE
+			for slot in range(1, K.MAX_PLAYERS):
+				if cfg.palette[slot] == PlayerSelect.PAL_GREEN:
+					cfg.palette[slot] = PlayerSelect.PAL_BLUE
 		m.court = Settings.court.duplicate()
 		m.time = Settings.time_i
 		m.setup(cfg, venue, mode == "demo")
@@ -181,6 +239,13 @@ func _tick() -> void:
 			v.sim.resolve_point(1, K.FAULT_OUT)
 		for f in K.POINT_RESULT_FRAMES + 40:
 			v._physics_process(1.0 / 60.0)
+	if _frames == _target - 20 and _view is MatchView and "unlock" in OS.get_cmdline_user_args():
+		# the UNLOCKED! card over a won match (nothing is written)
+		var v: MatchView = _view
+		v.sim.phase = K.PHASE_MATCH_RESULT
+		v.sim.match_winner = 0
+		v.save.career.new_unlocks = (1 << 0) | (1 << 3) | (1 << 5)
+		v.unlock_frames = 0
 	if _frames == _target - 3 and _view is MatchView and "score10" in OS.get_cmdline_user_args():
 		_view.sim.team_score = [10, 10]
 	if _frames >= _target:

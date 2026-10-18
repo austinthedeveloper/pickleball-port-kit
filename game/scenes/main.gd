@@ -171,7 +171,10 @@ func _on_start(cfg: SimTypes.MatchConfig, venue: String, ladder: bool, pads: Arr
 ## A ladder win: the next opponent, at their home court, with their card.
 func _on_next_rung(prev: SimTypes.MatchConfig) -> void:
 	var rung: int = save.data["records"]["ladder_rung"]
+	var p1 := PlayerSelect.new_choice(prev.palette[0], prev.variant[0], prev.paddle[0])
 	var cfg := Settings.config_for(prev.mode == K.MODE_DOUBLES, rung, prev.difficulty,
-		prev.points_to_win, Settings.p1_choice)
+		prev.points_to_win, p1)
 	cfg.modifiers = prev.modifiers
+	if prev.career_p1:
+		cfg.set_career(save.career.active_player())      # ADR-047
 	_on_start(cfg, Settings.home_venue(rung), true)

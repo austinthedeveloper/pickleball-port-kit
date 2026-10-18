@@ -610,6 +610,49 @@ feature/cld-release        (pushed)
     call, and the clubhouse.
   - Status: **Done**: you looked and approved it (2026-10-17).
 
+### 21. `feature/cld-career`: career players (ADR-047, asked for 2026-10-17)
+
+- [x] `PORT-21` MAIN's RECORDS row is now CAREER: three save slots, each a
+  named player with a look, lifetime stats and unlocks, and the old
+  records behind a RECORDS row. A slot opens the player's card (singles
+  and doubles W-L, aces, shutouts, best streak, longest rally, unlocks
+  n/9 and the next with its hint) and makes them active; an empty slot
+  makes a new player, named on an arcade keyboard, then dressed in the
+  editor (body, skin, hair, shirt, hat, paddle; locked hair and hats are
+  skipped; a GEAR row shows the hat's shift on the paddle), with a big
+  portrait beside it. NO PLAYER plays as before. The active player is
+  1P: Player Select starts on their look (skin, hair and hat on the
+  portrait and thumbnails, the gear in the bars), the HUD shows their
+  name, open play, the ball machine and the park's walk-around sprite
+  use their saved look, and their hat's gear applies to their paddle
+  (ADR-047 stage 4). Matches against the CPU (not the demo, practice, 2P
+  versus, or multiplayer) count, and after the initials card an
+  UNLOCKED! card lists what was just earned.
+  - Accept: test_career.c and test_career_page.c ported and passing; save
+    v5 with a test loading a v4 image; a career match recorded through
+    the view; the view equal to a bare sim; the title's CAREER pages by
+    row id; layout cases for every new screen; golden traces unchanged;
+    screenshots.
+  - Verified: `sim/career.gd`, `meta/career_page.gd`, `Paddles.profile`,
+    `MatchConfig.set_career`/`set_career_p1`, `SaveGame` v5, CAREER in
+    `view/title_screen.gd` with `view/career_keyboard.gd` and
+    `view/career_preview.gd`, `PlayerLook.for_career`, the HUD's name
+    and UNLOCKED! card. `test_career.gd` (23 tests) and
+    `test_layout.test_career_screens` (the slots, the card at every
+    unlock count, every editor value, the keyboard at every length and
+    key, the HUD and the card at their widest). 221/221 plus the e2e;
+    golden traces unchanged. The screenshots caught the career tables
+    being read before they were loaded (the look fell back to the team
+    sheet); fixed by loading them with the first `Career`. Screenshots:
+    the slots, the card, the editor, the keyboard, a singles and a
+    doubles match in the look, the UNLOCKED! card, Player Select, and the
+    park.
+  - Status: **Ready to test**: MAIN → CAREER → NEW PLAYER; type a name,
+    dress them, KEEP. Play SINGLES (Player Select starts on them) and
+    win: the card counts it and UNLOCKED! shows the visor. Wear it (CAREER
+    → the player → EDIT → HAT) and look at the GEAR row and Player
+    Select's bars. Try OPEN PLAY as them, then NO PLAYER.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
@@ -696,6 +739,15 @@ the chain: each has a default I've gone with.
   doubles record and the VS row for that team. Say if the park should be
   bigger (a 3x zoom would scroll more, like the SNES's two screens).
 
+- **PORT-21 career:** your existing save moves to layout v5 with no
+  players and nobody active, so everything plays as before until you make
+  one. Delete is a DELETE PLAYER row pressed twice (the SNES's L+R+X).
+  The editor's portrait sits in its own panel and the title demo keeps
+  playing behind (the SNES froze the demo and recoloured its P1). 1P's
+  HUD panel shows the whole name. Multiplayer matches don't count for a
+  career player (as they don't for the records). Say if you'd want
+  career stats on the clubhouse board too.
+
 - **PORT-18 sound:** I can't hear these: they were checked by measuring
   and looking at spectrograms. Tell me which sounds are off (too bright,
   too quiet, too long, wrong character) and I'll retune them in
@@ -709,4 +761,5 @@ the chain: each has a default I've gone with.
   expensive wildcard; it got its own branch (PORT-17,
   `feature/cld-open-play`) and an ADR-052 amendment.
 - **Out of scope for this run:** career (ADR-047), with a reason
-  recorded in `design/IDEAS.md`.
+  recorded in `design/IDEAS.md`. (Since ported: PORT-21,
+  `feature/cld-career`.)

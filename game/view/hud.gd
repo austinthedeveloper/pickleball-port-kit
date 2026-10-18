@@ -32,6 +32,8 @@ var _ini_line: BitmapText
 var _ini_under: ColorRect
 var _result_prompts: PromptBar   ## B / Start on the result screen
 var _stats_card: Control         ## the post-match stats (PORT-13), built when shown
+var _unlock: Control             ## the UNLOCKED! card (ADR-047), built when needed
+var _unlock_line: BitmapText
 # PORT-14: scores pop when they change, a ball marks the serving side (and
 # a marker the server in doubles), a rally counter on long rallies, and
 # MATCH POINT pulses.
@@ -95,6 +97,10 @@ func setup(v: MatchView) -> void:
 	if view.multiplayer() and not doubles:
 		left_name = _player_name(0)
 		right_name = _player_name(2)
+	# ADR-047: 1P's side reads the career player's name (the SNES panel
+	# fits its first four letters; this one fits all eight).
+	if cfg.career_p1 and cfg.career and not view.demo and not cfg.practice:
+		left_name = cfg.career.shown_name()
 	var left_tint: Color = MatchView.TEAM_TINTS[cfg.palette[0]]
 	var right_tint: Color = MatchView.TEAM_TINTS[cfg.palette[2]]
 	if cfg.opponent >= 0 and not cfg.human[2] and not view.demo:
@@ -347,8 +353,9 @@ func refresh() -> void:
 	_result_line.text = ""
 	_result_prompts.visible = false
 	_refresh_initials()
+	_refresh_unlock()
 	_refresh_stats()
-	if view.initials.open:
+	if view.initials.open or view.unlock_open():
 		_banner.text = ""
 		_banner_sub.text = ""
 	elif s.phase == K.PHASE_MATCH_RESULT:
@@ -479,7 +486,39 @@ func _draw_server_mark() -> void:
 func stats_shown() -> bool:
 	var s := view.sim
 	return s.phase == K.PHASE_MATCH_RESULT and not view.demo and not s.config.practice \
-		and not view.initials.open
+		and not view.initials.open and not view.unlock_open()
+
+
+## The UNLOCKED! card (ADR-047): what the career player just earned
+## ("VISOR, PINK HAIR"), over the result like the initials card.
+func _refresh_unlock() -> void:
+	var open := view.unlock_open()
+	if not open:
+		if _unlock:
+			_unlock.visible = false
+		return
+	if _unlock == null:
+		_unlock = Control.new()
+		add_child(_unlock)
+		var shade := ColorRect.new()
+		shade.color = Color(0, 0.02, 0.08, 0.55)
+		shade.size = Vector2(960, 540)
+		_unlock.add_child(shade)
+		var p := _panel("title", Rect2(180, 150, 600, 220))
+		p.reparent(_unlock)
+		var title := _text("big_gold", "UNLOCKED!", Vector2(480, 172), 0.5, Color.WHITE, _unlock)
+		title.scale = Vector2(1.5, 1.5)
+		title.position.x = 480
+		_unlock_line = _text("small", "", Vector2(480, 236), 0.5, Color("fbe46a"), _unlock)
+		_unlock_line.scale = Vector2(1.25, 1.25)
+		_unlock_line.position.x = 480
+		var player: Career.Player = view.sim.config.career
+		_text("small", "NEW LOOKS FOR %s: CAREER, EDIT" % (player.shown_name() if player else "YOU"),
+			Vector2(480, 282), 0.5, Color(0.8, 0.84, 0.95), _unlock)
+		_unlock.add_child(PromptBar.new().setup([["hit", "OK"]], Vector2(480, 336)))
+	_unlock.visible = true
+	# the SNES panel fits 24 letters; this one 30 (past that, "+n")
+	_unlock_line.text = Career.unlock_text(view.save.career.new_unlocks if view.save else 0, 30)
 
 
 func _refresh_stats() -> void:

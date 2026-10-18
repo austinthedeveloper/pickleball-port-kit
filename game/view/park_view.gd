@@ -270,7 +270,7 @@ func _person() -> Dictionary:
 
 
 ## A person's look: a ladder member (PlayerLook), or null for you (your
-## Player Select colours, as in your matches).
+## career player, else your Player Select colours, as in your matches).
 func _dress(p: Dictionary, look: PlayerLook) -> void:
 	var body: Sprite2D = p["body"]
 	var cap: Sprite2D = p["cap"]
@@ -279,6 +279,16 @@ func _dress(p: Dictionary, look: PlayerLook) -> void:
 		var hat := look.hat_sheet(manifest)
 		cap.texture = load("res://assets/levels/" + hat) if hat != "" else null
 		body.material = look.material()
+		cap.material = body.material
+		return
+	# ADR-047: you walk the park as your career player.
+	var me: Career.Player = save.career.active_player() if save else null
+	if me:
+		var mine := PlayerLook.for_career(me, me.shirt, me.variant, me.paddle, manifest)
+		body.texture = load("res://assets/levels/" + mine.body_sheet(manifest))
+		var file := mine.hat_sheet(manifest)
+		cap.texture = load("res://assets/levels/" + file) if file != "" else null
+		body.material = mine.material()
 		cap.material = body.material
 		return
 	var ch: Dictionary = Settings.p1_choice
@@ -402,12 +412,15 @@ func step_frame(it: SimTypes.Intent = null, pad2_start := false) -> void:
 	elif event == OpenPlay.EVENT_BOARD:
 		_sfx.play("blip")
 	if event == OpenPlay.EVENT_PLAY:
-		play.emit(Settings.open_play_config(op))
+		play.emit(Settings.open_play_config(op, save.career.active_player() if save else null))
 		return
 	if event == OpenPlay.EVENT_PRACTICE:
 		_sfx.play("confirm")
-		practice.emit(save.practice_config(Settings.difficulty_i) if save
-			else SimTypes.MatchConfig.practice_session(Practice.DEFAULTS, 0))
+		var cfg: SimTypes.MatchConfig = save.practice_config(Settings.difficulty_i) if save \
+			else SimTypes.MatchConfig.practice_session(Practice.DEFAULTS, 0)
+		if save:
+			cfg.set_career_p1(save.career.active_player())     # ADR-047
+		practice.emit(cfg)
 		return
 	refresh()
 

@@ -58,7 +58,7 @@ builds all four platforms and publishes them to the GitHub release
 - **Prompts, not button names in text**: help lines are `PromptBar`s of
   `[action, "LABEL"]`, so they follow the device and any remap.
 - **Settings live in `Settings`** (`meta/settings.gd`), not on screens.
-- **The save is versioned** (`meta/save.gd`, layout v4). A new saved key
+- **The save is versioned** (`meta/save.gd`, layout v5). A new saved key
   with a harmless default can ride on `defaults()` (missing keys fill);
   a changed meaning needs a new version, a migration, and a test that
   loads the old image.
