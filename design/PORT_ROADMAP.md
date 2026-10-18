@@ -498,6 +498,9 @@ feature/cld-release        (pushed)
   `feature/cld-release-0.4.0`).
 - **v0.5.0** (2026-10-17): PORT-19 the park, modernised (tag `v0.5.0`, on
   `feature/cld-release-0.5.0`).
+- **v0.6.0** (2026-10-18): PORT-20 the fun venues, PORT-21 career, PORT-22
+  music, merged and fixed on `feature/cld-integration-0.6` (tag `v0.6.0`,
+  on `feature/cld-release-0.6.0`).
 
 ### 16. `feature/cld-multiplayer`: four players on controllers (asked for 2026-10-17)
 
@@ -645,8 +648,7 @@ feature/cld-release        (pushed)
     line paint at SPACE (fixed: the paint is the preset). 201/201 plus the
     e2e; golden traces unchanged. Screenshots: each venue at DAY and
     NIGHT in a ladder singles match, and the COURT page at UNDERSEA.
-  - Status: **Ready to test**: COURT → VENUE → DINOSAUR, SPACE or
-    UNDERSEA (or VS GYM BROS, GOTH CLUB, SURF CREW), at DAY and NIGHT.
+  - Status: **Done**: you played and listened, and approved it for v0.6.0 (2026-10-18).
 
 ### 22. `feature/cld-music`: music (asked for 2026-10-17)
 
@@ -670,7 +672,7 @@ feature/cld-release        (pushed)
     toms and brass; SPACE: C lydian, 90 BPM, echoing pulse arpeggios and
     bells; UNDERSEA: E minor, 80 BPM, marimba drops and flute), since the
     music test asks every venue for one.
-  - Status: **Waiting for you to listen.**
+  - Status: **Done**: you played and listened, and approved it for v0.6.0 (2026-10-18).
 
 ### 21. `feature/cld-career`: career players (ADR-047, asked for 2026-10-17)
 
@@ -709,11 +711,7 @@ feature/cld-release        (pushed)
     the slots, the card, the editor, the keyboard, a singles and a
     doubles match in the look, the UNLOCKED! card, Player Select, and the
     park.
-  - Status: **Ready to test**: MAIN → CAREER → NEW PLAYER; type a name,
-    dress them, KEEP. Play SINGLES (Player Select starts on them) and
-    win: the card counts it and UNLOCKED! shows the visor. Wear it (CAREER
-    → the player → EDIT → HAT) and look at the GEAR row and Player
-    Select's bars. Try OPEN PLAY as them, then NO PLAYER.
+  - Status: **Done**: you played and listened, and approved it for v0.6.0 (2026-10-18).
 
 ## For you
 

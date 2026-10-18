@@ -4,7 +4,9 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
-## [Unreleased]
+## [0.6.0] - 2026-10-18
+
+Three new venues, career mode, and music.
 
 ### Added
 - Three more venues from the SNES game (COURT → VENUE): **DINOSAUR**
@@ -43,6 +45,10 @@ Pickleball '94, the Godot port. Versions follow
 ### Changed
 - The save moves to layout v5 (the career players); a v4 save carries
   over with no players.
+
+### Fixed
+- An error at startup when the window mode changes (FULLSCREEN saved on,
+  or a window the system opens maximized).
 
 ## [0.5.0] - 2026-10-17
 

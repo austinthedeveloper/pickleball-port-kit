@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.5.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.6.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-20 of 20 roadmap tasks are in.
+23 of 23 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -124,3 +124,21 @@ Status: **Done**: you listened and they sound good (2026-10-17).
 The open-play park, taking the old screen as a wireframe: a 3/4 view from about a second storey, twice as close, the camera following you (a little ahead as you walk; framing the room inside the clubhouse). Art by `art/park/build_park.py` with the venue pixel kit: the ground (striped grass, a concrete walkway with spurs, the courts in their level colours, the clubhouse floor, baked shadows) and upright sprites sorted with the people by depth (chain-link fences, sliced where they run into the picture; nets; racks with the waiting paddles; benches; lamps; trees; the clubhouse's walls and roof). The roof fades away and the front wall ghosts while you're inside; a tree's canopy fades when you walk behind it. HUD: OPEN PLAY and EXIT top left, a COURTS panel top right (level, score or NEXT/YOU, +N waiting), and the message and prompts at the bottom. The park sim is untouched.
 
 Status: **Done**: you looked and approved it (2026-10-17).
+
+## PORT-20: DINOSAUR, SPACE and UNDERSEA (asked for 2026-10-17)
+
+The SNES's other three venues (ADR-046), drawn at 960x540 by the level pipeline in the levels' style and manifest format: each has the eight parallax layers, the court mask, its venues.json default court (DINOSAUR GREEN / ORANGE / GRASS / WHITE, SPACE NAVY / PURPLE / ASPHALT / CYAN, UNDERSEA AQUA / NAVY / SAND / WHITE), four standing spectators, and a watcher spot behind the fence. DINOSAUR: a sunset jungle, palms, a volcano with lava and smoke, a long-neck over the trees, pterodactyls; a stegosaurus, raptors, a triceratops and a T. rex over a wooden palisade. SPACE: stars, a nebula, Earth, Saturn, a moon, a dome, a rocket on its gantry; aliens and astronauts behind a lit chain-link fence. UNDERSEA: light shafts and bubbles, a shipwreck, fish, jellyfish, a turtle, kelp and coral; an octopus, crabs, a pufferfish, a seahorse and a starfish along a rope fence. The creatures are shapes lit by `pix.solid` (`art/levels/tools/critters.py`). In the game: the COURT page's VENUE cycles all six, the ladder's GYM BROS, GOTH CLUB and SURF CREW play at home there (VS sets the venue), the venues' own ambience loops play by day, and every TIME works (NIGHT plays the crickets, as on the SNES).
+
+Status: **Done**: you played and listened, and approved it for v0.6.0 (2026-10-18).
+
+## PORT-22: music (asked for 2026-10-17)
+
+An original soundtrack, where the SNES had none (ADR-029/031's `M4-AUDIO-03`; ADR-052 amended): a title theme (D major, 132 BPM), the park's theme for open play (G, 116), a calmer match loop per venue (PARK: F, 100, electric piano and flute; LAKESIDE: A, 94, marimba and bells; SUNSET: Eb, 86, mellow keys and a round lead), and stingers for match won, match lost and ladder cleared. All composed and synthesized by `audio/music/make_music.py` (numpy, fixed seeds; see its README): 48 kHz stereo, loops seamless. `view/music.gd` crossfades between screens, stings a match's end, ducks under the applause and the whistle, and follows SOUND; MUSIC (OFF..100%) on OPTIONS, saved.
+
+Status: **Done**: you played and listened, and approved it for v0.6.0 (2026-10-18).
+
+## PORT-21: career players (ADR-047, asked for 2026-10-17)
+
+MAIN's RECORDS row is now CAREER: three save slots, each a named player with a look, lifetime stats and unlocks, and the old records behind a RECORDS row. A slot opens the player's card (singles and doubles W-L, aces, shutouts, best streak, longest rally, unlocks n/9 and the next with its hint) and makes them active; an empty slot makes a new player, named on an arcade keyboard, then dressed in the editor (body, skin, hair, shirt, hat, paddle; locked hair and hats are skipped; a GEAR row shows the hat's shift on the paddle), with a big portrait beside it. NO PLAYER plays as before. The active player is 1P: Player Select starts on their look (skin, hair and hat on the portrait and thumbnails, the gear in the bars), the HUD shows their name, open play, the ball machine and the park's walk-around sprite use their saved look, and their hat's gear applies to their paddle (ADR-047 stage 4). Matches against the CPU (not the demo, practice, 2P versus, or multiplayer) count, and after the initials card an UNLOCKED! card lists what was just earned.
+
+Status: **Done**: you played and listened, and approved it for v0.6.0 (2026-10-18).
