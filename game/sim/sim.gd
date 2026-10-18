@@ -85,6 +85,16 @@ func _init(cfg: SimTypes.MatchConfig = null) -> void:
 	new_match()
 
 
+## Breaks the sim <-> AI and sim <-> practice references, so all three can
+## be freed (reference counting can't free a cycle): its owner calls this
+## when the match is done. The sim isn't usable afterwards.
+func dispose() -> void:
+	if ai:
+		ai.sim = null
+	if practice:
+		practice.sim = null
+
+
 # --- Court helpers (court.c) -------------------------------------------------
 
 static func toward_net(team: int) -> int:

@@ -84,6 +84,13 @@ func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void
 	_update_visuals()
 
 
+## Freed (a match over, the title's demo restarting): release the sim,
+## which otherwise lives on in its own reference cycle.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE and sim:
+		sim.dispose()
+
+
 func _tex(rel: String) -> Texture2D:
 	return load(LEVELS + rel)
 
