@@ -76,6 +76,9 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.6.0** (2026-10-18): PORT-20 the fun venues, PORT-21 career, PORT-22
   music, merged and fixed on `feature/cld-integration-0.6` (tag `v0.6.0`,
   on `feature/cld-release-0.6.0`).
+- **v0.7.0** (2026-10-18): PORT-23 the cleanup round, PORT-24 the
+  overhead, PORT-25 the tournament (tag `v0.7.0`, on
+  `feature/cld-release-0.7.0`).
 
 ## Phase 3 (started 2026-10-18)
 

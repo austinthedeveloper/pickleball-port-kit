@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.6.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.7.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-23 of 23 roadmap tasks are in.
+26 of 26 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -131,14 +131,32 @@ The SNES's other three venues (ADR-046), drawn at 960x540 by the level pipeline 
 
 Status: **Done**: you played and listened, and approved it for v0.6.0 (2026-10-18).
 
+## PORT-21: career players (ADR-047, asked for 2026-10-17)
+
+MAIN's RECORDS row is now CAREER: three save slots, each a named player with a look, lifetime stats and unlocks, and the old records behind a RECORDS row. A slot opens the player's card (singles and doubles W-L, aces, shutouts, best streak, longest rally, unlocks n/9 and the next with its hint) and makes them active; an empty slot makes a new player, named on an arcade keyboard, then dressed in the editor (body, skin, hair, shirt, hat, paddle; locked hair and hats are skipped; a GEAR row shows the hat's shift on the paddle), with a big portrait beside it. NO PLAYER plays as before. The active player is 1P: Player Select starts on their look (skin, hair and hat on the portrait and thumbnails, the gear in the bars), the HUD shows their name, open play, the ball machine and the park's walk-around sprite use their saved look, and their hat's gear applies to their paddle (ADR-047 stage 4). Matches against the CPU (not the demo, practice, 2P versus, or multiplayer) count, and after the initials card an UNLOCKED! card lists what was just earned.
+
+Status: **Done**: you played and listened, and approved it for v0.6.0 (2026-10-18).
+
 ## PORT-22: music (asked for 2026-10-17)
 
 An original soundtrack, where the SNES had none (ADR-029/031's `M4-AUDIO-03`; ADR-052 amended): a title theme (D major, 132 BPM), the park's theme for open play (G, 116), a calmer match loop per venue (PARK: F, 100, electric piano and flute; LAKESIDE: A, 94, marimba and bells; SUNSET: Eb, 86, mellow keys and a round lead), and stingers for match won, match lost and ladder cleared. All composed and synthesized by `audio/music/make_music.py` (numpy, fixed seeds; see its README): 48 kHz stereo, loops seamless. `view/music.gd` crossfades between screens, stings a match's end, ducks under the applause and the whistle, and follows SOUND; MUSIC (OFF..100%) on OPTIONS, saved.
 
 Status: **Done**: you played and listened, and approved it for v0.6.0 (2026-10-18).
 
-## PORT-21: career players (ADR-047, asked for 2026-10-17)
+## PORT-23: a cleanup round (asked for 2026-10-18)
 
-MAIN's RECORDS row is now CAREER: three save slots, each a named player with a look, lifetime stats and unlocks, and the old records behind a RECORDS row. A slot opens the player's card (singles and doubles W-L, aces, shutouts, best streak, longest rally, unlocks n/9 and the next with its hint) and makes them active; an empty slot makes a new player, named on an arcade keyboard, then dressed in the editor (body, skin, hair, shirt, hat, paddle; locked hair and hats are skipped; a GEAR row shows the hat's shift on the paddle), with a big portrait beside it. NO PLAYER plays as before. The active player is 1P: Player Select starts on their look (skin, hair and hat on the portrait and thumbnails, the gear in the bars), the HUD shows their name, open play, the ball machine and the park's walk-around sprite use their saved look, and their hat's gear applies to their paddle (ADR-047 stage 4). Matches against the CPU (not the demo, practice, 2P versus, or multiplayer) count, and after the initials card an UNLOCKED! card lists what was just earned.
+Step back and organize, and fix what turned up: players flashing in the top-left corner whenever the title's demo restarted (a new COURT or TIME), every match leaking its whole sim, the title's CAREER pages split into their own component, one `UiKit` for the panels and labels seven screens built by hand, and the docs: this sheet down to an index (the full tasks moved to `design/PORT_HISTORY.md`), `game/README.md` and `CLAUDE.md` current. Two open defects closed on the way: the e2e's save is per checkout (KNOWN_ISSUES #42) and `sync_assets.sh` keeps the import files (#43).
 
-Status: **Done**: you played and listened, and approved it for v0.6.0 (2026-10-18).
+Status: **Done**.
+
+## PORT-24: the overhead (asked for 2026-10-18)
+
+A smash, which the SNES never had (ADR-053): a HIT or DRIVE swing at a falling ball 20 px up or higher becomes `SHOT_OVERHEAD`, twice a drive's pace, hit flat or down, aimed like a standard shot, and lengthened just enough to clear the tape (a dumped overhead only when it can't). SOFT still blocks. The CPUs smash with no new logic (their put-away and any lob they get under). The view: the overhead frames, SMASH! over the contact, the biggest shake and rumble, its own sound (`0_hit_smash*`), and a SMASHES row on the stats card.
+
+Status: **Ready to test**: get under a lob (practice: SHOT LOB) and swing with HIT or DRIVE. Does it feel strong enough, and too common in doubles?
+
+## PORT-25: the tournament (chosen 2026-10-18)
+
+TOURNAMENT on MAIN (ADR-054): an eight-entry knockout, you as top seed and seven ladder teams (the warm-up HENDERSON sits out), QUARTERFINAL, SEMIFINAL, FINAL, each match at the opponent's home court with their intro card. The bracket screen (`view/bracket_screen.gd`) shows the draw, scores, connectors and the champion; START / MODE / BACK before it starts, PLAY / FORFEIT (twice) / BACK during, NEW TOURNAMENT after. The other matches are decided from the tournament's seed (the higher rung usually wins) and appear one at a time when you come back. The result screen says BRACKET, and OUT AS SEMIFINALIST or CHAMPION! when it ends. Saved: the bracket in play, and cups in the records (RECORDS: SHUTOUTS CUPS). MAIN's footer prompt went (the key legend says HIT) to make room for the row.
+
+Status: **Ready to test**: TOURNAMENT on MAIN. Is the road's ramp right (SNOWBIRDS first), and do upsets feel too common or too rare?
