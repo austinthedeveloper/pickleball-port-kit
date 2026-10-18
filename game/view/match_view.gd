@@ -78,6 +78,10 @@ func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void
 	if ladder and cfg.opponent >= 0 and not cfg.human[2]:
 		card_frames = 0
 	_build()
+	# place everyone now: until the first tick they'd stand at the origin,
+	# which showed as a player in the top-left corner each time the title
+	# restarted its demo (a new venue or time of day)
+	_update_visuals()
 
 
 func _tex(rel: String) -> Texture2D:

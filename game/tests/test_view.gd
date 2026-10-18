@@ -184,3 +184,21 @@ func test_ladder_opponents_wear_their_looks() -> void:
 
 func test_rgb5_expands_like_the_dac() -> void:
 	eq(PlayerLook.rgb5([31, 0, 16]), Color8(255, 0, 132))
+
+
+## A new view places its people and ball before its first tick (the title
+## restarts its demo on a COURT or TIME change; they used to flash in the
+## top-left corner, at the origin, for a frame).
+func test_new_view_places_everyone_at_once() -> void:
+	for doubles in [false, true]:
+		var v := MatchView.new()
+		runner.root.add_child(v)
+		v.setup(SimTypes.MatchConfig.doubles() if doubles else SimTypes.MatchConfig.singles(), "park", true)
+		for i in K.MAX_PLAYERS:
+			var e: Dictionary = v._players[i]
+			if v.sim.players[i].active:
+				check(e["root"].position.length() > 100.0, "player %d placed on court" % i)
+			else:
+				check(not e["root"].visible, "an empty slot hidden")
+		check(not v._ball_root.visible or v._ball_root.position.length() > 100.0, "the ball placed or hidden")
+		v.free()
