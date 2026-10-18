@@ -4,6 +4,23 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [Unreleased]
+
+### Changed
+- The park (OPEN PLAY) is redrawn and modernised:
+  - **View:** a 3/4 view from about a second storey, closer in, with a
+    camera that follows you.
+  - **Art:** pixel-art courts with fences, nets, racks and benches;
+    trees; lamps; a walkway; a clubhouse with a roof and a front wall.
+  - **Clubhouse:** walking in, the roof lifts away and the camera frames
+    the room.
+  - **Trees:** they let you show through when you walk behind them.
+  - **HUD:** a COURTS panel shows every court's level, score and queue.
+  - **Panel:** what's around you, and what you can do, moves to the bottom.
+
+### Fixed
+- A changed prompt no longer leaves the old one showing for a frame.
+
 ## [0.4.0] - 2026-10-17
 
 HD sound.

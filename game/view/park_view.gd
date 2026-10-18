@@ -3,9 +3,14 @@
 ## a fixed 60 Hz and only ever reads it, apart from the input it passes
 ## to update() (as MatchView does with the Sim).
 ##
-## Park pixels are drawn at 2x under a panel; the view scrolls with you.
-## The people are the match sprites, small: the ladder captains and
-## partners in their own looks, you in your Player Select colours.
+## Redrawn for the HD port (PORT-19): a 3/4 view from about a second
+## storey, closer in, the camera following you. The art and its layout come
+## from art/park/build_park.py (assets/park/park.json): park pixels map to
+## the world 4x across and 3x down; fences, nets, walls, trees and the rest
+## stand as sprites sorted by depth with the people; the clubhouse's roof
+## and front wall fade while you're inside. The people are the match
+## sprites: the ladder captains and partners in their own looks, you in your
+## Player Select colours.
 class_name ParkView
 extends Node2D
 
@@ -13,11 +18,9 @@ signal play(cfg: SimTypes.MatchConfig)      ## your game is up
 signal practice(cfg: SimTypes.MatchConfig)  ## B at the ball machine
 signal leave                                ## Start: back to the title
 
-const SCALE := 2
-const ORIGIN_Y := 66                 ## screen y of park y 0
-const VIEW_W := 960 / SCALE          ## park pixels on screen
-const VIEW_MAX := OpenPlay.PARK_W - VIEW_W
-const PERSON_SCALE := 0.34
+const ART := "res://assets/park/"
+const VIEW := Vector2(960, 540)
+const PERSON_SCALE := 0.58          ## a person ~62 px tall, by a 64 px fence
 const FRAME := 128
 const ANCHOR := Vector2(56, 116)
 const SLOTS := ["idle0", "idle1", "run0", "run1", "run2", "run3", "windup", "swing",
@@ -43,12 +46,16 @@ var save: SaveGame
 var anim := 0
 var result_timer := 0
 var input_lock := INPUT_LOCK_FRAMES
-var cam := 0                         ## the view's left edge, park x
+var cam := Vector2.ZERO              ## the view's top-left, in world px
+var layout: Dictionary               ## assets/park/park.json
+var _world: Node2D                   ## everything that scrolls
+var _fading: Array = []              ## sprites that fade while you're inside
+var _canopies: Array = []            ## [holder, rect in world]: trees that fade over you
+var _fade := 1.0
 var message := ""                    ## the panel's text, for tests
 var _2p_shown := -1
 var _2p_timer := 0
 var manifest: Dictionary
-var _ground: Node2D
 var _actors: Node2D
 var _overlay: Node2D
 var _you: Dictionary
@@ -56,6 +63,7 @@ var _court_people: Array = []        ## per court: 4 people (side * 2 + p)
 var _bench_people: Array = []
 var _scores: Array = []
 var _labels: Array = []
+var _panel: NinePatchRect
 var _panel_text: BitmapText
 var _panel_prompts: PromptBar
 var _call: BitmapText
@@ -72,65 +80,163 @@ func setup(park: OpenPlay, s: SaveGame, back: bool) -> ParkView:
 	_2p_shown = op.two_players
 	manifest = JSON.parse_string(FileAccess.get_file_as_string("res://assets/levels/manifest.json"))
 	_build()
-	_follow()
+	_follow(true)
 	refresh()
 	return self
 
 
 func _build() -> void:
+	layout = JSON.parse_string(FileAccess.get_file_as_string(ART + "park.json"))
 	var bg := ColorRect.new()
-	bg.color = Color("2e5a2a")
-	bg.size = Vector2(960, 540)
+	bg.color = Color("356b2a")
+	bg.size = VIEW
 	add_child(bg)
-	_ground = ParkGround.new()
-	_ground.scale = Vector2(SCALE, SCALE)
-	add_child(_ground)
+	_world = Node2D.new()
+	add_child(_world)
+	var ground := Sprite2D.new()
+	ground.texture = load(ART + "ground.png")
+	ground.centered = false
+	_world.add_child(ground)
 	_actors = Node2D.new()
 	_actors.y_sort_enabled = true
-	add_child(_actors)
+	_world.add_child(_actors)
+	for spr in layout["sprites"]:
+		_add_prop(spr)
 	_overlay = ParkOverlay.new()
 	_overlay.view = self
-	add_child(_overlay)
+	_overlay.z_index = 2
+	_world.add_child(_overlay)
 	for c in OpenPlay.COURTS:
 		var people := []
 		for i in 4:
 			people.append(_person())
 		_court_people.append(people)
-		_labels.append(_text("small", LEVEL_LABELS[c], Color.WHITE))
-		_scores.append(_text("small", "", SCORE_TINT))
+		_labels.append(null)               # filled by _build_hud's COURTS panel
+		_scores.append(null)
 	for i in 4:
 		_bench_people.append(_person())
 	_you = _person()
 	_dress(_you, null)
-	var house := _text("small", "CLUBHOUSE", Color("f4e3c0"))
-	house.set_meta("park", Vector2(OpenPlay.HOUSE_DOOR_X, OpenPlay.HOUSE_TOP - 14))
-	_labels.append(house)
+	_build_hud()
+	_build_courts_panel()
+	_sfx = Sfx.new()
+	add_child(_sfx)
+	_sfx.setup("", false)
+
+
+## A prop from the layout: placed by its foot so the y-sort puts it with
+## the people; a long one running into the picture (a side fence or wall)
+## is cut into slices, each sorted by its own depth.
+func _add_prop(spr: Dictionary) -> void:
+	var tex: Texture2D = load(ART + String(spr["file"]))
+	var top := Vector2(spr["x"], spr["y"])
+	var sort := float(spr["sort"])
+	var pieces := []
+	if spr.get("slice", false):
+		var step := 18
+		var h := tex.get_height()
+		var r := 0
+		while r < h:
+			var rh := mini(step, h - r)
+			pieces.append([Rect2(0, r, tex.get_width(), rh), top.y + r + rh])
+			r += rh
+	else:
+		pieces.append([Rect2(Vector2.ZERO, tex.get_size()), sort])
+	for piece in pieces:
+		var holder := Node2D.new()
+		holder.position = Vector2(top.x, piece[1])
+		var sp := Sprite2D.new()
+		sp.texture = tex
+		sp.centered = false
+		sp.region_enabled = true
+		sp.region_rect = piece[0]
+		sp.position = Vector2(0, top.y + piece[0].position.y - piece[1])
+		holder.add_child(sp)
+		if spr.get("roof", false):
+			holder.z_index = 1                # over everyone outside
+		_actors.add_child(holder)
+		if spr.get("fade_inside", false):
+			_fading.append(holder)
+		if spr.get("canopy", false):
+			_canopies.append([holder, Rect2(top, tex.get_size())])
+
+
+## Top right: every court at a glance, its level (in its apron colour),
+## its score (or NEXT, or YOU) and how many paddles wait in its rack.
+func _build_courts_panel() -> void:
 	var ui := CanvasLayer.new()
 	ui.layer = 10
 	add_child(ui)
-	var panel := NinePatchRect.new()
-	panel.texture = load("res://assets/levels/ui/panel_title.png")
+	var plate := NinePatchRect.new()
+	plate.texture = load("res://assets/levels/ui/panel_title.png")
 	for m in ["patch_margin_left", "patch_margin_top", "patch_margin_right", "patch_margin_bottom"]:
-		panel.set(m, 12)
-	panel.position = Vector2(230, 4)
-	panel.size = Vector2(500, 60)
-	ui.add_child(panel)
+		plate.set(m, 12)
+	plate.position = Vector2(668, 10)
+	plate.size = Vector2(280, 30 + OpenPlay.COURTS * 24)
+	plate.modulate.a = 0.92
+	ui.add_child(plate)
+	for c in OpenPlay.COURTS:
+		var y := 22 + c * 24
+		var stripe := ColorRect.new()
+		stripe.color = APRONS[c]
+		stripe.position = Vector2(682, y + 2)
+		stripe.size = Vector2(6, 16)
+		ui.add_child(stripe)
+		var level := BitmapText.new()
+		level.font = "small"
+		level.text = LEVEL_LABELS[c]
+		level.position = Vector2(696, y)
+		ui.add_child(level)
+		_labels[c] = level
+		var score := BitmapText.new()
+		score.font = "small"
+		score.align = 1.0
+		score.tint = SCORE_TINT
+		score.position = Vector2(934, y)
+		ui.add_child(score)
+		_scores[c] = score
+
+
+func _build_hud() -> void:
+	var ui := CanvasLayer.new()
+	ui.layer = 10
+	add_child(ui)
+	# top left: where you are, and the way out
+	var chip := NinePatchRect.new()
+	chip.texture = load("res://assets/levels/ui/panel_title.png")
+	for m in ["patch_margin_left", "patch_margin_top", "patch_margin_right", "patch_margin_bottom"]:
+		chip.set(m, 12)
+	chip.position = Vector2(12, 10)
+	chip.size = Vector2(320, 44)
+	ui.add_child(chip)
+	var title := BitmapText.new()
+	title.font = "small"
+	title.text = "OPEN PLAY"
+	title.tint = SCORE_TINT
+	title.position = Vector2(28, 22)
+	ui.add_child(title)
+	ui.add_child(PromptBar.new().setup([["start", "EXIT"]], Vector2(236, 32)))
+	# bottom: what's here and what you can do
+	_panel = NinePatchRect.new()
+	_panel.texture = chip.texture
+	for m in ["patch_margin_left", "patch_margin_top", "patch_margin_right", "patch_margin_bottom"]:
+		_panel.set(m, 12)
+	_panel.position = Vector2(220, 474)
+	_panel.size = Vector2(520, 56)
+	ui.add_child(_panel)
 	_panel_text = BitmapText.new()
 	_panel_text.font = "small"
 	_panel_text.align = 0.5
-	_panel_text.position = Vector2(480, 14)
+	_panel_text.position = Vector2(480, 484)
 	ui.add_child(_panel_text)
-	_panel_prompts = PromptBar.new().setup([], Vector2(480, 46))
+	_panel_prompts = PromptBar.new().setup([], Vector2(480, 514))
 	ui.add_child(_panel_prompts)
 	_call = BitmapText.new()
 	_call.font = "big_gold"
 	_call.align = 0.5
 	_call.scale = Vector2(2, 2)
-	_call.position = Vector2(480, 236)
+	_call.position = Vector2(480, 200)
 	ui.add_child(_call)
-	_sfx = Sfx.new()
-	add_child(_sfx)
-	_sfx.setup("", false)
 
 
 func _text(font: String, s: String, tint: Color) -> BitmapText:
@@ -140,7 +246,7 @@ func _text(font: String, s: String, tint: Color) -> BitmapText:
 	t.align = 0.5
 	t.tint = tint
 	t.z_index = 5
-	add_child(t)
+	_world.add_child(t)
 	return t
 
 
@@ -209,7 +315,7 @@ func _show_member(p: Dictionary, team: int, member: int) -> void:
 func _place(p: Dictionary, x: int, y: int, frame: String, flip: bool) -> void:
 	var root: Node2D = p["root"]
 	root.visible = true
-	root.position = to_screen(Vector2(x, y))
+	root.position = to_world(Vector2(x, y))
 	var idx := SLOTS.find(frame)
 	for s in [p["body"], p["cap"]]:
 		s.region_rect = Rect2(idx * FRAME, 0, FRAME, FRAME)
@@ -217,14 +323,44 @@ func _place(p: Dictionary, x: int, y: int, frame: String, flip: bool) -> void:
 		s.offset = -Vector2((FRAME - 1 - ANCHOR.x) if flip else ANCHOR.x, ANCHOR.y)
 
 
+## Park px to world px (art/park/build_park.py's projection).
+func to_world(park: Vector2) -> Vector2:
+	var sc: Array = layout["scale"]
+	var mg: Array = layout["margin"]
+	return Vector2((park.x + mg[0]) * sc[0], (park.y + mg[1]) * sc[1])
+
+
 func to_screen(park: Vector2) -> Vector2:
-	return Vector2((park.x - cam) * SCALE, park.y * SCALE + ORIGIN_Y)
+	return to_world(park) - cam
 
 
-## The view follows you (render_park_prepare).
-func _follow() -> void:
-	cam = clampi(K.from_fp(op.x_fp) - VIEW_W / 2, 0, VIEW_MAX)
-	_ground.position = Vector2(-cam * SCALE, ORIGIN_Y)
+## The camera follows you, easing, a little ahead of where you walk, and
+## stops at the park's edges; the clubhouse's roof and front wall fade
+## while you're in.
+func _follow(snap := false) -> void:
+	var size := Vector2(layout["world"][0], layout["world"][1])
+	var you := to_world(Vector2(K.from_fp(op.x_fp), K.from_fp(op.y_fp)))
+	var lead := Vector2(-40 if op.facing_left else 40, 0) if op.walking else Vector2.ZERO
+	# outdoors you sit low in the picture so the courts show; indoors the
+	# camera frames the whole room
+	var want := you + lead - VIEW * Vector2(0.5, 0.74)
+	if op.in_house():
+		var r0 := to_world(Vector2(OpenPlay.HOUSE_LEFT, OpenPlay.HOUSE_TOP))
+		var r1 := to_world(Vector2(OpenPlay.HOUSE_RIGHT, OpenPlay.HOUSE_BOTTOM))
+		want = Vector2((r0.x + r1.x) / 2.0, (r0.y + r1.y) / 2.0 - 40) - VIEW / 2.0
+	want = want.clamp(Vector2.ZERO, size - VIEW)
+	cam = want if snap or cam == Vector2.ZERO else cam.lerp(want, 0.12)
+	_world.position = (-cam).round()
+	var target := 0.0 if op.in_house() else 1.0
+	_fade = target if snap else lerpf(_fade, target, 0.15)
+	for h in _fading:
+		# the roof goes; the front wall stays as a ghost so the door reads
+		h.modulate.a = _fade if h.z_index > 0 else lerpf(0.25, 1.0, _fade)
+	# a tree in front of you lets you show through its canopy
+	for t in _canopies:
+		var holder: Node2D = t[0]
+		var over: bool = t[1].grow(-10).has_point(you - Vector2(0, 30)) and holder.position.y > you.y
+		holder.modulate.a = lerpf(holder.modulate.a, 0.4 if over else 1.0, 1.0 if snap else 0.2)
 
 
 func _physics_process(_delta: float) -> void:
@@ -299,11 +435,6 @@ func refresh() -> void:
 		_draw_court(c)
 		_draw_score(c)
 	_draw_bench()
-	for c in OpenPlay.COURTS:
-		var left := OpenPlay.court_left(c)
-		_labels[c].position = to_screen(Vector2(left + OpenPlay.COURT_W / 2, LEVEL_Y - 11))
-	var house: BitmapText = _labels[OpenPlay.COURTS]
-	house.position = to_screen(house.get_meta("park"))
 	_draw_message()
 	_overlay.queue_redraw()
 
@@ -382,11 +513,11 @@ func ball_at(c: int):
 func _draw_score(c: int) -> void:
 	var ct: OpenPlay.OpenCourt = op.court[c]
 	var t: BitmapText = _scores[c]
+	var waiting := "  +%d" % ct.stack_count if ct.stack_count else ""
 	if ct.state == OpenPlay.COURT_PLAYING:
-		t.text = "%d-%d" % [ct.score[0], ct.score[1]]
+		t.text = "%d-%d%s" % [ct.score[0], ct.score[1], waiting]
 	else:
-		t.text = "YOU" if ct.state == OpenPlay.COURT_YOURS else "NEXT"
-	t.position = to_screen(Vector2(OpenPlay.court_left(c) + OpenPlay.COURT_W / 2, SCORE_Y - 7))
+		t.text = ("YOU" if ct.state == OpenPlay.COURT_YOURS else "NEXT") + waiting
 
 
 ## The bench in the clubhouse: the first two teams waiting, two each
@@ -488,121 +619,8 @@ func _draw_message() -> void:
 	if key != _prompt_key:
 		_prompt_key = key
 		_panel_prompts.set_items(m[1])
-	_panel_text.position.y = 12 if not m[1].is_empty() else 24
+	_panel_text.position.y = 482 if not m[1].is_empty() else 494
 	_call.text = "YOUR GAME!" if op.called != OpenPlay.NONE else ""
-
-
-## The park's ground: grass, the path, the courts with their fences and
-## racks, and the clubhouse, in park pixels (drawn once; the node scrolls).
-class ParkGround:
-	extends Node2D
-
-	const GRASS := Color("4f8a3c")
-	const GRASS_DARK := Color("467f35")
-	const PATH := Color("c9b28a")
-	const PATH_EDGE := Color("a8916b")
-	const SURFACE := Color("3d6fb0")
-	const KITCHEN := Color("4f82c4")
-	const LINE := Color("f4f4f0")
-	const FENCE := Color("2c3438")
-	const WALL := Color("6e4428")
-	const FLOOR := Color("c99d68")
-	const FLOOR_LINE := Color("b88d5a")
-
-	func _draw() -> void:
-		draw_rect(Rect2(0, 0, OpenPlay.PARK_W, OpenPlay.PARK_H), GRASS)
-		for i in 160:                                   # tufts, the same every time
-			var tx := (i * 97) % OpenPlay.PARK_W
-			var ty := (i * 53 + (i >> 3) * 31) % OpenPlay.PARK_H
-			draw_rect(Rect2(tx, ty, 3, 1), GRASS_DARK)
-		# Trees along the top, the courts' side of the park.
-		for i in 7:
-			var t := Vector2(18 + i * 40, 14 + (i % 2) * 4)
-			draw_circle(t + Vector2(2, 3), 13, Color(0, 0, 0, 0.18))
-			draw_circle(t, 13, Color("2f6b2c"))
-			draw_circle(t + Vector2(-3, -3), 8, Color("3f8a38"))
-		# The path along the bottom, and up to the clubhouse door.
-		draw_rect(Rect2(0, 178, OpenPlay.PARK_W, 36), PATH)
-		draw_rect(Rect2(0, 178, OpenPlay.PARK_W, 1), PATH_EDGE)
-		draw_rect(Rect2(0, 213, OpenPlay.PARK_W, 1), PATH_EDGE)
-		draw_rect(Rect2(OpenPlay.HOUSE_DOOR_X - 16, OpenPlay.HOUSE_BOTTOM, 32, 10), PATH)
-		for c in OpenPlay.COURTS:
-			_court(c)
-		_house()
-
-	func _court(c: int) -> void:
-		var left := OpenPlay.court_left(c)
-		var top := OpenPlay.COURT_TOP
-		var w := OpenPlay.COURT_W
-		var h := OpenPlay.COURT_H
-		draw_rect(Rect2(left - 6, top - 8, w + 12, h + 16), ParkView.APRONS[c])
-		draw_rect(Rect2(left, top, w, h), SURFACE)
-		var net := top + h / 2
-		draw_rect(Rect2(left, net - 14, w, 28), KITCHEN)
-		draw_rect(Rect2(left, top, w, h), LINE, false, 1.0)
-		draw_line(Vector2(left, net - 14), Vector2(left + w, net - 14), LINE)
-		draw_line(Vector2(left, net + 14), Vector2(left + w, net + 14), LINE)
-		draw_line(Vector2(left + w / 2, top), Vector2(left + w / 2, net - 14), LINE)
-		draw_line(Vector2(left + w / 2, net + 14), Vector2(left + w / 2, top + h), LINE)
-		draw_rect(Rect2(left - 3, net - 1, w + 6, 2), Color("1c2226"))
-		draw_rect(Rect2(left - 4, net - 2, 2, 4), Color("dddddd"))
-		draw_rect(Rect2(left + w + 2, net - 2, 2, 4), Color("dddddd"))
-		# The fence, with its gate at the bottom.
-		var m := OpenPlay.FENCE_MARGIN - 1
-		var f := Rect2(left - m, top - m, w + 2 * m, h + 2 * m)
-		var gate := left + w / 2
-		draw_line(f.position, Vector2(f.end.x, f.position.y), FENCE, 1.0)
-		draw_line(f.position, Vector2(f.position.x, f.end.y), FENCE, 1.0)
-		draw_line(Vector2(f.end.x, f.position.y), f.end, FENCE, 1.0)
-		draw_line(Vector2(f.position.x, f.end.y), Vector2(gate - 6, f.end.y), FENCE, 1.0)
-		draw_line(Vector2(gate + 6, f.end.y), f.end, FENCE, 1.0)
-		for py in range(int(f.position.y), int(f.end.y) + 1, 14):
-			draw_rect(Rect2(f.position.x - 1, py, 2, 2), FENCE)
-			draw_rect(Rect2(f.end.x - 1, py, 2, 2), FENCE)
-		# The rack at the gate: two posts and a bar.
-		var rx := OpenPlay.rack_x(c)
-		var ry := OpenPlay.RACK_Y
-		draw_rect(Rect2(rx - 10, ry - 13, 20, 2), Color("8a8f96"))
-		draw_rect(Rect2(rx - 10, ry - 13, 2, 12), Color("6d7278"))
-		draw_rect(Rect2(rx + 8, ry - 13, 2, 12), Color("6d7278"))
-		# A bench beside it.
-		draw_rect(Rect2(left - 2, ry - 2, 18, 4), Color("8a5a32"))
-		draw_rect(Rect2(left - 2, ry + 2, 18, 1), Color("5e3c20"))
-
-	func _house() -> void:
-		var r := Rect2(OpenPlay.HOUSE_LEFT, OpenPlay.HOUSE_TOP,
-			OpenPlay.HOUSE_RIGHT - OpenPlay.HOUSE_LEFT, OpenPlay.HOUSE_BOTTOM - OpenPlay.HOUSE_TOP)
-		draw_rect(Rect2(r.position + Vector2(3, 4), r.size), Color(0, 0, 0, 0.22))
-		draw_rect(r, WALL)
-		var wl := OpenPlay.HOUSE_WALL
-		var inner := r.grow(-wl)
-		draw_rect(inner, FLOOR)
-		for py in range(int(inner.position.y) + 8, int(inner.end.y), 8):
-			draw_line(Vector2(inner.position.x, py), Vector2(inner.end.x, py), FLOOR_LINE)
-		# The door.
-		var d := OpenPlay.HOUSE_DOOR_X - OpenPlay.HOUSE_DOOR_W / 2
-		draw_rect(Rect2(d, r.end.y - wl, OpenPlay.HOUSE_DOOR_W, wl), FLOOR)
-		# The records board on the back wall.
-		var b := Vector2(OpenPlay.BOARD_X, OpenPlay.BOARD_Y)
-		draw_rect(Rect2(b.x - 18, inner.position.y - 2, 36, 18), Color("2a3a2c"))
-		draw_rect(Rect2(b.x - 18, inner.position.y - 2, 36, 18), Color("8a6a3a"), false, 1.0)
-		for i in 4:
-			draw_rect(Rect2(b.x - 14, inner.position.y + 2 + i * 3, 16 + (i * 7) % 12, 1), Color("d8e0d0"))
-		# The ball machine.
-		var mx := OpenPlay.MACHINE_X
-		var my := OpenPlay.MACHINE_Y
-		draw_rect(Rect2(mx - 9, my - 12, 18, 16), Color("5a6470"))
-		draw_rect(Rect2(mx - 7, my - 18, 14, 7), Color("2e3640"))
-		for i in 3:
-			draw_circle(Vector2(mx - 4 + i * 4, my - 15), 2, Color("e8e04a"))
-		draw_rect(Rect2(mx - 12, my - 6, 4, 4), Color("2e3640"))
-		# The bench.
-		draw_rect(Rect2(OpenPlay.BENCH_X - 10, OpenPlay.BENCH_Y, 68, 8), Color("8a5a32"))
-		draw_rect(Rect2(OpenPlay.BENCH_X - 10, OpenPlay.BENCH_Y + 8, 68, 2), Color("5e3c20"))
-		# A rug, a table, a plant: it's a clubhouse.
-		draw_rect(Rect2(380, 84, 44, 26), Color("9c3c3a"))
-		draw_rect(Rect2(382, 86, 40, 22), Color("b85048"), false, 1.0)
-		draw_circle(Vector2(inner.end.x - 8, inner.end.y - 10), 6, Color("3f8a38"))
 
 
 ## What moves over the ground: the rally balls and their shadows, and the
@@ -616,15 +634,17 @@ class ParkOverlay:
 		for c in OpenPlay.COURTS:
 			var at = view.ball_at(c)
 			if at != null:
-				var ground := view.to_screen(Vector2(at.x, at.y))
-				draw_circle(ground + Vector2(0, 2), 3.0, Color(0, 0, 0, 0.35))
-				draw_circle(ground - Vector2(0, at.z * ParkView.SCALE), 3.5, Color("e8f04a"))
+				var ground := view.to_world(Vector2(at.x, at.y))
+				draw_circle(ground + Vector2(0, 3), 4.0, Color(0, 0, 0, 0.35))
+				draw_circle(ground - Vector2(0, at.z * 4.0), 5.0, Color("e8f04a"))
+				draw_arc(ground - Vector2(0, at.z * 4.0), 5.0, 0, TAU, 12, Color(0.1, 0.12, 0.1), 1.0)
 			var ct: OpenPlay.OpenCourt = view.op.court[c]
-			var x := OpenPlay.rack_x(c) - 7
+			# the paddles waiting in the rack: yours in your colour
+			var base := view.to_world(Vector2(OpenPlay.rack_x(c), OpenPlay.RACK_Y))
 			for i in ct.stack_count:
 				var mine: bool = ct.stack[i] == OpenPlay.YOU
 				var col := ParkView.YOU_TINT if mine else Color("b8bcc4")
-				var top := view.to_screen(Vector2(x + i * 5, OpenPlay.RACK_Y - 12))
-				draw_rect(Rect2(top + Vector2(-3, 0), Vector2(7, 9)), col)
-				draw_rect(Rect2(top + Vector2(-3, 0), Vector2(7, 9)), Color(0.1, 0.12, 0.16), false, 1.0)
-				draw_rect(Rect2(top + Vector2(0, 9), Vector2(2, 6)), Color("4a3a2a"))
+				var top := base + Vector2(-27 + i * 15, -46)
+				draw_rect(Rect2(top, Vector2(12, 20)), col)
+				draw_rect(Rect2(top, Vector2(12, 20)), Color(0.1, 0.12, 0.16), false, 1.0)
+				draw_rect(Rect2(top + Vector2(4, 20), Vector2(4, 12)), Color("4a3a2a"))

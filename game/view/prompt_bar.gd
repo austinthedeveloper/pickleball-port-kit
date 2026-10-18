@@ -31,7 +31,8 @@ func rebuild() -> void:
 	_serial = GameControls.device_serial
 	_binding_serial = GameControls.binding_serial
 	for t in _texts:
-		t.queue_free()
+		remove_child(t)
+		t.free()                         # now: a lazy free left the old prompt up a frame
 	_texts.clear()
 	_layout.clear()
 	var widths := []

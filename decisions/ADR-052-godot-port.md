@@ -200,6 +200,12 @@ stream, at the 960×540 art density, through the art's court geometry.
   ADR-029's pitch (`AudioMap.HIT_EFFECTS`), and hits and bounces play
   round-robin variants with a ±3-4% pitch spread (`Sfx`), which is
   presentation, so it isn't the sim's determinism.
+- **The park, redrawn** (PORT-19). The open-play view keeps
+  render_park.c's logic (who stands where, the panel's lines) but draws a
+  closer 3/4 world from `art/park/build_park.py`: park px → world px
+  4x across, 3x down. Upright sprites are y-sorted with the people, by
+  their foot; fences and walls that run into the picture are cut into
+  depth slices. The sim and its tests are untouched.
 - **Not ported yet:** career (ADR-047).
 
 ## Rejected (and why)

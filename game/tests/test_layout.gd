@@ -240,4 +240,11 @@ func test_park() -> void:
 		if f % 150 == 0:
 			view.refresh()
 			check_layout(view, "park frame %d" % f)
+	# inside the clubhouse, reading the records board
+	park.x_fp = K.to_fp(OpenPlay.BOARD_X + 4)
+	park.y_fp = K.to_fp(OpenPlay.BOARD_Y + 6)
+	park.update(0, 0, true)
+	for f in 60:
+		view.step_frame(SimTypes.Intent.new())
+	check_layout(view, "park clubhouse board")
 	view.free()

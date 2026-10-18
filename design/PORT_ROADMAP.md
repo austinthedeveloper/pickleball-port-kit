@@ -585,6 +585,30 @@ feature/cld-release        (pushed)
     errors.
   - Status: **Done**: you listened and they sound good (2026-10-17).
 
+### 19. `feature/cld-park-redesign`: the park, modernised (asked for 2026-10-17)
+
+- [x] `PORT-19` The open-play park, taking the old screen as a
+  wireframe: a 3/4 view from about a second storey, twice as close, the
+  camera following you (a little ahead as you walk; framing the room
+  inside the clubhouse). Art by `art/park/build_park.py` with the venue
+  pixel kit: the ground (striped grass, a concrete walkway with spurs,
+  the courts in their level colours, the clubhouse floor, baked shadows)
+  and upright sprites sorted with the people by depth (chain-link fences,
+  sliced where they run into the picture; nets; racks with the waiting
+  paddles; benches; lamps; trees; the clubhouse's walls and roof). The roof
+  fades away and the front wall ghosts while you're inside; a tree's canopy
+  fades when you walk behind it. HUD: OPEN PLAY and EXIT top left, a COURTS
+  panel top right (level, score or NEXT/YOU, +N waiting), and the message
+  and prompts at the bottom. The park sim is untouched.
+  - Verified: `test_open_play.gd` unchanged and passing (the view only
+    reads the park); `test_layout.gd` now also checks the park's HUD
+    outside and in the clubhouse, which caught a prompt bar leaving its
+    old text up for a frame (fixed in `PromptBar`). 197/197 plus the e2e;
+    golden traces unchanged. Screenshots: the walkway by court 2, the
+    call, and the clubhouse.
+  - Status: **Ready to test**: MAIN → OPEN PLAY. Walk the park, stack at
+    a rack, walk into the clubhouse.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks

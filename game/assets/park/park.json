@@ -1,0 +1,385 @@
+{
+ "doc": "art/park/build_park.py. world = ((x + margin_x) * scale_x, (y + margin_top) * scale_y) for park px (x, y); sprites: their top-left in the world, `sort` the depth (world y); `slice`: cut into depth slices of the given length; `fade_inside`: fades while you're in the clubhouse.",
+ "world": [
+  2240,
+  870
+ ],
+ "scale": [
+  4,
+  3
+ ],
+ "margin": [
+  24,
+  40,
+  26
+ ],
+ "height_scale": 4,
+ "sprites": [
+  {
+   "file": "tree_0.png",
+   "x": -16,
+   "y": -31,
+   "sort": 183,
+   "canopy": true
+  },
+  {
+   "file": "tree_1.png",
+   "x": 120,
+   "y": -12,
+   "sort": 162,
+   "canopy": true
+  },
+  {
+   "file": "tree_2.png",
+   "x": 267,
+   "y": -58,
+   "sort": 156,
+   "canopy": true
+  },
+  {
+   "file": "tree_3.png",
+   "x": 412,
+   "y": 33,
+   "sort": 177,
+   "canopy": true
+  },
+  {
+   "file": "tree_4.png",
+   "x": 525,
+   "y": 35,
+   "sort": 171,
+   "canopy": true
+  },
+  {
+   "file": "tree_5.png",
+   "x": 675,
+   "y": 15,
+   "sort": 189,
+   "canopy": true
+  },
+  {
+   "file": "tree_6.png",
+   "x": 825,
+   "y": 0,
+   "sort": 174,
+   "canopy": true
+  },
+  {
+   "file": "tree_7.png",
+   "x": 977,
+   "y": 33,
+   "sort": 177,
+   "canopy": true
+  },
+  {
+   "file": "tree_8.png",
+   "x": 1075,
+   "y": -12,
+   "sort": 162,
+   "canopy": true
+  },
+  {
+   "file": "tree_9.png",
+   "x": 1197,
+   "y": -18,
+   "sort": 156,
+   "canopy": true
+  },
+  {
+   "file": "tree_10.png",
+   "x": -44,
+   "y": 306,
+   "sort": 480,
+   "canopy": true
+  },
+  {
+   "file": "tree_11.png",
+   "x": -30,
+   "y": 564,
+   "sort": 708,
+   "canopy": true
+  },
+  {
+   "file": "tree_12.png",
+   "x": 2059,
+   "y": 18,
+   "sort": 162,
+   "canopy": true
+  },
+  {
+   "file": "tree_13.png",
+   "x": 2094,
+   "y": 306,
+   "sort": 480,
+   "canopy": true
+  },
+  {
+   "file": "tree_14.png",
+   "x": 2089,
+   "y": 606,
+   "sort": 750,
+   "canopy": true
+  },
+  {
+   "file": "tree_15.png",
+   "x": 1010,
+   "y": 602,
+   "sort": 816,
+   "canopy": true
+  },
+  {
+   "file": "tree_16.png",
+   "x": 471,
+   "y": 684,
+   "sort": 828,
+   "canopy": true
+  },
+  {
+   "file": "bush_0.png",
+   "x": 77,
+   "y": 602,
+   "sort": 644
+  },
+  {
+   "file": "bush_1.png",
+   "x": 1213,
+   "y": 600,
+   "sort": 644
+  },
+  {
+   "file": "bush_2.png",
+   "x": 2053,
+   "y": 600,
+   "sort": 644
+  },
+  {
+   "file": "fence_back_0.png",
+   "x": 161,
+   "y": 189,
+   "sort": 255
+  },
+  {
+   "file": "fence_front_0.png",
+   "x": 161,
+   "y": 543,
+   "sort": 609
+  },
+  {
+   "file": "fence_l_0.png",
+   "x": 162,
+   "y": 190,
+   "sort": 609,
+   "slice": true,
+   "length": 354
+  },
+  {
+   "file": "fence_r_0.png",
+   "x": 410,
+   "y": 190,
+   "sort": 609,
+   "slice": true,
+   "length": 354
+  },
+  {
+   "file": "net_0.png",
+   "x": 168,
+   "y": 406,
+   "sort": 432
+  },
+  {
+   "file": "rack_0.png",
+   "x": 251,
+   "y": 581,
+   "sort": 630
+  },
+  {
+   "file": "bench_0.png",
+   "x": 145,
+   "y": 603,
+   "sort": 634
+  },
+  {
+   "file": "fence_back_1.png",
+   "x": 481,
+   "y": 189,
+   "sort": 255
+  },
+  {
+   "file": "fence_front_1.png",
+   "x": 481,
+   "y": 543,
+   "sort": 609
+  },
+  {
+   "file": "fence_l_1.png",
+   "x": 482,
+   "y": 190,
+   "sort": 609,
+   "slice": true,
+   "length": 354
+  },
+  {
+   "file": "fence_r_1.png",
+   "x": 730,
+   "y": 190,
+   "sort": 609,
+   "slice": true,
+   "length": 354
+  },
+  {
+   "file": "net_1.png",
+   "x": 488,
+   "y": 406,
+   "sort": 432
+  },
+  {
+   "file": "rack_1.png",
+   "x": 571,
+   "y": 581,
+   "sort": 630
+  },
+  {
+   "file": "bench_1.png",
+   "x": 465,
+   "y": 603,
+   "sort": 634
+  },
+  {
+   "file": "fence_back_2.png",
+   "x": 801,
+   "y": 189,
+   "sort": 255
+  },
+  {
+   "file": "fence_front_2.png",
+   "x": 801,
+   "y": 543,
+   "sort": 609
+  },
+  {
+   "file": "fence_l_2.png",
+   "x": 802,
+   "y": 190,
+   "sort": 609,
+   "slice": true,
+   "length": 354
+  },
+  {
+   "file": "fence_r_2.png",
+   "x": 1050,
+   "y": 190,
+   "sort": 609,
+   "slice": true,
+   "length": 354
+  },
+  {
+   "file": "net_2.png",
+   "x": 808,
+   "y": 406,
+   "sort": 432
+  },
+  {
+   "file": "rack_2.png",
+   "x": 891,
+   "y": 581,
+   "sort": 630
+  },
+  {
+   "file": "bench_2.png",
+   "x": 785,
+   "y": 603,
+   "sort": 634
+  },
+  {
+   "file": "lamp_0.png",
+   "x": 86,
+   "y": 527,
+   "sort": 652
+  },
+  {
+   "file": "lamp_1.png",
+   "x": 438,
+   "y": 527,
+   "sort": 652
+  },
+  {
+   "file": "lamp_2.png",
+   "x": 758,
+   "y": 527,
+   "sort": 652
+  },
+  {
+   "file": "lamp_3.png",
+   "x": 1094,
+   "y": 527,
+   "sort": 652
+  },
+  {
+   "file": "lamp_4.png",
+   "x": 1286,
+   "y": 527,
+   "sort": 652
+  },
+  {
+   "file": "lamp_5.png",
+   "x": 2038,
+   "y": 527,
+   "sort": 652
+  },
+  {
+   "file": "house_back.png",
+   "x": 1280,
+   "y": 153,
+   "sort": 257
+  },
+  {
+   "file": "house_left.png",
+   "x": 1280,
+   "y": 135,
+   "sort": 624,
+   "slice": true,
+   "length": 384
+  },
+  {
+   "file": "house_right.png",
+   "x": 2024,
+   "y": 135,
+   "sort": 624,
+   "slice": true,
+   "length": 384
+  },
+  {
+   "file": "house_front.png",
+   "x": 1279,
+   "y": 519,
+   "sort": 624,
+   "fade_inside": true
+  },
+  {
+   "file": "house_roof.png",
+   "x": 1265,
+   "y": 129,
+   "sort": 625,
+   "fade_inside": true,
+   "roof": true
+  },
+  {
+   "file": "machine.png",
+   "x": 1867,
+   "y": 301,
+   "sort": 372
+  },
+  {
+   "file": "bench_house.png",
+   "x": 1431,
+   "y": 491,
+   "sort": 522
+  },
+  {
+   "file": "plant.png",
+   "x": 1962,
+   "y": 529,
+   "sort": 588
+  }
+ ]
+}
