@@ -172,14 +172,8 @@ func _build_courts_panel() -> void:
 	var ui := CanvasLayer.new()
 	ui.layer = 10
 	add_child(ui)
-	var plate := NinePatchRect.new()
-	plate.texture = load("res://assets/levels/ui/panel_title.png")
-	for m in ["patch_margin_left", "patch_margin_top", "patch_margin_right", "patch_margin_bottom"]:
-		plate.set(m, 12)
-	plate.position = Vector2(668, 10)
-	plate.size = Vector2(280, 30 + OpenPlay.COURTS * 24)
+	var plate := UiKit.panel(Rect2(Vector2(668, 10), Vector2(280, 30 + OpenPlay.COURTS * 24)), ui)
 	plate.modulate.a = 0.92
-	ui.add_child(plate)
 	for c in OpenPlay.COURTS:
 		var y := 22 + c * 24
 		var stripe := ColorRect.new()
@@ -207,13 +201,7 @@ func _build_hud() -> void:
 	ui.layer = 10
 	add_child(ui)
 	# top left: where you are, and the way out
-	var chip := NinePatchRect.new()
-	chip.texture = load("res://assets/levels/ui/panel_title.png")
-	for m in ["patch_margin_left", "patch_margin_top", "patch_margin_right", "patch_margin_bottom"]:
-		chip.set(m, 12)
-	chip.position = Vector2(12, 10)
-	chip.size = Vector2(320, 44)
-	ui.add_child(chip)
+	var chip := UiKit.panel(Rect2(Vector2(12, 10), Vector2(320, 44)), ui)
 	var title := BitmapText.new()
 	title.font = "small"
 	title.text = "OPEN PLAY"
@@ -222,13 +210,7 @@ func _build_hud() -> void:
 	ui.add_child(title)
 	ui.add_child(PromptBar.new().setup([["start", "EXIT"]], Vector2(236, 32)))
 	# bottom: what's here and what you can do
-	_panel = NinePatchRect.new()
-	_panel.texture = chip.texture
-	for m in ["patch_margin_left", "patch_margin_top", "patch_margin_right", "patch_margin_bottom"]:
-		_panel.set(m, 12)
-	_panel.position = Vector2(220, 474)
-	_panel.size = Vector2(520, 56)
-	ui.add_child(_panel)
+	_panel = UiKit.panel(Rect2(220, 474, 520, 56), ui)
 	_panel_text = BitmapText.new()
 	_panel_text.font = "small"
 	_panel_text.align = 0.5

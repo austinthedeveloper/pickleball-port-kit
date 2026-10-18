@@ -56,16 +56,7 @@ var _result_y := 316.0
 
 
 func _panel(name: String, rect: Rect2) -> NinePatchRect:
-	var n := NinePatchRect.new()
-	n.texture = load(UI + "panel_" + name + ".png")
-	n.patch_margin_left = 12
-	n.patch_margin_top = 12
-	n.patch_margin_right = 12
-	n.patch_margin_bottom = 12
-	n.position = rect.position
-	n.size = rect.size
-	add_child(n)
-	return n
+	return UiKit.panel(rect, self, name)
 
 
 func _text(font: String, s: String, pos: Vector2, align := 0.0, tint := Color.WHITE,

@@ -104,25 +104,12 @@ func setup(s: PlayerSelect) -> SelectScreen:
 
 
 func _panel(r: Rect2) -> NinePatchRect:
-	var n := NinePatchRect.new()
-	n.texture = load("res://assets/levels/ui/panel_title.png")
-	for m in ["patch_margin_left", "patch_margin_top", "patch_margin_right", "patch_margin_bottom"]:
-		n.set(m, 12)
-	n.position = r.position
-	n.size = r.size
-	add_child(n)
+	var n := UiKit.panel(r, self)
 	return n
 
 
 func _text(font: String, s: String, at: Vector2, align: float, tint: Color) -> BitmapText:
-	var t := BitmapText.new()
-	t.font = font
-	t.text = s
-	t.align = align
-	t.position = at
-	t.tint = tint
-	add_child(t)
-	return t
+	return UiKit.text(font, s, at, align, tint, self)
 
 
 func _sprite() -> Sprite2D:

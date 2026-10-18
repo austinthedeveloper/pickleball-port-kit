@@ -28,14 +28,7 @@ func setup(p: CareerPage) -> CareerKeyboard:
 	page = p
 	size = Vector2(960, 540)
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	var panel := NinePatchRect.new()
-	panel.texture = load("res://assets/levels/ui/panel_title.png")
-	for m in ["patch_margin_left", "patch_margin_top", "patch_margin_right", "patch_margin_bottom"]:
-		panel.set(m, 12)
-	panel.position = AREA.position
-	panel.size = AREA.size
-	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(panel)
+	var panel := UiKit.panel(AREA, self)
 	_overlay = Node2D.new()
 	_overlay.draw.connect(_draw_overlay)
 	add_child(_overlay)

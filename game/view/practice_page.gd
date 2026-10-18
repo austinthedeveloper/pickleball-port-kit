@@ -17,13 +17,7 @@ var _arrow: Sprite2D
 
 
 func _init() -> void:
-	var panel := NinePatchRect.new()
-	panel.texture = load("res://assets/levels/ui/panel_title.png")
-	for m in ["patch_margin_left", "patch_margin_top", "patch_margin_right", "patch_margin_bottom"]:
-		panel.set(m, 12)
-	panel.position = Vector2(300, 172)
-	panel.size = Vector2(360, 300)
-	add_child(panel)
+	var panel := UiKit.panel(Rect2(300, 172, 360, 300), self)
 	_text("big_gold", "PRACTICE", Vector2(480, 190), 0.5, Color.WHITE)
 	for i in ROWS.size():
 		_labels.append(_text("small", ROWS[i], Vector2(340, 250 + i * ROW_H), 0.0, Color.WHITE))
@@ -37,14 +31,7 @@ func _init() -> void:
 
 
 func _text(font: String, s: String, at: Vector2, align: float, tint: Color) -> BitmapText:
-	var t := BitmapText.new()
-	t.font = font
-	t.text = s
-	t.align = align
-	t.position = at
-	t.tint = tint
-	add_child(t)
-	return t
+	return UiKit.text(font, s, at, align, tint, self)
 
 
 ## Opens on the saved drill.

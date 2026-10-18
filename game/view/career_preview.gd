@@ -21,14 +21,7 @@ func setup() -> CareerPreview:
 	manifest = JSON.parse_string(FileAccess.get_file_as_string(MatchView.LEVELS + "manifest.json"))
 	size = Vector2(960, 540)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var panel := NinePatchRect.new()
-	panel.texture = load("res://assets/levels/ui/panel_title.png")
-	for m in ["patch_margin_left", "patch_margin_top", "patch_margin_right", "patch_margin_bottom"]:
-		panel.set(m, 12)
-	panel.position = AREA.position
-	panel.size = AREA.size
-	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(panel)
+	var panel := UiKit.panel(AREA, self)
 	var court := ColorRect.new()
 	court.color = Color(0.08, 0.27, 0.29)
 	court.position = AREA.position + Vector2(12, 52)
