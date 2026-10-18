@@ -648,6 +648,25 @@ feature/cld-release        (pushed)
   - Status: **Ready to test**: COURT → VENUE → DINOSAUR, SPACE or
     UNDERSEA (or VS GYM BROS, GOTH CLUB, SURF CREW), at DAY and NIGHT.
 
+### 22. `feature/cld-music`: music (asked for 2026-10-17)
+
+- [x] `PORT-22` An original soundtrack, where the SNES had none
+  (ADR-029/031's `M4-AUDIO-03`; ADR-052 amended): a title theme (D major,
+  132 BPM), the park's theme for open play (G, 116), a calmer match loop
+  per venue (PARK: F, 100, electric piano and flute; LAKESIDE: A, 94,
+  marimba and bells; SUNSET: Eb, 86, mellow keys and a round lead), and
+  stingers for match won, match lost and ladder cleared. All composed and
+  synthesized by `audio/music/make_music.py` (numpy, fixed seeds; see its
+  README): 48 kHz stereo, loops seamless. `view/music.gd` crossfades
+  between screens, stings a match's end, ducks under the applause and the
+  whistle, and follows SOUND; MUSIC (OFF..100%) on OPTIONS, saved.
+  - Verified: `test_music.gd` (each screen's track through the real main
+    scene, the equal-power crossfade, the stingers from a real match and
+    none from the demo, the duck, the MUSIC row, its save and an older
+    save's default). Loop seams measured (`--report`). 205/205 plus the
+    e2e; golden traces unchanged.
+  - Status: **Waiting for you to listen.**
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
@@ -745,6 +764,13 @@ the chain: each has a default I've gone with.
   watcher has company). At NIGHT the crickets play at SPACE and UNDERSEA
   too, as ADR-045 has it; each venue could keep its own loop at night
   instead.
+
+- **PORT-22 music:** I can't hear these either: they were checked by
+  measuring levels, seams and keys. Tell me which tracks are off (tempo,
+  a voice too loud or too bright, a melody you'd change, too busy under
+  play) and I'll rework them in `make_music.py`. The whole soundtrack's
+  level against the effects is `Music.BASE_DB` (-9 dB); the duck is
+  `Music.DUCK_DB`.
 
 ## If time runs short or long
 

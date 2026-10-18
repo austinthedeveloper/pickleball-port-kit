@@ -15,6 +15,13 @@ Pickleball '94, the Godot port. Versions follow
   background sounds, and works at every time of day.
 - The GYM BROS, GOTH CLUB and SURF CREW play their ladder matches at home
   at the new venues.
+- Music, which the SNES game never had: a title theme, the park's theme
+  in open play, a match loop for each venue, and stingers for a match
+  won, a match lost and the ladder cleared. All original, made in code.
+  - It crossfades between screens and dips under the crowd and the
+    whistle.
+  - **MUSIC** on OPTIONS sets its level (OFF to 100%); SOUND OFF silences
+    it too.
 
 ## [0.5.0] - 2026-10-17
 

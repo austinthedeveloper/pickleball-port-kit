@@ -94,6 +94,8 @@ func _play(name: String, pitch: float, volume: int, pan: float, ui: bool) -> voi
 	if not _players.has(name) or setting == AudioMap.SOUND_OFF:
 		return
 	last = [name, pitch, volume, pan]
+	if not ui:
+		Music.duck_for(name)             # the music dips under the crowd and the whistle
 	if not is_inside_tree():
 		return
 	var p: AudioStreamPlayer2D = _players[name][_next[name]]

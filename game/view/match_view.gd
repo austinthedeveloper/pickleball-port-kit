@@ -62,6 +62,11 @@ var feel: Feel
 var stats := MatchStats.new()
 
 
+## The venue's match loop (PORT-22); a match's end stings over it.
+func music_track() -> String:
+	return Music.match_track(venue)
+
+
 func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void:
 	venue = venue_name
 	demo = is_demo
@@ -438,6 +443,9 @@ func _physics_process(_delta: float) -> void:
 			_check_close_call()
 		if sim.phase == K.PHASE_MATCH_RESULT:
 			_on_match_over()
+			if not demo:
+				Music.sting(Music.result_sting(sim.match_winner == 0, cleared,
+					sim.config.human[2] or sim.config.human[3]))
 		_prev_phase = sim.phase
 	if sim.rematch_requested:
 		if park:
@@ -447,6 +455,7 @@ func _physics_process(_delta: float) -> void:
 			next_rung.emit()
 			return
 		sim.new_match()
+		Music.cue(music_track())             # the loop again after the stinger
 		input_lock = INPUT_LOCK_FRAMES
 		stats = MatchStats.new()
 		_hud.on_rematch()

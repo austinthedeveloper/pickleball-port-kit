@@ -1,5 +1,6 @@
 ## Top level: title <-> match, with the save loaded once and written at
-## safe points (leaving the title, a match's end).
+## safe points (leaving the title, a match's end). The music (PORT-22)
+## lives here, across screens: each screen entered names its loop.
 extends Node
 
 var save := SaveGame.new()
@@ -20,6 +21,7 @@ var _news_seen := GameControls.news_serial
 ## Open play (ADR-034): the park waits here while you play; fresh each time
 ## it's entered from the title.
 var park: OpenPlay
+var music: Music
 
 
 func _ready() -> void:
@@ -46,6 +48,8 @@ func _ready() -> void:
 	_toast_text.align = 0.5
 	_toast_text.position = Vector2(480, 470)
 	_toast.add_child(_toast_text)
+	music = Music.new()
+	add_child(music)
 	save.load_game()
 	show_title()
 
@@ -66,6 +70,8 @@ func _enter(n: Node) -> void:
 		_screen.queue_free()
 	_screen = n
 	add_child(n)
+	if music and n.has_method("music_track"):
+		music.play_loop(n.music_track())
 	_fade = FADE_IN
 	GameControls.clear_latch()
 
