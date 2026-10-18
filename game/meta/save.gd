@@ -57,11 +57,16 @@ static func defaults() -> Dictionary:
 			"streak": 0, "best_streak": 0, "shutouts": 0,
 			"vs": _vs_zero(),
 			# PORT-13: totals from the match stats (new keys fill in on load)
-			"points_won": 0, "points_lost": 0, "aces": 0, "winners": 0},
+			"points_won": 0, "points_lost": 0, "aces": 0, "winners": 0,
+			# PORT-25: tournaments finished, won, and the best finish (0 none,
+			# 1 quarterfinal .. 4 champion)
+			"cup_runs": 0, "cups": 0, "cup_best": 0},
 		## who holds a record ("" = nobody, shown ---)
 		"initials": {"best_streak": "", "longest_rally": ""},
 		## the three career players and the active one (ADR-047, v5)
 		"career": Career.new().to_dict(),
+		## the tournament in play (PORT-25; {} = none), filled in on load
+		"tournament": {"bracket": {}},
 	}
 
 
@@ -198,6 +203,31 @@ func _older_file() -> String:
 	if b == null:
 		return FILES[1]
 	return FILES[1] if _newer(int(a["seq"]), int(b["seq"])) else FILES[0]
+
+
+# --- Tournament (PORT-25) ---------------------------------------------------
+
+## The tournament in play, or null.
+func tournament() -> Tournament:
+	return Tournament.from_dict(data["tournament"]["bracket"])
+
+
+func store_tournament(t: Tournament) -> void:
+	data["tournament"]["bracket"] = t.to_dict() if t else {}
+
+
+const CUP_FINISHES := ["", "QUARTERFINALIST", "SEMIFINALIST", "FINALIST"]
+
+## A tournament over for you (Tournament.finish()): counted once.
+func record_cup(finish: String) -> void:
+	if finish == "":
+		return
+	var r: Dictionary = data["records"]
+	r["cup_runs"] = int(r["cup_runs"]) + 1
+	var place := 4 if finish.begins_with("CHAMPION") else maxi(0, CUP_FINISHES.find(finish))
+	if place == 4:
+		r["cups"] = int(r["cups"]) + 1
+	r["cup_best"] = maxi(int(r["cup_best"]), place)
 
 
 # --- Records ---------------------------------------------------------------

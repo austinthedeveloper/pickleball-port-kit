@@ -114,6 +114,7 @@ func show_title() -> void:
 	t.save = save
 	t.start_match.connect(_on_start)
 	t.open_park.connect(_on_open_park)
+	t.open_tournament.connect(show_bracket)
 	_swap(t)
 	park = null
 
@@ -184,3 +185,32 @@ func _on_next_rung(prev: SimTypes.MatchConfig) -> void:
 	if prev.career_p1:
 		cfg.set_career(save.career.active_player())      # ADR-047
 	_on_start(cfg, Settings.home_venue(rung), true)
+
+
+## The tournament's bracket (PORT-25), from the title or back from a match
+## (`reveal`: the new results appear one at a time).
+func show_bracket(reveal := false) -> void:
+	save.save_game()
+	var b := BracketScreen.new().setup(save, reveal)
+	b.leave.connect(show_title)
+	b.play.connect(_on_tournament_match)
+	_swap(b)
+
+
+## A tournament match at the opponent's home court: the match records its
+## result in the bracket; B on the result comes back to it, MENU to the title.
+func _on_tournament_match(cfg: SimTypes.MatchConfig, venue: String) -> void:
+	save.save_game()
+	var m := MatchView.new()
+	m.save = save
+	m.tournament = true
+	m.finished.connect(func(to_title: bool):
+		if to_title:
+			show_title()
+		else:
+			show_bracket(true))
+	_swap(m)
+	m.camera.percent = Settings.CAMERAS[Settings.camera_i]
+	m.court = Settings.court.duplicate()
+	m.time = Settings.time_i
+	m.setup(cfg, venue, false)

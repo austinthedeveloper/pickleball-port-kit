@@ -12,6 +12,10 @@ Pickleball '94, the Godot port. Versions follow
   fast, steep smash, with its own sound, a big shake and SMASH! over it.
   The CPUs smash too. SOFT still blocks a high ball. The stats card counts
   SMASHES.
+- A **TOURNAMENT** on the main menu: an eight-team knockout against the
+  ladder teams, each match at your opponent's home court, with a bracket
+  between matches that fills in as the rounds go. Cups won show on
+  RECORDS.
 
 ### Fixed
 - A player no longer flashes in the top-left corner of the title when

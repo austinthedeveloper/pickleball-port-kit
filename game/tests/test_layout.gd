@@ -98,7 +98,7 @@ func _save() -> SaveGame:
 	var r: Dictionary = s.data["records"]
 	for k in ["singles_wins", "singles_losses", "doubles_wins", "doubles_losses", "points_won",
 			"points_lost", "longest_rally", "best_streak", "practice_best", "shutouts", "aces",
-			"winners", "ladder_clears"]:
+			"winners", "ladder_clears", "cups"]:
 		r[k] = 188
 	s.data["initials"] = {"best_streak": "WWW", "longest_rally": "MMM"}
 	return s
@@ -354,3 +354,47 @@ func test_park() -> void:
 		view.step_frame(SimTypes.Intent.new())
 	check_layout(view, "park clubhouse board")
 	view.free()
+
+
+## PORT-25: the bracket fresh, in play, out, won (singles and doubles,
+## the career player's name in your boxes), and MAIN's TOURNAMENT row at
+## its widest value.
+func test_tournament() -> void:
+	for doubles in [false, true]:
+		for state in ["fresh", "semi", "out", "won"]:
+			var s := _save()
+			s.career.players[0] = Career.Player.new()
+			s.career.players[0].name = "WWWWWWWW"
+			s.career.active = 0
+			var t := Tournament.create(1994, doubles, K.DIFFICULTY_MEDIUM, 21)
+			if state != "fresh":
+				t.record(true, 21, 19)
+			if state == "out":
+				t.record(false, 19, 21)
+			elif state == "won":
+				t.record(true, 21, 19)
+				t.record(true, 23, 21)
+			t.seen = 99
+			if state != "fresh":
+				s.store_tournament(t)
+			var b := BracketScreen.new().setup(s, false)
+			runner.root.add_child(b)
+			if not b.is_node_ready():
+				b._ready()
+			for row in ["play", "mode", "back"]:
+				b.page.select(row)
+				b.forfeit_armed = row == "mode"
+				b.page.refresh()
+				check_layout(b, "bracket %s %s on %s" % ["doubles" if doubles else "singles", state, row])
+			b.free()
+	var s2 := _save()
+	var t2 := Tournament.create(3, false, K.DIFFICULTY_MEDIUM, 11)
+	s2.store_tournament(t2)
+	var title := TitleScreen.new()
+	title.save = s2
+	runner.root.add_child(title)
+	if not title.is_node_ready():
+		title._ready()
+	title.pages["main"].refresh()
+	check_layout(title, "title main, QF on TOURNAMENT")
+	title.free()

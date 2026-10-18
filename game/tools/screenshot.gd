@@ -92,6 +92,27 @@ func _initialize() -> void:
 		var pv := ParkView.new().setup(op, _career_save() if "career" in a.slice(4) else null, false)
 		root.add_child(pv)
 		_view = pv
+	elif mode.begins_with("bracket"):
+		# PORT-25: bracket (a fresh draw), bracket_semi (your quarterfinal
+		# won), bracket_out (out in the semifinal), bracket_won (champions)
+		var sv := SaveGame.new()
+		sv.data = SaveGame.defaults()
+		sv.career = Career.from_dict(sv.data["career"])
+		var tour := Tournament.create(1994, "doubles" in a.slice(4), K.DIFFICULTY_MEDIUM, 11)
+		if mode != "bracket":
+			tour.record(true, 11, 6)
+		if mode == "bracket_out":
+			tour.record(false, 8, 11)
+		elif mode == "bracket_won":
+			tour.record(true, 11, 9)
+			tour.record(true, 12, 10)
+		if mode != "bracket":
+			tour.seen = 99
+			sv.store_tournament(tour)
+		var bs := BracketScreen.new().setup(sv, false)
+		bs.save = null                      # nothing written
+		root.add_child(bs)
+		_view = bs
 	elif mode.begins_with("title"):
 		Settings.venue_i = maxi(0, Settings.VENUES.find(venue))
 		_view = TitleScreen.new()

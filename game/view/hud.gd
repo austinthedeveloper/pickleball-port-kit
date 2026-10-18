@@ -358,10 +358,11 @@ func refresh() -> void:
 			var cfg := s.config
 			var vs_ladder: bool = cfg.opponent >= 0 and not cfg.human[2]
 			_banner.text = "YOU WIN!" if you else "%s WINS" % _team_label(s.match_winner)
-			if view.cleared:
-				_banner.text = "CHAMPION!"
+			if view.cleared or (view.tournament and view.cup_finish.begins_with("CHAMPION")):
+				_banner.text = "CHAMPION!" if not view.cup_finish.begins_with("CHAMPIONS") else "CHAMPIONS!"
 			var ready := s.phase_timer >= K.POINT_RESULT_MIN_FRAMES
-			var next := "PARK" if view.park else ("NEXT OPPONENT" if (view.ladder and you) else "REMATCH")
+			var next := "PARK" if view.park else ("NEXT OPPONENT" if (view.ladder and you) else (
+				"BRACKET" if view.tournament else "REMATCH"))
 			_banner_sub.text = ""
 			_result_prompts.visible = ready
 			if ready and _result_prompts.items[0][1] != next:
@@ -371,6 +372,10 @@ func refresh() -> void:
 				_result_line.tint = Story.team_color(cfg.opponent)
 				if view.cleared:
 					_result_line.text = "LADDER CLEARED!"
+					_result_line.tint = Color("fbe46a")
+				elif view.tournament and view.cup_finish != "":
+					_result_line.text = view.cup_finish + "!" if view.cup_finish.begins_with("CHAMPION") \
+						else "OUT AS " + view.cup_finish
 					_result_line.tint = Color("fbe46a")
 				elif view.ladder and you and view.save:
 					_result_line.text += "  NEXT UP: " + String(Opponents.team(

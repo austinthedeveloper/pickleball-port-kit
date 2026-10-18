@@ -51,6 +51,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-22 | Music | `feature/cld-music` | Done |
 | PORT-23 | A cleanup round | `feature/cld-cleanup-2` | Done |
 | PORT-24 | The overhead | `feature/cld-overhead` | Ready to test |
+| PORT-25 | The tournament | `feature/cld-tournament` | Ready to test |
 
 ## Releases
 
@@ -144,6 +145,36 @@ feature/cld-release-0.6.0   (v0.6.0)
     swing with HIT or DRIVE. Does it feel strong enough, and too common
     in doubles?
 
+### 25. `feature/cld-tournament`: the tournament (chosen 2026-10-18)
+
+- [x] `PORT-25` TOURNAMENT on MAIN (ADR-054): an eight-entry knockout,
+  you as top seed and seven ladder teams (the warm-up HENDERSON sits
+  out), QUARTERFINAL, SEMIFINAL, FINAL, each match at the opponent's home
+  court with their intro card. The bracket screen (`view/bracket_screen.gd`)
+  shows the draw, scores, connectors and the champion; START / MODE /
+  BACK before it starts, PLAY / FORFEIT (twice) / BACK during, NEW
+  TOURNAMENT after. The other matches are decided from the tournament's
+  seed (the higher rung usually wins) and appear one at a time when you
+  come back. The result screen says BRACKET, and OUT AS SEMIFINALIST or
+  CHAMPION! when it ends. Saved: the bracket in play, and cups in the
+  records (RECORDS: SHUTOUTS  CUPS). MAIN's footer prompt went (the
+  key legend says HIT) to make room for the row.
+  - Accept: pure logic with tests; the save round-trip and an older save;
+    the screen by row id; a real match recording through the view; main's
+    loop; layout cases; screenshots; golden traces unchanged.
+  - Verified: `test_tournament.gd` (the draw and seeding; your road; out
+    in the semi and the rest playing out; the same seed the same bracket,
+    favourites 133 to 47 upsets over 60 draws; the save, its floats, an
+    older save, `record_cup`; START, MODE, FORFEIT by row id; the reveal;
+    a real KID match recorded and B going to the bracket; the title ->
+    bracket -> match -> bracket loop in the real main scene),
+    `test_layout.test_tournament` (four states, singles and doubles, an
+    eight-letter career name, every row, and MAIN's TOURNAMENT at QF).
+    253/253 plus the e2e; golden traces unchanged. Screenshots: a fresh
+    draw, in the semi, out in doubles, champions, and the title.
+  - Status: **Ready to test**: TOURNAMENT on MAIN. Is the road's ramp
+    right (SNOWBIRDS first), and do upsets feel too common or too rare?
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
@@ -180,4 +211,11 @@ the chain: each has a default I've gone with.
   smash (HIT a gentler overhead), it's one line. The swing's animation is
   guessed at the windup (a ball over 17 px), so a drive at a ball 18-19 px
   up can show the overhead frames without smashing (KNOWN_ISSUES #49).
+
+- **PORT-25 tournament:** you're the top seed, so the first round is the
+  easiest team in the draw; a random draw would be more of a lottery (say
+  if you'd prefer it). The other teams' matches are decided by odds from
+  the ladder, not played (ADR-054 says why). Matches use MATCH SETUP's
+  points; finals could be longer (to 15 or win by 2) if you want them to
+  feel bigger. No 2P/multiplayer tournament yet.
 

@@ -25,6 +25,10 @@ var demo := false
 var input_lock := 0
 var save: SaveGame              ## records (null: none kept)
 var ladder := false             ## a ladder match: intro card, next rung
+## A tournament match (PORT-25): the intro card, the result recorded in the
+## bracket, and B on the result goes back to it (finished(false)).
+var tournament := false
+var cup_finish := ""            ## set when this match ended your tournament
 ## From the park (ADR-034): B on the result, or PARK on practice's pause
 ## menu, goes back there (finished(false)).
 var park := false
@@ -75,7 +79,7 @@ func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void
 	if demo:
 		sim.start_attract()
 	input_lock = INPUT_LOCK_FRAMES
-	if ladder and cfg.opponent >= 0 and not cfg.human[2]:
+	if (ladder or tournament) and cfg.opponent >= 0 and not cfg.human[2]:
 		card_frames = 0
 	_build()
 	# place everyone now: until the first tick they'd stand at the origin,
@@ -497,8 +501,8 @@ func _physics_process(_delta: float) -> void:
 					sim.config.human[2] or sim.config.human[3]))
 		_prev_phase = sim.phase
 	if sim.rematch_requested:
-		if park:
-			finished.emit(false)             # ADR-034: back to the park
+		if park or tournament:
+			finished.emit(false)             # ADR-034: back to the park; PORT-25: the bracket
 			return
 		if ladder and sim.match_winner == 0:
 			next_rung.emit()
@@ -646,12 +650,26 @@ func _on_match_over() -> void:
 			sim.team_score[1] if won else -1)
 		if ladder and won:
 			cleared = save.advance_ladder(Opponents.count())
+		if tournament:
+			_record_tournament(won)
 		save.record_stats(stats)
 	save.save_game()
 	initials.begin(save)
 	# then what the career player unlocked (after the initials, if any)
 	if save.career.new_unlocks:
 		unlock_frames = 0
+
+
+## PORT-25: the bracket takes this result (and decides the round's other
+## matches); a tournament over for you goes in the records.
+func _record_tournament(won: bool) -> void:
+	var t := save.tournament()
+	if t == null or t.next_match().is_empty():
+		return
+	t.record(won, sim.team_score[0], sim.team_score[1])
+	save.store_tournament(t)
+	cup_finish = t.finish()
+	save.record_cup(cup_finish)
 
 
 ## Leaving practice: a new best streak (for the session's zone) is saved

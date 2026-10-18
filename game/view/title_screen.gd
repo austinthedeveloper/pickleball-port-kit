@@ -16,6 +16,7 @@ signal start_match(cfg: SimTypes.MatchConfig, venue: String, ladder: bool, pads:
 	players: Array)
 ## OPEN PLAY (ADR-034): the park; 2P comes along when PLAYERS is 2P.
 signal open_park(two_players: bool)
+signal open_tournament          ## PORT-25: the bracket
 
 const SWITCH_LOCK := MenuPage.TRANSITION   ## no menu input while a page slides in
 
@@ -136,7 +137,9 @@ func _add_page(id: String, title: String, rows: Array, help: Array,
 	if id != "main":
 		rows.append({"id": "back", "label": "BACK", "press": back})
 	# top pad, the rows, then a footer that keeps the prompt bar clear of them
-	var h := 18 + rows.size() * MenuPage.ROW_H + 52 + (46 if title != "" else 0)
+	# (MAIN has none: the key legend under it says HIT, and its rows need the room)
+	var h := 18 + rows.size() * MenuPage.ROW_H + (52 if not help.is_empty() else 12) \
+		+ (46 if title != "" else 0)
 	at.size.y = maxi(h, 300)
 	var p := MenuPage.new().setup(id, title, rows, at, help)
 	# the mouse: hover selects, click presses, wheel changes, right click backs
@@ -160,6 +163,7 @@ func _build_pages() -> void:
 			"press": _open_park},
 		{"id": "multiplayer", "label": "MULTIPLAYER", "value": func(): return "UP TO 4",
 			"press": open_lobby},
+		{"id": "tournament", "label": "TOURNAMENT", "value": _cup_label, "press": _open_tournament},
 		{"id": "play", "label": "MATCH SETUP", "value": _play_summary,
 			"press": func(): open_page("play")},
 		{"id": "practice", "label": "PRACTICE", "press": _open_practice},
@@ -170,7 +174,7 @@ func _build_pages() -> void:
 			"press": func(): open_page("modifiers")},
 		{"id": "options", "label": "OPTIONS", "press": func(): open_page("options")},
 		{"id": "career", "label": "CAREER", "value": _career_label, "press": open_career},
-	], [["hit", "SELECT"]], Rect2(300, 146, 360, 0))
+	], [], Rect2(300, 146, 360, 0))
 	_add_page("play", "MATCH SETUP", [
 		{"id": "vs", "label": "VS", "value": _opponent_label, "change": _change_opponent},
 		{"id": "difficulty", "label": "DIFFICULTY", "value": func(): return Settings.DIFFICULTIES[Settings.difficulty_i],
@@ -253,7 +257,8 @@ func _build_pages() -> void:
 		{"id": "rally", "label": "LONGEST RALLY", "value": func(): return _held("longest_rally")},
 		{"id": "points", "label": "POINTS", "value": func(): return "%d-%d" % [_rec("points_won"), _rec("points_lost")]},
 		{"id": "aces", "label": "ACES  WINNERS", "value": func(): return "%d  %d" % [_rec("aces"), _rec("winners")]},
-		{"id": "shutouts", "label": "SHUTOUTS", "value": func(): return str(_rec("shutouts"))},
+		{"id": "shutouts", "label": "SHUTOUTS  CUPS", "value": func(): return "%d  %d" % [
+			_rec("shutouts"), _rec("cups")]},    # PORT-25: tournaments won
 		{"id": "ladder", "label": "LADDER", "value": func(): return "%d OF %d  CLEARS %d" % [
 			_rung() + 1, Opponents.count(), _rec("ladder_clears")]},
 		{"id": "practice", "label": "PRACTICE BEST", "value": func(): return str(_rec("practice_best"))},
@@ -532,6 +537,23 @@ func _start(doubles: bool) -> void:
 	_store_settings()
 	main_cursor = pages["main"].cursor
 	start_match.emit(config(doubles), Settings.venue(), Settings.opponent_i == -2 and not Settings.two_players, [], [])
+
+
+## TOURNAMENT's value: your round in a bracket in play, else cups won.
+func _cup_label() -> String:
+	var t := save.tournament() if save else null
+	if t and not t.next_match().is_empty():
+		return Tournament.ROUND_SHORT[int(t.next_match()["round"])]
+	var cups: int = int(save.data["records"]["cups"]) if save else 0
+	return "%d CUP%s" % [cups, "" if cups == 1 else "S"] if cups else "8 TEAMS"
+
+
+func _open_tournament() -> void:
+	if _sfx:
+		_sfx.play("confirm")
+	_store_settings()
+	main_cursor = pages["main"].cursor
+	open_tournament.emit()
 
 
 func _open_park() -> void:
