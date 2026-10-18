@@ -4,6 +4,20 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [Unreleased]
+
+### Fixed
+- A player no longer flashes in the top-left corner of the title when
+  you change COURT or TIME of day.
+- Every match kept its whole simulation in memory after it ended; long
+  sessions now stay small.
+
+### Changed
+- Behind the scenes: the title's CAREER pages and the menus' panels and
+  labels share code; the roadmap is an index, with the finished tasks in
+  `design/PORT_HISTORY.md`. Re-syncing the art no longer rewrites every
+  asset's import file, and two checkouts can run their tests at once.
+
 ## [0.6.0] - 2026-10-18
 
 Three new venues, career mode, and music.

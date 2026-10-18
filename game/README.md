@@ -42,25 +42,30 @@ the first is P1's, with one pad P1 plays on the keyboard.
 
 MAIN: **SINGLES** / **DOUBLES** open Player Select (shirt, body, paddle
 with POWER / CONTROL / SPEED; 2P picks next on pad 2), then the match.
-**MATCH SETUP**: VS (LADDER plays your saved rung at the team's home
-court, with their intro card; the default CPU; or any team), DIFFICULTY,
-POINTS, PLAYERS (1P, 2P versus). **PRACTICE** (ADR-028): the ball machine
-feeds a drill (SHOT, TARGET, RATE, RETURN TO) and counts your return
-streak. **COURT**: VENUE, TIME (DAY, DUSK, NIGHT), SURFACE, KITCHEN,
-SURROUND, LINES, previewed on the demo. **MODIFIERS**: BIG BALL, FAST
-BALL, WIN BY 2, LAVA. **OPTIONS**: CAMERA, SOUND, FULLSCREEN, SCALE.
-**RECORDS**: wins, the best streak and longest rally with who holds them,
-shutouts, the ladder, practice, the record against each team, and ERASE
-RECORDS (B twice). Y backs out of any page. Start pauses a match: RESUME,
-RESTART, MAIN MENU. Settings, records and the ladder are saved
-(`user://save_a.json`/`save_b.json`, layout v4).
+**OPEN PLAY** walks the park (ADR-034): put your paddle in a court's
+stack and play when your turn comes. **MULTIPLAYER**: the four-pad lobby
+(above). **MATCH SETUP**: VS (LADDER plays your saved rung at the team's
+home court, with their intro card; the default CPU; or any team),
+DIFFICULTY, POINTS, PLAYERS (1P, 2P versus). **PRACTICE** (ADR-028): the
+ball machine feeds a drill (SHOT, TARGET, RATE, RETURN TO) and counts
+your return streak. **COURT**: VENUE (PARK, LAKESIDE, SUNSET, DINOSAUR,
+SPACE, UNDERSEA), TIME (DAY, DUSK, NIGHT), SURFACE, KITCHEN, SURROUND,
+LINES, previewed on the demo. **MODIFIERS**: BIG BALL, FAST BALL, WIN BY
+2, LAVA. **OPTIONS**: CAMERA, SOUND, MUSIC, FULLSCREEN, SCALE, CONTROLS,
+ACCESSIBILITY. **CAREER** (ADR-047): three player slots, each a named
+player with a look, lifetime stats and unlocks; the active one is 1P.
+Behind it, **RECORDS**: wins, the best streak and longest rally with who
+holds them, shutouts, the ladder, practice, the record against each
+team, and ERASE RECORDS (twice). Y backs out of any page. Start pauses a
+match: RESUME, RESTART, MAIN MENU. Settings, records, careers and the
+ladder are saved (`user://save_a.json`/`save_b.json`, layout v5).
 
 ## Release
 
 ```sh
 game/tools/export.sh --check        # the .pck export and a headless boot (no templates needed)
 game/tools/export.sh                # every preset into build/ (needs Godot's export templates)
-python3 game/tools/release_notes.py # game/RELEASE_NOTES.md from design/PORT_ROADMAP.md
+python3 game/tools/release_notes.py # game/RELEASE_NOTES.md from the roadmap and its history
 .venv/bin/python game/tools/make_icon.py   # game/icon.png from the art
 ```
 
@@ -77,12 +82,14 @@ title shows; from a checkout the title says `BUILD DEV <describe>`.
 
 | Path | What |
 |---|---|
-| `sim/` | The deterministic simulation: `k.gd` constants, `types.gd` records, `sim.gd` (ball, collision, players, serve, rules, game, frame pipeline), `ai.gd` (the CPU), `practice.gd` (the ball machine), `select.gd` (Player Select), `replay.gd` (close calls), `opponents.gd`, `paddles.gd`. Pure: no Nodes, time, or randomness. |
-| `view/` | Presentation, read-only: `match_view.gd`, `hud.gd`, `court_view.gd` (world → screen), `menu_page.gd` (every menu page), `title_screen.gd`, `practice_page.gd`, `select_screen.gd`, `crowd.gd`, `watcher.gd`, `camera_lean.gd`, `court_style.gd` (+ shader: court colours, time of day), `close_call.gd`, `feel.gd`, `audio_map.gd`/`sfx.gd`, `player_look.gd` (+ palette shader), `practice_view.gd`, `bitmap_text.gd`, `debug_overlay.gd`. |
-| `meta/` | `save.gd` (two-copy save with migration, layout v4), `story.gd` (cards, results, quips), `initials.gd` (the record initials card), `settings.gd` (every setting, load/store, match config), `build_info.gd`. |
-| `game_ui/controls.gd` | Input map (autoload), P1/P2 intents, tap latch, SNES pad bits for menus. |
+| `sim/` | The deterministic simulation: `k.gd` constants, `types.gd` records, `sim.gd` (ball, collision, players, serve, rules, game, frame pipeline), `ai.gd` (the CPU), `practice.gd` (the ball machine), `select.gd` (Player Select), `replay.gd` (close calls), `open_play.gd` (the park's courts and stacks), `career.gd` (career stats and unlocks), `opponents.gd`, `paddles.gd`. Pure: no Nodes, time, or randomness. |
+| `view/` match | `match_view.gd` (one match: sprites, ball, effects), `court_view.gd` (world → screen), `court_style.gd` (+ shader: court colours, time of day), `hud.gd`, `crowd.gd`, `watcher.gd`, `camera_lean.gd`, `close_call.gd`, `feel.gd`, `player_look.gd` (+ palette shader), `practice_view.gd`, `debug_overlay.gd`. |
+| `view/` menus | `title_screen.gd` (the title and its pages), `title_career.gd` (the CAREER pages), `menu_page.gd` (every menu page), `select_screen.gd` (Player Select), `lobby_screen.gd` (multiplayer), `practice_page.gd`, `career_keyboard.gd`, `career_preview.gd`, `park_view.gd` (open play), `prompts.gd`/`prompt_bar.gd` (device-aware button prompts), `ui_kit.gd` (panels and text), `bitmap_text.gd`. |
+| `view/` sound | `audio_map.gd`/`sfx.gd` (effects and ambience), `music.gd` (the soundtrack: crossfades, stingers, ducking). |
+| `meta/` | `save.gd` (two-copy save with migration, layout v5), `settings.gd` (every setting, load/store, match config), `story.gd` (cards, results, quips), `initials.gd` (the record initials card), `career_page.gd` (CAREER's input logic), `lobby.gd` (the multiplayer lobby's logic), `match_stats.gd` (post-match stats), `build_info.gd`. |
+| `game_ui/` | `controls.gd` (input map autoload, P1..P4 intents, tap latch, SNES pad bits for menus), `bindings.gd` (remapping). |
 | `tests/` | Headless runner and suites; `golden/` traces; `golden.gd` regenerates them. |
-| `tools/` | `test.sh`, `export.sh`, `release_notes.py`, `make_icon.py`, `sync_assets.sh` (copies `art/levels/out` and the SFX in), `screenshot.gd` (title pages, matches, `court=`, `time=`, `pause`, `closecall`, `initials`), `point_log.gd` (why each point ended). |
+| `tools/` | `test.sh`, `export.sh`, `version.py`, `release_notes.py`, `make_icon.py`, `sync_assets.sh` (copies `art/levels/out` and the audio in), `screenshot.gd` (title pages, matches, `court=`, `time=`, `pause`, `closecall`, `initials`), `point_log.gd` (why each point ended). |
 | `assets/` | Synced art and audio (don't edit here; rebuild in `art/levels`). |
 | `data/` | `opponents.json`, `paddles.json`, `court_colors.json`, `venues.json`, … copied from the kit's `data/`. |
 

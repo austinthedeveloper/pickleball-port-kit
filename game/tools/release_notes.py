@@ -1,4 +1,4 @@
-"""Release notes from design/PORT_ROADMAP.md (PORT-09): each task's title,
+"""Release notes from design/PORT_ROADMAP.md and PORT_HISTORY.md (PORT-09): each task's title,
 status and what to try, for the build's ID. Writes game/RELEASE_NOTES.md.
     python3 game/tools/release_notes.py [build-id]
 """
@@ -9,6 +9,7 @@ from pathlib import Path
 
 KIT = Path(__file__).resolve().parents[2]
 SHEET = KIT / "design/PORT_ROADMAP.md"
+HISTORY = KIT / "design/PORT_HISTORY.md"   # the finished tasks (PORT-23)
 OUT = KIT / "game/RELEASE_NOTES.md"
 
 
@@ -32,7 +33,7 @@ def main():
     build = sys.argv[1] if len(sys.argv) > 1 else subprocess.run(
         ["git", "-C", str(KIT), "describe", "--tags", "--always", "--dirty"],
         capture_output=True, text=True).stdout.strip()
-    rows = tasks(SHEET.read_text())
+    rows = sorted(tasks(HISTORY.read_text()) + tasks(SHEET.read_text()))
     done = [r for r in rows if r[3]]
     lines = [f"# Pickleball '94 (Godot port) release notes", "",
              f"Build `{build}`. Generated from `design/PORT_ROADMAP.md` by",

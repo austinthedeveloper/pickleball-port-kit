@@ -16,8 +16,9 @@ func _initialize() -> void:
 	# (the press lost, the e2e flaky)
 	Engine.max_physics_steps_per_frame = 1
 	Engine.physics_jitter_fix = 0.0
-	# a scratch save, so the run never touches the player's
-	SaveGame.default_dir = "user://e2e/"
+	# a scratch save, so the run never touches the player's; one per
+	# checkout, since every checkout shares user:// (KNOWN_ISSUES #42)
+	SaveGame.default_dir = "user://e2e_%s/" % ProjectSettings.globalize_path("res://").md5_text().left(8)
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(SaveGame.default_dir))
 	for f in SaveGame.FILES:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(SaveGame.default_dir + f))

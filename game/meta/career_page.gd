@@ -1,6 +1,6 @@
 ## The CAREER page's logic (ADR-047, career_page.c in its order): the
 ## title's RECORDS entry. Pure input logic, like the practice editor; the
-## screen (view/career_screen.gd) draws it as MenuPages and the title
+## screen (view/title_career.gd) draws it as MenuPages and the title
 ## writes the save on SAVE.
 ##
 ##   SLOTS   the three players, NO PLAYER, and RECORDS. B opens a player

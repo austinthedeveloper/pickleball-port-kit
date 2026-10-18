@@ -27,8 +27,10 @@ builds all four platforms and publishes them to the GitHub release
 (`release.yml`). Godot's version and SHA-512s are pinned in
 `.github/actions/setup-godot/action.yml`.
 
-`design/PORT_ROADMAP.md` is the milestone sheet (PORT-00..09, status and
-"For you" questions); keep it current with each branch.
+`design/PORT_ROADMAP.md` is the milestone sheet (an index of every PORT
+task, releases, the current phase's tasks, open "For you" questions);
+keep it current with each branch. Finished tasks, in full, live in
+`design/PORT_HISTORY.md`. `game/README.md` has the file layout.
 
 ## Rules of the code (game/)
 
@@ -51,6 +53,11 @@ builds all four platforms and publishes them to the GitHub release
   ignores input for `INPUT_LOCK_FRAMES`; a menu page change locks for
   `SWITCH_LOCK` and clears the latch; the intro and initials cards set
   the lock as they close.
+- **Panels and labels come from `UiKit`** (`view/ui_kit.gd`), not
+  hand-built NinePatchRects.
+- **A MatchView disposes its sim** when freed (`Sim.dispose()` breaks the
+  Sim↔AI↔practice cycles; `test_leaks.gd`). Anything else that holds a
+  Sim past its screen must call it too.
 - **Menus are MenuPages** (`view/menu_page.gd`): rows by id, driven by
   move/change/press (keys, pad and mouse alike). Tests select rows by id
   (`page.select("sound")`), never by counting presses (playbook §4.8).
