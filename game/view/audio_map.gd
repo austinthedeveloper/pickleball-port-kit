@@ -9,9 +9,9 @@ const SOUND_NO_CROWD := 1
 const SOUND_OFF := 2
 const SOUND_NAMES := ["ALL", "NO CROWD", "OFF"]
 
-## SNESMOD pitch 5 / 3 against 4: a drive is sharper, a soft shot duller.
-const PITCH_DRIVE := 1.19
-const PITCH_SOFT := 0.84
+## The HD set (audio/hd-sfx) has its own sample for each shot, where the
+## SNES pitched one sample (SNESMOD pitch 5 / 3 against 4).
+const HIT_EFFECTS := {K.SHOT_STANDARD: "hit", K.SHOT_DRIVE: "hit_drive", K.SHOT_SOFT: "hit_soft"}
 
 
 static func pan_for_x(x: int) -> float:
@@ -38,9 +38,7 @@ static func for_event(e: Array, setting: int, rally: int, match_won: bool) -> Ar
 			out.append(["hit", 1.0, 12, pan])
 		K.EVENT_HIT:
 			var shot: int = e[3] >> 4
-			var pitch := PITCH_DRIVE if shot == K.SHOT_DRIVE else \
-				(PITCH_SOFT if shot == K.SHOT_SOFT else 1.0)
-			out.append(["hit", pitch, 13 if shot == K.SHOT_DRIVE else 12, pan])
+			out.append([HIT_EFFECTS.get(shot, "hit"), 1.0, 13 if shot == K.SHOT_DRIVE else 12, pan])
 		K.EVENT_BOUNCE:
 			var n: int = e[3]
 			out.append(["bounce", 1.0, maxi(4, 11 - (n - 1) * 3), pan])

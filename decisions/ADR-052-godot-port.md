@@ -193,6 +193,13 @@ stream, at the 960×540 art density, through the art's court geometry.
   - Records count your game as a doubles game against the CPU, including
     the VS row for the team you played; the ladder doesn't move. No save
     change: the park isn't saved.
+- **HD audio** (PORT-18). The port's sounds come from
+  `audio/hd-sfx/make_sfx.py`, not the SNES set (kept in
+  `audio/snes-sfx`): 48 kHz, modal synthesis and shaped noise with
+  convolution reverb. Each shot type has its own sample instead of
+  ADR-029's pitch (`AudioMap.HIT_EFFECTS`), and hits and bounces play
+  round-robin variants with a ±3-4% pitch spread (`Sfx`), which is
+  presentation, so it isn't the sim's determinism.
 - **Not ported yet:** career (ADR-047).
 
 ## Rejected (and why)

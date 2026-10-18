@@ -9,5 +9,6 @@ mkdir -p "$DST/levels" "$DST/audio"
 cp -R "$KIT/art/levels/out/venues" "$KIT/art/levels/out/sprites" \
       "$KIT/art/levels/out/ui" "$DST/levels/"
 cp "$KIT/art/levels/out/manifest.json" "$KIT/art/levels/out/palettes.json" "$DST/levels/"
-cp "$KIT/audio/snes-sfx/"*.wav "$DST/audio/"
+# the HD set (audio/hd-sfx/make_sfx.py); the SNES originals stay in audio/snes-sfx
+cp "$KIT/audio/hd-sfx/out/"*.wav "$DST/audio/"
 echo "synced assets into $DST"

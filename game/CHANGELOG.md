@@ -4,6 +4,20 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [Unreleased]
+
+### Changed
+- Every sound remade in HD (48 kHz, stereo where it counts) without the
+  SNES's limits:
+  - paddle hits with a real "pock", and their own sound for drives and
+    soft shots;
+  - court bounces, the net, a pea whistle;
+  - a crowd of individual clappers;
+  - new venue ambience: birds and wind, gulls and waves, crickets.
+
+  Hits and bounces come in variants, so rallies don't repeat. The SNES
+  sounds are kept in `audio/snes-sfx`.
+
 ## [0.3.1] - 2026-10-17
 
 Text and layout fixes.

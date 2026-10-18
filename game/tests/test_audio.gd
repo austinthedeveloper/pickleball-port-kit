@@ -16,11 +16,23 @@ func test_events_to_effects() -> void:
 	eq(_first([K.EVENT_POINT, 100, 130, 0])[0], "applause")
 
 
-func test_pitch_by_shot() -> void:
-	var std: float = _first([K.EVENT_HIT, 60, 130, 0 | (K.SHOT_STANDARD << 4)])[1]
-	var drive: float = _first([K.EVENT_HIT, 60, 130, 0 | (K.SHOT_DRIVE << 4)])[1]
-	var soft: float = _first([K.EVENT_HIT, 60, 130, 0 | (K.SHOT_SOFT << 4)])[1]
-	check(drive > std and std > soft, "drive sharper, soft duller (%s %s %s)" % [drive, std, soft])
+## The HD set gives each shot its own sample (the SNES pitched one).
+func test_sound_by_shot() -> void:
+	eq(_first([K.EVENT_HIT, 60, 130, 0 | (K.SHOT_STANDARD << 4)])[0], "hit")
+	eq(_first([K.EVENT_HIT, 60, 130, 0 | (K.SHOT_DRIVE << 4)])[0], "hit_drive", "a drive's own crack")
+	eq(_first([K.EVENT_HIT, 60, 130, 0 | (K.SHOT_SOFT << 4)])[0], "hit_soft", "a soft shot's own pock")
+	check(_first([K.EVENT_HIT, 60, 130, 0 | (K.SHOT_DRIVE << 4)])[2]
+		> _first([K.EVENT_HIT, 60, 130, 0 | (K.SHOT_STANDARD << 4)])[2], "a drive is louder")
+
+
+## Every effect the map names has its samples in the game.
+func test_every_effect_has_samples() -> void:
+	for name in Sfx.EFFECTS:
+		for stem in Sfx.EFFECTS[name]:
+			check(ResourceLoader.exists(Sfx.DIR + stem + ".wav"), "%s: %s.wav" % [name, stem])
+	for name in AudioMap.HIT_EFFECTS.values():
+		check(Sfx.EFFECTS.has(name), "the map's %s has samples" % name)
+	check(Sfx.EFFECTS["hit"].size() >= 3, "hits come in variants")
 
 
 func test_pan_by_court_x() -> void:

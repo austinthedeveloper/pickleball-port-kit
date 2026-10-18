@@ -567,6 +567,24 @@ feature/cld-release        (pushed)
     clubhouse board and ball machine. Look at the park art (drawn in
     code, KNOWN_ISSUES #40).
 
+### 18. `feature/cld-hd-audio`: HD sounds (asked for 2026-10-17)
+
+- [x] `PORT-18` Every effect and ambience loop remade without the SNES's
+  limits by `audio/hd-sfx/make_sfx.py` (numpy, fixed seeds; see its
+  README). Shots have their own samples instead of a pitched one; hits and
+  bounces have variants played round-robin with a little pitch spread.
+  The SNES set stays in `audio/snes-sfx`.
+  - Verified: levels, lengths, DC and loop seams measured (`--report`, and
+    each loop's seam jump is no bigger than an ordinary sample step);
+    spectrograms looked over, which caught and fixed a reverb that hissed
+    and a filter that wrapped a sound's end onto its start.
+    `test_audio.gd`: the sound per shot, and every named effect having its
+    samples. 197/197 plus the e2e; a windowed match plays with no audio
+    errors.
+  - Status: **Ready to test**: nobody has listened yet. Play a rally,
+    lose a point to the net, win one, and sit on the title at each venue
+    and at NIGHT.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
@@ -652,6 +670,11 @@ the chain: each has a default I've gone with.
   `<` (a glyph would be a small art task). Your park games count in the
   doubles record and the VS row for that team. Say if the park should be
   bigger (a 3x zoom would scroll more, like the SNES's two screens).
+
+- **PORT-18 sound:** I can't hear these: they were checked by measuring
+  and looking at spectrograms. Tell me which sounds are off (too bright,
+  too quiet, too long, wrong character) and I'll retune them in
+  `make_sfx.py`. The mix trims are in `Sfx.TRIM_DB`.
 
 ## If time runs short or long
 
