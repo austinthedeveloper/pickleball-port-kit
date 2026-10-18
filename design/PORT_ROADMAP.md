@@ -57,6 +57,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-28 | Controller glyphs | `feature/cld-pad-glyphs` | Ready to test |
 | PORT-29 | The couch cup | `feature/cld-couch-cup` | Ready to test |
 | PORT-30 | How to play | `feature/cld-tutorial` | Ready to test |
+| PORT-31 | Online play | `feature/cld-online` | Ready to test |
 
 ## Releases
 
@@ -286,6 +287,27 @@ feature/cld-release-0.6.0   (v0.6.0)
     and SMASH cards, THE KITCHEN's banner with advice, the PRACTICE page.
   - Status: **Ready to test**: PRACTICE > HOW TO PLAY. Is SMASH too hard?
 
+### 31. `feature/cld-online`: online play (asked for 2026-10-18)
+
+- [x] `PORT-31` 1 vs 1 singles over the internet by address (ADR-056,
+  your choices: direct connections, singles first). MULTIPLAYER opens a
+  page: LOCAL (the lobby) or ONLINE (`view/online_screen.gd`: HOST A
+  MATCH, ADDRESS, JOIN). ENet on UDP 24994; HELLO with the versions and
+  looks; the host's START sends the match; lockstep over the exact sim
+  with an input delay fitted to the measured round trip, a wait when an
+  input is late, a hash every 2 s against desyncs. Menu leaves (twice in
+  play), the host rematches, nothing recorded. README: how to connect
+  (same Wi-Fi, Tailscale, or a forwarded port).
+  - Verified: `test_online.gd` (11 tests: packing, lockstep at three
+    latencies compared frame by frame, waiting, a desync caught, the
+    handshake, versions, the delay, ENet on this machine for 600 frames,
+    two MatchViews playing a match through, two ONLINE screens connecting
+    over ENet, main's flow), `test_layout.test_online`, `test_multiplayer`
+    (LOCAL). Golden traces unchanged. Screenshots: ONLINE idle, hosting,
+    connected; the MULTIPLAYER page. Not verified: two real machines.
+  - Status: **Ready to test**: with a friend. Start on the same Wi-Fi, then
+    over Tailscale.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
@@ -342,4 +364,11 @@ the chain: each has a default I've gone with.
   stand and when; the goal is one smash. If it's still too fiddly, the
   machine's lob could come down flatter in that lesson, or the overhead
   line could drop a little (a sim change, ADR-053).
+
+- **PORT-31 online:** only tested on one machine (two copies talking
+  over localhost, and a simulated slow line), never between two
+  computers. Tell me the round trip you get (if it feels laggy, rollback
+  is the next step, ADR-056) and anything that goes wrong, with the
+  message the screen shows. The guest plays on the right side of the
+  court; flipping the view so each of you is on the left is possible.
 

@@ -94,6 +94,22 @@ func _initialize() -> void:
 		var pv := ParkView.new().setup(op, _career_save() if "career" in a.slice(4) else null, false)
 		root.add_child(pv)
 		_view = pv
+	elif mode.begins_with("online"):
+		# PORT-31: online (idle, an address typed), online_host (waiting),
+		# online_connected (as host, a friend in)
+		var o := OnlineScreen.new().setup(null)
+		o.port = ENetLink.PORT + 11
+		o.address = "100.101.12.7"
+		root.add_child(o)
+		if not o.is_node_ready():
+			o._ready()
+		if mode != "online":
+			o.page.select("host")
+			o.page.press()
+		if mode == "online_connected":
+			o.session.state = OnlineSession.CONNECTED
+			o.session.peer_hello = {"name": "BO"}
+		_view = o
 	elif mode.begins_with("lesson"):
 		# PORT-30: lesson<N> (the card) or lesson<N>_play (the banner, advice up)
 		var m := MatchView.new()

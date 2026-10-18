@@ -7,6 +7,11 @@ Pickleball '94, the Godot port. Versions follow
 ## [Unreleased]
 
 ### Added
+- **ONLINE play** (MULTIPLAYER > ONLINE): 1 vs 1 singles with a friend.
+  One hosts, the other types the host's address and joins; same Wi-Fi
+  just works, and the README says how to connect over the internet
+  (Tailscale, or a forwarded port). MULTIPLAYER now opens a page: LOCAL
+  (the four-pad lobby) or ONLINE.
 - **Your controller's own buttons** in every prompt: PlayStation pads show
   the cross, circle, square and triangle (and L1, R1, OPTIONS), Switch pads
   their B, A, Y, X, + and -. Picked from the pad's name; CONTROLS has a

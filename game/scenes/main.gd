@@ -16,6 +16,7 @@ var _next: Node
 const TOAST_FRAMES := 150
 var _toast: Control
 var _toast_text: BitmapText
+var _toast_panel: NinePatchRect
 var _toast_frames := 0
 var _news_seen := GameControls.news_serial
 ## Open play (ADR-034): the park waits here while you play; fresh each time
@@ -43,6 +44,7 @@ func _ready() -> void:
 	panel.position = Vector2(330, 460)
 	panel.size = Vector2(300, 38)
 	_toast.add_child(panel)
+	_toast_panel = panel
 	_toast_text = BitmapText.new()
 	_toast_text.font = "small"
 	_toast_text.align = 0.5
@@ -87,6 +89,7 @@ func _update_toast() -> void:
 		_toast_text.text = "CONTROLLER " + String(news[0])
 		_toast_text.tint = Color("60e060") if news[0] == "CONNECTED" else Color("ff7060")
 		_toast_frames = TOAST_FRAMES
+		_fit_toast()
 	if _toast_frames > 0:
 		_toast_frames -= 1
 	_toast.visible = _toast_frames > 0
@@ -117,6 +120,7 @@ func show_title() -> void:
 	t.open_tournament.connect(show_bracket)
 	t.open_couch_cup.connect(_on_couch_cup)
 	t.open_lesson.connect(show_lesson)
+	t.open_online.connect(show_online)
 	_swap(t)
 	park = null
 
@@ -254,4 +258,49 @@ func show_lesson(i: int) -> void:
 	m.court = Settings.court.duplicate()
 	m.time = Settings.time_i
 	m.setup(m.lesson.config(Settings.p1_choice), "park", false)
+
+
+## ONLINE (PORT-31): host or join; the match when it starts.
+func show_online() -> void:
+	save.save_game()
+	var o := OnlineScreen.new().setup(save)
+	o.leave.connect(show_title)
+	o.play.connect(_on_online_match)
+	_swap(o)
+
+
+## An online match from the session's START: the host's court, time and
+## colours on both machines. Its end (or the line's) goes to the title,
+## saying why if the other side left.
+func _on_online_match(session: OnlineSession) -> void:
+	var info := session.start
+	var m := MatchView.new()
+	m.net = session
+	m.finished.connect(func(_to_title: bool):
+		var why := session.reason
+		session.quit()
+		show_title()
+		if why != "":
+			toast(why))
+	_swap(m)
+	m.camera.percent = Settings.CAMERAS[Settings.camera_i]
+	var court: Array = info.get("court", Settings.court)
+	m.court = court.map(func(x): return int(x))
+	m.time = int(info.get("time", 0))
+	m.setup(OnlineSession.config_from_dict(info["cfg"]), String(info.get("venue", "park")), false)
+
+
+## A message in the toast (the controller toast's panel).
+func toast(text: String) -> void:
+	_toast_text.text = text
+	_toast_text.tint = Color("ff7060")
+	_toast_frames = TOAST_FRAMES
+	_fit_toast()
+
+
+## The toast's panel around its text (300 px at least).
+func _fit_toast() -> void:
+	var w := maxf(300.0, BitmapText.measure("small", _toast_text.text) + 40.0)
+	_toast_panel.size.x = w
+	_toast_panel.position.x = 480.0 - w / 2.0
 

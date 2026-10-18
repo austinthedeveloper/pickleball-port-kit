@@ -350,7 +350,7 @@ func refresh() -> void:
 		_banner.text = ""
 		_banner_sub.text = ""
 	elif s.phase == K.PHASE_MATCH_RESULT:
-		var you := s.match_winner == 0
+		var you: bool = s.match_winner == view.my_team()
 		if view.demo:
 			_banner.text = "%s WINS" % _team_label(s.match_winner)
 			_banner_sub.text = ""
@@ -365,8 +365,12 @@ func refresh() -> void:
 				"BRACKET" if view.tournament else "REMATCH"))
 			_banner_sub.text = ""
 			_result_prompts.visible = ready
-			if ready and _result_prompts.items[0][1] != next:
-				_result_prompts.set_items([["hit", next], ["start", "MENU"]])
+			var items := [["hit", next], ["start", "MENU"]]
+			if view.net:                     # PORT-31: the host picks; either can leave
+				items = [["hit", "REMATCH"], ["start", "LEAVE"]] if view.net.host \
+					else [["start", "LEAVE, OR WAIT FOR A REMATCH"]]
+			if ready and _result_prompts.items != items:
+				_result_prompts.set_items(items)
 			if vs_ladder:
 				_result_line.text = Story.result_line(cfg.opponent, you)
 				_result_line.tint = Story.team_color(cfg.opponent)
@@ -564,6 +568,12 @@ func _team_label(team: int) -> String:
 	var cfg := view.sim.config
 	if team == 1 and cfg.opponent >= 0 and not cfg.human[2]:
 		return Story.card_name(cfg.opponent, cfg.mode == K.MODE_DOUBLES)
+	if view.net:
+		# PORT-31: YOU, and the friend by their name
+		if team == view.my_team():
+			return "YOU"
+		var n := String(view.net.peer_hello.get("name", ""))
+		return n if n != "" else "FRIEND"
 	if view.multiplayer():
 		# PORT-29: a side by its players ("P3", "P1 + P4"); a CPU side by colour
 		var names := []

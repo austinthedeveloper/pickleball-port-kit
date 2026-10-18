@@ -529,3 +529,69 @@ func test_tutorial() -> void:
 	GameControls.last_device = kept[0]
 	Settings.pad_glyphs = kept[1]
 	GameControls.device_serial += 1
+
+
+## PORT-31: the ONLINE screen in each state (idle, an error, hosting with
+## two addresses, calling, connected as host and guest, closed, typing the
+## longest address), the MULTIPLAYER page, and an online match's HUD and
+## result for host and guest (YOU against an 8-letter name).
+func test_online() -> void:
+	var o := OnlineScreen.new().setup(_save())
+	runner.root.add_child(o)
+	if not o.is_node_ready():
+		o._ready()
+	o.address = "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
+	o.refresh()
+	check_layout(o, "online idle, the longest address")
+	o.editing = true
+	o.refresh()
+	check_layout(o, "online typing")
+	o.editing = false
+	o.last_reason = "CAN'T REACH WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
+	o.refresh()
+	check_layout(o, "online, an error")
+	o.last_reason = ""
+	var links := LoopbackLink.pair(0)
+	for host in [true, false]:
+		o.session = OnlineSession.new(links[0], host)
+		o.session.my_hello = OnlineSession.hello({})
+		o.refresh()
+		check_layout(o, "online waiting (host %s)" % host)
+		o.session.state = OnlineSession.CONNECTED
+		o.session.peer_hello = {"name": "WWWWWWWW"}
+		o.refresh()
+		check_layout(o, "online connected (host %s)" % host)
+	o.session.reason = "VERSIONS DIFFER: 10.10.10 AND 10.10.11"
+	o.session.state = OnlineSession.CLOSED
+	o.refresh()
+	check_layout(o, "online closed")
+	o.free()
+	var t := _title()
+	t.open_page("multi")
+	t.pages["multi"].settle()
+	check_layout(t, "title MULTIPLAYER")
+	t.free()
+	for host in [true, false]:
+		var pair := LoopbackLink.pair(0)
+		var s := OnlineSession.new(pair[0], host)
+		s.peer_hello = {"name": "WWWWWWWW"}
+		var cfg := PlayerSelect.config_select(K.MODE_SINGLES, PlayerSelect.new_choice(0, 0, 1),
+			PlayerSelect.new_choice(1, 0, 1))
+		var v := MatchView.new()
+		v.net = s
+		runner.root.add_child(v)
+		v.setup(cfg, "park", false)
+		v.sim.team_score = [10, 10]
+		v._hud.refresh()
+		check_layout(v, "online match (host %s)" % host)
+		v.sim.phase = K.PHASE_MATCH_RESULT
+		v.sim.match_winner = 1
+		v.sim.phase_timer = K.POINT_RESULT_MIN_FRAMES + 1
+		v._hud.refresh()
+		check_layout(v, "online result (host %s)" % host)
+		v.sim.phase = K.PHASE_LIVE
+		v.leave_frames = 60
+		v._net_refresh(false)
+		v._hud.refresh()
+		check_layout(v, "online, press again to leave (host %s)" % host)
+		v.free()

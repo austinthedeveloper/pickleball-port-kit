@@ -196,7 +196,10 @@ func test_lobby_on_the_title() -> void:
 	t.start_match.connect(func(cfg, _v, _l, pads, players): started.append([cfg, pads, players]))
 	t.pages["main"].select("multiplayer")
 	t.pages["main"].press()
-	eq(t.page, "lobby", "MULTIPLAYER opens the lobby")
+	eq(t.page, "multi", "MULTIPLAYER: LOCAL or ONLINE (PORT-31)")
+	t.pages["multi"].select("local")
+	t.pages["multi"].press()
+	eq(t.page, "lobby", "LOCAL opens the lobby")
 	check(t.lobby_screen.visible and not t._header[0].visible, "over the title")
 	var tap := func(dev: int, buttons: Array) -> void:
 		_hold(dev, buttons)

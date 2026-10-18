@@ -50,6 +50,7 @@ static func defaults() -> Dictionary:
 			"shake": 1, "flash": 1, "hud_large": 0, "serve_assist": 0, "bindings": {},
 			"vibration": 1,  # PORT-15: controller rumble
 			"pad_glyphs": 0,  # PORT-28: BUTTON ICONS, AUTO
+			"net_address": "",  # PORT-31: the last address joined
 			"music": Music.DEFAULT_VOLUME},  # PORT-22: MUSIC, 0 (OFF) .. 10
 		"records": {"singles_wins": 0, "singles_losses": 0, "doubles_wins": 0,
 			"doubles_losses": 0, "ladder_rung": 0, "ladder_clears": 0,

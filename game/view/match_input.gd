@@ -12,10 +12,31 @@ func _init(view: MatchView) -> void:
 	v = view
 
 
+## Online (PORT-31): this machine's intent goes to the session, which
+## gives back both players' for this frame, or null while the other side's
+## is on its way. Menu never pauses online: it's the leave press.
+## Tests stand in a script for the keyboard here (two views, one process).
+var script_intent: Callable
+
+
+func net_read() -> Variant:
+	var it: SimTypes.Intent = script_intent.call() if script_intent.is_valid() else GameControls.read_intent()
+	if v.input_lock > 0:
+		v.input_lock -= 1
+		it = SimTypes.Intent.new()
+		GameControls.clear_latch()
+	if it.pause_pressed:
+		v.net_leave_press()
+	it.pause_pressed = 0
+	return v.net.intents(it)
+
+
 ## This frame's human intents for Sim.step (P1 on the input map, 2P on
 ## its pad, or every pad in multiplayer), or null when the pause menu took
 ## the frame. The demo has none.
 func read() -> Variant:
+	if v.net:
+		return net_read()
 	var human := []
 	if not v.demo and v.multiplayer():
 		human = multiplayer_intents()

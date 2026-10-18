@@ -34,6 +34,17 @@ var cup_key := "bracket"        ## the save's bracket: "bracket", or the couch c
 ## finished one starts again) and nothing is recorded (save is null).
 var lesson: Tutorial
 var lesson_view: TutorialView
+## Online (PORT-31, ADR-056): the session (null offline). The host plays
+## slot 0, the guest slot 2. Nothing is recorded (save is null); Menu never
+## pauses: pressed twice in play (once on the result) it leaves.
+var net: OnlineSession
+var leave_frames := 0            ## counting down after a first Menu press online
+var _net_text: BitmapText
+
+
+## The team this machine plays (online, the guest's is 1).
+func my_team() -> int:
+	return 1 if net and not net.host else 0
 ## From the park (ADR-034): B on the result, or PARK on practice's pause
 ## menu, goes back there (finished(false)).
 var park := false
@@ -189,6 +200,8 @@ func _build() -> void:
 	if lesson:
 		lesson_view = TutorialView.new().setup(self)
 		_hud.add_child(lesson_view)
+	if net:
+		_net_text = UiKit.text("small", "", Vector2(480, 452), 0.5, Color("fbe46a"), _hud)
 	_sfx = Sfx.new()
 	add_child(_sfx)
 	_sfx.setup(venue, demo, CourtStyle.time_ambience(time))
@@ -287,6 +300,10 @@ func _rumble_hit(slot: int, shot: int) -> void:
 	var strength: Array = {K.SHOT_DRIVE: [0.3, 0.7, 0.12], K.SHOT_SOFT: [0.2, 0.0, 0.06],
 		K.SHOT_OVERHEAD: [0.5, 1.0, 0.18]}.get(
 		shot, [0.35, 0.25, 0.08])
+	if net:                              # online: this machine's own player only, on P1's pad
+		if slot == my_team() * 2:
+			GameControls.rumble(0, strength[0], strength[1], strength[2])
+		return
 	if multiplayer():
 		GameControls.rumble_device(slot_pads[slot], strength[0], strength[1], strength[2])
 		return
@@ -332,10 +349,21 @@ func _physics_process(_delta: float) -> void:
 			return
 		_update_visuals()
 		return
+	if net:
+		net.poll()
+		if net.closed():
+			finished.emit(true)              # main says why
+			return
 	var human: Variant = input.read()
+	if net:
+		_net_refresh(human == null)
 	if human == null:
-		return                           # the pause menu took the frame
+		if net and net.closed():
+			finished.emit(true)
+		return                           # the pause menu took the frame, or online, the wait
 	sim.step(human)
+	if net:
+		net.after_step(sim)
 	var events := sim.drain_events()
 	for e in events:
 		_on_event(e)
@@ -352,7 +380,7 @@ func _physics_process(_delta: float) -> void:
 		if sim.phase == K.PHASE_MATCH_RESULT:
 			end.on_match_over()
 			if not demo:
-				Music.sting(Music.result_sting(sim.match_winner == 0, cleared,
+				Music.sting(Music.result_sting(sim.match_winner == my_team(), cleared,
 					sim.config.human[2] or sim.config.human[3]))
 		_prev_phase = sim.phase
 	if sim.rematch_requested:
@@ -415,6 +443,27 @@ func _on_event(e: Array) -> void:
 			# the server is still the rally's (the next serve isn't set up).
 			if end.career_counts():
 				save.career.record_point(rally, e[3] == 0, sim.server_index == 0)
+
+
+## Online: Menu's leave (twice in play, once on the result).
+func net_leave_press() -> void:
+	if leave_frames > 0 or sim.phase == K.PHASE_MATCH_RESULT:
+		net.quit()
+		return
+	leave_frames = 120
+
+
+func _net_refresh(waiting: bool) -> void:
+	if leave_frames > 0:
+		leave_frames -= 1
+	var text := ""
+	if sim.phase == K.PHASE_MATCH_RESULT:
+		pass                             # the stats card is up; one press leaves there
+	elif leave_frames > 0:
+		text = "PRESS AGAIN TO LEAVE"
+	elif waiting and net.lockstep and net.lockstep.waited > 20:
+		text = "WAITING FOR YOUR FRIEND..."
+	_net_text.text = text
 
 
 func _update_card() -> void:

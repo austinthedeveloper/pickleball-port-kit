@@ -19,6 +19,7 @@ signal open_park(two_players: bool)
 signal open_tournament          ## PORT-25: the bracket
 signal open_couch_cup(entries: Array, doubles: bool)   ## PORT-29: the lobby's cup
 signal open_lesson(index: int)  ## PORT-30: HOW TO PLAY from this lesson on
+signal open_online              ## PORT-31: 1 vs 1 over the internet
 
 const SWITCH_LOCK := MenuPage.TRANSITION   ## no menu input while a page slides in
 
@@ -163,8 +164,8 @@ func _build_pages() -> void:
 		{"id": "doubles", "label": "DOUBLES", "press": func(): open_select(true)},
 		{"id": "openplay", "label": "OPEN PLAY", "value": func(): return "THE PARK",
 			"press": _open_park},
-		{"id": "multiplayer", "label": "MULTIPLAYER", "value": func(): return "UP TO 4",
-			"press": open_lobby},
+		{"id": "multiplayer", "label": "MULTIPLAYER", "value": func(): return "ONLINE",
+			"press": func(): open_page("multi")},
 		{"id": "tournament", "label": "TOURNAMENT", "value": _cup_label, "press": _open_tournament},
 		{"id": "play", "label": "MATCH SETUP", "value": _play_summary,
 			"press": func(): open_page("play")},
@@ -211,6 +212,16 @@ func _build_pages() -> void:
 			"value": func(): return "ON" if Settings.mod_bits & bit else "OFF",
 			"change": func(_d): Settings.mod_bits ^= bit})
 	_add_page("modifiers", "MODIFIERS", mod_rows, help)
+	# PORT-31: local (the lobby, up to four pads) or online (1 vs 1)
+	_add_page("multi", "MULTIPLAYER", [
+		{"id": "local", "label": "LOCAL", "value": func(): return "UP TO 4 PADS", "press": open_lobby},
+		{"id": "online", "label": "ONLINE", "value": func(): return "1 VS 1", "press": func():
+			if _sfx:
+				_sfx.play("confirm")
+			_store_settings()
+			main_cursor = pages["main"].cursor
+			open_online.emit()},
+	], help)
 	# PORT-30: HOW TO PLAY's lessons, and the ball machine
 	_add_page("learn", "PRACTICE", [
 		{"id": "lessons", "label": "HOW TO PLAY", "value": func(): return "%d/%d" % [

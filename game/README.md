@@ -46,6 +46,32 @@ the way up for pace; a tap is the safe classic serve. F3 toggles the
 diagnostics overlay. 2P versus: set PLAYERS on the title; with two pads
 the first is P1's, with one pad P1 plays on the keyboard.
 
+## Playing online
+
+MAIN > MULTIPLAYER > **ONLINE**: 1 vs 1 singles with a friend (ADR-056).
+You both need the same version of the game (the desktop build; the Web
+build can't).
+
+1. **The host** picks HOST A MATCH. The screen shows their address and
+   waits. The match uses the host's COURT, POINTS and MODIFIERS.
+2. **The friend** picks ADDRESS, types the host's address (Enter when
+   done; paste works), then JOIN.
+3. Once you're connected, the host picks START MATCH.
+
+How the friend reaches the host:
+
+- **Same Wi-Fi:** use the address the host's screen shows (192.168...).
+- **Over the internet, easiest:** both install [Tailscale](https://tailscale.com)
+  (free), sign in, and join the same network; use the host's Tailscale
+  address (100.x.y.z). No router changes.
+- **Over the internet, without a VPN:** the host forwards **UDP port
+  24994** on their router to their computer, and the friend uses the
+  host's public address.
+
+The first time you host, macOS or Windows may ask to allow incoming
+connections: allow it. In a match, Menu pressed twice leaves; the host's
+button on the result is the rematch.
+
 ## The title menu
 
 MAIN: **SINGLES** / **DOUBLES** open Player Select (shirt, body, paddle
@@ -96,8 +122,9 @@ title shows; from a checkout the title says `BUILD DEV <describe>`.
 |---|---|
 | `sim/` | The deterministic simulation: `k.gd` constants, `types.gd` records, `sim.gd` (ball, collision, players, serve, rules, game, frame pipeline), `ai.gd` (the CPU), `practice.gd` (the ball machine), `select.gd` (Player Select), `replay.gd` (close calls), `open_play.gd` (the park's courts and stacks), `career.gd` (career stats and unlocks), `opponents.gd`, `paddles.gd`. Pure: no Nodes, time, or randomness. |
 | `view/` match | `match_view.gd` (one match: the scene, the frame, events) with `match_actors.gd` (people, ball, sparks), `match_input.gd` (intents, pause menu) and `match_end.gd` (records, the initials and UNLOCKED! cards), `court_view.gd` (world → screen), `court_style.gd` (+ shader: court colours, time of day), `hud.gd`, `crowd.gd`, `watcher.gd`, `camera_lean.gd`, `close_call.gd`, `feel.gd`, `player_look.gd` (+ palette shader), `practice_view.gd`, `debug_overlay.gd`. |
-| `view/` menus | `title_screen.gd` (the title and its pages), `title_career.gd` (the CAREER pages), `menu_page.gd` (every menu page), `bracket_screen.gd` (the tournament), `select_screen.gd` (Player Select), `lobby_screen.gd` (multiplayer), `practice_page.gd`, `tutorial_view.gd` (a lesson's card and banner), `career_keyboard.gd`, `career_preview.gd`, `park_view.gd` (open play), `prompts.gd`/`prompt_bar.gd` (device-aware button prompts), `ui_kit.gd` (panels and text), `bitmap_text.gd`. |
+| `view/` menus | `title_screen.gd` (the title and its pages), `title_career.gd` (the CAREER pages), `menu_page.gd` (every menu page), `bracket_screen.gd` (the tournament), `select_screen.gd` (Player Select), `lobby_screen.gd` (multiplayer), `practice_page.gd`, `tutorial_view.gd` (a lesson's card and banner), `career_keyboard.gd`, `online_screen.gd` (host and join), `career_preview.gd`, `park_view.gd` (open play), `prompts.gd`/`prompt_bar.gd` (device-aware button prompts), `ui_kit.gd` (panels and text), `bitmap_text.gd`. |
 | `view/` sound | `audio_map.gd`/`sfx.gd` (effects and ambience), `music.gd` (the soundtrack: crossfades, stingers, ducking). |
+| `net/` | Online play (ADR-056): `lockstep.gd` (inputs and the desync check), `online_session.gd` (the handshake and the match's inputs), `net_link.gd` with `enet_link.gd` (UDP) and `loopback_link.gd` (tests). |
 | `meta/` | `save.gd` (two-copy save with migration, layout v5), `settings.gd` (every setting, load/store, match config), `story.gd` (cards, results, quips), `initials.gd` (the record initials card), `career_page.gd` (CAREER's input logic), `lobby.gd` (the multiplayer lobby's logic), `match_stats.gd` (post-match stats), `tournament.gd` (the bracket's logic), `tutorial.gd` (HOW TO PLAY's lessons), `build_info.gd`. |
 | `game_ui/` | `controls.gd` (input map autoload, P1..P4 intents, tap latch, SNES pad bits for menus), `bindings.gd` (remapping). |
 | `tests/` | Headless runner and suites; `golden/` traces; `golden.gd` regenerates them. |
