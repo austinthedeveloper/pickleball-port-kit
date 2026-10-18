@@ -10,6 +10,7 @@ const ON := {"shake": true, "trail": true, "squash": true, "whoosh": true, "plan
 
 const SHAKE_DRIVE := [3.0, 8]      ## amplitude px, frames
 const SHAKE_PUTAWAY := [4.0, 10]
+const SHAKE_SMASH := [5.0, 12]     ## the overhead (ADR-053)
 const PUTAWAY_Z := 18              ## world px: a contact this high is a put-away
 const TRAIL_SPEED := 50            ## |vx| + |vy| (12.4) at or above which a trail shows
 const TRAIL_LEN := 6
@@ -41,7 +42,9 @@ func on_event(e: Array) -> void:
 		K.EVENT_HIT:
 			var shot: int = e[3] >> 4
 			if ON["shake"] and Settings.shake:
-				if view.sim.ball.z_fp >= K.to_fp(PUTAWAY_Z) or (shot == K.SHOT_DRIVE
+				if shot == K.SHOT_OVERHEAD:
+					_shake(SHAKE_SMASH)
+				elif view.sim.ball.z_fp >= K.to_fp(PUTAWAY_Z) or (shot == K.SHOT_DRIVE
 						and view.sim.ball.z_fp >= K.to_fp(PUTAWAY_Z - 4)):
 					_shake(SHAKE_PUTAWAY)
 				elif shot == K.SHOT_DRIVE:

@@ -11,6 +11,19 @@ func _ev(kind: int, a3: int) -> Array:
 	return [kind, 128, 130, a3]
 
 
+## The overhead (ADR-053): the CPU lobs, P1 smashes it away.
+func test_a_smash_winner() -> void:
+	var st := MatchStats.new()
+	st.on_event(_ev(K.EVENT_SERVE, S0))
+	st.on_event(_ev(K.EVENT_HIT, S2 | (K.SHOT_SOFT << 4)))
+	st.on_event(_ev(K.EVENT_HIT, S0 | (K.SHOT_OVERHEAD << 4)))
+	st.on_event(_ev(K.EVENT_POINT, 0))
+	eq(st.teams[0]["winners"], [0, 0, 0, 1], "a smash winner")
+	eq(st.teams[0]["smashes"], 1)
+	eq(st.rows()[3], ["WINNERS", "1 SMASH", "0"])
+	eq(st.rows()[7], ["SMASHES", "1", "0"], "the card's SMASHES row")
+
+
 func test_scripted_points() -> void:
 	var st := MatchStats.new()
 	# P1 serves, the CPU returns, P1 drives it past them (two bounces)
@@ -18,7 +31,7 @@ func test_scripted_points() -> void:
 	st.on_event(_ev(K.EVENT_HIT, S2 | (K.SHOT_STANDARD << 4)))
 	st.on_event(_ev(K.EVENT_HIT, S0 | (K.SHOT_DRIVE << 4)))
 	st.on_event(_ev(K.EVENT_POINT, 0))
-	eq(st.teams[0]["winners"], [0, 1, 0], "a drive winner")
+	eq(st.teams[0]["winners"], [0, 1, 0, 0], "a drive winner")
 	eq([st.teams[0]["serve_won"], st.teams[0]["serve_points"]], [1, 1])
 	eq(st.teams[0]["drives"], 1)
 	eq(st.rallies, [3], "three shots, the serve included")

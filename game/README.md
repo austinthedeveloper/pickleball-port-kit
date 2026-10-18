@@ -33,6 +33,8 @@ when ready, and Menu to start. LB and RB switch singles and doubles. Plug in or 
 a pad at any time (a match pauses if one drops). CONTROLS (in OPTIONS)
 remaps keys and buttons; VIBRATION is in ACCESSIBILITY.
 
+Swing at a high, falling ball (a lob you get under) with HIT or DRIVE
+for an **overhead smash** (ADR-053): fast and steep; SOFT still blocks it.
 Hold a swing button at the serve for the charged serve (ADR-044): let go on
 the way up for pace; a tap is the safe classic serve. F3 toggles the
 diagnostics overlay. 2P versus: set PLAYERS on the title; with two pads
@@ -89,7 +91,7 @@ title shows; from a checkout the title says `BUILD DEV <describe>`.
 | `meta/` | `save.gd` (two-copy save with migration, layout v5), `settings.gd` (every setting, load/store, match config), `story.gd` (cards, results, quips), `initials.gd` (the record initials card), `career_page.gd` (CAREER's input logic), `lobby.gd` (the multiplayer lobby's logic), `match_stats.gd` (post-match stats), `build_info.gd`. |
 | `game_ui/` | `controls.gd` (input map autoload, P1..P4 intents, tap latch, SNES pad bits for menus), `bindings.gd` (remapping). |
 | `tests/` | Headless runner and suites; `golden/` traces; `golden.gd` regenerates them. |
-| `tools/` | `test.sh`, `export.sh`, `version.py`, `release_notes.py`, `make_icon.py`, `sync_assets.sh` (copies `art/levels/out` and the audio in), `screenshot.gd` (title pages, matches, `court=`, `time=`, `pause`, `closecall`, `initials`), `point_log.gd` (why each point ended). |
+| `tools/` | `test.sh`, `export.sh`, `version.py`, `release_notes.py`, `make_icon.py`, `sync_assets.sh` (copies `art/levels/out` and the audio in), `screenshot.gd` (title pages, matches, `court=`, `time=`, `pause`, `closecall`, `initials`, `result`, `smash`), `point_log.gd` (why each point ended), `contact_probe.gd` (contact heights and smashes over bot matches). |
 | `assets/` | Synced art and audio (don't edit here; rebuild in `art/levels`). |
 | `data/` | `opponents.json`, `paddles.json`, `court_colors.json`, `venues.json`, … copied from the kit's `data/`. |
 

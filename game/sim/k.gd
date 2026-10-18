@@ -86,11 +86,21 @@ const HIT_LOB_MIN_FRAMES := 44
 const HIT_LOB_MAX_FRAMES := 50
 const HIT_PACE_DINK_FP := 24
 const HIT_TARGET_DINK_RIGHT := COURT_NET_X + 18
+# The overhead (ADR-053, port-only): a standard or drive swing at a falling
+# ball this high becomes a smash, fast and steep.
+const HIT_OVERHEAD_Z := 20
+const HIT_PACE_OVERHEAD_FP := 120
+const HIT_OVERHEAD_MIN_FRAMES := 10
+const HIT_OVERHEAD_MAX_FRAMES := 22
+const HIT_OVERHEAD_STRETCH_WIDE := 24
+const HIT_OVERHEAD_STRETCH_LONG := 18
+const HIT_OVERHEAD_NET_CLEAR := 3   ## px over the tape a smash keeps, if its flight allows
 
 # --- Shots and intents (input.h) ---------------------------------------------
 const SHOT_STANDARD := 0
 const SHOT_DRIVE := 1
 const SHOT_SOFT := 2
+const SHOT_OVERHEAD := 3   ## never asked for: a high contact makes it (ADR-053)
 
 const OWNER_NONE := 0
 const OWNER_HUMAN := 1

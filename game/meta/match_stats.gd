@@ -2,12 +2,13 @@
 ## only, nothing here reaches the sim. Per team:
 ##   points, serve points played and won, aces (an unreturned serve),
 ##   winners (the other side never returned it) by the winning shot's
-##   type, errors (a fault: out, net, kitchen...) by kind, shots, drives;
+##   type, errors (a fault: out, net, kitchen...) by kind, shots, drives,
+##   smashes (the overhead, ADR-053);
 ## and every rally's length (shots, the serve included).
 class_name MatchStats
 extends RefCounted
 
-const SHOT_NAMES := ["STD", "DRIVE", "SOFT"]
+const SHOT_NAMES := ["STD", "DRIVE", "SOFT", "SMASH"]
 
 var teams: Array = [_team(), _team()]
 var rallies: Array = []
@@ -20,7 +21,8 @@ var _fault := K.FAULT_NONE
 
 static func _team() -> Dictionary:
 	return {"points": 0, "serve_points": 0, "serve_won": 0, "aces": 0,
-		"winners": [0, 0, 0], "errors": {}, "shots": 0, "drives": 0}
+		"winners": [0, 0, 0, 0], "errors": {}, "shots": 0, "drives": 0,
+		"smashes": 0}
 
 
 static func team_of(slot: int) -> int:
@@ -45,6 +47,8 @@ func on_event(e: Array) -> void:
 			teams[_last_team]["shots"] += 1
 			if shot == K.SHOT_DRIVE:
 				teams[_last_team]["drives"] += 1
+			elif shot == K.SHOT_OVERHEAD:
+				teams[_last_team]["smashes"] += 1
 		K.EVENT_FAULT:
 			_fault = e[3]
 		K.EVENT_POINT:
@@ -74,7 +78,7 @@ func _point(winner: int) -> void:
 
 func winners(team: int) -> int:
 	var t: Array = teams[team]["winners"]
-	return t[0] + t[1] + t[2]
+	return t[0] + t[1] + t[2] + t[3]
 
 
 func errors(team: int) -> int:
@@ -118,7 +122,7 @@ func rows() -> Array:
 	var shot := func(t: int) -> String:
 		var w: Array = teams[t]["winners"]
 		var best := 0
-		for i in 3:
+		for i in w.size():
 			if w[i] > w[best]:
 				best = i
 		return "%d" % winners(t) if winners(t) == 0 else "%d %s" % [winners(t), SHOT_NAMES[best]]
@@ -130,6 +134,7 @@ func rows() -> Array:
 		["ERRORS", top_error(0), top_error(1)],
 		["SHOTS", str(teams[0]["shots"]), str(teams[1]["shots"])],
 		["DRIVES", str(teams[0]["drives"]), str(teams[1]["drives"])],
+		["SMASHES", str(teams[0]["smashes"]), str(teams[1]["smashes"])],
 	]
 
 

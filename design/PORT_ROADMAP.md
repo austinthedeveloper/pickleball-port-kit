@@ -50,6 +50,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-21 | Career players | `feature/cld-career` | Done |
 | PORT-22 | Music | `feature/cld-music` | Done |
 | PORT-23 | A cleanup round | `feature/cld-cleanup-2` | Done |
+| PORT-24 | The overhead | `feature/cld-overhead` | Ready to test |
 
 ## Releases
 
@@ -113,6 +114,36 @@ feature/cld-release-0.6.0   (v0.6.0)
     lobby, unchanged.
   - Status: **Done**.
 
+### 24. `feature/cld-overhead`: the overhead (asked for 2026-10-18)
+
+- [x] `PORT-24` A smash, which the SNES never had (ADR-053): a HIT or
+  DRIVE swing at a falling ball 20 px up or higher becomes
+  `SHOT_OVERHEAD`, twice a drive's pace, hit flat or down, aimed like a
+  standard shot, and lengthened just enough to clear the tape (a dumped
+  overhead only when it can't). SOFT still blocks. The CPUs smash with no
+  new logic (their put-away and any lob they get under). The view: the
+  overhead frames, SMASH! over the contact, the biggest shake and rumble,
+  its own sound (`0_hit_smash*`), and a SMASHES row on the stats card.
+  - Accept: a sim change with an ADR and regenerated golden traces; the
+    stats harness unchanged; tests for the rule, the flight, real play
+    and the view; screenshots.
+  - Verified: `test_overhead.gd` (a falling ball at the line is smashed
+    by HIT and DRIVE and the event says so; SOFT, a rising ball, or one a
+    pixel lower is not; a smash lands sooner and flatter than a drive and
+    in; from five depths and three aims it clears the net; three doubles
+    matches through `Sim.step()` see smashes that end points; the view's
+    overhead frame, SMASH!, the shake, and nothing written to the sim),
+    `test_stats.test_a_smash_winner`. Measured with
+    `tools/contact_probe.gd`: 9% of singles shots and 15% of doubles
+    shots are smashes; doubles rallies 6.5 → 5.3 shots, singles
+    unchanged. Stats harness unchanged (10, 6, 0, 0; 8 and 0; 0 and 18).
+    Golden traces regenerated: only `doubles_demo` moves (line 584, its
+    first smash). 243/243 plus the e2e. Screenshots: a smash at SUNSET
+    with SMASH! over it, and the stats card with its SMASHES row.
+  - Status: **Ready to test**: get under a lob (practice: SHOT LOB) and
+    swing with HIT or DRIVE. Does it feel strong enough, and too common
+    in doubles?
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
@@ -142,3 +173,11 @@ the chain: each has a default I've gone with.
   play) and I'll rework them in `make_music.py`. The whole soundtrack's
   level against the effects is `Music.BASE_DB` (-9 dB); the duck is
   `Music.DUCK_DB`.
+
+- **PORT-24 overhead:** the line is 20 px (the top of the reach is 24),
+  falling balls only, and any HIT or DRIVE there smashes. It's automatic
+  so a lob you get under is always punishable; if you'd rather DRIVE only
+  smash (HIT a gentler overhead), it's one line. The swing's animation is
+  guessed at the windup (a ball over 17 px), so a drive at a ball 18-19 px
+  up can show the overhead frames without smashing (KNOWN_ISSUES #49).
+

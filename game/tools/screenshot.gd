@@ -9,6 +9,7 @@
 ## "closecall" shows a forced close-up; "initials" the initials card;
 ## "result" plays a bot match and ends it (the stats card); "mp4" four
 ## humans on fake pads (doubles); title_lobby a lobby with three players.
+## `smash`: the first overhead after half the frames, just after contact.
 ## "park" the open play park (ADR-034), you stacked at court 2's rack;
 ## "park_house" in the clubhouse at the records board; "park_call" your
 ## game called. "partner=N" puts ladder team N's captain on slot 1.
@@ -246,6 +247,12 @@ func _tick() -> void:
 		v.sim.match_winner = 0
 		v.save.career.new_unlocks = (1 << 0) | (1 << 3) | (1 << 5)
 		v.unlock_frames = 0
+	if _view is MatchView and "smash" in OS.get_cmdline_user_args() and _target > _frames + 6:
+		# the first overhead after <frames>/2: shoot 4 frames after its contact
+		for pl in _view.sim.players:
+			if _frames > _target / 2 and pl.shot_type == K.SHOT_OVERHEAD and pl.contact_consumed \
+					and pl.state == K.STATE_ACTIVE:
+				_target = _frames + 4
 	if _frames == _target - 3 and _view is MatchView and "score10" in OS.get_cmdline_user_args():
 		_view.sim.team_score = [10, 10]
 	if _frames >= _target:

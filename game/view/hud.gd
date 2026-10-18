@@ -539,13 +539,13 @@ func _build_stats() -> void:
 		_text("small", _team_label(t), Vector2(cols[t], 188), 0.5, team_tint(t), _stats_card)
 	var rows := st.rows()
 	for i in rows.size():
-		var y := 222.0 + i * 28.0
+		var y := 222.0 + i * 26.0
 		_text("small", rows[i][0], Vector2(258, y), 0.0, Color(0.8, 0.84, 0.95), _stats_card)
 		for t in 2:
 			var won: bool = rows[i][0] == "POINTS" and view.sim.match_winner == t
 			_text("small", rows[i][t + 1], Vector2(cols[t], y), 0.5,
 				Color("fbe46a") if won else Color.WHITE, _stats_card)
-	_text("small", st.rally_line(), Vector2(480, 222.0 + rows.size() * 28.0 + 6), 0.5,
+	_text("small", st.rally_line(), Vector2(480, 222.0 + rows.size() * 26.0 + 6), 0.5,
 		Color("fbe46a"), _stats_card)
 
 

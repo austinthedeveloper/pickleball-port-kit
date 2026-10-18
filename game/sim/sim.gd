@@ -264,6 +264,12 @@ static func apply_targeted_shot(b: Ball, p: Player, intent: Intent, grow: int = 
 			max_frames = K.HIT_DRIVE_MAX_FRAMES
 			wide = K.HIT_DRIVE_STRETCH_WIDE
 			longer = K.HIT_DRIVE_STRETCH_LONG
+		elif shot == K.SHOT_OVERHEAD:
+			pace = K.HIT_PACE_OVERHEAD_FP
+			min_frames = K.HIT_OVERHEAD_MIN_FRAMES
+			max_frames = K.HIT_OVERHEAD_MAX_FRAMES
+			wide = K.HIT_OVERHEAD_STRETCH_WIDE
+			longer = K.HIT_OVERHEAD_STRETCH_LONG
 	pace = (pace * Paddles.power_mul(p.paddle)) >> 6
 	if not in_sweet_spot(p, b, grow):
 		wide = (wide * Paddles.control_mul(p.paddle)) >> 6
@@ -277,7 +283,42 @@ static func apply_targeted_shot(b: Ball, p: Player, intent: Intent, grow: int = 
 	tx = target_x_for(p.team, tx)
 	var distance := absi(K.to_fp(tx) - b.x_fp)
 	var flight := clampi(distance / pace, min_frames, max_frames)
+	if shot == K.SHOT_OVERHEAD:
+		flight = overhead_flight(b, tx, ty, flight, max_frames)
 	launch(b, tx, ty, flight)
+
+## A smash steep enough to land fast but not into the tape (ADR-053): the
+## flight lengthens a frame at a time until it clears the net by
+## HIT_OVERHEAD_NET_CLEAR, or reaches `longest` (then it may still find
+## the net: a dumped overhead).
+static func overhead_flight(b: Ball, tx: int, ty: int, flight: int, longest: int) -> int:
+	var probe := Ball.new()
+	while flight < longest:
+		probe.x_fp = b.x_fp
+		probe.y_fp = b.y_fp
+		probe.z_fp = b.z_fp
+		launch(probe, tx, ty, flight)
+		if net_clearance(probe, flight) >= K.to_fp(K.COURT_NET_HEIGHT + K.HIT_OVERHEAD_NET_CLEAR):
+			break
+		flight += 1
+	return flight
+
+## The ball's height where its flight crosses the net (as simulate_step
+## moves it), or a large number if it never does.
+static func net_clearance(b: Ball, frames: int) -> int:
+	var x := b.x_fp
+	var z := b.z_fp
+	var vz := b.vz_fp
+	for f in frames:
+		var nx := x + b.vx_fp
+		var nz := z + vz
+		vz += K.BALL_GRAVITY_FP
+		var h = net_crossing_height(x, z, nx, nz)
+		if h != null:
+			return h
+		x = nx
+		z = nz
+	return 1 << 20
 
 ## Contacting slot + 1, or 0.
 func resolve_player_hits() -> int:
@@ -293,6 +334,10 @@ func resolve_player_hits() -> int:
 		p.contact_consumed = 1
 		ball.last_hitter = i
 		ball.bounce_count = 0
+		# a swing at a falling ball overhead is a smash (ADR-053)
+		if p.shot_type != K.SHOT_SOFT and ball.vz_fp < 0 \
+				and ball.z_fp >= K.to_fp(K.HIT_OVERHEAD_Z):
+			p.shot_type = K.SHOT_OVERHEAD
 		apply_targeted_shot(ball, p, intents[i], grow_fp)
 		return i + 1
 	return 0

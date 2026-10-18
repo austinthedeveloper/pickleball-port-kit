@@ -6,6 +6,13 @@ Pickleball '94, the Godot port. Versions follow
 
 ## [Unreleased]
 
+### Added
+- The **overhead smash**, which the SNES game never had: swing HIT or
+  DRIVE at a high ball on its way down (a lob you get under) and it's a
+  fast, steep smash, with its own sound, a big shake and SMASH! over it.
+  The CPUs smash too. SOFT still blocks a high ball. The stats card counts
+  SMASHES.
+
 ### Fixed
 - A player no longer flashes in the top-left corner of the title when
   you change COURT or TIME of day.

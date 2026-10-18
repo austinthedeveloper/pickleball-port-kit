@@ -316,7 +316,8 @@ func _build_ball() -> void:
 func _rumble_hit(slot: int, shot: int) -> void:
 	if demo or sim.config.human[slot] == 0:
 		return
-	var strength: Array = {K.SHOT_DRIVE: [0.3, 0.7, 0.12], K.SHOT_SOFT: [0.2, 0.0, 0.06]}.get(
+	var strength: Array = {K.SHOT_DRIVE: [0.3, 0.7, 0.12], K.SHOT_SOFT: [0.2, 0.0, 0.06],
+		K.SHOT_OVERHEAD: [0.5, 1.0, 0.18]}.get(
 		shot, [0.35, 0.25, 0.08])
 	if multiplayer():
 		GameControls.rumble_device(slot_pads[slot], strength[0], strength[1], strength[2])
@@ -587,8 +588,12 @@ func _on_event(e: Array) -> void:
 			var slot: int = e[3] & 15
 			_rumble_hit(slot, e[3] >> 4 if kind == K.EVENT_HIT else K.SHOT_STANDARD)
 			var lead := -14.0 if sim.players[slot].team else 14.0
+			var shot: int = e[3] >> 4 if kind == K.EVENT_HIT else K.SHOT_STANDARD
 			_spawn_fx("spark", CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp)
-				+ Vector2(lead, 0), 1 if (e[3] >> 4) == K.SHOT_DRIVE else 0)
+				+ Vector2(lead, 0), 1 if shot == K.SHOT_DRIVE or shot == K.SHOT_OVERHEAD else 0)
+			if shot == K.SHOT_OVERHEAD:
+				_players[slot]["choice"] = "overhead"   # whatever the windup guessed
+				_smash_pop(CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp))
 		K.EVENT_BOUNCE:
 			_spawn_fx("dust", at, 0)
 		K.EVENT_CROWD:
@@ -705,12 +710,25 @@ func _frame_for(i: int) -> String:
 	return "idle%d" % (p.animation_frame % 2)
 
 
+## SMASH! over an overhead's contact (ADR-053): rises and fades in half a
+## second. Display only; skipped in the demo's quiet and when effects are off.
+func _smash_pop(at: Vector2) -> void:
+	if not Feel.ON["shake"]:
+		return
+	var t := UiKit.text("small", "SMASH!", at + Vector2(0, -26), 0.5, Color("fbe46a"), _fx)
+	t.z_index = 5
+	var tw := create_tween()
+	tw.tween_property(t, "position:y", t.position.y - 18.0, 0.5).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(t, "modulate:a", 0.0, 0.5).set_delay(0.25)
+	tw.tween_callback(t.queue_free)
+
+
 ## Display-only choice of swing animation: an overhead at a high ball, a
 ## scoop for a soft shot at a low one, a reach when the ball is wide.
 func _choose_swing(p: SimTypes.Player) -> String:
 	var b := sim.ball
 	var dy := absi(b.y_fp - p.y_fp)
-	if b.rally_state == K.BALL_RALLY_LIVE and b.z_fp > K.to_fp(17):
+	if b.rally_state == K.BALL_RALLY_LIVE and b.z_fp > K.to_fp(K.HIT_OVERHEAD_Z - 3):
 		return "overhead"
 	if p.shot_type == K.SHOT_SOFT and b.z_fp < K.to_fp(6):
 		return "scoop"
