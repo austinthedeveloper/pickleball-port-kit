@@ -166,7 +166,7 @@ func test_accessibility_effects() -> void:
 			frames += 1
 		if assist:
 			eq(s.sim.phase, K.PHASE_SERVE_TOSS, "the assist lets go")
-			check(s.sim.charge_power >= MatchView.SERVE_ASSIST_LEVEL, "a strong serve (%d)" % s.sim.charge_power)
+			check(s.sim.charge_power >= MatchInput.SERVE_ASSIST_LEVEL, "a strong serve (%d)" % s.sim.charge_power)
 		else:
 			eq(s.sim.phase, K.PHASE_SERVE_SETUP, "without it, holding never serves")
 		s.free()

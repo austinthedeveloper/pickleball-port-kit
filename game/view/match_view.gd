@@ -28,7 +28,6 @@ var ladder := false             ## a ladder match: intro card, next rung
 ## A tournament match (PORT-25): the intro card, the result recorded in the
 ## bracket, and B on the result goes back to it (finished(false)).
 var tournament := false
-var cup_finish := ""            ## set when this match ended your tournament
 ## From the park (ADR-034): B on the result, or PARK on practice's pause
 ## menu, goes back there (finished(false)).
 var park := false
@@ -64,6 +63,24 @@ var _debug: DebugOverlay
 var feel: Feel
 ## This match's stats (PORT-13), from the events; display only.
 var stats := MatchStats.new()
+## The parts (PORT-27): the people and ball, the input, the match's end.
+var actors := MatchActors.new(self)
+var input := MatchInput.new(self)
+var end := MatchEnd.new(self)
+## Kept on the view for the HUD, the tools and the tests.
+var initials: Initials:
+	get: return end.initials
+var unlock_frames: int:
+	get: return end.unlock_frames
+	set(value): end.unlock_frames = value
+var cup_finish: String:
+	get: return end.cup_finish
+func unlock_open() -> bool: return end.unlock_open()
+func pause_rows() -> Array: return input.pause_rows()
+func _pause_input(it: SimTypes.Intent) -> bool: return input.pause_input(it)
+func _serve_assist(it: SimTypes.Intent) -> void: input.serve_assist(it)
+func _frame_for(i: int) -> String: return actors.frame_for(i)
+func _spawn_fx(kind: String, at: Vector2, start: int) -> void: actors.spawn_fx(kind, at, start)
 
 
 ## The venue's match loop (PORT-22); a match's end stings over it.
@@ -145,8 +162,8 @@ func _build() -> void:
 	_fx = Node2D.new()
 	_fx.z_index = z + 1
 	add_child(_fx)
-	_build_players()
-	_build_ball()
+	actors.build_players()
+	actors.build_ball()
 	feel = Feel.new()
 	_fx.add_child(feel)
 	feel.setup(self)
@@ -251,68 +268,6 @@ func _build_lava(z: int) -> void:
 		_lava.append(poly)
 
 
-func _sheet(variant: String, team: String, cap: bool) -> Texture2D:
-	return _tex("sprites/players/player_%s_%s%s.png" % [variant, team, "_cap" if cap else ""])
-
-
-func _build_players() -> void:
-	var shadow_tex := _tex(manifest["sprites"]["player_shadow"]["file"])
-	for i in K.MAX_PLAYERS:
-		var entry := {}
-		var pal: int = sim.config.palette[i]
-		var team_name: String = ["blue", "red", "green", "gold"][maxi(pal, 0)]
-		var variant := "female" if sim.config.variant[i] == K.VARIANT_FEMALE else "male"
-		var root := Node2D.new()
-		var body := Sprite2D.new()
-		var cap := Sprite2D.new()
-		var look := PlayerLook.for_slot(sim.config, i, manifest)
-		if look:
-			# a ladder opponent: role sheets in their colours, their hat
-			body.texture = _tex(look.body_sheet(manifest))
-			var hat := look.hat_sheet(manifest)
-			cap.texture = _tex(hat) if hat != "" else null
-			body.material = look.material()
-			cap.material = body.material
-		else:
-			body.texture = _sheet(variant, team_name, false)
-			cap.texture = _sheet(variant, team_name, true)
-		for s in [body, cap]:
-			s.centered = false
-			s.region_enabled = true
-			s.region_rect = Rect2(0, 0, FRAME, FRAME)
-			root.add_child(s)
-		var shadow := Sprite2D.new()
-		shadow.texture = shadow_tex
-		_shadows.add_child(shadow)
-		_actors.add_child(root)
-		entry["root"] = root
-		entry["body"] = body
-		entry["cap"] = cap
-		entry["shadow"] = shadow
-		entry["choice"] = "standard"
-		entry["look"] = look
-		_players.append(entry)
-
-
-func _build_ball() -> void:
-	var meta: Dictionary = manifest["sprites"]["ball"]
-	_ball_root = Node2D.new()
-	_ball_sprite = Sprite2D.new()
-	_ball_sprite.texture = _tex(meta["file"])
-	_ball_sprite.region_enabled = true
-	var fw: int = meta["frame_size"][0]
-	_ball_sprite.region_rect = Rect2(0, 0, fw, meta["frame_size"][1])
-	_ball_root.add_child(_ball_sprite)
-	if sim.config.modifiers & K.MOD_BIG_BALL:
-		_ball_sprite.scale = Vector2(2, 2)        # BIG BALL reads as big
-	_actors.add_child(_ball_root)
-	_ball_shadow = Sprite2D.new()
-	_ball_shadow.texture = _tex(manifest["sprites"]["ball_shadow"]["file"])
-	if sim.config.modifiers & K.MOD_BIG_BALL:
-		_ball_shadow.scale = Vector2(2, 1.6)
-	_shadows.add_child(_ball_shadow)
-
-
 # --- Frame ------------------------------------------------------------------------
 
 ## Rumble on a human's contact (PORT-15): a drive kicks harder, a soft
@@ -344,148 +299,22 @@ func multiplayer() -> bool:
 	return not slot_pads.is_empty()
 
 
-## Every human slot's intent from its own pad. Any player's Menu pauses
-## (the sim reads the pause on slot 0), and while paused any pad drives
-## the pause menu. Empty when the pause menu took the frame.
-func _multiplayer_intents() -> Array:
-	var human := [null, null, null, null]
-	var menu := SimTypes.Intent.new()        # the pause menu: anyone's presses
-	for s in K.MAX_PLAYERS:
-		var dev: int = slot_pads[s] if s < slot_pads.size() else -1
-		if dev < 0 or not sim.config.human[s]:
-			continue
-		var it := GameControls.read_pad_intent(dev)
-		menu.hit_pressed |= it.hit_pressed
-		menu.pause_pressed |= it.pause_pressed
-		human[s] = it
-	if input_lock > 0:
-		input_lock -= 1
-		for s in K.MAX_PLAYERS:
-			if human[s] != null:
-				human[s] = SimTypes.Intent.new()
-		menu = SimTypes.Intent.new()
-	if human[0] == null:
-		human[0] = SimTypes.Intent.new()
-	if _pause_on_lost_pad():
-		menu.pause_pressed = 1
-	human[0].pause_pressed = menu.pause_pressed
-	if sim.paused:
-		menu.pause_pressed = human[0].pause_pressed
-		if _pause_input(menu):
-			return []
-		human[0].pause_pressed = menu.pause_pressed
-	return human
-
-
-## A controller dropping out mid-match pauses it (the pause menu waits
-## for the player to come back), as most games do.
-var _lost_seen := GameControls.lost_serial
-
-func _pause_on_lost_pad() -> bool:
-	if GameControls.lost_serial == _lost_seen:
-		return false
-	_lost_seen = GameControls.lost_serial
-	return not sim.paused and sim.phase != K.PHASE_MATCH_RESULT and not initials.open
-
-
-## SERVE ASSIST (PORT-12, an input aid, not a rule change): while P1
-## holds B on the charged serve, the press lets go by itself on the way up
-## at a strong charge, so holding is enough for a good serve.
-const SERVE_ASSIST_LEVEL := 24
-
-func _serve_assist(it: SimTypes.Intent) -> void:
-	if not Settings.serve_assist or not it.hit_held or not sim.charge_charging:
-		return
-	var server: SimTypes.Player = sim.players[sim.server_index]
-	if server.logical_input_slot == 0 and sim.charge_rising \
-			and sim.charge_level >= SERVE_ASSIST_LEVEL:
-		it.hit_held = 0
-
-
-## The initials card (ADR-040): the match waits under it like the intro card.
-var initials := Initials.new()
-
-
-func _update_initials() -> void:
-	var bits := GameControls.pad_bits()
-	if not initials.update(bits[0], bits[1]):
-		save.save_game()
-		input_lock = INPUT_LOCK_FRAMES      # the closing press doesn't rematch
-		GameControls.clear_latch()
-		_sfx.play("confirm")
-	elif bits[0]:
-		_sfx.play("blip")
-
-
-## The UNLOCKED! card (ADR-047, story.c's STORY_CARD_UNLOCK): after the
-## initials card, the career unlocks the match just earned; B, A or Start
-## closes it after UNLOCK_MIN_FRAMES, or it goes by itself.
-const UNLOCK_MIN_FRAMES := 30
-const UNLOCK_FRAMES := 300
-var unlock_frames := -1
-
-
-func unlock_open() -> bool:
-	return unlock_frames >= 0 and not initials.open
-
-
-func _update_unlock() -> void:
-	unlock_frames += 1
-	var pressed: int = GameControls.pad_bits()[0]
-	if unlock_frames >= UNLOCK_FRAMES or (unlock_frames >= UNLOCK_MIN_FRAMES
-			and pressed & (Practice.PAD_B | GameControls.PAD_A | Practice.PAD_START)):
-		unlock_frames = -1
-		if save:
-			save.career.new_unlocks = 0
-		input_lock = INPUT_LOCK_FRAMES      # the closing press doesn't rematch
-		GameControls.clear_latch()
-		_sfx.play("confirm")
-
-
-## A career match (ADR-047): 1P's points and the result count for the
-## active career player against the CPU, outside the demo, practice and
-## multiplayer (as the records).
-func career_counts() -> bool:
-	return save != null and not demo and not multiplayer() and not sim.config.human[2] \
-		and not sim.config.practice
-
-
 func _physics_process(_delta: float) -> void:
 	if initials.open:
-		_update_initials()
+		end.update_initials()
 		_update_visuals()
 		return
 	if unlock_frames >= 0:
-		_update_unlock()
+		end.update_unlock()
 		_update_visuals()
 		return
 	if card_frames >= 0:
 		_update_card()
 		_update_visuals()
 		return
-	var human := []
-	if not demo and multiplayer():
-		human = _multiplayer_intents()
-		if human.is_empty():
-			return
-	elif not demo:
-		var it := GameControls.read_intent()
-		var it2: SimTypes.Intent = GameControls.read_pad_intent(GameControls.p2_pad) if sim.config.human[2] else null
-		# 2P partnering you in the park (ADR-034): slot 1, on their pad
-		var it1: SimTypes.Intent = GameControls.read_pad_intent(GameControls.p2_pad) \
-			if sim.config.human[1] and not sim.config.human[2] else null
-		if input_lock > 0:
-			input_lock -= 1
-			it = SimTypes.Intent.new()
-			it1 = null
-			it2 = null
-			GameControls.clear_latch()
-		_serve_assist(it)
-		if _pause_on_lost_pad():
-			it.pause_pressed = 1
-		human = [it, it1, it2, null]
-		if sim.paused and _pause_input(it):
-			return
+	var human: Variant = input.read()
+	if human == null:
+		return                           # the pause menu took the frame
 	sim.step(human)
 	for e in sim.drain_events():
 		_on_event(e)
@@ -495,7 +324,7 @@ func _physics_process(_delta: float) -> void:
 		if sim.phase == K.PHASE_POINT_RESULT:
 			_check_close_call()
 		if sim.phase == K.PHASE_MATCH_RESULT:
-			_on_match_over()
+			end.on_match_over()
 			if not demo:
 				Music.sting(Music.result_sting(sim.match_winner == 0, cleared,
 					sim.config.human[2] or sim.config.human[3]))
@@ -521,64 +350,6 @@ func _physics_process(_delta: float) -> void:
 	_update_visuals()
 
 
-## The pause menu (ADR-030): RESUME, RESTART (not in practice), MAIN MENU.
-func pause_rows() -> Array:
-	var rows := [{"id": "resume", "label": "RESUME", "press": func(): pause_choice = "resume"}]
-	if not sim.config.practice:
-		rows.append({"id": "restart", "label": "RESTART", "press": func(): pause_choice = "restart"})
-	rows.append({"id": "menu", "label": "PARK" if park and sim.config.practice else "MAIN MENU",
-		"press": func(): pause_choice = "menu"})
-	return rows
-
-
-var pause_choice := ""
-
-## One paused frame: Up/Down move, B picks (Start still resumes, in the
-## sim). True when the frame is done (the sim doesn't step).
-func _pause_input(it: SimTypes.Intent) -> bool:
-	var menu: MenuPage = _hud.pause_menu
-	if GameControls.menu_pressed("move_up"):
-		menu.move(-1)
-		_sfx.play("blip")
-	elif GameControls.menu_pressed("move_down"):
-		menu.move(1)
-		_sfx.play("blip")
-	if it.hit_pressed and not it.pause_pressed:
-		menu.press()
-	it.hit_pressed = 0              # a menu press is never a swing
-	var choice := pause_choice      # set by a press: keys above, or a click
-	pause_choice = ""
-	match choice:
-		"resume":
-			_sfx.play("back")
-			it.pause_pressed = 1         # the sim unpauses on its own Start
-		"restart":
-			_sfx.play("confirm")
-			if save:
-				save.drop_new_records()          # only a finished match asks
-				save.career.new_unlocks = 0
-			sim.new_match()
-			_prev_phase = -1
-			input_lock = INPUT_LOCK_FRAMES   # the closing press doesn't serve
-			stats = MatchStats.new()
-			_hud.on_rematch()
-			_hud.on_new_match()
-			_update_visuals()
-			return true
-		"menu":
-			_sfx.play("back")
-			if save:
-				save.drop_new_records()
-			if sim.config.practice:
-				leave_practice()
-			else:
-				finished.emit(true)
-			return true
-	if it.pause_pressed and choice == "":
-		_sfx.play("back")
-	return false
-
-
 func _on_event(e: Array) -> void:
 	feel.on_event(e)
 	stats.on_event(e)
@@ -593,13 +364,13 @@ func _on_event(e: Array) -> void:
 			_rumble_hit(slot, e[3] >> 4 if kind == K.EVENT_HIT else K.SHOT_STANDARD)
 			var lead := -14.0 if sim.players[slot].team else 14.0
 			var shot: int = e[3] >> 4 if kind == K.EVENT_HIT else K.SHOT_STANDARD
-			_spawn_fx("spark", CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp)
+			actors.spawn_fx("spark", CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp)
 				+ Vector2(lead, 0), 1 if shot == K.SHOT_DRIVE or shot == K.SHOT_OVERHEAD else 0)
 			if shot == K.SHOT_OVERHEAD:
 				_players[slot]["choice"] = "overhead"   # whatever the windup guessed
-				_smash_pop(CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp))
+				actors.smash_pop(CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp))
 		K.EVENT_BOUNCE:
-			_spawn_fx("dust", at, 0)
+			actors.spawn_fx("dust", at, 0)
 		K.EVENT_CROWD:
 			crowd.cheer(90 if e[3] >= 13 else 50)
 		K.EVENT_POINT:
@@ -616,7 +387,7 @@ func _on_event(e: Array) -> void:
 					save.record_rally(rally)
 			# ADR-047: the active career player's point (against the CPU);
 			# the server is still the rally's (the next serve isn't set up).
-			if career_counts():
+			if end.career_counts():
 				save.career.record_point(rally, e[3] == 0, sim.server_index == 0)
 
 
@@ -630,48 +401,6 @@ func _update_card() -> void:
 		_hud.close_card()
 
 
-## Records at the match's end (a safe point to write, playbook §6), and the
-## ladder (ADR-023): a win moves to the next rung; beating the last clears.
-## A record beaten (the rally, in 2P too) asks for initials (ADR-040).
-func _on_match_over() -> void:
-	if demo or save == null:
-		return
-	var won := sim.match_winner == 0
-	if multiplayer():
-		save.drop_new_records()          # friends' matches don't touch the records
-		save.save_game()
-		return
-	if not sim.config.human[2]:
-		# ADR-047: before record_match, whose write keeps both.
-		if career_counts():
-			save.career.record_match(sim.config.mode, won, sim.team_score[1],
-				sim.config.opponent, sim.config.open_play != 0)
-		save.record_match(sim.config.mode == K.MODE_DOUBLES, won, sim.config.opponent,
-			sim.team_score[1] if won else -1)
-		if ladder and won:
-			cleared = save.advance_ladder(Opponents.count())
-		if tournament:
-			_record_tournament(won)
-		save.record_stats(stats)
-	save.save_game()
-	initials.begin(save)
-	# then what the career player unlocked (after the initials, if any)
-	if save.career.new_unlocks:
-		unlock_frames = 0
-
-
-## PORT-25: the bracket takes this result (and decides the round's other
-## matches); a tournament over for you goes in the records.
-func _record_tournament(won: bool) -> void:
-	var t := save.tournament()
-	if t == null or t.next_match().is_empty():
-		return
-	t.record(won, sim.team_score[0], sim.team_score[1])
-	save.store_tournament(t)
-	cup_finish = t.finish()
-	save.record_cup(cup_finish)
-
-
 ## Leaving practice: a new best streak (for the session's zone) is saved
 ## (main.c calls practice_finish), then back to the title, or to the park
 ## for the ball machine's practice.
@@ -679,80 +408,6 @@ func leave_practice() -> void:
 	if save:
 		save.finish_practice(sim.practice.zone, sim.practice.best)
 	finished.emit(not park)
-
-
-func _spawn_fx(kind: String, at: Vector2, start: int) -> void:
-	var meta: Dictionary = manifest["sprites"][kind]
-	var s := Sprite2D.new()
-	s.texture = _tex(meta["file"])
-	s.region_enabled = true
-	var fw: int = meta["frame_size"][0]
-	var fh: int = meta["frame_size"][1]
-	s.region_rect = Rect2(start * fw, 0, fw, fh)
-	s.position = at if kind == "spark" else at - Vector2(0, fh / 2.0)
-	_fx.add_child(s)
-	var frames: int = meta["frames"]
-	var ms: float = meta.get("ms_per_frame", 60)
-	var tw := create_tween()
-	for f in range(start + 1, frames):
-		tw.tween_interval(ms / 1000.0)
-		tw.tween_callback(func(): s.region_rect = Rect2(f * fw, 0, fw, fh))
-	tw.tween_interval(ms / 1000.0)
-	tw.tween_callback(s.queue_free)
-
-
-func _frame_for(i: int) -> String:
-	var p: SimTypes.Player = sim.players[i]
-	var entry: Dictionary = _players[i]
-	if p.pose == K.POSE_TOSS:
-		return "toss"
-	if p.pose == K.POSE_CHEER:
-		return "cheer"
-	match p.state:
-		K.STATE_WINDUP:
-			if p.state_frames_remaining == K.PLAYER_WINDUP_FRAMES:
-				entry["choice"] = _choose_swing(p)
-			return {"overhead": "overhead_windup", "scoop": "scoop",
-				"reach": "windup"}.get(entry["choice"], "windup")
-		K.STATE_ACTIVE:
-			return {"overhead": "overhead_contact", "scoop": "scoop",
-				"reach": "reach"}.get(entry["choice"], "swing")
-		K.STATE_RECOVERY:
-			if entry["choice"] == "overhead":
-				return "follow"
-			if entry["choice"] in ["scoop", "reach"] and p.state_frames_remaining > 3:
-				return entry["choice"]
-			return "follow"
-		K.STATE_MOVE:
-			return "run%d" % (p.animation_frame % 4)
-	return "idle%d" % (p.animation_frame % 2)
-
-
-## SMASH! over an overhead's contact (ADR-053): rises and fades in half a
-## second. Display only; skipped in the demo's quiet and when effects are off.
-func _smash_pop(at: Vector2) -> void:
-	if not Feel.ON["shake"]:
-		return
-	var t := UiKit.text("small", "SMASH!", at + Vector2(0, -26), 0.5, Color("fbe46a"), _fx)
-	t.z_index = 5
-	var tw := create_tween()
-	tw.tween_property(t, "position:y", t.position.y - 18.0, 0.5).set_ease(Tween.EASE_OUT)
-	tw.parallel().tween_property(t, "modulate:a", 0.0, 0.5).set_delay(0.25)
-	tw.tween_callback(t.queue_free)
-
-
-## Display-only choice of swing animation: an overhead at a high ball, a
-## scoop for a soft shot at a low one, a reach when the ball is wide.
-func _choose_swing(p: SimTypes.Player) -> String:
-	var b := sim.ball
-	var dy := absi(b.y_fp - p.y_fp)
-	if b.rally_state == K.BALL_RALLY_LIVE and b.z_fp > K.to_fp(K.HIT_OVERHEAD_Z - 3):
-		return "overhead"
-	if p.shot_type == K.SHOT_SOFT and b.z_fp < K.to_fp(6):
-		return "scoop"
-	if dy > K.to_fp(K.HIT_SWEET_Y):
-		return "reach"
-	return "standard"
 
 
 func _update_camera() -> void:
@@ -778,7 +433,7 @@ func _update_visuals() -> void:
 		var feet := CourtView.ground(p.x_fp, p.y_fp).round()
 		root.position = feet
 		e["shadow"].position = feet
-		var idx := SLOTS.find(_frame_for(i))
+		var idx := SLOTS.find(actors.frame_for(i))
 		var flip := p.team == 1
 		for s in [e["body"], e["cap"]]:
 			s.region_rect = Rect2(idx * FRAME, 0, FRAME, FRAME)

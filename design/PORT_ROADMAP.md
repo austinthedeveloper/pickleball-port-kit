@@ -53,6 +53,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-24 | The overhead | `feature/cld-overhead` | Ready to test |
 | PORT-25 | The tournament | `feature/cld-tournament` | Ready to test |
 | PORT-26 | The kitchen rule | `feature/cld-kitchen-rule` | Ready to test |
+| PORT-27 | Cleanup round 3 | `feature/cld-cleanup-3` | Done |
 
 ## Releases
 
@@ -197,6 +198,21 @@ feature/cld-release-0.6.0   (v0.6.0)
     from it, and without the AI check they do and lose the point).
     258/258 plus the e2e; golden traces unchanged.
   - Status: **Ready to test**: stand in your kitchen and try to volley.
+
+### 27. `feature/cld-cleanup-3`: split the match view (chosen 2026-10-18)
+
+- [x] `PORT-27` `view/match_view.gd` (about 800 lines) loses three parts,
+  each a RefCounted holding the view, as the title's CAREER pages did:
+  `match_actors.gd` (the people and ball: sprites, frames, the swing
+  choice, sparks, SMASH!), `match_input.gd` (each slot's intents,
+  multiplayer pads, the input lock, SERVE ASSIST, a dropped pad, the pause
+  menu) and `match_end.gd` (records, ladder, bracket and career at the
+  result; the initials and UNLOCKED! cards). The view keeps the scene,
+  the frame and the events (471 lines) and thin wrappers for what the
+  HUD, tools and tests use.
+  - Verified: 258/258 plus the e2e, golden traces unchanged, the leak
+    test still at its bound; a screenshot of a doubles smash unchanged.
+  - Status: **Done**.
 
 ## For you
 

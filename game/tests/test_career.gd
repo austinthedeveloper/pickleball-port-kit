@@ -514,7 +514,7 @@ func test_match_records_and_unlock_card() -> void:
 	check(v._hud._unlock.visible and v._hud._banner.text == "", "the card, not the result")
 	eq(v._hud._unlock_line.text, "VISOR, TRICORN, PINK HAIR", "what was earned")
 	var frame := v.sim.frame_count
-	for f in MatchView.UNLOCK_FRAMES - 2:
+	for f in MatchEnd.UNLOCK_FRAMES - 2:
 		v._physics_process(1.0 / 60.0)
 	eq(v.sim.frame_count, frame, "the match waits under it")
 	check(v.unlock_open(), "for five seconds")
