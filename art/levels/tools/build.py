@@ -31,7 +31,8 @@ OUT = HERE.parent / "out"
 PAL = json.loads((KIT / "art/sprites/hd/src/palettes.json").read_text())
 TEAMS = ["blue", "red", "green", "gold"]
 MOCKS = {"park": "level-01.png", "lakeside": "level-02.png",
-         "sunset": "level-03.png"}
+         "sunset": "level-03.png", "dinosaur": "court_top_dinosaur.png",
+         "space": "court_top_space.png", "undersea": "court_top_undersea.png"}
 
 
 def save(img, rel):
@@ -276,7 +277,8 @@ def build_venue(name, crowd_rows):
     sit = [i for i, (p, _) in enumerate(crowd_rows) if p == "sit"]
     stand = [i for i, (p, _) in enumerate(crowd_rows) if p == "stand"]
     k = {"sit": 0, "stand": 0}
-    offset = {"park": 0, "lakeside": 5, "sunset": 8}[name]
+    offset = {"park": 0, "lakeside": 5, "sunset": 8, "dinosaur": 2,
+              "space": 6, "undersea": 10}[name]
     for s in v.seats:
         pool = sit if s["pose"] == "sit" else stand
         person = pool[(k[s["pose"]] + offset) % len(pool)]
@@ -414,7 +416,7 @@ def scene(name, v, vmeta, meta_ui, fx):
         extras_net.append(sprite_layer(shadow, feet[0] - 22, feet[1] - 5))
         extras_net.append(place_player(variant, team, pose, feet, flip))
 
-    if name == "park":
+    if name in ("park", "dinosaur", "space", "undersea"):
         P("male", "blue", "toss", (150, 690))
         P("male", "red", "idle0", (1195, 700), flip=True)
         extras_net.append(fx_at(ball["file"], ball["frame_size"][0], 0, *M(212, 590)))
@@ -492,7 +494,7 @@ def main():
     manifest["ui"] = umeta
     manifest["venues"] = {}
     built = {}
-    for name in ("park", "lakeside", "sunset"):
+    for name in venues.VENUES:
         v, vm = build_venue(name, crowd_rows)
         manifest["venues"][name] = vm
         built[name] = (v, vm)

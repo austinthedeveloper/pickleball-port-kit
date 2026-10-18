@@ -182,13 +182,31 @@ func test_lobby() -> void:
 	GameControls.fake_pads = {}
 
 
-func _view(cfg: SimTypes.MatchConfig) -> MatchView:
+func _view(cfg: SimTypes.MatchConfig, venue := "park", time := CourtStyle.DAY) -> MatchView:
 	var v := MatchView.new()
 	v.save = _save()
+	v.time = time
 	runner.root.add_child(v)
-	v.setup(cfg, "park", false)
+	v.setup(cfg, venue, false)
 	v._hud.refresh()
 	return v
+
+
+## Every venue at every time (ADR-046's three too): a singles match
+## against the venue's home team, the watcher out, the scores and a quip.
+func test_every_venue() -> void:
+	for venue in Settings.VENUES:
+		var home := range(Opponents.count()).filter(func(o): return Settings.home_venue(o) == venue)
+		var opp: int = home[0] if home.size() > 0 else -1
+		for t in CourtStyle.time_names().size():
+			var v := _view(Settings.config_for(false, opp, K.DIFFICULTY_MEDIUM, 11), venue, t)
+			var tag := "%s %s vs %d" % [venue, CourtStyle.time_names()[t], opp]
+			check_layout(v, tag)
+			v.sim.team_score = [10, 9]
+			v._hud.show_quip("WHAT A SHOT THAT WAS", Color.WHITE)
+			v._hud.refresh()
+			check_layout(v, tag + " quip")
+			v.free()
 
 
 ## The HUD in its states, against every ladder team (the longest names).

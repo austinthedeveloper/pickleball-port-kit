@@ -54,6 +54,32 @@ func test_default_is_the_paint_pixel_for_pixel() -> void:
 	view.free()
 
 
+## ADR-046: the fun venues paint their venues.json ground presets, so
+## DEFAULT there is the preset the SNES named (GREEN / ORANGE / GRASS /
+## WHITE at DINOSAUR, and so on). (PARK, LAKESIDE and SUNSET keep the
+## level mocks' own paint.)
+func test_fun_venues_paint_their_presets() -> void:
+	var m := _manifest()
+	var venues: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/venues.json"))
+	var checked := 0
+	for v in venues["venues"]:
+		var venue := String(v["name"]).to_lower()
+		if not venue in ["dinosaur", "space", "undersea"]:
+			continue
+		check(venue in Settings.VENUES, "%s is a venue" % venue)
+		for part in CourtStyle.PARTS:
+			var want: Variant = CourtStyle.preset(part, CourtStyle.names(part).find(v["ground"][part]))
+			check(want != null, "%s %s names a preset" % [venue, part])
+			if want == null:
+				continue
+			var got := CourtStyle.venue_base(venue, part, m)
+			var off := maxf(absf(got.r - want.r), maxf(absf(got.g - want.g), absf(got.b - want.b)))
+			check(off <= 0.06 or (part == "lines" and got.get_luminance() > 0.85 * want.get_luminance()),
+				"%s %s paints %s (%s vs %s)" % [venue, part, v["ground"][part], got, want])
+			checked += 1
+	eq(checked, 12, "three venues, four parts")
+
+
 func test_a_preset_touches_only_its_part() -> void:
 	var m := _manifest()
 	var parts_with := func(choice: Array) -> Array:

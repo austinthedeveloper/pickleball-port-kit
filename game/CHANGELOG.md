@@ -4,6 +4,18 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [Unreleased]
+
+### Added
+- Three more venues from the SNES game (COURT → VENUE): **DINOSAUR**
+  (a sunset jungle with a volcano and dinosaurs over a wooden fence),
+  **SPACE** (stars, Earth, Saturn, a rocket, aliens and astronauts behind
+  a lit fence), and **UNDERSEA** (a shipwreck, fish, crabs and an octopus
+  along a rope fence). Each has its own default court colours and
+  background sounds, and works at every time of day.
+- The GYM BROS, GOTH CLUB and SURF CREW play their ladder matches at home
+  at the new venues.
+
 ## [0.5.0] - 2026-10-17
 
 The park, modernised.

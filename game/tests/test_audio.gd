@@ -35,6 +35,20 @@ func test_every_effect_has_samples() -> void:
 	check(Sfx.EFFECTS["hit"].size() >= 3, "hits come in variants")
 
 
+## Every venue has its own ambience loop (ADR-031; the fun three ADR-046),
+## and plays it by day.
+func test_every_venue_has_its_ambience() -> void:
+	for venue in Settings.VENUES:
+		check(Sfx.AMBIENCE.has(venue), "%s has an ambience" % venue)
+		check(ResourceLoader.exists(Sfx.DIR + String(Sfx.AMBIENCE.get(venue, "")) + ".wav"),
+			"%s: its loop exists" % venue)
+		var s := Sfx.new()
+		runner.root.add_child(s)
+		s.setup(venue, false)
+		eq(s.ambience_name, venue, "%s plays its own loop by day" % venue)
+		s.free()
+
+
 func test_pan_by_court_x() -> void:
 	check(_first([K.EVENT_BOUNCE, K.COURT_BASELINE_LEFT, 130, 1])[3] <= -0.99, "left baseline: left")
 	check(absf(_first([K.EVENT_BOUNCE, K.COURT_NET_X, 130, 1])[3]) < 0.01, "the net: centre")
