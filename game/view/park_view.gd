@@ -73,6 +73,11 @@ var _prompt_key := ""
 
 
 ## `back`: returning from your game (its result shows for a while).
+## The park's own music in open play (PORT-22).
+func music_track() -> String:
+	return "park"
+
+
 func setup(park: OpenPlay, s: SaveGame, back: bool) -> ParkView:
 	op = park
 	save = s

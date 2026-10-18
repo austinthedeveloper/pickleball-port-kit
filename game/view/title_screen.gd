@@ -50,6 +50,11 @@ func _store_settings() -> void:
 	Settings.store_to(save)
 
 
+## The title's music (PORT-22), on every page.
+func music_track() -> String:
+	return "title"
+
+
 func _ready() -> void:
 	_load_settings()
 	Settings.apply_window(get_window())
@@ -189,13 +194,15 @@ func _build_pages() -> void:
 			"change": func(d): Settings.camera_i = clampi(Settings.camera_i + d, 0, Settings.CAMERAS.size() - 1)},
 		{"id": "sound", "label": "SOUND", "value": func(): return AudioMap.SOUND_NAMES[Sfx.setting],
 			"change": func(d): Sfx.setting = (Sfx.setting + d + 3) % 3},
+		{"id": "music", "label": "MUSIC", "value": func(): return Music.volume_name(),
+			"change": func(d): Music.volume = clampi(Music.volume + d, 0, Music.VOLUMES)},
 		{"id": "fullscreen", "label": "FULLSCREEN", "value": func(): return "ON" if Settings.fullscreen else "OFF",
 			"change": func(_d): Settings.fullscreen = not Settings.fullscreen; Settings.apply_window(get_window())},
 		{"id": "scale", "label": "SCALE", "value": func(): return "PIXEL" if Settings.integer_scale else "FILL",
 			"change": func(_d): Settings.integer_scale = not Settings.integer_scale; Settings.apply_window(get_window())},
 		{"id": "controls", "label": "CONTROLS", "press": func(): open_page("controls")},
 		{"id": "access", "label": "ACCESSIBILITY", "press": func(): open_page("access")},
-	], help)
+	], help, Rect2(300, 146, 360, 0))
 	var onoff := func(on: bool) -> String: return "ON" if on else "OFF"
 	_add_page("access", "ACCESSIBILITY", [
 		{"id": "shake", "label": "SCREEN SHAKE", "value": func(): return onoff.call(Settings.shake),

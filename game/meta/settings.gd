@@ -1,7 +1,7 @@
 ## The player's settings (match setup, court, options, Player Select's
 ## last choice), shared by every screen and kept in the save's
 ## "settings". The title edits them; matches read them. SOUND lives on
-## Sfx.setting (the audio reads it there).
+## Sfx.setting and MUSIC on Music.volume (the audio reads them there).
 class_name Settings
 extends RefCounted
 
@@ -59,6 +59,7 @@ static func load_from(save: SaveGame) -> void:
 	mod_bits = (bits & 15) if bits >= 0 else \
 		OLD_MOD_PRESETS[clampi(int(st.get("mods", 0)), 0, OLD_MOD_PRESETS.size() - 1)]
 	Sfx.setting = clampi(int(st.get("sound", 0)), 0, AudioMap.SOUND_NAMES.size() - 1)
+	Music.volume = clampi(int(st.get("music", Music.DEFAULT_VOLUME)), 0, Music.VOLUMES)
 	fullscreen = int(st.get("fullscreen", 0)) != 0
 	integer_scale = int(st.get("integer_scale", 1)) != 0
 	var ct: Array = st.get("court", CourtStyle.DEFAULTS)
@@ -86,6 +87,7 @@ static func store_to(save: SaveGame) -> void:
 	save.data["settings"].merge({"venue": venue_i, "difficulty": difficulty_i,
 		"points": points_i, "players": 2 if two_players else 1, "opponent": opponent_i,
 		"camera": camera_i, "mod_bits": mod_bits, "sound": Sfx.setting,
+		"music": Music.volume,
 		"fullscreen": 1 if fullscreen else 0, "integer_scale": 1 if integer_scale else 0,
 		"player": [p1_choice["palette"], p1_choice["variant"], p1_choice["paddle"]],
 		"court": court.duplicate(), "time": time_i,

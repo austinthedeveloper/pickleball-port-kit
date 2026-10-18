@@ -45,7 +45,8 @@ static func defaults() -> Dictionary:
 			"time": 0,  # COURT TIME: DAY, DUSK, NIGHT (ADR-045)
 			# PORT-12: accessibility, and remapped controls ({} = defaults)
 			"shake": 1, "flash": 1, "hud_large": 0, "serve_assist": 0, "bindings": {},
-			"vibration": 1},  # PORT-15: controller rumble
+			"vibration": 1,  # PORT-15: controller rumble
+			"music": Music.DEFAULT_VOLUME},  # PORT-22: MUSIC, 0 (OFF) .. 10
 		"records": {"singles_wins": 0, "singles_losses": 0, "doubles_wins": 0,
 			"doubles_losses": 0, "ladder_rung": 0, "ladder_clears": 0,
 			"longest_rally": 0, "practice_best": 0,

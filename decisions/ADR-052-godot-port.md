@@ -206,6 +206,21 @@ stream, at the 960×540 art density, through the art's court geometry.
   4x across, 3x down. Upright sprites are y-sorted with the people, by
   their foot; fences and walls that run into the picture are cut into
   depth slices. The sim and its tests are untouched.
+- **Music** (PORT-22, *amended 2026-10-17*). The SNES game had none: the
+  ambience stood in (ADR-031, `M4-AUDIO-03`). The port has an original
+  soundtrack from `audio/music/make_music.py` (a note sequencer and
+  synth voices in numpy, fixed seeds, no recorded audio): a title theme,
+  the park's theme in open play, a match loop for each venue, and
+  stingers for a match won, lost, and the ladder cleared. Loops are
+  seamless (mixed circularly). `view/music.gd` is one player on main for
+  the session: each screen names its loop (`music_track()`) and entering
+  it crossfades (equal power, 1.6 s); a match's end stings over the
+  loop's quick fade and the result stays quiet; the music ducks 9 dB
+  under the applause and the whistle. MUSIC on OPTIONS (OFF, 10-100%,
+  default 70%) is a new saved key with a default, so no layout change;
+  SOUND OFF silences the music too, NO CROWD keeps it. It's presentation
+  only: nothing reads the sim but the result, so golden traces are
+  unchanged. The ambience stays under the music in matches.
 - **Not ported yet:** career (ADR-047).
 
 ## Rejected (and why)
