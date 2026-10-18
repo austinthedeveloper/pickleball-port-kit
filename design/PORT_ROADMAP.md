@@ -665,6 +665,11 @@ feature/cld-release        (pushed)
     none from the demo, the duck, the MUSIC row, its save and an older
     save's default). Loop seams measured (`--report`). 205/205 plus the
     e2e; golden traces unchanged.
+  - Integration (0.6): with the fun venues merged, the three new venues
+    got their own match loops too (DINOSAUR: D dorian, 104 BPM, marimba,
+    toms and brass; SPACE: C lydian, 90 BPM, echoing pulse arpeggios and
+    bells; UNDERSEA: E minor, 80 BPM, marimba drops and flute), since the
+    music test asks every venue for one.
   - Status: **Waiting for you to listen.**
 
 ### 21. `feature/cld-career`: career players (ADR-047, asked for 2026-10-17)

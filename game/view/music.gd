@@ -15,7 +15,8 @@ const DIR := "res://assets/audio/"
 ## Loops by name: the title, the park in open play, and a match at each venue.
 const LOOPS := {"title": "music_title", "park": "music_park",
 	"match_park": "music_match_park", "match_lakeside": "music_match_lakeside",
-	"match_sunset": "music_match_sunset"}
+	"match_sunset": "music_match_sunset", "match_dinosaur": "music_match_dinosaur",
+	"match_space": "music_match_space", "match_undersea": "music_match_undersea"}
 const STINGERS := {"won": "music_won", "lost": "music_lost", "cleared": "music_cleared"}
 const VOLUMES := 10                ## MUSIC steps above OFF
 const BASE_DB := -9.0              ## the soundtrack sits this far under the effects

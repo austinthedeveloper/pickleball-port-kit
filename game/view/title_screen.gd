@@ -65,7 +65,6 @@ func music_track() -> String:
 
 func _ready() -> void:
 	_load_settings()
-	Settings.apply_window(get_window())
 	_start_demo()
 	_ui = CanvasLayer.new()
 	_ui.layer = 20
@@ -130,6 +129,7 @@ func _ready() -> void:
 	_sfx.setup("", false)
 	pages["main"].cursor = clampi(main_cursor, 0, pages["main"].rows.size() - 1)
 	_show("main")
+	Settings.apply_window(get_window())    # last: a mode change can run a frame
 
 
 func _add_page(id: String, title: String, rows: Array, help: Array,
@@ -821,6 +821,9 @@ func _input(event: InputEvent) -> void:
 
 
 func _process(_delta: float) -> void:
+	# a window-mode change in _ready can run a frame before the demo exists
+	if _demo == null or _demo.sim == null:
+		return
 	if _demo.sim.phase == K.PHASE_MATCH_RESULT and _demo.sim.phase_timer >= K.ATTRACT_RESULT_FRAMES - 1:
 		_demo_doubles = not _demo_doubles
 		_start_demo()

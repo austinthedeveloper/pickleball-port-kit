@@ -20,6 +20,9 @@ cp audio/music/out/*.wav game/assets/audio/           # or game/tools/sync_asset
 | `music_match_park` | A match at the PARK | F major, 100 BPM, 16 bars (38 s) | Calm, softly swung: electric piano comping, a round bass, rim and hats; a flute melody in the second half. |
 | `music_match_lakeside` | A match at LAKESIDE | A major, 94 BPM, 16 bars (41 s) | Breezy: rolling marimba, long bass notes, soft pads, shaker and snaps; a bell melody in the second half. |
 | `music_match_sunset` | A match at SUNSET | Eb major, 86 BPM, 16 bars (45 s) | Warm and swung: mellow electric piano, a slow bass, rim clicks; a round lead in the second half. |
+| `music_match_dinosaur` | A match at DINOSAUR | D dorian, 104 BPM, 16 bars (37 s) | A jungle adventure: a marimba ostinato, toms and shaker, a plucky bass; brass stabs and a marimba melody in the second half. |
+| `music_match_space` | A match at SPACE | C lydian, 90 BPM, 16 bars (43 s) | Dreamy: a pulse-wave arpeggio through a long echo, wide slow pads, a held bass; a bell melody floats over the second half. |
+| `music_match_undersea` | A match at UNDERSEA | E minor, 80 BPM, 16 bars (48 s) | Watery: marimba drops through a heavy echo, soft keys, a slow bass, a muted kit; a flute melody drifts in the second half. |
 | `music_won` | A match won | D major (6 s) | A brass fanfare up the triad, a held chord, crash and bells. |
 | `music_lost` | A match lost | (7 s) | A friendly sliding "aww" to a soft G minor chord. |
 | `music_cleared` | The ladder cleared | E major (9 s) | A snare roll, then a bigger fanfare a key up from the title's, a held chord and bells. |

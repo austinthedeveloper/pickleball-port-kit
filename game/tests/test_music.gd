@@ -48,6 +48,8 @@ func test_each_screen_names_its_track() -> void:
 	v.venue = "sunset"
 	eq(v.music_track(), "match_sunset", "a match plays its venue's loop")
 	v.venue = "space"
+	eq(v.music_track(), "match_space", "the fun venues have their own too")
+	v.venue = "moon"
 	eq(v.music_track(), "match_park", "a venue without one plays the park's")
 	v.free()
 
