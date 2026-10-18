@@ -492,6 +492,8 @@ feature/cld-release        (pushed)
   `feature/cld-release-0.2.1`.
 - **v0.3.0** (2026-10-17): PORT-17 open play. The first release built and
   published by CI (tag `v0.3.0`, on `feature/cld-release-0.3.0`).
+- **v0.3.1** (2026-10-17): text and layout fixes, with a layout test
+  over every screen (tag `v0.3.1`, on `feature/cld-release-0.3.1`).
 
 ### 16. `feature/cld-multiplayer`: four players on controllers (asked for 2026-10-17)
 
