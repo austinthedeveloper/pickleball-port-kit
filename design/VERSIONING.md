@@ -60,6 +60,9 @@ is one that:
   rendering, a new autoload): the pack can't change those. Say so in the
   CHANGELOG entry ("download this one in full").
 
+The game reads releases without signing in, so the repository must stay
+public (`config/update_repo` in project.godot names it).
+
 `game/scenes/boot.gd` is the one file an update can't replace: change it
 only in a release that asks for a full download.
 

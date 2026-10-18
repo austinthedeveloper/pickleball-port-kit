@@ -49,6 +49,11 @@ exist only in the update (checked with a probe class) and the version.
 
 ## Limits
 
+- **The repository must be public.** The game asks GitHub's API without
+  signing in; a private repository's releases answer "Not Found". Found
+  on the 0.9.0 release; the repository was made public that day (with
+  your OK, after a scan of its history for secrets).
+
 - `boot.gd` is the one file an update can't change: keep it small and
   never load a game script in it before the pack.
 - An update can't change `project.godot` settings (the window, rendering,
