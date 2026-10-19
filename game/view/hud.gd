@@ -24,6 +24,7 @@ var _quip: Control
 var _quip_text: BitmapText
 var _quip_frames := 0
 var _result_line: BitmapText
+var _trophy: Node2D                     ## over CHAMPION! (SNES ADR-064)
 var _card: Control
 var _practice_menu: Control
 var _initials: Control           ## the initials card (ADR-040), built when needed
@@ -181,6 +182,11 @@ func setup(v: MatchView) -> void:
 	_meter_fill.position = Vector2(2, 2)
 	_meter_fill.size = Vector2(0, 5)
 	_meter.add_child(_meter_fill)
+	_trophy = Node2D.new()
+	_trophy.position = Vector2(480, 214)
+	_trophy.draw.connect(_draw_trophy)
+	_trophy.visible = false
+	add_child(_trophy)
 	_banner = _text("big_gold", "", Vector2(480, 250), 0.5)
 	_banner_sub = _text("small", "", Vector2(480, 288), 0.5)
 	_quip = Control.new()
@@ -393,6 +399,7 @@ func refresh() -> void:
 	else:
 		_banner.text = ""
 		_banner_sub.text = ""
+	_trophy.visible = _banner.text.begins_with("CHAMPION")
 
 
 ## After a rated park game (SNES ADR-070, hud_scene.c hud_result_rating):
@@ -405,6 +412,30 @@ static func park_line(c: Career) -> String:
 			OpenPlay.rating_points(c.park_after)]
 	return "PARK POINTS %d TO %d" % [OpenPlay.rating_points(c.park_before),
 		OpenPlay.rating_points(c.park_after)]
+
+
+## The trophy: a gold cup with handles on a brown base.
+func _draw_trophy() -> void:
+	var ink := Color(0.07, 0.06, 0.12)
+	var gold := Color("f4c430")
+	var light := Color("fbe46a")
+	var cup := PackedVector2Array([Vector2(-16, -26), Vector2(16, -26), Vector2(13, -10),
+		Vector2(6, -3), Vector2(-6, -3), Vector2(-13, -10)])
+	for side in [-1.0, 1.0]:
+		var from := -PI / 2 if side > 0 else PI / 2
+		_trophy.draw_arc(Vector2(side * 15, -18), 7.0, from, from + PI, 10, ink, 5.0)
+		_trophy.draw_arc(Vector2(side * 15, -18), 7.0, from, from + PI, 10, gold, 2.5)
+	var rim := PackedVector2Array()
+	for q in cup:
+		rim.append(q * 1.12 + Vector2(0, -1))
+	_trophy.draw_colored_polygon(rim, ink)
+	_trophy.draw_colored_polygon(cup, gold)
+	_trophy.draw_colored_polygon(PackedVector2Array([Vector2(-11, -23), Vector2(-5, -23),
+		Vector2(-5, -8), Vector2(-9, -11)]), light)
+	_trophy.draw_rect(Rect2(-4, -4, 8, 8), ink)
+	_trophy.draw_rect(Rect2(-2.5, -4, 5, 7), gold)
+	_trophy.draw_rect(Rect2(-14, 3, 28, 9), ink)
+	_trophy.draw_rect(Rect2(-12.5, 4.5, 25, 6), Color("8a5a2c"))
 
 
 func _player_of(slot: int) -> int:

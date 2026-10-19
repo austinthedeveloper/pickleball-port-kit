@@ -219,7 +219,8 @@ func _build_pages() -> void:
 		mod_rows.append({"id": m[0], "label": m[1],
 			"value": func(): return "ON" if Settings.mod_bits & bit else "OFF",
 			"change": func(_d): Settings.mod_bits ^= bit})
-	_add_page("modifiers", "MODIFIERS", mod_rows, help, Rect2(300, 146, 360, 0))   # 7 rows: as high as MAIN
+	# nine rows: over the logo (hidden, as on CONTROLS), clear of the key legend
+	_add_page("modifiers", "MODIFIERS", mod_rows, help, Rect2(300, 60, 360, 0))
 	# PORT-31: local (the lobby, up to four pads) or online (1 vs 1)
 	_add_page("multi", "MULTIPLAYER", [
 		{"id": "local", "label": "LOCAL", "value": func(): return "UP TO 4 PADS", "press": open_lobby},
@@ -424,7 +425,7 @@ func _show(id: String) -> void:
 	if hat_museum:
 		hat_museum.visible = id == "museum"
 	for n in _header:
-		n.visible = not id in ["select", "records", "controls", "lobby", "museum", "career_card", "career_edit",
+		n.visible = not id in ["select", "records", "controls", "modifiers", "lobby", "museum", "career_card", "career_edit",
 			"career_name"]
 	if lobby_screen:
 		lobby_screen.visible = id == "lobby"

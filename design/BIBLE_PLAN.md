@@ -67,7 +67,7 @@ Status: **have** (the port does it), **partly**, **missing**, **differs**
 | Ladder rebalance, every rung measurably harder | 062 + tuning v2-4 | **have** | PORT-35: frame for frame (the conformance traces). |
 | Singles and doubles keep **separate ladder places**; quitting a ladder match resets it | 055 | **have** | PORT-35, save v6. |
 | Modifiers **GHOST ball, POPCORN rally, ICE footing** | 053 | **have** | PORT-35. |
-| Modifiers **GLOW lights, INVERSE colours** | 054 | **missing** | Display (palettes); the port draws in full colour, so re-design them. |
+| Modifiers **GLOW lights, INVERSE colours** | 054 | **have** | PORT-39: GLOW (night, lime, neon) and INVERSE (a negative under the HUD). |
 | OPTIONS: SCORING (FIRST TO / WIN BY 2), CAMERA with AMOUNT | 065 | **partly** | Port: WIN BY 2 is a modifier; CAMERA has %. |
 | Nine title entries in the ROM's order | 065 | **differs** | The port's menus are its own (modernised, ADR-052). Keep, but note it. |
 | Career looks: 4 skins, **10 hair** (5 to earn), **13 hats** (11 to earn) | 059, 060 | **done** | PORT-38, ADR-061: the new hats drawn for the HD players. |
@@ -82,13 +82,13 @@ Status: **have** (the port does it), **partly**, **missing**, **differs**
 | **Pick your partner** at the rack (Y): any captain you've beaten | 072 | **done** | PORT-37: SLICE (Y) at your rack. |
 | A clubhouse with the records board and a ball machine | 034 | **have** | PORT-19. |
 | Four players | 073 | **have** | Port's own lobby (PORT-16), and online (PORT-31). |
-| **Rings at each player's feet**: 1P red, 2P blue, 3P yellow, 4P green, CPU grey | 066 | **missing** | Display. |
+| **Rings at each player's feet**: 1P red, 2P blue, 3P yellow, 4P green, CPU grey | 066 | **differs** | PORT-39: filled circles (the user's call), in the port's player colours (P1 blue, P2 red, P3 green, P4 gold). |
 | Close-call replay with inches | 041 | **have** | |
 | Story cards, portraits, quips | 026, 048 | **have** | |
 | **More quips** (more lines, a better pick) | 063 | **have** | PORT-35: sixteen a team, the deck. |
 | The captain's partner watches in singles | 042 | **have** | |
-| **Celebrations** (thumbs-up, flex, en garde), slumps, diving saves, emotes (`!` `?` sweat anger star Z's), bounce dust, net shiver, squash on drives | 064 | **partly** | Port has dust and squash (Feel); the rest is missing. |
-| **Critters** across the sky: a gull at Lakeside, a satellite in Space, a fish Undersea | 064 | **missing** | Display. |
+| **Celebrations** (thumbs-up, flex, en garde), slumps, diving saves, emotes (`!` `?` sweat anger star Z's), bounce dust, net shiver, squash on drives | 064 | **have** | PORT-39 (ADR-062); the practice pickle is left. |
+| **Critters** across the sky: a gull at Lakeside, a satellite in Space, a fish Undersea | 064 | **have** | PORT-39. |
 | Venues, day/dusk/night, ambiences, camera and parallax | 024-051 | **have** | |
 | KID swings and serves for you | 025 | **have** | |
 

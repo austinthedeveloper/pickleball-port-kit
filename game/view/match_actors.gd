@@ -16,6 +16,10 @@ func sheet(variant: String, team: String, cap: bool) -> Texture2D:
 	return v._tex("sprites/players/player_%s_%s%s.png" % [variant, team, "_cap" if cap else ""])
 
 
+const MARKER_RX := 32.0
+const MARKER_RY := 11.0
+
+
 func build_players() -> void:
 	var shadow_tex := v._tex(v.manifest["sprites"]["player_shadow"]["file"])
 	for i in K.MAX_PLAYERS:
@@ -27,6 +31,12 @@ func build_players() -> void:
 		var body := Sprite2D.new()
 		var cap := Sprite2D.new()
 		var look := PlayerLook.for_slot(v.sim.config, i, v.manifest)
+		if v.sim.config.modifiers & K.MOD_GLOW:
+			# SNES ADR-054: every player on role sheets, neon
+			if look == null:
+				look = PlayerLook.for_team(maxi(pal, 0), v.sim.config.variant[i],
+					v.sim.config.paddle[i], v.manifest)
+			look.glow(v.manifest)
 		if look:
 			# a ladder opponent: role sheets in their colours, their hat
 			body.texture = v._tex(look.body_sheet(v.manifest))
@@ -42,17 +52,40 @@ func build_players() -> void:
 			s.region_enabled = true
 			s.region_rect = Rect2(0, 0, MatchView.FRAME, MatchView.FRAME)
 			root.add_child(s)
+		# SNES ADR-066's ring at the feet, as a filled circle (the ring was
+		# the SNES's limit): who plays the slot, round its shadow
 		var shadow := Sprite2D.new()
 		shadow.texture = shadow_tex
 		v._shadows.add_child(shadow)
+		# over the shadow, which shows through as its darker middle
+		var marker := Node2D.new()
+		marker.draw.connect(draw_marker.bind(marker, v.marker_color(i)))
+		marker.visible = false
+		v._shadows.add_child(marker)
 		v._actors.add_child(root)
 		entry["root"] = root
 		entry["body"] = body
 		entry["cap"] = cap
 		entry["shadow"] = shadow
+		entry["marker"] = marker
 		entry["choice"] = "standard"
 		entry["look"] = look
 		v._players.append(entry)
+
+
+## A player's marker: a filled ellipse round the shadow, lighter at the
+## rim (nothing for a slot without one).
+static func draw_marker(n: Node2D, col: Color) -> void:
+	if col.a == 0.0:
+		return
+	var rim := PackedVector2Array()
+	var fill := PackedVector2Array()
+	for k in 32:
+		var a := TAU * k / 32.0
+		rim.append(Vector2(cos(a) * MARKER_RX, sin(a) * MARKER_RY))
+		fill.append(Vector2(cos(a) * (MARKER_RX - 3), sin(a) * (MARKER_RY - 2)))
+	n.draw_colored_polygon(rim, Color(col.lightened(0.35), col.a))
+	n.draw_colored_polygon(fill, col)
 
 
 func build_ball() -> void:
@@ -66,6 +99,9 @@ func build_ball() -> void:
 	v._ball_root.add_child(v._ball_sprite)
 	if v.sim.config.modifiers & K.MOD_BIG_BALL:
 		v._ball_sprite.scale = Vector2(2, 2)        # BIG BALL reads as big
+	if v.sim.config.modifiers & K.MOD_GLOW:
+		v._ball_sprite.material = ShaderMaterial.new()
+		v._ball_sprite.material.shader = preload("res://view/glow_outline.gdshader")
 	v._actors.add_child(v._ball_root)
 	v._ball_shadow = Sprite2D.new()
 	v._ball_shadow.texture = v._tex(v.manifest["sprites"]["ball_shadow"]["file"])
@@ -97,6 +133,9 @@ func spawn_fx(kind: String, at: Vector2, start: int) -> void:
 func frame_for(i: int) -> String:
 	var p: SimTypes.Player = v.sim.players[i]
 	var entry: Dictionary = v._players[i]
+	var react: String = v.flair.body_frame(i) if v.flair else ""
+	if react != "":
+		return react                     # a point's reaction (SNES ADR-064)
 	if p.pose == K.POSE_TOSS:
 		return "toss"
 	if p.pose == K.POSE_CHEER:

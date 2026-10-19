@@ -72,6 +72,21 @@ static func slot_style(cfg: SimTypes.MatchConfig, slot: int) -> SimTypes.AiStyle
 	return _default
 
 
+## A slot's point celebration (match.c match_slot_celebrate, SNES
+## ADR-064): an opponent's or open play partner's own ("thumbs_up",
+## "flex", "en_garde"), else the cheer (humans, the default CPU).
+static func slot_celebrate(cfg: SimTypes.MatchConfig, slot: int) -> String:
+	_load()
+	if cfg.human[slot]:
+		return "cheer"
+	if slot == 1 and cfg.partner >= 0 and cfg.partner < _teams.size():
+		return String(_teams[cfg.partner]["players"][0].get("celebrate", "cheer"))
+	if cfg.opponent >= 0 and cfg.opponent < _teams.size() and slot >= 2:
+		var members: Array = _teams[cfg.opponent]["players"]
+		return String(members[mini(slot - 2, members.size() - 1)].get("celebrate", "cheer"))
+	return "cheer"
+
+
 ## A CPU opposing the humans plays this much better or worse (options.c).
 static func apply_difficulty(s: SimTypes.AiStyle, difficulty: int) -> void:
 	var late := s.late_period

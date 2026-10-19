@@ -148,6 +148,28 @@ static func _rgb8(v: Array) -> Color:
 	return Color8(int(v[0]), int(v[1]), int(v[2]))
 
 
+## GLOW (SNES ADR-054): neon outlines, a purple, pink and cyan paddle, and
+## outfits (shirt, cap, the shoe accent) more saturated and a little
+## brighter, keeping their ramps' order.
+const NEON := Color(0.13, 1.0, 0.26)
+const GLOW_PADDLE := {"G": Color8(40, 16, 70), "p": Color8(90, 20, 160), "P": Color8(150, 40, 220),
+	"f": Color8(230, 40, 170), "e": Color8(255, 70, 200), "E": Color8(80, 240, 255)}
+
+
+static func neon(c: Color) -> Color:
+	return Color.from_hsv(c.h, minf(1.0, c.s * 1.5 + 0.1), minf(1.0, c.v * 1.15), c.a)
+
+
+func glow(manifest: Dictionary) -> void:
+	var order := String(manifest["sprites"]["players"]["roles"]["order"])
+	palette[order.find("o")] = NEON
+	for k in GLOW_PADDLE:
+		palette[order.find(k)] = GLOW_PADDLE[k]
+	for k in "DdMLkK":
+		var i := order.find(k)
+		palette[i] = neon(palette[i])
+
+
 ## The role sheets (hat "" for bareheaded) and one material for both.
 func body_sheet(manifest: Dictionary) -> String:
 	return manifest["sprites"]["players"]["roles"]["files"][variant]["body"]

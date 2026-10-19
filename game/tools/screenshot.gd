@@ -2,7 +2,8 @@
 ##   godot --path game -s res://tools/screenshot.gd -- <title|title_<page>|singles|doubles|demo|practice|practice_<zone>> <venue> <frames> <out.png> [human] [opp=N]
 ## "human" leaves P1 human (it serves on its own after the ready delay is
 ## not automatic, so the default makes P1 a bot for a moving picture).
-## "opp=N" plays ladder team N (0-based) in their looks. "title_options"
+## "opp=N" plays ladder team N (0-based) in their looks; "mods=N" sets
+## the MOD_* bits. "title_options"
 ## (any page id) opens that title page; "court=S,K,R,L" sets the court
 ## colour presets; "time=N" DAY 0, DUSK 1, NIGHT 2;
 ## "pad" shows the controller prompts; "save" a save with records (title); "pause" pauses the match at the end;
@@ -275,6 +276,8 @@ func _initialize() -> void:
 		for arg in a.slice(4):
 			if arg.begins_with("partner="):
 				cfg.set_partner(int(arg.substr(8)))
+			if arg.begins_with("mods="):
+				cfg.modifiers = int(arg.substr(5))         # MOD_* bits (GLOW 128, INVERSE 256)
 		if "career" in a.slice(4):
 			m.save = _career_save()
 			cfg.set_career(m.save.career.active_player())

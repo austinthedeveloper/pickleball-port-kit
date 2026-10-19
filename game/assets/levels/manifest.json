@@ -97,7 +97,13 @@
     "overhead_windup",
     "overhead_contact",
     "reach",
-    "scoop"
+    "scoop",
+    "thumbs_up",
+    "flex",
+    "en_garde",
+    "slump",
+    "dive",
+    "scramble"
    ],
    "animations": {
     "idle": {
@@ -154,6 +160,37 @@
       "scoop"
      ],
      "ms_per_frame": 150
+    },
+    "thumbs_up": {
+     "frames": [
+      "thumbs_up"
+     ],
+     "ms_per_frame": 200
+    },
+    "flex": {
+     "frames": [
+      "flex"
+     ],
+     "ms_per_frame": 200
+    },
+    "en_garde": {
+     "frames": [
+      "en_garde"
+     ],
+     "ms_per_frame": 200
+    },
+    "slump": {
+     "frames": [
+      "slump"
+     ],
+     "ms_per_frame": 200
+    },
+    "dive": {
+     "frames": [
+      "dive",
+      "scramble"
+     ],
+     "ms_per_frame": 200
     }
    },
    "sheets": {
@@ -242,7 +279,7 @@
      "chef",
      "viking"
     ],
-    "hats_doc": "Hat overlays (role sheets only), drawn like the cap: visor and headband in the shoe accent (k, K), tricorn in hair with a white (Z) trim, bandana in the shirt ramp.",
+    "hats_doc": "Hat overlays (role sheets only), drawn like the cap: visor and headband in the shoe accent (k, K), tricorn in hair with a white (Z) trim, bandana in the shirt ramp. SNES ADR-060 (PORT-38): beanie, whirly, backcap, bucket in the shirt ramp (whirly blades in the accent), crown silver with shirt jewels, chef white, viking grey with white horns and a shirt band.",
     "order": ".o1234hHiDdMLqwWsSxXgkKpPfeEGZ",
     "palettes": "palettes.json",
     "doc": "Pixel value = index into 'order' (0 transparent). Build a palette from palettes.json: base + team + paddle + skin + hair; shoe accent k/K = team M/d."

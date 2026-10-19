@@ -23,8 +23,7 @@ const VIEW := Vector2(960, 540)
 const PERSON_SCALE := 0.58          ## a person ~62 px tall, by a 64 px fence
 const FRAME := 128
 const ANCHOR := Vector2(56, 116)
-const SLOTS := ["idle0", "idle1", "run0", "run1", "run2", "run3", "windup", "swing",
-	"follow", "toss", "cheer", "overhead_windup", "overhead_contact", "reach", "scoop"]
+const SLOTS := MatchView.SLOTS
 ## Display only (render_park.c).
 const LEVEL_Y := 32                  ## each court's skill level
 const SCORE_Y := 40                  ## over the courts (court top 48)

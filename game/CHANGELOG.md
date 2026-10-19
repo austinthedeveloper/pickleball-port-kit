@@ -4,6 +4,23 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [Unreleased]
+
+### Added
+- **A coloured circle at each player's feet**: you in your player colour,
+  the CPUs grey.
+- **Celebrations and slumps** after every point: the Gym Bros flex, the
+  Pirates go en garde, Dad and Kiddo give a thumbs-up, and a player who
+  can't reach a ball dives for it.
+- **Emotes**: ! into the net, ? out, sweat, anger at a fault, a star for
+  a long rally, a note in a dink rally, Z's while you take your time to
+  serve.
+- The net shivers, drives squash and streak, slices leave a trail.
+- A gull at LAKESIDE, a satellite in SPACE, a fish UNDERSEA; a trophy
+  for the CHAMPION.
+- Two more modifiers: **GLOW** (lights out, neon players and lime lines)
+  and **INVERSE** (a photo negative).
+
 ## [0.10.0] - 2026-10-18
 
 The game caught up with the SNES: CPUs that play frame for frame as the

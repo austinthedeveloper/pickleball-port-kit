@@ -14,12 +14,12 @@ const CAMERAS := [0, 50, 75, 100]
 ## The modifier toggles: [id, label, MOD_* bit].
 const MOD_ROWS := [["big_ball", "BIG BALL", K.MOD_BIG_BALL], ["fast_ball", "FAST BALL", K.MOD_FAST_BALL],
 	["win_by_2", "WIN BY 2", K.MOD_WIN_BY_2], ["lava", "LAVA", K.MOD_LAVA],
-	# SNES ADR-053 (PORT-35); GLOW and INVERSE come with PORT-39
+	# SNES ADR-053 (PORT-35), ADR-054 (PORT-39)
 	["ghost", "GHOST BALL", K.MOD_GHOST_BALL], ["popcorn", "POPCORN", K.MOD_POPCORN],
-	["ice", "ICE", K.MOD_ICE]]
+	["ice", "ICE", K.MOD_ICE], ["glow", "GLOW", K.MOD_GLOW], ["inverse", "INVERSE", K.MOD_INVERSE]]
 ## The bits MODIFIERS saves (an older save's are a subset).
 const MOD_SAVED := K.MOD_BIG_BALL | K.MOD_FAST_BALL | K.MOD_WIN_BY_2 | K.MOD_LAVA \
-	| K.MOD_GHOST_BALL | K.MOD_POPCORN | K.MOD_ICE
+	| K.MOD_GHOST_BALL | K.MOD_POPCORN | K.MOD_ICE | K.MOD_GLOW | K.MOD_INVERSE
 ## Saves before the MODIFIERS page kept one preset index ("mods"); these
 ## are its bits, read only when loading such a save.
 const OLD_MOD_PRESETS := [0, K.MOD_BIG_BALL, K.MOD_FAST_BALL, K.MOD_WIN_BY_2, K.MOD_LAVA, 15]

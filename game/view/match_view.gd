@@ -13,7 +13,8 @@ const TEAM_TINTS := [Color("6aa0ff"), Color("ff5a50"), Color("6ad860"), Color("f
 const FRAME := 128
 const ANCHOR := Vector2(56, 116)
 const SLOTS := ["idle0", "idle1", "run0", "run1", "run2", "run3", "windup", "swing",
-	"follow", "toss", "cheer", "overhead_windup", "overhead_contact", "reach", "scoop"]
+	"follow", "toss", "cheer", "overhead_windup", "overhead_contact", "reach", "scoop",
+	"thumbs_up", "flex", "en_garde", "slump", "dive", "scramble"]
 ## Input is ignored this long after a match starts, so the press that
 ## started it can't also serve (playbook rule 9).
 const INPUT_LOCK_FRAMES := 12
@@ -78,6 +79,11 @@ var _hud: Hud
 var _sfx: Sfx
 var _debug: DebugOverlay
 var feel: Feel
+var flair: Flair                 ## SNES ADR-064: reactions, emotes, the net's shiver
+## SNES ADR-054: GLOW plays at NIGHT with the LINES preset LIME.
+const GLOW_TIME := 2
+const GLOW_LINES := 4
+var critter: Critter             ## SNES ADR-064: the venue's gull, satellite or fish
 ## This match's stats (PORT-13), from the events; display only.
 var stats := MatchStats.new()
 ## The parts (PORT-27): the people and ball, the input, the match's end.
@@ -108,6 +114,11 @@ func music_track() -> String:
 func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void:
 	venue = venue_name
 	demo = is_demo
+	if cfg.modifiers & K.MOD_GLOW:
+		# SNES ADR-054: lights out (NIGHT), LIME lines
+		time = GLOW_TIME
+		court = court.duplicate()
+		court[3] = GLOW_LINES
 	manifest = JSON.parse_string(FileAccess.get_file_as_string(LEVELS + "manifest.json"))
 	sim = Sim.new(cfg)
 	if demo:
@@ -184,6 +195,11 @@ func _build() -> void:
 	feel = Feel.new()
 	_fx.add_child(feel)
 	feel.setup(self)
+	flair = Flair.new().setup(sim, demo)
+	_fx.add_child(flair)
+	critter = Critter.for_venue(venue, sim)
+	if critter:
+		add_child(critter)
 	if sim.config.practice and not demo:
 		_shadows.add_child(PracticeView.zone(sim.practice))
 		_actors.add_child(PracticeView.machine(sim.practice))
@@ -194,6 +210,16 @@ func _build() -> void:
 	post.offset = -Vector2(post_meta["anchor"][0], post_meta["anchor"][1])
 	post.position = Vector2(post_meta["position"][0], post_meta["position"][1])
 	_actors.add_child(post)
+	if sim.config.modifiers & K.MOD_INVERSE:
+		var layer := CanvasLayer.new()
+		layer.layer = 9                  # just under the HUD's
+		var neg := ColorRect.new()
+		neg.set_anchors_preset(Control.PRESET_FULL_RECT)
+		neg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		neg.material = ShaderMaterial.new()
+		neg.material.shader = preload("res://view/invert.gdshader")
+		layer.add_child(neg)
+		add_child(layer)
 	_hud = Hud.new()
 	add_child(_hud)
 	_hud.setup(self)
@@ -261,6 +287,14 @@ func _tint_shadows() -> void:
 		mat = ShaderMaterial.new()
 		mat.shader = preload("res://view/shadow_tint.gdshader")
 		mat.set_shader_parameter("tint", CourtStyle.SHADOW_GREY)
+	if sim.config.modifiers & K.MOD_INVERSE:
+		# drawn as their negative (white, or the grey's), so the inversion
+		# over the picture leaves them dark, as on the SNES
+		var tint: Color = CourtStyle.SHADOW_GREY if shadow_grey else Color(0, 0, 0, 1)
+		mat = ShaderMaterial.new()
+		mat.shader = preload("res://view/shadow_tint.gdshader")
+		mat.set_shader_parameter("tint", Color(Color.WHITE - tint, tint.a if shadow_grey else 1.0))
+		mat.set_shader_parameter("keep_alpha", not shadow_grey)
 	for e in _players:
 		e["shadow"].material = mat
 	if _ball_shadow:
@@ -319,10 +353,35 @@ func _rumble_hit(slot: int, shot: int) -> void:
 var slot_pads: Array = []
 ## Each slot's player number (0..3 for P1..P4; -1 for a CPU), for the tags.
 var slot_players: Array = []
+const MARKER_ALPHA := 0.7
 
 
 func multiplayer() -> bool:
 	return not slot_pads.is_empty()
+
+
+## Who plays a slot, for its marker (SNES ADR-066): 0..3 for P1..P4,
+## -1 a CPU, -2 no marker (the title's demo).
+func marker_player(slot: int) -> int:
+	if demo:
+		return -2
+	if multiplayer():
+		return int(slot_players[slot]) if slot < slot_players.size() else -1
+	if sim.config.human[slot] == 0 or (slot == 0 and sim.p1_bot):
+		return -1
+	return 0 if slot == 0 else 1
+
+
+## A slot's marker colour: the player's (the lobby's), a CPU grey, or
+## clear (none).
+func marker_color(slot: int) -> Color:
+	var p := marker_player(slot)
+	if p == -2:
+		return Color(0, 0, 0, 0)
+	var col: Color = Color(0.62, 0.64, 0.7) if p < 0 else LobbyScreen.PLAYER_TINTS[p]
+	if sim.config.modifiers & K.MOD_INVERSE:
+		col = Color.WHITE - col              # the inversion puts it back
+	return Color(col, MARKER_ALPHA)
 
 
 func _physics_process(_delta: float) -> void:
@@ -383,6 +442,7 @@ func _physics_process(_delta: float) -> void:
 				Music.sting(Music.result_sting(sim.match_winner == my_team(), cleared,
 					sim.config.human[2] or sim.config.human[3]))
 		_prev_phase = sim.phase
+	flair.tick()
 	if sim.rematch_requested:
 		if park or tournament:
 			finished.emit(false)             # ADR-034: back to the park; PORT-25: the bracket
@@ -391,6 +451,7 @@ func _physics_process(_delta: float) -> void:
 			next_rung.emit()
 			return
 		sim.new_match()
+		flair.begin()
 		Music.cue(music_track())             # the loop again after the stinger
 		if save:
 			save.career.new_unlocks = 0      # game_new_match clears them
@@ -406,6 +467,7 @@ func _physics_process(_delta: float) -> void:
 
 func _on_event(e: Array) -> void:
 	feel.on_event(e)
+	flair.on_event(e)
 	stats.on_event(e)
 	var kind: int = e[0]
 	var at := CourtView.ground(K.to_fp(e[1]), K.to_fp(e[2]))
@@ -436,6 +498,7 @@ func _on_event(e: Array) -> void:
 			var line := story.quip(sim.config, loser, sim.frame_count)
 			if line != "":
 				_hud.show_quip(line, _hud.team_tint(loser))
+				flair.quip(loser)
 			if save and not demo:
 				if not multiplayer():
 					save.record_rally(rally)
@@ -512,11 +575,13 @@ func _update_visuals() -> void:
 		var root: Node2D = e["root"]
 		root.visible = p.active != 0
 		e["shadow"].visible = p.active != 0
+		e["marker"].visible = p.active != 0
 		if not p.active:
 			continue
 		var feet := CourtView.ground(p.x_fp, p.y_fp).round()
 		root.position = feet
 		e["shadow"].position = feet
+		e["marker"].position = feet
 		var idx := SLOTS.find(actors.frame_for(i))
 		var flip := p.team == 1
 		for s in [e["body"], e["cap"]]:
@@ -542,6 +607,8 @@ func _update_visuals() -> void:
 		var fw := _ball_sprite.region_rect.size.x
 		_ball_sprite.region_rect.position.x = int(_ball_frame) * fw
 	feel.update()
+	if critter:
+		critter.update()
 	_sfx.update_ambience(sim.phase == K.PHASE_LIVE, (sim.shot_serial - sim.rally_start) & 0xff,
 		sim.match_point(0) or sim.match_point(1), 1.0 / 60.0)
 	for poly in _lava:

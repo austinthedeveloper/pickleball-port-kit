@@ -231,6 +231,9 @@ const MOD_GHOST_BALL := 16    ## SNES ADR-053: high in flight, the ball only bli
 const MOD_POPCORN := 32       ## every hit in a rally adds pace
 const MOD_ICE := 64           ## players slide
 const MOD_GLOW := 128         ## SNES ADR-054: lights out, neon outlines
+## SNES ADR-054's INVERSE (its modifiers2 bit 0): the port's modifiers
+## are wider than a byte. Display only, as GLOW is.
+const MOD_INVERSE := 256
 const MOD_GHOST_Z := 8        ## GHOST: above this (px) the ball blinks
 const MOD_GHOST_SHOWN := 2    ## ... shown this many frames in every 16
 const MOD_POPCORN_STRIDE := 12   ## a level adds a step every 12 ticks (+8%)
