@@ -112,6 +112,8 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.10.0** (2026-10-18): PORT-35 the sim caught up to the ROM, PORT-36
   About this project, PORT-37 the period-true park, PORT-38 the hats and
   the Hat Museum (tag `v0.10.0`, on `feature/cld-release-0.10.0`).
+- **v0.11.0** (2026-10-18): PORT-39 the show (tag `v0.11.0`, on
+  `feature/cld-release-0.11.0`).
 
 ## Phase 3 (started 2026-10-18)
 

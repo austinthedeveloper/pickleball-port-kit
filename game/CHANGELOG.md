@@ -4,7 +4,10 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
-## [Unreleased]
+## [0.11.0] - 2026-10-18
+
+The show: players react to every point, emote, and wear a coloured
+circle; critters cross the sky; GLOW and INVERSE.
 
 ### Added
 - **A coloured circle at each player's feet**: you in your player colour,
