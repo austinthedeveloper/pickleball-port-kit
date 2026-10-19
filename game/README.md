@@ -72,7 +72,9 @@ build can't).
 
 How the friend reaches the host:
 
-- **Same Wi-Fi:** use the SAME WI-FI address the host's screen shows.
+- **Same Wi-Fi or router:** use an address the host's screen shows. A
+  computer on both Ethernet and Wi-Fi shows both, the wired one first;
+  if one doesn't answer, try the other.
 - **Over the internet, easiest:** both install [Tailscale](https://tailscale.com)
   (free), sign in, and join the same network; use the host's TAILSCALE
   address (100.x.y.z), which the screen shows once Tailscale is on. No
@@ -82,7 +84,10 @@ How the friend reaches the host:
   host's public address.
 
 The first time you host, macOS or Windows may ask to allow incoming
-connections: allow it. In a match, Menu pressed twice leaves; the host's
+connections: allow it. On Windows, if a friend still can't reach you,
+check the network is set to **Private** (Settings > Network & internet >
+your Wi-Fi or Ethernet > Network profile type): Windows blocks incoming
+calls on a Public network. In a match, Menu pressed twice leaves; the host's
 button on the result is the rematch.
 
 ## The title menu
