@@ -25,9 +25,9 @@ assets (HUD, players, crowd, ball) beside its mock.
 | `manifest.json` | The index: court geometry, layers, seats, sprites, animations, fonts, 9-slices, HUD layout |
 | `venues/<venue>/{sky,far,trees,ground,fence,stands,net,front}.png` | Parallax layers, 1056×588 each (48 px / 24 px overscan for the camera) |
 | `venues/<venue>/court_mask.png` | 8-bit role ids (surround, surface, kitchen, net shadow, lines) for recolouring the court |
-| `sprites/players/player_<male\|female>_<team>.png` | 15 frames, 128×128, per team (blue, red, green, gold) |
+| `sprites/players/player_<male\|female>_<team>.png` | 21 frames, 128×128, per team (blue, red, green, gold): the 15 play frames and ADR-062's celebrations, slump, dive and scramble |
 | `sprites/players/player_<variant>_<team>_cap.png` | Cap overlay, same frames; draw after the body, or leave it off |
-| `sprites/players/roles/*.png` + `palettes.json` | Indexed role sheets for palette-swap shaders (any team, 4 skins, 4 hairs, 5 paddles) |
+| `sprites/players/roles/*.png` + `palettes.json` | Indexed role sheets for palette-swap shaders (any team, 4 skins, 4 hairs, 5 paddles): the body and a sheet per hat (13 with the cap, ADR-061) |
 | `sprites/crowd.png` | 16 spectators (12 sitting, 4 standing) × idle and cheer, 32×64 |
 | `sprites/{ball,ball_shadow,player_shadow,spark,dust,net_post_near}.png` | Ball (4 roll frames), shadows (alpha), contact spark (4), dust puff (4), near net post |
 | `ui/font_{big,big_gold,small}.png/.json` | Bitmap fonts: caps, digits, `!?.,:-'/%+` with per-glyph advance. `big` and `small` are white, for tinting |

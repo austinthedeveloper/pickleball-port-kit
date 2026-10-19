@@ -231,8 +231,6 @@ stream, at the 960×540 art density, through the art's court geometry.
   SOUND OFF silences the music too, NO CROWD keeps it. It's presentation
   only: nothing reads the sim but the result, so golden traces are
   unchanged. The ambience stays under the music in matches.
-- **Not ported yet:** career (ADR-047).
-
 - **Career** (PORT-21, ADR-047 stages 1-4). `sim/career.gd` is career.c
   in order (`Career`, with `Career.Player` for `CareerPlayer`; ints and
   the name string; data from `data/career.json`, the SNES asset build's

@@ -5,6 +5,8 @@ Depends on: ADR-018 (doubles), ADR-020 (scenes), ADR-023 (opponents),
 ADR-025 (options), ADR-033 (modifiers).
 From: `docs/GOOFY_IDEAS.md`, "Open play".
 
+*Amended by ADR-060: the courts are ROOKIE, CLUB and CHAMP (not DUPR ratings), with park points, winners staying on and partner picking.*
+
 ## The idea
 
 The real open-play experience: you show up at a park with several courts,

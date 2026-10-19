@@ -1,7 +1,8 @@
-# Port history: PORT-00 to PORT-22
+# Port history: the finished tasks
 
 The finished tasks of the port, in full, moved out of
-`design/PORT_ROADMAP.md` in PORT-23 so the sheet stays short. Each block
+`design/PORT_ROADMAP.md` (PORT-00 to 22 in PORT-23; 23 to 39 and 41 in the
+2026-10-19 cleanup) so the sheet stays short. Each block
 is as it was when its branch landed. `game/tools/release_notes.py` reads
 this file and the sheet together.
 
@@ -301,8 +302,6 @@ feature/cld-release        (pushed)
   - Status: **Ready to test**: the platform exports need Godot's export
     templates, which aren't installed here (see "For you"). Then run
     `game/tools/export.sh` and try a build.
-
-
 
 ### 10. `feature/cld-cleanup`: organize the code
 
@@ -773,5 +772,351 @@ Each had a default that stands; ask again any time.
   expensive wildcard; it got its own branch (PORT-17,
   `feature/cld-open-play`) and an ADR-052 amendment.
 - **Out of scope for this run:** career (ADR-047), with a reason
-  recorded in `design/IDEAS.md`. (Since ported: PORT-21,
+  recorded in `design/snes/IDEAS.md`. (Since ported: PORT-21,
   `feature/cld-career`.)
+
+## Phase 3 and 4 (started 2026-10-18)
+
+From the v0.6.0 release: a cleanup round, the overhead, and a tournament.
+
+```
+feature/cld-release-0.6.0   (v0.6.0)
+ 23 feature/cld-cleanup-2
+ 24 feature/cld-overhead
+ 25 feature/cld-tournament
+```
+
+## Tasks
+
+### 23. `feature/cld-cleanup-2`: a cleanup round (asked for 2026-10-18)
+
+- [x] `PORT-23` Step back and organize, and fix what turned up: players
+  flashing in the top-left corner whenever the title's demo restarted (a
+  new COURT or TIME), every match leaking its whole sim, the title's
+  CAREER pages split into their own component, one `UiKit` for the
+  panels and labels seven screens built by hand, and the docs: this
+  sheet down to an index (the full tasks moved to
+  `design/PORT_HISTORY.md`), `game/README.md` and `CLAUDE.md` current.
+  Two open defects closed on the way: the e2e's save is per checkout
+  (KNOWN_ISSUES #42) and `sync_assets.sh` keeps the import files (#43).
+  - Accept: a test for each fix; no visual change from the dedupe;
+    golden traces unchanged.
+  - Verified: `test_view.test_new_view_places_everyone_at_once` (a new
+    MatchView has everyone placed before its first tick: the cause was
+    `_update_visuals` running only from the tick), `test_leaks.gd` (ten
+    matches built and freed leave at most 20 objects; `Sim.dispose()`
+    breaks the Sim/AI and Sim/practice cycles, and a MatchView disposes
+    its sim when freed; a probe measured +778 objects for 30 matches
+    before, +29 after). `view/title_career.gd` takes the CAREER pages
+    out of `title_screen.gd`; `view/ui_kit.gd` (panel, text). Golden
+    traces unchanged. Screenshots: Player Select, a doubles HUD and the
+    lobby, unchanged.
+  - Status: **Done**.
+
+### 24. `feature/cld-overhead`: the overhead (asked for 2026-10-18)
+
+- [x] `PORT-24` A smash, which the SNES never had (ADR-053): a HIT or
+  DRIVE swing at a falling ball 20 px up or higher becomes
+  `SHOT_OVERHEAD`, twice a drive's pace, hit flat or down, aimed like a
+  standard shot, and lengthened just enough to clear the tape (a dumped
+  overhead only when it can't). SOFT still blocks. The CPUs smash with no
+  new logic (their put-away and any lob they get under). The view: the
+  overhead frames, SMASH! over the contact, the biggest shake and rumble,
+  its own sound (`0_hit_smash*`), and a SMASHES row on the stats card.
+  - Accept: a sim change with an ADR and regenerated golden traces; the
+    stats harness unchanged; tests for the rule, the flight, real play
+    and the view; screenshots.
+  - Verified: `test_overhead.gd` (a falling ball at the line is smashed
+    by HIT and DRIVE and the event says so; SOFT, a rising ball, or one a
+    pixel lower is not; a smash lands sooner and flatter than a drive and
+    in; from five depths and three aims it clears the net; three doubles
+    matches through `Sim.step()` see smashes that end points; the view's
+    overhead frame, SMASH!, the shake, and nothing written to the sim),
+    `test_stats.test_a_smash_winner`. Measured with
+    `tools/contact_probe.gd`: 9% of singles shots and 15% of doubles
+    shots are smashes; doubles rallies 6.5 → 5.3 shots, singles
+    unchanged. Stats harness unchanged (10, 6, 0, 0; 8 and 0; 0 and 18).
+    Golden traces regenerated: only `doubles_demo` moves (line 584, its
+    first smash). 243/243 plus the e2e. Screenshots: a smash at SUNSET
+    with SMASH! over it, and the stats card with its SMASHES row.
+  - Status: **Ready to test**: get under a lob (practice: SHOT LOB) and
+    swing with HIT or DRIVE. Does it feel strong enough, and too common
+    in doubles?
+
+### 25. `feature/cld-tournament`: the tournament (chosen 2026-10-18)
+
+- [x] `PORT-25` TOURNAMENT on MAIN (ADR-054): an eight-entry knockout,
+  you as top seed and seven ladder teams (the warm-up HENDERSON sits
+  out), QUARTERFINAL, SEMIFINAL, FINAL, each match at the opponent's home
+  court with their intro card. The bracket screen (`view/bracket_screen.gd`)
+  shows the draw, scores, connectors and the champion; START / MODE /
+  BACK before it starts, PLAY / FORFEIT (twice) / BACK during, NEW
+  TOURNAMENT after. The other matches are decided from the tournament's
+  seed (the higher rung usually wins) and appear one at a time when you
+  come back. The result screen says BRACKET, and OUT AS SEMIFINALIST or
+  CHAMPION! when it ends. Saved: the bracket in play, and cups in the
+  records (RECORDS: SHUTOUTS  CUPS). MAIN's footer prompt went (the
+  key legend says HIT) to make room for the row.
+  - Accept: pure logic with tests; the save round-trip and an older save;
+    the screen by row id; a real match recording through the view; main's
+    loop; layout cases; screenshots; golden traces unchanged.
+  - Verified: `test_tournament.gd` (the draw and seeding; your road; out
+    in the semi and the rest playing out; the same seed the same bracket,
+    favourites 133 to 47 upsets over 60 draws; the save, its floats, an
+    older save, `record_cup`; START, MODE, FORFEIT by row id; the reveal;
+    a real KID match recorded and B going to the bracket; the title ->
+    bracket -> match -> bracket loop in the real main scene),
+    `test_layout.test_tournament` (four states, singles and doubles, an
+    eight-letter career name, every row, and MAIN's TOURNAMENT at QF).
+    253/253 plus the e2e; golden traces unchanged. Screenshots: a fresh
+    draw, in the semi, out in doubles, champions, and the title.
+  - Status: **Ready to test**: TOURNAMENT on MAIN. Is the road's ramp
+    right (SNOWBIRDS first), and do upsets feel too common or too rare?
+
+### 26. `feature/cld-kitchen-rule`: no volleys from the kitchen (reported 2026-10-18)
+
+- [x] `PORT-26` A volley from inside your own kitchen loses the point,
+  KITCHEN! (ADR-055; the SNES left it out as "ARCADE RULES"). Standing in
+  it, or hitting a ball that bounced there, stays legal. The two-bounce
+  rule's VOLLEY! comes first. The CPUs never volley from their kitchen
+  (they step back or let it bounce). Manual, guide and README updated.
+  - Accept: tests for the rule and its edges; the CPUs proven through
+    `Sim.step()`; golden traces and the stats harness unchanged.
+  - Verified: `test_kitchen.gd` (a volley from either kitchen faults with
+    KITCHEN! to the other side; a bounced ball in the kitchen, a volley
+    from behind the line, and the other side's player are fine; while
+    the return must bounce, a receiver's kitchen volley is KITCHEN! and
+    a server's early one VOLLEY!; four net-rushing doubles matches, 64
+    volleys, no kitchen fault; TWINS put in their kitchen don't volley
+    from it, and without the AI check they do and lose the point).
+    258/258 plus the e2e; golden traces unchanged.
+  - Status: **Ready to test**: stand in your kitchen and try to volley.
+
+### 27. `feature/cld-cleanup-3`: split the match view (chosen 2026-10-18)
+
+- [x] `PORT-27` `view/match_view.gd` (about 800 lines) loses three parts,
+  each a RefCounted holding the view, as the title's CAREER pages did:
+  `match_actors.gd` (the people and ball: sprites, frames, the swing
+  choice, sparks, SMASH!), `match_input.gd` (each slot's intents,
+  multiplayer pads, the input lock, SERVE ASSIST, a dropped pad, the pause
+  menu) and `match_end.gd` (records, ladder, bracket and career at the
+  result; the initials and UNLOCKED! cards). The view keeps the scene,
+  the frame and the events (471 lines) and thin wrappers for what the
+  HUD, tools and tests use.
+  - Verified: 258/258 plus the e2e, golden traces unchanged, the leak
+    test still at its bound; a screenshot of a doubles smash unchanged.
+  - Status: **Done**.
+
+### 28. `feature/cld-pad-glyphs`: each pad's own buttons (chosen 2026-10-18)
+
+- [x] `PORT-28` Prompts draw the pad family's buttons (`view/prompts.gd`):
+  Xbox (as before, and any unknown pad), PlayStation (cross, circle,
+  square, triangle drawn as shapes; L1 R1 L3 R3, OPTIONS, CREATE) and
+  Nintendo (B A Y X by position, since Godot maps pads by position; L R,
+  + and -, all grey). The family comes from the last pad's name
+  (`Prompts.family_of`), or BUTTON ICONS on CONTROLS (AUTO, XBOX,
+  PLAYSTATION, NINTENDO; saved, a new key with a default). Display only:
+  the bindings don't change.
+  - Verified: `test_controller.test_pad_families` (names to families,
+    each family's faces, shoulders, Start and Back, the forced setting, the
+    keyboard unaffected), `test_controller.test_button_icons_row` (by row
+    id, saved), `test_layout.test_pad_families` (every title page, the
+    lobby, the serve and pause HUD, and the bracket, in each family).
+    Screenshots: the title and lobby on PlayStation, the title and OPTIONS
+    on Nintendo.
+  - Status: **Ready to test**: plug in a PlayStation or Switch pad. Does
+    it pick the right icons? Is your pad's name one I don't know?
+
+### 29. `feature/cld-couch-cup`: the couch cup (chosen 2026-10-18)
+
+- [x] `PORT-29` A multiplayer tournament (ADR-054 amendment): the lobby's
+  LB / RB step through SINGLES, DOUBLES, SINGLES CUP and DOUBLES CUP; a
+  cup enters each player (singles) or side (doubles) in an eight-entry
+  bracket as its top seeds, in separate quarters, with CPU teams from the
+  ladder's top. Human against CPU at the team's court; human against human
+  on their own pads. A round's CPU matches wait for its human matches. The
+  bracket screen says COUCH CUP, names the entries in their shirt colours,
+  and PLAY sends each human slot's pad. Its own save slot; never in the
+  records. The HUD now names a multiplayer side by its players.
+  - Verified: `test_couch_cup.gd` (the lobby's four modes and its entries;
+    four humans in four quarters; CPU matches waiting; P1 against P2 in a
+    final on two pads; a doubles team against a CPU team at their court,
+    and P3 alone with a CPU partner; both out and the rest playing out;
+    the save slots apart and round-tripping; a match's end through the
+    view recording the cup and not the records; the bracket screen by row
+    id), `test_layout.test_couch_cup` (the lobby in both cup modes, the
+    bracket fresh, in play and over, three couch match HUDs at 20-20),
+    `test_multiplayer` (LB / RB stepping). Solo brackets unchanged.
+    Screenshots: a doubles and a singles cup bracket.
+  - Status: **Ready to test**: MULTIPLAYER, RB twice, join with two pads.
+
+### 30. `feature/cld-tutorial`: HOW TO PLAY (chosen 2026-10-18)
+
+- [x] `PORT-30` Six lessons (`meta/tutorial.gd`, `view/tutorial_view.gd`),
+  each a real sim with one goal read from its events: RALLY (the ball
+  machine at you: 3 returns), SHOTS (a DRIVE and a SOFT landed), SMASH (the
+  machine lobs: 1 smash in), SERVE (vs a KID CPU: 2 in), TWO BOUNCES (2
+  rallies past the rule), THE KITCHEN (2 volleys from behind the line).
+  A card first (the match waits, its press doesn't swing), then a banner
+  with the progress and advice after a miss (VOLLEY!, KITCHEN!, a serve
+  fault, a missed lob), LESSON DONE!, and the next. MAIN's PRACTICE opens
+  a page: HOW TO PLAY (from the first lesson not done), LESSON (any one),
+  BALL MACHINE. MAIN's PRACTICE row says HOW TO PLAY until one's done.
+  Lessons record nothing but themselves (`records.lessons`, a bit each).
+  - Verified: `test_tutorial.gd` (each lesson's sim and look; the machine
+    lessons' counting by shot; the match lessons' goals and advice; the
+    card holding the match; TWO BOUNCES played through by the bot to
+    LESSON DONE! and the next; a lesson only reads the sim; the save and
+    an older one; main's loop through two lessons and out; the lob can be
+    smashed, 9 of 200 spot and timing tries; RALLY was also played by the
+    bot, done in 552 frames), `test_layout.test_tutorial` (every card,
+    banner with advice, and LESSON DONE!, on keys and a PlayStation pad;
+    the PRACTICE page), `test_menus` (PRACTICE, BALL MACHINE, and back).
+    278/278 plus the e2e; golden traces unchanged. Screenshots: the RALLY
+    and SMASH cards, THE KITCHEN's banner with advice, the PRACTICE page.
+  - Status: **Ready to test**: PRACTICE > HOW TO PLAY. Is SMASH too hard?
+
+### 31. `feature/cld-online`: online play (asked for 2026-10-18)
+
+- [x] `PORT-31` 1 vs 1 singles over the internet by address (ADR-056,
+  your choices: direct connections, singles first). MULTIPLAYER opens a
+  page: LOCAL (the lobby) or ONLINE (`view/online_screen.gd`: HOST A
+  MATCH, ADDRESS, JOIN). ENet on UDP 24994; HELLO with the versions and
+  looks; the host's START sends the match; lockstep over the exact sim
+  with an input delay fitted to the measured round trip, a wait when an
+  input is late, a hash every 2 s against desyncs. Menu leaves (twice in
+  play), the host rematches, nothing recorded. README: how to connect
+  (same Wi-Fi, Tailscale, or a forwarded port).
+  - Verified: `test_online.gd` (11 tests: packing, lockstep at three
+    latencies compared frame by frame, waiting, a desync caught, the
+    handshake, versions, the delay, ENet on this machine for 600 frames,
+    two MatchViews playing a match through, two ONLINE screens connecting
+    over ENet, main's flow), `test_layout.test_online`, `test_multiplayer`
+    (LOCAL). Golden traces unchanged. Screenshots: ONLINE idle, hosting,
+    connected; the MULTIPLAYER page. Not verified: two real machines.
+  - Played (2026-10-18): two computers on the same Wi-Fi connected and
+    played with no lag noticed. The second address the host showed was a
+    virtual adapter's and couldn't be joined; the screen now offers only
+    reachable ones, labelled (KNOWN_ISSUES #55).
+  - Status: **Ready to test**: with a friend. Start on the same Wi-Fi, then
+    over Tailscale.
+
+### 32. `feature/cld-updater`: updates in the game (asked for 2026-10-18)
+
+- [x] `PORT-32` OPTIONS > UPDATES (ADR-057): a check of GitHub's latest
+  release at start, the news on the title, a download of just the game's
+  .pck (checked against the release's SHA-256), and RESTART onto it. The
+  boot scene (`scenes/boot.gd`, now the main scene) loads a newer
+  downloaded pack before anything else, then adds the input map and the
+  updater (no longer autoloads) and the title; a start that never reaches
+  the title is skipped next time. CI publishes the .pck and its manifest
+  (`tools/update_manifest.py`) with each release. The layout test now
+  also fails on a character the font can't draw (it found ONLINE's
+  invisible typing cursor).
+  - Verified: `test_updater.gd` (7 tests), `test_layout.test_updater`; by
+    hand, an exported 0.8.1 macOS app started a 0.9.9 pack (a class only
+    in the update ran, the version said 0.9.9, the title cleared the
+    mark) and fell back from a damaged one. 298/298 plus the e2e; golden
+    traces unchanged.
+  - Status: **Ready to test**: after 0.9.0, the next release (0.9.1) is
+    the first real update. Not tried on Windows or Linux.
+
+### 34. `feature/cld-polish-0.9.2`: from playing 0.9.1 (2026-10-18)
+
+- [x] `PORT-34` Four things you found: the update now comes up when the
+  game opens and can't be skipped (`view/update_screen.gd`, ADR-057
+  amended); OPTIONS > UPDATES no longer sticks on 98%; HOW TO PLAY's match
+  lessons play HENDERSON at full speed (KID's slowed ball read as
+  slowdown) and THE KITCHEN is a ball-machine drill; ONLINE's HOST screen
+  shows up to two addresses, 192.168 first, named by adapter.
+  - Verified: `test_updater.test_the_update_screen` (each state: straight
+    on, waiting then on, no way past a download, the bar, INSTALLED, a
+    failed restart, offline, RETRY / PLAY, GET IT / PLAY),
+    `test_layout.test_update_screen`, `test_tutorial` (HENDERSON, the
+    kitchen drill's counting and advice, a volley feasible on 9 of 120
+    spot and timing tries, TWO BOUNCES played through), `test_online` (a
+    PC with two adapters). The lessons' frame cost measured: under 0.1 ms.
+    302/302 plus the e2e. Screenshots: the update screen downloading,
+    installed, failed.
+  - Status: **Ready to test**: 0.9.1 gets 0.9.2 from OPTIONS > UPDATES
+    once; from then on updates come up at launch.
+
+## Phase 5: the bible (planned 2026-10-18)
+
+The plan and its open tasks are in `design/PORT_ROADMAP.md`.
+
+### 35. `feature/cld-sim-catchup`: catch the sim up to the ROM (planned 2026-10-18)
+
+- [x] `PORT-35` The sim is the ROM's at TUNING_VERSION 4 (port ADR-059;
+  with PORT-41's slice). The SNES repo's conformance traces come in by
+  `tools/conformance_import.sh` and `test_conformance` replays all four
+  scenarios frame by frame: every frame matches. On the way: the ROM's
+  `opponents.json` and `quips.json` (the rebalance, serve power and duds,
+  sixteen quips and the deck), the serve's depth, aim and power, the lane
+  covers' stagger per match, KID's top speed, ICE and POPCORN in the sim
+  and the AI, GHOST in the view, the kitchen line, and a ladder per mode
+  (save v6, a quit resets it). GHOST BALL, POPCORN, ICE are on MODIFIERS.
+  - Verified: `test_conformance` (4 x 5400 frames, the tuning version),
+    `test_save` (a v5 image keeps both places; per-mode advance, quit and
+    clear), `test_view` (pause, MAIN MENU resets a ladder only), `test_story`
+    (the deck), `test_layout` (MODIFIERS and RECORDS moved). Harness:
+    10, 9, 4, 3 and 10 to 3 (the ROM's rebalance). Golden traces
+    regenerated (the CPUs). 314/314 plus the e2e. Screenshots: MODIFIERS,
+    RECORDS.
+  - Status: **Done**: the conformance traces are the proof. The upper
+    rungs are easier than before (the ROM's playtest); say if they feel
+    off.
+
+### 41. `feature/cld-four-shots`: four swings and the short hold (asked for 2026-10-18)
+
+- [x] `PORT-41` The first piece of PORT-35 (ADR-058): SNES ADR-056 and 057.
+  SLICE (slow, never deep, steady), SHORT held (any swing goes short, the
+  D-pad still moves), the fast drop's long spray off a stretch, and CPUs
+  that slice (WALT, RAVEN, VLAD 3; ACE, JADE 4). Pad by position: SLICE
+  north, SHORT LB or RB; keyboard I and Shift/U; both on CONTROLS. The
+  overhead moved to shot 4 so the slice has the C's number; its own sound;
+  the key legend and the SHOTS lesson teach all four.
+  - Verified: `test_shots.gd` (the SNES repo's C tests, ported: the slice
+    and fast drop's flights, the short hold on fake pads for both teams,
+    RAVEN slicing 11 of 91 rally swings, none at 0; a high slice stays a
+    slice; the bindings), `test_controls`, `test_tutorial`, `test_layout`
+    (now also failing on a panel off the screen, which caught CONTROLS at
+    13 rows). Golden traces: only doubles_demo, for the overhead's number
+    (identical under the old one). 307/307 plus the e2e. Screenshots: the
+    legend on keys and an Xbox pad, CONTROLS, the SHOTS card.
+  - Status: **Ready to test**: try I / Y for the slice and hold Shift / LB
+    with each swing.
+
+### 37. `feature/cld-park`: the period-true park (planned 2026-10-18)
+
+- [x] `PORT-37` Period-true park: courts ROOKIE / CLUB / CHAMP (the port
+  shows DUPR-style `UNDER 3.5`), park points, winners stay on (two wins),
+  pick your partner (SNES ADR-070 to 072).
+  - Done (ADR-060): the courts renamed; park points on the career player
+    (10 to start, CLUB at 15, CHAMP at 25; locked racks say what they
+    need); winners stay on for two wins, you included; SLICE at your rack
+    picks a partner from the teams you've beaten. The SNES tests are
+    ported.
+  - Status: **Ready to test**.
+
+### 38. `feature/cld-hats`: career and the Hat Museum (planned 2026-10-18)
+
+- [x] `PORT-38` Career and the Hat Museum: 13 hats and 16 unlocks (the port
+  has 6 and 9), the museum (SNES ADR-059 to 061), new hat art.
+  - Done (ADR-061): BEANIE, BUCKET, BACKCAP, WHIRLY, VIKING, CHEF and
+    CROWN drawn for the HD players and earned as in the ROM; the HAT
+    MUSEUM from the player's card (cases, silhouettes, hints, B wears).
+    The SNES museum and career tests are ported.
+  - Status: **Ready to test**.
+
+### 39. `feature/cld-show`: the show (planned 2026-10-18)
+
+- [x] `PORT-39` The show: rings at each player's feet, celebrations,
+  slumps, emotes, net shiver, critters, more quips, and GLOW / INVERSE
+  redone for full colour (SNES ADR-054, 063, 064, 066).
+  - Done (ADR-062): filled circles at the feet (the user's call over the
+    SNES ring); celebrations, slumps and dives (six new poses); the
+    emotes; the net's shiver, drive squash and spin streaks; the gull,
+    satellite and fish; the trophy; GLOW and INVERSE. The quips came with
+    PORT-35. Left: the practice pickle.
+  - Status: **Ready to test**.

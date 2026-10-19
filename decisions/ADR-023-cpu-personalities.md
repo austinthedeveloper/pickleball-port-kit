@@ -1,7 +1,7 @@
 # ADR-023 — CPU Personalities and the Ladder
 
 Status: **Accepted 2026-10-13**
-Starts the story-mode opponents idea in [IDEAS.md](../IDEAS.md). It has no
+Starts the story-mode opponents idea in [IDEAS.md](../design/snes/IDEAS.md). It has no
 story screens yet: opponents come in ladder order.
 Depends on: ADR-013 (palette parts), ADR-014 (female variant), ADR-019
 (shots), ADR-020 (paddles), ADR-021 (save).

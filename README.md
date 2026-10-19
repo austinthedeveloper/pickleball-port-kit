@@ -3,49 +3,55 @@
 > **About this project:** the game is real; its 1993 history is invented.
 > See [ABOUT.md](ABOUT.md).
 
-Starting material for a modern version of Pickleball '94 (Godot, Unity, or
-browser TypeScript). Copied from the SNES repo at commit `a7e6a90`
-(release v0.18.1, 2026-10-16). These are copies, not links: the SNES repo
-remains the source of truth for the SNES game, and this folder can become
-the new repo (`git init` here).
+The modern remaster of Pickleball '94, and the kit it started from. The
+kit was copied from the SNES repo at commit `a7e6a90` (release v0.18.1,
+2026-10-16): copies, not links. The SNES repo (`../pickleball`) remains the
+source of truth for the SNES game; this repo holds the Godot port built
+from it.
 
 ## The Godot port
 
 `game/` is the modern port (Godot 4.7, 960×540): the SNES sim ported
-integer-exact, with headless tests, golden traces, and a stats harness.
-Start with `game/README.md`, `CLAUDE.md`, and `decisions/ADR-052-godot-port.md`.
+integer-exact (it matches the ROM frame for frame, port ADR-059), with
+headless tests, golden traces, and a stats harness, plus everything the
+remaster adds. Start with `game/README.md` (how to play, build, and the
+file layout), `CLAUDE.md` (the rules of the code), and
+`design/PORT_ROADMAP.md` (what's done and what's next). Releases:
+`game/CHANGELOG.md`, `design/VERSIONING.md`.
 
 ## Read first
 
 1. `design/NEXT_GAME_PLAYBOOK.md`: lessons and build order. Rule 1 is to
    build a deterministic sim, a golden trace, and a bot harness in week one.
 2. `design/00_PRODUCT_BRIEF.md` and `design/01_GAMEPLAY_SPEC.md`: what the
-   game is.
-3. `design/PLAYER_GUIDE.md`: what shipped, from the player's side.
+   game is (written for the SNES game; the port keeps its rules).
+3. `design/BIBLE_PLAN.md`: what the canon bible
+   (`../pickleball/docs/PICKLEBALL_94_BIBLE.md`) asks of the port.
 4. `design/07_DECISIONS_AND_RISKS.md` (index of ADR-001 to 017, details in
-   `design/10_MOCKUP_DECISIONS.md`) and `decisions/` (ADR-018 to 051): why
-   each feature works the way it does.
+   `design/10_MOCKUP_DECISIONS.md`) and `decisions/` (ADR-018 to 067):
+   why each feature works the way it does.
 
 ## What's here
 
-| Folder | Contents | Use in the port |
+| Folder | Contents | Use |
 |---|---|---|
-| `design/` | Brief, gameplay spec, test plan and scenario map, playbook, player guide, manual draft, ideas, known issues, mockup decisions, refactor plan, Multitap plan | Spec and backlog. `05_TEST_PLAN.md` and `SCENARIOS.md` list the rule tests to re-create. `MANUAL.md` describes four players as if shipped (planned, not in the SNES build). |
-| `decisions/` | ADR-018 to 051 (earlier ones are in `design/`) | Precedent. Gameplay, AI, save, and UI decisions carry over; the frame-budget and VRAM parts don't. |
-| `data/` | `opponents.json` (CPU styles and ladder), `career.json`, `venues.json`, `quips.json`, `paddles.json`, `court_colors.json`, `palettes/`, `player_frames.json` (animation frames), `m1-assets.json` | Load directly, or convert. Colours are 5-bit SNES RGB (multiply by 255/31). The per-field notes are in each file's `comment`. |
-| `art/concept/` | Concept art: box art, venue courts, levels, player select (high-res) | Style targets for new art. |
-| `art/snes-pixel/` | The SNES source sheets: players, objects, venues, portraits, busts | Pixel reference, or a retro skin. |
-| `audio/snes-sfx/` | The SNES sound effects and venue ambience as WAV | Placeholder audio. |
-| `baselines/` | AI ladder tables (`make stats LATE=0 MATCHES=20 OPPONENT=-2 DIFFICULTY=2`, `MODE` 0 singles, 1 and 3 doubles) | The port's ladder should rank the eight opponents in the same order. |
-| `reference/snes-src/` | The C simulation, headers, host tests, `match_stats.c`, `court_projection.py` | The exact rules and numbers. Read it, don't port its style. |
+| `game/` | The Godot port: `sim/` (the pure sim), `view/`, `meta/`, `net/`, `tests/`, `tools/`, `assets/` | See `game/README.md`. |
+| `design/` | The port's roadmap and history, known issues, bible plan, versioning; the brief, gameplay spec, scenario map, playbook, mockup decisions, and the open '95 ideas (`GOOFY_IDEAS.md`) | Plan and backlog. `SCENARIOS.md` maps the rule tests the port re-created. |
+| `design/snes/` | SNES-era docs: the 0.18.1 player guide, the manual draft, the idea list, the test plan, the Multitap and refactor plans | Reference and lore; not the port's. |
+| `decisions/` | ADR-018 to 067 (earlier ones are in `design/`). From ADR-052 on they're the port's; the SNES repo's own are cited as "SNES ADR-n" | Why each feature works the way it does. |
+| `data/` | The SNES data as copied at 0.18.1: `opponents.json`, `career.json`, `venues.json`, `quips.json`, `paddles.json`, `court_colors.json`, `palettes/`, `player_frames.json`, `m1-assets.json` | Reference. The game reads `game/data/` (newer `opponents.json` and `quips.json`, from the ROM at TUNING_VERSION 4, and the port's `dawson.json`). Colours are 5-bit SNES RGB (multiply by 255/31). |
+| `art/` | `levels/` (the 960×540 venues, players and UI, generated by `levels/tools/build.py`), `park/` (open play's park), `concept/` (style targets), `snes-pixel/` and `sprites/` (the SNES sheets) | `game/tools/sync_assets.sh` copies the generated art into `game/assets/`. |
+| `audio/` | `hd-sfx/` and `music/` (the port's effects and soundtrack, generated by their `make_*.py`), `snes-sfx/` (the SNES originals) | Synced into `game/assets/audio/`. |
+| `baselines/` | The SNES AI ladder tables (`make stats`, `MODE` 0 singles, 1 and 3 doubles) | The ladder's order to compare against. |
+| `reference/snes-src/` | The C simulation, headers and host tests as copied at 0.18.1 | An old snapshot: the source of truth is the SNES repo's `src/` at `K.TUNING_VERSION` (now 4), which `game/tools/conformance_import.sh` reads. |
 
 ## Reading the SNES numbers
 
 - **Units:** world coordinates are SNES screen pixels on a 256×224 screen.
   The court runs x 16..240 (net at 128, kitchen lines at 92 and 164) and
-  y 90..170 (`include/court.h`). Scale everything uniformly.
+  y 90..170 (`reference/snes-src/include/court.h`). Scale everything uniformly.
 - **Fixed point:** `fx` is 12.4, so positions and velocities are in 1/16
-  pixel. Gravity is -3/16 px per frame² (`include/ball.h`).
+  pixel. Gravity is -3/16 px per frame² (`reference/snes-src/include/ball.h`).
 - **Time:** 60 fixed steps per second. CPU decisions run on a staggered
   schedule, not every frame (ADR-043). Tune the port's AI on the schedule
   it ships with.

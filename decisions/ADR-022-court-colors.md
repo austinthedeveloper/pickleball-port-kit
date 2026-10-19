@@ -1,7 +1,7 @@
 # ADR-022 — Court Colours
 
 Status: **Accepted 2026-10-13**
-Starts the custom court colours idea in [IDEAS.md](../IDEAS.md).
+Starts the custom court colours idea in [IDEAS.md](../design/snes/IDEAS.md).
 Depends on: ADR-016 (BG1 palettes), ADR-021 (save block).
 
 ## What changes colour

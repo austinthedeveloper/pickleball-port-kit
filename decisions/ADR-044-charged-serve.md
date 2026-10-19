@@ -1,7 +1,7 @@
 # ADR-044 — Charged Serve
 
 Status: **Accepted 2026-10-15**
-Milestone: `M4-SERVE-01`. From [IDEAS.md](../IDEAS.md), "Charged serve".
+Milestone: `M4-SERVE-01`. From [IDEAS.md](../design/snes/IDEAS.md), "Charged serve".
 Depends on: ADR-021/025 (KID), ADR-029 (HUD prompts).
 
 ## Why

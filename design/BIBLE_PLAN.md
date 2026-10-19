@@ -2,7 +2,8 @@
 
 Source: `../pickleball/docs/PICKLEBALL_94_BIBLE.md`, **draft canon v0.3**
 (2026-10-18, commit `c00c450` "LORE-01" in the SNES repo). Read
-2026-10-18 against this port at v0.9.2. This file turns it into port work;
+2026-10-18 against this port at v0.9.2; the statuses below are kept
+current (last: v0.13.0, 2026-10-19). This file turns it into port work;
 the bible stays the source of truth (its change rule: no artifact may
 contradict it, and the remaster is an artifact).
 
@@ -49,13 +50,14 @@ records ADR-052 to 057 (the Godot port, overhead, tournament, kitchen
 volleys, online, updater) clash with SNES ADR-052 to 057 (kitchen fault,
 fun modifiers, glow and inverse, ladder per mode, slice, CPU slice).
 Decided (2026-10-18): the port keeps its numbers; the SNES repo's are
-cited as **SNES ADR-n**, here and everywhere in this repo. The port's next
-record is ADR-059.
+cited as **SNES ADR-n**, here and everywhere in this repo (the next port
+number is in `CLAUDE.md`).
 
 ### Gaps, by the bible's §5
 
-Status: **have** (the port does it), **partly**, **missing**, **differs**
-(the port does something else).
+Status: **have** (the port does it), **done** (a PORT task added it),
+**partly**, **missing**, **differs** (the port does something else),
+**check** (to verify).
 
 | Bible fact | SNES ADR | Port | Notes |
 |---|---|---|---|

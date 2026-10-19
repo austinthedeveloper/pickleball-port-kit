@@ -1,7 +1,7 @@
 # ADR-024 — Venues
 
 Status: **Accepted 2026-10-13**
-Starts the courts/locations idea in [IDEAS.md](../IDEAS.md).
+Starts the courts/locations idea in [IDEAS.md](../design/snes/IDEAS.md).
 Depends on: ADR-016 (BG1 budget), ADR-022 (court colours), ADR-023
 (opponents).
 

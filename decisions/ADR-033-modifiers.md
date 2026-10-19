@@ -4,6 +4,8 @@ Status: **Accepted 2026-10-13**
 Depends on: ADR-019 (shots), ADR-021/032 (save), ADR-025 (options, slow
 ball), ADR-027 (two-tone kitchen).
 
+*Amended by ADR-059, 062, 063-065 and 067: more modifiers, and the scoring and fault rules on their own RULES page.*
+
 ## Title page
 
 **MODIFIERS** is a title entry between OPTIONS and PRACTICE (SINGLES,
@@ -118,7 +120,7 @@ default CPU, 12 matches each:
   previous build (KNOWN_ISSUES #14). FAST BALL adds the most: the swing
   lookahead probes up to 10 ball steps instead of 7, and its heaviest stage
   grows from 46 to 57 scanlines.
-  *Since then (R15 notes in docs/REFACTOR_PLAN.md):* 7-14, budget 20; the
+  *Since then (R15 notes in design/snes/REFACTOR_PLAN.md):* 7-14, budget 20; the
   same match without modifiers drops none.
 - **Back to the title:** after MAIN MENU, the logo waits for a frame under
   `HUD_TITLE_PROMPT_LIMIT`. The demo's light frames there reach about 110,

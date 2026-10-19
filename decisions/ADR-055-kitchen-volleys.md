@@ -18,7 +18,9 @@ the net and slap every ball out of the air.
 - **Inside the kitchen** is `Sim.in_kitchen`, the same test LAVA uses: the
   player's feet strictly between their kitchen line and the net, within
   the sidelines. The line itself is behind the kitchen here, a small
-  arcade allowance (real rules count the line as kitchen).
+  arcade allowance (real rules count the line as kitchen). *Amended by
+  ADR-059 (SNES ADR-052): the line counts as kitchen now, as in the ROM
+  (`Sim.court_in_kitchen`).*
 - **Standing in the kitchen is fine**, and so is hitting a ball that has
   bounced there. A volley from behind the line is fine.
 - The **two-bounce rule comes first**: the servers' early volley is still

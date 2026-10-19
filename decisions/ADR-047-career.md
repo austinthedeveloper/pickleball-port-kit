@@ -2,10 +2,12 @@
 
 Status: **Accepted 2026-10-15** (stages 1-4: the data, the page, play,
 gear)
-Milestone: `M4-CAREER-01` to `-04`. From [IDEAS.md](../IDEAS.md), "Career
+Milestone: `M4-CAREER-01` to `-04`. From [IDEAS.md](../design/snes/IDEAS.md), "Career
 mode". Depends on: ADR-021/032 (save and migration), ADR-013/014 (palette
 parts, hats), ADR-020 (Player Select), ADR-023 (the ladder), ADR-040
 (initials entry).
+
+*Amended by ADR-061: 13 hats and 16 unlocks (the counts below are the first version's), and the HAT MUSEUM.*
 
 ## The idea
 

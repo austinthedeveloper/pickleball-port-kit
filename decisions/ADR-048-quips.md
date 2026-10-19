@@ -1,7 +1,7 @@
 # ADR-048 — Quips
 
 Status: **Accepted 2026-10-15**
-Milestone: `M4-FUN-01`. From [GOOFY_IDEAS.md](../GOOFY_IDEAS.md), "Quips".
+Milestone: `M4-FUN-01`. From [GOOFY_IDEAS.md](../design/GOOFY_IDEAS.md), "Quips".
 Depends on: ADR-023 (opponents), ADR-026 (story lines), ADR-041 (the close
 call's replay).
 

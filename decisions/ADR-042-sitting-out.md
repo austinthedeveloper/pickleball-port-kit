@@ -1,7 +1,7 @@
 # ADR-042 — The Partner Sitting Out
 
 Status: **Accepted 2026-10-14**
-From [GOOFY_IDEAS.md](../GOOFY_IDEAS.md) ("A crowd made of the players who
+From [GOOFY_IDEAS.md](../design/GOOFY_IDEAS.md) ("A crowd made of the players who
 are sitting out").
 Depends on: ADR-023 (opponents), ADR-024 (venues), ADR-034 (the park's
 people).

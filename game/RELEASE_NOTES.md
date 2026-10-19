@@ -3,7 +3,7 @@
 Build `v0.13.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-36 of 37 roadmap tasks are in.
+41 of 41 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -209,17 +209,41 @@ Four things you found: the update now comes up when the game opens and can't be 
 
 Status: **Ready to test**: 0.9.1 gets 0.9.2 from OPTIONS > UPDATES once; from then on updates come up at launch.
 
-## PORT-35: Catch the sim up to the ROM (planned)
+## PORT-35: catch the sim up to the ROM (planned 2026-10-18)
 
 The sim is the ROM's at TUNING_VERSION 4 (port ADR-059; with PORT-41's slice). The SNES repo's conformance traces come in by `tools/conformance_import.sh` and `test_conformance` replays all four scenarios frame by frame: every frame matches. On the way: the ROM's `opponents.json` and `quips.json` (the rebalance, serve power and duds, sixteen quips and the deck), the serve's depth, aim and power, the lane covers' stagger per match, KID's top speed, ICE and POPCORN in the sim and the AI, GHOST in the view, the kitchen line, and a ladder per mode (save v6, a quit resets it). GHOST BALL, POPCORN, ICE are on MODIFIERS.
 
 Status: **Done**: the conformance traces are the proof. The upper rungs are easier than before (the ROM's playtest); say if they feel off.
 
-## PORT-36: 36-40 (planned) (not in this build)
+## PORT-36: about this project, and Tiny Chair
 
 About this project, and Tiny Chair: the bible's ground rule 1 note, and a Tiny Chair splash in the A-11 colours after a name search.
 
 Status: **In progress**: the splash waits on the name search and the logo's final art (bible A-11); the releases already published don't carry the line (For you).
+
+## PORT-37: the period-true park (planned 2026-10-18)
+
+Period-true park: courts ROOKIE / CLUB / CHAMP (the port shows DUPR-style `UNDER 3.5`), park points, winners stay on (two wins), pick your partner (SNES ADR-070 to 072).
+
+Status: **Ready to test**.
+
+## PORT-38: career and the Hat Museum (planned 2026-10-18)
+
+Career and the Hat Museum: 13 hats and 16 unlocks (the port has 6 and 9), the museum (SNES ADR-059 to 061), new hat art.
+
+Status: **Ready to test**.
+
+## PORT-39: the show (planned 2026-10-18)
+
+The show: rings at each player's feet, celebrations, slumps, emotes, net shiver, critters, more quips, and GLOW / INVERSE redone for full colour (SNES ADR-054, 063, 064, 066).
+
+Status: **Ready to test**.
+
+## PORT-40: the Pickleball '95 promises (and the branches after it)
+
+The Pickleball '95 promises (bible §5.8): Dale Dawson as an unlockable (§3), side-out scoring, the momentum rule, new modifiers; the overhead smash is already in (PORT-24).
+
+Status: **In progress**.
 
 ## PORT-41: four swings and the short hold (asked for 2026-10-18)
 

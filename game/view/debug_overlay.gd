@@ -1,4 +1,4 @@
-## Diagnostics (docs/05_TEST_PLAN.md "Debug instrumentation"), toggled
+## Diagnostics (design/snes/05_TEST_PLAN.md "Debug instrumentation"), toggled
 ## with F3: game state and timer, positions and states, ball position and
 ## velocity, bounces and last hitter, predicted landing markers, hit
 ## volumes, court bounds, P1 input, and the last fault. Reads only.

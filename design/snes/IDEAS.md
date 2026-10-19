@@ -1,10 +1,10 @@
 # Ideas
 
 Candidate features that have not been planned yet. When one is picked up, it
-gets an ADR in [decisions/](decisions/) and this entry links to it. Started
+gets an ADR in [decisions/](../../decisions/) and this entry links to it. Started
 ideas and their follow-ups are tracked as tasks in
-[M4 — Game Features](../milestones/04_GAME_FEATURES.md). Unbaked, just-for-fun
-ideas live in [GOOFY_IDEAS.md](GOOFY_IDEAS.md).
+M4 — Game Features (the SNES repo's `milestones/04_GAME_FEATURES.md`). Unbaked, just-for-fun
+ideas live in [GOOFY_IDEAS.md](../GOOFY_IDEAS.md).
 
 Budget update (2026-10-16, R19): the ROM is now 1 MiB (32 banks), with about
 624 KiB free; the snapshot below is from before. Budget snapshot (2026-10-15,
@@ -12,11 +12,11 @@ release build of `20d22ec`): the ROM was 512 KiB
 (16 LoROM banks); about 307 KiB is used and 205 KiB free. Banks 0-7 are
 full; the free space is in banks 8-13 and 15 (14-15 hold the soundbank).
 `tools/build_report.py` prints the table. Per-screen limits are in
-[09_M1_VRAM_AND_BUILD.md](09_M1_VRAM_AND_BUILD.md).
+09_M1_VRAM_AND_BUILD.md (the SNES repo's `docs/09_M1_VRAM_AND_BUILD.md`).
 
 ## Locations
 
-**Started:** [ADR-024](decisions/ADR-024-venues.md) adds three venues (PARK,
+**Started:** [ADR-024](../../decisions/ADR-024-venues.md) adds three venues (PARK,
 LAKESIDE, SUNSET) built from the inspiration mocks, with shared ground
 tiles, per-venue default ground colours, and home courts for opponents. The
 notes below are the original idea.
@@ -58,7 +58,7 @@ Stadium. Each story opponent can have a home court (see below).
 
 ### Custom court colours
 
-**Started:** [ADR-022](decisions/ADR-022-court-colors.md) adds preset
+**Started:** [ADR-022](../../decisions/ADR-022-court-colors.md) adds preset
 colours for the surface, surround, and lines, chosen on the title's COURT
 page and saved. The notes below are the original idea.
 
@@ -75,7 +75,7 @@ outer area; maybe the lines), and the choice is used for later matches.
 
 ### Two-tone court: a separate kitchen colour
 
-**Done:** [ADR-027](decisions/ADR-027-two-tone-kitchen.md). The notes below
+**Done:** [ADR-027](../../decisions/ADR-027-two-tone-kitchen.md). The notes below
 are the original idea.
 
 Real courts are usually two-toned, with the kitchen (non-volley zone) in a
@@ -105,7 +105,7 @@ can't be coloured on its own.
 
 ## Story mode: CPU personalities
 
-**Started:** [ADR-023](decisions/ADR-023-cpu-personalities.md) adds eight
+**Started:** [ADR-023](../../decisions/ADR-023-cpu-personalities.md) adds eight
 opponents (looks from palette parts, play styles, a saved ladder). Story
 screens (intro cards, portraits, trash talk) are not built yet. The notes
 below are the original plan; the shipped ladder order and tuning are in the
@@ -116,7 +116,7 @@ home court, and a set of play-style numbers fed into the existing CPU.
 
 ### What the CPU can vary today
 
-These knobs already exist in [src/ai.c](../src/ai.c) as fixed constants
+These knobs already exist in [src/ai.c](../../reference/snes-src/src/ai.c) as fixed constants
 (ADR-019). Per-opponent values would come from a table:
 
 | Knob | Today | Personality use |
@@ -165,7 +165,7 @@ food-truck chef.
 
 ## Practice mode: ball machine
 
-**Done:** [ADR-028](decisions/ADR-028-practice.md), with the machine
+**Done:** [ADR-028](../../decisions/ADR-028-practice.md), with the machine
 sprite, its aiming nozzle, and return zones (M4-PRACTICE-02/03/04). The
 notes below are the original idea.
 
@@ -197,7 +197,7 @@ shot.
 
 ## Open play
 
-**Started:** [ADR-034](decisions/ADR-034-open-play.md) adds the park: three
+**Started:** [ADR-034](../../decisions/ADR-034-open-play.md) adds the park: three
 courts with games going, paddle stacks, and your turn as a doubles match.
 The original idea (from GOOFY_IDEAS.md): your player arrives at a park with
 several courts and has to wait for a match to finish. You wander the
@@ -208,7 +208,7 @@ stack.
 
 ## Play modifiers
 
-**Started:** [ADR-033](decisions/ADR-033-modifiers.md) adds the MODIFIERS
+**Started:** [ADR-033](../../decisions/ADR-033-modifiers.md) adds the MODIFIERS
 page with BIG BALL, FAST BALL, WIN BY 2, and a LAVA kitchen. The notes below
 are the original idea.
 
@@ -226,14 +226,14 @@ no-volley-anywhere.
 
 ## Close call replay
 
-**Done:** [ADR-041](decisions/ADR-041-close-call-replay.md), grown up from
+**Done:** [ADR-041](../../decisions/ADR-041-close-call-replay.md), grown up from
 GOOFY_IDEAS.md. A long rally that ends just out shows a close-up of the
 line during the point result: the ball dropping just past it, and by how
 many inches. Still in the goofy pile: a wrong call that kisses the paint.
 
 ## The players sitting out, watching
 
-**Done (in part):** [ADR-042](decisions/ADR-042-sitting-out.md), from
+**Done (in part):** [ADR-042](../../decisions/ADR-042-sitting-out.md), from
 GOOFY_IDEAS.md. In a singles ladder match the opponent's doubles partner
 watches from the venue's stands and cheers their teammate's points. Still
 open: four humans rotating, the two waiting in the stands heckling or
@@ -241,7 +241,7 @@ throwing things.
 
 ## Battery save (SRAM)
 
-**Started:** [ADR-021](decisions/ADR-021-battery-save.md) adds the SRAM, the
+**Started:** [ADR-021](../../decisions/ADR-021-battery-save.md) adds the SRAM, the
 save block, and records (initials since ADR-040). The notes below are the
 original idea.
 
@@ -323,7 +323,7 @@ player's own mistake: there is no auto-swing.
 
 ## Charged serve
 
-**Done:** [ADR-044](decisions/ADR-044-charged-serve.md) for human servers;
+**Done:** [ADR-044](../../decisions/ADR-044-charged-serve.md) for human servers;
 CPU serve power is `M4-SERVE-02`. The notes below are the original idea.
 
 Hold during serve setup to run a meter that rises and falls (golf style);
@@ -344,7 +344,7 @@ release to toss and serve at that power.
 
 ## Career mode
 
-**Started:** [ADR-047](decisions/ADR-047-career.md): three slots, stats,
+**Started:** [ADR-047](../../decisions/ADR-047-career.md): three slots, stats,
 and cosmetic unlocks (stage 1, the data). The notes below are the original
 idea.
 
@@ -374,7 +374,7 @@ are kept per character, and playing unlocks cosmetics.
 
 ## Night courts
 
-**Done:** [ADR-045](decisions/ADR-045-night-courts.md). Still open: light
+**Done:** [ADR-045](../../decisions/ADR-045-night-courts.md). Still open: light
 poles, and a match that darkens as it goes. The notes below are the
 original idea.
 

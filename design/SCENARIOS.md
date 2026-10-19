@@ -1,6 +1,6 @@
 # Deterministic Scenario Results
 
-Maps every scenario in `docs/05_TEST_PLAN.md` to the compile-time fixture that
+Maps every scenario in `design/snes/05_TEST_PLAN.md` to the compile-time fixture that
 automates it. All of them run in `make check` (host build of the same C
 sources the ROM uses).
 

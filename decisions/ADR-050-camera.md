@@ -2,7 +2,7 @@
 
 Status: **Accepted 2026-10-16**
 Milestone: `M4-CAM-01`. Amends: ADR-002 (static court). Depends on:
-ADR-011 (projection), R17–R20 (docs/REFACTOR_PLAN.md: OBJ writes, VBlank).
+ADR-011 (projection), R17–R20 (design/snes/REFACTOR_PLAN.md: OBJ writes, VBlank).
 
 ## What
 

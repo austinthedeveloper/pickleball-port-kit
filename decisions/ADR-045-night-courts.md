@@ -1,7 +1,7 @@
 # ADR-045 — Night Courts
 
 Status: **Accepted 2026-10-15**
-Milestone: `M4-COURT-03`. From [IDEAS.md](../IDEAS.md), "Night courts".
+Milestone: `M4-COURT-03`. From [IDEAS.md](../design/snes/IDEAS.md), "Night courts".
 Depends on: ADR-022 (court colours), ADR-024 (venues), ADR-027 (kitchen),
 ADR-031 (ambience), ADR-032 (save migration).
 

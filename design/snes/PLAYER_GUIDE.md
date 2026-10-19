@@ -1,5 +1,8 @@
 # Pickleball '94 — Player Guide
 
+*The SNES game's guide, as of its 0.18.1 (a few port notes crept in
+since). The Godot port's is `game/README.md`.*
+
 One player against the CPU (singles), or with a CPU partner against two CPUs
 (doubles), on a single outdoor court. A second player can join on
 controller 2. First to 5 points wins (or another score you set in OPTIONS).

@@ -5,6 +5,8 @@ Resolves the deferred rule decision "Lob, dink, drive, charge, and
 special-shot controls" (`07_DECISIONS_AND_RISKS.md`). Charge and special
 shots stay deferred. Paddle stats (ADR-015) will scale these shots later.
 
+*Amended by ADR-053 (the overhead smash) and ADR-058 (four swings: the slice, and SHORT held).*
+
 ## Controls
 
 | Button | Shot | Flight |

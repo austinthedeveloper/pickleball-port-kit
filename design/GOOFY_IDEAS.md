@@ -2,7 +2,7 @@
 
 A running list of ideas that are **not** needed for the MVP and are not fully
 baked. These are for fun and inspiration, not commitments. When one grows
-up, it moves to [IDEAS.md](IDEAS.md) and gets an ADR.
+up, it moves to [IDEAS.md](snes/IDEAS.md) and gets an ADR.
 
 ## 5-player Multitap: the line judge
 
@@ -34,7 +34,7 @@ money.
 
 ## Quips
 
-**Done:** [ADR-048](decisions/ADR-048-quips.md). The notes below are the
+**Done:** [ADR-048](../decisions/ADR-048-quips.md). The notes below are the
 original idea.
 
 Players say something when they miss or fault, in the point-result banner

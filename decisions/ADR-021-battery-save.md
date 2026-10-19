@@ -2,7 +2,7 @@
 
 Status: **Accepted 2026-10-13**
 Amends ADR-017 ("no SRAM"). Starts the battery-save idea in
-[IDEAS.md](../IDEAS.md); court colours and story progress will add fields to
+[IDEAS.md](../design/snes/IDEAS.md); court colours and story progress will add fields to
 the same save block.
 
 ## Cartridge

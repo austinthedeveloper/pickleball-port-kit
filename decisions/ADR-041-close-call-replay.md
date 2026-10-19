@@ -1,7 +1,7 @@
 # ADR-041 — Close Call Replay
 
 Status: **Accepted 2026-10-14**
-From [GOOFY_IDEAS.md](../GOOFY_IDEAS.md) ("Dramatic replay of a long rally
+From [GOOFY_IDEAS.md](../design/GOOFY_IDEAS.md) ("Dramatic replay of a long rally
 that goes out").
 Depends on: ADR-021 (the rally count), ADR-022 (court colours), M4-STORY-03
 (BG2 during a match).
