@@ -6,6 +6,12 @@ Pickleball '94, the Godot port. Versions follow
 
 ## [Unreleased]
 
+### Added
+- **MULTI BALL**, the last '95 modifier: RULES > MULTI BALL. No serving:
+  balls appear at the net every few seconds (three at most), blink, then
+  shoot to one side. Every ball scores on its own, two-bounce rule and
+  all, and the first to the winning score wins.
+
 ### Changed
 - SCREEN SHAKE (OPTIONS > ACCESSIBILITY) is a strength now: OFF, 25%, 50%,
   75% or 100%. It starts at 50%; the full shake was too jarring.

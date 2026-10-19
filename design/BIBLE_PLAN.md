@@ -101,7 +101,7 @@ Status: **have** (the port does it), **partly**, **missing**, **differs**
 | Traditional side-out scoring | **delivered** (PORT-40, ADR-063: RULES > SIDE-OUT) |
 | The momentum rule (carry into the kitchen after a volley) | **delivered** (PORT-40, ADR-064: RULES > MOMENTUM) |
 | A fifth player as line judge | not yet |
-| Modifiers MOON, BOUNCY, WIND, DINK OR DIE, SUDDEN DEATH, MULTI BALL | **delivered** but MULTI BALL (PORT-40, ADR-065) |
+| Modifiers MOON, BOUNCY, WIND, DINK OR DIE, SUDDEN DEATH, MULTI BALL | **delivered** (PORT-40, ADR-065; MULTI BALL ADR-067) |
 | A club manager mode | not yet |
 
 Only the remaster may deliver these; they must stay out of the ROM (bible

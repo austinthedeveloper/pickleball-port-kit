@@ -74,6 +74,7 @@ var _players: Array = []         # per slot: {root, body, cap, shadow, choice, l
 var _ball_root: Node2D
 var _ball_sprite: Sprite2D
 var _ball_shadow: Sprite2D
+var _multi_balls: Array = []     ## MULTI BALL's other balls: [root, sprite, shadow]
 var _ball_frame := 0.0
 var _hud: Hud
 var _sfx: Sfx
@@ -516,6 +517,31 @@ func _on_event(e: Array) -> void:
 ## GHOST BALL (SNES ADR-053, render_ball): high in a live rally the ball
 ## shows only in a brief blink, MOD_GHOST_SHOWN frames in every 16; the
 ## shadow always. Display only.
+## MULTI BALL: a new ball blinks at the net before it flies.
+func _multi_blink_off(i: int) -> bool:
+	if not sim.multi_on or i >= sim.multi.size():
+		return false
+	var m: Sim.MultiBall = sim.multi[i]
+	return m.blink > 0 and (m.blink >> 3) & 1 == 0
+
+
+## MULTI BALL: the balls past the first (sim.ball is the first).
+func _draw_multi_balls() -> void:
+	for k in _multi_balls.size():
+		var e: Array = _multi_balls[k]
+		var i := k + 1
+		var live := sim.multi_on and i < sim.multi.size() and sim.phase != K.PHASE_MATCH_RESULT
+		e[0].visible = live and not _multi_blink_off(i)
+		e[2].visible = live
+		if not live:
+			continue
+		var mb: SimTypes.Ball = sim.multi[i].ball
+		var g := CourtView.ground(mb.x_fp, mb.y_fp)
+		e[0].position = g.round() + Vector2(0, 1)
+		e[1].position = (CourtView.air(mb.x_fp, mb.y_fp, mb.z_fp) - g).round()
+		e[2].position = g.round()
+
+
 func ghost_hidden() -> bool:
 	var b := sim.ball
 	return (sim.config.modifiers & K.MOD_GHOST_BALL) != 0 and b.z_fp >= K.to_fp(K.MOD_GHOST_Z) \
@@ -600,7 +626,7 @@ func _update_visuals() -> void:
 			e["body"].modulate = Color(1.8, 1.8, 1.8) if flash else Color.WHITE
 	var b := sim.ball
 	var show := b.active != 0 and sim.phase != K.PHASE_MATCH_RESULT
-	_ball_root.visible = show and not ghost_hidden()
+	_ball_root.visible = show and not ghost_hidden() and not _multi_blink_off(0)
 	_ball_shadow.visible = show
 	if show:
 		var g := CourtView.ground(b.x_fp, b.y_fp)
@@ -611,6 +637,7 @@ func _update_visuals() -> void:
 		_ball_frame = fmod(_ball_frame + speed / 80.0, 4.0)
 		var fw := _ball_sprite.region_rect.size.x
 		_ball_sprite.region_rect.position.x = int(_ball_frame) * fw
+	_draw_multi_balls()
 	feel.update()
 	if critter:
 		critter.update()

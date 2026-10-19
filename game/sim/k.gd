@@ -258,6 +258,15 @@ const MOON_FLIGHT := [3, 2]     ## a shot's frames, times 3/2
 const BOUNCY_VERTICAL_256 := 175
 const WIND_PERIOD := 8          ## the wind pushes vy by 1 (12.4) every 8 frames aloft
 const WIND_DIRS := [1, -1, 0, -1, 1, 1, -1, 0]   ## a serve's wind, by frame
+## MULTI BALL (port ADR-067): balls trickle in from the net, no serving.
+const MOD_MULTI_BALL := 65536
+const MULTI_MAX := 3            ## balls in play at most
+const MULTI_EVERY := 240        ## frames between new balls (4 s)
+const MULTI_BLINK := 60         ## a new ball blinks at the net this long
+const MULTI_START_Z := 24       ## px: where it hangs, over the tape
+const MULTI_FLIGHT := 32        ## frames from the net to its landing (a flat shot, not a lob)
+const MULTI_DEPTH := 52         ## px past the net it lands (mid-court)
+const MULTI_LANES := [0, 22, -22, 11, -11]   ## its landing's y off the centre line, in turn
 const MOD_GHOST_Z := 8        ## GHOST: above this (px) the ball blinks
 const MOD_GHOST_SHOWN := 2    ## ... shown this many frames in every 16
 const MOD_POPCORN_STRIDE := 12   ## a level adds a step every 12 ticks (+8%)

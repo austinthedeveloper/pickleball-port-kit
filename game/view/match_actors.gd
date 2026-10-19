@@ -108,6 +108,18 @@ func build_ball() -> void:
 	if v.sim.config.modifiers & K.MOD_BIG_BALL:
 		v._ball_shadow.scale = Vector2(2, 1.6)
 	v._shadows.add_child(v._ball_shadow)
+	# MULTI BALL (port ADR-067): the balls past the first, the same art
+	if v.sim.multi_on:
+		for k in K.MULTI_MAX - 1:
+			var root := Node2D.new()
+			var spr: Sprite2D = v._ball_sprite.duplicate()
+			root.add_child(spr)
+			root.visible = false
+			v._actors.add_child(root)
+			var sh: Sprite2D = v._ball_shadow.duplicate()
+			sh.visible = false
+			v._shadows.add_child(sh)
+			v._multi_balls.append([root, spr, sh])
 
 
 func spawn_fx(kind: String, at: Vector2, start: int) -> void:

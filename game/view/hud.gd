@@ -502,7 +502,7 @@ func _refresh_live() -> void:
 		label.position.y = _score_y - (sc - 1.0) * 29.0   # bottom fixed: grows up
 		label.tint = Color.WHITE.lerp(Color("fbe46a"), k)
 	# the serving side, and the server in doubles while they set up
-	var serving := s.phase <= K.PHASE_LIVE and not s.config.practice
+	var serving := s.phase <= K.PHASE_LIVE and not s.config.practice and not s.multi_on
 	for t in 2:
 		_serve_icons[t].visible = serving and s.serving_team == t
 	var mark := not view.demo and s.config.mode == K.MODE_DOUBLES \

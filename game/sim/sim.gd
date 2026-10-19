@@ -772,10 +772,15 @@ func _last_hitter_team() -> int:
 	return 1 if ball.last_hitter >= 2 else 0
 
 func _server_team() -> int:
+	if multi_on:
+		return multi_serve_team      # MULTI BALL: the side a ball was "served" from
 	return 1 if server_index >= 2 else 0
 
 func resolve_point(losing_team: int, fault: int) -> void:
 	if phase == K.PHASE_POINT_RESULT or phase == K.PHASE_MATCH_RESULT:
+		return
+	if multi_on:
+		_multi_point(losing_team, fault)
 		return
 	var winner := 1 - losing_team
 	point_winner = winner
@@ -969,8 +974,11 @@ func new_match() -> void:
 	ball_steps = 0
 	events = []
 	_activate_players()
+	multi_on = config.modifiers & K.MOD_MULTI_BALL != 0 and not config.practice
 	if config.practice:
 		practice.begin()            # ADR-028: no serve
+	elif multi_on:
+		_multi_begin()
 	else:
 		_begin_serve(0)
 	if attract:
@@ -1193,7 +1201,10 @@ func game_update() -> void:
 		K.PHASE_SERVE_SETUP, K.PHASE_SERVE_TOSS:
 			serve_update()
 		K.PHASE_LIVE:
-			_update_live()
+			if multi_on:
+				_multi_update()
+			else:
+				_update_live()
 		K.PHASE_POINT_RESULT:
 			_update_point_result()
 		K.PHASE_MATCH_RESULT:
@@ -1223,13 +1234,13 @@ func step(human: Array = []) -> void:
 	var lc := loop_count & 0xff
 	if p1_bot and not attract:
 		var pressed: int = intents[0].hit_pressed
-		ai.update(0, intents[0])
+		_ai_update(0)
 		intents[0].hit_pressed |= pressed
 	if attract:
 		var think: bool = (ai.slots[0].has_target or (lc & 3) == 0) \
 			if config.mode == K.MODE_DOUBLES else (loop_count & 1) == 1
 		if think:
-			ai.update(0, intents[0])
+			_ai_update(0)
 		else:
 			ai.hold_intent(0, intents[0])
 	elif config.difficulty == K.DIFFICULTY_KID:
@@ -1239,7 +1250,7 @@ func step(human: Array = []) -> void:
 			if slot == 0 and p1_bot:
 				continue                 # the stats bot plays its own swings
 			if owners[slot] == K.OWNER_HUMAN and players[slot].active \
-					and ai.assist_swing(slot):
+					and _ai_assist(slot):
 				intents[slot].hit_pressed = 1
 				intents[slot].shot = K.SHOT_STANDARD
 	# CPU_THINKS (cpu_schedule.h, tuning v4): the stagger counts the
@@ -1250,7 +1261,7 @@ func step(human: Array = []) -> void:
 		if owners[slot] == K.OWNER_CPU and players[slot].active:
 			if not players[slot ^ 1].active or ai.slots[slot].has_target \
 					or _serving(slot) or (cpu_frame & 3) == slot:
-				ai.update(slot, intents[slot])
+				_ai_update(slot)
 			else:
 				ai.hold_intent(slot, intents[slot])
 	# DINK OR DIE: the CPUs (and the bot) play the soft shot for a drive
@@ -1261,6 +1272,224 @@ func step(human: Array = []) -> void:
 				intents[slot].shot = K.SHOT_SOFT
 	game_update()
 	loop_count = (loop_count + 1) & 0xffff
+
+
+# --- MULTI BALL (port ADR-067) ------------------------------------------------------------------
+# Several balls, no serving. Each ball keeps the rally state the ROM's code
+# keeps for its one ball; a frame swaps each into the single-ball fields,
+# runs the unchanged hit, rules and physics code on it, and swaps it out,
+# so off, nothing here runs and the traces are the ROM's.
+
+## One ball in play and its rally state.
+class MultiBall:
+	var ball: Ball
+	var required_bounce := K.REQUIRED_BOUNCE_SERVE
+	var landing_pending := 0
+	var contact_volley := 0
+	var shot_serial := 0
+	var ball_steps := 0
+	var serve_team := 0              ## as if this side had served it
+	var blink := K.MULTI_BLINK       ## frames left at the net before it flies
+	var dead := false
+	var id := 0                      ## its launch number this match
+
+var multi_on := false
+var multi: Array = []                ## MultiBall, oldest first
+var multi_timer := 0                 ## frames to the next ball
+var multi_launched := 0              ## balls so far this match
+var multi_serve_team := 0            ## the swapped-in ball's serve_team
+var _multi_idle := Ball.new()        ## sim.ball while none is in play
+var _ai_ball := [-1, -1, -1, -1]     ## the ball each slot plays (its id)
+var _multi_serving := 0              ## serving_team outside a swap
+
+## The match opens: everyone at their serve spots, live at once, the first
+## ball at the net.
+func _multi_begin() -> void:
+	serve_setup(0)
+	for p in players:
+		p.frozen = 0
+		p.pose = K.POSE_NONE
+	multi = []
+	multi_timer = 0
+	multi_launched = 0
+	_ai_ball = [-1, -1, -1, -1]
+	_multi_idle = Ball.new()
+	_multi_idle.set_physics(ball)
+	ball = _multi_idle
+	required_bounce = K.REQUIRED_BOUNCE_NONE
+	set_phase(K.PHASE_LIVE)
+
+func _multi_swap_in(m: MultiBall) -> void:
+	ball = m.ball
+	required_bounce = m.required_bounce
+	landing_pending = m.landing_pending
+	contact_volley = m.contact_volley
+	shot_serial = m.shot_serial
+	ball_steps = m.ball_steps
+	multi_serve_team = m.serve_team
+	serving_team = m.serve_team      # the AI's return rule reads it
+
+func _multi_swap_out(m: MultiBall) -> void:
+	m.required_bounce = required_bounce
+	m.landing_pending = landing_pending
+	m.contact_volley = contact_volley
+	m.shot_serial = shot_serial
+	m.ball_steps = ball_steps
+
+## A new ball at the net: it shoots to each side in turn (the left first),
+## landing mid-court in a lane of its own, as if served from the far side.
+func _multi_spawn() -> void:
+	var m := MultiBall.new()
+	m.ball = Ball.new()
+	m.ball.set_physics(_multi_idle)
+	m.ball.active = 1
+	m.ball.x_fp = K.to_fp(K.COURT_NET_X)
+	m.ball.y_fp = K.to_fp(K.COURT_CENTERLINE_Y)
+	m.ball.z_fp = K.to_fp(K.MULTI_START_Z)
+	m.ball.rally_state = K.BALL_RALLY_INACTIVE
+	var side := multi_launched & 1
+	m.serve_team = side ^ 1
+	m.shot_serial = multi_launched & 0xff
+	m.id = multi_launched
+	m.ball.last_hitter = 2 if m.serve_team else 0
+	multi_launched += 1
+	multi.append(m)
+
+func _multi_launch(m: MultiBall) -> void:
+	var side := m.serve_team ^ 1
+	var lane: int = K.MULTI_LANES[(multi_launched - 1) % K.MULTI_LANES.size()]
+	var tx := K.COURT_NET_X - K.MULTI_DEPTH if side == 0 else K.COURT_NET_X + K.MULTI_DEPTH
+	m.ball.rally_state = K.BALL_RALLY_LIVE
+	launch(m.ball, tx, K.COURT_CENTERLINE_Y + lane, K.MULTI_FLIGHT)
+	emit(K.EVENT_SERVE, K.COURT_NET_X, K.COURT_CENTERLINE_Y, 2 if m.serve_team else 0)
+
+## A ball died: its point, by the usual rules for whoever hit it last; the
+## match can end with balls still in the air.
+func _multi_point(losing_team: int, fault: int) -> void:
+	var winner := 1 - losing_team
+	point_winner = winner
+	last_fault = fault
+	team_score[winner] += 1
+	if fault != K.FAULT_SECOND_BOUNCE and fault != K.FAULT_NONE:
+		emit(K.EVENT_FAULT, K.from_fp(ball.x_fp), K.from_fp(ball.y_fp), fault)
+	emit(K.EVENT_POINT, K.from_fp(ball.x_fp), K.from_fp(ball.y_fp), winner)
+	required_bounce = K.REQUIRED_BOUNCE_NONE
+	landing_pending = 0
+	ball.rally_state = K.BALL_RALLY_INACTIVE
+	ball.active = 0
+	ball.vx_fp = 0
+	ball.vy_fp = 0
+	ball.vz_fp = 0
+	for m: MultiBall in multi:
+		if m.ball == ball:
+			m.dead = true
+	if score_wins(team_score[winner], team_score[winner ^ 1]):
+		match_winner = winner
+		set_phase(K.PHASE_MATCH_RESULT)
+
+## One live frame: new balls, then each ball's hits, flight and rules.
+## (LAVA and MOMENTUM aren't called here: with no rally to end they'd score
+## every frame you stood in the kitchen.)
+func _multi_update() -> void:
+	if multi_timer > 0:
+		multi_timer -= 1
+	elif multi.size() < K.MULTI_MAX:
+		_multi_spawn()
+		multi_timer = K.MULTI_EVERY
+	# FAST BALL's pace advances once a frame, whatever the balls
+	var tick0 := ball_tick
+	for m: MultiBall in multi.duplicate():
+		if phase != K.PHASE_LIVE:
+			break
+		ball_tick = tick0
+		if m.blink > 0:
+			m.blink -= 1
+			if m.blink == 0:
+				_multi_launch(m)
+			continue
+		_multi_swap_in(m)
+		var hit_player := 0
+		for p in players:
+			if p.state == K.STATE_ACTIVE:
+				hit_player = resolve_player_hits()
+				break
+		if hit_player:
+			contact(hit_player - 1)
+			rules_process_player_hit(hit_player - 1)
+		if not m.dead and phase == K.PHASE_LIVE:
+			var ev := step_ball()
+			if ev & K.BALL_EVENT_BOUNCE:
+				emit(K.EVENT_BOUNCE, K.from_fp(ball.x_fp), K.from_fp(ball.y_fp), ball.bounce_count)
+			rules_process_ball_events(ev)
+		_multi_swap_out(m)
+	if ball_paced:
+		ball_tick = (tick0 + 1) % BALL_CYCLE
+	serving_team = _multi_serving
+	multi = multi.filter(func(m): return not m.dead)
+	ball = multi[0].ball if not multi.is_empty() else _multi_idle
+
+## The ball a slot plays: the one it played if it's still coming, else the
+## nearest that is on its side or flying to it (or, none, the nearest).
+func _multi_ball_for(slot: int) -> MultiBall:
+	var p: Player = players[slot]
+	var best: MultiBall = null
+	var best_d := 0x7fffffff
+	for m: MultiBall in multi:
+		if m.blink > 0 or m.dead:
+			continue
+		var b := m.ball
+		var mine := (b.x_fp < K.to_fp(K.COURT_NET_X)) == (p.team == 0)
+		var coming := (b.vx_fp < 0) == (p.team == 0)
+		var theirs_last := b.last_hitter < K.MAX_PLAYERS and (b.last_hitter >= 2) == (p.team == 1)
+		if theirs_last or not (mine or coming):
+			continue
+		if m.id == _ai_ball[slot]:
+			return m
+		var d := absi(b.x_fp - p.x_fp) + absi(b.y_fp - p.y_fp)
+		if d < best_d:
+			best_d = d
+			best = m
+	return best
+
+## The AI thinks about its ball: it is swapped in, and the AI's landing
+## cache (one ball's) starts over when the ball changes.
+func _ai_update(slot: int) -> void:
+	if not multi_on or phase != K.PHASE_LIVE:
+		ai.update(slot, intents[slot])
+		return
+	var m := _multi_ball_for(slot)
+	if m == null:
+		var keep := ball
+		ball = _multi_idle
+		ai.update(slot, intents[slot])
+		ball = keep
+		return
+	var kept := [ball, required_bounce, landing_pending, contact_volley, shot_serial, ball_steps,
+		multi_serve_team, serving_team]
+	_ai_ball[slot] = m.id
+	ai.land_valid = false
+	_multi_swap_in(m)
+	ai.update(slot, intents[slot])
+	ball = kept[0]
+	required_bounce = kept[1]
+	landing_pending = kept[2]
+	contact_volley = kept[3]
+	shot_serial = kept[4]
+	ball_steps = kept[5]
+	multi_serve_team = kept[6]
+	serving_team = kept[7]
+
+func _ai_assist(slot: int) -> bool:
+	if not multi_on or phase != K.PHASE_LIVE:
+		return ai.assist_swing(slot)
+	var m := _multi_ball_for(slot)
+	if m == null:
+		return false
+	var keep := ball
+	ball = m.ball
+	var r := ai.assist_swing(slot)
+	ball = keep
+	return r
 
 
 # --- Trace -------------------------------------------------------------------------------------
@@ -1285,6 +1514,12 @@ func snapshot() -> Array:
 		s.append_array([server_number, first_server, point_scored, opening])
 	if config.modifiers & K.MOD_MOMENTUM:
 		s.append(momentum_slot)
+	if multi_on:
+		s.append_array([multi_timer, multi_launched])
+		for m: MultiBall in multi:
+			s.append_array(m.ball.to_array())
+			s.append_array([m.required_bounce, m.landing_pending, m.contact_volley, m.shot_serial,
+				m.ball_steps, m.serve_team, m.blink])
 	s.append_array(ball.to_array())
 	for p in players:
 		s.append_array(p.to_array())

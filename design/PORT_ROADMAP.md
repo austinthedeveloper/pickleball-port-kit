@@ -497,8 +497,8 @@ feature/cld-release-0.9.2   (v0.9.2)
     scoring rules got their own RULES page); the momentum rule (ADR-064:
     RULES > MOMENTUM); MOON, BOUNCY, WIND, DINK OR DIE and SUDDEN DEATH
     (ADR-065); Dale Dawson (ADR-066: unlocked by a ladder clear, on VS;
-    plays doubles alone and fast). Left: MULTI BALL, the line judge, the
-    club manager.
+    plays doubles alone and fast); MULTI BALL (ADR-067: RULES > MULTI
+    BALL). Left: the line judge, the club manager.
   - Status: **In progress**.
 
 ## For you
