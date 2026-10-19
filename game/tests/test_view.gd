@@ -202,3 +202,27 @@ func test_new_view_places_everyone_at_once() -> void:
 				check(not e["root"].visible, "an empty slot hidden")
 		check(not v._ball_root.visible or v._ball_root.position.length() > 100.0, "the ball placed or hidden")
 		v.free()
+
+
+## SNES ADR-055: pause, MAIN MENU in a ladder match starts that mode's
+## ladder over (and saves); outside the ladder nothing moves.
+func test_quitting_a_ladder_match_resets_it() -> void:
+	for ladder in [true, false]:
+		var s := SaveGame.new()
+		s.dir = "user://test_view_save/"
+		s.data = SaveGame.defaults()
+		s.career = Career.from_dict(s.data["career"])
+		s.data["records"]["ladder_doubles"] = 3
+		s.data["records"]["ladder_rung"] = 2
+		var v := MatchView.new()
+		v.save = s
+		v.ladder = ladder
+		runner.root.add_child(v)
+		var cfg := SimTypes.MatchConfig.doubles()
+		cfg.opponent = 3
+		v.setup(cfg, "park", false)
+		v.input.pause_choice = "menu"
+		v._pause_input(SimTypes.Intent.new())
+		eq([s.ladder(false), s.ladder(true)], [2, 0] if ladder else [2, 3],
+			"ladder %s: doubles reset, singles kept" % ladder if ladder else "not a ladder match: nothing moves")
+		v.free()

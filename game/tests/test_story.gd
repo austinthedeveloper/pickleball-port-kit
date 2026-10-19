@@ -19,7 +19,7 @@ func test_every_line_fits_the_hud_font() -> void:
 		var t := Opponents.team(i)
 		for key in ["intro", "taunt", "concede"]:
 			check(_fits(t[key]), "%s %s: '%s'" % [t["team"], key, t[key]])
-		eq(t["quips"].size(), 4, "%s has four quips" % t["team"])
+		eq(t["quips"].size(), 16, "%s has sixteen quips (SNES ADR-063)" % t["team"])
 		for q in t["quips"]:
 			check(_fits(q), "%s quip '%s'" % [t["team"], q])
 	for side in ["player", "cpu"]:
@@ -55,6 +55,22 @@ func test_quips_never_repeat_in_a_row() -> void:
 			continue
 		check(q != last, "no repeat")
 		last = q
+
+
+## SNES ADR-063: a shuffled deck per side: every line once before any again.
+func test_quips_go_through_the_deck() -> void:
+	var st := Story.new()
+	var cfg := SimTypes.MatchConfig.singles()
+	cfg.opponent = 5
+	var heard := {}
+	var frame := 0
+	while heard.size() < 16 and frame < 3000:
+		var q := st.quip(cfg, 1, frame)
+		if q != "":
+			check(not heard.has(q), "no line twice in a pass: '%s'" % q)
+			heard[q] = true
+		frame += 3
+	eq(heard.size(), 16, "all sixteen in one pass")
 
 
 func test_cards_and_results() -> void:

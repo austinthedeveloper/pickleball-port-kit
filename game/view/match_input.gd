@@ -173,6 +173,9 @@ func pause_input(it: SimTypes.Intent) -> bool:
 			v._sfx.play("back")
 			if v.save:
 				v.save.drop_new_records()
+				# SNES ADR-055: quitting a ladder match starts that mode's ladder over
+				if v.ladder and not v.demo and v.save.quit_ladder(v.sim.config.mode == K.MODE_DOUBLES):
+					v.save.save_game()
 			if v.sim.config.practice:
 				v.leave_practice()
 			else:

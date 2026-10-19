@@ -103,6 +103,10 @@ const HIT_OVERHEAD_STRETCH_LONG := 18
 const HIT_OVERHEAD_NET_CLEAR := 3   ## px over the tape a smash keeps, if its flight allows
 
 # --- Shots and intents (input.h) ---------------------------------------------
+## The SNES repo's TUNING_VERSION (include/tuning.h) this sim matches,
+## proven by the conformance traces (PORT-35; docs/TUNING.md there).
+const TUNING_VERSION := 4
+
 const SHOT_STANDARD := 0
 const SHOT_DRIVE := 1
 const SHOT_SOFT := 2
@@ -132,6 +136,11 @@ const PLAYER_ACCEL_FP := 4
 const PLAYER_DIAGONAL_ACCEL_FP := 3
 const PLAYER_MAX_SPEED_FP := 24
 const PLAYER_FRICTION_FP := 6
+# ICE (SNES ADR-053): half the acceleration and a sixth of the friction, so
+# a run takes 12 frames to reach top speed and slides about 18 px.
+const PLAYER_ICE_ACCEL_FP := 2
+const PLAYER_ICE_DIAGONAL_ACCEL_FP := 2
+const PLAYER_ICE_FRICTION_FP := 1
 const PLAYER_SWING_MAX_SPEED_FP := 12
 const PLAYER_CPU_MAX_SPEED_FP := 19
 const PLAYER_SEPARATION_X := 16
@@ -218,6 +227,14 @@ const MOD_BIG_BALL := 1
 const MOD_FAST_BALL := 2
 const MOD_WIN_BY_2 := 4
 const MOD_LAVA := 8
+const MOD_GHOST_BALL := 16    ## SNES ADR-053: high in flight, the ball only blinks
+const MOD_POPCORN := 32       ## every hit in a rally adds pace
+const MOD_ICE := 64           ## players slide
+const MOD_GLOW := 128         ## SNES ADR-054: lights out, neon outlines
+const MOD_GHOST_Z := 8        ## GHOST: above this (px) the ball blinks
+const MOD_GHOST_SHOWN := 2    ## ... shown this many frames in every 16
+const MOD_POPCORN_STRIDE := 12   ## a level adds a step every 12 ticks (+8%)
+const MOD_POPCORN_LEVELS := 6    ## up to +50%
 const MOD_BIG_REACH := 4
 const MOD_LAVA_MARGIN := 8
 

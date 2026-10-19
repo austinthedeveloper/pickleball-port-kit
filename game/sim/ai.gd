@@ -108,6 +108,21 @@ func predict_landing(b: Ball) -> Array:
 	return [steps, K.from_fp(b.x_fp + b.vx_fp * steps), K.from_fp(b.y_fp + b.vy_fp * steps)]
 
 
+## ICE (SNES ADR-053): how far (px) a player moving at v (12.4, 0-31)
+## coasts to a stop with the ice's friction, 1: v (v - 1) / 32.
+const ICE_COAST := [0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 3, 4, 4, 5, 6,
+	7, 8, 9, 10, 11, 13, 14, 15, 17, 18, 20, 21, 23, 25, 27, 29]
+
+## On ice, let go once the slide would carry the player to the target.
+static func _move_toward_ice(from: int, to: int, v: int) -> int:
+	var delta := to - from
+	if delta > 0 and v > 0 and ICE_COAST[v & 31] >= delta:
+		return 0
+	if delta < 0 and v < 0 and ICE_COAST[(-v) & 31] >= -delta:
+		return 0
+	return _move_toward(from, to)
+
+
 static func _move_toward(from: int, to: int) -> int:
 	var d := to - from
 	if d > K.AI_DEAD_ZONE:
@@ -281,12 +296,12 @@ func _probe_frame(frame: int) -> void:
 		probe_step()
 
 ## How far a player slides after pressing swing (ADR-038 footwork).
-static func _slide(v: int, limit: int) -> int:
-	v = Sim._approach_zero(v)
+static func _slide(v: int, limit: int, friction := K.PLAYER_FRICTION_FP) -> int:
+	v = Sim._approach_zero(v, friction)
 	v = clampi(v, -limit, limit)
 	var total := v
 	while v:
-		v = Sim._approach_zero(v)
+		v = Sim._approach_zero(v, friction)
 		total += v
 	return total
 
@@ -328,8 +343,9 @@ func _swing_connects(p: Player) -> bool:
 	reach_x = p.x_fp
 	reach_y = p.y_fp
 	if style.footwork:
-		reach_x += _slide(p.vx_fp, Paddles.swing_limit(p.paddle))
-		reach_y += _slide(p.vy_fp, Paddles.swing_limit(p.paddle))
+		var fr := K.PLAYER_ICE_FRICTION_FP if sim.ice else K.PLAYER_FRICTION_FP
+		reach_x += _slide(p.vx_fp, Paddles.swing_limit(p.paddle), fr)
+		reach_y += _slide(p.vy_fp, Paddles.swing_limit(p.paddle), fr)
 	var paced: bool = sim.ball_paced
 	if not paced and (_window_misses(b.x_fp, b.vx_fp, reach_x, K.to_fp(K.HIT_REACH_X) + sim.grow_fp) \
 			or _window_misses(b.y_fp, b.vy_fp, reach_y, K.to_fp(K.HIT_REACH_Y) + sim.grow_fp)):
@@ -368,7 +384,7 @@ func _swing_connects(p: Player) -> bool:
 		contact_z = pz
 		contact_volley = pbounces == 0
 		# ADR-055: never a volley from inside the kitchen; let it bounce
-		if pbounces == 0 and Sim.in_kitchen(reach_x, reach_y, p.team):
+		if pbounces == 0 and Sim.court_in_kitchen(reach_x, reach_y, p.team):
 			return false
 		if pbounces == 0 and (not volleys or pz < K.AI_VOLLEY_MIN_Z \
 				or not Sim.contains_ground_fp(K.to_fp(g.predicted_land_x),
@@ -407,13 +423,14 @@ func _may_come_in(team: int) -> bool:
 
 func _plan_volley(p: Player, land_steps: int, lx: int) -> bool:
 	var b: Ball = sim.ball
-	if Sim.in_kitchen(p.x_fp, p.y_fp, p.team):
-		return false                   # ADR-055: from the kitchen, wait for the bounce
 	var x := p.x_fp
 	var pxx := K.from_fp(x)
 	var bx := K.from_fp(b.x_fp)
 	var vx := b.vx_fp
 	if not vx or ((pxx - bx) < 0) != ((lx - pxx) < 0) or pxx == lx:
+		return false
+	# Not from the kitchen (SNES ADR-052): that ball is played off the bounce.
+	if Sim.court_in_kitchen(x, p.y_fp, p.team):
 		return false
 	var t := (x - b.x_fp) / vx
 	if t <= 0 or t >= land_steps:
@@ -469,8 +486,18 @@ func _plan_intercept(p: Player) -> void:
 		land_x = lx
 		land_y = ly
 		land_impact_vz = impact_vz
+	# POPCORN (SNES ADR-053) adds up to 1/12 a level (+50% at six): N steps
+	# take at least 3N/4 frames to level 4, 5N/8 beyond, and N/2 with FAST
+	# BALL too.
+	if sim.popcorn_level and steps > 1:
+		if sim.config.modifiers & K.MOD_FAST_BALL:
+			steps = (steps >> 1) - 1
+		elif sim.popcorn_level > 4:
+			steps -= (steps >> 2) + (steps >> 3) + 1
+		else:
+			steps -= (steps >> 2) + 1
 	# FAST BALL: N steps take at least N - N/4 - 1 frames (safe early-out).
-	if (sim.config.modifiers & K.MOD_FAST_BALL) and steps > 1:
+	elif (sim.config.modifiers & K.MOD_FAST_BALL) and steps > 1:
 		steps -= (steps >> 2) + 1
 	g.predicted_frames = steps
 	g.predicted_land_x = lx
@@ -572,13 +599,26 @@ func _think(i: int, intent: Intent) -> void:
 		block_volley[i] = 0
 		open_aim[i] = K.AI_AIM_PATTERN
 		g.planned_shot = K.SHOT_STANDARD
-		if (g.shot_counter & 3) == 3:
-			g.planned_depth = -1
-		else:
-			g.planned_depth = 1 if (g.shot_counter & 1) else 0
+		# The depth is picked before the press and kept through the toss
+		# (SNES ADR-062), so the serve lands where its power was chosen for.
+		if sim.phase == K.PHASE_SERVE_SETUP:
+			if (g.shot_counter & 3) == 3:
+				g.planned_depth = -1
+			else:
+				g.planned_depth = 1 if (g.shot_counter & 1) else 0
 		_choose_aim(p, intent)
+		# SNES ADR-062: a short serve goes to the middle of the box.
+		if g.planned_depth < 0:
+			intent.aim_y = 0
 		if sim.phase == K.PHASE_SERVE_SETUP and sim.phase_timer >= K.AI_SERVE_DELAY_FRAMES:
 			intent.hit_pressed = 1
+			# SNES ADR-058: the style's serve power, and about one serve in
+			# serve_dud a dud (the frame count a multiple of it; no RNG).
+			var dud := style.serve_dud
+			sim.charge_power = 0 if (dud and (sim.frame_count % dud) == 0) else style.serve_power
+			# SNES ADR-062: and soft, whatever the style's power.
+			if g.planned_depth < 0 and sim.charge_power:
+				sim.charge_power = K.SERVE_CHARGE_CLASSIC
 			g.shot_counter = (g.shot_counter + 1) & 0xff
 		return
 	if sim.phase != K.PHASE_LIVE:
@@ -641,5 +681,9 @@ func _think(i: int, intent: Intent) -> void:
 			var shift := clampi((K.from_fp(b.y_fp) - K.COURT_CENTERLINE_Y) >> 2,
 				-K.AI_SHIFT_MAX, K.AI_SHIFT_MAX)
 			g.target_y += shift
+	if sim.ice:
+		intent.move_x = _move_toward_ice(x, g.target_x, p.vx_fp)
+		intent.move_y = _move_toward_ice(y, g.target_y, p.vy_fp)
+		return
 	intent.move_x = _move_toward(x, g.target_x)
 	intent.move_y = _move_toward(y, g.target_y)

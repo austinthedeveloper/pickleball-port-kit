@@ -1,15 +1,39 @@
 {
-  "comment": "Quips (GOOFY_IDEAS.md): after a lost point, sometimes, the side that lost it says a line on the point result. PG only: no cursing, no put-downs. Ladder teams have their own in opponents.json; 'player' is a human's side (1P, or 2P in versus), 'cpu' the default CPU. Four each, up to 28 HUD font characters.",
+  "comment": "Quips (GOOFY_IDEAS.md): after a lost point, sometimes, the side that lost it says a line on the point result. PG only: no cursing, no put-downs. Ladder teams have their own in opponents.json; 'player' is a human's side (1P, or 2P in versus), 'cpu' the default CPU. Sixteen each, up to 28 HUD font characters.",
   "player": [
     "OOPS!",
     "WHOOPS!",
     "SO CLOSE!",
-    "MY BAD!"
+    "MY BAD!",
+    "NEXT ONE'S MINE!",
+    "SHAKE IT OFF!",
+    "ALMOST HAD IT!",
+    "OUCH!",
+    "WELL, DILL WITH IT.",
+    "THAT WAS A PRACTICE SWING.",
+    "NOTE TO SELF: SWING.",
+    "I'LL GET THE NEXT ONE.",
+    "WHOA, FAST ONE!",
+    "OKAY, FOCUS.",
+    "DIDN'T SEE THAT COMING!",
+    "OH, PICKLES!"
   ],
   "cpu": [
     "DRAT!",
     "NOT AGAIN!",
     "WHOOPSIE!",
-    "BEEP BOOP... OOPS."
+    "BEEP BOOP... OOPS.",
+    "ERROR 404: BALL NOT FOUND.",
+    "RECALIBRATING...",
+    "DOES NOT COMPUTE.",
+    "REBOOTING PADDLE...",
+    "SYNTAX ERROR.",
+    "LOW BATTERY.",
+    "BZZT!",
+    "INSERT COIN TO CONTINUE.",
+    "PLEASE STAND BY.",
+    "MUST... DINK... BETTER.",
+    "BLUE SCREEN OF DEFEAT.",
+    "UPDATING SOFTWARE..."
   ]
 }

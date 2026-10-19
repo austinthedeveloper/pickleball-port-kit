@@ -17,6 +17,7 @@ godot --path game --resolution 960x540 -s res://tools/screenshot.gd -- <title|si
 godot --headless --path game -s res://tools/point_log.gd -- doubles 2   # why each point ended
 game/tools/export.sh --check                         # .pck export + headless boot (refuses a dirty tree; --dev)
 python3 game/tools/release_notes.py                  # game/RELEASE_NOTES.md from the roadmap sheet
+game/tools/conformance_import.sh                     # the SNES repo's conformance traces (KEEP=1: full lines)
 python3 game/tools/version.py set X.Y.Z              # the version, everywhere (design/VERSIONING.md)
 ```
 
@@ -45,9 +46,12 @@ its own numbering (next: ADR-059).
   point), no Nodes, no time, no randomness. Mask u8/u16 state where the C
   wraps (`& 0xff`, `& 0xffff`). GDScript `/` on ints truncates like C;
   `>>` floors, like the C's arithmetic shift.
-- **The sim follows the C reference.** `reference/snes-src/src` is the
-  source of truth for rules and AI; keep functions in the same order and
-  shape so they diff against it. Behaviour changes need an ADR.
+- **The sim follows the C reference.** The SNES repo's `src/` (at
+  `K.TUNING_VERSION`) is the source of truth for rules and AI; keep
+  functions in the same order and shape so they diff against it.
+  `test_conformance` replays the ROM's conformance traces frame by frame
+  (port ADR-059); remaster-only rules switch off there (`MatchConfig.overhead`).
+  `reference/snes-src` is the old 0.18.1 snapshot. Behaviour changes need an ADR.
 - **Presentation never writes to the sim** (`test_view_never_writes_to_the_sim`).
   Display choices (animation variants, effects, crowd) live in `game/view/`.
 - **CPU schedule = shipped schedule.** `Sim.step()` runs the CPUs as
@@ -72,7 +76,7 @@ its own numbering (next: ADR-059).
 - **Prompts, not button names in text**: help lines are `PromptBar`s of
   `[action, "LABEL"]`, so they follow the device and any remap.
 - **Settings live in `Settings`** (`meta/settings.gd`), not on screens.
-- **The save is versioned** (`meta/save.gd`, layout v5). A new saved key
+- **The save is versioned** (`meta/save.gd`, layout v6). A new saved key
   with a harmless default can ride on `defaults()` (missing keys fill);
   a changed meaning needs a new version, a migration, and a test that
   loads the old image.

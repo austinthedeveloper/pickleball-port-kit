@@ -9,6 +9,9 @@ const QUIP_PERIOD := 3          ## about one lost point in three
 
 static var _generic: Dictionary = {}
 var _last_quip := ""
+var _quip_next := [0, 0]
+var _quip_stride := [1, 1]
+var _quip_left := [0, 0]
 
 
 static func generic() -> Dictionary:
@@ -58,8 +61,20 @@ func quip(cfg: SimTypes.MatchConfig, losing_team: int, frame: int) -> String:
 		lines = generic()["player"]
 	else:
 		lines = generic()["cpu"]
-	var line: String = lines[(frame / QUIP_PERIOD) % lines.size()]
-	if line == _last_quip:
-		line = lines[(frame / QUIP_PERIOD + 1) % lines.size()]
-	_last_quip = line
-	return line
+	# SNES ADR-063 (story_quip): a shuffled deck per side. Each pass starts
+	# somewhere and steps by an odd stride, both from the frame count, so
+	# it says every line before any again, in a new order each pass. No RNG.
+	var n := lines.size()                 # 16, a power of two (the stride's
+	var side := 1 if losing_team else 0   # odd steps visit every line)
+	if _quip_left[side] == 0:
+		_quip_next[side] = (frame >> 2) & (n - 1)
+		_quip_stride[side] = ((frame >> 6) & (n - 1)) | 1
+		_quip_left[side] = n
+		# not on the line the last pass ended on: that one comes last
+		if lines[_quip_next[side]] == _last_quip:
+			_quip_next[side] = (_quip_next[side] + _quip_stride[side]) & (n - 1)
+	var pick: int = _quip_next[side]
+	_quip_next[side] = (pick + _quip_stride[side]) & (n - 1)
+	_quip_left[side] -= 1
+	_last_quip = lines[pick]
+	return _last_quip

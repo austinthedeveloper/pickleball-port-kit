@@ -81,7 +81,7 @@ func on_match_over() -> void:
 		v.save.record_match(v.sim.config.mode == K.MODE_DOUBLES, won, v.sim.config.opponent,
 			v.sim.team_score[1] if won else -1)
 		if v.ladder and won:
-			v.cleared = v.save.advance_ladder(Opponents.count())
+			v.cleared = v.save.advance_ladder(Opponents.count(), v.sim.config.mode == K.MODE_DOUBLES)
 		if v.tournament:
 			record_tournament(won)
 		v.save.record_stats(v.stats)

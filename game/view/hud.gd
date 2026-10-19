@@ -383,7 +383,7 @@ func refresh() -> void:
 					_result_line.tint = Color("fbe46a")
 				elif view.ladder and you and view.save:
 					_result_line.text += "  NEXT UP: " + String(Opponents.team(
-						int(view.save.data["records"]["ladder_rung"]))["team"])
+						view.save.ladder(cfg.mode == K.MODE_DOUBLES))["team"])
 	elif s.phase == K.PHASE_POINT_RESULT and _point_banner_frames > 0:
 		_banner.text = K.fault_word(s.last_fault)
 		_banner_sub.text = "%s SCORES" % _team_label(s.point_winner)

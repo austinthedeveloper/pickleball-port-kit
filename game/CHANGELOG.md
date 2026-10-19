@@ -4,6 +4,26 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [Unreleased]
+
+### Added
+- Three more modifiers from the SNES game: **GHOST BALL** (high in flight
+  the ball only blinks), **POPCORN** (every hit in a rally adds pace) and
+  **ICE** (everyone slides).
+- Singles and doubles each keep their own **ladder place**. Quitting a
+  ladder match from the pause menu starts that ladder over; losing keeps
+  your place. Your current place carries over to both.
+
+### Changed
+- **The CPUs play exactly as on the SNES**, frame for frame: the ladder
+  was rebalanced there (the upper teams can be beaten now), the big
+  hitters serve hard and sometimes into the net, and a short serve goes to
+  the middle of the box.
+- Each team has sixteen things to mutter after a lost point (four
+  before), and says them all before repeating one.
+- A volley with your feet on the kitchen line is a kitchen fault, as on
+  the SNES.
+
 ## [0.9.3] - 2026-10-18
 
 All four swings, as on the SNES: the slice, and SHORT to drop any shot.

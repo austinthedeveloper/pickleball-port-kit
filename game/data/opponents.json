@@ -1,16 +1,16 @@
 {
-  "comment": "ADR-035: 'volley' (0/1) lets a CPU hit before the bounce once the two-bounce rule is done; 'net' is how close it comes in (home distance from the net, at least 44, behind the LAVA line) once the rally allows, 0 to stay back; 'partner_style' is a human's CPU partner. ADR-036: 'team' (0/1) is doubles teamwork: taking middle balls by who is nearer, poaching at the net, coming in only with a human partner, shifting with the ball. ADR-037: 'tactics' (0/1) picks shots by position: drops against players at the net, dink rallies at the net. ADR-038: 'footwork' (0/1) plans a swing from where the player stops after pressing it, not where it pressed: fewer mis-hits. CPU personalities (ADR-023), in ladder order. Singles plays the captain (players[0]); doubles plays both. 'venue' is the team's home court (venues.json), used when the COURT page's VENUE is AUTO. 'intro', 'taunt' (they won), and 'concede' (you won) are the captain's lines on the story cards (ADR-026), up to 28 HUD font characters. 'quips' are four lines the team may say after losing a point (quips.json has the player's and the default CPU's), up to 28. Colours are 5-bit RGB in the palette-part roles of ADR-013 (2-4 skin, 5-7 shirt/cap, 8-9 shorts, 10 shoe, 15 hair); the paddle part comes from palettes/paddle_<paddle>.json. 'hat' (M4-OPP-04) is 'cap' (the cap every body wears) or a hat from assets/manifest/player_frames.json, drawn in the player's colours (visor and headband in the shoe colour). Style knobs replace the default CPU constants in src/ai.c; 'default_style' is those constants and must stay equal to them.",
+  "comment": "ADR-035: 'volley' (0/1) lets a CPU hit before the bounce once the two-bounce rule is done; 'net' is how close it comes in (home distance from the net, at least 44, behind the LAVA line) once the rally allows, 0 to stay back; 'partner_style' is a human's CPU partner. ADR-036: 'team' (0/1) is doubles teamwork: taking middle balls by who is nearer, poaching at the net, coming in only with a human partner, shifting with the ball. ADR-037: 'tactics' (0/1) picks shots by position: drops against players at the net, dink rallies at the net. ADR-038: 'footwork' (0/1) plans a swing from where the player stops after pressing it, not where it pressed: fewer mis-hits. ADR-057: 'slice' is a slice every Nth rally shot (after the dink pattern), 0 never: slow, never deep. ADR-058: 'serve_power' is the charge level a CPU serves at (4, the classic serve, to 30, the fastest; ADR-044), and 'serve_dud' makes about one serve in N a dud into the net (0 never; when the frame count is a multiple of N). CPU personalities (ADR-023), in ladder order. Singles plays the captain (players[0]); doubles plays both. 'venue' is the team's home court (venues.json), used when the COURT page's VENUE is AUTO. 'intro', 'taunt' (they won), and 'concede' (you won) are the captain's lines on the story cards (ADR-026), up to 28 HUD font characters. 'quips' are sixteen lines the team may say after losing a point (quips.json has the player's and the default CPU's), up to 28. Colours are 5-bit RGB in the palette-part roles of ADR-013 (2-4 skin, 5-7 shirt/cap, 8-9 shorts, 10 shoe, 15 hair); the paddle part comes from palettes/paddle_<paddle>.json. 'celebrate' (ADR-064) is the player's point celebration, a frame from player_frames.json's 'celebrations' (the cheer when absent). 'hat' (M4-OPP-04) is 'cap' (the cap every body wears) or a hat from assets/manifest/player_frames.json, drawn in the player's colours (visor and headband in the shoe colour). Style knobs replace the default CPU constants in src/ai.c; 'default_style' is those constants and must stay equal to them.",
   "default_style": {
     "late_period": 7, "reaction": 0, "dink_period": 4, "lob_distance": 44,
     "putaway_z": 14, "putaway_distance": 48, "aim": "away",
     "depth": "alternate", "recover": 80, "speed": 19, "volley": 0, "net": 0,
-    "team": 0, "tactics": 0, "footwork": 0
+    "team": 0, "tactics": 0, "footwork": 0, "slice": 0, "serve_power": 4, "serve_dud": 0
   },
   "partner_style": {
     "late_period": 7, "reaction": 0, "dink_period": 4, "lob_distance": 44,
     "putaway_z": 14, "putaway_distance": 48, "aim": "away",
     "depth": "alternate", "recover": 80, "speed": 19, "volley": 1, "net": 48,
-    "team": 1, "tactics": 1, "footwork": 1
+    "team": 1, "tactics": 1, "footwork": 1, "slice": 0, "serve_power": 4, "serve_dud": 0
   },
   "skins": {
     "light": [[22, 13, 9], [30, 21, 15], [31, 26, 20]],
@@ -24,22 +24,25 @@
       "intro": "DAD JOKES INCOMING, SPORT!",
       "taunt": "THAT'S HOW IT'S DONE, SPORT!",
       "concede": "GOOD GAME! WHO WANTS PIZZA?",
-      "quips": ["WELL, THAT'S A PICKLE.", "I'LL BE DILLED!", "THAT ONE'S ON DAD.", "HOLD MY COFFEE."],
+      "quips": ["WELL, THAT'S A PICKLE.", "I'LL BE DILLED!", "THAT ONE'S ON DAD.", "HOLD MY COFFEE.",
+                "SUN WAS IN MY EYES, SPORT.", "I MEANT TO DO THAT.", "DAD BOD, DAD SHOT.", "TIME FOR A JUICE BOX.",
+                "KIDDO, DON'T TELL MOM.", "NOT VERY DILL-LIGHTFUL.", "I'M IN A REAL PICKLE NOW.", "BACK IN MY COLLEGE DAYS...",
+                "WHERE'S MY LUCKY VISOR?", "THAT BALL WAS DILL-USIONAL.", "PADDLE NEEDS BATTERIES.", "GOOD THING WE'RE HAVING FUN!"],
       "hud": [[31, 17, 4], [22, 10, 2]],
       "players": [
         {
-          "name": "DAD", "variant": "male", "paddle": "wood", "hat": "visor", "skin": "light",
+          "name": "DAD", "variant": "male", "paddle": "wood", "hat": "visor", "celebrate": "thumbs_up", "skin": "light",
           "hair": [12, 7, 4],
           "shirt": [[20, 8, 1], [28, 14, 3], [31, 22, 10]],
           "shorts": [[19, 16, 10], [26, 23, 16]], "shoe": [31, 31, 31],
-          "style": {"late_period": 3, "reaction": 6, "dink_period": 6,
+          "style": {"late_period": 2, "reaction": 6, "dink_period": 6,
                     "lob_distance": 0, "putaway_z": 20, "putaway_distance": 40,
                     "aim": "away", "depth": "alternate", "recover": 84,
                     "speed": 16,
-                    "volley": 0, "net": 0, "team": 0, "tactics": 0, "footwork": 0}
+                    "volley": 0, "net": 0, "team": 0, "tactics": 0, "footwork": 0, "slice": 0, "serve_power": 4, "serve_dud": 0}
         },
         {
-          "name": "KIDDO", "variant": "female", "paddle": "red", "hat": "cap", "skin": "light",
+          "name": "KIDDO", "variant": "female", "paddle": "red", "hat": "cap", "celebrate": "thumbs_up", "skin": "light",
           "hair": [26, 18, 6],
           "shirt": [[20, 8, 1], [28, 14, 3], [31, 22, 10]],
           "shorts": [[6, 9, 18], [10, 14, 24]], "shoe": [31, 31, 31],
@@ -47,7 +50,7 @@
                     "lob_distance": 30, "putaway_z": 12, "putaway_distance": 64,
                     "aim": "mix", "depth": "alternate", "recover": 64,
                     "speed": 22,
-                    "volley": 0, "net": 0, "team": 0, "tactics": 0, "footwork": 0}
+                    "volley": 0, "net": 0, "team": 0, "tactics": 0, "footwork": 0, "slice": 0, "serve_power": 18, "serve_dud": 10}
         }
       ]
     },
@@ -56,7 +59,10 @@
       "intro": "WE'VE PLAYED SINCE 1962.",
       "taunt": "AGE BEFORE BEAUTY, DEAR.",
       "concede": "WELL PLAYED, YOUNGSTER!",
-      "quips": ["OH, FIDDLESTICKS.", "MY HIP, MY HIP!", "WHO MOVED THE NET?", "BACK IN MY DAY..."],
+      "quips": ["OH, FIDDLESTICKS.", "MY HIP, MY HIP!", "WHO MOVED THE NET?", "BACK IN MY DAY...",
+                "WHERE ARE MY GLASSES?", "I NEED A NAP.", "TIME FOR EARLY BIRD DINNER.", "MY KNEES SAID NO.",
+                "WALT, YOU HAD THAT ONE!", "BLAST THESE BIFOCALS.", "IN 1962 THAT WAS IN.", "SOMEBODY CALL MY GRANDSON.",
+                "OH, MY STARS!", "I'LL FEEL THAT TOMORROW.", "HEAVENS TO BETSY!", "THE BALLS WERE SLOWER THEN."],
       "hud": [[29, 18, 22], [20, 10, 14]],
       "players": [
         {
@@ -64,22 +70,22 @@
           "hair": [27, 27, 28],
           "shirt": [[22, 12, 16], [29, 18, 22], [31, 25, 28]],
           "shorts": [[24, 24, 26], [31, 31, 31]], "shoe": [31, 31, 31],
-          "style": {"late_period": 6, "reaction": 5, "dink_period": 3,
+          "style": {"late_period": 3, "reaction": 3, "dink_period": 3,
                     "lob_distance": 100, "putaway_z": 18, "putaway_distance": 40,
                     "aim": "away", "depth": "deep", "recover": 88,
-                    "speed": 15,
-                    "volley": 0, "net": 0, "team": 0, "tactics": 0, "footwork": 0}
+                    "speed": 14,
+                    "volley": 0, "net": 0, "team": 0, "tactics": 0, "footwork": 0, "slice": 0, "serve_power": 4, "serve_dud": 0}
         },
         {
           "name": "WALT", "variant": "male", "paddle": "wood", "hat": "visor", "skin": "light",
           "hair": [20, 20, 21],
           "shirt": [[12, 18, 24], [18, 24, 29], [25, 29, 31]],
           "shorts": [[19, 16, 10], [26, 23, 16]], "shoe": [31, 31, 31],
-          "style": {"slice": 3, "late_period": 2, "reaction": 5, "dink_period": 3,
+          "style": {"late_period": 2, "reaction": 5, "dink_period": 3,
                     "lob_distance": 90, "putaway_z": 18, "putaway_distance": 40,
                     "aim": "away", "depth": "deep", "recover": 88,
                     "speed": 15,
-                    "volley": 0, "net": 0, "team": 0, "tactics": 0, "footwork": 0}
+                    "volley": 0, "net": 0, "team": 0, "tactics": 0, "footwork": 0, "slice": 3, "serve_power": 4, "serve_dud": 0}
         }
       ]
     },
@@ -88,22 +94,25 @@
       "intro": "DO YOU EVEN DINK, BRO?",
       "taunt": "NEW PERSONAL BEST, BRO!",
       "concede": "BRO... THAT WAS SICK.",
-      "quips": ["BRO. NO.", "NOT ON LEG DAY!", "TOO MUCH POWER, BRO.", "SPOT ME NEXT TIME!"],
+      "quips": ["BRO. NO.", "NOT ON LEG DAY!", "TOO MUCH POWER, BRO.", "SPOT ME NEXT TIME!",
+                "I SKIPPED CARDIO FOR THIS.", "NEED MORE PROTEIN.", "MY GAINS! MY GAINS!", "BRO, I WAS MID-FLEX.",
+                "THAT'S JUST A REST SET.", "NO PAIN, NO... OW.", "WHO PUT THE NET THERE, BRO?", "TOTALLY MEANT TO BENCH THAT.",
+                "PRE-WORKOUT WORE OFF.", "BRO, CHECK MY FORM.", "ONE MORE REP. ONE MORE.", "TOO SWOLE TO BEND."],
       "hud": [[16, 31, 6], [8, 20, 2]],
       "players": [
         {
-          "name": "BRAD", "variant": "male", "paddle": "red", "hat": "headband", "skin": "tan",
+          "name": "BRAD", "variant": "male", "paddle": "red", "hat": "headband", "celebrate": "flex", "skin": "tan",
           "hair": [6, 4, 2],
           "shirt": [[10, 10, 12], [16, 16, 18], [24, 24, 26]],
           "shorts": [[4, 4, 6], [8, 8, 10]], "shoe": [28, 6, 6],
-          "style": {"late_period": 4, "reaction": 16, "dink_period": 0,
+          "style": {"late_period": 2, "reaction": 20, "dink_period": 0,
                     "lob_distance": 0, "putaway_z": 10, "putaway_distance": 128,
                     "aim": "body", "depth": "deep", "recover": 76,
                     "speed": 13,
-                    "volley": 1, "net": 44, "team": 1, "tactics": 1, "footwork": 0}
+                    "volley": 1, "net": 44, "team": 1, "tactics": 1, "footwork": 0, "slice": 0, "serve_power": 30, "serve_dud": 8}
         },
         {
-          "name": "CHAD", "variant": "male", "paddle": "red", "hat": "headband", "skin": "light",
+          "name": "CHAD", "variant": "male", "paddle": "red", "hat": "headband", "celebrate": "flex", "skin": "light",
           "hair": [28, 22, 10],
           "shirt": [[6, 18, 2], [12, 26, 4], [22, 31, 10]],
           "shorts": [[4, 4, 6], [8, 8, 10]], "shoe": [28, 6, 6],
@@ -111,7 +120,7 @@
                     "lob_distance": 0, "putaway_z": 10, "putaway_distance": 128,
                     "aim": "body", "depth": "deep", "recover": 76,
                     "speed": 15,
-                    "volley": 1, "net": 44, "team": 1, "tactics": 1, "footwork": 0}
+                    "volley": 1, "net": 44, "team": 1, "tactics": 1, "footwork": 0, "slice": 0, "serve_power": 30, "serve_dud": 12}
         }
       ]
     },
@@ -120,22 +129,25 @@
       "intro": "ARR! PREPARE TO BE BOARDED!",
       "taunt": "YE WALK THE PLANK, MATEY!",
       "concede": "ARR... KEEP THE TREASURE.",
-      "quips": ["ARRRGH!", "SHIVER ME PADDLES!", "BLOW ME DOWN!", "THAT BALL WALKS THE PLANK!"],
+      "quips": ["ARRRGH!", "SHIVER ME PADDLES!", "BLOW ME DOWN!", "THAT BALL WALKS THE PLANK!",
+                "SCURVY LUCK!", "ME PARROT DISTRACTED ME.", "DAVY JONES TOOK THAT ONE.", "YO HO... NO.",
+                "THAR SHE GOES. OVERBOARD.", "ME PEG LEG SLIPPED!", "SHE'S TAKIN' ON WATER!", "ALL HANDS ON DECK!",
+                "CURSED DOUBLOONS!", "THE SEA GIVETH, AND TAKETH.", "FETCH ME SPYGLASS!", "BARNACLES!"],
       "hud": [[28, 10, 8], [16, 4, 4]],
       "players": [
         {
-          "name": "PETE", "variant": "male", "paddle": "gold", "hat": "tricorn", "skin": "tan",
+          "name": "PETE", "variant": "male", "paddle": "gold", "hat": "tricorn", "celebrate": "en_garde", "skin": "tan",
           "hair": [3, 3, 4],
           "shirt": [[12, 2, 2], [20, 4, 4], [28, 10, 8]],
           "shorts": [[3, 3, 5], [7, 7, 9]], "shoe": [12, 7, 3],
-          "style": {"late_period": 5, "reaction": 2, "dink_period": 0,
+          "style": {"late_period": 3, "reaction": 1, "dink_period": 0,
                     "lob_distance": 20, "putaway_z": 10, "putaway_distance": 80,
                     "aim": "body", "depth": "deep", "recover": 80,
                     "speed": 18,
-                    "volley": 1, "net": 44, "team": 1, "tactics": 1, "footwork": 0}
+                    "volley": 1, "net": 44, "team": 1, "tactics": 1, "footwork": 0, "slice": 0, "serve_power": 4, "serve_dud": 0}
         },
         {
-          "name": "BILGE", "variant": "male", "paddle": "gold", "hat": "bandana", "skin": "light",
+          "name": "BILGE", "variant": "male", "paddle": "gold", "hat": "bandana", "celebrate": "en_garde", "skin": "light",
           "hair": [24, 10, 3],
           "shirt": [[3, 4, 12], [6, 8, 20], [28, 28, 30]],
           "shorts": [[10, 6, 3], [16, 10, 5]], "shoe": [12, 7, 3],
@@ -143,7 +155,7 @@
                     "lob_distance": 20, "putaway_z": 10, "putaway_distance": 80,
                     "aim": "body", "depth": "deep", "recover": 80,
                     "speed": 18,
-                    "volley": 1, "net": 44, "team": 1, "tactics": 1, "footwork": 1}
+                    "volley": 1, "net": 44, "team": 1, "tactics": 1, "footwork": 1, "slice": 0, "serve_power": 4, "serve_dud": 0}
         }
       ]
     },
@@ -152,7 +164,10 @@
       "intro": "THE KITCHEN IS OUR CRYPT.",
       "taunt": "DARKNESS ALWAYS WINS.",
       "concede": "HOW... DELIGHTFULLY GRIM.",
-      "quips": ["HOW TRAGIC.", "AS EXPECTED.", "THE VOID TOOK IT.", "SIGH. OF COURSE."],
+      "quips": ["HOW TRAGIC.", "AS EXPECTED.", "THE VOID TOOK IT.", "SIGH. OF COURSE.",
+                "THE DARKNESS IS PATIENT.", "LIKE MY HOPES, IT FELL.", "A FITTING END.", "EVEN THE BALL FLEES ME.",
+                "IT'S TOO SUNNY OUT HERE.", "I'LL WRITE A POEM ABOUT IT.", "WHATEVER.", "NEVERMORE.",
+                "MY EYELINER RAN.", "POINTS ARE FLEETING.", "THE CANDLE FLICKERS.", "ALL IS DUST. EVEN DINKS."],
       "hud": [[20, 8, 28], [12, 3, 18]],
       "players": [
         {
@@ -160,22 +175,22 @@
           "hair": [16, 4, 22],
           "shirt": [[2, 2, 4], [5, 4, 8], [10, 8, 14]],
           "shorts": [[2, 2, 4], [6, 5, 8]], "shoe": [18, 6, 24],
-          "style": {"slice": 3, "late_period": 6, "reaction": 4, "dink_period": 2,
+          "style": {"late_period": 3, "reaction": 4, "dink_period": 2,
                     "lob_distance": 0, "putaway_z": 30, "putaway_distance": 24,
                     "aim": "away", "depth": "alternate", "recover": 56,
-                    "speed": 18,
-                    "volley": 1, "net": 44, "team": 1, "tactics": 1, "footwork": 0}
+                    "speed": 16,
+                    "volley": 1, "net": 44, "team": 1, "tactics": 1, "footwork": 0, "slice": 3, "serve_power": 4, "serve_dud": 0}
         },
         {
           "name": "VLAD", "variant": "male", "paddle": "wood", "hat": "hair", "skin": "pale",
           "hair": [3, 3, 4],
           "shirt": [[6, 1, 3], [10, 2, 5], [16, 4, 8]],
           "shorts": [[2, 2, 4], [6, 5, 8]], "shoe": [18, 6, 24],
-          "style": {"slice": 3, "late_period": 3, "reaction": 4, "dink_period": 2,
+          "style": {"late_period": 3, "reaction": 0, "dink_period": 2,
                     "lob_distance": 0, "putaway_z": 30, "putaway_distance": 24,
                     "aim": "away", "depth": "alternate", "recover": 56,
-                    "speed": 18,
-                    "volley": 1, "net": 44, "team": 1, "tactics": 1, "footwork": 0}
+                    "speed": 16,
+                    "volley": 1, "net": 44, "team": 1, "tactics": 1, "footwork": 0, "slice": 3, "serve_power": 4, "serve_dud": 0}
         }
       ]
     },
@@ -184,7 +199,10 @@
       "intro": "COWABUNGA, DUDE!",
       "taunt": "TOTALLY TUBULAR, BRAH!",
       "concede": "GNARLY GAME, DUDE. RESPECT.",
-      "quips": ["WIPEOUT!", "BOGUS, DUDE.", "TOTAL BAIL, BRAH.", "GNARLY... NOT."],
+      "quips": ["WIPEOUT!", "BOGUS, DUDE.", "TOTAL BAIL, BRAH.", "GNARLY... NOT.",
+                "THE TIDE WAS WRONG, BRAH.", "CAUGHT INSIDE, BRAH.", "HANG LOOSE. IT'S COOL.", "NO WAVE, NO PROBLEM.",
+                "SHARK! JUST KIDDING.", "MY WAX WAS OFF.", "DUDE... HEAVY.", "THAT'S SO NOT RADICAL.",
+                "BRAIN FREEZE, BRAH.", "BUMMER, BUT CHILL.", "SAND IN MY SHOES, DUDE.", "PADDLE OUT, PADDLE IN."],
       "hud": [[6, 26, 28], [2, 16, 18]],
       "players": [
         {
@@ -192,22 +210,22 @@
           "hair": [30, 26, 14],
           "shirt": [[2, 14, 16], [4, 22, 24], [14, 29, 30]],
           "shorts": [[26, 12, 4], [31, 20, 8]], "shoe": [28, 20, 13],
-          "style": {"late_period": 5, "reaction": 0, "dink_period": 5,
+          "style": {"late_period": 3, "reaction": 3, "dink_period": 5,
                     "lob_distance": 50, "putaway_z": 12, "putaway_distance": 56,
-                    "aim": "mix", "depth": "alternate", "recover": 92,
+                    "aim": "mix", "depth": "alternate", "recover": 88,
                     "speed": 20,
-                    "volley": 1, "net": 44, "team": 1, "tactics": 1, "footwork": 0}
+                    "volley": 1, "net": 44, "team": 1, "tactics": 1, "footwork": 0, "slice": 0, "serve_power": 4, "serve_dud": 0}
         },
         {
           "name": "LANI", "variant": "female", "paddle": "blue", "hat": "hair", "skin": "deep",
           "hair": [3, 3, 4],
           "shirt": [[20, 3, 12], [28, 8, 18], [31, 18, 25]],
           "shorts": [[2, 14, 16], [4, 22, 24]], "shoe": [19, 12, 8],
-          "style": {"late_period": 5, "reaction": 0, "dink_period": 5,
+          "style": {"late_period": 4, "reaction": 0, "dink_period": 5,
                     "lob_distance": 50, "putaway_z": 12, "putaway_distance": 56,
                     "aim": "mix", "depth": "alternate", "recover": 92,
                     "speed": 20,
-                    "volley": 1, "net": 44, "team": 1, "tactics": 1, "footwork": 0}
+                    "volley": 1, "net": 44, "team": 1, "tactics": 1, "footwork": 0, "slice": 0, "serve_power": 4, "serve_dud": 0}
         }
       ]
     },
@@ -216,7 +234,10 @@
       "intro": "DOUBLE TROUBLE. READY?",
       "taunt": "TWINS WIN! TWINS WIN!",
       "concede": "WAIT... THAT WASN'T PLANNED.",
-      "quips": ["THAT WAS HIS FAULT.", "THAT WAS HER FAULT.", "JINX!", "TWIN FAIL!"],
+      "quips": ["THAT WAS HIS FAULT.", "THAT WAS HER FAULT.", "JINX!", "TWIN FAIL!",
+                "WE BOTH MISSED IT. AGAIN.", "SAME BRAIN, SAME MISS.", "MOM SAYS IT'S A TIE.", "I CALLED IT FIRST!",
+                "YOU MOVE, I MOVE.", "STEREO OOPS!", "TWIN TELEPATHY: OFFLINE.", "WAIT, WHICH ONE ARE YOU?",
+                "THAT WAS THE OTHER ONE.", "DOUBLE OOPS!", "NOT IN THE PLAN.", "WE NEED A NEW SIGNAL."],
       "hud": [[8, 28, 26], [3, 18, 17]],
       "players": [
         {
@@ -224,22 +245,22 @@
           "hair": [3, 3, 4],
           "shirt": [[2, 12, 12], [4, 20, 19], [12, 28, 26]],
           "shorts": [[24, 24, 26], [31, 31, 31]], "shoe": [4, 20, 19],
-          "style": {"late_period": 7, "reaction": 0, "dink_period": 4,
+          "style": {"late_period": 5, "reaction": 0, "dink_period": 4,
                     "lob_distance": 36, "putaway_z": 10, "putaway_distance": 64,
                     "aim": "mix", "depth": "alternate", "recover": 50,
-                    "speed": 21,
-                    "volley": 1, "net": 44, "team": 0, "tactics": 1, "footwork": 1}
+                    "speed": 19,
+                    "volley": 1, "net": 44, "team": 0, "tactics": 1, "footwork": 1, "slice": 0, "serve_power": 4, "serve_dud": 0}
         },
         {
           "name": "MIA", "variant": "female", "paddle": "gold", "hat": "cap", "skin": "deep",
           "hair": [3, 3, 4],
           "shirt": [[20, 21, 23], [26, 27, 29], [31, 31, 31]],
           "shorts": [[2, 12, 12], [4, 20, 19]], "shoe": [4, 20, 19],
-          "style": {"late_period": 9, "reaction": 0, "dink_period": 4,
+          "style": {"late_period": 6, "reaction": 0, "dink_period": 4,
                     "lob_distance": 36, "putaway_z": 10, "putaway_distance": 64,
                     "aim": "mix", "depth": "alternate", "recover": 50,
                     "speed": 21,
-                    "volley": 1, "net": 44, "team": 0, "tactics": 1, "footwork": 1}
+                    "volley": 1, "net": 44, "team": 0, "tactics": 1, "footwork": 1, "slice": 0, "serve_power": 4, "serve_dud": 0}
         }
       ]
     },
@@ -248,7 +269,10 @@
       "intro": "THE TITLE STAYS WITH US.",
       "taunt": "THAT'S WHY WE'RE CHAMPS.",
       "concede": "THE CROWN IS YOURS. EARNED.",
-      "quips": ["...THAT NEVER HAPPENS.", "A WARM-UP SHOT.", "NOBODY SAW THAT.", "PRACTICE POINT."],
+      "quips": ["...THAT NEVER HAPPENS.", "A WARM-UP SHOT.", "NOBODY SAW THAT.", "PRACTICE POINT.",
+                "ON PURPOSE, OBVIOUSLY.", "LET'S NOT REVIEW THAT.", "CHARITY POINT.", "THE TROPHY IS UNIMPRESSED.",
+                "STATISTICALLY RARE.", "I ALLOWED THAT.", "STRATEGIC CONCESSION.", "CALL MY AGENT.",
+                "DON'T PUT THAT ON TV.", "SPONSORS, LOOK AWAY.", "EVEN LEGENDS BLINK.", "WE'LL EDIT THAT OUT."],
       "hud": [[31, 25, 6], [22, 15, 2]],
       "players": [
         {
@@ -256,22 +280,22 @@
           "hair": [4, 3, 2],
           "shirt": [[22, 17, 4], [29, 24, 8], [31, 31, 31]],
           "shorts": [[3, 4, 10], [6, 8, 16]], "shoe": [31, 25, 6],
-          "style": {"slice": 4, "late_period": 8, "reaction": 0, "dink_period": 3,
+          "style": {"late_period": 5, "reaction": 0, "dink_period": 3,
                     "lob_distance": 48, "putaway_z": 12, "putaway_distance": 56,
                     "aim": "away", "depth": "alternate", "recover": 80,
                     "speed": 22,
-                    "volley": 1, "net": 60, "team": 1, "tactics": 1, "footwork": 1}
+                    "volley": 1, "net": 60, "team": 1, "tactics": 1, "footwork": 1, "slice": 4, "serve_power": 30, "serve_dud": 20}
         },
         {
           "name": "JADE", "variant": "female", "paddle": "gold", "hat": "visor", "skin": "tan",
           "hair": [20, 8, 4],
           "shirt": [[22, 17, 4], [29, 24, 8], [31, 31, 31]],
           "shorts": [[3, 4, 10], [6, 8, 16]], "shoe": [31, 25, 6],
-          "style": {"slice": 4, "late_period": 30, "reaction": 0, "dink_period": 3,
+          "style": {"late_period": 10, "reaction": 0, "dink_period": 3,
                     "lob_distance": 48, "putaway_z": 12, "putaway_distance": 56,
                     "aim": "away", "depth": "alternate", "recover": 80,
                     "speed": 22,
-                    "volley": 1, "net": 60, "team": 1, "tactics": 1, "footwork": 1}
+                    "volley": 1, "net": 60, "team": 1, "tactics": 1, "footwork": 1, "slice": 4, "serve_power": 30, "serve_dud": 20}
         }
       ]
     }

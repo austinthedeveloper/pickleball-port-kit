@@ -445,6 +445,15 @@ func _on_event(e: Array) -> void:
 				save.career.record_point(rally, e[3] == 0, sim.server_index == 0)
 
 
+## GHOST BALL (SNES ADR-053, render_ball): high in a live rally the ball
+## shows only in a brief blink, MOD_GHOST_SHOWN frames in every 16; the
+## shadow always. Display only.
+func ghost_hidden() -> bool:
+	var b := sim.ball
+	return (sim.config.modifiers & K.MOD_GHOST_BALL) != 0 and b.z_fp >= K.to_fp(K.MOD_GHOST_Z) \
+		and b.rally_state == K.BALL_RALLY_LIVE and (sim.frame_count & 15) >= K.MOD_GHOST_SHOWN
+
+
 ## Online: Menu's leave (twice in play, once on the result).
 func net_leave_press() -> void:
 	if leave_frames > 0 or sim.phase == K.PHASE_MATCH_RESULT:
@@ -521,7 +530,7 @@ func _update_visuals() -> void:
 			e["body"].modulate = Color(1.8, 1.8, 1.8) if flash else Color.WHITE
 	var b := sim.ball
 	var show := b.active != 0 and sim.phase != K.PHASE_MATCH_RESULT
-	_ball_root.visible = show
+	_ball_root.visible = show and not ghost_hidden()
 	_ball_shadow.visible = show
 	if show:
 		var g := CourtView.ground(b.x_fp, b.y_fp)

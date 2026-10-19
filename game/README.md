@@ -99,14 +99,14 @@ real match or ball-machine drill with one goal; and the **BALL MACHINE**
 your return streak. **COURT**: VENUE (PARK, LAKESIDE, SUNSET, DINOSAUR,
 SPACE, UNDERSEA), TIME (DAY, DUSK, NIGHT), SURFACE, KITCHEN, SURROUND,
 LINES, previewed on the demo. **MODIFIERS**: BIG BALL, FAST BALL, WIN BY
-2, LAVA. **OPTIONS**: CAMERA, SOUND, MUSIC, FULLSCREEN, SCALE, CONTROLS,
+2, LAVA, GHOST BALL, POPCORN, ICE. **OPTIONS**: CAMERA, SOUND, MUSIC, FULLSCREEN, SCALE, CONTROLS,
 ACCESSIBILITY. **CAREER** (ADR-047): three player slots, each a named
 player with a look, lifetime stats and unlocks; the active one is 1P.
 Behind it, **RECORDS**: wins, the best streak and longest rally with who
 holds them, shutouts, the ladder, practice, the record against each
 team, and ERASE RECORDS (twice). Y backs out of any page. Start pauses a
 match: RESUME, RESTART, MAIN MENU. Settings, records, careers and the
-ladder are saved (`user://save_a.json`/`save_b.json`, layout v5).
+ladder are saved (`user://save_a.json`/`save_b.json`, layout v6).
 
 ## Release
 
@@ -136,7 +136,7 @@ title shows; from a checkout the title says `BUILD DEV <describe>`.
 | `view/` sound | `audio_map.gd`/`sfx.gd` (effects and ambience), `music.gd` (the soundtrack: crossfades, stingers, ducking). |
 | `net/` | Online play (ADR-056): `lockstep.gd` (inputs and the desync check), `online_session.gd` (the handshake and the match's inputs), `net_link.gd` with `enet_link.gd` (UDP) and `loopback_link.gd` (tests). |
 | `scenes/` | `boot.gd` (the first scene: loads a downloaded update's pack, then starts the game; ADR-057), `main.gd` (title, park, matches and the screens between). |
-| `meta/` | `save.gd` (two-copy save with migration, layout v5), `settings.gd` (every setting, load/store, match config), `story.gd` (cards, results, quips), `initials.gd` (the record initials card), `career_page.gd` (CAREER's input logic), `lobby.gd` (the multiplayer lobby's logic), `match_stats.gd` (post-match stats), `tournament.gd` (the bracket's logic), `tutorial.gd` (HOW TO PLAY's lessons), `updater.gd` (the in-game updater), `build_info.gd`. |
+| `meta/` | `save.gd` (two-copy save with migration, layout v6), `settings.gd` (every setting, load/store, match config), `story.gd` (cards, results, quips), `initials.gd` (the record initials card), `career_page.gd` (CAREER's input logic), `lobby.gd` (the multiplayer lobby's logic), `match_stats.gd` (post-match stats), `tournament.gd` (the bracket's logic), `tutorial.gd` (HOW TO PLAY's lessons), `updater.gd` (the in-game updater), `build_info.gd`. |
 | `game_ui/` | `controls.gd` (input map autoload, P1..P4 intents, tap latch, SNES pad bits for menus), `bindings.gd` (remapping). |
 | `tests/` | Headless runner and suites; `golden/` traces; `golden.gd` regenerates them. |
 | `tools/` | `test.sh`, `export.sh`, `version.py`, `release_notes.py`, `make_icon.py`, `sync_assets.sh` (copies `art/levels/out` and the audio in), `screenshot.gd` (title pages, matches, `court=`, `time=`, `pause`, `closecall`, `initials`, `result`, `smash`, `bracket`, `bracket_semi`, `bracket_out`, `bracket_won`), `point_log.gd` (why each point ended), `contact_probe.gd` (contact heights and smashes over bot matches). |

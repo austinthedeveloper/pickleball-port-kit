@@ -60,7 +60,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-31 | Online play | `feature/cld-online` | Ready to test |
 | PORT-32 | The in-game updater | `feature/cld-updater` | Done |
 | PORT-34 | Update at launch, lessons, addresses | `feature/cld-polish-0.9.2` | Ready to test |
-| PORT-35 | Catch the sim up to the ROM (TUNING_VERSION 4) | | Planned |
+| PORT-35 | Catch the sim up to the ROM (TUNING_VERSION 4) | `feature/cld-sim-catchup` | Done |
 | PORT-36 | About this project, and Tiny Chair | | Planned |
 | PORT-37 | Period-true park: ROOKIE / CLUB / CHAMP, park points | | Planned |
 | PORT-38 | Career: 13 hats, 16 unlocks, the Hat Museum | | Planned |
@@ -398,19 +398,25 @@ feature/cld-release-0.9.2   (v0.9.2)
 
 ### 35. Catch the sim up to the ROM (planned)
 
-- [ ] `PORT-35` Import the SNES repo's `docs/tuning/tuning.json`
-  (TUNING_VERSION 4) and its `opponents.json`, `paddles.json`,
-  `career.json`; port SNES ADR-052 (the kitchen line counts), 053 (GHOST,
-  POPCORN, ICE), 055 (ladder per mode, a save migration), 058 (CPU serve
-  power and duds), 062 (the rebalance) and tuning v2-4 (the doubles think
-  stagger from match frame 0). Record the port's tuning version. Add a
-  test that replays the SNES conformance traces (`make conformance` at the
-  matched commit) frame by frame.
-  - Accept: every conformance trace matches; `test_ladder` ladder order
-    matches `make stats`; golden traces regenerated with the reason; a port
-    ADR (SNES records cited as "SNES ADR-n").
-  - Status: **Planned**. SNES ADR-056 and 057 (the slice and the short
-    hold) are done: PORT-41, ADR-058.
+- [x] `PORT-35` The sim is the ROM's at TUNING_VERSION 4 (port ADR-059;
+  with PORT-41's slice). The SNES repo's conformance traces come in by
+  `tools/conformance_import.sh` and `test_conformance` replays all four
+  scenarios frame by frame: every frame matches. On the way: the ROM's
+  `opponents.json` and `quips.json` (the rebalance, serve power and duds,
+  sixteen quips and the deck), the serve's depth, aim and power, the lane
+  covers' stagger per match, KID's top speed, ICE and POPCORN in the sim
+  and the AI, GHOST in the view, the kitchen line, and a ladder per mode
+  (save v6, a quit resets it). GHOST BALL, POPCORN, ICE are on MODIFIERS.
+  - Verified: `test_conformance` (4 x 5400 frames, the tuning version),
+    `test_save` (a v5 image keeps both places; per-mode advance, quit and
+    clear), `test_view` (pause, MAIN MENU resets a ladder only), `test_story`
+    (the deck), `test_layout` (MODIFIERS and RECORDS moved). Harness:
+    10, 9, 4, 3 and 10 to 3 (the ROM's rebalance). Golden traces
+    regenerated (the CPUs). 314/314 plus the e2e. Screenshots: MODIFIERS,
+    RECORDS.
+  - Status: **Done**: the conformance traces are the proof. The upper
+    rungs are easier than before (the ROM's playtest); say if they feel
+    off.
 
 ### 41. `feature/cld-four-shots`: four swings and the short hold (asked for 2026-10-18)
 

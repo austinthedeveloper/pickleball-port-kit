@@ -13,7 +13,7 @@ class_name SaveGame
 extends RefCounted
 
 const MAGIC := "PB94"
-const VERSION := 5
+const VERSION := 6   ## v6: a ladder place per mode (SNES ADR-055)
 ## Records beaten by the match in progress (save_new_records: session
 ## only, never saved). ADR-040.
 const NEW_STREAK := 1
@@ -54,6 +54,8 @@ static func defaults() -> Dictionary:
 			"music": Music.DEFAULT_VOLUME},  # PORT-22: MUSIC, 0 (OFF) .. 10
 		"records": {"singles_wins": 0, "singles_losses": 0, "doubles_wins": 0,
 			"doubles_losses": 0, "ladder_rung": 0, "ladder_clears": 0,
+			# v6 (SNES ADR-055): ladder_rung is singles' place, this doubles'
+			"ladder_doubles": 0,
 			"longest_rally": 0, "practice_best": 0,
 			"practice_zone_best": [0, 0, 0, 0],
 			"streak": 0, "best_streak": 0, "shutouts": 0,
@@ -111,6 +113,9 @@ static func migrate(version: int, d: Dictionary) -> Dictionary:
 		out["initials"] = defaults()["initials"].duplicate()
 	if version < 5:
 		out["career"] = Career.new().to_dict()
+	if version < 6:
+		# one shared rung before: both modes keep it, so nobody loses a place
+		out["records"]["ladder_doubles"] = int(out["records"].get("ladder_rung", 0))
 	# 0.9.1: CAMERA's default went from OFF to 50%. A save from before
 	# (no camera_rev) still on OFF moves to 50% once; a choice made after
 	# stays. Not a layout change: the key's meaning is the same.
@@ -336,17 +341,35 @@ func erase_records() -> void:
 	streak_held = false
 
 
-## A ladder win moves to the next rung; beating the last clears the ladder
-## and starts over (ADR-023/026). Returns true on a clear.
-func advance_ladder(count: int) -> bool:
+## The ladder place in a mode (SNES ADR-055: singles and doubles each have
+## their own; out of range reads as the first).
+func ladder(doubles := false) -> int:
+	var rung := int(data["records"]["ladder_doubles" if doubles else "ladder_rung"])
+	return rung if rung >= 0 and rung < Opponents.count() else 0
+
+
+## A ladder win moves that mode to the next rung; beating the last clears
+## the ladder (either mode counts) and starts over (ADR-023/026). Returns
+## true on a clear.
+func advance_ladder(count: int, doubles := false) -> bool:
 	var r: Dictionary = data["records"]
-	var rung := int(r["ladder_rung"]) + 1
+	var key := "ladder_doubles" if doubles else "ladder_rung"
+	var rung := ladder(doubles) + 1
 	if rung >= count:
-		r["ladder_rung"] = 0
+		r[key] = 0
 		r["ladder_clears"] = int(r["ladder_clears"]) + 1
 		return true
-	r["ladder_rung"] = rung
+	r[key] = rung
 	return false
+
+
+## Quitting a ladder match (pause, MAIN MENU) starts that mode's ladder
+## over (SNES ADR-055); a loss keeps the place. True if it moved.
+func quit_ladder(doubles := false) -> bool:
+	if ladder(doubles) == 0:
+		return false
+	data["records"]["ladder_doubles" if doubles else "ladder_rung"] = 0
+	return true
 
 
 # --- Practice (ADR-028) --------------------------------------------------------

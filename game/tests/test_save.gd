@@ -161,3 +161,24 @@ func test_camera_default_moves_once() -> void:
 	var after := SaveGame.migrate(SaveGame.VERSION, SaveGame.defaults())
 	after["settings"]["camera"] = 0
 	eq(SaveGame.migrate(SaveGame.VERSION, after)["settings"]["camera"], 0, "OFF chosen after: kept")
+
+
+## v6 (SNES ADR-055): a ladder place per mode. A v5 image's one shared
+## rung becomes both, so nobody loses their place in either.
+func test_v5_save_keeps_both_ladders() -> void:
+	var s := _fresh()
+	var v5 := SaveGame.defaults()
+	v5["records"].erase("ladder_doubles")
+	v5["records"]["ladder_rung"] = 4
+	_write_raw("save_b.json", _image(5, 40, v5))
+	s.load_game()
+	eq([s.ladder(false), s.ladder(true)], [4, 4], "both modes on rung 5")
+	check(not s.advance_ladder(8, true), "a doubles win")
+	eq([s.ladder(false), s.ladder(true)], [4, 5], "moves doubles only")
+	check(s.quit_ladder(false), "quitting a singles ladder match")
+	eq([s.ladder(false), s.ladder(true)], [0, 5], "starts singles over, doubles kept")
+	check(not s.quit_ladder(false), "on the first rung there's nothing to reset")
+	for i in 2:
+		s.advance_ladder(8, true)
+	check(s.advance_ladder(8, true), "beating the CHAMPS in doubles clears the ladder")
+	eq([s.ladder(true), int(s.data["records"]["ladder_clears"])], [0, 1], "and counts a clear")

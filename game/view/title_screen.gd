@@ -212,7 +212,7 @@ func _build_pages() -> void:
 		mod_rows.append({"id": m[0], "label": m[1],
 			"value": func(): return "ON" if Settings.mod_bits & bit else "OFF",
 			"change": func(_d): Settings.mod_bits ^= bit})
-	_add_page("modifiers", "MODIFIERS", mod_rows, help)
+	_add_page("modifiers", "MODIFIERS", mod_rows, help, Rect2(300, 146, 360, 0))   # 7 rows: as high as MAIN
 	# PORT-31: local (the lobby, up to four pads) or online (1 vs 1)
 	_add_page("multi", "MULTIPLAYER", [
 		{"id": "local", "label": "LOCAL", "value": func(): return "UP TO 4 PADS", "press": open_lobby},
@@ -296,14 +296,14 @@ func _build_pages() -> void:
 		{"id": "aces", "label": "ACES  WINNERS", "value": func(): return "%d  %d" % [_rec("aces"), _rec("winners")]},
 		{"id": "shutouts", "label": "SHUTOUTS  CUPS", "value": func(): return "%d  %d" % [
 			_rec("shutouts"), _rec("cups")]},    # PORT-25: tournaments won
-		{"id": "ladder", "label": "LADDER", "value": func(): return "%d OF %d  CLEARS %d" % [
-			_rung() + 1, Opponents.count(), _rec("ladder_clears")]},
+		{"id": "ladder", "label": "LADDER", "value": func(): return "S %d/%d  D %d/%d  CLEARS %d" % [
+			_rung() + 1, Opponents.count(), _rung(true) + 1, Opponents.count(), _rec("ladder_clears")]},
 		{"id": "practice", "label": "PRACTICE BEST", "value": func(): return str(_rec("practice_best"))},
 		{"id": "vs", "label": "VS", "value": _vs_label,
 			"change": func(d): vs_i = (vs_i + d + Opponents.count()) % Opponents.count()},
 		{"id": "erase", "label": "ERASE RECORDS", "value": func(): return "B AGAIN" if _erase_armed else "",
 			"press": _erase},
-	], [["back", "BACK"]], Rect2(290, 46, 380, 0))
+	], [["back", "BACK"]], Rect2(230, 46, 500, 0))   # wide: LADDER shows both modes
 
 
 # --- CAREER (ADR-047): view/title_career.gd -------------------------------------------
@@ -665,10 +665,11 @@ func _start_demo() -> void:
 func _refresh() -> void:
 	if save:
 		var r: Dictionary = save.data["records"]
-		_record_text = "RECORD %d-%d   LADDER %d OF %d   CLEARS %d" % [
+		_record_text = "RECORD %d-%d   LADDER S %d/%d D %d/%d   CLEARS %d" % [
 			int(r["singles_wins"]) + int(r["doubles_wins"]),
 			int(r["singles_losses"]) + int(r["doubles_losses"]),
-			int(r["ladder_rung"]) + 1, Opponents.count(), int(r["ladder_clears"])]
+			_rung() + 1, Opponents.count(), _rung(true) + 1, Opponents.count(),
+			int(r["ladder_clears"])]
 	_refresh_record()
 
 
@@ -684,8 +685,8 @@ func _refresh_record() -> void:
 	_record.tint = Color("fbe46a") if news != "" else Color(0.8, 0.85, 0.95)
 
 
-func _rung() -> int:
-	return int(save.data["records"]["ladder_rung"]) if save else 0
+func _rung(doubles := false) -> int:
+	return save.ladder(doubles) if save else 0
 
 
 func _opponent_label() -> String:
@@ -701,10 +702,10 @@ func _opponent_label() -> String:
 func config(doubles: bool) -> SimTypes.MatchConfig:
 	var me := _career().active_player()
 	if me == null:
-		return Settings.match_config(doubles, _rung())
+		return Settings.match_config(doubles, _rung(doubles))
 	var p1: Dictionary = select.choice[0] if not select.choice.is_empty() \
 		else PlayerSelect.new_choice(me.shirt, me.variant, me.paddle)
-	var cfg := Settings.match_config(doubles, _rung(), p1)
+	var cfg := Settings.match_config(doubles, _rung(doubles), p1)
 	cfg.set_career(me)
 	return cfg
 

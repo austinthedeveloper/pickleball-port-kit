@@ -99,7 +99,7 @@ func test_a_smash_clears_the_net() -> void:
 func test_smashes_happen_in_play() -> void:
 	var smashes := 0
 	var won := 0
-	for i in 3:
+	for i in [3, 5, 6]:                  # net teams: lobs come back over them
 		var cfg := SimTypes.MatchConfig.doubles()
 		cfg.opponent = i
 		var s := Sim.new(cfg)

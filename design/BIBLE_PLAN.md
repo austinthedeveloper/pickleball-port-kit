@@ -59,14 +59,14 @@ Status: **have** (the port does it), **partly**, **missing**, **differs**
 
 | Bible fact | SNES ADR | Port | Notes |
 |---|---|---|---|
-| Kitchen volley fault, the **line counts as kitchen** | 052 | **differs** | Port ADR-055 calls the line outside (an "arcade allowance"). The ROM: `COURT_IN_KITCHEN_FP` is `>=`/`<=`. Copy the ROM. |
+| Kitchen volley fault, the **line counts as kitchen** | 052 | **have** | PORT-35 (port ADR-059). |
 | Charged serve: let go on the last white block and it dumps into the net | 044 | check | Port has ADR-044; check the dud block matches. |
-| CPU serve power and duds (bangers serve hard, sometimes into the net) | 058 | **missing** | Sim + opponents.json. |
+| CPU serve power and duds (bangers serve hard, sometimes into the net) | 058 | **have** | PORT-35. |
 | Slice on **X**; **hold L or R** to hit short (L+A fast drop, L+Y dink) | 056 | **have** | PORT-41 (ADR-058): SLICE on the pad's north button, SHORT on LB/RB. |
 | CPUs slice (Goth Club, Champs) | 057 | **have** | PORT-41. |
-| Ladder rebalance, every rung measurably harder | 062 + tuning v2-4 | **missing** | opponents.json differs from the ROM's in 216 lines. |
-| Singles and doubles keep **separate ladder places**; quitting a ladder match resets it | 055 | **missing** | Save change (a migration). |
-| Modifiers **GHOST ball, POPCORN rally, ICE footing** | 053 | **missing** | Sim (POPCORN adds ball steps; ICE is footing). |
+| Ladder rebalance, every rung measurably harder | 062 + tuning v2-4 | **have** | PORT-35: frame for frame (the conformance traces). |
+| Singles and doubles keep **separate ladder places**; quitting a ladder match resets it | 055 | **have** | PORT-35, save v6. |
+| Modifiers **GHOST ball, POPCORN rally, ICE footing** | 053 | **have** | PORT-35. |
 | Modifiers **GLOW lights, INVERSE colours** | 054 | **missing** | Display (palettes); the port draws in full colour, so re-design them. |
 | OPTIONS: SCORING (FIRST TO / WIN BY 2), CAMERA with AMOUNT | 065 | **partly** | Port: WIN BY 2 is a modifier; CAMERA has %. |
 | Nine title entries in the ROM's order | 065 | **differs** | The port's menus are its own (modernised, ADR-052). Keep, but note it. |
@@ -85,7 +85,7 @@ Status: **have** (the port does it), **partly**, **missing**, **differs**
 | **Rings at each player's feet**: 1P red, 2P blue, 3P yellow, 4P green, CPU grey | 066 | **missing** | Display. |
 | Close-call replay with inches | 041 | **have** | |
 | Story cards, portraits, quips | 026, 048 | **have** | |
-| **More quips** (more lines, a better pick) | 063 | **missing** | Data. |
+| **More quips** (more lines, a better pick) | 063 | **have** | PORT-35: sixteen a team, the deck. |
 | The captain's partner watches in singles | 042 | **have** | |
 | **Celebrations** (thumbs-up, flex, en garde), slumps, diving saves, emotes (`!` `?` sweat anger star Z's), bounce dust, net shiver, squash on drives | 064 | **partly** | Port has dust and squash (Feel); the rest is missing. |
 | **Critters** across the sky: a gull at Lakeside, a satellite in Space, a fish Undersea | 064 | **missing** | Display. |
@@ -106,6 +106,15 @@ Status: **have** (the port does it), **partly**, **missing**, **differs**
 
 Only the remaster may deliver these; they must stay out of the ROM (bible
 §5.8: anything the ROM does leaves the list).
+
+## Since: the ROM's hitting poses (SNES ADR-074)
+
+After the bible's v0.3 the ROM added SNES ADR-074 (2026-10-18): it now
+**shows** its four hitting poses (overhead, reach, scoop) at the contact,
+display only; it still has no smash. So the bible's §5.7 ("Left on the
+cartridge": poses nothing draws) is no longer true of the ROM. That is a
+bible question for the project lead; the remaster's smash (PORT-24) is
+unaffected.
 
 ## The plan
 

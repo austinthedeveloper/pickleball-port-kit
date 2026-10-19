@@ -63,6 +63,11 @@ var ball_steps := 0             ## physics steps this match (AI cache)
 const BALL_CYCLE := 60
 const BALL_PACE_TICKS := BALL_CYCLE + 12
 var ball_paced := false
+## POPCORN (SNES ADR-053): pace levels this rally has added (0..POPCORN_LEVELS).
+var popcorn_level := 0
+## ICE (SNES ADR-053): this match's footing (players_set_ice). Per sim, not
+## a global as in the C: two sims can run at once (online's tests).
+var ice := false
 ## BIG BALL grows reach and sweet spot (collision.c g_hit_box).
 var grow_fp := 0
 var ball_pace: Array = []
@@ -344,7 +349,8 @@ func resolve_player_hits() -> int:
 		contact_volley = 1 if ball.bounce_count == 0 else 0
 		ball.bounce_count = 0
 		# a swing at a falling ball overhead is a smash (ADR-053)
-		if (p.shot_type == K.SHOT_STANDARD or p.shot_type == K.SHOT_DRIVE) and ball.vz_fp < 0 \
+		if config.overhead and (p.shot_type == K.SHOT_STANDARD or p.shot_type == K.SHOT_DRIVE) \
+				and ball.vz_fp < 0 \
 				and ball.z_fp >= K.to_fp(K.HIT_OVERHEAD_Z):
 			p.shot_type = K.SHOT_OVERHEAD
 		apply_targeted_shot(ball, p, intents[i], grow_fp)
@@ -374,11 +380,11 @@ static func place(p: Player, x: int, y: int) -> void:
 	p.animation_frame = 0
 	p.animation_timer = 0
 
-static func _approach_zero(v: int) -> int:
-	if v > K.PLAYER_FRICTION_FP:
-		return v - K.PLAYER_FRICTION_FP
-	if v < -K.PLAYER_FRICTION_FP:
-		return v + K.PLAYER_FRICTION_FP
+static func _approach_zero(v: int, friction := K.PLAYER_FRICTION_FP) -> int:
+	if v > friction:
+		return v - friction
+	if v < -friction:
+		return v + friction
 	return 0
 
 const ANIM_IDLE_CELS := 2
@@ -386,7 +392,7 @@ const ANIM_RUN_CELS := 4
 const IDLE_CEL_FRAMES := 20
 const RUN_CEL_FRAMES := 6
 
-static func player_step(p: Player, intent: Intent) -> void:
+static func player_step(p: Player, intent: Intent, ice := false) -> void:
 	if p.flash_timer:
 		p.flash_timer -= 1
 	var mx := intent.move_x
@@ -417,22 +423,22 @@ static func player_step(p: Player, intent: Intent) -> void:
 		p.state = K.STATE_MOVE if (mx or my) else K.STATE_IDLE
 	var limit := Paddles.swing_limit(p.paddle) if p.state >= K.STATE_WINDUP \
 		else p.max_speed_fp
-	var accel := K.PLAYER_ACCEL_FP
+	var accel := K.PLAYER_ICE_ACCEL_FP if ice else K.PLAYER_ACCEL_FP
 	if mx and my:
-		accel = K.PLAYER_DIAGONAL_ACCEL_FP
+		accel = K.PLAYER_ICE_DIAGONAL_ACCEL_FP if ice else K.PLAYER_DIAGONAL_ACCEL_FP
 		limit = K.DIAGONAL_LIMIT[limit & 31]
 	if mx > 0:
 		p.vx_fp += accel
 	elif mx < 0:
 		p.vx_fp -= accel
 	else:
-		p.vx_fp = _approach_zero(p.vx_fp)
+		p.vx_fp = _approach_zero(p.vx_fp, K.PLAYER_ICE_FRICTION_FP if ice else K.PLAYER_FRICTION_FP)
 	if my > 0:
 		p.vy_fp += accel
 	elif my < 0:
 		p.vy_fp -= accel
 	else:
-		p.vy_fp = _approach_zero(p.vy_fp)
+		p.vy_fp = _approach_zero(p.vy_fp, K.PLAYER_ICE_FRICTION_FP if ice else K.PLAYER_FRICTION_FP)
 	p.vx_fp = clampi(p.vx_fp, -limit, limit)
 	p.vy_fp = clampi(p.vy_fp, -limit, limit)
 	var nx := p.x_fp + p.vx_fp
@@ -470,7 +476,7 @@ func players_update() -> void:
 	for i in K.MAX_PLAYERS:
 		var p: Player = players[i]
 		if p.active:
-			player_step(p, intents[p.logical_input_slot])
+			player_step(p, intents[p.logical_input_slot], ice)
 
 ## Doubles (ADR-018): nudge crowded teammates 1 px apart in y.
 func separate_teammates() -> void:
@@ -756,7 +762,7 @@ func rules_process_player_hit(slot: int) -> void:
 		return
 	# ADR-055, port-only: a legal volley still can't be made from inside
 	# your own kitchen.
-	if contact_volley and in_kitchen(players[slot].x_fp, players[slot].y_fp, team):
+	if contact_volley and court_in_kitchen(players[slot].x_fp, players[slot].y_fp, team):
 		resolve_point(team, K.FAULT_KITCHEN)
 
 func rules_process_ball_events(ev: int) -> void:
@@ -849,11 +855,13 @@ func _players_initialize() -> void:
 func _activate_players() -> void:
 	ball_tick = 0
 	ball_steps = 0
-	ball_paced = (config.modifiers & K.MOD_FAST_BALL) != 0 \
+	popcorn_level = 0
+	ball_paced = (config.modifiers & (K.MOD_FAST_BALL | K.MOD_POPCORN)) != 0 \
 		or ball_per_cycle(config.difficulty) != BALL_CYCLE
 	if ball_paced:
 		ball_pace = make_ball_pace(config.difficulty, config.modifiers)
 	grow_fp = K.to_fp(K.MOD_BIG_REACH) if config.modifiers & K.MOD_BIG_BALL else 0
+	ice = (config.modifiers & K.MOD_ICE) != 0       # players_set_ice
 	for i in K.MAX_PLAYERS:
 		var active := config.slot_active(i)
 		if i == 0:
@@ -873,10 +881,13 @@ func _activate_players() -> void:
 			p.paddle = Paddles.profile(config.paddle[0], config.career.hat)
 		if p.cpu_controlled:
 			var style: SimTypes.AiStyle = Opponents.slot_style(config, i).copy()
+			# The top speed is the style's before the difficulty (game.c):
+			# the difficulty's speed change never reaches the running speed.
+			# The ladder is tuned so; the port copies it (port ADR-059).
+			p.max_speed_fp = style.speed
 			if config.difficulty != K.DIFFICULTY_MEDIUM \
 					and not config.human[i & 2] and not config.human[(i & 2) + 1]:
 				Opponents.apply_difficulty(style, config.difficulty)
-			p.max_speed_fp = style.speed
 			ai.styles[i] = style
 			ai.slots[i].late_period = style.late_period
 			ai.slots[i].reaction_frames = style.reaction
@@ -911,6 +922,29 @@ func contact(slot: int) -> void:
 	p.flash_timer = K.HIT_FLASH_FRAMES
 	hit_stop = K.HIT_STOP_FRAMES
 	emit(K.EVENT_HIT, K.from_fp(ball.x_fp), K.from_fp(ball.y_fp), slot | (p.shot_type << 4))
+	# POPCORN: each hit in the rally adds pace, up to the cap.
+	if (config.modifiers & K.MOD_POPCORN) and popcorn_level < K.MOD_POPCORN_LEVELS \
+			and config.practice == 0:
+		popcorn_add(ball_pace, popcorn_level)
+		popcorn_level += 1
+
+## The tick each popcorn level starts at, in its stride (modifiers.c). None
+## is 2 mod 3, FAST BALL's extra step: a tick gains one or the other.
+const POPCORN_OFFSET := [0, 6, 3, 9, 1, 7]
+
+## modifiers_popcorn_add / _remove: level `level`'s steps, one every
+## MOD_POPCORN_STRIDE ticks through the pace table.
+static func popcorn_add(pace: Array, level: int) -> void:
+	var i: int = POPCORN_OFFSET[level]
+	while i < BALL_PACE_TICKS:
+		pace[i] += 1
+		i += K.MOD_POPCORN_STRIDE
+
+static func popcorn_remove(pace: Array, level: int) -> void:
+	var i: int = POPCORN_OFFSET[level]
+	while i < BALL_PACE_TICKS:
+		pace[i] -= 1
+		i += K.MOD_POPCORN_STRIDE
 
 static func ball_per_cycle(difficulty: int, percent: int = 100) -> int:
 	var base := BALL_CYCLE
@@ -960,6 +994,15 @@ func step_ball() -> int:
 
 ## LAVA (ADR-033): a ground point past your own kitchen line toward the
 ## net, between the sidelines.
+## COURT_IN_KITCHEN_FP (court.h): the kitchen line counts as in, for the
+## volley fault (SNES ADR-052). LAVA's test (in_kitchen) leaves it out.
+static func court_in_kitchen(x_fp: int, y_fp: int, team: int) -> bool:
+	if y_fp < K.to_fp(K.COURT_SIDELINE_TOP) or y_fp > K.to_fp(K.COURT_SIDELINE_BOTTOM):
+		return false
+	if team:
+		return x_fp <= K.to_fp(K.COURT_KITCHEN_RIGHT_X) and x_fp > K.to_fp(K.COURT_NET_X)
+	return x_fp >= K.to_fp(K.COURT_KITCHEN_LEFT_X) and x_fp < K.to_fp(K.COURT_NET_X)
+
 static func in_kitchen(x_fp: int, y_fp: int, team: int) -> bool:
 	if y_fp < K.to_fp(K.COURT_SIDELINE_TOP) or y_fp > K.to_fp(K.COURT_SIDELINE_BOTTOM):
 		return false
@@ -1007,6 +1050,12 @@ func _freeze_players(winner: int) -> void:
 func _update_point_result() -> void:
 	var winner := point_winner
 	_freeze_players(winner)
+	# POPCORN: back to the match's pace for the next serve. Not on the
+	# result's first frame, which records the rally.
+	if popcorn_level and phase_timer == 2:
+		while popcorn_level:
+			popcorn_level -= 1
+			popcorn_remove(ball_pace, popcorn_level)
 	if phase_timer == 1:
 		last_rally_length = (shot_serial - rally_start) & 0xff
 	if phase_timer < K.POINT_RESULT_MIN_FRAMES:
@@ -1095,14 +1144,20 @@ func step(human: Array = []) -> void:
 		# main.c assists slots 0-2 (2P sat on slot 2); multiplayer (PORT-16)
 		# can put a human on slot 3 too
 		for slot in [0, 1, 2, 3]:
+			if slot == 0 and p1_bot:
+				continue                 # the stats bot plays its own swings
 			if owners[slot] == K.OWNER_HUMAN and players[slot].active \
 					and ai.assist_swing(slot):
 				intents[slot].hit_pressed = 1
 				intents[slot].shot = K.SHOT_STANDARD
+	# CPU_THINKS (cpu_schedule.h, tuning v4): the stagger counts the
+	# match's frames (frame_count, 0 at each new match), not the loop since
+	# power-on, so the same inputs play the same match.
+	var cpu_frame := frame_count & 0xff
 	for slot in [1, 2, 3]:
 		if owners[slot] == K.OWNER_CPU and players[slot].active:
 			if not players[slot ^ 1].active or ai.slots[slot].has_target \
-					or _serving(slot) or (lc & 3) == slot:
+					or _serving(slot) or (cpu_frame & 3) == slot:
 				ai.update(slot, intents[slot])
 			else:
 				ai.hold_intent(slot, intents[slot])

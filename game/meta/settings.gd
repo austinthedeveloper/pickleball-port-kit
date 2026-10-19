@@ -13,7 +13,13 @@ const POINTS := [3, 5, 7, 9, 11, 15, 21]
 const CAMERAS := [0, 50, 75, 100]
 ## The modifier toggles: [id, label, MOD_* bit].
 const MOD_ROWS := [["big_ball", "BIG BALL", K.MOD_BIG_BALL], ["fast_ball", "FAST BALL", K.MOD_FAST_BALL],
-	["win_by_2", "WIN BY 2", K.MOD_WIN_BY_2], ["lava", "LAVA", K.MOD_LAVA]]
+	["win_by_2", "WIN BY 2", K.MOD_WIN_BY_2], ["lava", "LAVA", K.MOD_LAVA],
+	# SNES ADR-053 (PORT-35); GLOW and INVERSE come with PORT-39
+	["ghost", "GHOST BALL", K.MOD_GHOST_BALL], ["popcorn", "POPCORN", K.MOD_POPCORN],
+	["ice", "ICE", K.MOD_ICE]]
+## The bits MODIFIERS saves (an older save's are a subset).
+const MOD_SAVED := K.MOD_BIG_BALL | K.MOD_FAST_BALL | K.MOD_WIN_BY_2 | K.MOD_LAVA \
+	| K.MOD_GHOST_BALL | K.MOD_POPCORN | K.MOD_ICE
 ## Saves before the MODIFIERS page kept one preset index ("mods"); these
 ## are its bits, read only when loading such a save.
 const OLD_MOD_PRESETS := [0, K.MOD_BIG_BALL, K.MOD_FAST_BALL, K.MOD_WIN_BY_2, K.MOD_LAVA, 15]
@@ -60,7 +66,7 @@ static func load_from(save: SaveGame) -> void:
 	opponent_i = clampi(int(st["opponent"]), -2, Opponents.count() - 1)
 	camera_i = clampi(int(st.get("camera", 1)), 0, CAMERAS.size() - 1)
 	var bits := int(st.get("mod_bits", -1))
-	mod_bits = (bits & 15) if bits >= 0 else \
+	mod_bits = (bits & MOD_SAVED) if bits >= 0 else \
 		OLD_MOD_PRESETS[clampi(int(st.get("mods", 0)), 0, OLD_MOD_PRESETS.size() - 1)]
 	Sfx.setting = clampi(int(st.get("sound", 0)), 0, AudioMap.SOUND_NAMES.size() - 1)
 	Music.volume = clampi(int(st.get("music", Music.DEFAULT_VOLUME)), 0, Music.VOLUMES)

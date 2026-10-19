@@ -116,12 +116,14 @@ class AiStyle:
 	var tactics := 0
 	var footwork := 0
 	var slice := 0                   ## a slice every Nth rally shot, 0 never (SNES ADR-057)
+	var serve_power := 4             ## the serve meter's level a CPU serves at (SNES ADR-058)
+	var serve_dud := 0               ## about one serve in this many a dud, 0 never
 
 	func copy() -> AiStyle:
 		var s := AiStyle.new()
 		for f in ["late_period", "reaction", "dink_period", "lob_distance",
 				"putaway_z", "putaway_distance", "aim", "depth", "recover",
-				"speed", "volley", "net", "team", "tactics", "footwork", "slice"]:
+				"speed", "volley", "net", "team", "tactics", "footwork", "slice", "serve_power", "serve_dud"]:
 			s.set(f, get(f))
 		return s
 
@@ -129,7 +131,7 @@ class AiStyle:
 		var s := AiStyle.new()
 		for f in ["late_period", "reaction", "dink_period", "lob_distance",
 				"putaway_z", "putaway_distance", "recover", "speed",
-				"volley", "net", "team", "tactics", "footwork", "slice"]:
+				"volley", "net", "team", "tactics", "footwork", "slice", "serve_power", "serve_dud"]:
 			if d.has(f):
 				s.set(f, int(d[f]))
 		s.aim = {"away": K.AIM_AWAY, "body": K.AIM_BODY,
@@ -179,6 +181,9 @@ class MatchConfig:
 	var points_to_win := K.POINTS_TO_WIN
 	var difficulty := K.DIFFICULTY_MEDIUM
 	var modifiers := 0                 # MOD_* bits (ADR-033)
+	## The remaster's overhead smash (ADR-053; the ROM has none). Off, the
+	## sim is the ROM's: the SNES conformance traces run with it off.
+	var overhead := 1
 	## Practice (ADR-028): the ball machine instead of an opponent, with the
 	## saved settings (shot, target, rate, zone) and that zone's saved best.
 	var practice := 0
