@@ -125,7 +125,7 @@ copies the ROM's behaviour instead of guessing it.
 | Task | What | Kind |
 |---|---|---|
 | PORT-35 | **Catch the sim up to the ROM** (TUNING_VERSION 4): import `tuning.json` and the three JSON sources; slice and short hold (SNES 056, 057); CPU serve power and duds (058); the ladder rebalance (062 and v2-4); ladder per mode (055); GHOST, POPCORN, ICE (053); the kitchen line (052). A conformance-trace runner in the tests (068, 069) proves it frame by frame. | Sim: golden traces regenerate, with the reason |
-| PORT-36 | **About this project, and Tiny Chair**: the "About" note (title, README, every release), a Tiny Chair splash in the bible's colours (after the name search). | Presentation, docs |
+| PORT-36 | **About this project, and Tiny Chair**: `ABOUT.md`, linked from the READMEs and every release (done); a Tiny Chair splash in the bible's colours (after the name search). | Presentation, docs |
 | PORT-37 | **Period-true park**: ROOKIE / CLUB / CHAMP, park points, winners stay on, pick your partner (SNES 070-072). | Sim (open play), save |
 | PORT-38 | **Career and the Hat Museum**: 13 hats, 16 unlocks, the museum (059-061); check the ponytail and the silhouette for a taken shirt. | Art, save, menus |
 | PORT-39 | **The show**: rings at the feet (066), celebrations, slumps, emotes, net shiver, critters (064), more quips (063), GLOW and INVERSE redone for full colour (054). | Display |

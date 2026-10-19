@@ -15,7 +15,16 @@ DOWNLOADS = """### Downloads
 - **Linux** (x86_64): `Pickleball94-{v}-linux.tar.gz`. Mark it executable if needed (`chmod +x`).
 - **Web**: `Pickleball94-{v}-web.zip`. It must be served over HTTP (e.g. `python3 -m http.server` in the unzipped folder); it won't run opened as a file.
 - `Pickleball94-{v}.pck` and `.json` are for the in-game updater (OPTIONS > UPDATES); you don't need them.
+
+*About this project: the game is real; its 1993 history is invented. See [ABOUT.md](https://github.com/{repo}/blob/main/ABOUT.md).*
 """
+
+
+def repo():
+    """owner/name, from project.godot's config/update_repo (the updater's)."""
+    godot = (CHANGELOG.parent / "project.godot").read_text()
+    m = re.search(r'config/update_repo="([^"]+)"', godot)
+    return m.group(1) if m else "austinthedeveloper/pickleball-port-kit"
 
 
 def entry(v, text):
@@ -44,4 +53,4 @@ if __name__ == "__main__":
     body = entry(v, CHANGELOG.read_text())
     if not body:
         sys.exit(f"no ## [{v}] entry in {CHANGELOG}")
-    print(unwrap(body) + "\n\n" + DOWNLOADS.format(v=v))
+    print(unwrap(body) + "\n\n" + DOWNLOADS.format(v=v, repo=repo()))

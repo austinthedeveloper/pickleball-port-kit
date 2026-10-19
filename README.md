@@ -1,5 +1,8 @@
 # Pickleball '94 port kit
 
+> **About this project:** the game is real; its 1993 history is invented.
+> See [ABOUT.md](ABOUT.md).
+
 Starting material for a modern version of Pickleball '94 (Godot, Unity, or
 browser TypeScript). Copied from the SNES repo at commit `a7e6a90`
 (release v0.18.1, 2026-10-16). These are copies, not links: the SNES repo

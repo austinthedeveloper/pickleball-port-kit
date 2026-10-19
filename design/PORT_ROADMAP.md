@@ -61,7 +61,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-32 | The in-game updater | `feature/cld-updater` | Done |
 | PORT-34 | Update at launch, lessons, addresses | `feature/cld-polish-0.9.2` | Ready to test |
 | PORT-35 | Catch the sim up to the ROM (TUNING_VERSION 4) | `feature/cld-sim-catchup` | Done |
-| PORT-36 | About this project, and Tiny Chair | | Planned |
+| PORT-36 | About this project, and Tiny Chair | `feature/cld-about` | In progress |
 | PORT-37 | Period-true park: ROOKIE / CLUB / CHAMP, park points | | Planned |
 | PORT-38 | Career: 13 hats, 16 unlocks, the Hat Museum | | Planned |
 | PORT-39 | The show: rings, celebrations, critters, quips | | Planned |
@@ -441,9 +441,16 @@ feature/cld-release-0.9.2   (v0.9.2)
 ### 36-40 (planned)
 
 - [ ] `PORT-36` About this project, and Tiny Chair: the bible's ground
-  rule 1 note (title, README, release notes; due now that the repo is
-  public), and a Tiny Chair splash in the A-11 colours after a name search.
-  - Status: **Planned**.
+  rule 1 note, and a Tiny Chair splash in the A-11 colours after a name
+  search.
+  - Done: `ABOUT.md` (the game is real, its 1993 history invented; no
+    real brands; not affiliated with Nintendo), linked from both READMEs
+    and every new release's notes (`tools/release_body.py`). It names no
+    studio: Tiny Chair, Ferry Dock and Sunvale all wait on the bible's name
+    search. The game keeps its fiction (the rule is about release pages).
+  - Status: **In progress**: the splash waits on the name search and the
+    logo's final art (bible A-11); the releases already published don't
+    carry the line (For you).
 - [ ] `PORT-37` Period-true park: courts ROOKIE / CLUB / CHAMP (the port
   shows DUPR-style `UNDER 3.5`), park points, winners stay on (two wins),
   pick your partner (SNES ADR-070 to 072).
@@ -538,4 +545,10 @@ the chain: each has a default I've gone with.
   2. **The menus.** The ROM's nine title entries have a set order (SNES
      ADR-065); the port's menus are its own. I'd keep the port's (it has
      more modes), unless you want the ROM's order.
+
+- **PORT-36 about:** releases 0.1.0 to 0.9.3 are public without the
+  "About this project" line (new ones carry it). I can add it to each
+  published release's notes with `gh release edit`; that changes public
+  pages, so it waits for your OK. And the Tiny Chair splash waits on the
+  bible's name search and the logo's final art.
 

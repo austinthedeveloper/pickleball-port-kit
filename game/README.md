@@ -1,5 +1,8 @@
 # Pickleball '94 — Godot port
 
+> **About this project:** the game is real; its 1993 history is invented.
+> See [ABOUT.md](../ABOUT.md).
+
 Arcade pickleball at 960×540, ported from the SNES game. Godot **4.7**
 (pinned; installed with Homebrew: `brew install godot`). Decision record:
 `decisions/ADR-052-godot-port.md`.
