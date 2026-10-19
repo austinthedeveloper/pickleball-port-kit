@@ -376,26 +376,17 @@ func _process(_delta: float) -> void:
 	if _lock > 0:
 		_lock -= 1
 		return
-	if GameControls.menu_pressed("move_up"):
-		page.move(-1)
+	var nav := page.drive()
+	if nav & MenuPage.NAV_MOVED:
 		_moved()
-	elif GameControls.menu_pressed("move_down"):
-		page.move(1)
-		_moved()
-	var dir := 0
-	if GameControls.menu_pressed("move_left"):
-		dir = -1
-	elif GameControls.menu_pressed("move_right"):
-		dir = 1
-	if dir != 0 and page.change(dir):
+	if nav & MenuPage.NAV_CHANGED:
 		_sfx.play("blip")
 		_refresh()
-	if Input.is_action_just_pressed("soft") or Input.is_action_just_pressed("drive"):
+	if nav & MenuPage.NAV_BACK:
 		_leave()
-	elif Input.is_action_just_pressed("hit") or Input.is_action_just_pressed("start"):
-		if page.press():
-			_sfx.play("blip")
-			_refresh()
+	elif nav & MenuPage.NAV_PRESSED:
+		_sfx.play("blip")
+		_refresh()
 
 
 func _moved() -> void:

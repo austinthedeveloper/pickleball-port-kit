@@ -190,10 +190,13 @@ the same request). Open: 36 and 40.
   palettes.json and manifest.json are read once, the host screen reads
   the adapters once; dead code out; `UiKit`, `PlayerLook.team_sheet` and
   `TestSuite.fresh_save` own what was copied; the AI's and Feel's
-  references typed.
-  - Verified: 365/365 plus the e2e, golden traces unchanged; no broken
-    links; screenshots of the lobby, park, a match and the museum
-    unchanged.
+  references typed. Then the splits: `title_pages.gd` (the title's page
+  tables), `hud_cards.gd` (the HUD's cards), `park_message.gd` (the park's
+  panel text), `sim/multi_ball.gd` (MULTI BALL, so `sim.gd` keeps the C's
+  shape), and `MenuPage.drive()` for the five copies of the menu keys.
+  - Verified: 365/365 plus the e2e, golden and conformance traces
+    unchanged; no broken links; screenshots of the title, lobby, park, a
+    match, a result and the museum unchanged.
   - Status: **Done**.
 
 ## For you

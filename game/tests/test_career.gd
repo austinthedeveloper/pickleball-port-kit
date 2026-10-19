@@ -507,8 +507,8 @@ func test_match_records_and_unlock_card() -> void:
 	v._physics_process(1.0 / 60.0)
 	check(v.unlock_open(), "then UNLOCKED!")
 	v._hud.refresh()
-	check(v._hud._unlock.visible and v._hud._banner.text == "", "the card, not the result")
-	eq(v._hud._unlock_line.text, "VISOR, TRICORN, PINK HAIR", "what was earned")
+	check(v._hud.cards.unlock.visible and v._hud._banner.text == "", "the card, not the result")
+	eq(v._hud.cards.unlock_line.text, "VISOR, TRICORN, PINK HAIR", "what was earned")
 	var frame := v.sim.frame_count
 	for f in MatchEnd.UNLOCK_FRAMES - 2:
 		v._physics_process(1.0 / 60.0)

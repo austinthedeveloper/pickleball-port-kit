@@ -167,156 +167,7 @@ func _add_page(id: String, title: String, rows: Array, help: Array,
 
 
 func _build_pages() -> void:
-	var help := [["hit", "SELECT"], ["back", "BACK"]]
-	_add_page("main", "", [
-		{"id": "singles", "label": "SINGLES", "press": func(): open_select(false)},
-		{"id": "doubles", "label": "DOUBLES", "press": func(): open_select(true)},
-		{"id": "openplay", "label": "OPEN PLAY", "value": func(): return "THE PARK",
-			"press": _open_park},
-		{"id": "multiplayer", "label": "MULTIPLAYER", "value": func(): return "ONLINE",
-			"press": func(): open_page("multi")},
-		{"id": "tournament", "label": "TOURNAMENT", "value": _cup_label, "press": _open_tournament},
-		{"id": "play", "label": "MATCH SETUP", "value": _play_summary,
-			"press": func(): open_page("play")},
-		{"id": "practice", "label": "PRACTICE", "value": _learn_label,
-			"press": func(): open_page("learn")},
-		{"id": "court", "label": "COURT", "value": func(): return Settings.VENUE_NAMES[Settings.venue_i] + (
-			"" if Settings.time_i == 0 else " " + CourtStyle.time_names()[Settings.time_i]),
-			"press": func(): open_page("court")},
-		{"id": "modifiers", "label": "MODIFIERS", "value": _mods_label,
-			"press": func(): open_page("modifiers")},
-		{"id": "options", "label": "OPTIONS", "press": func(): open_page("options")},
-		{"id": "career", "label": "CAREER", "value": _career_label, "press": open_career},
-	], [], Rect2(300, 146, 360, 0))
-	_add_page("play", "MATCH SETUP", [
-		{"id": "vs", "label": "VS", "value": _opponent_label, "change": _change_opponent},
-		{"id": "difficulty", "label": "DIFFICULTY", "value": func(): return Settings.DIFFICULTIES[Settings.difficulty_i],
-			"change": func(d): Settings.difficulty_i = clampi(Settings.difficulty_i + d, 0, Settings.DIFFICULTIES.size() - 1)},
-		{"id": "points", "label": "POINTS", "value": func(): return str(Settings.POINTS[Settings.points_i]),
-			"change": func(d): Settings.points_i = clampi(Settings.points_i + d, 0, Settings.POINTS.size() - 1)},
-		{"id": "players", "label": "PLAYERS", "value": func(): return "2P VS" if Settings.two_players else "1P",
-			"change": func(_d):
-				Settings.two_players = not Settings.two_players
-				GameControls.refresh_pads()},
-	], help)
-	var court_rows := [{"id": "venue", "label": "VENUE", "value": func(): return Settings.VENUE_NAMES[Settings.venue_i],
-		"change": func(d): Settings.venue_i = (Settings.venue_i + d + Settings.VENUES.size()) % Settings.VENUES.size(); _start_demo()},
-		{"id": "time", "label": "TIME", "value": func(): return CourtStyle.time_names()[Settings.time_i],
-			"change": func(d):
-				var n := CourtStyle.time_names().size()
-				Settings.time_i = (Settings.time_i + d + n) % n
-				_start_demo()}]
-	for i in CourtStyle.PARTS.size():
-		var part: String = CourtStyle.PARTS[i]
-		court_rows.append({"id": part, "label": CourtStyle.PART_NAMES[i],
-			"value": func(): return CourtStyle.names(part)[Settings.court[i]],
-			"change": func(d):
-				Settings.court[i] = (Settings.court[i] + d + CourtStyle.count(part)) % CourtStyle.count(part)
-				_demo.set_court(Settings.court)})
-	_add_page("court", "COURT", court_rows, help, Rect2(590, 150, 350, 0))
-	var mod_rows := {"modifiers": [], "rules": []}
-	for m in Settings.MOD_ROWS:
-		var bit: int = m[2]
-		mod_rows[m[3]].append({"id": m[0], "label": m[1],
-			"value": func(): return "ON" if Settings.mod_bits & bit else "OFF",
-			"change": func(_d): Settings.mod_bits ^= bit})
-	mod_rows["modifiers"].append({"id": "rules", "label": "RULES", "value": func(): return _mods_label("rules"),
-		"press": func(): open_page("rules")})
-	# over the logo (hidden, as on CONTROLS), clear of the key legend
-	_add_page("modifiers", "MODIFIERS", mod_rows["modifiers"], help, Rect2(300, 60, 360, 0))
-	_add_page("rules", "RULES", mod_rows["rules"], help, Rect2(300, 60, 360, 0))
-	# PORT-31: local (the lobby, up to four pads) or online (1 vs 1)
-	_add_page("multi", "MULTIPLAYER", [
-		{"id": "local", "label": "LOCAL", "value": func(): return "UP TO 4 PADS", "press": open_lobby},
-		{"id": "online", "label": "ONLINE", "value": func(): return "1 VS 1", "press": func():
-			if _sfx:
-				_sfx.play("confirm")
-			_store_settings()
-			main_cursor = pages["main"].cursor
-			open_online.emit()},
-	], help)
-	# PORT-30: HOW TO PLAY's lessons, and the ball machine
-	_add_page("learn", "PRACTICE", [
-		{"id": "lessons", "label": "HOW TO PLAY", "value": func(): return "%d/%d" % [
-			save.lessons_done() if save else 0, Tutorial.LESSONS.size()],
-			"press": func(): _start_lesson(save.next_lesson() if save else 0)},
-		{"id": "lesson", "label": "LESSON", "value": func(): return "%d %s" % [lesson_i + 1,
-			Tutorial.LESSONS[lesson_i]["title"]],
-			"change": func(d): lesson_i = (lesson_i + d + Tutorial.LESSONS.size()) % Tutorial.LESSONS.size(),
-			"press": func(): _start_lesson(lesson_i)},
-		{"id": "machine", "label": "BALL MACHINE", "press": _open_practice},
-	], help)
-	_add_page("options", "OPTIONS", [
-		{"id": "camera", "label": "CAMERA",
-			"value": func(): return "OFF" if Settings.camera_i == 0 else "%d%%" % Settings.CAMERAS[Settings.camera_i],
-			"change": func(d): Settings.camera_i = clampi(Settings.camera_i + d, 0, Settings.CAMERAS.size() - 1)},
-		{"id": "sound", "label": "SOUND", "value": func(): return AudioMap.SOUND_NAMES[Sfx.setting],
-			"change": func(d): Sfx.setting = (Sfx.setting + d + 3) % 3},
-		{"id": "music", "label": "MUSIC", "value": func(): return Music.volume_name(),
-			"change": func(d): Music.volume = clampi(Music.volume + d, 0, Music.VOLUMES)},
-		{"id": "fullscreen", "label": "FULLSCREEN", "value": func(): return "ON" if Settings.fullscreen else "OFF",
-			"change": func(_d): Settings.fullscreen = not Settings.fullscreen; Settings.apply_window(get_window())},
-		{"id": "scale", "label": "SCALE", "value": func(): return "PIXEL" if Settings.integer_scale else "FILL",
-			"change": func(_d): Settings.integer_scale = not Settings.integer_scale; Settings.apply_window(get_window())},
-		{"id": "controls", "label": "CONTROLS", "press": func(): open_page("controls")},
-		{"id": "access", "label": "ACCESSIBILITY", "press": func(): open_page("access")},
-		# PORT-32: the in-game updater
-		{"id": "updates", "label": "UPDATES", "value": func():
-			return Updater.instance.label() if Updater.instance else "DEV BUILD",
-			"press": func():
-				if Updater.instance:
-					Updater.instance.press()},
-	], [], Rect2(300, 146, 360, 0))
-	var onoff := func(on: bool) -> String: return "ON" if on else "OFF"
-	_add_page("access", "ACCESSIBILITY", [
-		{"id": "shake", "label": "SCREEN SHAKE",
-			"value": func(): return "OFF" if Settings.shake_i == 0 else "%d%%" % Settings.SHAKES[Settings.shake_i],
-			"change": func(d): Settings.shake_i = clampi(Settings.shake_i + d, 0, Settings.SHAKES.size() - 1)},
-		{"id": "flashes", "label": "FLASHES", "value": func(): return onoff.call(Settings.flashes),
-			"change": func(_d): Settings.flashes = not Settings.flashes},
-		{"id": "hud", "label": "HUD TEXT", "value": func(): return "LARGE" if Settings.hud_large else "NORMAL",
-			"change": func(_d): Settings.hud_large = not Settings.hud_large},
-		{"id": "assist", "label": "SERVE ASSIST", "value": func(): return onoff.call(Settings.serve_assist),
-			"change": func(_d): Settings.serve_assist = not Settings.serve_assist},
-		{"id": "vibration", "label": "VIBRATION", "value": func(): return onoff.call(Settings.vibration),
-			"change": func(_d):
-				Settings.vibration = not Settings.vibration
-				GameControls.rumble(0, 0.4, 0.4, 0.15)},       # a taste of it
-	], help, Rect2(280, 172, 400, 0))
-	var control_rows := []
-	for a in Bindings.ACTIONS:
-		var action: String = a
-		control_rows.append({"id": action, "label": Bindings.NAMES[action],
-			"value": func(): return "PRESS A KEY OR BUTTON" if listening == action else Bindings.describe(action),
-			"press": func(): listen(action)})
-	control_rows.append({"id": "icons", "label": "BUTTON ICONS",
-		"value": func(): return Prompts.FAMILY_NAMES[Settings.pad_glyphs],
-		"change": func(d):
-			Settings.pad_glyphs = (Settings.pad_glyphs + d + Prompts.FAMILIES.size()) % Prompts.FAMILIES.size()
-			GameControls.device_serial += 1})        # every prompt bar redraws
-	control_rows.append({"id": "reset", "label": "RESET DEFAULTS", "press": func():
-		Bindings.reset()
-		_store_settings()})
-	_add_page("controls", "CONTROLS", control_rows, [["hit", "REBIND"], ["back", "BACK"]],
-		Rect2(250, 34, 460, 0))          # high: SLICE and SHORT made it 13 rows
-	career.build_pages()
-	_add_page("records", "RECORDS", [
-		{"id": "singles", "label": "SINGLES", "value": func(): return _wl("singles")},
-		{"id": "doubles", "label": "DOUBLES", "value": func(): return _wl("doubles")},
-		{"id": "streak", "label": "BEST STREAK", "value": func(): return _held("best_streak")},
-		{"id": "rally", "label": "LONGEST RALLY", "value": func(): return _held("longest_rally")},
-		{"id": "points", "label": "POINTS", "value": func(): return "%d-%d" % [_rec("points_won"), _rec("points_lost")]},
-		{"id": "aces", "label": "ACES  WINNERS", "value": func(): return "%d  %d" % [_rec("aces"), _rec("winners")]},
-		{"id": "shutouts", "label": "SHUTOUTS  CUPS", "value": func(): return "%d  %d" % [
-			_rec("shutouts"), _rec("cups")]},    # PORT-25: tournaments won
-		{"id": "ladder", "label": "LADDER", "value": func(): return "S %d/%d  D %d/%d  CLEARS %d" % [
-			_rung() + 1, Opponents.count(), _rung(true) + 1, Opponents.count(), _rec("ladder_clears")]},
-		{"id": "practice", "label": "PRACTICE BEST", "value": func(): return str(_rec("practice_best"))},
-		{"id": "vs", "label": "VS", "value": _vs_label,
-			"change": func(d): vs_i = (vs_i + d + Opponents.count()) % Opponents.count()},
-		{"id": "erase", "label": "ERASE RECORDS", "value": func(): return "B AGAIN" if _erase_armed else "",
-			"press": _erase},
-	], [["back", "BACK"]], Rect2(230, 46, 500, 0))   # wide: LADDER shows both modes
+	TitlePages.build(self)
 
 
 # --- CAREER (ADR-047): view/title_career.gd -------------------------------------------
@@ -828,27 +679,16 @@ func _process(_delta: float) -> void:
 		select_input(pressed | (p2 if select.current == 1 else 0))
 		return
 	var p: MenuPage = pages[page]
-	if GameControls.menu_pressed("move_up"):
-		p.move(-1)
+	var on_edit_start := page == "career_edit" and Input.is_action_just_pressed("start")
+	var nav := p.drive(true, page != "main", not on_edit_start)
+	if nav & (MenuPage.NAV_MOVED | MenuPage.NAV_CHANGED):
 		_sfx.play("blip")
-	elif GameControls.menu_pressed("move_down"):
-		p.move(1)
-		_sfx.play("blip")
-	var dir := 0
-	if GameControls.menu_pressed("move_left"):
-		dir = -1
-	elif GameControls.menu_pressed("move_right"):
-		dir = 1
-	if dir != 0 and p.change(dir):
-		_sfx.play("blip")
+	if nav & MenuPage.NAV_CHANGED:
 		_refresh()
-	if (Input.is_action_just_pressed("soft") or Input.is_action_just_pressed("drive")) \
-			and page != "main":
+	if nav & MenuPage.NAV_BACK:
 		back()
-	elif page == "career_edit" and Input.is_action_just_pressed("start"):
+	elif on_edit_start:
 		_career_input(CareerPage.PAD_START)       # Start keeps, on any row
 		_sfx.play("confirm")
-	elif Input.is_action_just_pressed("hit") or Input.is_action_just_pressed("start"):
-		var id := p.current_id()
-		if p.press():
-			_after_press(id)
+	elif nav & MenuPage.NAV_PRESSED:
+		_after_press(p.pressed_id)

@@ -172,7 +172,7 @@ func test_card_after_a_finished_match_only() -> void:
 	view._physics_process(1.0 / 60.0)
 	eq(view.sim.frame_count, frame, "the match waits under the card")
 	view._hud.refresh()
-	check(view._hud._initials.visible and view._hud._banner.text == "", "the card, not the result")
+	check(view._hud.cards.initials.visible and view._hud._banner.text == "", "the card, not the result")
 	view.free()
 	# a match left early: the rally record stays, the request goes
 	var v2 := MatchView.new()

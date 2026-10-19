@@ -33,7 +33,7 @@ func test_no_serve_balls_trickle_in() -> void:
 	eq(s.phase, K.PHASE_LIVE, "live from the start: no serve")
 	_run(s, 1)
 	eq(s.multi.size(), 1, "the first ball at the net")
-	var m: Sim.MultiBall = s.multi[0]
+	var m: MultiBallPlay.Entry = s.multi[0]
 	eq(m.ball.rally_state, K.BALL_RALLY_INACTIVE, "blinking, not flying")
 	_run(s, K.MULTI_BLINK)
 	eq(m.ball.rally_state, K.BALL_RALLY_LIVE, "then it flies")

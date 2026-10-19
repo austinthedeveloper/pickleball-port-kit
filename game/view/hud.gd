@@ -24,17 +24,10 @@ var _quip: Control
 var _quip_text: BitmapText
 var _quip_frames := 0
 var _result_line: BitmapText
+var cards: HudCards              ## the intro, initials, UNLOCKED! and stats cards
 var _trophy: Node2D                     ## over CHAMPION! (SNES ADR-064)
-var _card: Control
 var _practice_menu: Control
-var _initials: Control           ## the initials card (ADR-040), built when needed
-var _ini_letters: Array = []
-var _ini_line: BitmapText
-var _ini_under: ColorRect
 var _result_prompts: PromptBar   ## B / Start on the result screen
-var _stats_card: Control         ## the post-match stats (PORT-13), built when shown
-var _unlock: Control             ## the UNLOCKED! card (ADR-047), built when needed
-var _unlock_line: BitmapText
 # PORT-14: scores pop when they change, a ball marks the serving side (and
 # a marker the server in doubles), a rally counter on long rallies, and
 # MATCH POINT pulses.
@@ -63,6 +56,10 @@ func _panel(name: String, rect: Rect2) -> NinePatchRect:
 func _text(font: String, s: String, pos: Vector2, align := 0.0, tint := Color.WHITE,
 		parent: Node = null) -> BitmapText:
 	return UiKit.text(font, s, pos, align, tint, parent if parent else self)
+
+
+func _init() -> void:
+	cards = HudCards.new(self)
 
 
 func setup(v: MatchView) -> void:
@@ -197,7 +194,7 @@ func setup(v: MatchView) -> void:
 	_result_prompts.visible = false
 	add_child(_result_prompts)
 	if view.card_frames >= 0:
-		_build_card(cfg)
+		cards.build_card(cfg)
 	_paused = Control.new()
 	add_child(_paused)
 	var shade := ColorRect.new()
@@ -219,73 +216,12 @@ func setup(v: MatchView) -> void:
 	refresh()
 
 
-func _build_card(cfg: SimTypes.MatchConfig) -> void:
-	var opp := cfg.opponent
-	var doubles := cfg.mode == K.MODE_DOUBLES
-	_card = Control.new()
-	add_child(_card)
-	var shade := ColorRect.new()
-	shade.color = Color(0, 0.02, 0.08, 0.5)
-	shade.size = Vector2(960, 540)
-	_card.add_child(shade)
-	var name := Story.card_name(opp, doubles)
-	_text("big_gold", "", Vector2.ZERO, 0, Color.WHITE, _card)
-	var title := _text("big", name, Vector2(480, 170), 0.5, Story.team_color(opp), _card)
-	title.scale = Vector2(2, 2)
-	title.position.x = 480
-	var line := Story.intro_line(opp)
-	var w := 40 + BitmapText.measure("small", line)
-	var p := _panel("title", Rect2(480 - w / 2, 236, w, 36))
-	p.reparent(_card)
-	_text("small", line, Vector2(480, 246), 0.5, Color.WHITE, _card)
-	_text("small", Story.rung_line(opp), Vector2(480, 296), 0.5, Color("fbe46a"), _card)
-	_card.add_child(PromptBar.new().setup([["hit", "PLAY"]], Vector2(480, 338)))
-
-
-func _refresh_initials() -> void:
-	var ini: Initials = view.initials
-	if not ini.open:
-		if _initials:
-			_initials.visible = false
-		return
-	if _initials == null:
-		_initials = Control.new()
-		add_child(_initials)
-		var shade := ColorRect.new()
-		shade.color = Color(0, 0.02, 0.08, 0.55)
-		shade.size = Vector2(960, 540)
-		_initials.add_child(shade)
-		var p := _panel("title", Rect2(220, 140, 520, 250))
-		p.reparent(_initials)
-		var title := _text("big_gold", "NEW RECORD!", Vector2(480, 160), 0.5, Color.WHITE, _initials)
-		title.scale = Vector2(1.5, 1.5)
-		title.position.x = 480
-		_ini_line = _text("small", "", Vector2(480, 214), 0.5, Color("fbe46a"), _initials)
-		for i in 3:
-			var l := _text("big", "", Vector2(420 + i * 60, 252), 0.5, Color.WHITE, _initials)
-			l.scale = Vector2(2, 2)
-			l.position.x = 420 + i * 60
-			_ini_letters.append(l)
-		_ini_under = ColorRect.new()
-		_ini_under.size = Vector2(36, 5)
-		_ini_under.color = Color("fbe46a")
-		_initials.add_child(_ini_under)
-		_initials.add_child(PromptBar.new().setup([["dpad", "LETTER"], ["hit", "NEXT"], ["start", "OK"]],
-			Vector2(480, 352)))
-	_initials.visible = true
-	_ini_line.text = ini.records_line()
-	var t := ini.text()
-	for i in 3:
-		_ini_letters[i].text = t[i]
-		_ini_letters[i].tint = Color.WHITE if i == ini.cursor else Color(0.7, 0.74, 0.85)
-	_ini_under.position = Vector2(402 + ini.cursor * 60, 310)
-
-
 func close_card() -> void:
-	if _card:
-		_card.visible = false             # gone this frame, freed after it
-		_card.queue_free()
-		_card = null
+	cards.close_card()
+
+
+func on_rematch() -> void:
+	cards.on_rematch()
 
 
 func team_tint(team: int) -> Color:
@@ -343,9 +279,9 @@ func refresh() -> void:
 	_quip.visible = _quip_frames > 0 and s.phase == K.PHASE_POINT_RESULT and view.close_call == null
 	_result_line.text = ""
 	_result_prompts.visible = false
-	_refresh_initials()
-	_refresh_unlock()
-	_refresh_stats()
+	cards.refresh_initials()
+	cards.refresh_unlock()
+	cards.refresh_stats()
 	if view.initials.open or view.unlock_open():
 		_banner.text = ""
 		_banner_sub.text = ""
@@ -538,81 +474,6 @@ func stats_shown() -> bool:
 	var s := view.sim
 	return s.phase == K.PHASE_MATCH_RESULT and not view.demo and not s.config.practice \
 		and not view.initials.open and not view.unlock_open()
-
-
-## The UNLOCKED! card (ADR-047): what the career player just earned
-## ("VISOR, PINK HAIR"), over the result like the initials card.
-func _refresh_unlock() -> void:
-	var open := view.unlock_open()
-	if not open:
-		if _unlock:
-			_unlock.visible = false
-		return
-	if _unlock == null:
-		_unlock = Control.new()
-		add_child(_unlock)
-		var shade := ColorRect.new()
-		shade.color = Color(0, 0.02, 0.08, 0.55)
-		shade.size = Vector2(960, 540)
-		_unlock.add_child(shade)
-		var p := _panel("title", Rect2(180, 150, 600, 220))
-		p.reparent(_unlock)
-		var title := _text("big_gold", "UNLOCKED!", Vector2(480, 172), 0.5, Color.WHITE, _unlock)
-		title.scale = Vector2(1.5, 1.5)
-		title.position.x = 480
-		_unlock_line = _text("small", "", Vector2(480, 236), 0.5, Color("fbe46a"), _unlock)
-		_unlock_line.scale = Vector2(1.25, 1.25)
-		_unlock_line.position.x = 480
-		var player: Career.Player = view.sim.config.career
-		_text("small", "NEW LOOKS FOR %s: CAREER, EDIT" % (player.shown_name() if player else "YOU"),
-			Vector2(480, 282), 0.5, Color(0.8, 0.84, 0.95), _unlock)
-		_unlock.add_child(PromptBar.new().setup([["hit", "OK"]], Vector2(480, 336)))
-	_unlock.visible = true
-	# the SNES panel fits 24 letters; this one 30 (past that, "+n")
-	_unlock_line.text = Career.unlock_text(view.save.career.new_unlocks if view.save else 0, 30)
-
-
-func _refresh_stats() -> void:
-	var show := stats_shown()
-	if show and _stats_card == null:
-		_build_stats()
-	if _stats_card:
-		_stats_card.visible = show
-	_banner.position.y = 96.0 if show else _banner_y
-	_result_line.position.y = 142.0 if show else _result_y
-	_result_prompts.position.y = 486.0 if show else 296.0
-
-
-func _build_stats() -> void:
-	var st: MatchStats = view.stats
-	_stats_card = Control.new()
-	add_child(_stats_card)
-	move_child(_stats_card, 0)       # under the banner and the prompts
-	var shade := ColorRect.new()
-	shade.color = Color(0.02, 0.03, 0.08, 0.45)
-	shade.size = Vector2(960, 540)
-	_stats_card.add_child(shade)
-	var p := _panel("title", Rect2(210, 170, 540, 290))
-	p.reparent(_stats_card)
-	var cols := [545.0, 665.0]
-	for t in 2:
-		_text("small", _team_label(t), Vector2(cols[t], 188), 0.5, team_tint(t), _stats_card)
-	var rows := st.rows()
-	for i in rows.size():
-		var y := 222.0 + i * 26.0
-		_text("small", rows[i][0], Vector2(258, y), 0.0, Color(0.8, 0.84, 0.95), _stats_card)
-		for t in 2:
-			var won: bool = rows[i][0] == "POINTS" and view.sim.match_winner == t
-			_text("small", rows[i][t + 1], Vector2(cols[t], y), 0.5,
-				Color("fbe46a") if won else Color.WHITE, _stats_card)
-	_text("small", st.rally_line(), Vector2(480, 222.0 + rows.size() * 26.0 + 6), 0.5,
-		Color("fbe46a"), _stats_card)
-
-
-func on_rematch() -> void:
-	if _stats_card:
-		_stats_card.queue_free()
-		_stats_card = null
 
 
 func _team_label(team: int) -> String:

@@ -49,6 +49,7 @@ var _fading: Array = []              ## sprites that fade while you're inside
 var _canopies: Array = []            ## [holder, rect in world]: trees that fade over you
 var _fade := 1.0
 var message := ""                    ## the panel's text, for tests
+var message_text: ParkMessage        ## the panel's text (view/park_message.gd)
 var _2p_shown := -1
 var _2p_timer := 0
 var manifest: Dictionary
@@ -70,6 +71,10 @@ var _prompt_key := ""
 
 ## `back`: returning from your game (its result shows for a while).
 ## The park's own music in open play (PORT-22).
+func _init() -> void:
+	message_text = ParkMessage.new(self)
+
+
 func music_track() -> String:
 	return "park"
 
@@ -557,93 +562,13 @@ func _team_name(entry: int) -> String:
 	return String(Opponents.team(entry)["team"])
 
 
-## The panel (render_park.c park_message): [text, prompts, yellow].
+## The panel's text, prompts and colour, and a board page (ParkMessage).
 func panel() -> Array:
-	var rack := op.rack_near()
-	if _2p_shown != op.two_players:
-		_2p_shown = op.two_players
-		_2p_timer = TWO_P_FRAMES
-	if _2p_timer and op.called == OpenPlay.NONE:
-		_2p_timer -= 1
-		return ["2P JOINED: YOUR PARTNER!" if _2p_shown else "2P LEFT", [], false]
-	if op.called != OpenPlay.NONE:
-		# "WITH ACE VS TWINS": the captain next in line partners you, or 2P;
-		# called again as a winner, "WINNERS STAY: VS SNOWBIRDS" (ADR-071).
-		var with := "COURT %d" % (op.called + 1)
-		if op.stay_court == op.called:
-			with = "WINNERS STAY:"
-		elif op.two_players:
-			with = "WITH 2P"
-		elif op.partner < OpenPlay.TEAMS:
-			with = "WITH " + String(Opponents.team(op.partner)["players"][0]["name"])
-		return [with + " VS " + _team_name(op.opponent), [], true]
-	# Back from your game: its result first, for a few seconds.
-	# Off after STAY_MAX wins in a row: that, then (rated) your points.
-	if result_timer and op.last_won != OpenPlay.NONE:
-		var s := "YOU %s %d-%d" % ["WON" if op.last_won else "LOST", op.last_score[0],
-			op.last_score[1]]
-		if op.last_won and op.last_streak >= OpenPlay.STAY_MAX and (op.rating == OpenPlay.RATING_NONE
-				or result_timer > RESULT_FRAMES / 2):
-			s += "  %d IN A ROW" % op.last_streak
-		elif op.rating != OpenPlay.RATING_NONE:
-			s += "  %d PTS" % OpenPlay.rating_points(op.rating)
-		return [s, [], false]
-	if op.board_near():
-		if op.board_page == OpenPlay.NONE:
-			return ["THE RECORDS BOARD", [["hit", "READ"]], false]
-		return [board_page(op.board_page), [["hit", "NEXT"]], false]
-	if op.machine_near():
-		return ["BALL MACHINE", [["hit", "PRACTICE"]], false]
-	if op.bench_near() and op.waiting_team(0) != OpenPlay.NONE:
-		var s := _team_name(op.waiting_team(0))
-		if op.waiting_team(1) != OpenPlay.NONE:
-			s += " AND " + _team_name(op.waiting_team(1))
-		return [s + " WAIT", [], false]
-	if rack != OpenPlay.NONE:
-		if op.your_court == rack:
-			# Teams to pick from, and no 2P (SNES ADR-072).
-			if op.pickable and not op.two_players:
-				var who := String(Opponents.team(op.pick)["players"][0]["name"]) \
-					if op.pick < OpenPlay.TEAMS else "NEXT UP"
-				return ["PARTNER: " + who, [["hit", "TAKE"], ["slice", "PARTNER"]], false]
-			return ["COURT %d" % (rack + 1), [["hit", "TAKE YOUR PADDLE"]], false]
-		if not op.court_open(rack):
-			# "OPENS AT 15 PTS  YOU HAVE 12" (ADR-070)
-			return ["OPENS AT %d PTS  YOU HAVE %d" % [OpenPlay.rating_points(OpenPlay.court_floor(rack)),
-				OpenPlay.rating_points(op.rating)], [], false]
-		if op.court[rack].stack_count >= OpenPlay.STACK_MAX:
-			return ["THIS STACK IS FULL", [], false]
-		return ["COURT %d  %s" % [rack + 1, OpenPlay.court_level_name(rack)], [["hit", "STACK YOUR PADDLE"]], false]
-	var court := op.court_near()
-	if court != OpenPlay.NONE and court != op.your_court \
-			and op.court[court].state == OpenPlay.COURT_PLAYING:
-		return [_team_name(op.court[court].playing[0]) + " VS " + _team_name(op.court[court].playing[1]),
-			[], false]
-	var wait := op.your_wait()
-	if wait != OpenPlay.NONE:
-		return ["YOU'RE NEXT ON COURT %d" % (op.your_court + 1) if wait == 0
-			else "WAITING ON COURT %d" % (op.your_court + 1), [], false]
-	if op.in_house():
-		return ["THE CLUBHOUSE", [["start", "EXIT"]], false]
-	# "OPEN PLAY 14 PTS": your points, when rated.
-	if op.rating == OpenPlay.RATING_NONE:
-		return ["YOU AND 2P" if op.two_players else "OPEN PLAY", [["start", "EXIT"]], false]
-	return ["%s %d PTS" % ["YOU+2P" if op.two_players else "OPEN PLAY", OpenPlay.rating_points(op.rating)],
-		[["start", "EXIT"]], false]
+	return message_text.panel()
 
 
-## A records board page: the title's RECORDS, a line each.
 func board_page(page: int) -> String:
-	var r: Dictionary = save.data["records"] if save else {}
-	var n := func(key: String) -> int: return int(r.get(key, 0))
-	match page:
-		0:
-			return "DOUBLES  WON %d  LOST %d" % [n.call("doubles_wins"), n.call("doubles_losses")]
-		1:
-			return "SINGLES  WON %d  LOST %d" % [n.call("singles_wins"), n.call("singles_losses")]
-		2:
-			return "BEST STREAK %d  RALLY %d" % [n.call("best_streak"), n.call("longest_rally")]
-	return "CLEARS %d  DRILL BEST %d" % [n.call("ladder_clears"), n.call("practice_best")]
+	return message_text.board_page(page)
 
 
 func _draw_message() -> void:

@@ -528,7 +528,7 @@ func _on_event(e: Array) -> void:
 func _multi_blink_off(i: int) -> bool:
 	if not sim.multi_on or i >= sim.multi.size():
 		return false
-	var m: Sim.MultiBall = sim.multi[i]
+	var m: MultiBallPlay.Entry = sim.multi[i]
 	return m.blink > 0 and (m.blink >> 3) & 1 == 0
 
 

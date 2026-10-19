@@ -141,11 +141,8 @@ var pause_choice := ""
 ## sim). True when the frame is done (the sim doesn't step).
 func pause_input(it: SimTypes.Intent) -> bool:
 	var menu: MenuPage = v._hud.pause_menu
-	if GameControls.menu_pressed("move_up"):
-		menu.move(-1)
-		v._sfx.play("blip")
-	elif GameControls.menu_pressed("move_down"):
-		menu.move(1)
+	# the pause menu moves on the keys and pads; a press is the match's HIT
+	if menu.drive(false, false, false) & MenuPage.NAV_MOVED:
 		v._sfx.play("blip")
 	if it.hit_pressed and not it.pause_pressed:
 		menu.press()

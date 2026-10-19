@@ -130,6 +130,44 @@ func select(id: String) -> bool:
 	return true
 
 
+## drive()'s results, as bits.
+const NAV_MOVED := 1             ## Up or Down moved the cursor
+const NAV_CHANGED := 2           ## Left or Right changed the row's value
+const NAV_PRESSED := 4           ## HIT or Start ran the row's press
+const NAV_BACK := 8              ## SOFT or DRIVE asked to go back
+## The row a press in drive() was on (it may move the page on).
+var pressed_id := ""
+
+
+## One frame of the menu keys and pads (the input map's) on this page:
+## Up/Down move, Left/Right change, HIT or Start press, SOFT or DRIVE ask
+## to go back (the screen decides what back means). Each screen keeps its
+## own sounds and follow-ups; the flags say which parts it reads.
+func drive(can_change := true, can_back := true, can_press := true) -> int:
+	var out := 0
+	if GameControls.menu_pressed("move_up"):
+		move(-1)
+		out |= NAV_MOVED
+	elif GameControls.menu_pressed("move_down"):
+		move(1)
+		out |= NAV_MOVED
+	if can_change:
+		var dir := 0
+		if GameControls.menu_pressed("move_left"):
+			dir = -1
+		elif GameControls.menu_pressed("move_right"):
+			dir = 1
+		if dir != 0 and change(dir):
+			out |= NAV_CHANGED
+	if can_back and (Input.is_action_just_pressed("soft") or Input.is_action_just_pressed("drive")):
+		out |= NAV_BACK
+	elif can_press and (Input.is_action_just_pressed("hit") or Input.is_action_just_pressed("start")):
+		pressed_id = current_id()
+		if press():
+			out |= NAV_PRESSED
+	return out
+
+
 func current_id() -> String:
 	return rows[cursor]["id"]
 
