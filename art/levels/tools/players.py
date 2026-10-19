@@ -80,7 +80,9 @@ class Part:
                   ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1))]
             nb = [c for c in nb if c is not None and c not in keep]
             if len(nb) >= 3 and ch not in nb:
-                fixed[(x, y)] = max(set(nb), key=nb.count)
+                # Ties go to the first neighbour (right, left, down, up):
+                # a set's order of strings changes with PYTHONHASHSEED.
+                fixed[(x, y)] = max(nb, key=nb.count)
         self.px = fixed
         return self
 
