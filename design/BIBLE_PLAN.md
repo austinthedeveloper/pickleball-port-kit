@@ -48,7 +48,9 @@ traces an integer-exact port must match), proven against the ROM itself
 records ADR-052 to 057 (the Godot port, overhead, tournament, kitchen
 volleys, online, updater) clash with SNES ADR-052 to 057 (kitchen fault,
 fun modifiers, glow and inverse, ladder per mode, slice, CPU slice).
-Below, **SNES ADR-n** means the SNES repo's. A fix is a "For you" question.
+Decided (2026-10-18): the port keeps its numbers; the SNES repo's are
+cited as **SNES ADR-n**, here and everywhere in this repo. The port's next
+record is ADR-058.
 
 ### Gaps, by the bible's §5
 

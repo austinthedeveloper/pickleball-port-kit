@@ -404,8 +404,8 @@ feature/cld-release-0.9.2   (v0.9.2)
   tuning version. Add a test that replays the SNES conformance traces
   (`make conformance` at the matched commit) frame by frame.
   - Accept: every conformance trace matches; `test_ladder` ladder order
-    matches `make stats`; golden traces regenerated with the reason; an
-    ADR (a port ADR, numbered after the clash is settled).
+    matches `make stats`; golden traces regenerated with the reason; an ADR (the port's next,
+    ADR-058; SNES records cited as "SNES ADR-n").
   - Status: **Planned**. Note: X is SOFT in the port today; the ROM's
     soft shot is Y. Online play's input packing (net/lockstep.gd) gains
     the new presses.
@@ -501,16 +501,13 @@ the chain: each has a default I've gone with.
   a strength slider like CAMERA's (OFF, 25%..100%) with a gentler default
   (KNOWN_ISSUES #58).
 
-- **Phase 5, the bible:** three questions before PORT-35.
-  1. **ADR numbers clash.** Our ADR-052 to 057 (the Godot port, overhead,
-     tournament, kitchen volleys, online, updater) share numbers with the
-     SNES repo's ADR-052 to 057. I'd renumber ours as port ADRs (say
-     `PADR-001` on), and cite the SNES ones as "SNES ADR-n". Say if you'd
-     rather keep them.
-  2. **The park's sign says RIVERDALE PARK** in the remaster's art. The
+- **Phase 5, the bible:** two questions before PORT-35. (ADR numbers:
+  answered 2026-10-18, the port keeps its own and cites the SNES repo's as
+  "SNES ADR-n".)
+  1. **The park's sign says RIVERDALE PARK** in the remaster's art. The
      bible keeps Riverdale [OPEN] and off anything that claims the game
      calls it that (Q10). Keep the sign, or blank it until you decide?
-  3. **The menus.** The ROM's nine title entries have a set order (SNES
+  2. **The menus.** The ROM's nine title entries have a set order (SNES
      ADR-065); the port's menus are its own. I'd keep the port's (it has
      more modes), unless you want the ROM's order.
 
