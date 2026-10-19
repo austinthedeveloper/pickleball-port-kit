@@ -232,9 +232,16 @@ static func pick_addresses(interfaces: Array) -> Array:
 				vpn.append(["TAILSCALE", a])
 			elif kind != "":
 				lan.append([adapter_label(String(i.get("friendly", "")), String(i.get("name", ""))), a])
-	lan.sort_custom(func(x, y): return _rank(x[1]) < _rank(y[1]))
+	# the home router's range first; on one range, a wired adapter before
+	# Wi-Fi (a Wi-Fi network Windows calls Public can block a friend's
+	# call; 0.12.0's tester found the Ethernet address answered)
+	lan.sort_custom(func(x, y): return _rank(x[1]) * 2 + _wifi(x[0]) < _rank(y[1]) * 2 + _wifi(y[0]))
 	var out: Array = lan.slice(0, 2 if vpn.is_empty() else 1) + vpn.slice(0, 1)
 	return out
+
+
+static func _wifi(label: String) -> int:
+	return 1 if "WI-FI" in label or "WIFI" in label or "WLAN" in label or "WIRELESS" in label else 0
 
 
 static func _rank(a: String) -> int:
@@ -249,7 +256,8 @@ static func _rank(a: String) -> int:
 ## "EN0"), or "HOME NETWORK".
 static func adapter_label(friendly: String, name: String) -> String:
 	var n := friendly if friendly != "" and not friendly.begins_with("{") else name
-	if RegEx.create_from_string("^(en|eth|wlan|wlp|enp|eno)[0-9a-z]*$").search(n.to_lower()):
+	# an id, not a name: en0, eth0, wlan0, enp3s0 (Windows' "Ethernet" is a name)
+	if RegEx.create_from_string("^(en|eth|wlan|wlp|enp|eno)[0-9][0-9a-z]*$").search(n.to_lower()):
 		return "NETWORK"                  # macOS and Linux name adapters en0, eth0...
 	var out := ""
 	for c in n.to_upper():
