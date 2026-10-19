@@ -485,7 +485,8 @@ feature/cld-release-0.9.2   (v0.9.2)
   unlockable (§3), side-out scoring, the momentum rule, new modifiers;
   the overhead smash is already in (PORT-24).
   - Done: side-out scoring (ADR-063: MODIFIERS > RULES > SIDE-OUT; the
-    scoring rules got their own RULES page).
+    scoring rules got their own RULES page); the momentum rule (ADR-064:
+    RULES > MOMENTUM).
   - Status: **In progress**.
 
 ## For you

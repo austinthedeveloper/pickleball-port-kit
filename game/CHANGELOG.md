@@ -10,6 +10,9 @@ Pickleball '94, the Godot port. Versions follow
 - **Side-out scoring**, the *Pickleball '95* promise: MODIFIERS > RULES >
   SIDE-OUT. Only the serving side scores; in doubles both partners serve
   before the side out, and a game opens on the second server.
+- **The momentum rule**, another '95 promise: RULES > MOMENTUM. After a
+  volley, step into your kitchen before the ball bounces or is hit again
+  and it's your point lost (MOMENTUM!).
 
 ### Changed
 - WIN BY 2 and LAVA moved to the new RULES page (MODIFIERS > RULES).

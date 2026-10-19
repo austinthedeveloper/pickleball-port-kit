@@ -189,6 +189,8 @@ const FAULT_OUT := 4
 const FAULT_SECOND_BOUNCE := 5
 const FAULT_EARLY_VOLLEY := 6
 const FAULT_LAVA := 7
+## The momentum rule (port ADR-064): a volley carried into your kitchen.
+const FAULT_MOMENTUM := 8
 
 const REQUIRED_BOUNCE_NONE := 0
 const REQUIRED_BOUNCE_SERVE := 1
@@ -239,6 +241,11 @@ const MOD_INVERSE := 256
 ## only the serving side scores; in doubles both partners serve before a
 ## side out (the first serve of a game is the second server's).
 const MOD_SIDE_OUT := 512
+## MOMENTUM (port ADR-064): after a volley, a step into your kitchen before
+## the ball next bounces or is hit loses the point. MOMENTUM_GRACE px past
+## the line are forgiven (players run fast in this game).
+const MOD_MOMENTUM := 1024
+const MOMENTUM_GRACE := 2
 const MOD_GHOST_Z := 8        ## GHOST: above this (px) the ball blinks
 const MOD_GHOST_SHOWN := 2    ## ... shown this many frames in every 16
 const MOD_POPCORN_STRIDE := 12   ## a level adds a step every 12 ticks (+8%)
@@ -282,4 +289,5 @@ static func fault_word(fault: int) -> String:
 		FAULT_SECOND_BOUNCE: return "2 BOUNCES"
 		FAULT_EARLY_VOLLEY: return "VOLLEY!"
 		FAULT_LAVA: return "LAVA!"
+		FAULT_MOMENTUM: return "MOMENTUM!"
 	return "POINT!"

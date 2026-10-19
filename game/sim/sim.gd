@@ -40,6 +40,8 @@ var match_winner := K.NO_TEAM
 var hit_stop := 0
 ## The last rally contact was before the ball bounced (ADR-055, the kitchen).
 var contact_volley := 0
+## MOMENTUM: the slot whose volley is still carrying them (-1: none).
+var momentum_slot := -1
 var shot_serial := 0            # u8
 var frame_count := 0            # u16
 
@@ -760,6 +762,7 @@ func resolve_point(losing_team: int, fault: int) -> void:
 	var winner := 1 - losing_team
 	point_winner = winner
 	last_fault = fault
+	momentum_slot = -1
 	# SIDE-OUT: only the serving side scores
 	point_scored = not (config.modifiers & K.MOD_SIDE_OUT) or winner == serving_team
 	if point_scored:
@@ -791,6 +794,8 @@ func rules_process_player_hit(slot: int) -> void:
 		resolve_point(team, K.FAULT_KITCHEN)
 
 func rules_process_ball_events(ev: int) -> void:
+	if ev & K.BALL_EVENT_BOUNCE:
+		momentum_slot = -1           # MOMENTUM: the ball bounced, balance back
 	if phase == K.PHASE_SERVE_FAULT:
 		resolve_point(_last_hitter_team(), last_fault)
 		return
@@ -854,6 +859,7 @@ func _game_initialize() -> void:
 	team_score = [0, 0]
 	required_bounce = K.REQUIRED_BOUNCE_NONE
 	serving_team = 0
+	momentum_slot = -1
 	server_number = 2                # SIDE-OUT: "0-0-2"
 	first_server = -1
 	opening = true
@@ -954,6 +960,9 @@ func contact(slot: int) -> void:
 	p.flash_timer = K.HIT_FLASH_FRAMES
 	hit_stop = K.HIT_STOP_FRAMES
 	emit(K.EVENT_HIT, K.from_fp(ball.x_fp), K.from_fp(ball.y_fp), slot | (p.shot_type << 4))
+	# MOMENTUM: a volley carries its hitter until the next bounce or hit
+	if config.modifiers & K.MOD_MOMENTUM:
+		momentum_slot = slot if contact_volley else -1
 	# POPCORN: each hit in the rally adds pace, up to the cap.
 	if (config.modifiers & K.MOD_POPCORN) and popcorn_level < K.MOD_POPCORN_LEVELS \
 			and config.practice == 0:
@@ -1048,6 +1057,11 @@ static func lava_target(x: int, team: int) -> int:
 		return maxi(x, K.COURT_KITCHEN_RIGHT_X + K.MOD_LAVA_MARGIN)
 	return mini(x, K.COURT_KITCHEN_LEFT_X - K.MOD_LAVA_MARGIN)
 
+## MOMENTUM: in the kitchen past the forgiven margin.
+static func momentum_in_kitchen(x_fp: int, y_fp: int, team: int) -> bool:
+	var grace := K.to_fp(K.MOMENTUM_GRACE)
+	return in_kitchen(x_fp + (grace if team else -grace), y_fp, team)
+
 func _update_live() -> void:
 	if config.modifiers & K.MOD_LAVA:
 		for p in players:
@@ -1055,6 +1069,11 @@ func _update_live() -> void:
 				resolve_point(p.team, K.FAULT_LAVA)
 				break
 		if phase != K.PHASE_LIVE:
+			return
+	if momentum_slot >= 0:
+		var mp: Player = players[momentum_slot]
+		if momentum_in_kitchen(mp.x_fp, mp.y_fp, mp.team):
+			resolve_point(mp.team, K.FAULT_MOMENTUM)
 			return
 	var hit_player := 0
 	for p in players:
@@ -1231,6 +1250,8 @@ func snapshot() -> Array:
 		serve_aim_y, server_y_fp]
 	if config.modifiers & K.MOD_SIDE_OUT:
 		s.append_array([server_number, first_server, point_scored, opening])
+	if config.modifiers & K.MOD_MOMENTUM:
+		s.append(momentum_slot)
 	s.append_array(ball.to_array())
 	for p in players:
 		s.append_array(p.to_array())
