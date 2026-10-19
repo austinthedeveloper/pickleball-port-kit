@@ -405,3 +405,8 @@ the chain: each has a default I've gone with.
   message the screen shows. The guest plays on the right side of the
   court; flipping the view so each of you is on the left is possible.
 
+- **Next, from your note (2026-10-18):** the screen shake is too jarring.
+  Today ACCESSIBILITY > SCREEN SHAKE only turns it on or off; the plan is
+  a strength slider like CAMERA's (OFF, 25%..100%) with a gentler default
+  (KNOWN_ISSUES #58).
+

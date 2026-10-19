@@ -4,6 +4,13 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [Unreleased]
+
+### Changed
+- **CAMERA** (OPTIONS) now starts at 50%, so the view leans toward the
+  ball. If yours was OFF (the old default) it moves to 50% once; set it
+  back to OFF and it stays.
+
 ## [0.9.0] - 2026-10-18
 
 Updates in the game. Download this one in full; after it, OPTIONS >

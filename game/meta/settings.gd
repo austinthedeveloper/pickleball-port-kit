@@ -24,7 +24,7 @@ static var points_i := 1
 ## -2 = the ladder's current rung, -1 = the default CPU, else a team.
 static var opponent_i := -2
 static var two_players := false
-static var camera_i := 0
+static var camera_i := 1                ## CAMERAS: 50% (since 0.9.1; was OFF)
 static var mod_bits := 0
 ## Window options: fullscreen, and integer scaling (crisp) or fit (fills).
 static var fullscreen := false
@@ -58,7 +58,7 @@ static func load_from(save: SaveGame) -> void:
 	points_i = clampi(int(st["points"]), 0, POINTS.size() - 1)
 	two_players = int(st["players"]) == 2
 	opponent_i = clampi(int(st["opponent"]), -2, Opponents.count() - 1)
-	camera_i = clampi(int(st.get("camera", 0)), 0, CAMERAS.size() - 1)
+	camera_i = clampi(int(st.get("camera", 1)), 0, CAMERAS.size() - 1)
 	var bits := int(st.get("mod_bits", -1))
 	mod_bits = (bits & 15) if bits >= 0 else \
 		OLD_MOD_PRESETS[clampi(int(st.get("mods", 0)), 0, OLD_MOD_PRESETS.size() - 1)]

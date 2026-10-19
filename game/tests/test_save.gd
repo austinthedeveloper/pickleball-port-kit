@@ -145,3 +145,19 @@ func test_records_and_ladder() -> void:
 	check(s.advance_ladder(8), "beating the last rung clears the ladder")
 	eq(s.data["records"]["ladder_rung"], 0, "and it starts over")
 	eq(s.data["records"]["ladder_clears"], 1)
+
+
+## 0.9.1: CAMERA defaults to 50%. A new save starts there; a save from
+## before still on OFF (the old default) moves to 50% once; one on 100%
+## stays; OFF chosen after the move stays OFF.
+func test_camera_default_moves_once() -> void:
+	eq(SaveGame.defaults()["settings"]["camera"], 1, "a new save: 50%")
+	var old := SaveGame.defaults()
+	old["settings"].erase("camera_rev")
+	old["settings"]["camera"] = 0
+	eq(SaveGame.migrate(SaveGame.VERSION, old)["settings"]["camera"], 1, "an old save on OFF: 50%")
+	old["settings"]["camera"] = 3
+	eq(SaveGame.migrate(SaveGame.VERSION, old)["settings"]["camera"], 3, "an old save on 100%: kept")
+	var after := SaveGame.migrate(SaveGame.VERSION, SaveGame.defaults())
+	after["settings"]["camera"] = 0
+	eq(SaveGame.migrate(SaveGame.VERSION, after)["settings"]["camera"], 0, "OFF chosen after: kept")

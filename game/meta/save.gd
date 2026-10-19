@@ -37,7 +37,7 @@ var career := Career.new()
 static func defaults() -> Dictionary:
 	return {
 		"settings": {"venue": 0, "difficulty": K.DIFFICULTY_MEDIUM, "points": 1,
-			"players": 1, "opponent": -2, "camera": 0, "mods": 0, "sound": 0,
+			"players": 1, "opponent": -2, "camera": 1, "camera_rev": 1, "mods": 0, "sound": 0,
 			"practice": Practice.DEFAULTS.duplicate(),
 			# menus (PORT-03): modifiers as bits (-1: take the old "mods"
 			# preset), window options. New keys fill from these defaults on
@@ -111,6 +111,13 @@ static func migrate(version: int, d: Dictionary) -> Dictionary:
 		out["initials"] = defaults()["initials"].duplicate()
 	if version < 5:
 		out["career"] = Career.new().to_dict()
+	# 0.9.1: CAMERA's default went from OFF to 50%. A save from before
+	# (no camera_rev) still on OFF moves to 50% once; a choice made after
+	# stays. Not a layout change: the key's meaning is the same.
+	if out.has("settings") and not out["settings"].has("camera_rev"):
+		if int(out["settings"].get("camera", 0)) == 0:
+			out["settings"]["camera"] = 1
+		out["settings"]["camera_rev"] = 1
 	var def := defaults()
 	for section in def:
 		if not out.has(section):
