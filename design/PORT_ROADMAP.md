@@ -66,6 +66,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-38 | Career: 13 hats, 16 unlocks, the Hat Museum | | Planned |
 | PORT-39 | The show: rings, celebrations, critters, quips | | Planned |
 | PORT-40 | The Pickleball '95 promises | | Planned |
+| PORT-41 | Four swings and the short hold | `feature/cld-four-shots` | Ready to test |
 
 ## Releases
 
@@ -396,19 +397,38 @@ feature/cld-release-0.9.2   (v0.9.2)
 ### 35. Catch the sim up to the ROM (planned)
 
 - [ ] `PORT-35` Import the SNES repo's `docs/tuning/tuning.json`
-  (TUNING_VERSION 4) and its `opponents.json`, `paddles.json`, `career.json`; port SNES ADR-052
-  (the kitchen line counts), 053 (GHOST, POPCORN, ICE), 055 (ladder per
-  mode, a save migration), 056/057 (slice on X, short hold on L/R, CPU
-  slice), 058 (CPU serve power and duds), 062 (the rebalance) and tuning
-  v2-4 (the doubles think stagger from match frame 0). Record the port's
-  tuning version. Add a test that replays the SNES conformance traces
-  (`make conformance` at the matched commit) frame by frame.
+  (TUNING_VERSION 4) and its `opponents.json`, `paddles.json`,
+  `career.json`; port SNES ADR-052 (the kitchen line counts), 053 (GHOST,
+  POPCORN, ICE), 055 (ladder per mode, a save migration), 058 (CPU serve
+  power and duds), 062 (the rebalance) and tuning v2-4 (the doubles think
+  stagger from match frame 0). Record the port's tuning version. Add a
+  test that replays the SNES conformance traces (`make conformance` at the
+  matched commit) frame by frame.
   - Accept: every conformance trace matches; `test_ladder` ladder order
-    matches `make stats`; golden traces regenerated with the reason; an ADR (the port's next,
-    ADR-058; SNES records cited as "SNES ADR-n").
-  - Status: **Planned**. Note: X is SOFT in the port today; the ROM's
-    soft shot is Y. Online play's input packing (net/lockstep.gd) gains
-    the new presses.
+    matches `make stats`; golden traces regenerated with the reason; a port
+    ADR (SNES records cited as "SNES ADR-n").
+  - Status: **Planned**. SNES ADR-056 and 057 (the slice and the short
+    hold) are done: PORT-41, ADR-058.
+
+### 41. `feature/cld-four-shots`: four swings and the short hold (asked for 2026-10-18)
+
+- [x] `PORT-41` The first piece of PORT-35 (ADR-058): SNES ADR-056 and 057.
+  SLICE (slow, never deep, steady), SHORT held (any swing goes short, the
+  D-pad still moves), the fast drop's long spray off a stretch, and CPUs
+  that slice (WALT, RAVEN, VLAD 3; ACE, JADE 4). Pad by position: SLICE
+  north, SHORT LB or RB; keyboard I and Shift/U; both on CONTROLS. The
+  overhead moved to shot 4 so the slice has the C's number; its own sound;
+  the key legend and the SHOTS lesson teach all four.
+  - Verified: `test_shots.gd` (the SNES repo's C tests, ported: the slice
+    and fast drop's flights, the short hold on fake pads for both teams,
+    RAVEN slicing 11 of 91 rally swings, none at 0; a high slice stays a
+    slice; the bindings), `test_controls`, `test_tutorial`, `test_layout`
+    (now also failing on a panel off the screen, which caught CONTROLS at
+    13 rows). Golden traces: only doubles_demo, for the overhead's number
+    (identical under the old one). 307/307 plus the e2e. Screenshots: the
+    legend on keys and an Xbox pad, CONTROLS, the SHOTS card.
+  - Status: **Ready to test**: try I / Y for the slice and hold Shift / LB
+    with each swing.
 
 ### 36-40 (planned)
 

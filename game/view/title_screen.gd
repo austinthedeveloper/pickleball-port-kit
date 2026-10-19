@@ -90,8 +90,9 @@ func _ready() -> void:
 	sub.align = 0.5
 	sub.position = Vector2(480, 94)
 	_ui.add_child(sub)
-	var keys := PromptBar.new().setup([["dpad", "MOVE"], ["hit", "HIT"], ["drive", "DRIVE"],
-		["soft", "SOFT"], ["start", "PAUSE"]], Vector2(480, 518))
+	# the four swings and SHORT (SNES ADR-056); moving needs no telling
+	var keys := PromptBar.new().setup([["hit", "HIT"], ["drive", "DRIVE"], ["soft", "SOFT"],
+		["slice", "SLICE"], ["short", "SHORT"], ["start", "PAUSE"]], Vector2(480, 518))
 	_ui.add_child(keys)
 	_record = BitmapText.new()
 	_record.font = "small"
@@ -284,7 +285,7 @@ func _build_pages() -> void:
 		Bindings.reset()
 		_store_settings()})
 	_add_page("controls", "CONTROLS", control_rows, [["hit", "REBIND"], ["back", "BACK"]],
-		Rect2(250, 70, 460, 0))
+		Rect2(250, 34, 460, 0))          # high: SLICE and SHORT made it 13 rows
 	career.build_pages()
 	_add_page("records", "RECORDS", [
 		{"id": "singles", "label": "SINGLES", "value": func(): return _wl("singles")},

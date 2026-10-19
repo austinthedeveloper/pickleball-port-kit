@@ -115,12 +115,13 @@ class AiStyle:
 	var team := 0
 	var tactics := 0
 	var footwork := 0
+	var slice := 0                   ## a slice every Nth rally shot, 0 never (SNES ADR-057)
 
 	func copy() -> AiStyle:
 		var s := AiStyle.new()
 		for f in ["late_period", "reaction", "dink_period", "lob_distance",
 				"putaway_z", "putaway_distance", "aim", "depth", "recover",
-				"speed", "volley", "net", "team", "tactics", "footwork"]:
+				"speed", "volley", "net", "team", "tactics", "footwork", "slice"]:
 			s.set(f, get(f))
 		return s
 
@@ -128,7 +129,7 @@ class AiStyle:
 		var s := AiStyle.new()
 		for f in ["late_period", "reaction", "dink_period", "lob_distance",
 				"putaway_z", "putaway_distance", "recover", "speed",
-				"volley", "net", "team", "tactics", "footwork"]:
+				"volley", "net", "team", "tactics", "footwork", "slice"]:
 			if d.has(f):
 				s.set(f, int(d[f]))
 		s.aim = {"away": K.AIM_AWAY, "body": K.AIM_BODY,

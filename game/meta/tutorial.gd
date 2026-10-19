@@ -4,7 +4,7 @@
 ## card and banner (view/tutorial_view.gd).
 ##
 ##   RALLY        the ball machine feeds at you: return 3
-##   SHOTS        land one DRIVE and one SOFT return
+##   SHOTS        land a DRIVE, a SOFT and a SLICE (SNES ADR-056); SHORT drops any
 ##   SMASH        the machine lobs: smash 1 back in
 ##   SERVE        against a KID CPU: 2 serves in
 ##   TWO BOUNCES  2 rallies past the two-bounce rule
@@ -21,10 +21,10 @@ const LESSONS := [
 			"OVER THE NET AND IN, THREE TIMES."],
 		"prompts": [["dpad", "MOVE"], ["hit", "HIT"]],
 		"drill": [Practice.SHOT_DRIVE, Practice.TARGET_AT_YOU, Practice.RATE_SLOW]},
-	{"id": "shots", "title": "SHOTS", "goal": 2, "count": "SHOTS",
-		"lines": ["DRIVE IS FAST AND FLAT. SOFT LOBS IT,", "OR DINKS IT SHORT IF YOU HOLD AWAY",
-			"FROM THE NET. LAND ONE OF EACH."],
-		"prompts": [["drive", "DRIVE"], ["soft", "SOFT"]],
+	{"id": "shots", "title": "SHOTS", "goal": 3, "count": "SHOTS",
+		"lines": ["DRIVE IS FAST. SOFT LOBS. SLICE IS SLOW", "AND STEADY. HOLD SHORT AND ANY SHOT",
+			"DROPS SHORT. LAND ONE OF EACH SWING."],
+		"prompts": [["drive", "DRIVE"], ["soft", "SOFT"], ["slice", "SLICE"], ["short", "SHORT"]],
 		"drill": [Practice.SHOT_DRIVE, Practice.TARGET_AT_YOU, Practice.RATE_SLOW]},
 	{"id": "smash", "title": "SMASH", "goal": 1, "count": "SMASH",
 		"lines": ["A HIGH BALL ON ITS WAY DOWN IS YOURS.", "STAND A STEP IN FRONT OF THE LOB AND",
@@ -159,7 +159,8 @@ func observe(sim: Sim, events: Array) -> void:
 				"rally":
 					_gain()
 				"shots":
-					if _last_shot in [K.SHOT_DRIVE, K.SHOT_SOFT] and not _shots_landed.has(_last_shot):
+					if _last_shot in [K.SHOT_DRIVE, K.SHOT_SOFT, K.SHOT_SLICE] \
+							and not _shots_landed.has(_last_shot):
 						_shots_landed[_last_shot] = true
 						_gain()
 				"smash":

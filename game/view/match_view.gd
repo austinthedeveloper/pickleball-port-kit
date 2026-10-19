@@ -298,7 +298,7 @@ func _rumble_hit(slot: int, shot: int) -> void:
 	if demo or sim.config.human[slot] == 0:
 		return
 	var strength: Array = {K.SHOT_DRIVE: [0.3, 0.7, 0.12], K.SHOT_SOFT: [0.2, 0.0, 0.06],
-		K.SHOT_OVERHEAD: [0.5, 1.0, 0.18]}.get(
+		K.SHOT_OVERHEAD: [0.5, 1.0, 0.18], K.SHOT_SLICE: [0.15, 0.1, 0.06]}.get(
 		shot, [0.35, 0.25, 0.08])
 	if net:                              # online: this machine's own player only, on P1's pad
 		if slot == my_team() * 2:

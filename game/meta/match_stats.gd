@@ -8,7 +8,7 @@
 class_name MatchStats
 extends RefCounted
 
-const SHOT_NAMES := ["STD", "DRIVE", "SOFT", "SMASH"]
+const SHOT_NAMES := ["STD", "DRIVE", "SOFT", "SLICE", "SMASH"]   ## by K.SHOT_*
 
 var teams: Array = [_team(), _team()]
 var rallies: Array = []
@@ -21,7 +21,7 @@ var _fault := K.FAULT_NONE
 
 static func _team() -> Dictionary:
 	return {"points": 0, "serve_points": 0, "serve_won": 0, "aces": 0,
-		"winners": [0, 0, 0, 0], "errors": {}, "shots": 0, "drives": 0,
+		"winners": [0, 0, 0, 0, 0], "errors": {}, "shots": 0, "drives": 0,
 		"smashes": 0}
 
 
@@ -78,7 +78,10 @@ func _point(winner: int) -> void:
 
 func winners(team: int) -> int:
 	var t: Array = teams[team]["winners"]
-	return t[0] + t[1] + t[2] + t[3]
+	var n := 0
+	for w in t:
+		n += int(w)
+	return n
 
 
 func errors(team: int) -> int:

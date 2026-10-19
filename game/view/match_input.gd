@@ -20,7 +20,8 @@ var script_intent: Callable
 
 
 func net_read() -> Variant:
-	var it: SimTypes.Intent = script_intent.call() if script_intent.is_valid() else GameControls.read_intent()
+	var it: SimTypes.Intent = script_intent.call() if script_intent.is_valid() \
+		else GameControls.read_intent(v.my_team())
 	if v.input_lock > 0:
 		v.input_lock -= 1
 		it = SimTypes.Intent.new()
@@ -44,7 +45,7 @@ func read() -> Variant:
 			return null
 	elif not v.demo:
 		var it := GameControls.read_intent()
-		var it2: SimTypes.Intent = GameControls.read_pad_intent(GameControls.p2_pad) if v.sim.config.human[2] else null
+		var it2: SimTypes.Intent = GameControls.read_pad_intent(GameControls.p2_pad, 1) if v.sim.config.human[2] else null
 		# 2P partnering you in the park (ADR-034): slot 1, on their pad
 		var it1: SimTypes.Intent = GameControls.read_pad_intent(GameControls.p2_pad) \
 			if v.sim.config.human[1] and not v.sim.config.human[2] else null
@@ -73,7 +74,7 @@ func multiplayer_intents() -> Array:
 		var dev: int = v.slot_pads[s] if s < v.slot_pads.size() else -1
 		if dev < 0 or not v.sim.config.human[s]:
 			continue
-		var it := GameControls.read_pad_intent(dev)
+		var it := GameControls.read_pad_intent(dev, 1 if s >= 2 else 0)
 		menu.hit_pressed |= it.hit_pressed
 		menu.pause_pressed |= it.pause_pressed
 		human[s] = it

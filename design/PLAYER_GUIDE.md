@@ -257,6 +257,8 @@ partner. The CPUs take the remaining colours.
 | B | Standard swing. When you're holding the ball, press B (or A/Y) to serve, or hold it to charge a faster serve. |
 | A | Drive: a faster, flatter shot. Mistimed drives spray wider. |
 | Y | Lob: a slow, high shot deep over an opponent at the net. With the D-pad away from the net, it's a dink that lands softly in the opponent's kitchen. |
+| X | Slice: slow and low, never deep, and steady off a stretch. It buys time to get back. |
+| L or R (hold) | Short: any swing goes short while held (a short shot, a fast drop, a dink, a short slice). The D-pad still moves and aims at a sideline. |
 | Start | Open Player Select from the title; pause and unpause during play (in practice too); back to the title from the result screen. |
 | Select | Debug and hardware-test ROMs only: OBJ stress scene. |
 

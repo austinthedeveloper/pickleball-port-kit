@@ -86,6 +86,12 @@ const HIT_LOB_MIN_FRAMES := 44
 const HIT_LOB_MAX_FRAMES := 50
 const HIT_PACE_DINK_FP := 24
 const HIT_TARGET_DINK_RIGHT := COURT_NET_X + 18
+# The slice and the fast drop (SNES ADR-056, collision.h)
+const HIT_PACE_SLICE_FP := 30          ## 1.875 px/frame
+const HIT_SLICE_MIN_FRAMES := 34
+const HIT_SLICE_STRETCH_WIDE := 10
+const HIT_SLICE_STRETCH_LONG := 8
+const HIT_FAST_DROP_STRETCH_LONG := 34  ## a drive aimed short, off a stretch
 # The overhead (ADR-053, port-only): a standard or drive swing at a falling
 # ball this high becomes a smash, fast and steep.
 const HIT_OVERHEAD_Z := 20
@@ -100,7 +106,8 @@ const HIT_OVERHEAD_NET_CLEAR := 3   ## px over the tape a smash keeps, if its fl
 const SHOT_STANDARD := 0
 const SHOT_DRIVE := 1
 const SHOT_SOFT := 2
-const SHOT_OVERHEAD := 3   ## never asked for: a high contact makes it (ADR-053)
+const SHOT_SLICE := 3      ## X: slow, never deep, steady off a stretch (SNES ADR-056)
+const SHOT_OVERHEAD := 4   ## never asked for: a high contact makes it (ADR-053; the port's)
 
 const OWNER_NONE := 0
 const OWNER_HUMAN := 1

@@ -35,8 +35,10 @@ You move with the Control Pad and hit with B, A, and Y. The Control Pad also aim
 | B | Standard swing. When you are holding the ball, press B to serve, or hold it to charge a faster serve. |
 | A | Drive: a fast, flat shot. A mistimed drive sprays wide. |
 | Y | Lob: a slow, high shot over an opponent at the net. Hold the Control Pad away from the net for a dink that drops softly into the opponent's kitchen. |
+| X | Slice: a slow, low shot that never goes deep and stays steady when you have to stretch. It buys you time. |
+| L or R (hold) | Short: while held, any swing goes short (B a short shot, A a fast drop, Y a dink, X a short slice); the Control Pad still moves and aims at a sideline. |
 | START | Pause and resume. |
-| X, L, R, SELECT | Not used during play. |
+| SELECT | Not used during play. |
 
 ### In the Menus
 

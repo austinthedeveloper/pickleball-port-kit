@@ -50,7 +50,7 @@ volleys, online, updater) clash with SNES ADR-052 to 057 (kitchen fault,
 fun modifiers, glow and inverse, ladder per mode, slice, CPU slice).
 Decided (2026-10-18): the port keeps its numbers; the SNES repo's are
 cited as **SNES ADR-n**, here and everywhere in this repo. The port's next
-record is ADR-058.
+record is ADR-059.
 
 ### Gaps, by the bible's §5
 
@@ -62,8 +62,8 @@ Status: **have** (the port does it), **partly**, **missing**, **differs**
 | Kitchen volley fault, the **line counts as kitchen** | 052 | **differs** | Port ADR-055 calls the line outside (an "arcade allowance"). The ROM: `COURT_IN_KITCHEN_FP` is `>=`/`<=`. Copy the ROM. |
 | Charged serve: let go on the last white block and it dumps into the net | 044 | check | Port has ADR-044; check the dud block matches. |
 | CPU serve power and duds (bangers serve hard, sometimes into the net) | 058 | **missing** | Sim + opponents.json. |
-| Slice on **X**; **hold L or R** to hit short (L+A fast drop, L+Y dink) | 056 | **missing** | Port X is SOFT; L/R unbound in play. New shot type and input. |
-| CPUs slice (Goth Club, Champs) | 057 | **missing** | |
+| Slice on **X**; **hold L or R** to hit short (L+A fast drop, L+Y dink) | 056 | **have** | PORT-41 (ADR-058): SLICE on the pad's north button, SHORT on LB/RB. |
+| CPUs slice (Goth Club, Champs) | 057 | **have** | PORT-41. |
 | Ladder rebalance, every rung measurably harder | 062 + tuning v2-4 | **missing** | opponents.json differs from the ROM's in 216 lines. |
 | Singles and doubles keep **separate ladder places**; quitting a ladder match resets it | 055 | **missing** | Save change (a migration). |
 | Modifiers **GHOST ball, POPCORN rally, ICE footing** | 053 | **missing** | Sim (POPCORN adds ball steps; ICE is footing). |

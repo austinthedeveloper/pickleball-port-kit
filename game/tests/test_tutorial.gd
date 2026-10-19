@@ -52,13 +52,13 @@ func test_machine_lessons() -> void:
 	sim.practice.streak = 0
 	var shots := _lesson("shots")
 	shots.observe(sim, [])
-	for shot in [K.SHOT_DRIVE, K.SHOT_DRIVE, K.SHOT_STANDARD, K.SHOT_SOFT]:
+	for shot in [K.SHOT_DRIVE, K.SHOT_DRIVE, K.SHOT_STANDARD, K.SHOT_SOFT, K.SHOT_SLICE]:
 		shots.observe(sim, [[K.EVENT_HIT, 60, 130, 0 | (shot << 4)]])
 		sim.practice.streak += 1
 		shots.observe(sim, [])
 		if shot == K.SHOT_DRIVE:
 			eq(shots.progress, 1, "a DRIVE counts once")
-	check(shots.done, "SHOTS: a DRIVE and a SOFT")
+	check(shots.done, "SHOTS: a DRIVE, a SOFT and a SLICE")
 	sim.practice.streak = 0
 	var smash := _lesson("smash")
 	smash.observe(sim, [])

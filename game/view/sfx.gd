@@ -14,12 +14,13 @@ const EFFECTS := {
 	"hit": ["0_hit", "0_hit_2", "0_hit_3", "0_hit_4"],
 	"hit_drive": ["0_hit_drive", "0_hit_drive_2", "0_hit_drive_3", "0_hit_drive_4"],
 	"hit_smash": ["0_hit_smash", "0_hit_smash_2", "0_hit_smash_3", "0_hit_smash_4"],
+	"hit_slice": ["0_hit_slice", "0_hit_slice_2", "0_hit_slice_3", "0_hit_slice_4"],
 	"hit_soft": ["0_hit_soft", "0_hit_soft_2", "0_hit_soft_3", "0_hit_soft_4"],
 	"bounce": ["1_bounce", "1_bounce_2", "1_bounce_3"],
 	"net": ["2_net"], "whistle": ["3_whistle"], "applause": ["4_applause"],
 	"blip": ["5_blip"], "confirm": ["6_confirm"], "back": ["7_back"]}
 ## Pitch spread per play (a fraction either way).
-const JITTER := {"hit": 0.03, "hit_drive": 0.03, "hit_smash": 0.03, "hit_soft": 0.03, "bounce": 0.04}
+const JITTER := {"hit": 0.03, "hit_drive": 0.03, "hit_smash": 0.03, "hit_slice": 0.03, "hit_soft": 0.03, "bounce": 0.04}
 ## Per-effect level trims (dB) for the HD set's mix.
 const TRIM_DB := {"whistle": -3.0, "applause": 1.0, "net": -1.0, "hit_soft": 1.0}
 const AMBIENCE := {"park": "ambience_park", "lakeside": "ambience_lakeside",

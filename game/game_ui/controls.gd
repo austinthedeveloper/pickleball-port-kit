@@ -17,12 +17,16 @@ const ACTIONS := {
 	"hit": [KEY_SPACE, KEY_J],
 	"drive": [KEY_K],
 	"soft": [KEY_L],
+	"slice": [KEY_I],                  # SNES X (SNES ADR-056)
+	"short": [KEY_SHIFT, KEY_U],       # SNES L or R held: any shot goes short
 	"start": [KEY_ENTER, KEY_ESCAPE],
 }
 const PAD_BUTTONS := {
 	"hit": JOY_BUTTON_A,
 	"drive": JOY_BUTTON_B,
 	"soft": JOY_BUTTON_X,
+	"slice": JOY_BUTTON_Y,
+	"short": JOY_BUTTON_LEFT_SHOULDER,   # RB too (added in _ready)
 	"start": JOY_BUTTON_START,
 	"move_up": JOY_BUTTON_DPAD_UP,
 	"move_down": JOY_BUTTON_DPAD_DOWN,
@@ -157,6 +161,10 @@ func _ready() -> void:
 			var b := InputEventJoypadButton.new()
 			b.button_index = PAD_BUTTONS[action]
 			InputMap.action_add_event(action, b)
+	# SHORT is either shoulder, as on the SNES (L or R)
+	var rb := InputEventJoypadButton.new()
+	rb.button_index = JOY_BUTTON_RIGHT_SHOULDER
+	InputMap.action_add_event("short", rb)
 	for pair in [["move_left", JOY_AXIS_LEFT_X, -1.0], ["move_right", JOY_AXIS_LEFT_X, 1.0],
 			["move_up", JOY_AXIS_LEFT_Y, -1.0], ["move_down", JOY_AXIS_LEFT_Y, 1.0]]:
 		var m := InputEventJoypadMotion.new()
@@ -169,7 +177,7 @@ func _ready() -> void:
 ## Presses latched from input events until the next sim step reads them,
 ## so a tap shorter than a physics tick (fast frames, high refresh) is
 ## never lost.
-const LATCHED := ["hit", "drive", "soft", "start"]
+const LATCHED := ["hit", "drive", "soft", "slice", "start"]
 static var _latch := {}
 
 
@@ -243,7 +251,12 @@ static func pad_bits() -> Array:
 	return [pressed, held]
 
 
-static func read_intent() -> SimTypes.Intent:
+## P1's intent from the input map. The four swings (SNES ADR-056): HIT
+## (standard), DRIVE, SOFT (a lob, or a dink aimed away), SLICE. SHORT
+## held (L or R on a pad) aims away from your own net, so any of them goes
+## short, while the D-pad still moves and aims at a sideline; `team` says
+## which way away is (0 left: -1; 1 right: +1).
+static func read_intent(team := 0) -> SimTypes.Intent:
 	var it := SimTypes.Intent.new()
 	if Input.is_action_pressed("move_left"):
 		it.move_x = -1
@@ -253,18 +266,21 @@ static func read_intent() -> SimTypes.Intent:
 		it.move_y = -1
 	elif Input.is_action_pressed("move_down"):
 		it.move_y = 1
-	it.aim_x = it.move_x
+	it.aim_x = (1 if team else -1) if Input.is_action_pressed("short") else it.move_x
 	it.aim_y = it.move_y
 	var b := _pressed("hit")
 	var a := _pressed("drive")
 	var y := _pressed("soft")
-	it.hit_pressed = 1 if (a or b or y) else 0
+	var x := _pressed("slice")
+	it.hit_pressed = 1 if (a or b or y or x) else 0
 	it.hit_held = 1 if (Input.is_action_pressed("hit") or Input.is_action_pressed("drive")
-		or Input.is_action_pressed("soft")) else 0
+		or Input.is_action_pressed("soft") or Input.is_action_pressed("slice")) else 0
 	if a:
 		it.shot = K.SHOT_DRIVE
 	elif y:
 		it.shot = K.SHOT_SOFT
+	elif x:
+		it.shot = K.SHOT_SLICE
 	it.pause_pressed = 1 if _pressed("start") else 0
 	return it
 
@@ -305,7 +321,7 @@ static func joy_axis(device: int, axis: int) -> float:
 static var _pad_prev := {}
 
 ## A pad's intent this frame (2P and multiplayer). Menu is the pause.
-static func read_pad_intent(device: int) -> SimTypes.Intent:
+static func read_pad_intent(device: int, team := 0) -> SimTypes.Intent:
 	var it := SimTypes.Intent.new()
 	if not device in connected_pads():
 		return it
@@ -319,22 +335,26 @@ static func read_pad_intent(device: int) -> SimTypes.Intent:
 		it.move_y = -1
 	elif joy_button(device, JOY_BUTTON_DPAD_DOWN) or ay > 0.4:
 		it.move_y = 1
-	it.aim_x = it.move_x
+	var short := joy_button(device, JOY_BUTTON_LEFT_SHOULDER) or joy_button(device, JOY_BUTTON_RIGHT_SHOULDER)
+	it.aim_x = (1 if team else -1) if short else it.move_x
 	it.aim_y = it.move_y
 	var held := {}
-	for b in [JOY_BUTTON_A, JOY_BUTTON_B, JOY_BUTTON_X, JOY_BUTTON_START]:
+	for b in [JOY_BUTTON_A, JOY_BUTTON_B, JOY_BUTTON_X, JOY_BUTTON_Y, JOY_BUTTON_START]:
 		held[b] = joy_button(device, b)
 	var prev: Dictionary = _pad_prev.get(device, {})
 	var pressed := {}
 	for b in held:
 		pressed[b] = held[b] and not prev.get(b, false)
 	_pad_prev[device] = held
-	it.hit_pressed = 1 if (pressed[JOY_BUTTON_A] or pressed[JOY_BUTTON_B] or pressed[JOY_BUTTON_X]) else 0
-	it.hit_held = 1 if (held[JOY_BUTTON_A] or held[JOY_BUTTON_B] or held[JOY_BUTTON_X]) else 0
+	var swings := [JOY_BUTTON_A, JOY_BUTTON_B, JOY_BUTTON_X, JOY_BUTTON_Y]
+	it.hit_pressed = 1 if swings.any(func(b): return pressed[b]) else 0
+	it.hit_held = 1 if swings.any(func(b): return held[b]) else 0
 	if pressed[JOY_BUTTON_B]:
 		it.shot = K.SHOT_DRIVE
 	elif pressed[JOY_BUTTON_X]:
 		it.shot = K.SHOT_SOFT
+	elif pressed[JOY_BUTTON_Y]:
+		it.shot = K.SHOT_SLICE
 	it.pause_pressed = 1 if pressed[JOY_BUTTON_START] else 0
 	return it
 

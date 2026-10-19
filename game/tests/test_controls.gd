@@ -98,7 +98,8 @@ func test_controls_page_listens() -> void:
 	var t := _title()
 	t.open_page("controls")
 	var p: MenuPage = t.pages["controls"]
-	eq(p.rows.map(func(r): return r["id"]).slice(0, 4), ["hit", "drive", "soft", "start"])
+	eq(p.rows.map(func(r): return r["id"]).slice(0, 6), ["hit", "drive", "soft", "slice", "short", "start"],
+		"the four swings, SHORT (SNES ADR-056), then START")
 	p.select("soft")
 	p.press()
 	eq(t.listening, "soft", "B on a row listens")

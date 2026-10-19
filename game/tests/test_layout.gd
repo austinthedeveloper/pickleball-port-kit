@@ -60,6 +60,9 @@ func check_layout(root: Node, where: String) -> void:
 			panels.append(Rect2(n.get_global_transform().origin, n.size))
 		for c in n.get_children():
 			stack.append(c)
+	for pr in panels:                    # every panel on the screen, edges and all
+		if not SCREEN.grow(SLACK).encloses(pr):
+			_fail("%s: a panel leaves the screen: %s" % [where, pr], "panel|%s" % pr)
 	for i in ts.size():
 		var r: Rect2 = rects[i]
 		for pr in panels:

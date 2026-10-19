@@ -4,6 +4,20 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [Unreleased]
+
+### Added
+- **All four swings**, as on the SNES: the **SLICE** (I on the keyboard,
+  Y on an Xbox pad, triangle on PlayStation) is slow, never deep, and
+  steady when you stretch: it buys time. Hold **SHORT** (Shift or U, LB or
+  RB) and any swing goes short: a short shot, a fast drop, a dink or a
+  short slice. Both are on CONTROLS.
+- The Snowbirds' Walt, the Goth Club and the Champs slice too.
+
+### Changed
+- A drive hit short off a stretch now flies long and sits up mid-court,
+  as on the SNES. HOW TO PLAY's SHOTS lesson asks for a slice too.
+
 ## [0.9.2] - 2026-10-18
 
 Updates at launch, easier lessons, and online's addresses. From 0.9.1, get

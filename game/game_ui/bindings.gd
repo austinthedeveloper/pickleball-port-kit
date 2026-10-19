@@ -6,8 +6,9 @@
 class_name Bindings
 extends RefCounted
 
-const ACTIONS := ["hit", "drive", "soft", "start", "move_up", "move_down", "move_left", "move_right"]
-const NAMES := {"hit": "HIT", "drive": "DRIVE", "soft": "SOFT", "start": "START",
+const ACTIONS := ["hit", "drive", "soft", "slice", "short", "start", "move_up", "move_down",
+	"move_left", "move_right"]
+const NAMES := {"hit": "HIT", "drive": "DRIVE", "soft": "SOFT", "slice": "SLICE", "short": "SHORT", "start": "START",
 	"move_up": "UP", "move_down": "DOWN", "move_left": "LEFT", "move_right": "RIGHT"}
 
 ## action -> {"keys": [physical keycodes], "pad": JOY_BUTTON_*}
@@ -37,6 +38,11 @@ static func apply() -> void:
 		b.button_index = current[a]["pad"]
 		b.device = GameControls.p1_device()
 		InputMap.action_add_event(a, b)
+		if a == "short" and current[a]["pad"] == JOY_BUTTON_LEFT_SHOULDER:
+			var rb := InputEventJoypadButton.new()   # either shoulder, as on the SNES
+			rb.button_index = JOY_BUTTON_RIGHT_SHOULDER
+			rb.device = GameControls.p1_device()
+			InputMap.action_add_event(a, rb)
 	GameControls.binding_serial += 1
 
 

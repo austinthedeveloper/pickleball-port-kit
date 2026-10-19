@@ -250,6 +250,12 @@ static func apply_targeted_shot(b: Ball, p: Player, intent: Intent, grow: int = 
 		pace = K.HIT_PACE_LOB_FP
 		min_frames = K.HIT_LOB_MIN_FRAMES
 		max_frames = K.HIT_LOB_MAX_FRAMES
+	elif shot == K.SHOT_SLICE:
+		tx = K.HIT_TARGET_SHORT_RIGHT if depth < 0 else K.HIT_TARGET_NEUTRAL_RIGHT
+		pace = K.HIT_PACE_SLICE_FP
+		min_frames = K.HIT_SLICE_MIN_FRAMES
+		wide = K.HIT_SLICE_STRETCH_WIDE
+		longer = K.HIT_SLICE_STRETCH_LONG
 	else:
 		if depth > 0:
 			tx = K.HIT_TARGET_DEEP_RIGHT
@@ -265,7 +271,7 @@ static func apply_targeted_shot(b: Ball, p: Player, intent: Intent, grow: int = 
 			min_frames = K.HIT_DRIVE_MIN_FRAMES
 			max_frames = K.HIT_DRIVE_MAX_FRAMES
 			wide = K.HIT_DRIVE_STRETCH_WIDE
-			longer = K.HIT_DRIVE_STRETCH_LONG
+			longer = K.HIT_FAST_DROP_STRETCH_LONG if depth < 0 else K.HIT_DRIVE_STRETCH_LONG
 		elif shot == K.SHOT_OVERHEAD:
 			pace = K.HIT_PACE_OVERHEAD_FP
 			min_frames = K.HIT_OVERHEAD_MIN_FRAMES
@@ -338,7 +344,7 @@ func resolve_player_hits() -> int:
 		contact_volley = 1 if ball.bounce_count == 0 else 0
 		ball.bounce_count = 0
 		# a swing at a falling ball overhead is a smash (ADR-053)
-		if p.shot_type != K.SHOT_SOFT and ball.vz_fp < 0 \
+		if (p.shot_type == K.SHOT_STANDARD or p.shot_type == K.SHOT_DRIVE) and ball.vz_fp < 0 \
 				and ball.z_fp >= K.to_fp(K.HIT_OVERHEAD_Z):
 			p.shot_type = K.SHOT_OVERHEAD
 		apply_targeted_shot(ball, p, intents[i], grow_fp)

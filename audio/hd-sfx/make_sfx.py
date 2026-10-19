@@ -206,13 +206,14 @@ def paddle_hit(rng, kind):
     """A paddle meeting a hollow plastic ball: a hard click, the ball's shell
     ringing (bright, short partials), the paddle face's lower 'thock', a
     burst of airy noise from the holes, and a small court's reflections.
-    kind: standard, drive (harder, brighter, more slap), soft (padded) or
-    smash (the overhead, PORT-24: the hardest crack, a deep slap, and the
+    kind: standard, drive (harder, brighter, more slap), soft (padded),
+    slice (SNES ADR-056: padded and dull, with the brush of the face across
+    the ball for the spin), or smash (the overhead, PORT-24: the hardest crack, a deep slap, and the
     air tearing off the ball after it)."""
     j = lambda: rng.uniform(0.96, 1.04)
     dur = 0.32
     n = int(dur * SR)
-    hard = {"standard": 1.0, "drive": 1.45, "soft": 0.55, "smash": 1.9}[kind]
+    hard = {"standard": 1.0, "drive": 1.45, "soft": 0.55, "slice": 0.7, "smash": 1.9}[kind]
     click = fit(band(noise(rng, 0.004), 2500, 14000) * env_exp(0.004, 0.0002, 0.0009), n)
     shell = modes(dur, [(1180 * j(), 0.020, 1.0), (1890 * j(), 0.015, 0.7),
                         (2660 * j(), 0.011, 0.45), (3710 * j(), 0.007, 0.3),
@@ -221,9 +222,14 @@ def paddle_hit(rng, kind):
                        (1320 * j(), 0.016, 0.2)], glide=0.05, phase_rng=rng)
     holes = band(noise(rng, dur), 900, 3200) * env_exp(dur, 0.0006, 0.018)
     x = click * (1.6 * hard) + shell * 0.9 + face * 0.8 + holes * 0.35
-    if kind == "soft":
-        x = band(x, 0, 2600, order=2) * 1.6
+    if kind in ("soft", "slice"):
+        x = band(x, 0, 2600 if kind == "soft" else 2000, order=2) * 1.6
         x *= np.clip(t_axis(dur) / 0.0025, 0, 1)
+    if kind == "slice":
+        # the brush: a short band of noise sweeping down as the face slides
+        tt = t_axis(dur)
+        brush = band(noise(rng, dur), 700, 2400) * np.clip(tt / 0.004, 0, 1) * np.exp(-tt / 0.04)
+        x += brush * 0.22
     if kind in ("drive", "smash"):
         # the face slap: a low, fast body on the hit
         x += modes(dur, [(185 * j(), 0.018, 0.5 * hard / 1.45)], glide=0.1, phase_rng=rng)
@@ -238,7 +244,7 @@ def paddle_hit(rng, kind):
         x += band(air, 600, 3000) * 0.5 + air * 0.25
     x = reverb(x, rng, wet=0.14, seconds=0.3, decay=0.06, brightness=8000,
                early=[(0.009, 0.35), (0.017, 0.22), (0.026, 0.15)])
-    target = {"standard": -17.0, "drive": -15.0, "soft": -21.0, "smash": -13.5}[kind]
+    target = {"standard": -17.0, "drive": -15.0, "soft": -21.0, "slice": -22.0, "smash": -13.5}[kind]
     return fade_tail(trim_silence(match(x, target, -1.0), -60), 0.02)
 
 
@@ -584,7 +590,7 @@ def main():
     made = {}
     rng = np.random.default_rng(1994)
     for kind, stem in [("standard", "0_hit"), ("drive", "0_hit_drive"), ("soft", "0_hit_soft"),
-                       ("smash", "0_hit_smash")]:
+                       ("slice", "0_hit_slice"), ("smash", "0_hit_smash")]:
         for v in range(4):
             made[f"{stem}{'' if v == 0 else '_' + str(v + 1)}"] = paddle_hit(np.random.default_rng(100 + v * 7 + len(stem)), kind)
     for v in range(3):

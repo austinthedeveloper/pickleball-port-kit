@@ -208,6 +208,10 @@ func _plan_shot(p: Player, cz: int) -> void:
 	elif dink and (n % dink) == dink - 1:
 		g.planned_shot = K.SHOT_SOFT
 		g.planned_depth = -1
+	elif style.slice and (n % style.slice) == style.slice - 1:
+		# SNES ADR-057: a slice every Nth rally shot (neutral).
+		g.planned_shot = K.SHOT_SLICE
+		g.planned_depth = 0
 	else:
 		g.planned_shot = K.SHOT_STANDARD
 		g.planned_depth = 1 if (style.depth == K.DEPTH_DEEP or (n & 1)) else 0

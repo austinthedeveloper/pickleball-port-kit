@@ -19,6 +19,8 @@ game/tools/test.sh           # all tests, headless
 | Hit (standard), serve | Space or J | A |
 | Drive | K | B |
 | Soft (lob; dink aimed away from the net) | L | X |
+| Slice (slow, never deep, steady off a stretch) | I | Y |
+| Short (hold: any swing goes short) | Shift or U | LB or RB |
 | Pause; on the result, back to the title | Enter / Esc | Menu |
 
 Any controller works (Xbox, PlayStation, Switch Pro, most others), by
