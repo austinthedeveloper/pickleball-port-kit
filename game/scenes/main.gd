@@ -53,8 +53,11 @@ func _ready() -> void:
 	music = Music.new()
 	add_child(music)
 	save.load_game()
-	show_title()
 	Updater.mark_good()                # PORT-32: an updated launch reached the title
+	if UpdateScreen.wanted():
+		show_update()                  # PORT-34: first, any update (it can't be skipped)
+	else:
+		show_title()
 
 
 func _swap(n: Node) -> void:
@@ -304,4 +307,12 @@ func _fit_toast() -> void:
 	var w := maxf(300.0, BitmapText.measure("small", _toast_text.text) + 40.0)
 	_toast_panel.size.x = w
 	_toast_panel.position.x = 480.0 - w / 2.0
+
+
+## The update screen (PORT-34): a newer version downloads and restarts the
+## game; up to date (or no way to update), on to the title.
+func show_update() -> void:
+	var u := UpdateScreen.new().setup(Updater.instance)
+	u.done.connect(show_title)
+	_swap(u)
 

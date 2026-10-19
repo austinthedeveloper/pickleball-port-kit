@@ -343,7 +343,7 @@ func test_the_online_screens() -> void:
 	check(a.page.select("host"))
 	a.page.press()
 	eq(a.session.state, OnlineSession.WAITING, "hosting")
-	check(a.info()[0].begins_with("WAITING FOR YOUR FRIEND"), "says it's waiting: " + a.info()[0])
+	check(a.info()[0].begins_with("WAITING."), "says it's waiting: " + a.info()[0])
 	b.page.select("address")
 	b.page.press()
 	check(b.editing, "ADDRESS: typing")
@@ -429,14 +429,22 @@ func test_the_addresses_offered() -> void:
 		{"name": "{D4}", "friendly": "Tailscale", "addresses": ["100.101.12.7"]},
 		{"name": "{E5}", "friendly": "Loopback Pseudo-Interface 1", "addresses": ["127.0.0.1"]},
 	]
-	eq(OnlineScreen.pick_addresses(windows), [["SAME WI-FI", "192.168.1.40"], ["TAILSCALE", "100.101.12.7"]],
+	eq(OnlineScreen.pick_addresses(windows), [["WI-FI", "192.168.1.40"], ["TAILSCALE", "100.101.12.7"]],
 		"Windows: Wi-Fi and Tailscale, not WSL or VirtualBox")
+	# a second home-network address listed first (a VPN's or a second card's):
+	# both shown, 192.168 first (0.9.1 showed only the 10.x, which didn't answer)
+	var two := [
+		{"name": "{F6}", "friendly": "Ethernet 2", "addresses": ["10.5.0.2"]},
+		{"name": "{B2}", "friendly": "Wi-Fi", "addresses": ["192.168.1.40"]},
+	]
+	eq(OnlineScreen.pick_addresses(two), [["WI-FI", "192.168.1.40"], ["ETHERNET 2", "10.5.0.2"]],
+		"both, the home router's first")
 	var mac := [
 		{"name": "en0", "friendly": "en0", "addresses": ["192.168.1.198"]},
 		{"name": "utun4", "friendly": "utun4", "addresses": ["100.70.1.2"]},
 		{"name": "bridge100", "friendly": "bridge100", "addresses": ["192.168.64.1"]},
 	]
-	eq(OnlineScreen.pick_addresses(mac), [["SAME WI-FI", "192.168.1.198"], ["TAILSCALE", "100.70.1.2"]],
+	eq(OnlineScreen.pick_addresses(mac), [["NETWORK", "192.168.1.198"], ["TAILSCALE", "100.70.1.2"]],
 		"macOS: en0 and Tailscale's utun, not a VM bridge")
 	eq(OnlineScreen.address_kind("172.20.0.5", "ethernet eth0"), "SAME WI-FI", "a real 172.16/12 network")
 	eq(OnlineScreen.address_kind("172.17.0.1", "docker0"), "", "Docker's")

@@ -159,7 +159,7 @@ func check() -> void:
 
 ## Downloads the newest pack (when AVAILABLE).
 func download() -> void:
-	if state != AVAILABLE:
+	if state != AVAILABLE or _http == null:
 		return
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(DIR))
 	state = DOWNLOADING
@@ -179,9 +179,12 @@ func progress() -> float:
 
 ## READY: start again on the new pack.
 func restart() -> void:
+	if state == READY and not supported():
+		error = "QUIT AND OPEN THE GAME AGAIN"   # a checkout or a test: never spawn a process
+		return
 	if state == READY:
 		if not relaunch():
-			_fail("QUIT AND OPEN THE GAME AGAIN")
+			error = "QUIT AND OPEN THE GAME AGAIN"   # stays READY: the update's installed
 
 
 ## FULL: the release page, for the full download.

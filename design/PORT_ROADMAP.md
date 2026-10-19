@@ -58,7 +58,8 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-29 | The couch cup | `feature/cld-couch-cup` | Ready to test |
 | PORT-30 | How to play | `feature/cld-tutorial` | Ready to test |
 | PORT-31 | Online play | `feature/cld-online` | Ready to test |
-| PORT-32 | The in-game updater | `feature/cld-updater` | Ready to test |
+| PORT-32 | The in-game updater | `feature/cld-updater` | Done |
+| PORT-34 | Update at launch, lessons, addresses | `feature/cld-polish-0.9.2` | Ready to test |
 
 ## Releases
 
@@ -343,6 +344,26 @@ feature/cld-release-0.6.0   (v0.6.0)
     traces unchanged.
   - Status: **Ready to test**: after 0.9.0, the next release (0.9.1) is
     the first real update. Not tried on Windows or Linux.
+
+### 34. `feature/cld-polish-0.9.2`: from playing 0.9.1 (2026-10-18)
+
+- [x] `PORT-34` Four things you found: the update now comes up when the
+  game opens and can't be skipped (`view/update_screen.gd`, ADR-057
+  amended); OPTIONS > UPDATES no longer sticks on 98%; HOW TO PLAY's match
+  lessons play HENDERSON at full speed (KID's slowed ball read as
+  slowdown) and THE KITCHEN is a ball-machine drill; ONLINE's HOST screen
+  shows up to two addresses, 192.168 first, named by adapter.
+  - Verified: `test_updater.test_the_update_screen` (each state: straight
+    on, waiting then on, no way past a download, the bar, INSTALLED, a
+    failed restart, offline, RETRY / PLAY, GET IT / PLAY),
+    `test_layout.test_update_screen`, `test_tutorial` (HENDERSON, the
+    kitchen drill's counting and advice, a volley feasible on 9 of 120
+    spot and timing tries, TWO BOUNCES played through), `test_online` (a
+    PC with two adapters). The lessons' frame cost measured: under 0.1 ms.
+    302/302 plus the e2e. Screenshots: the update screen downloading,
+    installed, failed.
+  - Status: **Ready to test**: 0.9.1 gets 0.9.2 from OPTIONS > UPDATES
+    once; from then on updates come up at launch.
 
 ## For you
 

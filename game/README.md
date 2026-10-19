@@ -48,9 +48,9 @@ the first is P1's, with one pad P1 plays on the keyboard.
 
 ## Updates
 
-From 0.9.0 the game keeps itself up to date: when a new version is out,
-the title says so, and OPTIONS > UPDATES downloads it (about 23 MB) and
-restarts on it. Only the desktop builds do this; a release that changes
+From 0.9.0 the game keeps itself up to date. From 0.9.2, when you open
+it, it checks for a new version and, if there is one, downloads it
+(about 23 MB) and restarts on it before the title. Only the desktop builds do this; a release that changes
 Godot itself sends you to the releases page instead (ADR-057).
 
 ## Playing online

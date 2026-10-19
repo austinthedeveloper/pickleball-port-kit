@@ -208,10 +208,13 @@ func _leave() -> void:
 
 # --- The info panel -----------------------------------------------------------
 
-## This machine's addresses worth telling a friend, labelled: [[kind,
-## address]] with kind "SAME WI-FI" (the home network) or "TAILSCALE".
-## Virtual adapters (WSL, Hyper-V, VirtualBox, VMware, Docker, bridges)
-## are left out: nobody else can reach them. The LAN's first.
+## This machine's addresses worth telling a friend, labelled by the
+## adapter they're on: [[label, address]], at most two. Home-network
+## addresses (192.168 first, then 10 and 172.16) before a Tailscale one;
+## virtual adapters (WSL, Hyper-V, VirtualBox, VMware, Docker, bridges)
+## are left out: nobody else can reach them. A computer can have more than
+## one home-network address (Wi-Fi and Ethernet, or a VPN's): all are
+## shown, since only the friend's side can tell which one answers.
 static func my_addresses() -> Array:
 	return pick_addresses(IP.get_local_interfaces())
 
@@ -226,10 +229,34 @@ static func pick_addresses(interfaces: Array) -> Array:
 		for a in i.get("addresses", []):
 			var kind := address_kind(String(a), name)
 			if kind == "TAILSCALE":
-				vpn.append([kind, a])
+				vpn.append(["TAILSCALE", a])
 			elif kind != "":
-				lan.append([kind, a])
-	return (lan.slice(0, 1) + vpn.slice(0, 1))
+				lan.append([adapter_label(String(i.get("friendly", "")), String(i.get("name", ""))), a])
+	lan.sort_custom(func(x, y): return _rank(x[1]) < _rank(y[1]))
+	var out: Array = lan.slice(0, 2 if vpn.is_empty() else 1) + vpn.slice(0, 1)
+	return out
+
+
+static func _rank(a: String) -> int:
+	if a.begins_with("192.168."):
+		return 0
+	if a.begins_with("10."):
+		return 1
+	return 2
+
+
+## An adapter's name as the font can draw it ("WI-FI", "ETHERNET 2",
+## "EN0"), or "HOME NETWORK".
+static func adapter_label(friendly: String, name: String) -> String:
+	var n := friendly if friendly != "" and not friendly.begins_with("{") else name
+	if RegEx.create_from_string("^(en|eth|wlan|wlp|enp|eno)[0-9a-z]*$").search(n.to_lower()):
+		return "NETWORK"                  # macOS and Linux name adapters en0, eth0...
+	var out := ""
+	for c in n.to_upper():
+		if c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789- ":
+			out += c
+	out = out.strip_edges().left(14)
+	return out if out != "" else "HOME NETWORK"
 
 
 const VIRTUAL := ["vethernet", "wsl", "hyper-v", "virtualbox", "vbox", "vmware", "vmnet",
@@ -277,7 +304,7 @@ func info() -> Array:
 	if st == OnlineSession.WAITING:
 		if session.host:
 			var mine := my_addresses()
-			var lines := ["WAITING FOR YOUR FRIEND, PORT %d." % ENetLink.PORT, "", ""]
+			var lines := ["WAITING. YOUR FRIEND JOINS ONE OF THESE:", "", ""]
 			for k in mine.size():
 				lines[k + 1] = "%s: %s" % mine[k]
 			if mine.is_empty():

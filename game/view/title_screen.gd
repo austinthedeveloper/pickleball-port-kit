@@ -672,6 +672,7 @@ func _refresh() -> void:
 
 
 var _record_text := ""
+var _updates_label := ""
 
 
 ## The line under the logo: the updater's news while there is some
@@ -747,9 +748,9 @@ func _process(_delta: float) -> void:
 	if _demo == null or _demo.sim == null:
 		return
 	_refresh_record()
-	if page == "options" and Updater.instance and Updater.instance.state == Updater.DOWNLOADING \
-			and Engine.get_process_frames() % 10 == 0:
-		pages["options"].refresh()       # the download's percentage
+	if page == "options" and Updater.instance and Updater.instance.label() != _updates_label:
+		_updates_label = Updater.instance.label()
+		pages["options"].refresh()       # the download's percentage, and when it's done
 	if _demo.sim.phase == K.PHASE_MATCH_RESULT and _demo.sim.phase_timer >= K.ATTRACT_RESULT_FRAMES - 1:
 		_demo_doubles = not _demo_doubles
 		_start_demo()

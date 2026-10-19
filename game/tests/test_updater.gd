@@ -104,3 +104,77 @@ func test_the_manifest() -> void:
 	if m is Dictionary:
 		eq([m["version"], m["engine"], int(m["size"])], ["9.9.9", Updater.engine(), 10])
 		eq(m["sha256"], FileAccess.get_sha256(pck), "the same SHA-256 the game checks")
+
+
+func _screen(state: int) -> Array:
+	var u := Updater.new()
+	u.state = state
+	u.latest = "0.9.2"
+	if state in [Updater.AVAILABLE, Updater.DOWNLOADING, Updater.READY]:
+		u.manifest = {"size": 24156944}
+	var s := UpdateScreen.new().setup(u)
+	runner.root.add_child(s)
+	if not s.is_node_ready():
+		s._ready()
+	var done := []
+	s.done.connect(func(): done.append(true))
+	return [s, u, done]
+
+
+## PORT-34: the update screen at launch. Up to date: straight on. A newer
+## version: it downloads at once with no way past; installed: it restarts.
+## Only no answer, a failed download or a full download let you play on.
+func test_the_update_screen() -> void:
+	var r := _screen(Updater.LATEST)
+	r[0]._process(0.016)
+	eq(r[2], [true], "up to date: on to the title")
+	r[0].free()
+	r[1].free()
+	r = _screen(Updater.CHECKING)
+	r[0]._process(1.0)
+	eq(r[2], [], "checking: it waits")
+	eq(r[0].lines()[0], "CHECKING FOR A NEW VERSION...")
+	r[0]._process(UpdateScreen.CHECK_TIMEOUT)
+	eq(r[2], [true], "no answer in %d s: on with this version" % UpdateScreen.CHECK_TIMEOUT)
+	r[0].free()
+	r[1].free()
+	r = _screen(Updater.AVAILABLE)
+	var s: UpdateScreen = r[0]
+	for f in 30:
+		s._process(0.016)
+	eq(r[2], [], "a newer version: no way past")
+	eq(s.page, null, "no choices while it downloads")
+	eq(s.lines()[0], "VERSION 0.9.2 IS OUT.")
+	check(s.lines()[2].ends_with("OF 23.0 MB"), "the size: " + s.lines()[2])
+	check(s._bar.visible, "a progress bar")
+	r[1].state = Updater.READY
+	s._process(0.016)
+	eq(s.lines()[0], "VERSION 0.9.2 IS INSTALLED.")
+	eq(s._bar.size.x, s._bar_back.size.x - 6, "the bar full")
+	for f in UpdateScreen.RESTART_FRAMES + 40:
+		s._process(0.016)
+	eq(s.lines()[1], "CLOSE THE GAME AND OPEN IT AGAIN.", "a restart that didn't happen says so")
+	eq(r[2], [], "and still no way past (it's installed: the next start runs it)")
+	s.free()
+	r[1].free()
+	r = _screen(Updater.FAILED)
+	r[1].error = "OFFLINE"
+	r[0]._process(0.016)
+	eq(r[2], [true], "no network at all: on with this version")
+	r[0].free()
+	r[1].free()
+	r = _screen(Updater.FAILED)
+	r[1].error = "THE DOWNLOAD WAS DAMAGED: TRY AGAIN"
+	r[1].manifest = {"size": 10}
+	r[0]._process(0.016)
+	eq(r[0]._page_ids, ["retry", "play"], "a failed download: RETRY, or PLAY THIS VERSION")
+	check(r[0].page.select("play"))
+	r[0].page.press()
+	eq(r[2], [true], "PLAY THIS VERSION: on")
+	r[0].free()
+	r[1].free()
+	r = _screen(Updater.FULL)
+	r[0]._process(0.016)
+	eq(r[0]._page_ids, ["get", "play"], "a full download: GET IT, or PLAY THIS VERSION")
+	r[0].free()
+	r[1].free()

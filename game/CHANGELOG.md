@@ -4,6 +4,25 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [Unreleased]
+
+### Changed
+- **Updates happen when you open the game**: a new version downloads
+  right away with a progress bar, says INSTALLED, and restarts the game.
+  Only no connection, a failed download, or a release that needs a full
+  download lets you play the version you have. (OPTIONS > UPDATES still
+  checks by hand.)
+- **HOW TO PLAY**: THE KITCHEN is a ball-machine drill now (volley the
+  machine's drive back from behind the line), and SERVE and TWO BOUNCES
+  play HENDERSON at full ball speed (the KID opponent's slowed ball felt
+  like slow motion).
+
+### Fixed
+- ONLINE's HOST screen showed only one address and could pick the wrong
+  one (a second network's); it now shows up to two, the home router's
+  (192.168...) first, each named by its adapter.
+- OPTIONS > UPDATES could stay on 98% after the download finished.
+
 ## [0.9.1] - 2026-10-18
 
 The first update you can get in the game: OPTIONS > UPDATES.

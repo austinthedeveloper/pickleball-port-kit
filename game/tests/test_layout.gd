@@ -622,3 +622,23 @@ func test_updater() -> void:
 	t.free()
 	Updater.instance = null
 	u.free()
+
+
+## PORT-34: the update screen in every state, the longest version and error.
+func test_update_screen() -> void:
+	for st in range(Updater.IDLE, Updater.FAILED + 1):
+		var u := Updater.new()
+		u.state = st
+		u.latest = "10.10.10"
+		u.error = "THE DOWNLOAD WAS DAMAGED: TRY AGAIN"
+		u.manifest = {"size": 999999999}
+		var s := UpdateScreen.new().setup(u)
+		runner.root.add_child(s)
+		if not s.is_node_ready():
+			s._ready()
+		s.refresh()
+		if s.page:
+			s.page.settle()
+		check_layout(s, "update screen, state %d" % st)
+		s.free()
+		u.free()

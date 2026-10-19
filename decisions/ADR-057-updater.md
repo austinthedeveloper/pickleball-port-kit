@@ -39,6 +39,23 @@ this over itch.io's app for now (2026-10-18).
 - Only exported desktop builds check (a checkout says DEV BUILD; the Web
   build is always the newest: WEB). Nothing is sent but the requests.
 
+## Amendment: at launch, not in OPTIONS (PORT-34, 2026-10-18)
+
+Played on 0.9.0 to 0.9.1 on macOS and Windows: it worked, but the steps
+weren't obvious (OPTIONS showed 98% after the download was done). You
+asked for the update to come up when the game opens, with no skipping.
+
+`view/update_screen.gd` is now the first screen of an exported desktop
+game: CHECKING FOR A NEW VERSION, then (if there's one) VERSION X IS OUT,
+DOWNLOADING with a bar and the MB, then INSTALLED, RESTARTING. There's no
+way past a download. It goes on to the title when it's up to date, when
+there's no answer in 8 s or no network, and offers PLAY THIS VERSION only
+when updating in-game can't work: a failed download (with RETRY) or a
+release that needs a full download (with GET THE FULL DOWNLOAD). If the
+restart doesn't start, it asks you to close and open the game (the update
+is installed). OPTIONS > UPDATES stays for a check by hand, and now
+refreshes when its state changes.
+
 ## Why not `--main-pack`
 
 The first design relaunched the game with `--main-pack <update>`. Release

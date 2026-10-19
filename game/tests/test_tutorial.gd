@@ -29,8 +29,8 @@ func test_each_lesson_sets_up_its_sim() -> void:
 		var t := Tutorial.new(i)
 		var cfg := t.config(PlayerSelect.new_choice(PlayerSelect.PAL_GOLD, K.VARIANT_FEMALE, 2))
 		if t.is_match():
-			eq([cfg.practice, cfg.difficulty, cfg.points_to_win, cfg.opponent], [0, K.DIFFICULTY_KID, 21, -1],
-				"%s: singles against a KID CPU" % t.lesson()["id"])
+			eq([cfg.practice, cfg.difficulty, cfg.points_to_win, cfg.opponent], [0, K.DIFFICULTY_MEDIUM, 21, 0],
+				"%s: singles against HENDERSON at full ball speed" % t.lesson()["id"])
 		else:
 			eq(cfg.practice, 1, "%s: the ball machine" % t.lesson()["id"])
 			eq(cfg.practice_settings[0], t.lesson()["drill"][0], "with the lesson's feed")
@@ -73,6 +73,29 @@ func test_machine_lessons() -> void:
 	sim.practice.streak += 1
 	smash.observe(sim, [])
 	check(smash.done, "SMASH: one")
+	# THE KITCHEN: a volley from behind the line that comes back in counts
+	sim.practice.streak = 0
+	var kitchen := _lesson("kitchen")
+	kitchen.observe(sim, [])
+	var p: SimTypes.Player = sim.players[0]
+	sim.contact_volley = 1
+	p.x_fp = K.to_fp(K.COURT_KITCHEN_LEFT_X + 8)
+	kitchen.observe(sim, [[K.EVENT_HIT, 100, 130, 0]])
+	check(kitchen.message.begins_with("NO VOLLEYS"), "a volley from the kitchen: advice at once")
+	sim.practice.streak += 1
+	kitchen.observe(sim, [])
+	eq(kitchen.progress, 0, "and it doesn't count, even back in")
+	p.x_fp = K.to_fp(K.COURT_KITCHEN_LEFT_X - 4)
+	kitchen.observe(sim, [[K.EVENT_HIT, 90, 130, 0]])
+	sim.practice.streak += 1
+	kitchen.observe(sim, [])
+	eq(kitchen.progress, 1, "one from behind the line does")
+	sim.contact_volley = 0
+	kitchen.observe(sim, [[K.EVENT_HIT, 90, 130, 0]])
+	sim.practice.streak += 1
+	kitchen.observe(sim, [])
+	eq(kitchen.progress, 1, "a ball that bounced isn't a volley")
+	check(kitchen.message.begins_with("HIT IT BEFORE"), "advice")
 	sim.dispose()
 
 
@@ -96,20 +119,6 @@ func test_match_lessons() -> void:
 	eq(bounces.progress, 1, "past the two bounces: once per rally")
 	bounces.observe(sim, [[K.EVENT_FAULT, 0, 0, K.FAULT_EARLY_VOLLEY]])
 	check(bounces.message.begins_with("LET THE SERVE"), "VOLLEY! gets advice")
-	var kitchen := _lesson("kitchen")
-	var p: SimTypes.Player = sim.players[0]
-	sim.contact_volley = 1
-	p.x_fp = K.to_fp(K.COURT_KITCHEN_LEFT_X + 8)
-	kitchen.observe(sim, [[K.EVENT_HIT, 100, 130, 0]])
-	eq(kitchen.progress, 0, "a volley from the kitchen doesn't count")
-	p.x_fp = K.to_fp(K.COURT_KITCHEN_LEFT_X - 4)
-	kitchen.observe(sim, [[K.EVENT_HIT, 90, 130, 0]])
-	eq(kitchen.progress, 1, "one from behind the line does")
-	sim.contact_volley = 0
-	kitchen.observe(sim, [[K.EVENT_HIT, 90, 130, 0]])
-	eq(kitchen.progress, 1, "a ball that bounced isn't a volley")
-	kitchen.observe(sim, [[K.EVENT_FAULT, 0, 0, K.FAULT_KITCHEN]])
-	check(kitchen.message.begins_with("NO VOLLEYS"), "KITCHEN! gets advice")
 	sim.dispose()
 
 
@@ -255,3 +264,38 @@ func test_the_lob_can_be_smashed() -> void:
 			sim.dispose()
 	print("    spots and swing timings that smash the lob back in: %d of %d" % [hits, tries])
 	check(hits >= 3, "a smash is possible, and not by a hair")
+
+
+## THE KITCHEN can be done on the machine: from just behind the line, some
+## swing timings volley the feed back in (a fresh deterministic sim each).
+func test_the_kitchen_volley_can_be_done() -> void:
+	var t := _lesson("kitchen")
+	var ok := 0
+	var tries := 0
+	for back in [2, 8, 16]:
+		for press in range(0, 80, 2):
+			tries += 1
+			var sim := Sim.new(t.config({}))
+			var p: SimTypes.Player = sim.players[0]
+			var f := 0
+			while sim.practice.state == Practice.WAIT and f < 600:
+				p.x_fp = K.to_fp(K.COURT_KITCHEN_LEFT_X - back)
+				sim.step([SimTypes.Intent.new(), null, null, null])
+				f += 1
+			var lesson := Tutorial.new(t.index)
+			lesson.observe(sim, [])
+			for g in 140:
+				var it := SimTypes.Intent.new()
+				var dy := sim.ball.y_fp - p.y_fp
+				it.move_y = 0 if absi(dy) < 48 else (1 if dy > 0 else -1)
+				if g == press:
+					it.hit_pressed = 1
+				sim.step([it, null, null, null])
+				lesson.observe(sim, sim.drain_events())
+				if sim.practice.state == Practice.WAIT:
+					break
+			if lesson.progress > 0:
+				ok += 1
+			sim.dispose()
+	print("    spots and timings that volley the feed back in: %d of %d" % [ok, tries])
+	check(ok >= 5, "a volley from behind the line is possible, and not by a hair")

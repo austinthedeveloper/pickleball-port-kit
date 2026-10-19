@@ -8,7 +8,7 @@
 ##   SMASH        the machine lobs: smash 1 back in
 ##   SERVE        against a KID CPU: 2 serves in
 ##   TWO BOUNCES  2 rallies past the two-bounce rule
-##   THE KITCHEN  2 volleys from behind the kitchen line (ADR-055)
+##   THE KITCHEN  the machine: 2 volleys back in from behind the line (ADR-055)
 ##
 ## Lesson text never names a button (CLAUDE.md): each lesson's prompts are
 ## [action, label] pairs for a PromptBar.
@@ -40,9 +40,10 @@ const LESSONS := [
 			"VOLLEY. PLAY TWO RALLIES PAST IT."],
 		"prompts": [["dpad", "MOVE"], ["hit", "HIT"]], "match": true},
 	{"id": "kitchen", "title": "THE KITCHEN", "goal": 2, "count": "VOLLEYS",
-		"lines": ["STAND IN THE KITCHEN IF YOU LIKE, BUT", "NEVER VOLLEY FROM IT. COME UP TO THE",
-			"LINE AND VOLLEY TWO FROM BEHIND IT."],
-		"prompts": [["dpad", "MOVE"], ["hit", "HIT"]], "match": true},
+		"lines": ["NEVER VOLLEY FROM INSIDE THE KITCHEN.", "STAND JUST BEHIND ITS LINE AND HIT",
+			"THE BALL BEFORE IT BOUNCES. TWO IN."],
+		"prompts": [["dpad", "MOVE"], ["hit", "HIT"]],
+		"drill": [Practice.SHOT_DRIVE, Practice.TARGET_AT_YOU, Practice.RATE_SLOW]},
 ]
 const MESSAGE_FRAMES := 150
 
@@ -56,6 +57,7 @@ var _last_shot := -1              ## P1's last swing's shot (practice lessons)
 var _shots_landed := {}           ## SHOTS: the shot types landed
 var _serving := false             ## SERVE: P1's serve in the air
 var _rally_counted := false       ## TWO BOUNCES: this rally already counted
+var _legal_volley := false        ## THE KITCHEN: P1's last hit was a volley from behind the line
 
 
 func _init(lesson := 0) -> void:
@@ -70,12 +72,14 @@ func is_match() -> bool:
 	return lesson().get("match", false)
 
 
-## The lesson's sim: the ball machine with its drill, or singles against a
-## KID CPU to 21 (it restarts if it ends first). You play in your last
-## Player Select choice.
+## The lesson's sim: the ball machine with its drill, or singles against
+## HENDERSON (the ladder's warm-up) at full ball speed, to 21 (it restarts
+## if it ends first). KID's slowed ball read as slow motion (0.9.1). You
+## play in your last Player Select choice.
+const OPPONENT := 0
 func config(p1: Dictionary) -> SimTypes.MatchConfig:
 	if is_match():
-		var cfg := Settings.config_for(false, -1, K.DIFFICULTY_KID, 21, p1)
+		var cfg := Settings.config_for(false, OPPONENT, K.DIFFICULTY_MEDIUM, 21, p1)
 		return cfg
 	var d: Array = lesson()["drill"]
 	var cfg2 := SimTypes.MatchConfig.practice_session([d[0], d[1], d[2], Practice.ZONE_ANY], 0)
@@ -118,10 +122,12 @@ func observe(sim: Sim, events: Array) -> void:
 				if slot != 0:
 					continue
 				_last_shot = e[3] >> 4
-				if id == "kitchen" and sim.contact_volley and sim.phase == K.PHASE_LIVE:
+				if id == "kitchen":
 					var p: SimTypes.Player = sim.players[0]
-					if not Sim.in_kitchen(p.x_fp, p.y_fp, 0):
-						_gain()
+					var inside := Sim.in_kitchen(p.x_fp, p.y_fp, 0)
+					_legal_volley = sim.contact_volley == 1 and not inside
+					if sim.contact_volley and inside:
+						_say("NO VOLLEYS FROM THE KITCHEN: STEP BACK.")
 			K.EVENT_SERVE:
 				_serving = slot == 0
 				_rally_counted = false
@@ -159,6 +165,11 @@ func observe(sim: Sim, events: Array) -> void:
 				"smash":
 					if _last_shot == K.SHOT_OVERHEAD:
 						_gain()
+				"kitchen":
+					if _legal_volley:
+						_gain()
+					else:
+						_say("HIT IT BEFORE IT BOUNCES.")
 		elif s < _streak and id == "smash" and _last_shot != K.SHOT_OVERHEAD:
 			_say("A STEP IN FRONT OF IT, AND SWING EARLY.")
 		_streak = s

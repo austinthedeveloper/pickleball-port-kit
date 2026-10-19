@@ -99,6 +99,17 @@ func _initialize() -> void:
 		var pv := ParkView.new().setup(op, _career_save() if "career" in a.slice(4) else null, false)
 		root.add_child(pv)
 		_view = pv
+	elif mode == "update":
+		# PORT-34: the update screen in update=<state> (a stand-in updater)
+		var u := Updater.instance if Updater.instance else Updater.new()
+		u.manifest = {"size": 24156944}
+		u.error = "THE DOWNLOAD WAS DAMAGED: TRY AGAIN"
+		var us := UpdateScreen.new().setup(u)
+		root.add_child(us)
+		if not us.is_node_ready():
+			us._ready()
+		us.refresh()
+		_view = us
 	elif mode.begins_with("online"):
 		# PORT-31: online (idle, an address typed), online_host (waiting),
 		# online_connected (as host, a friend in)
