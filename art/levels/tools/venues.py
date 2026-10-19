@@ -15,7 +15,7 @@ import numpy as np
 
 import court as C
 from pix import Layer, bush, fbm, hexrgb, ramp, tree
-from scenery import (OUTLINE, M, ball_icon, bin_can, bleachers, brain_coral, bubbles,
+from scenery import (OUTLINE, M, ball_icon, bin_can, bleachers, brain_coral, bubbles, hills, sailboat,
                      cloud, coral_fan, coral_tubes, dome, fence, fern_band, flowers,
                      hedge_band, house, kelp, lamp_post, moon_ridge, nebula,
                      notice_board, palisade, palm, park_bench, pavers, planet,
@@ -103,8 +103,9 @@ def park() -> Venue:
     v.add("sky", S, 0.2)
     # far: skyline
     F = Layer()
-    skyline(F, 250, 720, 112, 18, 50, ramp("8fbddd", "74a8cb", "6699bb",
-                                               "b0d4ea"), hexrgb("d2e8f4"),
+    # the city from edge to edge (it stopped at 720, beside the right oak)
+    skyline(F, -48, 1008, 112, 18, 50, ramp("8fbddd", "74a8cb", "6699bb",
+                                                "b0d4ea"), hexrgb("d2e8f4"),
             seed=11, lit=0.15)
     v.add("far", F, 0.4)
     # trees: back tree line + big edge oaks
@@ -172,17 +173,33 @@ def lakeside() -> Venue:
         cloud(S, cx, cy, w, h, ramp("9cc6f3", "cfe3f6", "eef5f8", "ffffff"),
               seed=sd)
     v.add("sky", S, 0.2)
-    # far: tree line on the far shore, houses, the lake
+    # far: hazy hills, the far shore's trees and its town, the lake: the
+    # whole width (a centre-only lake read as a small rectangle between the
+    # side trees)
     F = Layer()
-    tree_line(F, 300, 720, 84, 22, 40, ramp("1d4a45", "2c6250", "437c56",
-                                            "62965c"), BARK, seed=71,
+    hills(F, -48, 1008, 86, 14, 36, ramp("5f8a8a", "6f9a94", "82aaa0",
+                                         "97b8a8"), seed=70)
+    tree_line(F, -60, 1020, 86, 18, 36, ramp("1d4a45", "2c6250", "437c56",
+                                             "62965c"), BARK, seed=71,
               step=(14, 24))
-    for (x, w, h, sd) in ((420, 22, 12, 0), (450, 16, 10, 1), (568, 24, 13, 2),
-                          (600, 18, 10, 3)):
-        house(F, x, 88, w, h, ramp("6b6a62", "b8b2a0", "d9d2bd"),
-              ramp("6e3a2e", "9a5440"))
-    water(F, 320, 700, 88, 116, ramp("3e6f9a", "4f84b3", "5f95c4", "79abd6"),
+    walls = (ramp("6b6a62", "b8b2a0", "d9d2bd"), ramp("6e6455", "c9b48e", "e2d0aa"),
+             ramp("5e6a6e", "a9b6b8", "cfd8d8"), ramp("6a5a52", "c7a690", "e0c4ae"))
+    roofs = (ramp("6e3a2e", "9a5440"), ramp("3e4a5a", "5a6a7e"),
+             ramp("5a3a2a", "7e5236"), ramp("7a2e2a", "a8443a"))
+    rng = random.Random(77)
+    # three clusters along the shore, a few on their own between
+    for (x0, x1, n) in ((40, 200, 5), (380, 640, 7), (790, 960, 4), (250, 320, 1),
+                        (700, 740, 1)):
+        for k in range(n):
+            x = rng.randint(x0, x1)
+            w = rng.randint(14, 24)
+            house(F, x, 88 + rng.randint(-1, 0), w, rng.randint(8, 13),
+                  walls[rng.randrange(4)], roofs[rng.randrange(4)])
+    water(F, -48, 1008, 88, 116, ramp("3e6f9a", "4f84b3", "5f95c4", "79abd6"),
           hexrgb("d8ecf8"), seed=72)
+    for (x, y, s, c) in ((600, 100, 5, "ffffff"), (730, 106, 6, "f2d36b"),
+                         (880, 96, 4, "ffffff")):
+        sailboat(F, x, y, s, hexrgb("8a4a32"), hexrgb(c))
     # grass field from the shore to the fence
     G = F.rect_mask(-48, 114, 1008, 200)
     n = fbm(F.h, F.w, 16, 73, 2)
@@ -275,8 +292,9 @@ def sunset() -> Venue:
         stripes=((6, 1), (11, 2), (16, 2)), sky=hexrgb("f3b45a"))
     v.add("sky", S, 0.2)
     F = Layer()
-    skyline(F, 330, 660, 100, 14, 40, ramp("3a2f5c", "4a3a70", "56407a",
-                                           "6e4e7e"), hexrgb("f6c36a"),
+    # the city from the left edge to just short of the sun
+    skyline(F, -48, 660, 100, 14, 40, ramp("3a2f5c", "4a3a70", "56407a",
+                                            "6e4e7e"), hexrgb("f6c36a"),
             seed=94, lit=0.3)
     water(F, -48, 1008, 100, 118, ramp("3c3164", "5a3f78", "7a4c80", "9a5c7c"),
           hexrgb("f8c878"), seed=95, reflect=(700, 22, hexrgb("f6b45a")))

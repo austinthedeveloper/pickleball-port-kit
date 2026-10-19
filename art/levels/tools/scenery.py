@@ -280,6 +280,39 @@ def water(layer: Layer, x0, x1, y0, y1, rmp, sparkle, seed=0, reflect=None):
     return m
 
 
+def hills(layer: Layer, x0, x1, base, h_min, h_max, rmp, seed=0, waves=(70, 160)):
+    """Soft rolling hills in the distance: a smooth silhouette (a sum of
+    sines), shaded lighter toward its crest, no outline (it's far)."""
+    rng = random.Random(seed)
+    comps = [(rng.uniform(*waves), rng.uniform(0, 6.3), rng.uniform(0.4, 1.0))
+             for _ in range(3)]
+    H, W = layer.h, layer.w
+    yy, xx = np.mgrid[0:H, 0:W]
+    sx, sy = xx - layer.ox, yy - layer.oy
+    s = sum(a * np.sin(sx * 6.283 / p + ph) for p, ph, a in comps)
+    s = (s - s.min()) / max(1e-6, s.max() - s.min())
+    top = base - (h_min + s * (h_max - h_min))
+    m = (sx >= x0) & (sx < x1) & (sy >= top) & (sy < base)
+    n = fbm(H, W, 10, seed, 2)
+    v = np.clip(0.8 - (sy - top) / max(1, h_max) * 0.9 + (n - 0.5) * 0.25, 0, 0.999)
+    img = np.array(rmp, np.uint8)[np.clip((v * len(rmp)).astype(int), 0, len(rmp) - 1)]
+    layer.fill_where(m, img)
+    return m
+
+
+def sailboat(layer: Layer, x, base_y, size, hull, sail, outline=OUTLINE):
+    """A small sailboat on the water: a hull and a triangle sail."""
+    hb = layer.poly_mask([(x - size, base_y - 2), (x + size, base_y - 2),
+                          (x + size * 0.7, base_y + 1), (x - size * 0.7, base_y + 1)])
+    layer.fill(hb, hull)
+    mast = layer.rect_mask(x, base_y - size * 2.2, x + 1, base_y - 2)
+    layer.fill(mast, outline)
+    sl = layer.poly_mask([(x + 1, base_y - size * 2.1), (x + 1, base_y - 3),
+                          (x + size * 1.1, base_y - 3)])
+    layer.fill(sl, sail)
+    layer.outline(outline, hb | sl)
+
+
 def house(layer: Layer, x, base_y, w, h, wall, roof, outline=OUTLINE):
     body = layer.rect_mask(x, base_y - h, x + w, base_y)
     layer.fill(body, wall[1])
