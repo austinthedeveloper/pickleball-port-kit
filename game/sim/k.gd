@@ -234,6 +234,11 @@ const MOD_GLOW := 128         ## SNES ADR-054: lights out, neon outlines
 ## SNES ADR-054's INVERSE (its modifiers2 bit 0): the port's modifiers
 ## are wider than a byte. Display only, as GLOW is.
 const MOD_INVERSE := 256
+## The Pickleball '95 promises (PORT-40), remaster-only, so off in the
+## ROM's conformance runs. SIDE-OUT (port ADR-063): traditional scoring,
+## only the serving side scores; in doubles both partners serve before a
+## side out (the first serve of a game is the second server's).
+const MOD_SIDE_OUT := 512
 const MOD_GHOST_Z := 8        ## GHOST: above this (px) the ball blinks
 const MOD_GHOST_SHOWN := 2    ## ... shown this many frames in every 16
 const MOD_POPCORN_STRIDE := 12   ## a level adds a step every 12 ticks (+8%)

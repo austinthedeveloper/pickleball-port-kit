@@ -98,7 +98,7 @@ Status: **have** (the port does it), **partly**, **missing**, **differs**
 |---|---|
 | The overhead smash | **delivered** (PORT-24) |
 | Dale Dawson playable (as an unlockable) | not yet |
-| Traditional side-out scoring | not yet |
+| Traditional side-out scoring | **delivered** (PORT-40, ADR-063: RULES > SIDE-OUT) |
 | The momentum rule (carry into the kitchen after a volley) | not yet (KNOWN_ISSUES #51 says it isn't called) |
 | A fifth player as line judge | not yet |
 | Modifiers MOON, BOUNCY, WIND, DINK OR DIE, SUDDEN DEATH, MULTI BALL | not yet |

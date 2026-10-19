@@ -213,14 +213,17 @@ func _build_pages() -> void:
 				Settings.court[i] = (Settings.court[i] + d + CourtStyle.count(part)) % CourtStyle.count(part)
 				_demo.set_court(Settings.court)})
 	_add_page("court", "COURT", court_rows, help, Rect2(590, 150, 350, 0))
-	var mod_rows := []
+	var mod_rows := {"modifiers": [], "rules": []}
 	for m in Settings.MOD_ROWS:
 		var bit: int = m[2]
-		mod_rows.append({"id": m[0], "label": m[1],
+		mod_rows[m[3]].append({"id": m[0], "label": m[1],
 			"value": func(): return "ON" if Settings.mod_bits & bit else "OFF",
 			"change": func(_d): Settings.mod_bits ^= bit})
-	# nine rows: over the logo (hidden, as on CONTROLS), clear of the key legend
-	_add_page("modifiers", "MODIFIERS", mod_rows, help, Rect2(300, 60, 360, 0))
+	mod_rows["modifiers"].append({"id": "rules", "label": "RULES", "value": func(): return _mods_label("rules"),
+		"press": func(): open_page("rules")})
+	# over the logo (hidden, as on CONTROLS), clear of the key legend
+	_add_page("modifiers", "MODIFIERS", mod_rows["modifiers"], help, Rect2(300, 60, 360, 0))
+	_add_page("rules", "RULES", mod_rows["rules"], help, Rect2(300, 60, 360, 0))
 	# PORT-31: local (the lobby, up to four pads) or online (1 vs 1)
 	_add_page("multi", "MULTIPLAYER", [
 		{"id": "local", "label": "LOCAL", "value": func(): return "UP TO 4 PADS", "press": open_lobby},
@@ -389,8 +392,10 @@ func _play_summary() -> String:
 	return "%s  %d" % [Settings.DIFFICULTIES[Settings.difficulty_i], Settings.POINTS[Settings.points_i]]
 
 
-func _mods_label() -> String:
-	var on := Settings.MOD_ROWS.filter(func(m): return Settings.mod_bits & m[2])
+## How many toggles are on (one: its name), on a page or all of them.
+func _mods_label(on_page := "") -> String:
+	var on := Settings.MOD_ROWS.filter(func(m): return Settings.mod_bits & m[2] \
+		and (on_page == "" or m[3] == on_page))
 	if on.is_empty():
 		return "NONE"
 	return on[0][1] if on.size() == 1 else "%d ON" % on.size()
@@ -425,7 +430,7 @@ func _show(id: String) -> void:
 	if hat_museum:
 		hat_museum.visible = id == "museum"
 	for n in _header:
-		n.visible = not id in ["select", "records", "controls", "modifiers", "lobby", "museum", "career_card", "career_edit",
+		n.visible = not id in ["select", "records", "controls", "modifiers", "rules", "lobby", "museum", "career_card", "career_edit",
 			"career_name"]
 	if lobby_screen:
 		lobby_screen.visible = id == "lobby"
@@ -456,9 +461,11 @@ func back() -> void:
 			_sfx.play("back")
 		return
 	var from := page
-	_show("main")
-	pages["main"].select(from)
-	pages["main"].appear(-1)
+	# RULES is MODIFIERS' sub-page: back to its row there
+	var parent := "modifiers" if from == "rules" else "main"
+	_show(parent)
+	pages[parent].select(from)
+	pages[parent].appear(-1)
 	_lock = SWITCH_LOCK
 	GameControls.clear_latch()
 	if _sfx:

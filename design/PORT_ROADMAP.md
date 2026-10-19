@@ -65,7 +65,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-37 | Period-true park: ROOKIE / CLUB / CHAMP, park points | `feature/cld-park` | Ready to test |
 | PORT-38 | Career: 13 hats, 16 unlocks, the Hat Museum | `feature/cld-hats` | Ready to test |
 | PORT-39 | The show: rings, celebrations, critters, quips | `feature/cld-show` | Ready to test |
-| PORT-40 | The Pickleball '95 promises | | Planned |
+| PORT-40 | The Pickleball '95 promises | `feature/cld-sideout` ... | In progress |
 | PORT-41 | Four swings and the short hold | `feature/cld-four-shots` | Ready to test |
 
 ## Releases
@@ -484,7 +484,9 @@ feature/cld-release-0.9.2   (v0.9.2)
 - [ ] `PORT-40` The Pickleball '95 promises (bible §5.8): Dale Dawson as an
   unlockable (§3), side-out scoring, the momentum rule, new modifiers;
   the overhead smash is already in (PORT-24).
-  - Status: **Planned**.
+  - Done: side-out scoring (ADR-063: MODIFIERS > RULES > SIDE-OUT; the
+    scoring rules got their own RULES page).
+  - Status: **In progress**.
 
 ## For you
 

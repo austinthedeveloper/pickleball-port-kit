@@ -395,11 +395,22 @@ func refresh() -> void:
 					_result_line.text += "  " + park_line(view.save.career)
 	elif s.phase == K.PHASE_POINT_RESULT and _point_banner_frames > 0:
 		_banner.text = K.fault_word(s.last_fault)
-		_banner_sub.text = "%s SCORES" % _team_label(s.point_winner)
+		_banner_sub.text = point_line(s, _team_label(s.point_winner))
 	else:
 		_banner.text = ""
 		_banner_sub.text = ""
 	_trophy.visible = _banner.text.begins_with("CHAMPION")
+
+
+## Under the fault word: who scored, or with SIDE-OUT (port ADR-063) a
+## rally the receivers won: SECOND SERVER (doubles, the first server's
+## rally) or SIDE OUT.
+static func point_line(s: Sim, winner_label: String) -> String:
+	if s.point_scored:
+		return "%s SCORES" % winner_label
+	if s.side_out_doubles() and s.server_number == 1:
+		return "SECOND SERVER"
+	return "SIDE OUT"
 
 
 ## After a rated park game (SNES ADR-070, hud_scene.c hud_result_rating):

@@ -4,6 +4,16 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [Unreleased]
+
+### Added
+- **Side-out scoring**, the *Pickleball '95* promise: MODIFIERS > RULES >
+  SIDE-OUT. Only the serving side scores; in doubles both partners serve
+  before the side out, and a game opens on the second server.
+
+### Changed
+- WIN BY 2 and LAVA moved to the new RULES page (MODIFIERS > RULES).
+
 ## [0.11.0] - 2026-10-18
 
 The show: players react to every point, emote, and wear a coloured

@@ -153,9 +153,17 @@ func test_modifiers_page_sets_bits() -> void:
 	Settings.opponent_i = -1
 	t.open_page("modifiers")
 	var m: MenuPage = t.pages["modifiers"]
-	m.select("lava")
+	m.select("rules")
 	m.press()
+	eq(t.page, "rules", "RULES opens from MODIFIERS")
+	var r: MenuPage = t.pages["rules"]
+	r.select("lava")
+	r.press()
 	eq(t.pages["main"].value_of("modifiers"), "LAVA")
+	eq(m.value_of("rules"), "LAVA")
+	t.back()
+	eq(t.page, "modifiers", "back to MODIFIERS")
+	eq(m.current_id(), "rules")
 	m.select("big_ball")
 	m.change(1)
 	eq(t.config(false).modifiers, K.MOD_LAVA | K.MOD_BIG_BALL, "the toggles reach the match")

@@ -29,6 +29,13 @@ var point_winner := K.NO_TEAM
 var team_score := [0, 0]
 var required_bounce := K.REQUIRED_BOUNCE_NONE
 var serving_team := 0
+## SIDE-OUT (port ADR-063): which of the serving pair serves, 1 or 2 (a
+## game opens on 2), the side-out's first server's slot, whether the last
+## rally scored, and whether it's still the game's opening server.
+var server_number := 2
+var first_server := -1
+var opening := true
+var point_scored := true
 var match_winner := K.NO_TEAM
 var hit_stop := 0
 ## The last rally contact was before the ball bounced (ADR-055, the kitchen).
@@ -589,6 +596,13 @@ func _serve_place_partner(slot: int, at_kitchen: bool) -> void:
 	p.frozen = 0
 	p.pose = K.POSE_NONE
 
+## SIDE-OUT in doubles: the players keep their sides here (as in rally
+## scoring), so the server is a person, not a lane: the side-out's first
+## server is the one on the side the score's parity names, the second
+## their partner, each serving from their own side.
+func side_out_doubles() -> bool:
+	return config.modifiers & K.MOD_SIDE_OUT != 0 and config.mode == K.MODE_DOUBLES
+
 func serve_setup(team: int) -> void:
 	var even: bool = (team_score[team] & 1) == 0
 	var server_y: int
@@ -596,6 +610,14 @@ func serve_setup(team: int) -> void:
 		server_y = K.COURT_CENTERLINE_Y + K.SERVE_STANCE_OFFSET_Y
 	else:
 		server_y = K.COURT_CENTERLINE_Y - K.SERVE_STANCE_OFFSET_Y
+	if side_out_doubles():
+		if first_server < 0 or (first_server >= 2) != (team == 1):
+			first_server = _serve_slot_for_lane(team, server_y < K.COURT_CENTERLINE_Y)
+		# the game's opener serves on as "server 2": one lost rally sides out
+		var slot := first_server if server_number == 1 or opening \
+			or not players[first_server ^ 1].active else first_server ^ 1
+		server_y = K.COURT_CENTERLINE_Y - K.SERVE_STANCE_OFFSET_Y if lane_top(slot) \
+			else K.COURT_CENTERLINE_Y + K.SERVE_STANCE_OFFSET_Y
 	var receiver_y := K.COURT_CENTERLINE_Y - K.SERVE_STANCE_OFFSET_Y \
 		if server_y >= K.COURT_CENTERLINE_Y \
 		else K.COURT_CENTERLINE_Y + K.SERVE_STANCE_OFFSET_Y
@@ -738,7 +760,10 @@ func resolve_point(losing_team: int, fault: int) -> void:
 	var winner := 1 - losing_team
 	point_winner = winner
 	last_fault = fault
-	team_score[winner] += 1
+	# SIDE-OUT: only the serving side scores
+	point_scored = not (config.modifiers & K.MOD_SIDE_OUT) or winner == serving_team
+	if point_scored:
+		team_score[winner] += 1
 	if fault != K.FAULT_SECOND_BOUNCE and fault != K.FAULT_NONE:
 		emit(K.EVENT_FAULT, K.from_fp(ball.x_fp), K.from_fp(ball.y_fp), fault)
 	emit(K.EVENT_POINT, K.from_fp(ball.x_fp), K.from_fp(ball.y_fp), winner)
@@ -816,6 +841,9 @@ func team_won(team: int) -> bool:
 	return score_wins(team_score[team], team_score[team ^ 1])
 
 func match_point(team: int) -> bool:
+	# SIDE-OUT: only the serving side can win the next rally's point
+	if config.modifiers & K.MOD_SIDE_OUT and team != serving_team:
+		return false
 	return score_wins(team_score[team] + 1, team_score[team ^ 1])
 
 func _game_initialize() -> void:
@@ -826,6 +854,10 @@ func _game_initialize() -> void:
 	team_score = [0, 0]
 	required_bounce = K.REQUIRED_BOUNCE_NONE
 	serving_team = 0
+	server_number = 2                # SIDE-OUT: "0-0-2"
+	first_server = -1
+	opening = true
+	point_scored = true
 	hit_stop = 0
 	shot_serial = 0
 	frame_count = 0
@@ -1066,7 +1098,21 @@ func _update_point_result() -> void:
 		match_winner = winner
 		set_phase(K.PHASE_MATCH_RESULT)
 		return
-	_begin_serve(winner)
+	_begin_serve(next_server_team(winner))
+
+## Who serves next: the rally's winner (rally scoring); with SIDE-OUT the
+## server keeps serving while their side scores, a lost rally passes it to
+## the partner (doubles, server 1) or sides out.
+func next_server_team(winner: int) -> int:
+	if not (config.modifiers & K.MOD_SIDE_OUT) or winner == serving_team:
+		return winner
+	if side_out_doubles() and server_number == 1:
+		server_number = 2
+		return serving_team
+	server_number = 1
+	first_server = -1
+	opening = false
+	return winner
 
 func _update_match_result() -> void:
 	_freeze_players(match_winner)
@@ -1183,6 +1229,8 @@ func snapshot() -> Array:
 		match_winner, hit_stop, shot_serial, frame_count, server_index,
 		receiver_index, landing_pending, serve_requested, serve_aim_x,
 		serve_aim_y, server_y_fp]
+	if config.modifiers & K.MOD_SIDE_OUT:
+		s.append_array([server_number, first_server, point_scored, opening])
 	s.append_array(ball.to_array())
 	for p in players:
 		s.append_array(p.to_array())
