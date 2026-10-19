@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.9.2`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.9.3`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-34 of 34 roadmap tasks are in.
+35 of 37 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -208,3 +208,21 @@ Status: **Ready to test**: after 0.9.0, the next release (0.9.1) is the first re
 Four things you found: the update now comes up when the game opens and can't be skipped (`view/update_screen.gd`, ADR-057 amended); OPTIONS > UPDATES no longer sticks on 98%; HOW TO PLAY's match lessons play HENDERSON at full speed (KID's slowed ball read as slowdown) and THE KITCHEN is a ball-machine drill; ONLINE's HOST screen shows up to two addresses, 192.168 first, named by adapter.
 
 Status: **Ready to test**: 0.9.1 gets 0.9.2 from OPTIONS > UPDATES once; from then on updates come up at launch.
+
+## PORT-35: Catch the sim up to the ROM (planned) (not in this build)
+
+Import the SNES repo's `docs/tuning/tuning.json` (TUNING_VERSION 4) and its `opponents.json`, `paddles.json`, `career.json`; port SNES ADR-052 (the kitchen line counts), 053 (GHOST, POPCORN, ICE), 055 (ladder per mode, a save migration), 058 (CPU serve power and duds), 062 (the rebalance) and tuning v2-4 (the doubles think stagger from match frame 0). Record the port's tuning version. Add a test that replays the SNES conformance traces (`make conformance` at the matched commit) frame by frame.
+
+Status: **Planned**. SNES ADR-056 and 057 (the slice and the short hold) are done: PORT-41, ADR-058.
+
+## PORT-36: 36-40 (planned) (not in this build)
+
+About this project, and Tiny Chair: the bible's ground rule 1 note (title, README, release notes; due now that the repo is public), and a Tiny Chair splash in the A-11 colours after a name search.
+
+Status: **Planned**.
+
+## PORT-41: four swings and the short hold (asked for 2026-10-18)
+
+The first piece of PORT-35 (ADR-058): SNES ADR-056 and 057. SLICE (slow, never deep, steady), SHORT held (any swing goes short, the D-pad still moves), the fast drop's long spray off a stretch, and CPUs that slice (WALT, RAVEN, VLAD 3; ACE, JADE 4). Pad by position: SLICE north, SHORT LB or RB; keyboard I and Shift/U; both on CONTROLS. The overhead moved to shot 4 so the slice has the C's number; its own sound; the key legend and the SHOTS lesson teach all four.
+
+Status: **Ready to test**: try I / Y for the slice and hold Shift / LB with each swing.

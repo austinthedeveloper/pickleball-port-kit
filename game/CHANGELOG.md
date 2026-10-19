@@ -4,7 +4,9 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
-## [Unreleased]
+## [0.9.3] - 2026-10-18
+
+All four swings, as on the SNES: the slice, and SHORT to drop any shot.
 
 ### Added
 - **All four swings**, as on the SNES: the **SLICE** (I on the keyboard,

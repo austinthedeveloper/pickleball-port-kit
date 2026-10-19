@@ -107,6 +107,8 @@ status in the same commit. The finished tasks, in full, are in
   `feature/cld-release-0.9.1`).
 - **v0.9.2** (2026-10-18): PORT-34 update at launch, lessons, addresses
   (tag `v0.9.2`, on `feature/cld-release-0.9.2`).
+- **v0.9.3** (2026-10-18): PORT-41 the four swings and the short hold
+  (tag `v0.9.3`, on `feature/cld-release-0.9.3`).
 
 ## Phase 3 (started 2026-10-18)
 
