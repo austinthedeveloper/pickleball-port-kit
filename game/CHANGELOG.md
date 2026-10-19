@@ -4,7 +4,9 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
-## [Unreleased]
+## [0.13.0] - 2026-10-19
+
+MULTI BALL, and a gentler screen shake you can set.
 
 ### Added
 - **MULTI BALL**, the last '95 modifier: RULES > MULTI BALL. No serving:

@@ -123,6 +123,9 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.12.2** (2026-10-19): fuller backdrops, LAKESIDE's lake and town
   and the PARK and SUNSET skylines across the width (KNOWN_ISSUES #66;
   tag `v0.12.2`, on `feature/cld-release-0.12.2`).
+- **v0.13.0** (2026-10-19): MULTI BALL (PORT-40, ADR-067) and the
+  SCREEN SHAKE strength (KNOWN_ISSUES #58; tag `v0.13.0`, on
+  `feature/cld-release-0.13.0`).
 
 ## Phase 3 (started 2026-10-18)
 
