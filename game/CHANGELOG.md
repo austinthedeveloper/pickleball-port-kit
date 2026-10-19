@@ -17,6 +17,10 @@ Pickleball '94, the Godot port. Versions follow
   career player earns **park points** (10 to start; CLUB opens at 15,
   CHAMP at 25), **winners stay on** for up to two games, and at your rack
   SLICE picks **your partner** from the captains you've beaten.
+- **Seven new hats** to earn, as on the SNES: BEANIE, BUCKET, BACKCAP,
+  WHIRLY, VIKING, CHEF and CROWN.
+- The **HAT MUSEUM**, from your career card: every hat in a lit case on
+  you, the ones still to earn as silhouettes with how to get them.
 
 ### Changed
 - **The CPUs play exactly as on the SNES**, frame for frame: the ladder

@@ -1,5 +1,5 @@
 {
-  "comment": "Career mode (ADR-047). 'skins' name the skin tones of opponents.json in order; every skin is always available. 'hair' colours are 5-bit RGB (palette index 15); 'hats' are player_frames.json hats in HAT id order (CAP is the body's own cap, 0). A hair colour or hat with an 'unlock' is locked until that unlock's rule is met. 'unlocks' are checked after every finished match, in this order (bit n of a player's unlocked mask). Rules: WINS (matches won against the CPU), RALLY (longest rally), ACES (serves not returned), SHUTOUTS, STREAK (best win streak), BEAT (beat this ladder team), CLEARS (ladder clears), OPEN (open play games). Names fit 12 HUD cells; 'how' (the card's hint, after NEXT:) fits 18.",
+  "comment": "Career mode (ADR-047). 'skins' name the skin tones of opponents.json in order; every skin is always available. 'hair' colours are 5-bit RGB (palette index 15); 'hats' are player_frames.json hats in HAT id order (CAP first, 0; NONE is the bare head). A hair colour or hat with an 'unlock' is locked until that unlock's rule is met. 'unlocks' are checked after every finished match, in this order (bit n of a player's unlocked mask). Rules: WINS (matches won against the CPU), RALLY (longest rally), ACES (serves not returned), SHUTOUTS, STREAK (best win streak), BEAT (beat this ladder team), CLEARS (ladder clears), OPEN (open play games). Names fit 12 HUD cells; 'how' (the card's hint, after NEXT:) fits 18.",
   "skins": ["LIGHT", "TAN", "DEEP", "PALE"],
   "hair": [
     ["BROWN", [12, 7, 4]],
@@ -19,7 +19,14 @@
     ["HEADBAND", "HEADBAND"],
     ["TRICORN", "TRICORN"],
     ["BANDANA", "BANDANA"],
-    ["NONE"]
+    ["NONE"],
+    ["BEANIE", "BEANIE"],
+    ["BACKCAP", "BACKCAP"],
+    ["BUCKET", "BUCKET"],
+    ["CROWN", "CROWN"],
+    ["WHIRLY", "WHIRLY"],
+    ["CHEF", "CHEF"],
+    ["VIKING", "VIKING"]
   ],
   "gear": {
     "comment": "Stage 4 (ADR-047): a career player's hat moves one paddle stat point to another (power, control, speed), so the paddle budget holds and every pairing stays within ADR-015's 15% (checked). A stat can't pass 5: on a paddle that already maxes the stat a hat raises, the hat changes nothing. A hat not listed (CAP, NONE) changes nothing. CPUs' hats are looks only.",
@@ -37,6 +44,13 @@
     {"name": "PINK HAIR", "rule": "SHUTOUTS", "value": 1, "how": "A SHUTOUT"},
     {"name": "GREEN HAIR", "rule": "OPEN", "value": 5, "how": "5 OPEN PLAY GAMES"},
     {"name": "PURPLE HAIR", "rule": "STREAK", "value": 5, "how": "A 5-WIN STREAK"},
-    {"name": "GOLD HAIR", "rule": "CLEARS", "value": 1, "how": "CLEAR THE LADDER"}
+    {"name": "GOLD HAIR", "rule": "CLEARS", "value": 1, "how": "CLEAR THE LADDER"},
+    {"name": "BEANIE", "rule": "WINS", "value": 3, "how": "WIN 3 MATCHES"},
+    {"name": "BUCKET", "rule": "OPEN", "value": 10, "how": "10 OPEN PLAY GAMES"},
+    {"name": "BACKCAP", "rule": "WINS", "value": 25, "how": "WIN 25 MATCHES"},
+    {"name": "WHIRLY", "rule": "RALLY", "value": 30, "how": "A 30-SHOT RALLY"},
+    {"name": "VIKING", "rule": "BEAT", "value": "GYM BROS", "how": "BEAT THE GYM BROS"},
+    {"name": "CHEF", "rule": "STREAK", "value": 10, "how": "A 10-WIN STREAK"},
+    {"name": "CROWN", "rule": "CLEARS", "value": 3, "how": "3 LADDER CLEARS"}
   ]
 }

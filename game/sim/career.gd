@@ -99,6 +99,13 @@ static func hats() -> int:
 	return hat_names.size()
 
 
+## The bare head's id (CAREER_HAT_NONE): after the first six, with the
+## hats SNES ADR-060 added after it.
+static func hat_none() -> int:
+	_load()
+	return hat_names.find("NONE")
+
+
 static func unlocks() -> int:
 	_load()
 	return unlock_names.size()
@@ -445,6 +452,16 @@ static func next_unlock(player: Player) -> int:
 		if (player.unlocked >> i) & 1 == 0:
 			return i
 	return unlocks()
+
+
+## How many of the museum's hats the player holds (career_hats_held):
+## every hat but the bare head.
+static func hats_held(player: Player) -> int:
+	var count := 0
+	for i in hats():
+		if i != hat_none() and hat_unlocked(player, i):
+			count += 1
+	return count
 
 
 ## How many unlocks the player holds.

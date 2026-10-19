@@ -50,6 +50,9 @@ var lobby_screen: LobbyScreen
 var career_page := CareerPage.new()
 var career_keyboard: CareerKeyboard
 var career_preview: CareerPreview
+## The HAT MUSEUM (SNES ADR-061), from the career card.
+var museum := Museum.new()
+var hat_museum: HatMuseum
 var _spare_career := Career.new()      ## no save (some tests): nobody
 
 
@@ -128,6 +131,10 @@ func _ready() -> void:
 	select_screen = SelectScreen.new().setup(select)
 	select_screen.visible = false
 	_ui.add_child(select_screen)
+	hat_museum = HatMuseum.new().setup(museum)
+	hat_museum.visible = false
+	hat_museum.pressed.connect(museum_input)
+	_ui.add_child(hat_museum)
 	_sfx = Sfx.new()
 	add_child(_sfx)
 	_sfx.setup("", false)
@@ -414,8 +421,10 @@ func _show(id: String) -> void:
 		career.delete_armed = false
 	if select_screen:
 		select_screen.visible = id == "select"
+	if hat_museum:
+		hat_museum.visible = id == "museum"
 	for n in _header:
-		n.visible = not id in ["select", "records", "controls", "lobby", "career_card", "career_edit",
+		n.visible = not id in ["select", "records", "controls", "lobby", "museum", "career_card", "career_edit",
 			"career_name"]
 	if lobby_screen:
 		lobby_screen.visible = id == "lobby"
@@ -457,6 +466,38 @@ func back() -> void:
 
 func page_open() -> bool:
 	return page == "practice"
+
+
+## HAT MUSEUM on the career card: the player's hats in their cases.
+func open_museum() -> void:
+	museum.begin(career.career(), career_page.slot)
+	_show("museum")
+	hat_museum.refresh()
+	_lock = SWITCH_LOCK
+	GameControls.clear_latch()
+
+
+## One frame of the museum: Y or Start back to the card (writing the save
+## if a hat was put on).
+func museum_input(pressed: int) -> void:
+	if pressed == 0:
+		return
+	var was := [museum.cursor, museum.player().hat]
+	var result := museum.input(pressed)
+	if result != Museum.STAY:
+		if result == Museum.CLOSE_SAVE and save:
+			save.save_game()
+		_show("career_card")
+		pages["career_card"].select("hats")
+		pages["career_card"].appear(-1)
+		career.sync(false)
+		_lock = SWITCH_LOCK
+		GameControls.clear_latch()
+		_sfx.play("back")
+	elif museum.player().hat != was[1]:
+		_sfx.play("confirm")
+	elif museum.cursor != was[0]:
+		_sfx.play("blip")
 
 
 ## SINGLES / DOUBLES: Player Select for 1P (on their last choice), then 2P.
@@ -772,6 +813,9 @@ func _process(_delta: float) -> void:
 		return
 	if page == "lobby":
 		_update_lobby()
+		return
+	if page == "museum":
+		museum_input(GameControls.pad_bits()[0])
 		return
 	if page == "select":
 		var pressed: int = GameControls.pad_bits()[0]

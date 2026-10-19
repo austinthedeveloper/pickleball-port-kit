@@ -113,10 +113,11 @@ func test_unlocks() -> void:
 	var tricorn := 1 << _unlock_bit("TRICORN")
 	var pink := 1 << _unlock_bit("PINK HAIR")
 	var gold := 1 << _unlock_bit("GOLD HAIR")
+	var beanie := 1 << _unlock_bit("BEANIE")
 	c.create(2, "MAX")
 	var p := c.active_player()
 	# Free from the start: the cap, bare hair, the first hair colours.
-	check(Career.hat_unlocked(p, 0) and Career.hat_unlocked(p, Career.hats() - 1), "cap and NONE")
+	check(Career.hat_unlocked(p, 0) and Career.hat_unlocked(p, Career.hat_none()), "cap and NONE")
 	check(Career.hair_unlocked(p, 0), "the first hair")
 	for i in Career.hats():
 		eq(Career.hat_unlocked(p, i), Career.hat_unlock[i] == Career.FREE, "hat %d" % i)
@@ -127,9 +128,10 @@ func test_unlocks() -> void:
 	# Earned once: the next win earns nothing new.
 	c.record_match(K.MODE_SINGLES, true, 3, -1, 0)
 	eq(c.new_unlocks, 0, "earned once")
-	# A shutout of the PIRATES: their hat and the pink hair together.
+	# A shutout of the PIRATES, the third win: their hat, the pink hair,
+	# and the beanie together (SNES ADR-060).
 	c.record_match(K.MODE_SINGLES, true, 0, 3, 0)
-	eq(c.new_unlocks, tricorn | pink, "two at once")
+	eq(c.new_unlocks, tricorn | pink | beanie, "three at once")
 	# A ladder clear: the gold hair; a loss earns nothing.
 	c.record_match(K.MODE_SINGLES, false, 5, 1, 0)
 	eq(c.new_unlocks, 0, "a loss earns nothing")
@@ -196,7 +198,7 @@ func test_gear() -> void:
 	# The cap and bare hair are the plain paddles.
 	for paddle in Paddles.COUNT:
 		eq(Paddles.stats(Paddles.profile(paddle, 0)), Paddles.STATS[paddle], "cap")
-		eq(Paddles.stats(Paddles.profile(paddle, Career.hats() - 1)), Paddles.STATS[paddle], "none")
+		eq(Paddles.stats(Paddles.profile(paddle, Career.hat_none())), Paddles.STATS[paddle], "none")
 	# VISOR on BLUE: control up, power down; on WOOD (control 5): none.
 	var hat := 1
 	eq(Paddles.stats(Paddles.profile(Paddles.BLUE, hat)), [2, 4, 3], "visor on blue")
@@ -370,7 +372,7 @@ func test_page_edit_look() -> void:
 	eq(p.shirt, PlayerSelect.PAL_RED, "shirt")
 	_press(CareerPage.PAD_DOWN)                  # HAT: nothing won yet
 	_press(CareerPage.PAD_RIGHT)
-	eq(p.hat, Career.hats() - 1, "past the locked: NONE")
+	eq(p.hat, Career.hat_none(), "past the locked: NONE")
 	_press(CareerPage.PAD_RIGHT)
 	eq(p.hat, 0, "and round to the cap")
 	# Y puts it all back.

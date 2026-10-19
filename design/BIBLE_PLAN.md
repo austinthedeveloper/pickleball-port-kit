@@ -70,12 +70,12 @@ Status: **have** (the port does it), **partly**, **missing**, **differs**
 | Modifiers **GLOW lights, INVERSE colours** | 054 | **missing** | Display (palettes); the port draws in full colour, so re-design them. |
 | OPTIONS: SCORING (FIRST TO / WIN BY 2), CAMERA with AMOUNT | 065 | **partly** | Port: WIN BY 2 is a modifier; CAMERA has %. |
 | Nine title entries in the ROM's order | 065 | **differs** | The port's menus are its own (modernised, ADR-052). Keep, but note it. |
-| Career looks: 4 skins, **10 hair** (5 to earn), **13 hats** (11 to earn) | 059, 060 | **partly** | Port: 10 hair, **6 hats**, 9 unlocks. Needs the new hats' art. |
-| The **16 unlocks** (VISOR ... CROWN, BUCKET; five hair colours) | 060 | **partly** | Port has 9. |
+| Career looks: 4 skins, **10 hair** (5 to earn), **13 hats** (11 to earn) | 059, 060 | **done** | PORT-38, ADR-061: the new hats drawn for the HD players. |
+| The **16 unlocks** (VISOR ... CROWN, BUCKET; five hair colours) | 060 | **done** | PORT-38. |
 | Four hats trade a paddle stat (VISOR, HEADBAND, TRICORN, BANDANA) | 047 | **have** | `data/career.json` gear. |
-| **Hat Museum**: X on a player's card, 4 × 3 cases, locked as silhouettes with hints | 061 | **missing** | |
-| A taken shirt colour shows as a dark silhouette in Player Select | 020 | check | |
-| The female player wears a ponytail | 059 | check | The port's art is its own (HD); check it has one. |
+| **Hat Museum**: X on a player's card, 4 × 3 cases, locked as silhouettes with hints | 061 | **done** | PORT-38: a HAT MUSEUM row on the card (the port's menus take rows, not X). |
+| A taken shirt colour shows as a dark silhouette in Player Select | 020 | **differs** | The port fades it and labels it 1P (its own select screen, ADR-020's layout). Keep. |
+| The female player wears a ponytail | 059 | **have** | Baked into the HD female sheets. |
 | Open play courts **ROOKIE / CLUB / CHAMP** | 070 | **done** | PORT-37, ADR-060. |
 | **Park points**: 10 to start, +2 a win at your level, -1 a loss; CLUB at 15, CHAMP at 25 | 070 | **done** | PORT-37: `Career.Player.park`. |
 | **Winners stay on**, up to two wins in a row | 071 | **done** | PORT-37. |

@@ -296,6 +296,19 @@ func test_career_screens() -> void:
 		t.career_preview.show_player(p0)
 		card.refresh()
 		check_layout(t, "career card, %d unlocked" % n)
+	# the HAT MUSEUM: every case picked, all locked (the hints) and all won
+	for mask in [0, 0xffff]:
+		p0.unlocked = mask
+		card.select("hats")
+		card.press()
+		eq(t.page, "museum")
+		for i in Museum.hats():
+			t.museum.cursor = i
+			t.museum.changed = true
+			t.hat_museum._process(0.0)
+			check_layout(t, "museum, unlocked %x, case %d" % [mask, i])
+		t.museum_input(Practice.PAD_Y)
+		card.settle()
 	card.select("delete")
 	card.press()
 	check_layout(t, "career card, delete armed")

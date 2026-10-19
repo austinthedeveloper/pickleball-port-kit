@@ -203,7 +203,14 @@
       "visor": "sprites/players/roles/player_male_visor.png",
       "headband": "sprites/players/roles/player_male_headband.png",
       "tricorn": "sprites/players/roles/player_male_tricorn.png",
-      "bandana": "sprites/players/roles/player_male_bandana.png"
+      "bandana": "sprites/players/roles/player_male_bandana.png",
+      "beanie": "sprites/players/roles/player_male_beanie.png",
+      "backcap": "sprites/players/roles/player_male_backcap.png",
+      "bucket": "sprites/players/roles/player_male_bucket.png",
+      "crown": "sprites/players/roles/player_male_crown.png",
+      "whirly": "sprites/players/roles/player_male_whirly.png",
+      "chef": "sprites/players/roles/player_male_chef.png",
+      "viking": "sprites/players/roles/player_male_viking.png"
      },
      "female": {
       "body": "sprites/players/roles/player_female_body.png",
@@ -211,7 +218,14 @@
       "visor": "sprites/players/roles/player_female_visor.png",
       "headband": "sprites/players/roles/player_female_headband.png",
       "tricorn": "sprites/players/roles/player_female_tricorn.png",
-      "bandana": "sprites/players/roles/player_female_bandana.png"
+      "bandana": "sprites/players/roles/player_female_bandana.png",
+      "beanie": "sprites/players/roles/player_female_beanie.png",
+      "backcap": "sprites/players/roles/player_female_backcap.png",
+      "bucket": "sprites/players/roles/player_female_bucket.png",
+      "crown": "sprites/players/roles/player_female_crown.png",
+      "whirly": "sprites/players/roles/player_female_whirly.png",
+      "chef": "sprites/players/roles/player_female_chef.png",
+      "viking": "sprites/players/roles/player_female_viking.png"
      }
     },
     "hats": [
@@ -219,7 +233,14 @@
      "visor",
      "headband",
      "tricorn",
-     "bandana"
+     "bandana",
+     "beanie",
+     "backcap",
+     "bucket",
+     "crown",
+     "whirly",
+     "chef",
+     "viking"
     ],
     "hats_doc": "Hat overlays (role sheets only), drawn like the cap: visor and headband in the shoe accent (k, K), tricorn in hair with a white (Z) trim, bandana in the shirt ramp.",
     "order": ".o1234hHiDdMLqwWsSxXgkKpPfeEGZ",

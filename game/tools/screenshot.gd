@@ -18,7 +18,8 @@
 ## ROOKIE rack (SNES ADR-070, 072).
 ## "career" (ADR-047) plays as a scratch career player (ACE: green, pink
 ## hair, a visor) in a match, the park, or on title_career,
-## title_career_card, title_career_edit and title_career_name; "unlock"
+## title_career_card, title_career_edit and title_career_name (and
+## title_career_museum: the HAT MUSEUM, half the hats won); "unlock"
 ## shows the UNLOCKED! card at the end of a match.
 extends SceneTree
 
@@ -230,6 +231,14 @@ func _initialize() -> void:
 						t.pages["career_card"].select("edit")
 						t.pages["career_card"].press()
 						t.pages["career_edit"].select("hat")
+					if mode == "title_career_museum":
+						var me: Career.Player = t.save.career.players[0]
+						for u in ["BEANIE", "BUCKET", "WHIRLY", "VIKING"]:
+							me.unlocked |= 1 << Career.unlock_names.find(u)
+						me.hat = Career.hat_names.find("WHIRLY")
+						t.pages["career_card"].select("hats")
+						t.pages["career_card"].press()
+						t.museum_input(Practice.PAD_RIGHT)
 					if mode == "title_career_name":
 						t.pages["career_edit"].select("name")
 						t.pages["career_edit"].press()

@@ -63,7 +63,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-35 | Catch the sim up to the ROM (TUNING_VERSION 4) | `feature/cld-sim-catchup` | Done |
 | PORT-36 | About this project, and Tiny Chair | `feature/cld-about` | In progress |
 | PORT-37 | Period-true park: ROOKIE / CLUB / CHAMP, park points | `feature/cld-park` | Ready to test |
-| PORT-38 | Career: 13 hats, 16 unlocks, the Hat Museum | | Planned |
+| PORT-38 | Career: 13 hats, 16 unlocks, the Hat Museum | `feature/cld-hats` | Ready to test |
 | PORT-39 | The show: rings, celebrations, critters, quips | | Planned |
 | PORT-40 | The Pickleball '95 promises | | Planned |
 | PORT-41 | Four swings and the short hold | `feature/cld-four-shots` | Ready to test |
@@ -462,7 +462,11 @@ feature/cld-release-0.9.2   (v0.9.2)
   - Status: **Ready to test**.
 - [ ] `PORT-38` Career and the Hat Museum: 13 hats and 16 unlocks (the port
   has 6 and 9), the museum (SNES ADR-059 to 061), new hat art.
-  - Status: **Planned**.
+  - Done (ADR-061): BEANIE, BUCKET, BACKCAP, WHIRLY, VIKING, CHEF and
+    CROWN drawn for the HD players and earned as in the ROM; the HAT
+    MUSEUM from the player's card (cases, silhouettes, hints, B wears).
+    The SNES museum and career tests are ported.
+  - Status: **Ready to test**.
 - [ ] `PORT-39` The show: rings at each player's feet, celebrations,
   slumps, emotes, net shiver, critters, more quips, and GLOW / INVERSE
   redone for full colour (SNES ADR-054, 063, 064, 066).

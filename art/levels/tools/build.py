@@ -138,7 +138,11 @@ def build_players():
                   "hats_doc": "Hat overlays (role sheets only), drawn like the "
                               "cap: visor and headband in the shoe accent "
                               "(k, K), tricorn in hair with a white (Z) trim, "
-                              "bandana in the shirt ramp.",
+                              "bandana in the shirt ramp. SNES ADR-060 "
+                              "(PORT-38): beanie, whirly, backcap, bucket in "
+                              "the shirt ramp (whirly blades in the accent), "
+                              "crown silver with shirt jewels, chef white, "
+                              "viking grey with white horns and a shirt band.",
                   "order": PL.ROLES,
                   "palettes": "palettes.json",
                   "doc": "Pixel value = index into 'order' (0 transparent). "

@@ -31,6 +31,8 @@ RAMP = {
     "sock_far": ("S", "S", "S", "s"),
     "hair": ("h", "h", "H", "i"),
     "accent": ("K", "K", "k", "k"),
+    "white": ("q", "w", "W", "Z"),
+    "steel": ("g", "g", "q", "S"),
 }
 
 
@@ -459,7 +461,9 @@ def head_parts(neck, female=False, pony="hang"):
     return head, cap, tail
 
 
-HATS = ("visor", "headband", "tricorn", "bandana")
+HATS = ("visor", "headband", "tricorn", "bandana",
+        # SNES ADR-060 (port PORT-38): looks only, the owner's palette
+        "beanie", "backcap", "bucket", "crown", "whirly", "chef", "viking")
 
 
 def hat_part(neck, kind):
@@ -532,6 +536,129 @@ def hat_part(neck, kind):
         p.capsule(knot, knot, 2.2, 2.2, "shirt")
         p.capsule(knot, (knot[0] - 6, knot[1] + 4), 1.8, 1.1, "shirt")
         p.capsule(knot, (knot[0] - 3, knot[1] + 8), 1.8, 1.1, "shirt")
+    elif kind in ("beanie", "whirly"):
+        # a knit dome down to the brow, a ribbed cuff; the beanie has a
+        # white pom-pom, the whirly a propeller in the shoe accent
+        for y in range(int(cy - 13), int(band_y + 4)):
+            for x in range(int(cx - 13), int(cx + 13)):
+                px, py = x + 0.5, y + 0.5
+                low = band_y + 1 + slope(px)
+                if not in_dome(px, py, 12.0, 11.4, -0.5) or py > low:
+                    continue
+                s = lit(px, py)
+                ch = "L" if s < -0.45 else ("d" if s > 0.5 else "M")
+                if py > low - 3:
+                    ch = "D" if x % 2 else "d"            # the cuff's ribs
+                elif kind == "whirly" and int(px - cx + 40) // 5 % 2:
+                    ch = {"L": "M", "M": "d", "d": "D"}[ch]   # panels
+                p.px[(x, y)] = ch
+        if kind == "beanie":
+            p.capsule((cx - 1, cy - 12.5), (cx - 1, cy - 12.5), 3.0, 3.0, "white")
+        else:
+            for y in range(int(cy - 16), int(cy - 11)):   # the stalk
+                p.px[(round(cx - 1), y)] = "g"
+            for x in range(int(cx - 10), int(cx + 9)):    # the blades
+                if abs(x + 0.5 - (cx - 1)) < 1.5:
+                    continue
+                p.px[(x, int(cy - 17))] = "k"
+                if abs(x + 0.5 - (cx - 1)) < 7:
+                    p.px[(x, int(cy - 16))] = "K"
+            p.px[(round(cx - 1), int(cy - 17))] = "g"     # the hub
+    elif kind == "backcap":
+        # the cap worn backwards: the brim over the nape
+        for y in range(int(cy - 12), int(band_y + 3)):
+            for x in range(int(cx - 12), int(cx + 13)):
+                px, py = x + 0.5, y + 0.5
+                if not in_dome(px, py, 11.4, 10.6) or py > band_y + slope(px):
+                    continue
+                s = lit(px, py)
+                ch = "L" if s < -0.45 else ("d" if s > 0.5 else "M")
+                if py > band_y - 1.5 + slope(px):
+                    ch = "d"
+                p.px[(x, y)] = ch
+        for y in range(int(band_y - 1), int(band_y + 6)):
+            for x in range(int(cx - 19), int(cx - 7)):
+                t = (cx - 7 - x) / 12
+                top = band_y + slope(cx - 7) - 1 + t * 2.5
+                if top <= y + 0.5 <= top + 3.0 - t * 0.8:
+                    p.px[(x, y)] = "L" if y + 0.5 < top + 1 else "M"
+        p.px[(round(cx), round(cy - 11))] = "d"           # button
+    elif kind == "bucket":
+        for y in range(int(cy - 15), int(band_y + 1)):    # the crown
+            for x in range(int(cx - 12), int(cx + 12)):
+                px, py = x + 0.5, y + 0.5
+                if not in_dome(px, py, 10.6, 11.0, -2) or py > band_y + slope(px) * 0.5:
+                    continue
+                s = lit(px, py)
+                ch = "L" if s < -0.45 else ("d" if s > 0.5 else "M")
+                if py > band_y - 2.5 + slope(px) * 0.5:
+                    ch = "D"                              # the band
+                p.px[(x, y)] = ch
+        for x in range(int(cx - 17), int(cx + 18)):       # the floppy brim
+            tt = (x + 0.5 - cx) / 17
+            top = band_y + slope(x + 0.5) * 0.5 + 3.5 * tt * tt - 0.5
+            for y in range(int(top), int(top + 4)):
+                if top <= y + 0.5 <= top + 3.2:
+                    p.px[(x, y)] = "M" if y + 0.5 < top + 1.2 else "d"
+    elif kind == "crown":
+        # silver, its points lit white, jewels in the shirt colour
+        for x in range(int(cx - 11), int(cx + 12)):
+            px = x + 0.5
+            if not in_dome(px, cy, 11.0, 10.6):
+                continue
+            ph = (x - cx + 70) % 7
+            spike = 4.5 - abs(ph - 3) * 1.4
+            top = band_y - 5 + slope(px) - max(spike, 0)
+            low = band_y + 1 + slope(px)
+            for y in range(int(top), int(low) + 1):
+                py = y + 0.5
+                if not top <= py <= low:
+                    continue
+                s = lit(px, py)
+                ch = "W" if s < -0.3 else ("q" if s > 0.5 else "w")
+                if py < top + 1.2 and spike > 3:
+                    ch = "Z"
+                if py > low - 1.2:
+                    ch = "q"
+                p.px[(x, y)] = ch
+            if ph == 3:
+                p.px[(x, int(band_y - 2 + slope(px)))] = "M"
+                p.px[(x, int(band_y - 1 + slope(px)))] = "d"
+    elif kind == "chef":
+        for y in range(int(band_y - 5), int(band_y + 3)):  # the band
+            for x in range(int(cx - 11), int(cx + 11)):
+                px, py = x + 0.5, y + 0.5
+                if not in_dome(px, py, 11.2, 10.6) or py > band_y + 1 + slope(px):
+                    continue
+                p.px[(x, y)] = "q" if py > band_y + slope(px) else "w"
+        for y in range(int(cy - 19), int(band_y - 4)):     # the puff
+            for x in range(int(cx - 13), int(cx + 13)):
+                px, py = x + 0.5, y + 0.5
+                if ((px - cx) / 12.5) ** 2 + ((py - (cy - 12)) / 7.5) ** 2 > 1:
+                    continue
+                s = lit(px, py)
+                ch = "Z" if s < -0.3 else ("q" if s > 0.6 else "W")
+                if (x + 40) % 6 == 0 and py > cy - 13:
+                    ch = "w"                              # the pleats
+                p.px[(x, y)] = ch
+    elif kind == "viking":
+        for y in range(int(cy - 13), int(band_y + 4)):     # the helmet
+            for x in range(int(cx - 13), int(cx + 13)):
+                px, py = x + 0.5, y + 0.5
+                low = band_y + 1 + slope(px)
+                if not in_dome(px, py, 12.0, 11.4, -0.5) or py > low:
+                    continue
+                s = lit(px, py)
+                ch = "S" if s < -0.4 else ("g" if s > 0.5 else "q")
+                if py > low - 2.5:
+                    ch = "d" if s > 0.3 else "M"          # the shirt band
+                elif abs(px - cx) < 1.2:
+                    ch = "S"                              # the crest
+                p.px[(x, y)] = ch
+        p.capsule((cx + 8, cy - 7), (cx + 11, cy - 12), 2.2, 1.6, "white")
+        p.capsule((cx + 11, cy - 12), (cx + 10, cy - 17), 1.6, 0.7, "white")
+        p.capsule((cx - 9, cy - 7), (cx - 13, cy - 12), 2.2, 1.6, "white")
+        p.capsule((cx - 13, cy - 12), (cx - 12, cy - 17), 1.6, 0.7, "white")
     else:
         raise ValueError(kind)
     return p
