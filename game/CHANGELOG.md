@@ -4,6 +4,16 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.12.2] - 2026-10-19
+
+Fuller backdrops: LAKESIDE's lake and town across the whole view.
+
+### Fixed
+- LAKESIDE's lake and its little town now stretch across the whole view
+  (they were a small rectangle in the middle), with hills behind and
+  sailboats on the water; PARK's and SUNSET's city skylines no longer
+  stop short.
+
 ## [0.12.1] - 2026-10-19
 
 Online: the host's wired address is labelled and listed first.

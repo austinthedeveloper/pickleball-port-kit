@@ -1,6 +1,6 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.12.1`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.12.2`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
 36 of 37 roadmap tasks are in.

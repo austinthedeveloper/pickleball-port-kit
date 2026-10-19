@@ -120,6 +120,9 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.12.1** (2026-10-19): online, the host's Ethernet address labelled
   and listed first (KNOWN_ISSUES #65; tag `v0.12.1`, on
   `feature/cld-release-0.12.1`).
+- **v0.12.2** (2026-10-19): fuller backdrops, LAKESIDE's lake and town
+  and the PARK and SUNSET skylines across the width (KNOWN_ISSUES #66;
+  tag `v0.12.2`, on `feature/cld-release-0.12.2`).
 
 ## Phase 3 (started 2026-10-18)
 
