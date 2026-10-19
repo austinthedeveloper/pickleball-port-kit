@@ -13,6 +13,10 @@ Pickleball '94, the Godot port. Versions follow
 - **The momentum rule**, another '95 promise: RULES > MOMENTUM. After a
   volley, step into your kitchen before the ball bounces or is hit again
   and it's your point lost (MOMENTUM!).
+- Five more '95 modifiers: **MOON** (low gravity, floaty shots),
+  **BOUNCY**, **WIND** (a new crosswind each serve), and on RULES **DINK
+  OR DIE** (a drive loses the point) and **SUDDEN DEATH** (one point takes
+  the match).
 
 ### Changed
 - WIN BY 2 and LAVA moved to the new RULES page (MODIFIERS > RULES).

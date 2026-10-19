@@ -16,6 +16,21 @@ class Ball:
 	var last_hitter := K.BALL_NO_HITTER
 	var bounce_count := 0
 	var rally_state := K.BALL_RALLY_INACTIVE
+	## The match's ball physics (port ADR-065: MOON, BOUNCY, WIND), set
+	## from the config; outside to_array (the traces' ball is unchanged).
+	var gravity_fp := K.BALL_GRAVITY_FP
+	var bounce_256 := K.BALL_BOUNCE_VERTICAL_256
+	var flight := [1, 1]            ## a launch's frames, times flight[0] / flight[1]
+	var wind := 0                   ## vy added every WIND_PERIOD frames aloft
+	var wind_tick := 0
+
+	## Another ball's physics (a probe flies as the match's ball does).
+	func set_physics(o: Ball) -> void:
+		gravity_fp = o.gravity_fp
+		bounce_256 = o.bounce_256
+		flight = o.flight
+		wind = o.wind
+		wind_tick = o.wind_tick
 
 	func copy() -> Ball:
 		var b := Ball.new()
@@ -29,6 +44,7 @@ class Ball:
 		b.last_hitter = last_hitter
 		b.bounce_count = bounce_count
 		b.rally_state = rally_state
+		b.set_physics(self)
 		return b
 
 	func to_array() -> Array:

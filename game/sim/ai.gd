@@ -14,6 +14,14 @@ const AiState := SimTypes.AiState
 const AiStyle := SimTypes.AiStyle
 
 var sim  # Sim (untyped: the two classes reference each other)
+
+
+## The match ball's physics (port ADR-065: MOON, BOUNCY), typed.
+func _gravity() -> int:
+	return sim.ball.gravity_fp
+
+func _bounce() -> int:
+	return sim.ball.bounce_256
 var slots: Array = []           # AiState per slot (traced)
 var styles: Array = []          # AiStyle per slot
 
@@ -90,21 +98,21 @@ func predict_landing(b: Ball) -> Array:
 	impact_vz = 0
 	if z <= 0 and vz <= 0:
 		return [0, K.from_fp(b.x_fp), K.from_fp(b.y_fp)]
-	var block_fall := 28 * K.BALL_GRAVITY_FP
+	var block_fall := 28 * b.gravity_fp
 	while steps + K.AI_PREDICT_BLOCK <= K.AI_PREDICT_MAX_STEPS:
 		var rise := 8 * vz + block_fall
 		if z + rise <= 0:
 			break
 		z += rise
-		vz += K.AI_PREDICT_BLOCK * K.BALL_GRAVITY_FP
+		vz += K.AI_PREDICT_BLOCK * b.gravity_fp
 		steps += K.AI_PREDICT_BLOCK
 	while steps < K.AI_PREDICT_MAX_STEPS:
 		z += vz
-		vz += K.BALL_GRAVITY_FP
+		vz += b.gravity_fp
 		steps += 1
 		if z <= 0:
 			break
-	impact_vz = vz - K.BALL_GRAVITY_FP
+	impact_vz = vz - b.gravity_fp
 	return [steps, K.from_fp(b.x_fp + b.vx_fp * steps), K.from_fp(b.y_fp + b.vy_fp * steps)]
 
 
@@ -274,13 +282,13 @@ func probe_step() -> void:
 	px += pvx
 	py += pvy
 	pz += pvz
-	pvz += K.BALL_GRAVITY_FP
+	pvz += _gravity()
 	if prev_z > 0 and pz <= 0:
-		var iv := pvz - K.BALL_GRAVITY_FP
+		var iv := pvz - _gravity()
 		pz = 0
 		pvx = Sim.retain(pvx, K.BALL_BOUNCE_PLANAR_256)
 		pvy = Sim.retain(pvy, K.BALL_BOUNCE_PLANAR_256)
-		pvz = -Sim.retain(iv, K.BALL_BOUNCE_VERTICAL_256)
+		pvz = -Sim.retain(iv, _bounce())
 		pbounces += 1
 		if pvz <= K.BALL_MIN_BOUNCE_VZ_FP:
 			pvx = 0
@@ -351,10 +359,10 @@ func _swing_connects(p: Player) -> bool:
 			or _window_misses(b.y_fp, b.vy_fp, reach_y, K.to_fp(K.HIT_REACH_Y) + sim.grow_fp)):
 		return false
 	if not paced and (pz != 0 or pvz > 0):
-		var rise := 3 * pvz + 3 * K.BALL_GRAVITY_FP
+		var rise := 3 * pvz + 3 * _gravity()
 		if pz + rise > 0:
 			pz += rise
-			pvz += 3 * K.BALL_GRAVITY_FP
+			pvz += 3 * _gravity()
 			px += 3 * pvx
 			py += 3 * pvy
 			step = K.PLAYER_WINDUP_FRAMES
@@ -365,7 +373,7 @@ func _swing_connects(p: Player) -> bool:
 		var fall := 0
 		for k in n:
 			rise2 += pvz + fall
-			fall += K.BALL_GRAVITY_FP
+			fall += _gravity()
 		if pz + rise2 > 0:
 			pz += rise2
 			pvz += fall
@@ -435,7 +443,7 @@ func _plan_volley(p: Player, land_steps: int, lx: int) -> bool:
 	var t := (x - b.x_fp) / vx
 	if t <= 0 or t >= land_steps:
 		return false
-	var z := b.z_fp + t * b.vz_fp + K.BALL_GRAVITY_FP * (t * (t - 1) / 2)
+	var z := b.z_fp + t * b.vz_fp + _gravity() * (t * (t - 1) / 2)
 	if z < K.AI_VOLLEY_MIN_Z or z > K.to_fp(K.HIT_REACH_Z) + sim.grow_fp - K.to_fp(2):
 		return false
 	g.target_x = K.from_fp(x)
@@ -509,8 +517,8 @@ func _plan_intercept(p: Player) -> void:
 			or not Sim.x_on_side(K.to_fp(lx), p.team):
 		g.has_target = 0
 		return
-	var bounce_vz := Sim.retain(-impact_vz, K.BALL_BOUNCE_VERTICAL_256)
-	var rise2 := (bounce_vz / -K.BALL_GRAVITY_FP) & 0xff
+	var bounce_vz := Sim.retain(-impact_vz, _bounce())
+	var rise2 := (bounce_vz / -_gravity()) & 0xff
 	if rise2 > 10:
 		rise2 = 10
 	var vx := Sim.retain(b.vx_fp, K.BALL_BOUNCE_PLANAR_256)

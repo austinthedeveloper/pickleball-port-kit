@@ -161,7 +161,8 @@ static func launch(b: Ball, tx: int, ty: int, frames: int) -> void:
 	var half := frames >> 1
 	var dx := K.to_fp(tx) - b.x_fp
 	var dy := K.to_fp(ty) - b.y_fp
-	var rise := -b.z_fp - K.BALL_GRAVITY_FP * frames * (frames - 1) / 2
+	frames = frames * b.flight[0] / b.flight[1]      # MOON: longer, higher
+	var rise := -b.z_fp - b.gravity_fp * frames * (frames - 1) / 2
 	b.vx_fp = (dx + half if dx >= 0 else dx - half) / frames
 	b.vy_fp = (dy + half if dy >= 0 else dy - half) / frames
 	b.vz_fp = (rise if rise >= 0 else rise - frames + 1) / frames
@@ -193,18 +194,22 @@ static func simulate_step(b: Ball) -> int:
 	b.x_fp += b.vx_fp
 	b.y_fp += b.vy_fp
 	b.z_fp += b.vz_fp
-	b.vz_fp += K.BALL_GRAVITY_FP
+	b.vz_fp += b.gravity_fp
+	if b.wind:
+		b.wind_tick += 1
+		if b.wind_tick % K.WIND_PERIOD == 0:
+			b.vy_fp += b.wind
 	var net := K.to_fp(K.COURT_NET_X)
 	if (px < net) != (b.x_fp < net):
 		var h = net_crossing_height(px, pz, b.x_fp, b.z_fp)
 		if h != null and h < K.to_fp(K.COURT_NET_HEIGHT):
 			ev |= K.BALL_EVENT_NET_FAULT
 	if pz > 0 and b.z_fp <= 0:
-		var impact_vz := b.vz_fp - K.BALL_GRAVITY_FP
+		var impact_vz := b.vz_fp - b.gravity_fp
 		b.z_fp = 0
 		b.vx_fp = retain(b.vx_fp, K.BALL_BOUNCE_PLANAR_256)
 		b.vy_fp = retain(b.vy_fp, K.BALL_BOUNCE_PLANAR_256)
-		b.vz_fp = -retain(impact_vz, K.BALL_BOUNCE_VERTICAL_256)
+		b.vz_fp = -retain(impact_vz, b.bounce_256)
 		b.bounce_count += 1
 		ev |= K.BALL_EVENT_BOUNCE
 		if not contains_ground_fp(b.x_fp, b.y_fp):
@@ -221,6 +226,17 @@ func ball_initialize() -> void:
 	ball.x_fp = K.to_fp(K.BALL_START_X)
 	ball.y_fp = K.to_fp(K.BALL_START_Y)
 	ball.rally_state = K.BALL_RALLY_LIVE
+	_ball_physics()
+
+
+## MOON, BOUNCY and WIND (port ADR-065) on the match's ball.
+func _ball_physics() -> void:
+	var mods := config.modifiers
+	ball.gravity_fp = K.MOON_GRAVITY_FP if mods & K.MOD_MOON else K.BALL_GRAVITY_FP
+	ball.flight = K.MOON_FLIGHT if mods & K.MOD_MOON else [1, 1]
+	ball.bounce_256 = K.BOUNCY_VERTICAL_256 if mods & K.MOD_BOUNCY else K.BALL_BOUNCE_VERTICAL_256
+	ball.wind = 0
+	ball.wind_tick = 0
 
 
 # --- Collision (collision.c) -------------------------------------------------------
@@ -315,6 +331,7 @@ static func apply_targeted_shot(b: Ball, p: Player, intent: Intent, grow: int = 
 ## the net: a dumped overhead).
 static func overhead_flight(b: Ball, tx: int, ty: int, flight: int, longest: int) -> int:
 	var probe := Ball.new()
+	probe.set_physics(b)
 	while flight < longest:
 		probe.x_fp = b.x_fp
 		probe.y_fp = b.y_fp
@@ -334,7 +351,7 @@ static func net_clearance(b: Ball, frames: int) -> int:
 	for f in frames:
 		var nx := x + b.vx_fp
 		var nz := z + vz
-		vz += K.BALL_GRAVITY_FP
+		vz += b.gravity_fp
 		var h = net_crossing_height(x, z, nx, nz)
 		if h != null:
 			return h
@@ -358,7 +375,8 @@ func resolve_player_hits() -> int:
 		contact_volley = 1 if ball.bounce_count == 0 else 0
 		ball.bounce_count = 0
 		# a swing at a falling ball overhead is a smash (ADR-053)
-		if config.overhead and (p.shot_type == K.SHOT_STANDARD or p.shot_type == K.SHOT_DRIVE) \
+		if config.overhead and not (config.modifiers & K.MOD_DINK_OR_DIE) \
+				and (p.shot_type == K.SHOT_STANDARD or p.shot_type == K.SHOT_DRIVE) \
 				and ball.vz_fp < 0 \
 				and ball.z_fp >= K.to_fp(K.HIT_OVERHEAD_Z):
 			p.shot_type = K.SHOT_OVERHEAD
@@ -782,6 +800,10 @@ func rules_process_player_hit(slot: int) -> void:
 	if phase != K.PHASE_LIVE or slot >= K.MAX_PLAYERS:
 		return
 	var team: int = players[slot].team
+	# DINK OR DIE (port ADR-065): a drive loses the point
+	if config.modifiers & K.MOD_DINK_OR_DIE and players[slot].shot_type == K.SHOT_DRIVE:
+		resolve_point(team, K.FAULT_DRIVE)
+		return
 	if required_bounce == K.REQUIRED_BOUNCE_SERVE:
 		resolve_point(team, K.FAULT_EARLY_VOLLEY)
 		return
@@ -839,6 +861,8 @@ func set_phase(p: int) -> void:
 	phase_timer = 0
 
 func score_wins(score: int, other: int) -> bool:
+	if config.modifiers & K.MOD_SUDDEN_DEATH:
+		return score >= 1                # SUDDEN DEATH (port ADR-065)
 	return score >= config.points_to_win \
 		and (not (config.modifiers & K.MOD_WIN_BY_2) or score >= other + 2)
 
@@ -872,6 +896,9 @@ func _game_initialize() -> void:
 func _begin_serve(team: int) -> void:
 	for p in players:
 		p.pose = K.POSE_NONE
+	if config.modifiers & K.MOD_WIND:
+		ball.wind = K.WIND_DIRS[(frame_count >> 3) & 7]   # WIND: a new one each serve
+		ball.wind_tick = 0
 	serve_setup(team)
 	rally_start = shot_serial
 	set_phase(K.PHASE_SERVE_SETUP)
@@ -1226,6 +1253,12 @@ func step(human: Array = []) -> void:
 				ai.update(slot, intents[slot])
 			else:
 				ai.hold_intent(slot, intents[slot])
+	# DINK OR DIE: the CPUs (and the bot) play the soft shot for a drive
+	if config.modifiers & K.MOD_DINK_OR_DIE:
+		for slot in K.MAX_PLAYERS:
+			if (owners[slot] == K.OWNER_CPU or (slot == 0 and (p1_bot or attract))) \
+					and intents[slot].shot == K.SHOT_DRIVE:
+				intents[slot].shot = K.SHOT_SOFT
 	game_update()
 	loop_count = (loop_count + 1) & 0xffff
 

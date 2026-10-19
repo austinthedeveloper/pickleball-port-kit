@@ -20,13 +20,18 @@ const MOD_ROWS := [["big_ball", "BIG BALL", K.MOD_BIG_BALL, "modifiers"],
 	["ghost", "GHOST BALL", K.MOD_GHOST_BALL, "modifiers"], ["popcorn", "POPCORN", K.MOD_POPCORN, "modifiers"],
 	["ice", "ICE", K.MOD_ICE, "modifiers"], ["glow", "GLOW", K.MOD_GLOW, "modifiers"],
 	["inverse", "INVERSE", K.MOD_INVERSE, "modifiers"],
+	# the Pickleball '95 promises (PORT-40, ADR-065)
+	["moon", "MOON", K.MOD_MOON, "modifiers"], ["bouncy", "BOUNCY", K.MOD_BOUNCY, "modifiers"],
+	["wind", "WIND", K.MOD_WIND, "modifiers"],
 	["win_by_2", "WIN BY 2", K.MOD_WIN_BY_2, "rules"], ["lava", "LAVA", K.MOD_LAVA, "rules"],
 	# the Pickleball '95 promises (PORT-40)
-	["side_out", "SIDE-OUT", K.MOD_SIDE_OUT, "rules"], ["momentum", "MOMENTUM", K.MOD_MOMENTUM, "rules"]]
+	["side_out", "SIDE-OUT", K.MOD_SIDE_OUT, "rules"], ["momentum", "MOMENTUM", K.MOD_MOMENTUM, "rules"],
+	["dink_or_die", "DINK OR DIE", K.MOD_DINK_OR_DIE, "rules"],
+	["sudden_death", "SUDDEN DEATH", K.MOD_SUDDEN_DEATH, "rules"]]
 ## The bits MODIFIERS saves (an older save's are a subset).
 const MOD_SAVED := K.MOD_BIG_BALL | K.MOD_FAST_BALL | K.MOD_WIN_BY_2 | K.MOD_LAVA \
 	| K.MOD_GHOST_BALL | K.MOD_POPCORN | K.MOD_ICE | K.MOD_GLOW | K.MOD_INVERSE | K.MOD_SIDE_OUT \
-	| K.MOD_MOMENTUM
+	| K.MOD_MOMENTUM | K.MOD_MOON | K.MOD_BOUNCY | K.MOD_WIND | K.MOD_DINK_OR_DIE | K.MOD_SUDDEN_DEATH
 ## Saves before the MODIFIERS page kept one preset index ("mods"); these
 ## are its bits, read only when loading such a save.
 const OLD_MOD_PRESETS := [0, K.MOD_BIG_BALL, K.MOD_FAST_BALL, K.MOD_WIN_BY_2, K.MOD_LAVA, 15]

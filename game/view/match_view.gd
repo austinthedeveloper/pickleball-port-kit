@@ -84,6 +84,7 @@ var flair: Flair                 ## SNES ADR-064: reactions, emotes, the net's s
 const GLOW_TIME := 2
 const GLOW_LINES := 4
 var critter: Critter             ## SNES ADR-064: the venue's gull, satellite or fish
+var wind_view: WindView          ## WIND's streaks (port ADR-065)
 ## This match's stats (PORT-13), from the events; display only.
 var stats := MatchStats.new()
 ## The parts (PORT-27): the people and ball, the input, the match's end.
@@ -200,6 +201,9 @@ func _build() -> void:
 	critter = Critter.for_venue(venue, sim)
 	if critter:
 		add_child(critter)
+	if sim.config.modifiers & K.MOD_WIND:
+		wind_view = WindView.new().setup(sim)
+		add_child(wind_view)
 	if sim.config.practice and not demo:
 		_shadows.add_child(PracticeView.zone(sim.practice))
 		_actors.add_child(PracticeView.machine(sim.practice))
@@ -609,6 +613,8 @@ func _update_visuals() -> void:
 	feel.update()
 	if critter:
 		critter.update()
+	if wind_view:
+		wind_view.update()
 	_sfx.update_ambience(sim.phase == K.PHASE_LIVE, (sim.shot_serial - sim.rally_start) & 0xff,
 		sim.match_point(0) or sim.match_point(1), 1.0 / 60.0)
 	for poly in _lava:

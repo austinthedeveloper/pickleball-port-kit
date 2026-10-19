@@ -191,6 +191,7 @@ const FAULT_EARLY_VOLLEY := 6
 const FAULT_LAVA := 7
 ## The momentum rule (port ADR-064): a volley carried into your kitchen.
 const FAULT_MOMENTUM := 8
+const FAULT_DRIVE := 9          ## DINK OR DIE (port ADR-065)
 
 const REQUIRED_BOUNCE_NONE := 0
 const REQUIRED_BOUNCE_SERVE := 1
@@ -246,6 +247,17 @@ const MOD_SIDE_OUT := 512
 ## the line are forgiven (players run fast in this game).
 const MOD_MOMENTUM := 1024
 const MOMENTUM_GRACE := 2
+## The '95 modifiers (port ADR-065), remaster-only.
+const MOD_MOON := 2048          ## low gravity: flights hang half as long again
+const MOD_BOUNCY := 4096        ## the ball keeps more height on each bounce
+const MOD_WIND := 8192          ## a crosswind, a new one each serve
+const MOD_DINK_OR_DIE := 16384  ## a drive loses the point (DRIVE!)
+const MOD_SUDDEN_DEATH := 32768 ## one point takes the match
+const MOON_GRAVITY_FP := -2     ## a third less than BALL_GRAVITY_FP
+const MOON_FLIGHT := [3, 2]     ## a shot's frames, times 3/2
+const BOUNCY_VERTICAL_256 := 175
+const WIND_PERIOD := 8          ## the wind pushes vy by 1 (12.4) every 8 frames aloft
+const WIND_DIRS := [1, -1, 0, -1, 1, 1, -1, 0]   ## a serve's wind, by frame
 const MOD_GHOST_Z := 8        ## GHOST: above this (px) the ball blinks
 const MOD_GHOST_SHOWN := 2    ## ... shown this many frames in every 16
 const MOD_POPCORN_STRIDE := 12   ## a level adds a step every 12 ticks (+8%)
@@ -290,4 +302,5 @@ static func fault_word(fault: int) -> String:
 		FAULT_EARLY_VOLLEY: return "VOLLEY!"
 		FAULT_LAVA: return "LAVA!"
 		FAULT_MOMENTUM: return "MOMENTUM!"
+		FAULT_DRIVE: return "DRIVE!"
 	return "POINT!"

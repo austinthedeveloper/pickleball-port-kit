@@ -486,7 +486,9 @@ feature/cld-release-0.9.2   (v0.9.2)
   the overhead smash is already in (PORT-24).
   - Done: side-out scoring (ADR-063: MODIFIERS > RULES > SIDE-OUT; the
     scoring rules got their own RULES page); the momentum rule (ADR-064:
-    RULES > MOMENTUM).
+    RULES > MOMENTUM); MOON, BOUNCY, WIND, DINK OR DIE and SUDDEN DEATH
+    (ADR-065). Left: Dale Dawson, MULTI BALL, the line judge, the club
+    manager.
   - Status: **In progress**.
 
 ## For you
