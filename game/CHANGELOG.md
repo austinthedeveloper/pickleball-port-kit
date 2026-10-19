@@ -4,6 +4,18 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.13.1] - 2026-10-19
+
+A cleanup release: the same game, with less work per frame in the menus,
+the lobby and the online screen.
+
+### Changed
+- Menus, the multiplayer lobby and the online host screen do less work
+  each frame (text redraws only when it changes, hidden pages rest).
+- The lobby's status line reads READY TO START (the prompt bar shows
+  which button).
+- 2P's pad on the title now also steers with the stick.
+
 ## [0.13.0] - 2026-10-19
 
 MULTI BALL, and a gentler screen shake you can set.

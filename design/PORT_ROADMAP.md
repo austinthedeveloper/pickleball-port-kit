@@ -127,6 +127,8 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.13.0** (2026-10-19): MULTI BALL (PORT-40, ADR-067) and the
   SCREEN SHAKE strength (KNOWN_ISSUES #58; tag `v0.13.0`, on
   `feature/cld-release-0.13.0`).
+- **v0.13.1** (2026-10-19): PORT-42, cleanup round 4 (tag `v0.13.1`, on
+  `feature/cld-release-0.13.1`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 
