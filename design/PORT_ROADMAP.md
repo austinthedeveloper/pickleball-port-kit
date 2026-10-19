@@ -94,6 +94,9 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.9.0** (2026-10-18): PORT-32 the in-game updater; the first release
   with the .pck and manifest it downloads (tag `v0.9.0`, on
   `feature/cld-release-0.9.0`).
+- **v0.9.1** (2026-10-18): CAMERA starts at 50%; the first release to
+  arrive through the in-game updater (tag `v0.9.1`, on
+  `feature/cld-release-0.9.1`).
 
 ## Phase 3 (started 2026-10-18)
 

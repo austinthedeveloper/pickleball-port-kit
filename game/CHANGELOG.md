@@ -4,7 +4,9 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
-## [Unreleased]
+## [0.9.1] - 2026-10-18
+
+The first update you can get in the game: OPTIONS > UPDATES.
 
 ### Changed
 - **CAMERA** (OPTIONS) now starts at 50%, so the view leans toward the
