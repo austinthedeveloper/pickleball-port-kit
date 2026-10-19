@@ -4,7 +4,10 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
-## [Unreleased]
+## [0.12.0] - 2026-10-19
+
+The Pickleball '95 promises: side-out scoring, the momentum rule, five
+new modifiers, and Dale Dawson.
 
 ### Added
 - **Side-out scoring**, the *Pickleball '95* promise: MODIFIERS > RULES >

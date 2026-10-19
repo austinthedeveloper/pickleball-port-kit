@@ -114,6 +114,9 @@ status in the same commit. The finished tasks, in full, are in
   the Hat Museum (tag `v0.10.0`, on `feature/cld-release-0.10.0`).
 - **v0.11.0** (2026-10-18): PORT-39 the show (tag `v0.11.0`, on
   `feature/cld-release-0.11.0`).
+- **v0.12.0** (2026-10-19): PORT-40 part one, the '95 promises: side-out
+  scoring, the momentum rule, MOON, BOUNCY, WIND, DINK OR DIE, SUDDEN
+  DEATH, Dale Dawson (tag `v0.12.0`, on `feature/cld-release-0.12.0`).
 
 ## Phase 3 (started 2026-10-18)
 
