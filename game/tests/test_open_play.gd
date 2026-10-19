@@ -49,8 +49,8 @@ func test_levels() -> void:
 	check(OpenPlay.team_court(0) == 0 and OpenPlay.team_court(2) == 0)
 	check(OpenPlay.team_court(3) == 1 and OpenPlay.team_court(5) == 1)
 	check(OpenPlay.team_court(6) == 2 and OpenPlay.team_court(7) == 2)
-	eq(OpenPlay.court_level_name(0), "<3.5")
-	eq(OpenPlay.court_level_name(2), "4.5+")
+	eq(OpenPlay.court_level_name(0), "ROOKIE")
+	eq(OpenPlay.court_level_name(2), "CHAMP")
 	eq(OpenPlay.court_difficulty(0, K.DIFFICULTY_HARD), K.DIFFICULTY_EASY)
 	eq(OpenPlay.court_difficulty(1, K.DIFFICULTY_EASY), K.DIFFICULTY_MEDIUM)
 	eq(OpenPlay.court_difficulty(2, K.DIFFICULTY_MEDIUM), K.DIFFICULTY_HARD)
@@ -166,10 +166,11 @@ func test_your_turn() -> void:
 	check(quiet, "nothing during the call")
 	eq(K.from_fp(op.x_fp), 128, "input ignored")
 	eq(op.update(0, 0, false), OpenPlay.EVENT_PLAY)
-	# Back from the match: you leave, the court changes over.
-	op.return_from_match(true, 11, 7)
+	# Back from a lost match: you leave, the court changes over (a win
+	# keeps you on: test_you_stay).
+	op.return_from_match(false, 7, 11)
 	eq(op.called, OpenPlay.NONE)
-	check(op.last_won == 1 and op.last_score[0] == 11)
+	check(op.last_won == 0 and op.last_score[1] == 11)
 	eq(op.court[c].state, OpenPlay.COURT_CHANGEOVER)
 	check(OpenPlay.walkable(op.x_fp, op.y_fp))
 	for f in OpenPlay.CHANGEOVER_FRAMES + 1:
@@ -281,6 +282,457 @@ func test_clubhouse() -> void:
 	_check_population()
 
 
+## The park rating (SNES ADR-070): ROOKIE, CLUB, CHAMP, shown as points.
+func test_rating() -> void:
+	eq(OpenPlay.rating_points(OpenPlay.RATING_START), 10, "10 points to start")
+	eq(OpenPlay.rating_points(OpenPlay.court_floor(1)), 15)
+	eq(OpenPlay.rating_points(OpenPlay.court_floor(2)), 25)
+	eq(OpenPlay.rating_points(OpenPlay.RATING_MIN), 0)
+	eq(OpenPlay.rating_points(OpenPlay.RATING_MAX), 40)
+	check(OpenPlay.rating_court(20) == 0 and OpenPlay.rating_court(34) == 0)
+	check(OpenPlay.rating_court(35) == 1 and OpenPlay.rating_court(44) == 1)
+	check(OpenPlay.rating_court(45) == 2 and OpenPlay.rating_court(60) == 2)
+	check(OpenPlay.court_floor(1) == 35 and OpenPlay.court_floor(2) == 45)
+	# At your level a win is +0.2, above it +0.3, below it nothing; a loss
+	# is -0.1 anywhere.
+	eq(OpenPlay.rating_after(30, 0, true), 32)
+	eq(OpenPlay.rating_after(30, 1, true), 33)
+	eq(OpenPlay.rating_after(30, 2, true), 33)
+	eq(OpenPlay.rating_after(40, 0, true), 40)
+	eq(OpenPlay.rating_after(40, 0, false), 39)
+	eq(OpenPlay.rating_after(40, 1, false), 39)
+	eq(OpenPlay.rating_after(OpenPlay.RATING_MIN, 0, false), OpenPlay.RATING_MIN, "the floor")
+	eq(OpenPlay.rating_after(59, 2, true), OpenPlay.RATING_MAX, "the cap")
+	eq(OpenPlay.rating_after(OpenPlay.RATING_MAX, 2, true), OpenPlay.RATING_MAX)
+	# Unrated (a fresh park): every court open.
+	op = OpenPlay.new()
+	op.begin(7, false)
+	eq(op.rating, OpenPlay.RATING_NONE)
+	check(op.court_open(0) and op.court_open(1) and op.court_open(2))
+	# Rated 3.2 with only the first court reached: the others closed.
+	op.rate(32, 0)
+	check(op.court_open(0) and not op.court_open(1) and not op.court_open(2))
+	_place_you(OpenPlay.rack_x(1), OpenPlay.RACK_Y)
+	eq(op.update(0, 0, true), OpenPlay.EVENT_LOCKED)
+	eq(op.your_court, OpenPlay.NONE)
+	_place_you(OpenPlay.rack_x(0), OpenPlay.RACK_Y)
+	eq(op.update(0, 0, true), OpenPlay.EVENT_STACKED)
+	# A court reached stays open below its level (best_court).
+	op.rate(42, 2)
+	check(op.court_open(2))
+	_place_you(OpenPlay.rack_x(2), OpenPlay.RACK_Y)
+	eq(op.update(0, 0, true), OpenPlay.EVENT_STACKED)
+	eq(op.your_court, 2)
+	_check_population()
+
+
+## Runs court c's game to its end with side winning it.
+func _finish_game(c: int, side: int) -> void:
+	var ct: OpenPlay.OpenCourt = op.court[c]
+	var n := 0
+	while ct.state == OpenPlay.COURT_PLAYING and n < 2000:
+		ct.score[side] = OpenPlay.GAME_POINTS - 1
+		ct.score[side ^ 1] = 0
+		op.update(0, 0, false)
+		n += 1
+	eq(ct.state, OpenPlay.COURT_CHANGEOVER, "the game ended")
+	eq(ct.stay, side, "the winners stay")
+
+
+## Through court c's changeover; EVENT_CALLED if it called you.
+func _run_changeover(c: int) -> int:
+	var ct: OpenPlay.OpenCourt = op.court[c]
+	var event := OpenPlay.EVENT_NONE
+	var n := 0
+	while ct.state == OpenPlay.COURT_CHANGEOVER and n <= OpenPlay.CHANGEOVER_FRAMES:
+		if op.update(0, 0, false) == OpenPlay.EVENT_CALLED:
+			event = OpenPlay.EVENT_CALLED
+		n += 1
+	return event
+
+
+## Winners stay on (SNES ADR-071), the losers leave; after STAY_MAX wins
+## in a row the winners come off too.
+func test_winners_stay() -> void:
+	op = OpenPlay.new()
+	op.begin(321, false)
+	var ct: OpenPlay.OpenCourt = op.court[0]
+	check(ct.stay == OpenPlay.NONE and ct.streak == 0)
+	var winner: int = ct.playing[1]
+	var loser: int = ct.playing[0]
+	var next: int = ct.stack[0]
+	_finish_game(0, 1)
+	eq(ct.streak, 1)
+	_run_changeover(0)
+	eq(ct.state, OpenPlay.COURT_PLAYING)
+	eq(ct.playing[1], winner, "the winners keep their side")
+	eq(ct.playing[0], next, "the next team comes on at the other")
+	eq(ct.stack[ct.stack_count - 1], loser, "the losers wait at the back")
+	check(ct.stay == 1 and ct.streak == 1)
+	_check_population()
+	_finish_game(0, 1)
+	eq(ct.streak, OpenPlay.STAY_MAX)
+	_run_changeover(0)
+	eq(ct.state, OpenPlay.COURT_PLAYING)
+	check(ct.playing[0] != winner and ct.playing[1] != winner, "the cap: all four come off")
+	check(ct.stay == OpenPlay.NONE and ct.streak == 0)
+	_check_population()
+	_finish_game(0, 0)
+	_run_changeover(0)
+	winner = ct.playing[0]
+	_finish_game(0, 1)
+	check(ct.stay == 1 and ct.streak == 1, "the other side's win starts its own streak")
+	_run_changeover(0)
+	check(ct.playing[0] != winner)
+	_check_population()
+
+
+## Stack at a court and play up to your call there, then its match.
+func _wait_for_call(c: int) -> void:
+	_place_you(OpenPlay.rack_x(c), OpenPlay.RACK_Y)
+	eq(op.update(0, 0, true), OpenPlay.EVENT_STACKED)
+	_place_you(128, 200)
+	var event := OpenPlay.EVENT_NONE
+	var frames := 0
+	while event != OpenPlay.EVENT_CALLED and frames < 60 * 60 * 5:
+		event = op.update(0, 0, false)
+		frames += 1
+	check(event == OpenPlay.EVENT_CALLED and op.called == c, "called at court %d" % c)
+	for f in range(1, OpenPlay.CALL_FRAMES):
+		op.update(0, 0, false)
+	eq(op.update(0, 0, false), OpenPlay.EVENT_PLAY)
+
+
+## You win: you stay on, called again with the same partner against a
+## team that isn't your partner's; a second win and you come off.
+func test_you_stay() -> void:
+	var c := 0
+	op = OpenPlay.new()
+	op.begin(99, false)
+	var ct: OpenPlay.OpenCourt = op.court[c]
+	_wait_for_call(c)
+	var partner := op.partner
+	var first := op.opponent
+	check(partner < OpenPlay.TEAMS)
+	eq(ct.stack[0], partner)
+	eq(op.stay_court, OpenPlay.NONE)
+	op.return_from_match(true, 11, 4)
+	check(op.last_won == 1 and op.last_streak == 1)
+	eq(op.stay_court, c)
+	check(ct.playing[0] == OpenPlay.YOU or ct.playing[1] == OpenPlay.YOU, "you stay on")
+	var side := 0 if ct.playing[0] == OpenPlay.YOU else 1
+	check(ct.stay == side and ct.streak == 1)
+	_check_population()
+	# The changeover calls you again: same side, same partner, and the
+	# partner's team (first in line) is skipped.
+	eq(_run_changeover(c), OpenPlay.EVENT_CALLED)
+	eq(op.called, c)
+	eq(ct.state, OpenPlay.COURT_YOURS)
+	eq(ct.playing[side], OpenPlay.YOU)
+	eq(op.stay_court, c)
+	eq(op.partner, partner, "the same partner")
+	check(op.opponent < OpenPlay.TEAMS and op.opponent != partner)
+	check(op.opponent != first, "the losers went to the back")
+	eq(ct.stack[0], partner)
+	_check_population()
+	print("    open play: winners stay, you and %s's captain vs %s" % [
+		Opponents.team(partner)["team"], Opponents.team(op.opponent)["team"]])
+	op.return_from_match(true, 11, 9)
+	eq(op.last_streak, OpenPlay.STAY_MAX)
+	eq(op.stay_court, OpenPlay.NONE)
+	check(ct.playing[0] != OpenPlay.YOU and ct.playing[1] != OpenPlay.YOU, "the cap: you come off")
+	eq(_run_changeover(c), OpenPlay.EVENT_NONE)
+	eq(ct.state, OpenPlay.COURT_PLAYING)
+	check(ct.stay == OpenPlay.NONE and ct.streak == 0)
+	_check_population()
+	# 2P as your partner: no partner team to skip, still called again.
+	op.begin(99, true)
+	_wait_for_call(c)
+	op.return_from_match(true, 11, 2)
+	eq(_run_changeover(c), OpenPlay.EVENT_CALLED)
+	eq(op.stay_court, c)
+	_check_population()
+
+
+## You lose: you come off and the winners stay. B at a rack while waiting
+## to be called again gives up your place.
+func test_you_lose() -> void:
+	var c := 0
+	op = OpenPlay.new()
+	op.begin(99, false)
+	var ct: OpenPlay.OpenCourt = op.court[c]
+	_wait_for_call(c)
+	var winner := op.opponent
+	op.return_from_match(false, 6, 11)
+	check(op.last_won == 0 and op.last_streak == 0)
+	eq(op.stay_court, OpenPlay.NONE)
+	check(ct.playing[0] != OpenPlay.YOU and ct.playing[1] != OpenPlay.YOU)
+	check(ct.playing[ct.stay] == winner and ct.streak == 1, "your opponents stay")
+	_run_changeover(c)
+	eq(ct.state, OpenPlay.COURT_PLAYING)
+	eq(ct.playing[ct.stay], winner)
+	_check_population()
+	# Won, then stacked elsewhere before the call: you give up the stay.
+	op.begin(99, false)
+	ct = op.court[c]
+	_wait_for_call(c)
+	op.return_from_match(true, 11, 4)
+	eq(op.stay_court, c)
+	_place_you(OpenPlay.rack_x(1), OpenPlay.RACK_Y)
+	eq(op.update(0, 0, true), OpenPlay.EVENT_STACKED)
+	eq(op.stay_court, OpenPlay.NONE)
+	check(ct.playing[0] != OpenPlay.YOU and ct.playing[1] != OpenPlay.YOU)
+	eq(ct.stay, OpenPlay.NONE)
+	eq(_run_changeover(c), OpenPlay.EVENT_NONE)
+	eq(ct.state, OpenPlay.COURT_PLAYING)
+	_check_population()
+
+
+## Nobody waiting: the winners come off and the court waits (the stacks
+## are emptied by hand, so the population check does not apply).
+func test_stay_nobody_waiting() -> void:
+	var c := 2
+	op = OpenPlay.new()
+	op.begin(5, false)
+	var ct: OpenPlay.OpenCourt = op.court[c]
+	for o: OpenPlay.OpenCourt in op.court:
+		o.stack_count = 0
+	ct.playing[1] = OpenPlay.YOU
+	ct.state = OpenPlay.COURT_YOURS
+	op.called = c
+	op.return_from_match(false, 2, 11)
+	check(ct.stay == 0 and ct.streak == 1)
+	_run_changeover(c)
+	eq(ct.state, OpenPlay.COURT_CHANGEOVER, "the court waits")
+	check(ct.playing[0] == OpenPlay.NONE and ct.playing[1] == OpenPlay.NONE)
+	check(ct.stay == OpenPlay.NONE and ct.streak == 0)
+	check(ct.stack_count == 1 and ct.stack[0] == 6)
+	# You won, and only your partner's team waits: you come off.
+	op.begin(5, false)
+	ct = op.court[c]
+	for o: OpenPlay.OpenCourt in op.court:
+		o.stack_count = 0
+	ct.playing[0] = OpenPlay.YOU
+	ct.playing[1] = OpenPlay.NONE
+	ct.stack[0] = 7
+	ct.stack_count = 1
+	ct.state = OpenPlay.COURT_YOURS
+	op.called = c
+	op.partner = 7
+	op.return_from_match(true, 11, 3)
+	eq(op.stay_court, c)
+	eq(_run_changeover(c), OpenPlay.EVENT_NONE)
+	eq(op.called, OpenPlay.NONE)
+	eq(op.stay_court, OpenPlay.NONE)
+	check(ct.playing[0] == OpenPlay.NONE and ct.playing[1] == OpenPlay.NONE)
+	check(ct.stack_count == 1 and ct.stack[0] == 7)
+
+
+static func _xorshift(r: int) -> int:
+	r ^= (r << 7) & 0xffff
+	r ^= r >> 9
+	r ^= (r << 8) & 0xffff
+	return r
+
+
+## A long soak with you in it: stack, play, win or lose at random, stay on
+## or come off; nobody is lost or duplicated.
+func test_stay_soak() -> void:
+	var rng := 0x1234
+	var games := 0
+	var stays := 0
+	var caps := 0
+	var team_caps := 0
+	var rack := 0
+	var population := true
+	var partners_ok := true
+	op = OpenPlay.new()
+	op.begin(2024, false)
+	for f in 60 * 60 * 30:
+		if op.called == OpenPlay.NONE and op.your_court == OpenPlay.NONE \
+				and op.stay_court == OpenPlay.NONE:
+			rack = 0 if rack >= OpenPlay.COURTS - 1 else rack + 1
+			_place_you(OpenPlay.rack_x(rack), OpenPlay.RACK_Y)
+			op.update(0, 0, true)
+			_place_you(128, 200)
+		for ct: OpenPlay.OpenCourt in op.court:
+			if ct.streak >= OpenPlay.STAY_MAX and ct.state == OpenPlay.COURT_CHANGEOVER and ct.timer == 1:
+				team_caps += 1
+		var event := op.update(0, 0, false)
+		if event == OpenPlay.EVENT_CALLED and op.stay_court != OpenPlay.NONE:
+			stays += 1
+			partners_ok = partners_ok and op.opponent != op.partner
+		if event == OpenPlay.EVENT_PLAY:
+			rng = _xorshift(rng)
+			op.return_from_match((rng & 1) == 1, 11, 5)
+			if op.last_streak >= OpenPlay.STAY_MAX:
+				caps += 1
+			games += 1
+		if (f & 63) == 0:
+			population = population and _check_population()
+	print("    open play: 30 minutes with you, %d games, %d stays, %d capped, %d team caps" % [
+		games, stays, caps, team_caps])
+	check(population and partners_ok)
+	check(games >= 20 and stays >= 3 and caps >= 1 and team_caps >= 10)
+
+
+## Pick your partner (SNES ADR-072): Y at your rack cycles next in line,
+## then each team you may pick in ladder order, then next in line.
+func test_pick_cycle() -> void:
+	op = OpenPlay.new()
+	op.begin(77, false)
+	check(op.pick == OpenPlay.NONE and op.pickable == 0)
+	_place_you(OpenPlay.rack_x(1), OpenPlay.RACK_Y)
+	eq(op.update(0, 0, true), OpenPlay.EVENT_STACKED)
+	check(not op.pick_ready() and not op.pick_next(), "no teams to pick: Y does nothing")
+	eq(op.pick, OpenPlay.NONE)
+	op.partners(0x29)               # teams 0, 3, 5
+	check(op.pick_ready())
+	var cycle := []
+	for i in 5:
+		check(op.pick_next())
+		cycle.append(op.pick)
+	eq(cycle, [0, 3, 5, OpenPlay.NONE, 0])
+	# Only at your own rack.
+	_place_you(OpenPlay.rack_x(0), OpenPlay.RACK_Y)
+	check(not op.pick_ready() and not op.pick_next(), "not at another rack")
+	_place_you(128, 200)
+	check(not op.pick_next(), "not away from the racks")
+	eq(op.pick, 0)
+	# Not holding your paddle there (taken back): nothing.
+	_place_you(OpenPlay.rack_x(1), OpenPlay.RACK_Y)
+	eq(op.update(0, 0, true), OpenPlay.EVENT_UNSTACKED)
+	check(not op.pick_next())
+	eq(op.update(0, 0, true), OpenPlay.EVENT_STACKED)
+	check(op.pick_next() and op.pick == 3)
+	# A pick no longer available goes back to next in line.
+	op.partners(0x01)
+	eq(op.pick, OpenPlay.NONE)
+	op.partners(0x80)
+	check(op.pick_next() and op.pick == 7)
+	check(op.pick_next() and op.pick == OpenPlay.NONE)
+	# 2P along: 2P is your partner, Y does nothing.
+	op.begin(77, true)
+	op.partners(0xff)
+	_place_you(OpenPlay.rack_x(1), OpenPlay.RACK_Y)
+	eq(op.update(0, 0, true), OpenPlay.EVENT_STACKED)
+	check(not op.pick_ready() and not op.pick_next())
+	eq(op.pick, OpenPlay.NONE)
+	_check_population()
+
+
+## Stack at court c with a pick, and play up to your call.
+func _pick_and_wait(seed: int, c: int, pick: int) -> void:
+	op.begin(seed, false)
+	op.partners(0xff)
+	_place_you(OpenPlay.rack_x(c), OpenPlay.RACK_Y)
+	eq(op.update(0, 0, true), OpenPlay.EVENT_STACKED)
+	while op.pick != pick:
+		if not op.pick_next():
+			runner.fail("can't pick %d" % pick)
+			return
+	_place_you(128, 200)
+	var frames := 0
+	while op.called == OpenPlay.NONE and frames < 60 * 60 * 5:
+		op.update(0, 0, false)
+		frames += 1
+
+
+## Called with a pick: the picked captain partners you, and their team is
+## never your opponent; winning, you stay on with them.
+func test_pick_called() -> void:
+	op = OpenPlay.new()
+	var games := 0
+	var ok := true
+	for seed in range(1, 7):
+		for c in OpenPlay.COURTS:
+			for pick in OpenPlay.TEAMS:
+				_pick_and_wait(seed, c, pick)
+				ok = ok and op.called == c and op.partner == pick \
+					and op.opponent < OpenPlay.TEAMS and op.opponent != pick
+				games += 1
+	print("    open play: %d calls with a picked partner" % games)
+	check(ok, "the picked captain partners you, never against you")
+	# The picked team first in line at that court: passed over.
+	op.begin(99, false)
+	var pick: int = op.court[0].stack[0]
+	_pick_and_wait(99, 0, pick)
+	check(op.partner == pick and op.opponent != pick)
+	# Winners stay keeps the picked partner.
+	op.return_from_match(true, 11, 3)
+	eq(op.stay_court, 0)
+	var side := 0 if op.court[0].playing[0] == OpenPlay.YOU else 1
+	eq(_run_changeover(0), OpenPlay.EVENT_CALLED)
+	eq(op.stay_court, 0)
+	eq(op.court[0].playing[side], OpenPlay.YOU)
+	check(op.partner == pick and op.opponent != pick)
+	_check_population()
+
+
+## You come on against winners who are your picked partner's team: a
+## fresh game instead, so they are not your opponents.
+func test_pick_vs_winners() -> void:
+	op = OpenPlay.new()
+	op.begin(321, false)
+	op.partners(0xff)
+	var ct: OpenPlay.OpenCourt = op.court[0]
+	var winners: int = ct.playing[1]
+	_place_you(OpenPlay.rack_x(0), OpenPlay.RACK_Y)
+	eq(op.update(0, 0, true), OpenPlay.EVENT_STACKED)
+	while op.pick != winners:
+		check(op.pick_next())
+	while ct.stack[0] != OpenPlay.YOU:
+		var e: int = ct.stack[0]
+		for i in range(1, ct.stack_count):
+			ct.stack[i - 1] = ct.stack[i]
+		ct.stack[ct.stack_count - 1] = e
+	_finish_game(0, 1)
+	eq(ct.stay, 1)
+	eq(_run_changeover(0), OpenPlay.EVENT_CALLED)
+	eq(op.partner, winners)
+	check(op.opponent != winners)
+	eq(ct.streak, 0, "a fresh game")
+	_check_population()
+
+
+## A soak with you picking partners as you go.
+func test_pick_soak() -> void:
+	var rng := 0x4321
+	var games := 0
+	var picked := 0
+	var rack := 0
+	var ok := true
+	var population := true
+	op = OpenPlay.new()
+	op.begin(2025, false)
+	op.partners(0xb5)
+	for f in 60 * 60 * 30:
+		if op.called == OpenPlay.NONE and op.your_court == OpenPlay.NONE \
+				and op.stay_court == OpenPlay.NONE:
+			rack = 0 if rack >= OpenPlay.COURTS - 1 else rack + 1
+			_place_you(OpenPlay.rack_x(rack), OpenPlay.RACK_Y)
+			op.update(0, 0, true)
+			rng = _xorshift(rng)
+			for n in rng & 7:
+				op.pick_next()
+			_place_you(128, 200)
+		var event := op.update(0, 0, false)
+		if event == OpenPlay.EVENT_CALLED:
+			ok = ok and op.opponent != op.partner
+			if op.pick != OpenPlay.NONE:
+				ok = ok and op.partner == op.pick
+				picked += 1
+		if event == OpenPlay.EVENT_PLAY:
+			rng = _xorshift(rng)
+			op.return_from_match((rng & 1) == 1, 11, 5)
+			games += 1
+		if (f & 63) == 0:
+			population = population and _check_population()
+	print("    open play: 30 minutes picking partners, %d games, %d picked" % [games, picked])
+	check(ok and population)
+	check(games >= 20 and picked >= 10)
+
+
 func _same_style(a: SimTypes.AiStyle, b: SimTypes.AiStyle) -> bool:
 	for f in ["late_period", "reaction", "dink_period", "lob_distance", "putaway_z",
 			"putaway_distance", "aim", "depth", "recover", "speed", "volley", "net",
@@ -336,10 +788,10 @@ func test_open_play_config() -> void:
 	eq(cfg.opponent, 6)
 	eq(cfg.partner, 7)
 	eq(cfg.human, [1, 0, 0, 0])
-	eq(cfg.difficulty, K.DIFFICULTY_HARD, "4.5+ is HARD whatever OPTIONS says")
+	eq(cfg.difficulty, K.DIFFICULTY_HARD, "CHAMP is HARD whatever OPTIONS says")
 	eq(cfg.points_to_win, Settings.POINTS[1])
 	eq(cfg.modifiers, K.MOD_BIG_BALL)
-	eq(cfg.open_play, 1)
+	eq(cfg.open_play, op.called + 1, "the court + 1, for the rating")
 	Settings.difficulty_i = K.DIFFICULTY_KID
 	eq(Settings.open_play_config(op).difficulty, K.DIFFICULTY_KID, "KID keeps its assist")
 	op.partner = OpenPlay.NONE

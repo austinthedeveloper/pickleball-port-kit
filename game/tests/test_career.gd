@@ -73,7 +73,7 @@ func test_points_and_matches() -> void:
 	var c := Career.new()
 	# No player: nothing records.
 	c.record_point(1, true, true)
-	c.record_match(K.MODE_SINGLES, true, 0, 0, false)
+	c.record_match(K.MODE_SINGLES, true, 0, 0, 0)
 	eq(c.new_unlocks, 0, "no player, no unlocks")
 	c.create(0, "ACE")
 	var p := c.active_player()
@@ -82,16 +82,16 @@ func test_points_and_matches() -> void:
 	c.record_point(7, false, true)
 	check(p.points_won == 2 and p.points_lost == 1, "points")
 	check(p.aces == 1 and p.longest_rally == 7, "aces and the rally")
-	c.record_match(K.MODE_DOUBLES, true, 0, 3, false)        # PIRATES, 5-0
+	c.record_match(K.MODE_DOUBLES, true, 0, 3, 0)        # PIRATES, 5-0
 	check(p.wins[K.MODE_DOUBLES] == 1 and p.shutouts == 1, "a doubles shutout")
 	check(p.streak == 1 and p.best_streak == 1 and p.beaten[3] == 1, "the streak and the team")
-	c.record_match(K.MODE_SINGLES, false, 5, -1, true)
+	c.record_match(K.MODE_SINGLES, false, 5, -1, 1)
 	check(p.losses[K.MODE_SINGLES] == 1 and p.streak == 0, "a loss ends the streak")
 	check(p.best_streak == 1 and p.open_play == 1, "the best stays; a park game counts")
 	# Beating the last ladder team clears the ladder; at the park, not.
-	c.record_match(K.MODE_SINGLES, true, 2, Opponents.count() - 1, true)
+	c.record_match(K.MODE_SINGLES, true, 2, Opponents.count() - 1, 1)
 	eq(p.ladder_clears, 0, "not at the park")
-	c.record_match(K.MODE_SINGLES, true, 2, Opponents.count() - 1, false)
+	c.record_match(K.MODE_SINGLES, true, 2, Opponents.count() - 1, 0)
 	eq(p.ladder_clears, 1, "on the ladder")
 
 
@@ -102,7 +102,7 @@ func test_counters_saturate() -> void:
 	p.points_won = Career.COUNTER_MAX
 	p.beaten[0] = 255
 	c.record_point(3, true, false)
-	c.record_match(K.MODE_SINGLES, true, 3, 0, false)
+	c.record_match(K.MODE_SINGLES, true, 3, 0, 0)
 	eq(p.points_won, Career.COUNTER_MAX, "counters stop at 9999")
 	eq(p.beaten[0], 255, "beaten[] stops at 255")
 
@@ -121,19 +121,19 @@ func test_unlocks() -> void:
 	for i in Career.hats():
 		eq(Career.hat_unlocked(p, i), Career.hat_unlock[i] == Career.FREE, "hat %d" % i)
 	# A first win (the default CPU, 5-3): the visor, nothing else.
-	c.record_match(K.MODE_SINGLES, true, 3, -1, false)
+	c.record_match(K.MODE_SINGLES, true, 3, -1, 0)
 	check(c.new_unlocks == visor and (p.unlocked & visor) != 0, "the visor")
 	check(Career.hat_unlocked(p, 1), "worn now")
 	# Earned once: the next win earns nothing new.
-	c.record_match(K.MODE_SINGLES, true, 3, -1, false)
+	c.record_match(K.MODE_SINGLES, true, 3, -1, 0)
 	eq(c.new_unlocks, 0, "earned once")
 	# A shutout of the PIRATES: their hat and the pink hair together.
-	c.record_match(K.MODE_SINGLES, true, 0, 3, false)
+	c.record_match(K.MODE_SINGLES, true, 0, 3, 0)
 	eq(c.new_unlocks, tricorn | pink, "two at once")
 	# A ladder clear: the gold hair; a loss earns nothing.
-	c.record_match(K.MODE_SINGLES, false, 5, 1, false)
+	c.record_match(K.MODE_SINGLES, false, 5, 1, 0)
 	eq(c.new_unlocks, 0, "a loss earns nothing")
-	c.record_match(K.MODE_SINGLES, true, 4, Opponents.count() - 1, false)
+	c.record_match(K.MODE_SINGLES, true, 4, Opponents.count() - 1, 0)
 	check(c.new_unlocks & gold != 0, "a clear: gold hair")
 	check(Career.hair_unlocked(p, Career.hairs() - 1), "GOLD")
 	check(not Career.hair_unlocked(p, Career.hairs()), "past the end")
@@ -679,3 +679,46 @@ func test_park_and_practice_wear_the_player() -> void:
 	var pc := page.config()
 	check(pc.career_p1 == 1 and pc.palette[0] == PlayerSelect.PAL_GOLD, "practice as the player")
 	page.free()
+
+
+## SNES ADR-070: the park rating, packed in Player.park (test_career.c's
+## test_park_rating).
+func test_park_rating() -> void:
+	var c := Career.new()
+	c.create(0, "ACE")
+	var p := c.active_player()
+	eq(p.park, 0)
+	check(Career.park_rating(p) == 30 and Career.park_court(p) == 0, "a new player: 3.0, the first court")
+	# Wins at the first court: 3.0, 3.2, 3.4, then 3.6 opens the next.
+	c.rate_park(p, 0, true)
+	c.rate_park(p, 0, true)
+	check(Career.park_rating(p) == 34 and c.park_opened == OpenPlay.NONE)
+	c.rate_park(p, 0, true)
+	check(c.park_before == 34 and c.park_after == 36)
+	check(c.park_opened == 1 and Career.park_court(p) == 1, "CLUB opens")
+	# A loss drops the rating below the CLUB court's; it stays open.
+	c.rate_park(p, 1, false)
+	c.rate_park(p, 1, false)
+	check(Career.park_rating(p) == 34 and Career.park_court(p) == 1)
+	eq(c.park_opened, OpenPlay.NONE)
+	# The floor holds in the byte...
+	p.park = (1 << Career.PARK_COURT_SHIFT) | (OpenPlay.RATING_MIN - Career.PARK_BASE)
+	c.rate_park(p, 0, false)
+	eq(Career.park_rating(p), OpenPlay.RATING_MIN)
+	eq(Career.park_court(p), 1)
+	# ...and the cap, with the top court.
+	p.park = OpenPlay.RATING_MAX - Career.PARK_BASE
+	c.rate_park(p, 2, true)
+	eq(Career.park_rating(p), OpenPlay.RATING_MAX)
+	check(Career.park_court(p) == 2 and c.park_opened == 2)
+	# Through a match: open_play is the court + 1; KID is not rated.
+	p.park = 0
+	c.record_match(K.MODE_DOUBLES, true, 4, 3, 2)
+	check(Career.park_rating(p) == 33 and c.park_before == 30, "a CLUB win from 3.0")
+	c.record_match(K.MODE_DOUBLES, true, 4, 3, 0)
+	check(Career.park_rating(p) == 33 and c.park_before == OpenPlay.RATING_NONE, "the ladder isn't rated")
+	c.record_match(K.MODE_DOUBLES, false, 4, 3, 1, true)
+	check(Career.park_rating(p) == 33 and c.park_before == OpenPlay.RATING_NONE, "KID isn't")
+	# It survives a save round trip.
+	var back := Career.from_dict(JSON.parse_string(JSON.stringify(c.to_dict())))
+	eq(Career.park_rating(back.active_player()), 33)

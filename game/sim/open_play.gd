@@ -91,7 +91,24 @@ const EVENT_PLAY := 5           ## the banner is done: start the match
 const EVENT_BOARD := 6          ## B at the records board: the next page
 const EVENT_PRACTICE := 7       ## B at the ball machine: start practice
 
-const LEVEL_NAMES := ["<3.5", "3.5-4.5", "4.5+"]
+const EVENT_LOCKED := 8          ## that court is above your park rating (SNES ADR-070)
+const STAY_MAX := 2               ## winners stay on for this many wins (SNES ADR-071)
+## ROOKIE, CLUB, CHAMP (SNES ADR-070: period-true; DUPR-style ratings
+## didn't exist in 1994).
+const LEVEL_NAMES := ["ROOKIE", "CLUB", "CHAMP"]
+
+## The park rating (SNES ADR-070), in tenths. A win at your level (the
+## court whose range holds your rating) or above it moves you up more than
+## a loss moves you down, so winning a third of your games there holds
+## your place; below your level a win counts for nothing.
+const RATING_NONE := 0            ## unrated: every court open
+const RATING_START := 30          ## a new player: 10 points
+const RATING_MIN := 20            ## 0 points
+const RATING_MAX := 60
+const RATING_WIN := 2             ## a win at your level
+const RATING_WIN_UP := 3          ## a win on a court above it
+const RATING_LOSS := 1            ## a loss anywhere
+const COURT_FLOOR := [0, 35, 45]  ## each court's floor: 15 and 25 points
 
 
 class OpenCourt:
@@ -103,6 +120,8 @@ class OpenCourt:
 	var timer := 0                  ## frames to the next point or game
 	var rally := 0                  ## animation: frames into the rally (u8)
 	var age := 0                    ## frames since this game began (to 255)
+	var stay := NONE                ## the side on a winning streak (it stays on), or NONE
+	var streak := 0                 ## games in a row that side has won
 
 
 var court: Array = []           ## [OpenCourt] x COURTS
@@ -124,6 +143,15 @@ var two_players := 0            ## 2P is with you: your partner
 var last_won := NONE            ## your last game: 1 won, 0 lost, none
 var last_score := [0, 0]        ## yours, theirs
 var board_page := NONE          ## the records board's page, or NONE
+var rating := RATING_NONE       ## yours (SNES ADR-070), or RATING_NONE
+var best_court := COURTS - 1    ## the highest court open to you
+var stay_court := NONE          ## you won and stay on this court, or NONE (SNES ADR-071)
+var last_streak := 0            ## your last game: wins in a row there
+## Pick your partner (SNES ADR-072): the team whose captain partners you in
+## a fresh game, or NONE (next in line); bit n of pickable: team n may be
+## picked (the ladder teams the career player has beaten).
+var pick := NONE
+var pickable := 0
 
 
 func _init() -> void:
@@ -160,6 +188,47 @@ static func court_difficulty(c: int, saved_difficulty: int) -> int:
 	if saved_difficulty == K.DIFFICULTY_KID:
 		return K.DIFFICULTY_KID
 	return LEVELS[c if c >= 0 and c < COURTS else 0]
+
+
+# --- The park rating (SNES ADR-070) -------------------------------------------
+
+static func court_floor(c: int) -> int:
+	return COURT_FLOOR[c if c < COURTS else 0]
+
+
+## The court whose range holds a rating.
+static func rating_court(r: int) -> int:
+	var c := COURTS - 1
+	while c and r < COURT_FLOOR[c]:
+		c -= 1
+	return c
+
+
+## A rating after a game on a court, won or lost.
+static func rating_after(r: int, c: int, won: bool) -> int:
+	var level := rating_court(r)
+	if not won:
+		return r - RATING_LOSS if r >= RATING_MIN + RATING_LOSS else RATING_MIN
+	if c < level:
+		return r
+	var gain := RATING_WIN_UP if c > level else RATING_WIN
+	return mini(r + gain, RATING_MAX)
+
+
+## A rating as the park points shown (0 to 40): no decimals.
+static func rating_points(r: int) -> int:
+	return r - RATING_MIN if r > RATING_MIN else 0
+
+
+## Your rating and the highest court open to you (from the career player
+## when the park opens and after each game); RATING_NONE opens every court.
+func rate(r: int, best: int) -> void:
+	rating = r
+	best_court = COURTS - 1 if r == RATING_NONE or best >= COURTS else best
+
+
+func court_open(c: int) -> bool:
+	return c <= best_court
 
 
 static func court_left(c: int) -> int:
@@ -274,15 +343,24 @@ func your_wait() -> int:
 	return NONE
 
 
-func _stack_pop(ct: OpenCourt) -> int:
-	if not ct.stack_count:
-		return NONE
-	var entry: int = ct.stack[0]
-	stacks = (stacks + 1) & 0xff
-	for i in range(1, ct.stack_count):
-		ct.stack[i - 1] = ct.stack[i]
-	ct.stack_count -= 1
-	return entry
+## The first entry in a stack that is not skip, taken out (NONE skips
+## nothing: the front).
+func _stack_take(ct: OpenCourt, skip: int) -> int:
+	for i in ct.stack_count:
+		var entry: int = ct.stack[i]
+		if entry != skip:
+			_stack_remove(ct, entry)
+			return entry
+	return NONE
+
+
+## A team waits in some stack.
+func _team_waiting(team: int) -> bool:
+	for ct: OpenCourt in court:
+		for i in ct.stack_count:
+			if ct.stack[i] == team:
+				return true
+	return false
 
 
 func _stack_remove(ct: OpenCourt, entry: int) -> bool:
@@ -324,18 +402,45 @@ func _stack_join(entry: int) -> void:
 
 ## The next entry for a court: its own stack, else the front team of the
 ## longest other stack (never your paddle: it waits where you put it).
-func _next_entry(c: int) -> int:
+## Never skip: your partner's team, when you stay on (SNES ADR-071).
+func _next_entry(c: int, skip: int) -> int:
 	var ct: OpenCourt = court[c]
 	if ct.stack_count:
-		return _stack_pop(ct)
+		var entry := _stack_take(ct, skip)
+		if entry != NONE:
+			return entry
 	var best: OpenCourt = null
 	for o in COURTS:
 		var other: OpenCourt = court[o]
-		if other == ct or other.stack_count == 0 or other.stack[0] == YOU:
+		if other == ct or other.stack_count == 0 or other.stack[0] == YOU or other.stack[0] == skip:
 			continue
 		if best == null or other.stack_count > best.stack_count:
 			best = other
-	return _stack_pop(best) if best else NONE
+	return _stack_take(best, NONE) if best else NONE
+
+
+## A game won by a side (SNES ADR-071): its streak goes on, or starts.
+func _court_won(ct: OpenCourt, side: int) -> void:
+	if ct.stay != side:
+		ct.streak = 0
+	ct.streak += 1
+	ct.stay = side
+
+
+## You give up your place as a winner (B at a rack while you wait to be
+## called again): you come off, and the court's next game is a fresh one.
+func _leave_stay() -> void:
+	if stay_court >= COURTS:
+		return
+	var ct: OpenCourt = court[stay_court]
+	if ct.playing[0] == YOU:
+		ct.playing[0] = NONE
+	if ct.playing[1] == YOU:
+		ct.playing[1] = NONE
+	ct.stay = NONE
+	ct.streak = 0
+	stay_court = NONE
+	lineup = (lineup + 1) & 0xff
 
 
 func _court_next_point(ct: OpenCourt) -> void:
@@ -343,29 +448,63 @@ func _court_next_point(ct: OpenCourt) -> void:
 	ct.rally = 0
 
 
-## Changeover over: the next two on, then the two off join stacks.
+## Changeover over. Winners stay (SNES ADR-071): the losers join a stack
+## and the next entry comes on against the winners, at the other side. A
+## fresh game (no winners staying, or they have won STAY_MAX in a row): the
+## two off join stacks, then the next two come on.
 func _court_start_game(c: int) -> int:
 	var ct: OpenCourt = court[c]
 	var off0: int = ct.playing[0]
 	var off1: int = ct.playing[1]
-	# The two off go to the back of their stacks first, so a court whose
-	# stack is short keeps its own level playing (the 4.5+ court has two
+	var stay: int = ct.stay
+	var skip := NONE
+	# Your picked partner (SNES ADR-072); with 2P there is none.
+	var pk: int = NONE if two_players else pick
+	if stay >= 2 or ct.streak >= STAY_MAX or ct.playing[stay] == NONE:
+		stay = NONE
+	# You would challenge winners who are your picked partner's team: a
+	# fresh game instead, so they are never your opponents.
+	if stay != NONE and pk != NONE and ct.playing[stay] == pk and ct.stack_count \
+			and ct.stack[0] == YOU:
+		stay = NONE
+	# Those off go to the back of their stacks first, so a court whose
+	# stack is short keeps its own level playing (the CHAMP court has two
 	# teams); anyone waiting is ahead of them.
 	lineup = (lineup + 1) & 0xff
-	ct.playing[0] = NONE
-	ct.playing[1] = NONE
-	_stack_join(off0)
-	_stack_join(off1)
-	ct.playing[0] = _next_entry(c)
-	ct.playing[1] = _next_entry(c)
+	if stay != NONE:
+		ct.playing[stay ^ 1] = NONE
+		_stack_join(off0 if stay else off1)
+		# You stay on with the same partner: their team waits on.
+		if ct.playing[stay] == YOU and two_players == 0:
+			skip = partner
+		ct.playing[stay ^ 1] = _next_entry(c, skip)
+	else:
+		ct.stay = NONE
+		ct.streak = 0
+		ct.playing[0] = NONE
+		ct.playing[1] = NONE
+		_stack_join(off0)
+		_stack_join(off1)
+		# You come on (first or second in line) with a picked partner:
+		# their team is passed over.
+		if pk != NONE and ct.stack_count and (ct.stack[0] == YOU
+				or (ct.stack_count > 1 and ct.stack[1] == YOU)):
+			skip = pk
+		ct.playing[0] = _next_entry(c, skip)
+		ct.playing[1] = _next_entry(c, skip)
 	ct.score[0] = 0
 	ct.score[1] = 0
 	if ct.playing[0] == NONE or ct.playing[1] == NONE:
-		# Not enough players yet: wait for the next changeover.
+		# Not enough players yet (winners staying come off too): wait for
+		# the next changeover.
 		_stack_join(ct.playing[0])
 		_stack_join(ct.playing[1])
 		ct.playing[0] = NONE
 		ct.playing[1] = NONE
+		ct.stay = NONE
+		ct.streak = 0
+		if stay_court == c:
+			stay_court = NONE
 		ct.state = COURT_CHANGEOVER
 		ct.timer = CHANGEOVER_FRAMES
 		return EVENT_NONE
@@ -377,9 +516,21 @@ func _court_start_game(c: int) -> int:
 		called = c
 		call_timer = 0
 		opponent = ct.playing[side ^ 1]
-		# Your partner: the captain of the team waiting next at this court
-		# (they stay in line); none waiting, the regular.
-		partner = ct.stack[0] if ct.stack_count and ct.stack[0] != YOU else NONE
+		if side == stay:
+			# Called again as a winner: the same partner, while their team
+			# still waits (another court may have taken it).
+			stay_court = c
+			if partner == NONE or _team_waiting(partner):
+				return EVENT_CALLED
+		else:
+			stay_court = NONE
+		# Your partner: the captain you picked, else the captain of the
+		# team waiting next at this court (they stay in line); none
+		# waiting, the regular.
+		if pk != NONE:
+			partner = pk
+		else:
+			partner = ct.stack[0] if ct.stack_count and ct.stack[0] != YOU else NONE
 		return EVENT_CALLED
 	ct.state = COURT_PLAYING
 	_court_next_point(ct)
@@ -405,6 +556,7 @@ func _court_update(c: int) -> int:
 	var side := _random() & 1
 	ct.score[side] += 1
 	if ct.score[side] >= GAME_POINTS:
+		_court_won(ct, side)
 		ct.state = COURT_CHANGEOVER
 		ct.timer = CHANGEOVER_FRAMES
 		return EVENT_NONE
@@ -425,6 +577,8 @@ func begin(start_seed: int, with_2p: bool) -> void:
 		ct.score[0] = _random() & 3
 		ct.score[1] = _random() & 3
 		ct.stack_count = 0
+		ct.stay = NONE
+		ct.streak = 0
 		_court_next_point(ct)
 		ct.age = 255                # these games are already going
 	# Each team at its level's court: the first two play, the rest wait.
@@ -451,14 +605,50 @@ func begin(start_seed: int, with_2p: bool) -> void:
 	last_won = NONE
 	last_score = [0, 0]
 	board_page = NONE
+	stay_court = NONE
+	last_streak = 0
+	pick = NONE
+	pickable = 0
+	rate(RATING_NONE, 0)
+
+
+## Pick your partner (SNES ADR-072): the teams you may pick (bit n: ladder
+## team n); a pick no longer among them goes back to next in line.
+func partners(teams: int) -> void:
+	pickable = teams
+	if pick >= TEAMS or (teams & (1 << pick)) == 0:
+		pick = NONE
+
+
+## Y picks: you stand at the rack holding your paddle, with teams to pick
+## and no 2P.
+func pick_ready() -> bool:
+	return called == NONE and two_players == 0 and pickable != 0 \
+		and your_court != NONE and rack_near() == your_court
+
+
+## Y: next in line, then each team you may pick in ladder order, then next
+## in line again. True when the pick changed.
+func pick_next() -> bool:
+	if not pick_ready():
+		return false
+	var team := 0 if pick >= TEAMS else pick + 1
+	while team < TEAMS and (pickable & (1 << team)) == 0:
+		team += 1
+	pick = team if team < TEAMS else NONE
+	return true
 
 
 func _press_rack(rack: int) -> int:
 	var ct: OpenCourt = court[rack]
+	# Waiting to be called again as a winner, you give that up.
+	_leave_stay()
 	if your_court == rack:
 		_stack_remove(ct, YOU)
 		your_court = NONE
 		return EVENT_UNSTACKED
+	if not court_open(rack):
+		return EVENT_LOCKED
 	if ct.stack_count >= STACK_MAX:
 		return EVENT_FULL
 	if your_court != NONE:
@@ -524,15 +714,24 @@ func return_from_match(won: bool, points_for: int, points_against: int) -> void:
 	var c := called
 	last_won = 1 if won else 0
 	last_score = [points_for, points_against]
+	last_streak = 0
 	called = NONE
+	stay_court = NONE
 	if c >= COURTS:
 		return
 	var ct: OpenCourt = court[c]
-	# You leave; the court's next game starts after a changeover.
-	if ct.playing[0] == YOU:
-		ct.playing[0] = NONE
-	if ct.playing[1] == YOU:
-		ct.playing[1] = NONE
+	# Winners stay (SNES ADR-071): won, below the cap, you stay on and the
+	# changeover calls you again; otherwise you leave. The court's next
+	# game starts after a changeover.
+	var side := 0 if ct.playing[0] == YOU else (1 if ct.playing[1] == YOU else NONE)
+	if side != NONE:
+		_court_won(ct, side if won else side ^ 1)
+		if won:
+			last_streak = ct.streak
+		if won and ct.streak < STAY_MAX:
+			stay_court = c
+		else:
+			ct.playing[side] = NONE
 	ct.state = COURT_CHANGEOVER
 	ct.timer = CHANGEOVER_FRAMES
 	lineup = (lineup + 1) & 0xff
@@ -544,8 +743,8 @@ func return_from_match(won: bool, points_for: int, points_against: int) -> void:
 func snapshot() -> Array:
 	var s := [x_fp, y_fp, facing_left, walking, step, your_court, called, call_timer,
 		opponent, partner, seed, lineup, stacks, two_players, last_won, last_score.duplicate(),
-		board_page]
+		board_page, rating, best_court, stay_court, last_streak, pick, pickable]
 	for ct: OpenCourt in court:
 		s.append([ct.state, ct.playing.duplicate(), ct.score.duplicate(), ct.stack.duplicate(),
-			ct.stack_count, ct.timer, ct.rally, ct.age])
+			ct.stack_count, ct.timer, ct.rally, ct.age, ct.stay, ct.streak])
 	return s

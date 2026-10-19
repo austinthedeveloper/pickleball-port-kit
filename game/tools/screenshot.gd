@@ -13,6 +13,9 @@
 ## "park" the open play park (ADR-034), you stacked at court 2's rack;
 ## "park_house" in the clubhouse at the records board; "park_call" your
 ## game called. "partner=N" puts ladder team N's captain on slot 1.
+## "park_locked" a career player at 10 points at the CLUB court's rack;
+## "park_pick" one who has beaten the ladder, picking a partner at the
+## ROOKIE rack (SNES ADR-070, 072).
 ## "career" (ADR-047) plays as a scratch career player (ACE: green, pink
 ## hair, a visor) in a match, the park, or on title_career,
 ## title_career_card, title_career_edit and title_career_name; "unlock"
@@ -96,7 +99,20 @@ func _initialize() -> void:
 		elif mode == "park":
 			op.x_fp = K.to_fp(OpenPlay.rack_x(1) + 30)
 			op.y_fp = K.to_fp(OpenPlay.RACK_Y + 14)
-		var pv := ParkView.new().setup(op, _career_save() if "career" in a.slice(4) else null, false)
+		var sv: SaveGame = _career_save() if "career" in a.slice(4) or mode in ["park_locked", "park_pick"] \
+			else null
+		if mode == "park_locked":
+			op.update(0, 0, true)           # your paddle back: you stand at the rack
+		elif mode == "park_pick":
+			op.update(0, 0, true)
+			op.x_fp = K.to_fp(OpenPlay.rack_x(0))
+			op.update(0, 0, true)
+			for t in Career.TEAMS:
+				sv.career.active_player().beaten[t] = 1
+		var pv := ParkView.new().setup(op, sv, false)
+		if mode == "park_pick":
+			op.pick_next()
+			op.pick_next()
 		root.add_child(pv)
 		_view = pv
 	elif mode == "update":

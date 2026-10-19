@@ -342,6 +342,18 @@ func test_career_screens() -> void:
 		v.save.career.new_unlocks = 1 << 8
 		v._hud.refresh()
 		check_layout(v, "hud unlocked card, one")
+		# the park's result: the rating line under the story line
+		v.unlock_frames = -1
+		v.save.career.new_unlocks = 0
+		v.park = true
+		for opened in [OpenPlay.NONE, 1]:
+			v.save.career.park_before = 38
+			v.save.career.park_after = 40
+			v.save.career.park_opened = opened
+			v._hud.refresh()
+			check_layout(v, "hud park rating, opened %d" % opened)
+		v.park = false
+		v.save.career.park_before = OpenPlay.RATING_NONE
 		v.free()
 
 
@@ -363,6 +375,58 @@ func test_park() -> void:
 	for f in 60:
 		view.step_frame(SimTypes.Intent.new())
 	check_layout(view, "park clubhouse board")
+	view.free()
+	# Rated (SNES ADR-070..072): every panel the rating, the stay and the
+	# pick add, at their widest.
+	var s := _save()
+	s.career.create(0, "WWWWWWWW")
+	var player := s.career.active_player()
+	player.park = OpenPlay.RATING_MAX - Career.PARK_BASE - 2  # 38 points, CHAMP not reached
+	for t in Career.TEAMS:
+		player.beaten[t] = 1
+	park = OpenPlay.new()
+	park.begin(1234, false)
+	view = ParkView.new()
+	runner.root.add_child(view)
+	view.setup(park, s, false)
+	var cases := []
+	park.x_fp = K.to_fp(OpenPlay.rack_x(1))
+	park.y_fp = K.to_fp(OpenPlay.RACK_Y)
+	player.park = 18 - Career.PARK_BASE + 20             # 18 points: CLUB locked
+	view.rate_park()
+	view.refresh()
+	cases.append(["park locked rack", "OPENS AT 15"])
+	check_layout(view, "park locked rack")
+	check(view.message.begins_with("OPENS AT"), "a locked rack says so: " + view.message)
+	player.park = (2 << Career.PARK_COURT_SHIFT) | 30
+	view.rate_park()
+	park.x_fp = K.to_fp(OpenPlay.rack_x(2))
+	park.update(0, 0, true)
+	for pick in OpenPlay.TEAMS + 1:
+		park.pick_next()
+		view.refresh()
+		check_layout(view, "park pick %d" % park.pick)
+	check(view.message.begins_with("PARTNER:"), "the pick panel: " + view.message)
+	park.update(0, 0, true)                                # your paddle back
+	park.x_fp = K.to_fp(128)
+	park.y_fp = K.to_fp(200)
+	view.refresh()
+	check_layout(view, "park rated hello")
+	check(view.message.ends_with("PTS"), "your points: " + view.message)
+	park.last_won = 1
+	park.last_score = [11, 10]
+	park.last_streak = OpenPlay.STAY_MAX
+	for timer in [ParkView.RESULT_FRAMES, 10]:
+		view.result_timer = timer
+		view.refresh()
+		check_layout(view, "park won, timer %d: %s" % [timer, view.message])
+	view.result_timer = 0
+	park.called = 2
+	park.stay_court = 2
+	park.opponent = 4
+	view.refresh()
+	check_layout(view, "park winners stay")
+	eq(view.message.left(13), "WINNERS STAY:")
 	view.free()
 
 

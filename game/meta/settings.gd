@@ -152,7 +152,7 @@ static func open_play_config(op: OpenPlay, career: Career.Player = null) -> SimT
 	else:
 		cfg.set_partner(op.partner if op.partner < OpenPlay.TEAMS else -1)
 	cfg.modifiers = mod_bits
-	cfg.open_play = 1
+	cfg.open_play = op.called + 1      # the court + 1: the career rates it (SNES ADR-070)
 	cfg.set_career_p1(career)
 	return cfg
 

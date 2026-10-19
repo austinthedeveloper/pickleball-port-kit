@@ -18,6 +18,11 @@ const TEAMS := 8                 ## ladder teams (Opponents.count(), checked)
 const NONE := -1                 ## no active player (CAREER_NONE)
 const FREE := -1                 ## an item no unlock gates (CAREER_FREE)
 const COUNTER_MAX := 9999        ## SAVE_COUNTER_MAX: four digits on screen
+## Player.park (SNES ADR-070), save.h's byte: the highest court reached in
+## the top two bits, the rating less PARK_BASE tenths below (0: unrated).
+const PARK_BASE := 19            ## 2.0 is stored as 1
+const PARK_RATING := 0x3f
+const PARK_COURT_SHIFT := 6
 
 const RULE_WINS := 0
 const RULE_RALLY := 1
@@ -123,13 +128,14 @@ class Player:
 	var hat := 0                 ## HAT id, 0 the cap
 	var paddle := Paddles.STANDARD
 	var beaten := [0, 0, 0, 0, 0, 0, 0, 0]   ## wins over each ladder team
+	var park := 0                ## the park rating and court (PARK_*), 0 a new player
 
 	func _init() -> void:
 		Career._load()           # the tables, before anything reads them
 
 	const KEYS := ["wins", "losses", "points_won", "points_lost", "aces", "shutouts",
 		"streak", "best_streak", "longest_rally", "ladder_clears", "open_play", "unlocked",
-		"used", "name", "variant", "skin", "hair", "shirt", "hat", "paddle", "beaten"]
+		"used", "name", "variant", "skin", "hair", "shirt", "hat", "paddle", "beaten", "park"]
 
 	func copy() -> Player:
 		var p := Player.new()
@@ -165,6 +171,7 @@ class Player:
 		for i in mini(b.size(), TEAMS):
 			p.beaten[i] = clampi(int(b[i]), 0, 255)
 		p.unlocked = int(d.get("unlocked", 0)) & 0xffff
+		p.park = int(d.get("park", 0)) & 0xff
 		p.used = 1 if int(d.get("used", 0)) else 0
 		p.name = (String(d.get("name", "")) + "        ").substr(0, NAME)
 		p.variant = clampi(int(d.get("variant", 0)), 0, 1)
@@ -185,6 +192,12 @@ var active := NONE               ## slot, or NONE
 ## The unlocks newly earned by the last finished match (bit n: unlock n);
 ## never saved, for the result screen (g_career_new_unlocks).
 var new_unlocks := 0
+## The park rating before and after the last finished park game, in tenths
+## (OpenPlay.RATING_NONE before: not rated), and a court it opened (or
+## OpenPlay.NONE); never saved, for the result (g_career_park_*).
+var park_before := OpenPlay.RATING_NONE
+var park_after := OpenPlay.RATING_NONE
+var park_opened := OpenPlay.NONE
 
 
 func _init() -> void:
@@ -297,19 +310,57 @@ func record_point(shots: int, won: bool, served: bool) -> void:
 		player.longest_rally = shots
 
 
+# --- The park rating (SNES ADR-070) -------------------------------------------
+
+## A player's park rating in tenths (3.0 until their first game).
+static func park_rating(player: Player) -> int:
+	var stored := player.park & PARK_RATING
+	return stored + PARK_BASE if stored else OpenPlay.RATING_START
+
+
+## The highest court a player has reached.
+static func park_court(player: Player) -> int:
+	var court := player.park >> PARK_COURT_SHIFT
+	return court if court < OpenPlay.COURTS else OpenPlay.COURTS - 1
+
+
+## A park game on a court: the rating moves (OpenPlay.rating_after) and a
+## court it reaches opens; sets park_*.
+func rate_park(player: Player, court: int, won: bool) -> void:
+	var before := park_rating(player)
+	var after := OpenPlay.rating_after(before, court, won)
+	var best := park_court(player)
+	var reached := OpenPlay.rating_court(after)
+	park_before = before
+	park_after = after
+	park_opened = OpenPlay.NONE
+	if reached > best:
+		best = reached
+		park_opened = reached
+	player.park = (best << PARK_COURT_SHIFT) | (after - PARK_BASE)
+
+
 ## A finished career match against the CPU; opponent is the ladder team
-## (-1 for the default CPU), open_play a park game. Updates the stats and
-## the unlocks (new_unlocks); the caller writes the save.
+## (-1 for the default CPU), open_play a park game: its court + 1 (0 not
+## one), rated unless the match is on KID (`kid`). Updates the stats, the
+## unlocks (new_unlocks) and the park rating (park_*); the caller writes
+## the save. (The C rates the park on the next frame, career_park_flush,
+## for the SNES's frame budget; here it is at once.)
 func record_match(mode: int, won: bool, points_against: int, opponent: int,
-		open_play: bool) -> void:
+		open_play: int, kid := false) -> void:
 	var player := active_player()
 	new_unlocks = 0
+	park_before = OpenPlay.RATING_NONE
+	park_opened = OpenPlay.NONE
 	if player == null:
 		return
 	if mode > K.MODE_DOUBLES:
 		mode = K.MODE_DOUBLES
 	if open_play:
 		player.open_play = _bump(player.open_play)
+		# KID's games are all KID (ADR-034): not rated.
+		if not kid:
+			rate_park(player, open_play - 1, won)
 	if won:
 		player.wins[mode] = _bump(player.wins[mode])
 		player.streak = _bump(player.streak)

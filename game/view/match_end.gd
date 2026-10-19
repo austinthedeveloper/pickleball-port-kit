@@ -77,7 +77,8 @@ func on_match_over() -> void:
 		# ADR-047: before record_match, whose write keeps both.
 		if career_counts():
 			v.save.career.record_match(v.sim.config.mode, won, v.sim.team_score[1],
-				v.sim.config.opponent, v.sim.config.open_play != 0)
+				v.sim.config.opponent, v.sim.config.open_play,
+				v.sim.config.difficulty == K.DIFFICULTY_KID)
 		v.save.record_match(v.sim.config.mode == K.MODE_DOUBLES, won, v.sim.config.opponent,
 			v.sim.team_score[1] if won else -1)
 		if v.ladder and won:

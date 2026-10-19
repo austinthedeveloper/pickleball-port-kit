@@ -384,12 +384,27 @@ func refresh() -> void:
 				elif view.ladder and you and view.save:
 					_result_line.text += "  NEXT UP: " + String(Opponents.team(
 						view.save.ladder(cfg.mode == K.MODE_DOUBLES))["team"])
+				elif view.park and view.save and park_line(view.save.career) != "":
+					# off the ladder: the park rating's move where NEXT UP goes
+					_result_line.text += "  " + park_line(view.save.career)
 	elif s.phase == K.PHASE_POINT_RESULT and _point_banner_frames > 0:
 		_banner.text = K.fault_word(s.last_fault)
 		_banner_sub.text = "%s SCORES" % _team_label(s.point_winner)
 	else:
 		_banner.text = ""
 		_banner_sub.text = ""
+
+
+## After a rated park game (SNES ADR-070, hud_scene.c hud_result_rating):
+## "PARK POINTS 14 TO 16", or a court it opened, "CLUB COURT OPEN! 16 PTS".
+static func park_line(c: Career) -> String:
+	if c.park_before == OpenPlay.RATING_NONE:
+		return ""
+	if c.park_opened != OpenPlay.NONE:
+		return "%s COURT OPEN! %d PTS" % [OpenPlay.court_level_name(c.park_opened),
+			OpenPlay.rating_points(c.park_after)]
+	return "PARK POINTS %d TO %d" % [OpenPlay.rating_points(c.park_before),
+		OpenPlay.rating_points(c.park_after)]
 
 
 func _player_of(slot: int) -> int:

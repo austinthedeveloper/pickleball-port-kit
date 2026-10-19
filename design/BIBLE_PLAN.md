@@ -76,10 +76,10 @@ Status: **have** (the port does it), **partly**, **missing**, **differs**
 | **Hat Museum**: X on a player's card, 4 × 3 cases, locked as silhouettes with hints | 061 | **missing** | |
 | A taken shirt colour shows as a dark silhouette in Player Select | 020 | check | |
 | The female player wears a ponytail | 059 | check | The port's art is its own (HD); check it has one. |
-| Open play courts **ROOKIE / CLUB / CHAMP** | 070 | **differs** | Port shows `UNDER 3.5`, `3.5-4.5`, `4.5+` (view/park_view.gd). Anachronistic: rename. |
-| **Park points**: 10 to start, +2 a win at your level, -1 a loss; CLUB at 15, CHAMP at 25 | 070 | **missing** | Career save field. |
-| **Winners stay on**, up to two wins in a row | 071 | **missing** | open_play.c port. |
-| **Pick your partner** at the rack (Y): any captain you've beaten | 072 | **missing** | Career `beaten[]`. |
+| Open play courts **ROOKIE / CLUB / CHAMP** | 070 | **done** | PORT-37, ADR-060. |
+| **Park points**: 10 to start, +2 a win at your level, -1 a loss; CLUB at 15, CHAMP at 25 | 070 | **done** | PORT-37: `Career.Player.park`. |
+| **Winners stay on**, up to two wins in a row | 071 | **done** | PORT-37. |
+| **Pick your partner** at the rack (Y): any captain you've beaten | 072 | **done** | PORT-37: SLICE (Y) at your rack. |
 | A clubhouse with the records board and a ball machine | 034 | **have** | PORT-19. |
 | Four players | 073 | **have** | Port's own lobby (PORT-16), and online (PORT-31). |
 | **Rings at each player's feet**: 1P red, 2P blue, 3P yellow, 4P green, CPU grey | 066 | **missing** | Display. |

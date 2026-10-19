@@ -36,8 +36,7 @@ const BOTTOM_Y := OpenPlay.COURT_TOP + OpenPlay.COURT_H - 10
 const INPUT_LOCK_FRAMES := 12
 ## The courts' aprons (ADR-034 skill levels): teal, gold, red.
 const APRONS := [Color("2f9d96"), Color("d2a33a"), Color("c4473c")]
-## The labels in the bitmap font, which has no "<".
-const LEVEL_LABELS := ["UNDER 3.5", "3.5-4.5", "4.5+"]
+const LOCKED_TINT := Color(0.55, 0.57, 0.62)
 const YOU_TINT := Color("6aa0ff")
 const SCORE_TINT := Color("fbe46a")
 
@@ -83,11 +82,28 @@ func setup(park: OpenPlay, s: SaveGame, back: bool) -> ParkView:
 	save = s
 	result_timer = RESULT_FRAMES if back and op.last_won != OpenPlay.NONE else 0
 	_2p_shown = op.two_players
+	rate_park()
 	manifest = JSON.parse_string(FileAccess.get_file_as_string("res://assets/levels/manifest.json"))
 	_build()
 	_follow(true)
 	refresh()
 	return self
+
+
+## The career player's park (main.c's park entry): the teams they have
+## beaten to pick as partners (SNES ADR-072), and their rating, which
+## locks the courts above it (ADR-070); no player, or KID, rates nothing.
+func rate_park() -> void:
+	var player: Career.Player = save.career.active_player() if save else null
+	var teams := 0
+	for t in Career.TEAMS:
+		if player and player.beaten[t]:
+			teams |= 1 << t
+	op.partners(teams)
+	if player == null or Settings.difficulty_i == K.DIFFICULTY_KID:
+		op.rate(OpenPlay.RATING_NONE, 0)
+	else:
+		op.rate(Career.park_rating(player), Career.park_court(player))
 
 
 func _build() -> void:
@@ -183,7 +199,7 @@ func _build_courts_panel() -> void:
 		ui.add_child(stripe)
 		var level := BitmapText.new()
 		level.font = "small"
-		level.text = LEVEL_LABELS[c]
+		level.text = OpenPlay.court_level_name(c)
 		level.position = Vector2(696, y)
 		ui.add_child(level)
 		_labels[c] = level
@@ -390,11 +406,15 @@ func step_frame(it: SimTypes.Intent = null, pad2_start := false) -> void:
 		_sfx.play("back")
 		leave.emit()
 		return
+	# Y (SLICE) at your rack picks your partner (SNES ADR-072).
+	if it.hit_pressed != 0 and it.shot == K.SHOT_SLICE and op.pick_next():
+		_sfx.play("blip")
 	var b := it.hit_pressed != 0 and it.shot == K.SHOT_STANDARD
 	var event := op.update(it.move_x, it.move_y, b)
 	if event == OpenPlay.EVENT_STACKED or event == OpenPlay.EVENT_CALLED:
 		_sfx.play("confirm")
-	elif event == OpenPlay.EVENT_UNSTACKED or event == OpenPlay.EVENT_FULL:
+	elif event == OpenPlay.EVENT_UNSTACKED or event == OpenPlay.EVENT_FULL \
+			or event == OpenPlay.EVENT_LOCKED:
 		_sfx.play("back")
 	elif event == OpenPlay.EVENT_BOARD:
 		_sfx.play("blip")
@@ -518,6 +538,11 @@ func _draw_score(c: int) -> void:
 		t.text = "%d-%d%s" % [ct.score[0], ct.score[1], waiting]
 	else:
 		t.text = ("YOU" if ct.state == OpenPlay.COURT_YOURS else "NEXT") + waiting
+	# A court above your rating (ADR-070): its name greyed, its floor shown.
+	var label: BitmapText = _labels[c]
+	label.tint = Color.WHITE if op.court_open(c) else LOCKED_TINT
+	if not op.court_open(c):
+		t.text = "%d PTS" % OpenPlay.rating_points(OpenPlay.court_floor(c))
 
 
 ## The bench in the clubhouse: the first two teams waiting, two each
@@ -554,17 +579,27 @@ func panel() -> Array:
 		_2p_timer -= 1
 		return ["2P JOINED: YOUR PARTNER!" if _2p_shown else "2P LEFT", [], false]
 	if op.called != OpenPlay.NONE:
-		# "WITH ACE VS TWINS": the captain next in line partners you, or 2P.
+		# "WITH ACE VS TWINS": the captain next in line partners you, or 2P;
+		# called again as a winner, "WINNERS STAY: VS SNOWBIRDS" (ADR-071).
 		var with := "COURT %d" % (op.called + 1)
-		if op.two_players:
+		if op.stay_court == op.called:
+			with = "WINNERS STAY:"
+		elif op.two_players:
 			with = "WITH 2P"
 		elif op.partner < OpenPlay.TEAMS:
 			with = "WITH " + String(Opponents.team(op.partner)["players"][0]["name"])
 		return [with + " VS " + _team_name(op.opponent), [], true]
 	# Back from your game: its result first, for a few seconds.
+	# Off after STAY_MAX wins in a row: that, then (rated) your points.
 	if result_timer and op.last_won != OpenPlay.NONE:
-		return ["YOU %s %d-%d" % ["WON" if op.last_won else "LOST", op.last_score[0],
-			op.last_score[1]], [], false]
+		var s := "YOU %s %d-%d" % ["WON" if op.last_won else "LOST", op.last_score[0],
+			op.last_score[1]]
+		if op.last_won and op.last_streak >= OpenPlay.STAY_MAX and (op.rating == OpenPlay.RATING_NONE
+				or result_timer > RESULT_FRAMES / 2):
+			s += "  %d IN A ROW" % op.last_streak
+		elif op.rating != OpenPlay.RATING_NONE:
+			s += "  %d PTS" % OpenPlay.rating_points(op.rating)
+		return [s, [], false]
 	if op.board_near():
 		if op.board_page == OpenPlay.NONE:
 			return ["THE RECORDS BOARD", [["hit", "READ"]], false]
@@ -578,10 +613,19 @@ func panel() -> Array:
 		return [s + " WAIT", [], false]
 	if rack != OpenPlay.NONE:
 		if op.your_court == rack:
+			# Teams to pick from, and no 2P (SNES ADR-072).
+			if op.pickable and not op.two_players:
+				var who := String(Opponents.team(op.pick)["players"][0]["name"]) \
+					if op.pick < OpenPlay.TEAMS else "NEXT UP"
+				return ["PARTNER: " + who, [["hit", "TAKE"], ["slice", "PARTNER"]], false]
 			return ["COURT %d" % (rack + 1), [["hit", "TAKE YOUR PADDLE"]], false]
+		if not op.court_open(rack):
+			# "OPENS AT 15 PTS  YOU HAVE 12" (ADR-070)
+			return ["OPENS AT %d PTS  YOU HAVE %d" % [OpenPlay.rating_points(OpenPlay.court_floor(rack)),
+				OpenPlay.rating_points(op.rating)], [], false]
 		if op.court[rack].stack_count >= OpenPlay.STACK_MAX:
 			return ["THIS STACK IS FULL", [], false]
-		return ["COURT %d  %s" % [rack + 1, LEVEL_LABELS[rack]], [["hit", "STACK YOUR PADDLE"]], false]
+		return ["COURT %d  %s" % [rack + 1, OpenPlay.court_level_name(rack)], [["hit", "STACK YOUR PADDLE"]], false]
 	var court := op.court_near()
 	if court != OpenPlay.NONE and court != op.your_court \
 			and op.court[court].state == OpenPlay.COURT_PLAYING:
@@ -593,7 +637,11 @@ func panel() -> Array:
 			else "WAITING ON COURT %d" % (op.your_court + 1), [], false]
 	if op.in_house():
 		return ["THE CLUBHOUSE", [["start", "EXIT"]], false]
-	return ["YOU AND 2P" if op.two_players else "OPEN PLAY", [["start", "EXIT"]], false]
+	# "OPEN PLAY 14 PTS": your points, when rated.
+	if op.rating == OpenPlay.RATING_NONE:
+		return ["YOU AND 2P" if op.two_players else "OPEN PLAY", [["start", "EXIT"]], false]
+	return ["%s %d PTS" % ["YOU+2P" if op.two_players else "OPEN PLAY", OpenPlay.rating_points(op.rating)],
+		[["start", "EXIT"]], false]
 
 
 ## A records board page: the title's RECORDS, a line each.

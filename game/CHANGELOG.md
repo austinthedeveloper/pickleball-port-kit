@@ -13,6 +13,10 @@ Pickleball '94, the Godot port. Versions follow
 - Singles and doubles each keep their own **ladder place**. Quitting a
   ladder match from the pause menu starts that ladder over; losing keeps
   your place. Your current place carries over to both.
+- **The park, as in 1994**: the courts are ROOKIE, CLUB and CHAMP. A
+  career player earns **park points** (10 to start; CLUB opens at 15,
+  CHAMP at 25), **winners stay on** for up to two games, and at your rack
+  SLICE picks **your partner** from the captains you've beaten.
 
 ### Changed
 - **The CPUs play exactly as on the SNES**, frame for frame: the ladder

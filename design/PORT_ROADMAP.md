@@ -62,7 +62,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-34 | Update at launch, lessons, addresses | `feature/cld-polish-0.9.2` | Ready to test |
 | PORT-35 | Catch the sim up to the ROM (TUNING_VERSION 4) | `feature/cld-sim-catchup` | Done |
 | PORT-36 | About this project, and Tiny Chair | `feature/cld-about` | In progress |
-| PORT-37 | Period-true park: ROOKIE / CLUB / CHAMP, park points | | Planned |
+| PORT-37 | Period-true park: ROOKIE / CLUB / CHAMP, park points | `feature/cld-park` | Ready to test |
 | PORT-38 | Career: 13 hats, 16 unlocks, the Hat Museum | | Planned |
 | PORT-39 | The show: rings, celebrations, critters, quips | | Planned |
 | PORT-40 | The Pickleball '95 promises | | Planned |
@@ -454,7 +454,12 @@ feature/cld-release-0.9.2   (v0.9.2)
 - [ ] `PORT-37` Period-true park: courts ROOKIE / CLUB / CHAMP (the port
   shows DUPR-style `UNDER 3.5`), park points, winners stay on (two wins),
   pick your partner (SNES ADR-070 to 072).
-  - Status: **Planned**.
+  - Done (ADR-060): the courts renamed; park points on the career player
+    (10 to start, CLUB at 15, CHAMP at 25; locked racks say what they
+    need); winners stay on for two wins, you included; SLICE at your rack
+    picks a partner from the teams you've beaten. The SNES tests are
+    ported.
+  - Status: **Ready to test**.
 - [ ] `PORT-38` Career and the Hat Museum: 13 hats and 16 unlocks (the port
   has 6 and 9), the museum (SNES ADR-059 to 061), new hat art.
   - Status: **Planned**.
