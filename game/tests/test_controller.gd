@@ -197,12 +197,7 @@ func test_pad_families() -> void:
 ## BUTTON ICONS on CONTROLS, by row id, saved.
 func test_button_icons_row() -> void:
 	var dir := "user://test_glyphs/"
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(dir))
-	for f in SaveGame.FILES:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(dir + f))
-	var s := SaveGame.new()
-	s.dir = dir
-	s.load_game()
+	var s := fresh_save(dir)
 	var kept := Settings.pad_glyphs
 	var t := TitleScreen.new()
 	t.save = s

@@ -13,7 +13,7 @@ func _init(view: MatchView) -> void:
 
 
 func sheet(variant: String, team: String, cap: bool) -> Texture2D:
-	return v._tex("sprites/players/player_%s_%s%s.png" % [variant, team, "_cap" if cap else ""])
+	return v._tex(PlayerLook.team_sheet(variant, team, cap))
 
 
 const MARKER_RX := 32.0
@@ -26,7 +26,7 @@ func build_players() -> void:
 		var entry := {}
 		var pal: int = v.sim.config.palette[i]
 		var team_name: String = ["blue", "red", "green", "gold"][maxi(pal, 0)]
-		var variant := "female" if v.sim.config.variant[i] == K.VARIANT_FEMALE else "male"
+		var variant := PlayerLook.variant_name(v.sim.config.variant[i])
 		var root := Node2D.new()
 		var body := Sprite2D.new()
 		var cap := Sprite2D.new()

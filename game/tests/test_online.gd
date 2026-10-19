@@ -386,9 +386,7 @@ func test_main_opens_online() -> void:
 	var dir := "user://test_online_main/"
 	var kept := SaveGame.default_dir
 	SaveGame.default_dir = dir
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(dir))
-	for f in SaveGame.FILES:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(dir + f))
+	wipe_saves(dir)
 	var main: Node = load("res://scenes/main.tscn").instantiate()
 	runner.root.add_child(main)
 	if not main.is_node_ready():

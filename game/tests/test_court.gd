@@ -9,7 +9,7 @@ var manifest: Dictionary
 
 func _manifest() -> Dictionary:
 	if manifest.is_empty():
-		manifest = JSON.parse_string(FileAccess.get_file_as_string(MatchView.LEVELS + "manifest.json"))
+		manifest = MatchView.levels_manifest()
 	return manifest
 
 
@@ -136,12 +136,7 @@ func test_lines_and_ball_stay_readable() -> void:
 
 func test_court_page_and_save() -> void:
 	var kept: Array = Settings.court.duplicate()
-	var save := SaveGame.new()
-	save.dir = "user://test_court/"
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(save.dir))
-	for f in SaveGame.FILES:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(save.dir + f))
-	save.load_game()
+	var save := fresh_save("user://test_court/")
 	var t := TitleScreen.new()
 	t.save = save
 	runner.root.add_child(t)

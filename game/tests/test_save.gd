@@ -6,10 +6,7 @@ const DIR := "user://test_save/"
 
 
 func _fresh() -> SaveGame:
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(DIR))
-	for f in SaveGame.FILES:
-		if FileAccess.file_exists(DIR + f):
-			DirAccess.remove_absolute(ProjectSettings.globalize_path(DIR + f))
+	wipe_saves(DIR)
 	var s := SaveGame.new()
 	s.dir = DIR
 	return s

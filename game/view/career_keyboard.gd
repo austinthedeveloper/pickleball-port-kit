@@ -47,14 +47,7 @@ func setup(p: CareerPage) -> CareerKeyboard:
 
 
 func _text(font: String, s: String, at: Vector2, tint: Color) -> BitmapText:
-	var t := BitmapText.new()
-	t.font = font
-	t.text = s
-	t.align = 0.5
-	t.position = at
-	t.tint = tint
-	add_child(t)
-	return t
+	return UiKit.text(font, s, at, 0.5, tint, self)
 
 
 func _place_center(i: int) -> Vector2:

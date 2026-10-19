@@ -29,12 +29,7 @@ func _restore() -> void:
 
 
 func _save() -> SaveGame:
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(DIR))
-	for f in SaveGame.FILES:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(DIR + f))
-	var s := SaveGame.new()
-	s.dir = DIR
-	s.load_game()
+	var s := fresh_save(DIR)
 	return s
 
 
@@ -238,7 +233,7 @@ func _pick(view: MatchView, row: String) -> bool:
 	view._hud.pause_menu.select(row)
 	var it := SimTypes.Intent.new()
 	it.hit_pressed = 1
-	var done := view._pause_input(it)
+	var done := view.input.pause_input(it)
 	check(it.hit_pressed == 0, "a menu press is never a swing")
 	return done
 
@@ -260,7 +255,7 @@ func test_pause_menu_actions() -> void:
 	var it := SimTypes.Intent.new()
 	view._hud.pause_menu.select("resume")
 	it.hit_pressed = 1
-	check(not view._pause_input(it), "RESUME lets the sim step")
+	check(not view.input.pause_input(it), "RESUME lets the sim step")
 	eq(it.pause_pressed, 1, "...with Start, so the sim unpauses itself")
 	view.sim.step([it, null, null, null])
 	eq(view.sim.paused, 0, "resumed")

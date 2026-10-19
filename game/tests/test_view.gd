@@ -5,7 +5,7 @@ extends TestSuite
 
 
 func _manifest() -> Dictionary:
-	return JSON.parse_string(FileAccess.get_file_as_string("res://assets/levels/manifest.json"))
+	return MatchView.levels_manifest()
 
 
 func test_projected_court_is_the_painted_court() -> void:
@@ -87,12 +87,7 @@ func test_title_config_takes_the_opponent() -> void:
 ## ADR-023 through the real view: a ladder win records the match, moves
 ## the save's rung on, and B asks for the next opponent (not a rematch).
 func test_ladder_win_advances_and_offers_the_next_rung() -> void:
-	var save := SaveGame.new()
-	save.dir = "user://test_view_save/"
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(save.dir))
-	for f in SaveGame.FILES:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(save.dir + f))
-	save.load_game()
+	var save := fresh_save("user://test_view_save/")
 	var view := MatchView.new()
 	view.save = save
 	view.ladder = true
@@ -222,7 +217,7 @@ func test_quitting_a_ladder_match_resets_it() -> void:
 		cfg.opponent = 3
 		v.setup(cfg, "park", false)
 		v.input.pause_choice = "menu"
-		v._pause_input(SimTypes.Intent.new())
+		v.input.pause_input(SimTypes.Intent.new())
 		eq([s.ladder(false), s.ladder(true)], [2, 0] if ladder else [2, 3],
 			"ladder %s: doubles reset, singles kept" % ladder if ladder else "not a ladder match: nothing moves")
 		v.free()

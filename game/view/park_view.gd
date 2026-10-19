@@ -25,8 +25,6 @@ const FRAME := 128
 const ANCHOR := Vector2(56, 116)
 const SLOTS := MatchView.SLOTS
 ## Display only (render_park.c).
-const LEVEL_Y := 32                  ## each court's skill level
-const SCORE_Y := 40                  ## over the courts (court top 48)
 const RESULT_FRAMES := 240           ## "YOU WON" after a match
 const TWO_P_FRAMES := 120            ## "2P JOINED" / "2P LEFT"
 const TOP_Y := OpenPlay.COURT_TOP + 24
@@ -82,7 +80,7 @@ func setup(park: OpenPlay, s: SaveGame, back: bool) -> ParkView:
 	result_timer = RESULT_FRAMES if back and op.last_won != OpenPlay.NONE else 0
 	_2p_shown = op.two_players
 	rate_park()
-	manifest = JSON.parse_string(FileAccess.get_file_as_string("res://assets/levels/manifest.json"))
+	manifest = MatchView.levels_manifest()
 	_build()
 	_follow(true)
 	refresh()
@@ -242,13 +240,8 @@ func _build_hud() -> void:
 
 
 func _text(font: String, s: String, tint: Color) -> BitmapText:
-	var t := BitmapText.new()
-	t.font = font
-	t.text = s
-	t.align = 0.5
-	t.tint = tint
+	var t := UiKit.text(font, s, Vector2.ZERO, 0.5, tint, _world)
 	t.z_index = 5
-	_world.add_child(t)
 	return t
 
 
@@ -256,7 +249,7 @@ func _person() -> Dictionary:
 	var root := Node2D.new()
 	root.scale = Vector2(PERSON_SCALE, PERSON_SCALE)
 	var shadow := Sprite2D.new()
-	shadow.texture = load("res://assets/levels/" + String(manifest["sprites"]["player_shadow"]["file"]))
+	shadow.texture = load(MatchView.LEVELS + String(manifest["sprites"]["player_shadow"]["file"]))
 	root.add_child(shadow)
 	var body := Sprite2D.new()
 	var cap := Sprite2D.new()
@@ -277,9 +270,9 @@ func _dress(p: Dictionary, look: PlayerLook) -> void:
 	var body: Sprite2D = p["body"]
 	var cap: Sprite2D = p["cap"]
 	if look:
-		body.texture = load("res://assets/levels/" + look.body_sheet(manifest))
+		body.texture = load(MatchView.LEVELS + look.body_sheet(manifest))
 		var hat := look.hat_sheet(manifest)
-		cap.texture = load("res://assets/levels/" + hat) if hat != "" else null
+		cap.texture = load(MatchView.LEVELS + hat) if hat != "" else null
 		body.material = look.material()
 		cap.material = body.material
 		return
@@ -287,25 +280,25 @@ func _dress(p: Dictionary, look: PlayerLook) -> void:
 	var me: Career.Player = save.career.active_player() if save else null
 	if me:
 		var mine := PlayerLook.for_career(me, me.shirt, me.variant, me.paddle, manifest)
-		body.texture = load("res://assets/levels/" + mine.body_sheet(manifest))
+		body.texture = load(MatchView.LEVELS + mine.body_sheet(manifest))
 		var file := mine.hat_sheet(manifest)
-		cap.texture = load("res://assets/levels/" + file) if file != "" else null
+		cap.texture = load(MatchView.LEVELS + file) if file != "" else null
 		body.material = mine.material()
 		cap.material = body.material
 		return
 	var ch: Dictionary = Settings.p1_choice
 	var team: String = PlayerLook.TEAMS[ch["palette"]]
-	var variant := "female" if ch["variant"] == K.VARIANT_FEMALE else "male"
+	var variant := PlayerLook.variant_name(ch["variant"])
 	var mine := PlayerLook.for_team(ch["palette"], ch["variant"], ch["paddle"], manifest) \
 		if not PlayerLook.sheet_has_paddle(ch["palette"], ch["paddle"]) else null
 	if mine:
-		body.texture = load("res://assets/levels/" + mine.body_sheet(manifest))
-		cap.texture = load("res://assets/levels/" + mine.hat_sheet(manifest))
+		body.texture = load(MatchView.LEVELS + mine.body_sheet(manifest))
+		cap.texture = load(MatchView.LEVELS + mine.hat_sheet(manifest))
 		body.material = mine.material()
 		cap.material = body.material
 	else:
-		body.texture = load("res://assets/levels/sprites/players/player_%s_%s.png" % [variant, team])
-		cap.texture = load("res://assets/levels/sprites/players/player_%s_%s_cap.png" % [variant, team])
+		body.texture = load(MatchView.LEVELS + PlayerLook.team_sheet(variant, team, false))
+		cap.texture = load(MatchView.LEVELS + PlayerLook.team_sheet(variant, team, true))
 
 
 func _look(team: int, member: int) -> PlayerLook:
@@ -340,10 +333,6 @@ func to_world(park: Vector2) -> Vector2:
 	var sc: Array = layout["scale"]
 	var mg: Array = layout["margin"]
 	return Vector2((park.x + mg[0]) * sc[0], (park.y + mg[1]) * sc[1])
-
-
-func to_screen(park: Vector2) -> Vector2:
-	return to_world(park) - cam
 
 
 ## The camera follows you, easing, a little ahead of where you walk, and
@@ -515,7 +504,7 @@ func ball_x_for(c: int) -> int:
 
 ## A court's rally ball in park pixels and its height, or null while
 ## nobody is playing (or walking).
-func ball_at(c: int):
+func ball_at(c: int) -> Variant:
 	var ct: OpenPlay.OpenCourt = op.court[c]
 	if ct.state != OpenPlay.COURT_PLAYING or ct.age < OpenPlay.WALK_FRAMES:
 		return null
@@ -679,7 +668,7 @@ class ParkOverlay:
 
 	func _draw() -> void:
 		for c in OpenPlay.COURTS:
-			var at = view.ball_at(c)
+			var at: Variant = view.ball_at(c)
 			if at != null:
 				var ground := view.to_world(Vector2(at.x, at.y))
 				draw_circle(ground + Vector2(0, 3), 4.0, Color(0, 0, 0, 0.35))

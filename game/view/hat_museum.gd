@@ -34,7 +34,7 @@ var _frame := 0
 
 func setup(m: Museum) -> HatMuseum:
 	museum = m
-	manifest = JSON.parse_string(FileAccess.get_file_as_string(MatchView.LEVELS + "manifest.json"))
+	manifest = MatchView.levels_manifest()
 	size = Vector2(960, 540)
 	var wall := ColorRect.new()
 	wall.color = WALL

@@ -102,15 +102,22 @@ var cup_finish: String:
 	get: return end.cup_finish
 func unlock_open() -> bool: return end.unlock_open()
 func pause_rows() -> Array: return input.pause_rows()
-func _pause_input(it: SimTypes.Intent) -> bool: return input.pause_input(it)
-func _serve_assist(it: SimTypes.Intent) -> void: input.serve_assist(it)
-func _frame_for(i: int) -> String: return actors.frame_for(i)
 func _spawn_fx(kind: String, at: Vector2, start: int) -> void: actors.spawn_fx(kind, at, start)
 
 
 ## The venue's match loop (PORT-22); a match's end stings over it.
 func music_track() -> String:
 	return Music.match_track(venue)
+
+
+## The art's manifest.json, read once: every screen that draws the
+## generated art reads it, and nothing writes to it.
+static var _manifest := {}
+
+static func levels_manifest() -> Dictionary:
+	if _manifest.is_empty():
+		_manifest = JSON.parse_string(FileAccess.get_file_as_string(LEVELS + "manifest.json"))
+	return _manifest
 
 
 func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void:
@@ -121,7 +128,7 @@ func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void
 		time = GLOW_TIME
 		court = court.duplicate()
 		court[3] = GLOW_LINES
-	manifest = JSON.parse_string(FileAccess.get_file_as_string(LEVELS + "manifest.json"))
+	manifest = levels_manifest()
 	sim = Sim.new(cfg)
 	if demo:
 		sim.start_attract()

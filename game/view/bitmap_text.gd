@@ -9,17 +9,25 @@ const FONT_DIR := "res://assets/levels/ui/"
 static var _fonts := {}
 
 @export var font := "big"
+# Setting the same value doesn't redraw: screens set their labels every
+# frame, and most frames nothing changed.
 @export var text := "":
 	set(v):
+		if v == text:
+			return
 		text = v
 		queue_redraw()
 @export var tint := Color.WHITE:
 	set(v):
+		if v == tint:
+			return
 		tint = v
 		queue_redraw()
 ## 0 left, 0.5 centred, 1 right on the node's x.
 @export var align := 0.0:
 	set(v):
+		if v == align:
+			return
 		align = v
 		queue_redraw()
 var spacing := -1

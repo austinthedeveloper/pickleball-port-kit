@@ -62,14 +62,7 @@ func _panel(name: String, rect: Rect2) -> NinePatchRect:
 
 func _text(font: String, s: String, pos: Vector2, align := 0.0, tint := Color.WHITE,
 		parent: Node = null) -> BitmapText:
-	var t := BitmapText.new()
-	t.font = font
-	t.text = s
-	t.align = align
-	t.tint = tint
-	t.position = pos
-	(parent if parent else self).add_child(t)
-	return t
+	return UiKit.text(font, s, pos, align, tint, parent if parent else self)
 
 
 func setup(v: MatchView) -> void:

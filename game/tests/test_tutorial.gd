@@ -8,12 +8,7 @@ const DT := 1.0 / 60.0
 
 
 func _save() -> SaveGame:
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(DIR))
-	for f in SaveGame.FILES:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(DIR + f))
-	var s := SaveGame.new()
-	s.dir = DIR
-	s.load_game()
+	var s := fresh_save(DIR)
 	return s
 
 

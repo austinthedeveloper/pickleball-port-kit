@@ -209,6 +209,8 @@ func _apply_anim() -> void:
 
 
 func _process(_delta: float) -> void:
+	if not visible:
+		return                          # the title keeps a dozen pages, one shown
 	if _anim > 0:
 		_anim -= 1
 		_apply_anim()

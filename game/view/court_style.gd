@@ -127,8 +127,6 @@ static func material(choice: Array, venue: String, manifest: Dictionary, time :=
 const DAY := 0
 const DUSK := 1
 const NIGHT := 2
-## Roles at or above this are the court under the lights.
-const LIT_ROLE := 3
 
 
 static func time_names() -> Array:

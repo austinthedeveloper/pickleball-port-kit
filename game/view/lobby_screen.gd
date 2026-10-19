@@ -26,7 +26,7 @@ var _frame := 0
 
 func setup(l: Lobby) -> LobbyScreen:
 	lobby = l
-	manifest = JSON.parse_string(FileAccess.get_file_as_string(MatchView.LEVELS + "manifest.json"))
+	manifest = MatchView.levels_manifest()
 	var back := ColorRect.new()
 	back.color = Color(0.03, 0.06, 0.14, 0.9)
 	back.size = Vector2(960, 540)
@@ -114,6 +114,8 @@ func _build_card(i: int) -> Dictionary:
 
 
 func _process(_delta: float) -> void:
+	if not visible:
+		return                          # the title builds it hidden
 	_frame += 1
 	refresh()
 
@@ -148,20 +150,25 @@ func refresh() -> void:
 		_dress(c, card)
 	_teams.text = _teams_line()
 	var why := lobby.blocker()
-	_status.text = "PRESS MENU TO START" if why == "" else why
+	_status.text = "READY TO START" if why == "" else why   # the prompt bar shows the button
 	_status.tint = Color("60e060") if why == "" else GOLD
 
 
 func _dress(c: Dictionary, card: Dictionary) -> void:
 	var idle := (_frame / 20) % 2
+	# the sheets and material only when the look changes; the frame each time
+	var key := [card["palette"], card["variant"], card["paddle"]]
+	var fresh: bool = c.get("dressed") != key
+	c["dressed"] = key
 	for k in ["body", "cap"]:
 		var s: Sprite2D = c[k]
 		var cap: bool = k == "cap"
-		if PlayerLook.sheet_has_paddle(card["palette"], card["paddle"]):
-			var v := "female" if card["variant"] == K.VARIANT_FEMALE else "male"
+		if not fresh:
+			pass
+		elif PlayerLook.sheet_has_paddle(card["palette"], card["paddle"]):
 			s.material = null
-			s.texture = load(MatchView.LEVELS + "sprites/players/player_%s_%s%s.png" % [
-				v, PlayerLook.TEAMS[card["palette"]], "_cap" if cap else ""])
+			s.texture = load(MatchView.LEVELS + PlayerLook.team_sheet(
+				PlayerLook.variant_name(card["variant"]), PlayerLook.TEAMS[card["palette"]], cap))
 		else:
 			var look := PlayerLook.for_team(card["palette"], card["variant"], card["paddle"], manifest)
 			s.texture = load(MatchView.LEVELS + (look.hat_sheet(manifest) if cap else look.body_sheet(manifest)))

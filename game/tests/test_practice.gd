@@ -11,10 +11,7 @@ var zone_setting := Practice.ZONE_ANY   ## RETURN TO for the next start()
 
 ## A blank save in the test folder (save_initialize on cleared SRAM).
 func _blank_save() -> SaveGame:
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(DIR))
-	for f in SaveGame.FILES:
-		if FileAccess.file_exists(DIR + f):
-			DirAccess.remove_absolute(ProjectSettings.globalize_path(DIR + f))
+	wipe_saves(DIR)
 	return _reload()
 
 

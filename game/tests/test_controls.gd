@@ -55,12 +55,7 @@ func test_conflicts_swap() -> void:
 
 
 func test_bindings_saved() -> void:
-	var save := SaveGame.new()
-	save.dir = "user://test_controls/"
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(save.dir))
-	for f in SaveGame.FILES:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(save.dir + f))
-	save.load_game()
+	var save := fresh_save("user://test_controls/")
 	Bindings.reset()
 	Bindings.rebind_key("start", KEY_P)
 	Bindings.rebind_pad("soft", JOY_BUTTON_Y)
@@ -167,7 +162,7 @@ func test_accessibility_effects() -> void:
 		while s.sim.phase == K.PHASE_SERVE_SETUP and frames < 400:
 			var it := SimTypes.Intent.new()
 			it.hit_held = 1
-			s._serve_assist(it)
+			s.input.serve_assist(it)
 			s.sim.step([it, null, null, null])
 			s.sim.drain_events()
 			frames += 1

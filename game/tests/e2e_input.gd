@@ -19,9 +19,7 @@ func _initialize() -> void:
 	# a scratch save, so the run never touches the player's; one per
 	# checkout, since every checkout shares user:// (KNOWN_ISSUES #42)
 	SaveGame.default_dir = "user://e2e_%s/" % ProjectSettings.globalize_path("res://").md5_text().left(8)
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(SaveGame.default_dir))
-	for f in SaveGame.FILES:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(SaveGame.default_dir + f))
+	TestSuite.wipe_saves(SaveGame.default_dir)
 	var controls = load("res://game_ui/controls.gd").new()
 	controls.name = "Controls"
 	root.add_child(controls)

@@ -18,7 +18,6 @@ const VERSION := 6   ## v6: a ladder place per mode (SNES ADR-055)
 ## only, never saved). ADR-040.
 const NEW_STREAK := 1
 const NEW_RALLY := 2
-const INITIALS := 3
 const FILES := ["save_a.json", "save_b.json"]
 
 ## Where saves live; tests point it elsewhere before the game starts.

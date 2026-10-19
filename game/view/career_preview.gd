@@ -18,7 +18,7 @@ var _frame := 0
 
 
 func setup() -> CareerPreview:
-	manifest = JSON.parse_string(FileAccess.get_file_as_string(MatchView.LEVELS + "manifest.json"))
+	manifest = MatchView.levels_manifest()
 	size = Vector2(960, 540)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var panel := UiKit.panel(AREA, self)
@@ -45,12 +45,7 @@ func setup() -> CareerPreview:
 
 
 func _text(font: String, at: Vector2) -> BitmapText:
-	var t := BitmapText.new()
-	t.font = font
-	t.align = 0.5
-	t.position = at
-	add_child(t)
-	return t
+	return UiKit.text(font, "", at, 0.5, Color.WHITE, self)
 
 
 ## Shows a player (null hides the portrait).

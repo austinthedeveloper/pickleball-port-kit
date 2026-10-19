@@ -40,12 +40,31 @@ static func sheet_has_paddle(team: int, paddle: int) -> bool:
 
 ## The team-colour sheets' look (light skin, brown hair, the cap) with any
 ## paddle: base + team + paddle + skin + hair, shoe accent from the team.
+## A team-colour sheet's path under MatchView.LEVELS: `variant` "male" or
+## "female", `team` a TEAMS name; the cap overlay or the body.
+static func team_sheet(variant: String, team: String, cap: bool) -> String:
+	return "sprites/players/player_%s_%s%s.png" % [variant, team, "_cap" if cap else ""]
+
+
+static func variant_name(body_variant: int) -> String:
+	return "female" if body_variant == K.VARIANT_FEMALE else "male"
+
+
+## palettes.json, read once (every look reads it; it doesn't change).
+static var _palettes := {}
+
+static func palettes(roles: Dictionary) -> Dictionary:
+	if _palettes.is_empty():
+		_palettes = JSON.parse_string(FileAccess.get_file_as_string(
+			MatchView.LEVELS + String(roles["palettes"])))
+	return _palettes
+
+
 static func for_team(team: int, body_variant: int, paddle: int, manifest: Dictionary) -> PlayerLook:
 	var look := PlayerLook.new()
-	look.variant = "female" if body_variant == K.VARIANT_FEMALE else "male"
+	look.variant = variant_name(body_variant)
 	var roles: Dictionary = manifest["sprites"]["players"]["roles"]
-	var pals: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(
-		"res://assets/levels/" + String(roles["palettes"])))
+	var pals := palettes(roles)
 	var t: Dictionary = pals["teams"][TEAMS[team]]
 	var c := {".": Color.TRANSPARENT}
 	for src in [pals["base"], t, pals["paddles"][Paddles.NAMES[paddle]], pals["skins"]["light"],
@@ -94,8 +113,7 @@ static func from_member(m: Dictionary, manifest: Dictionary) -> PlayerLook:
 	look.variant = String(m.get("variant", "male"))
 	look.hat = String(m.get("hat", "cap"))
 	var roles: Dictionary = manifest["sprites"]["players"]["roles"]
-	var pals: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(
-		"res://assets/levels/" + String(roles["palettes"])))
+	var pals := palettes(roles)
 	look.palette = palette_for(m, String(roles["order"]), pals)
 	return look
 

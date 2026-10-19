@@ -43,12 +43,7 @@ func test_alone_and_fast() -> void:
 
 ## VS offers him once a ladder has been cleared, and not before.
 func test_unlocked_by_a_clear() -> void:
-	var s := SaveGame.new()
-	s.dir = "user://test_dawson/"
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(s.dir))
-	for f in SaveGame.FILES:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(s.dir + f))
-	s.load_game()
+	var s := fresh_save("user://test_dawson/")
 	var kept := Settings.opponent_i
 	var t := TitleScreen.new()
 	t.save = s

@@ -67,6 +67,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-39 | The show: rings, celebrations, critters, quips | `feature/cld-show` | Ready to test |
 | PORT-40 | The Pickleball '95 promises | `feature/cld-sideout` ... | In progress |
 | PORT-41 | Four swings and the short hold | `feature/cld-four-shots` | Ready to test |
+| PORT-42 | Cleanup round 4: files, code, docs | `feature/cld-cleanup` | Done |
 
 ## Releases
 
@@ -176,6 +177,24 @@ the same request). Open: 36 and 40.
     plays doubles alone and fast); MULTI BALL (ADR-067: RULES > MULTI
     BALL). Left: the line judge, the club manager.
   - Status: **In progress**.
+
+### 42. `feature/cld-cleanup`: cleanup round 4 (asked for 2026-10-19)
+
+- [x] `PORT-42` Organize the files, optimize the code, clean up the docs.
+  Docs: one heading per roadmap task (the release notes had dropped
+  PORT-37 to 40), the finished tasks moved to the history, the SNES-era
+  docs into `design/snes/`, 37 broken links fixed, KNOWN_ISSUES split
+  into open, resolved and the SNES game's, the READMEs current. Code: text
+  doesn't redraw unchanged, hidden menu pages and the hidden lobby stop
+  working every frame, the lobby dresses a card only when it changes,
+  palettes.json and manifest.json are read once, the host screen reads
+  the adapters once; dead code out; `UiKit`, `PlayerLook.team_sheet` and
+  `TestSuite.fresh_save` own what was copied; the AI's and Feel's
+  references typed.
+  - Verified: 365/365 plus the e2e, golden traces unchanged; no broken
+    links; screenshots of the lobby, park, a match and the museum
+    unchanged.
+  - Status: **Done**.
 
 ## For you
 

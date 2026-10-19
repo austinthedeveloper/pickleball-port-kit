@@ -11,7 +11,7 @@ var manifest: Dictionary
 
 func _m() -> Dictionary:
 	if manifest.is_empty():
-		manifest = JSON.parse_string(FileAccess.get_file_as_string(MatchView.LEVELS + "manifest.json"))
+		manifest = MatchView.levels_manifest()
 	return manifest
 
 
@@ -146,12 +146,7 @@ func test_every_venue_at_night() -> void:
 
 func test_time_row_and_save() -> void:
 	var kept := Settings.time_i
-	var save := SaveGame.new()
-	save.dir = "user://test_night/"
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(save.dir))
-	for f in SaveGame.FILES:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(save.dir + f))
-	save.load_game()
+	var save := fresh_save("user://test_night/")
 	Settings.time_i = 0
 	var t := TitleScreen.new()
 	t.save = save

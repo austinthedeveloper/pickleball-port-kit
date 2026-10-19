@@ -98,12 +98,7 @@ func _fail(msg: String, key: String) -> void:
 
 
 func _save() -> SaveGame:
-	var s := SaveGame.new()
-	s.dir = "user://test_layout/"
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(s.dir))
-	for f in SaveGame.FILES:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(s.dir + f))
-	s.load_game()
+	var s := fresh_save("user://test_layout/")
 	# big numbers and holders, so the record lines are at their widest
 	var r: Dictionary = s.data["records"]
 	for k in ["singles_wins", "singles_losses", "doubles_wins", "doubles_losses", "points_won",

@@ -13,7 +13,7 @@ const Intent := SimTypes.Intent
 const AiState := SimTypes.AiState
 const AiStyle := SimTypes.AiStyle
 
-var sim  # Sim (untyped: the two classes reference each other)
+var sim: Sim
 
 
 ## The match ball's physics (port ADR-065: MOON, BOUNCY), typed.
@@ -62,7 +62,7 @@ var pvz := 0
 var pbounces := 0
 
 
-func _init(owner_sim) -> void:
+func _init(owner_sim: Sim) -> void:
 	sim = owner_sim
 	for i in K.MAX_PLAYERS:
 		slots.append(AiState.new())

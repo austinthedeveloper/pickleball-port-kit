@@ -178,7 +178,7 @@ func _flight(paddle: int) -> Array:
 ## The role sheet in the team's palette with the team-coloured paddle is
 ## the team-colour sheet, so a chosen paddle changes only the paddle.
 func test_team_look_matches_the_colour_sheet() -> void:
-	var manifest: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(MatchView.LEVELS + "manifest.json"))
+	var manifest: Dictionary = MatchView.levels_manifest()
 	for pair in [[K.VARIANT_MALE, PlayerSelect.PAL_RED, Paddles.RED],
 			[K.VARIANT_FEMALE, PlayerSelect.PAL_GOLD, Paddles.GOLD]]:
 		var v: int = pair[0]

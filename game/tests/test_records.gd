@@ -8,12 +8,7 @@ const DIR := "user://test_records/"
 
 
 func _fresh() -> SaveGame:
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(DIR))
-	for f in SaveGame.FILES:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(DIR + f))
-	var s := SaveGame.new()
-	s.dir = DIR
-	s.load_game()
+	var s := fresh_save(DIR)
 	return s
 
 
@@ -191,7 +186,7 @@ func test_card_after_a_finished_match_only() -> void:
 	v2._hud.pause_menu.select("restart")
 	var it := SimTypes.Intent.new()
 	it.hit_pressed = 1
-	v2._pause_input(it)
+	v2.input.pause_input(it)
 	eq(s.new_records, 0, "RESTART drops the request (only a finished match asks)")
 	eq(s.data["records"]["longest_rally"], 40, "and keeps the record")
 	v2.free()

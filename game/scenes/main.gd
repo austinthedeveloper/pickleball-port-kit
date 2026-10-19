@@ -37,19 +37,8 @@ func _ready() -> void:
 	_toast = Control.new()
 	_toast.visible = false
 	layer.add_child(_toast)
-	var panel := NinePatchRect.new()
-	panel.texture = load("res://assets/levels/ui/panel_title.png")
-	for m in ["patch_margin_left", "patch_margin_top", "patch_margin_right", "patch_margin_bottom"]:
-		panel.set(m, 12)
-	panel.position = Vector2(330, 460)
-	panel.size = Vector2(300, 38)
-	_toast.add_child(panel)
-	_toast_panel = panel
-	_toast_text = BitmapText.new()
-	_toast_text.font = "small"
-	_toast_text.align = 0.5
-	_toast_text.position = Vector2(480, 470)
-	_toast.add_child(_toast_text)
+	_toast_panel = UiKit.panel(Rect2(330, 460, 300, 38), _toast)
+	_toast_text = UiKit.text("small", "", Vector2(480, 470), 0.5, Color.WHITE, _toast)
 	music = Music.new()
 	add_child(music)
 	save.load_game()

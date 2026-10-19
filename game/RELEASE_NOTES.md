@@ -3,7 +3,7 @@
 Build `v0.13.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-41 of 41 roadmap tasks are in.
+42 of 42 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -250,3 +250,9 @@ Status: **In progress**.
 The first piece of PORT-35 (ADR-058): SNES ADR-056 and 057. SLICE (slow, never deep, steady), SHORT held (any swing goes short, the D-pad still moves), the fast drop's long spray off a stretch, and CPUs that slice (WALT, RAVEN, VLAD 3; ACE, JADE 4). Pad by position: SLICE north, SHORT LB or RB; keyboard I and Shift/U; both on CONTROLS. The overhead moved to shot 4 so the slice has the C's number; its own sound; the key legend and the SHOTS lesson teach all four.
 
 Status: **Ready to test**: try I / Y for the slice and hold Shift / LB with each swing.
+
+## PORT-42: cleanup round 4 (asked for 2026-10-19)
+
+Organize the files, optimize the code, clean up the docs. Docs: one heading per roadmap task (the release notes had dropped PORT-37 to 40), the finished tasks moved to the history, the SNES-era docs into `design/snes/`, 37 broken links fixed, KNOWN_ISSUES split into open, resolved and the SNES game's, the READMEs current. Code: text doesn't redraw unchanged, hidden menu pages and the hidden lobby stop working every frame, the lobby dresses a card only when it changes, palettes.json and manifest.json are read once, the host screen reads the adapters once; dead code out; `UiKit`, `PlayerLook.team_sheet` and `TestSuite.fresh_save` own what was copied; the AI's and Feel's references typed.
+
+Status: **Done**.

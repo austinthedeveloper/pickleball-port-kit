@@ -878,9 +878,7 @@ func test_panel_lines() -> void:
 
 func _main() -> Node:
 	SaveGame.default_dir = DIR
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(DIR))
-	for f in SaveGame.FILES:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(DIR + f))
+	wipe_saves(DIR)
 	var main: Node = load("res://scenes/main.tscn").instantiate()
 	runner.root.add_child(main)
 	if not main.is_node_ready():

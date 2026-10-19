@@ -99,12 +99,7 @@ func _finish(view: MatchView) -> void:
 
 
 func test_card_and_totals() -> void:
-	var save := SaveGame.new()
-	save.dir = "user://test_stats/"
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(save.dir))
-	for f in SaveGame.FILES:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(save.dir + f))
-	save.load_game()
+	var save := fresh_save("user://test_stats/")
 	var v := MatchView.new()
 	v.save = save
 	runner.root.add_child(v)

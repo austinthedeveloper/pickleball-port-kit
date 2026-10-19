@@ -300,6 +300,10 @@ static func address_kind(a: String, name: String) -> String:
 	return ""
 
 
+var _mine: Array = []
+var _mine_for: OnlineSession
+
+
 func info() -> Array:
 	var st := _state()
 	if session and session.closed():
@@ -311,7 +315,11 @@ func info() -> Array:
 			"SAME WI-FI JUST WORKS. FAR AWAY: SEE THE README."]
 	if st == OnlineSession.WAITING:
 		if session.host:
-			var mine := my_addresses()
+			# the adapters, read once per hosting (info() runs every frame)
+			if _mine_for != session:
+				_mine_for = session
+				_mine = my_addresses()
+			var mine := _mine
 			var lines := ["WAITING. YOUR FRIEND JOINS ONE OF THESE:", "", ""]
 			for k in mine.size():
 				lines[k + 1] = "%s: %s" % mine[k]

@@ -35,7 +35,7 @@ var career: Career.Player
 
 func setup(s: PlayerSelect) -> SelectScreen:
 	sel = s
-	manifest = JSON.parse_string(FileAccess.get_file_as_string(MatchView.LEVELS + "manifest.json"))
+	manifest = MatchView.levels_manifest()
 	var roles: Dictionary = manifest["sprites"]["players"]["roles"]
 	_pals = JSON.parse_string(FileAccess.get_file_as_string(MatchView.LEVELS + String(roles["palettes"])))
 	var back := ColorRect.new()
@@ -124,11 +124,10 @@ func _sprite() -> Sprite2D:
 ## A team-colour sheet, or the role sheet in the team's colours with the
 ## chosen paddle (PlayerLook.for_team), so the paddle shows in hand.
 func _set_sheet(spr: Sprite2D, team: int, variant: int, cap: bool, paddle := -1) -> void:
-	var v := "female" if variant == K.VARIANT_FEMALE else "male"
 	if paddle < 0 or PlayerLook.sheet_has_paddle(team, paddle):
 		spr.material = null
-		spr.texture = load(MatchView.LEVELS + "sprites/players/player_%s_%s%s.png" % [
-			v, PlayerLook.TEAMS[team], "_cap" if cap else ""])
+		spr.texture = load(MatchView.LEVELS + PlayerLook.team_sheet(PlayerLook.variant_name(variant),
+			PlayerLook.TEAMS[team], cap))
 		return
 	var look := PlayerLook.for_team(team, variant, paddle, manifest)
 	spr.texture = load(MatchView.LEVELS + (look.hat_sheet(manifest) if cap else look.body_sheet(manifest)))

@@ -217,7 +217,7 @@ func test_lobby_on_the_title() -> void:
 	tap.call(30, [JOY_BUTTON_A])
 	tap.call(31, [JOY_BUTTON_A])
 	t.lobby_screen.refresh()
-	eq(t.lobby_screen._status.text, "PRESS MENU TO START")
+	eq(t.lobby_screen._status.text, "READY TO START")
 	tap.call(30, [JOY_BUTTON_START])
 	eq(started.size(), 1, "Menu starts the match")
 	var cfg: SimTypes.MatchConfig = started[0][0]

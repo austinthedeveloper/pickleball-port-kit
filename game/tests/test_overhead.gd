@@ -138,7 +138,7 @@ func test_the_view_shows_a_smash() -> void:
 	p.state = K.STATE_ACTIVE
 	v._on_event([K.EVENT_HIT, 100, 130, 0 | (K.SHOT_OVERHEAD << 4)])
 	eq(v._players[0]["choice"], "overhead", "the overhead swing")
-	eq(v._frame_for(0), "overhead_contact", "on the contact frame")
+	eq(v.actors.frame_for(0), "overhead_contact", "on the contact frame")
 	var pops := v._fx.get_children().filter(func(n): return n is BitmapText and n.text == "SMASH!")
 	eq(pops.size(), 1, "SMASH! over it")
 	check(v.feel.shake_amp >= Feel.SHAKE_SMASH[0] * Settings.shake_scale() - 0.001 or Settings.shake_i == 0,

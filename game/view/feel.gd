@@ -22,7 +22,7 @@ const PLANT_SPEED := 14            ## 12.4: running faster than this, a stop kic
 ## with BIG BALL.
 const DRIVE_SQUASH_FRAMES := 3
 
-var view                           ## MatchView (untyped: the classes reference each other)
+var view: MatchView
 var shake_frames := 0
 var shake_total := 1
 var shake_amp := 0.0
@@ -37,7 +37,7 @@ var _prev_speed := [0, 0, 0, 0]
 var _ball_scale := Vector2.ONE
 
 
-func setup(v) -> void:
+func setup(v: MatchView) -> void:
 	view = v
 	_ball_scale = view._ball_sprite.scale
 	z_index = 1

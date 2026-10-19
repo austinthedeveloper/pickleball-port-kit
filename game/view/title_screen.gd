@@ -40,7 +40,6 @@ var select := PlayerSelect.new()
 var select_screen: SelectScreen
 var _select_doubles := false
 var _header: Array = []          # the logo and record line (hidden on Player Select)
-var _pad2_prev := 0
 var build_label: BitmapText
 ## MULTIPLAYER (PORT-16): the lobby and its screen.
 var lobby := Lobby.new()
@@ -346,10 +345,6 @@ func _career_input(bits: int) -> void:
 	career.input(bits)
 
 
-func _back_to_main(row: String) -> void:
-	career.back_to_main(row)
-
-
 func _after_press(id: String) -> void:
 	if id not in ["singles", "doubles", "back"]:
 		_sfx.play("confirm")
@@ -557,20 +552,13 @@ func select_input(pressed: int) -> void:
 		select_screen.refresh()
 
 
-## 2P's newly pressed buttons on pad 1 (the input map is P1's).
+## 2P's newly pressed buttons on their pad (the input map is P1's): the
+## menus' reading of a pad (D-pad or stick, A, B or X back, Start).
 func _pad2_pressed() -> int:
-	var held := 0
 	var dev := GameControls.p2_pad
-	if dev >= 0 and dev in Input.get_connected_joypads():
-		for pair in [[JOY_BUTTON_DPAD_UP, Practice.PAD_UP], [JOY_BUTTON_DPAD_DOWN, Practice.PAD_DOWN],
-				[JOY_BUTTON_DPAD_LEFT, Practice.PAD_LEFT], [JOY_BUTTON_DPAD_RIGHT, Practice.PAD_RIGHT],
-				[JOY_BUTTON_A, Practice.PAD_B], [JOY_BUTTON_X, Practice.PAD_Y],
-				[JOY_BUTTON_START, Practice.PAD_START]]:
-			if Input.is_joy_button_pressed(dev, pair[0]):
-				held |= pair[1]
-	var pressed := held & ~_pad2_prev
-	_pad2_prev = held
-	return pressed
+	if dev < 0:
+		return 0
+	return int(GameControls.pad_menu_bits(dev)[0])
 
 
 ## MULTIPLAYER: a fresh lobby every time (pads may have changed).

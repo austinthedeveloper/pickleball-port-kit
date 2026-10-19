@@ -28,7 +28,6 @@ extends RefCounted
 
 const SIZE := 8
 const ROUNDS := 3
-const ROUND_NAMES := ["QUARTERFINAL", "SEMIFINAL", "FINAL"]
 const ROUND_SHORT := ["QF", "SEMI", "FINAL"]   ## where a row has little room
 const YOU := -1
 const SITS_OUT := 0                  ## the ladder's first rung, the warm-up
