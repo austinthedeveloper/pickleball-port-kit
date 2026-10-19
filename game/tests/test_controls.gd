@@ -123,17 +123,23 @@ func test_controls_page_listens() -> void:
 
 
 func test_accessibility_effects() -> void:
-	var kept := [Settings.shake, Settings.flashes, Settings.hud_large, Settings.serve_assist]
+	var kept := [Settings.shake_i, Settings.flashes, Settings.hud_large, Settings.serve_assist]
 	# SCREEN SHAKE off: a drive doesn't move the picture
-	Settings.shake = false
+	Settings.shake_i = 0
 	var v := MatchView.new()
 	runner.root.add_child(v)
 	v.setup(SimTypes.MatchConfig.singles(), "park", false)
 	v.feel.on_event([K.EVENT_HIT, 120, 130, K.SHOT_DRIVE << 4])
 	eq(v.feel.shake_frames, 0, "no shake")
-	Settings.shake = true
+	Settings.shake_i = Settings.SHAKES.size() - 1
 	v.feel.on_event([K.EVENT_HIT, 120, 130, K.SHOT_DRIVE << 4])
 	check(v.feel.shake_frames > 0, "shake on again")
+	var full := v.feel.shake_amp
+	v.feel.shake_frames = 0
+	v.feel.shake_amp = 0.0
+	Settings.shake_i = 1                           # 25%
+	v.feel.on_event([K.EVENT_HIT, 120, 130, K.SHOT_DRIVE << 4])
+	check(is_equal_approx(v.feel.shake_amp, full * 0.25), "a quarter as strong (%f of %f)" % [v.feel.shake_amp, full])
 	# FLASHES off: a hit player doesn't flash white
 	Settings.flashes = false
 	v.sim.players[0].flash_timer = 3
@@ -171,7 +177,28 @@ func test_accessibility_effects() -> void:
 		else:
 			eq(s.sim.phase, K.PHASE_SERVE_SETUP, "without it, holding never serves")
 		s.free()
-	Settings.shake = kept[0]
+	Settings.shake_i = kept[0]
 	Settings.flashes = kept[1]
 	Settings.hud_large = kept[2]
 	Settings.serve_assist = kept[3]
+
+
+## SCREEN SHAKE's strength (KNOWN_ISSUES #58): a save from before the
+## slider keeps OFF off and turns ON into 50%; the level saves and loads.
+func test_shake_strength_saves() -> void:
+	var kept := Settings.shake_i
+	var s := SaveGame.new()
+	s.data = SaveGame.defaults()
+	s.data["settings"].erase("shake_level")
+	s.data["settings"]["shake"] = 0
+	Settings.load_from(s)
+	eq(Settings.shake_i, 0, "an old OFF stays off")
+	s.data["settings"]["shake"] = 1
+	Settings.load_from(s)
+	eq(Settings.SHAKES[Settings.shake_i], 50, "an old ON is 50%")
+	Settings.shake_i = 1
+	Settings.store_to(s)
+	Settings.shake_i = 4
+	Settings.load_from(s)
+	eq(Settings.SHAKES[Settings.shake_i], 25, "the level round-trips")
+	Settings.shake_i = kept

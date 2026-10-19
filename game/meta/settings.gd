@@ -11,6 +11,10 @@ const VENUE_NAMES := ["PARK", "LAKESIDE", "SUNSET", "DINOSAUR", "SPACE", "UNDERS
 const DIFFICULTIES := ["KID", "EASY", "MEDIUM", "HARD"]
 const POINTS := [3, 5, 7, 9, 11, 15, 21]
 const CAMERAS := [0, 50, 75, 100]
+## SCREEN SHAKE strength, % of the full shake (KNOWN_ISSUES #58: on/off
+## before; the full one was too jarring, so 50 is the default).
+const SHAKES := [0, 25, 50, 75, 100]
+const SHAKE_DEFAULT := 2
 ## The modifier toggles: [id, label, MOD_* bit, page]. The MODIFIERS page
 ## holds the play and look ones and a RULES row; RULES the scoring and
 ## fault rules (PORT-40: the page outgrew the screen).
@@ -53,9 +57,14 @@ static var time_i := CourtStyle.DAY
 ## The last Player Select choices (PlayerSelect.new_choice; 1P's is saved).
 static var p1_choice := PlayerSelect.new_choice(PlayerSelect.PAL_BLUE, K.VARIANT_MALE, Paddles.STANDARD)
 static var p2_choice := PlayerSelect.new_choice(PlayerSelect.PAL_RED, K.VARIANT_MALE, Paddles.STANDARD)
+## The screen shake's strength, 0 (off) to 1.
+static func shake_scale() -> float:
+	return SHAKES[shake_i] / 100.0
+
+
 ## Accessibility (PORT-12): screen shake, the white hit flashes, a larger
 ## HUD text, and the serve assist (holding B releases a strong serve).
-static var shake := true
+static var shake_i := SHAKE_DEFAULT   ## SHAKES
 static var flashes := true
 static var hud_large := false
 static var serve_assist := false
@@ -90,7 +99,9 @@ static func load_from(save: SaveGame) -> void:
 		var n := CourtStyle.count(CourtStyle.PARTS[i])
 		court[i] = int(ct[i]) if int(ct[i]) >= 0 and int(ct[i]) < n else 0
 	time_i = clampi(int(st.get("time", 0)), 0, CourtStyle.time_names().size() - 1)
-	shake = int(st.get("shake", 1)) != 0
+	# a save from before the slider kept on/off: off stays off, on is 50%
+	shake_i = clampi(int(st.get("shake_level", SHAKE_DEFAULT if int(st.get("shake", 1)) else 0)),
+		0, SHAKES.size() - 1)
 	flashes = int(st.get("flash", 1)) != 0
 	hud_large = int(st.get("hud_large", 0)) != 0
 	serve_assist = int(st.get("serve_assist", 0)) != 0
@@ -114,7 +125,7 @@ static func store_to(save: SaveGame) -> void:
 		"fullscreen": 1 if fullscreen else 0, "integer_scale": 1 if integer_scale else 0,
 		"player": [p1_choice["palette"], p1_choice["variant"], p1_choice["paddle"]],
 		"court": court.duplicate(), "time": time_i,
-		"shake": 1 if shake else 0, "flash": 1 if flashes else 0,
+		"shake": 1 if shake_i else 0, "shake_level": shake_i, "flash": 1 if flashes else 0,
 		"hud_large": 1 if hud_large else 0, "serve_assist": 1 if serve_assist else 0,
 		"vibration": 1 if vibration else 0, "pad_glyphs": pad_glyphs,
 		"bindings": Bindings.to_save()}, true)

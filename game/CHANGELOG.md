@@ -4,6 +4,12 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [Unreleased]
+
+### Changed
+- SCREEN SHAKE (OPTIONS > ACCESSIBILITY) is a strength now: OFF, 25%, 50%,
+  75% or 100%. It starts at 50%; the full shake was too jarring.
+
 ## [0.12.2] - 2026-10-19
 
 Fuller backdrops: LAKESIDE's lake and town across the whole view.

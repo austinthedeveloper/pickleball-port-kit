@@ -141,7 +141,8 @@ func test_the_view_shows_a_smash() -> void:
 	eq(v._frame_for(0), "overhead_contact", "on the contact frame")
 	var pops := v._fx.get_children().filter(func(n): return n is BitmapText and n.text == "SMASH!")
 	eq(pops.size(), 1, "SMASH! over it")
-	check(v.feel.shake_amp >= Feel.SHAKE_SMASH[0] or not Settings.shake, "the biggest shake")
+	check(v.feel.shake_amp >= Feel.SHAKE_SMASH[0] * Settings.shake_scale() - 0.001 or Settings.shake_i == 0,
+		"the biggest shake")
 	p.state = kept
 	eq(v.sim.snapshot(), before, "the view wrote nothing to the sim")
 	v.free()

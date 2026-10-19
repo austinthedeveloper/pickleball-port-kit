@@ -270,8 +270,9 @@ func _build_pages() -> void:
 	], [], Rect2(300, 146, 360, 0))
 	var onoff := func(on: bool) -> String: return "ON" if on else "OFF"
 	_add_page("access", "ACCESSIBILITY", [
-		{"id": "shake", "label": "SCREEN SHAKE", "value": func(): return onoff.call(Settings.shake),
-			"change": func(_d): Settings.shake = not Settings.shake},
+		{"id": "shake", "label": "SCREEN SHAKE",
+			"value": func(): return "OFF" if Settings.shake_i == 0 else "%d%%" % Settings.SHAKES[Settings.shake_i],
+			"change": func(d): Settings.shake_i = clampi(Settings.shake_i + d, 0, Settings.SHAKES.size() - 1)},
 		{"id": "flashes", "label": "FLASHES", "value": func(): return onoff.call(Settings.flashes),
 			"change": func(_d): Settings.flashes = not Settings.flashes},
 		{"id": "hud", "label": "HUD TEXT", "value": func(): return "LARGE" if Settings.hud_large else "NORMAL",

@@ -47,7 +47,7 @@ func on_event(e: Array) -> void:
 	match e[0]:
 		K.EVENT_HIT:
 			var shot: int = e[3] >> 4
-			if ON["shake"] and Settings.shake:
+			if ON["shake"] and Settings.shake_i > 0:
 				if shot == K.SHOT_OVERHEAD:
 					_shake(SHAKE_SMASH)
 				elif view.sim.ball.z_fp >= K.to_fp(PUTAWAY_Z) or (shot == K.SHOT_DRIVE
@@ -67,8 +67,9 @@ func on_event(e: Array) -> void:
 
 
 func _shake(spec: Array) -> void:
-	if spec[0] >= shake_amp or shake_frames == 0:
-		shake_amp = spec[0]
+	var amp: float = spec[0] * Settings.shake_scale()     # SCREEN SHAKE strength
+	if amp >= shake_amp or shake_frames == 0:
+		shake_amp = amp
 		shake_frames = spec[1]
 		shake_total = spec[1]
 
