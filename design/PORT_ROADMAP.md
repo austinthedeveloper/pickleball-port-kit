@@ -98,6 +98,8 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.9.1** (2026-10-18): CAMERA starts at 50%; the first release to
   arrive through the in-game updater (tag `v0.9.1`, on
   `feature/cld-release-0.9.1`).
+- **v0.9.2** (2026-10-18): PORT-34 update at launch, lessons, addresses
+  (tag `v0.9.2`, on `feature/cld-release-0.9.2`).
 
 ## Phase 3 (started 2026-10-18)
 

@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.9.1`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.9.2`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-33 of 33 roadmap tasks are in.
+34 of 34 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -202,3 +202,9 @@ Status: **Ready to test**: with a friend. Start on the same Wi-Fi, then over Tai
 OPTIONS > UPDATES (ADR-057): a check of GitHub's latest release at start, the news on the title, a download of just the game's .pck (checked against the release's SHA-256), and RESTART onto it. The boot scene (`scenes/boot.gd`, now the main scene) loads a newer downloaded pack before anything else, then adds the input map and the updater (no longer autoloads) and the title; a start that never reaches the title is skipped next time. CI publishes the .pck and its manifest (`tools/update_manifest.py`) with each release. The layout test now also fails on a character the font can't draw (it found ONLINE's invisible typing cursor).
 
 Status: **Ready to test**: after 0.9.0, the next release (0.9.1) is the first real update. Not tried on Windows or Linux.
+
+## PORT-34: from playing 0.9.1 (2026-10-18)
+
+Four things you found: the update now comes up when the game opens and can't be skipped (`view/update_screen.gd`, ADR-057 amended); OPTIONS > UPDATES no longer sticks on 98%; HOW TO PLAY's match lessons play HENDERSON at full speed (KID's slowed ball read as slowdown) and THE KITCHEN is a ball-machine drill; ONLINE's HOST screen shows up to two addresses, 192.168 first, named by adapter.
+
+Status: **Ready to test**: 0.9.1 gets 0.9.2 from OPTIONS > UPDATES once; from then on updates come up at launch.

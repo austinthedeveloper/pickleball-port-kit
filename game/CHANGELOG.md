@@ -4,7 +4,10 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
-## [Unreleased]
+## [0.9.2] - 2026-10-18
+
+Updates at launch, easier lessons, and online's addresses. From 0.9.1, get
+it in OPTIONS > UPDATES; after this one, updates come up by themselves.
 
 ### Changed
 - **Updates happen when you open the game**: a new version downloads
