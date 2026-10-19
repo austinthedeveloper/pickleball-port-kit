@@ -219,13 +219,19 @@ func test_every_venue() -> void:
 			v.free()
 
 
-## The HUD in its states, against every ladder team (the longest names).
+## The HUD in its states, against every ladder team (the longest names)
+## and Dale Dawson (his card, and his name alone in doubles).
 func test_hud() -> void:
-	for opp in range(-1, Opponents.count()):
+	for opp in range(-1, Opponents.DAWSON + 1):
 		for doubles in [false, true]:
 			var v := _view(Settings.config_for(doubles, opp, K.DIFFICULTY_MEDIUM, 11))
 			var tag := "hud %s vs %d" % ["doubles" if doubles else "singles", opp]
 			check_layout(v, tag)
+			if v.card_frames >= 0:
+				# Dale's intro card (it's modal: dismissed before play)
+				v.card_frames = -1
+				v._hud.close_card()
+				check_layout(v, tag + " card closed")
 			v.sim.team_score = [10, 9]
 			v._hud.refresh()
 			check_layout(v, tag + " match point")

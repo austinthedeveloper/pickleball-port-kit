@@ -15,7 +15,7 @@ func _fits(s: String) -> bool:
 
 
 func test_every_line_fits_the_hud_font() -> void:
-	for i in Opponents.count():
+	for i in Opponents.DAWSON + 1:            # the ladder and Dale Dawson
 		var t := Opponents.team(i)
 		for key in ["intro", "taunt", "concede"]:
 			check(_fits(t[key]), "%s %s: '%s'" % [t["team"], key, t[key]])

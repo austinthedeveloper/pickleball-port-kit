@@ -25,7 +25,7 @@ static func for_slot(cfg: SimTypes.MatchConfig, slot: int, manifest: Dictionary)
 		return for_team(cfg.palette[slot], cfg.variant[slot], cfg.paddle[slot], manifest)
 	if slot == 1 and not cfg.human[1] and cfg.partner >= 0 and cfg.partner < Opponents.count():
 		return from_member(Opponents.team(cfg.partner)["players"][0], manifest)
-	if cfg.opponent < 0 or cfg.opponent >= Opponents.count() or cfg.human[2] or slot < 2:
+	if not Opponents.exists(cfg.opponent) or cfg.human[2] or slot < 2:
 		return null
 	var members: Array = Opponents.team(cfg.opponent)["players"]
 	var m: Dictionary = members[mini(slot - 2, members.size() - 1)]

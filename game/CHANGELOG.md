@@ -17,6 +17,9 @@ Pickleball '94, the Godot port. Versions follow
   **BOUNCY**, **WIND** (a new crosswind each serve), and on RULES **DINK
   OR DIE** (a drive loses the point) and **SUDDEN DEATH** (one point takes
   the match).
+- **Dale "Dink" Dawson**, the man on the box, at last: clear a ladder and
+  he's on MATCH SETUP's VS row. In doubles he takes on both of you alone,
+  and he's fast enough to do it.
 
 ### Changed
 - WIN BY 2 and LAVA moved to the new RULES page (MODIFIERS > RULES).

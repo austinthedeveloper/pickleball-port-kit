@@ -125,7 +125,8 @@ func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void
 	if demo:
 		sim.start_attract()
 	input_lock = INPUT_LOCK_FRAMES
-	if (ladder or tournament) and cfg.opponent >= 0 and not cfg.human[2]:
+	if (ladder or tournament or cfg.opponent == Opponents.DAWSON) and cfg.opponent >= 0 \
+			and not cfg.human[2]:
 		card_frames = 0
 	_build()
 	# place everyone now: until the first tick they'd stand at the origin,

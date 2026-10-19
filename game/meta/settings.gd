@@ -75,7 +75,7 @@ static func load_from(save: SaveGame) -> void:
 	difficulty_i = clampi(int(st["difficulty"]), 0, DIFFICULTIES.size() - 1)
 	points_i = clampi(int(st["points"]), 0, POINTS.size() - 1)
 	two_players = int(st["players"]) == 2
-	opponent_i = clampi(int(st["opponent"]), -2, Opponents.count() - 1)
+	opponent_i = clampi(int(st["opponent"]), -2, Opponents.DAWSON)
 	camera_i = clampi(int(st.get("camera", 1)), 0, CAMERAS.size() - 1)
 	var bits := int(st.get("mod_bits", -1))
 	mod_bits = (bits & MOD_SAVED) if bits >= 0 else \
@@ -188,4 +188,8 @@ static func config_for(doubles: bool, opponent: int, difficulty: int, points: in
 			var m: Dictionary = members[mini(slot - 2, members.size() - 1)]
 			cfg.variant[slot] = K.VARIANT_FEMALE if m.get("variant", "male") == "female" else K.VARIANT_MALE
 			cfg.paddle[slot] = maxi(0, Paddles.NAMES.find(m.get("paddle", "blue")))
+		# Dale Dawson plays doubles alone (port ADR-066): two against one
+		if doubles and Opponents.solo(opponent):
+			cfg.palette[3] = -1
+			cfg.human[3] = 0
 	return cfg

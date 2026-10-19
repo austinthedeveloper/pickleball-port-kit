@@ -97,7 +97,7 @@ Status: **have** (the port does it), **partly**, **missing**, **differs**
 | Promise | Port |
 |---|---|
 | The overhead smash | **delivered** (PORT-24) |
-| Dale Dawson playable (as an unlockable) | not yet |
+| Dale Dawson playable (as an unlockable) | **delivered** (PORT-40, ADR-066: after a ladder clear, VS; he plays doubles alone) |
 | Traditional side-out scoring | **delivered** (PORT-40, ADR-063: RULES > SIDE-OUT) |
 | The momentum rule (carry into the kitchen after a volley) | **delivered** (PORT-40, ADR-064: RULES > MOMENTUM) |
 | A fifth player as line judge | not yet |

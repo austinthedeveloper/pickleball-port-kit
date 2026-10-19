@@ -290,6 +290,7 @@ func _refresh_initials() -> void:
 
 func close_card() -> void:
 	if _card:
+		_card.visible = false             # gone this frame, freed after it
 		_card.queue_free()
 		_card = null
 

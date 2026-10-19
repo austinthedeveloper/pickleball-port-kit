@@ -1,0 +1,42 @@
+{
+  "comment": "PORT-40 (port ADR-066), port-only: Dale \"Dink\" Dawson, the cover athlete (bible §3), never in the ROM; the remaster adds him as an unlockable opponent after a ladder clear. Same fields as an opponents.json team, one player: in doubles he plays alone, two against one, fast enough ('speed' 30; a human runs at 24, the ladder's CPUs at 16 to 22) to cover the whole court. Loaded after the ladder as Opponents.DAWSON; Opponents.count() stays the ladder's 8.",
+  "team": "DALE DAWSON",
+  "venue": "PARK",
+  "intro": "I'M ON THE BOX. LET'S PLAY.",
+  "taunt": "THAT'S WHY I'M ON THE BOX.",
+  "concede": "TAKE THE BOX. YOU EARNED IT.",
+  "quips": [
+    "STILL ON THE BOX.",
+    "NOT IN THE BROCHURE.",
+    "THE COVER SHOOT WAS EASIER.",
+    "DINK, DALE. DINK.",
+    "MY AGENT WON'T LIKE THAT.",
+    "LUCKY. I'LL ALLOW IT.",
+    "THE KNEES REMEMBER.",
+    "THAT ONE'S ON THE SPONSOR.",
+    "BACK IN MY DAY...",
+    "I WAS NEVER IN THE GAME.",
+    "PRESS START, KID.",
+    "WHO PAINTED THIS COURT?",
+    "TWO OF YOU, ONE OF ME.",
+    "SIGNATURE SHOT. MISSED.",
+    "FINE. BEST OF FIVE.",
+    "AUTOGRAPHS AFTER."
+  ],
+  "hud": [[31, 8, 8], [20, 3, 3]],
+  "players": [
+    {
+      "name": "DAWSON", "variant": "male", "paddle": "wood", "hat": "headband", "celebrate": "thumbs_up", "skin": "light",
+      "hair": [14, 9, 4],
+      "shirt": [[18, 3, 4], [28, 6, 7], [31, 31, 31]],
+      "shorts": [[3, 4, 10], [6, 8, 16]],
+      "shoe": [31, 31, 31],
+      "style": {
+        "late_period": 6, "reaction": 0, "dink_period": 3, "lob_distance": 48,
+        "putaway_z": 12, "putaway_distance": 56, "aim": "away", "depth": "alternate",
+        "recover": 80, "speed": 30, "volley": 1, "net": 60, "team": 0, "tactics": 1,
+        "footwork": 1, "slice": 4, "serve_power": 30, "serve_dud": 0
+      }
+    }
+  ]
+}

@@ -5,6 +5,9 @@ class_name Opponents
 extends RefCounted
 
 const PATH := "res://data/opponents.json"
+## Dale Dawson (port ADR-066): the bonus team after the ladder, port-only.
+const DAWSON_PATH := "res://data/dawson.json"
+const DAWSON := 8
 
 static var _data: Dictionary = {}
 static var _default: SimTypes.AiStyle
@@ -28,6 +31,12 @@ static func _load() -> void:
 		var team: Dictionary = t.duplicate()
 		team["players"] = players
 		_teams.append(team)
+	var dawson: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(DAWSON_PATH))
+	var dale: Dictionary = dawson["players"][0].duplicate()
+	dale["style_obj"] = SimTypes.AiStyle.from_dict(dale["style"])
+	dawson["players"] = [dale]
+	assert(_teams.size() == DAWSON, "Dawson follows the ladder")
+	_teams.append(dawson)
 
 
 static func default_style() -> SimTypes.AiStyle:
@@ -40,9 +49,21 @@ static func partner_style() -> SimTypes.AiStyle:
 	return _partner.copy()
 
 
+## The ladder's teams (Dale Dawson, after them, isn't one).
 static func count() -> int:
 	_load()
-	return _teams.size()
+	return _teams.size() - 1
+
+
+## A team to play: the ladder's, or Dale Dawson.
+static func exists(i: int) -> bool:
+	_load()
+	return i >= 0 and i < _teams.size()
+
+
+## A team of one (Dale Dawson): in doubles his partner's slot sits out.
+static func solo(i: int) -> bool:
+	return exists(i) and team(i)["players"].size() == 1
 
 
 static func team(i: int) -> Dictionary:

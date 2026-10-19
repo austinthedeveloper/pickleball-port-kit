@@ -37,6 +37,8 @@ static func intro_line(opponent: int) -> String:
 
 
 static func rung_line(opponent: int) -> String:
+	if opponent == Opponents.DAWSON:
+		return "THE COVER MATCH"         # port ADR-066: off the ladder
 	return "LADDER %d OF %d" % [opponent + 1, Opponents.count()]
 
 

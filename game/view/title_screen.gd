@@ -58,6 +58,8 @@ var _spare_career := Career.new()      ## no save (some tests): nobody
 
 func _load_settings() -> void:
 	Settings.load_from(save)
+	if Settings.opponent_i == Opponents.DAWSON and not dawson_unlocked():
+		Settings.opponent_i = -2          # records erased: Dale is locked again
 
 
 func _store_settings() -> void:
@@ -401,11 +403,17 @@ func _mods_label(on_page := "") -> String:
 	return on[0][1] if on.size() == 1 else "%d ON" % on.size()
 
 
+## Dale Dawson (port ADR-066) joins VS once a ladder has been cleared.
+func dawson_unlocked() -> bool:
+	return _rec("ladder_clears") > 0
+
+
 func _change_opponent(dir: int) -> void:
+	var last := Opponents.DAWSON if dawson_unlocked() else Opponents.count() - 1
 	Settings.opponent_i += dir
 	if Settings.opponent_i < -2:
-		Settings.opponent_i = Opponents.count() - 1
-	elif Settings.opponent_i >= Opponents.count():
+		Settings.opponent_i = last
+	elif Settings.opponent_i > last:
 		Settings.opponent_i = -2
 	if Settings.opponent_i != -1:
 		Settings.venue_i = Settings.VENUES.find(Settings.home_venue(_rung() if Settings.opponent_i == -2 else Settings.opponent_i))

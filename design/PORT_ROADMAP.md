@@ -487,14 +487,19 @@ feature/cld-release-0.9.2   (v0.9.2)
   - Done: side-out scoring (ADR-063: MODIFIERS > RULES > SIDE-OUT; the
     scoring rules got their own RULES page); the momentum rule (ADR-064:
     RULES > MOMENTUM); MOON, BOUNCY, WIND, DINK OR DIE and SUDDEN DEATH
-    (ADR-065). Left: Dale Dawson, MULTI BALL, the line judge, the club
-    manager.
+    (ADR-065); Dale Dawson (ADR-066: unlocked by a ladder clear, on VS;
+    plays doubles alone and fast). Left: MULTI BALL, the line judge, the
+    club manager.
   - Status: **In progress**.
 
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
+
+- **PORT-40 Dale Dawson:** the bible marks his name "[PROPOSED; name
+  search required]"; he's data (`game/data/dawson.json`) if it changes.
+  His look (red shirt, headband, wood paddle) and lines are mine to start.
 
 - **PORT-21 career:** your existing save moves to layout v5 with no
   players and nobody active, so everything plays as before until you make
