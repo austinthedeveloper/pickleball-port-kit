@@ -32,6 +32,12 @@ task, releases, the current phase's tasks, open "For you" questions);
 keep it current with each branch. Finished tasks, in full, live in
 `design/PORT_HISTORY.md`. `game/README.md` has the file layout.
 
+**The canon bible** is `../pickleball/docs/PICKLEBALL_94_BIBLE.md` (the
+project lead's; the remaster is one of its artifacts and may not
+contradict it). `design/BIBLE_PLAN.md` lists what it asks of the port and
+the gaps (phase 5 in the roadmap). The SNES repo's decisions are cited as
+"SNES ADR-n": its numbers from 052 on are not this repo's.
+
 ## Rules of the code (game/)
 
 - **The sim is pure and exact.** `game/sim/` uses ints only (12.4 fixed

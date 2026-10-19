@@ -60,6 +60,12 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-31 | Online play | `feature/cld-online` | Ready to test |
 | PORT-32 | The in-game updater | `feature/cld-updater` | Done |
 | PORT-34 | Update at launch, lessons, addresses | `feature/cld-polish-0.9.2` | Ready to test |
+| PORT-35 | Catch the sim up to the ROM (TUNING_VERSION 4) | | Planned |
+| PORT-36 | About this project, and Tiny Chair | | Planned |
+| PORT-37 | Period-true park: ROOKIE / CLUB / CHAMP, park points | | Planned |
+| PORT-38 | Career: 13 hats, 16 unlocks, the Hat Museum | | Planned |
+| PORT-39 | The show: rings, celebrations, critters, quips | | Planned |
+| PORT-40 | The Pickleball '95 promises | | Planned |
 
 ## Releases
 
@@ -367,6 +373,65 @@ feature/cld-release-0.6.0   (v0.6.0)
   - Status: **Ready to test**: 0.9.1 gets 0.9.2 from OPTIONS > UPDATES
     once; from then on updates come up at launch.
 
+## Phase 5: the bible (planned 2026-10-18)
+
+From the project lead's canon bible v0.3 (`../pickleball/docs/PICKLEBALL_94_BIBLE.md`):
+the remaster is "faithfully remastered" with the '95 features delivered,
+so it must do what the ROM does, and the ROM has moved on 22 decisions
+since the port was copied at 0.18.1. `design/BIBLE_PLAN.md` has the gap
+list, fact by fact. The order puts the sim first: once it matches the ROM
+frame for frame (the SNES repo's conformance traces), the rest copies the
+ROM instead of guessing.
+
+```
+feature/cld-release-0.9.2   (v0.9.2)
+ 35 catch the sim up to the ROM
+ 36 about this project, Tiny Chair
+ 37 period-true park
+ 38 career and the Hat Museum
+ 39 the show
+ 40 the '95 promises
+```
+
+### 35. Catch the sim up to the ROM (planned)
+
+- [ ] `PORT-35` Import the SNES repo's `docs/tuning/tuning.json`
+  (TUNING_VERSION 4) and its `opponents.json`, `paddles.json`, `career.json`; port SNES ADR-052
+  (the kitchen line counts), 053 (GHOST, POPCORN, ICE), 055 (ladder per
+  mode, a save migration), 056/057 (slice on X, short hold on L/R, CPU
+  slice), 058 (CPU serve power and duds), 062 (the rebalance) and tuning
+  v2-4 (the doubles think stagger from match frame 0). Record the port's
+  tuning version. Add a test that replays the SNES conformance traces
+  (`make conformance` at the matched commit) frame by frame.
+  - Accept: every conformance trace matches; `test_ladder` ladder order
+    matches `make stats`; golden traces regenerated with the reason; an
+    ADR (a port ADR, numbered after the clash is settled).
+  - Status: **Planned**. Note: X is SOFT in the port today; the ROM's
+    soft shot is Y. Online play's input packing (net/lockstep.gd) gains
+    the new presses.
+
+### 36-40 (planned)
+
+- [ ] `PORT-36` About this project, and Tiny Chair: the bible's ground
+  rule 1 note (title, README, release notes; due now that the repo is
+  public), and a Tiny Chair splash in the A-11 colours after a name search.
+  - Status: **Planned**.
+- [ ] `PORT-37` Period-true park: courts ROOKIE / CLUB / CHAMP (the port
+  shows DUPR-style `UNDER 3.5`), park points, winners stay on (two wins),
+  pick your partner (SNES ADR-070 to 072).
+  - Status: **Planned**.
+- [ ] `PORT-38` Career and the Hat Museum: 13 hats and 16 unlocks (the port
+  has 6 and 9), the museum (SNES ADR-059 to 061), new hat art.
+  - Status: **Planned**.
+- [ ] `PORT-39` The show: rings at each player's feet, celebrations,
+  slumps, emotes, net shiver, critters, more quips, and GLOW / INVERSE
+  redone for full colour (SNES ADR-054, 063, 064, 066).
+  - Status: **Planned**.
+- [ ] `PORT-40` The Pickleball '95 promises (bible §5.8): Dale Dawson as an
+  unlockable (§3), side-out scoring, the momentum rule, new modifiers;
+  the overhead smash is already in (PORT-24).
+  - Status: **Planned**.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
@@ -435,4 +500,17 @@ the chain: each has a default I've gone with.
   Today ACCESSIBILITY > SCREEN SHAKE only turns it on or off; the plan is
   a strength slider like CAMERA's (OFF, 25%..100%) with a gentler default
   (KNOWN_ISSUES #58).
+
+- **Phase 5, the bible:** three questions before PORT-35.
+  1. **ADR numbers clash.** Our ADR-052 to 057 (the Godot port, overhead,
+     tournament, kitchen volleys, online, updater) share numbers with the
+     SNES repo's ADR-052 to 057. I'd renumber ours as port ADRs (say
+     `PADR-001` on), and cite the SNES ones as "SNES ADR-n". Say if you'd
+     rather keep them.
+  2. **The park's sign says RIVERDALE PARK** in the remaster's art. The
+     bible keeps Riverdale [OPEN] and off anything that claims the game
+     calls it that (Q10). Keep the sign, or blank it until you decide?
+  3. **The menus.** The ROM's nine title entries have a set order (SNES
+     ADR-065); the port's menus are its own. I'd keep the port's (it has
+     more modes), unless you want the ROM's order.
 
