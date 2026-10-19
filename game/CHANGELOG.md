@@ -4,6 +4,13 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [Unreleased]
+
+### Fixed
+- ONLINE: hosting on a PC with both Ethernet and Wi-Fi, the wired address
+  showed as "NETWORK" and came second. It reads ETHERNET now and comes
+  first (it's the one that answered in testing).
+
 ## [0.12.0] - 2026-10-19
 
 The Pickleball '95 promises: side-out scoring, the momentum rule, five

@@ -450,3 +450,13 @@ func test_the_addresses_offered() -> void:
 	eq(OnlineScreen.address_kind("172.17.0.1", "docker0"), "", "Docker's")
 	eq(OnlineScreen.address_kind("10.0.0.12", "wlan0"), "SAME WI-FI")
 	eq(OnlineScreen.pick_addresses([]), [], "none")
+	# Windows' wired adapter is "Ethernet", not NETWORK; on the same range
+	# it comes before Wi-Fi (0.12.0: the Wi-Fi address didn't answer)
+	var desk := [
+		{"name": "{B2}", "friendly": "Wi-Fi", "addresses": ["192.168.1.40"]},
+		{"name": "{F6}", "friendly": "Ethernet", "addresses": ["192.168.1.41"]},
+	]
+	eq(OnlineScreen.pick_addresses(desk), [["ETHERNET", "192.168.1.41"], ["WI-FI", "192.168.1.40"]],
+		"wired first, by name")
+	eq(OnlineScreen.adapter_label("eth0", "eth0"), "NETWORK", "a Linux id")
+	eq(OnlineScreen.adapter_label("Ethernet", "{F6}"), "ETHERNET")
