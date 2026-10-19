@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.9.3`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.10.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-35 of 37 roadmap tasks are in.
+36 of 37 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -209,17 +209,17 @@ Four things you found: the update now comes up when the game opens and can't be 
 
 Status: **Ready to test**: 0.9.1 gets 0.9.2 from OPTIONS > UPDATES once; from then on updates come up at launch.
 
-## PORT-35: Catch the sim up to the ROM (planned) (not in this build)
+## PORT-35: Catch the sim up to the ROM (planned)
 
-Import the SNES repo's `docs/tuning/tuning.json` (TUNING_VERSION 4) and its `opponents.json`, `paddles.json`, `career.json`; port SNES ADR-052 (the kitchen line counts), 053 (GHOST, POPCORN, ICE), 055 (ladder per mode, a save migration), 058 (CPU serve power and duds), 062 (the rebalance) and tuning v2-4 (the doubles think stagger from match frame 0). Record the port's tuning version. Add a test that replays the SNES conformance traces (`make conformance` at the matched commit) frame by frame.
+The sim is the ROM's at TUNING_VERSION 4 (port ADR-059; with PORT-41's slice). The SNES repo's conformance traces come in by `tools/conformance_import.sh` and `test_conformance` replays all four scenarios frame by frame: every frame matches. On the way: the ROM's `opponents.json` and `quips.json` (the rebalance, serve power and duds, sixteen quips and the deck), the serve's depth, aim and power, the lane covers' stagger per match, KID's top speed, ICE and POPCORN in the sim and the AI, GHOST in the view, the kitchen line, and a ladder per mode (save v6, a quit resets it). GHOST BALL, POPCORN, ICE are on MODIFIERS.
 
-Status: **Planned**. SNES ADR-056 and 057 (the slice and the short hold) are done: PORT-41, ADR-058.
+Status: **Done**: the conformance traces are the proof. The upper rungs are easier than before (the ROM's playtest); say if they feel off.
 
 ## PORT-36: 36-40 (planned) (not in this build)
 
-About this project, and Tiny Chair: the bible's ground rule 1 note (title, README, release notes; due now that the repo is public), and a Tiny Chair splash in the A-11 colours after a name search.
+About this project, and Tiny Chair: the bible's ground rule 1 note, and a Tiny Chair splash in the A-11 colours after a name search.
 
-Status: **Planned**.
+Status: **In progress**: the splash waits on the name search and the logo's final art (bible A-11); the releases already published don't carry the line (For you).
 
 ## PORT-41: four swings and the short hold (asked for 2026-10-18)
 

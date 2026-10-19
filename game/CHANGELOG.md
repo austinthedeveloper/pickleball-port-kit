@@ -4,7 +4,10 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
-## [Unreleased]
+## [0.10.0] - 2026-10-18
+
+The game caught up with the SNES: CPUs that play frame for frame as the
+ROM's, the 1994 park, thirteen hats and the Hat Museum.
 
 ### Added
 - Three more modifiers from the SNES game: **GHOST BALL** (high in flight
