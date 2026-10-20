@@ -4,6 +4,17 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.15.1] - 2026-10-20
+
+Easier-to-read story notices, and rally scoring in PICKLEBALL 101.
+
+### Changed
+- **Story**: Grimsby's notices and the petition are printed in clean,
+  solid ink, so they read clearly on the paper.
+- **PICKLEBALL 101**: KEEPING SCORE now says side-out is how most parks
+  play, then explains rally scoring (what this game plays: every rally
+  scores) and where to switch SIDE-OUT on, with a new quiz.
+
 ## [0.15.0] - 2026-10-19
 
 Story mode, and a course on how to play pickleball for real.

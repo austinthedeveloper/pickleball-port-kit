@@ -136,6 +136,8 @@ status in the same commit. The finished tasks, in full, are in
   `feature/cld-release-0.14.0`).
 - **v0.15.0** (2026-10-19): PORT-44 story mode and PORT-45 PICKLEBALL
   101 (tag `v0.15.0`, on `feature/cld-release-0.15.0`).
+- **v0.15.1** (2026-10-20): the story's paper in ink, rally scoring in
+  KEEPING SCORE (tag `v0.15.1`, on `feature/cld-release-0.15.1`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 
