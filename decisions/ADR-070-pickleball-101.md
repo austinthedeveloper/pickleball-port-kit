@@ -23,7 +23,8 @@ got it.
   KITCHEN (no volleys in it or on its line, momentum, stepping in for a
   bounced ball, the dink); KEEPING SCORE (side-out scoring, 11 win by 2,
   the three-number call, switching sides after a point, server 2, side
-  out, 0-0-2, the right court first, singles' even/odd); LINE CALLS
+  out, 0-0-2, the right court first, singles' even/odd; then rally
+  scoring, which this game plays, and where SIDE-OUT is switched on); LINE CALLS
   (faults, the line is in, calling your side, when in doubt it's in, a
   ball that hits you); PLAYING SMART (get to the line, deep serves and
   returns, the third-shot drop, dink and wait, feet and the middle);
@@ -34,7 +35,7 @@ got it.
   (a fault), players, arrows for who moves, and the ball flying its path
   on a loop, leaving a ring at each bounce, a burst at a volley and an X
   at a fault. Scoring pages show the call, big.
-- **Each lesson ends in a quiz or two** (17 in all): the first pick is
+- **Each lesson ends in a quiz or two** (18 in all): the first pick is
   the one that counts; right or wrong, the answer and why follow. A
   lesson is DONE when its closing page is reached, and PERFECT when every
   quiz was right the first time.

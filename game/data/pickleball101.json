@@ -1048,8 +1048,8 @@
    "pages": [
     {
      "lines": [
-      "ONLY THE SERVING TEAM SCORES. A GAME GOES TO 11,",
-      "AND YOU MUST WIN BY 2."
+      "MOST PARKS PLAY SIDE-OUT SCORING: ONLY THE SERVING",
+      "TEAM SCORES. A GAME GOES TO 11, AND YOU MUST WIN BY 2."
      ],
      "call": "11 - 9"
     },
@@ -1155,6 +1155,21 @@
      "call": "6 - 3"
     },
     {
+     "lines": [
+      "THERE'S ANOTHER WAY TO KEEP SCORE: RALLY SCORING.",
+      "EVERY RALLY SCORES A POINT, WHOEVER SERVED, AND THE",
+      "TEAM THAT WINS IT SERVES NEXT. THIS GAME PLAYS IT."
+     ],
+     "call": "6 - 5"
+    },
+    {
+     "lines": [
+      "RALLY SCORING IS QUICKER: SOME LEAGUES AND PRO EVENTS",
+      "PLAY IT. AT THE PARK, EXPECT SIDE-OUT. TO PLAY SIDE-OUT",
+      "HERE: MODIFIERS, RULES, SIDE-OUT."
+     ]
+    },
+    {
      "quiz": [
       "YOU HAVE 6, THEY HAVE 4, AND YOU'RE THE",
       "SECOND SERVER. WHAT DO YOU CALL?"
@@ -1200,6 +1215,21 @@
      "why": [
       "THE SERVER KEEPS SERVING, FROM THE OTHER",
       "SIDE, UNTIL THEIR TEAM LOSES A RALLY."
+     ]
+    },
+    {
+     "quiz": [
+      "RALLY SCORING: THEY SERVE, AND YOU WIN",
+      "THE RALLY. WHAT HAPPENS?"
+     ],
+     "choices": [
+      "A SIDE OUT, NO POINT",
+      "YOU SCORE AND SERVE"
+     ],
+     "answer": 1,
+     "why": [
+      "IN RALLY SCORING EVERY RALLY SCORES A",
+      "POINT, WHOEVER SERVED."
      ]
     }
    ]

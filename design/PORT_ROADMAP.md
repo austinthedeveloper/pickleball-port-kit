@@ -258,6 +258,10 @@ the same request). Open: 36 and 40.
     and after, a closing page and PRACTICE.
   - Status: **Ready to test**: read a lesson or two; say if anything
     should be explained differently (`game/data/pickleball101.json`).
+  - Added (`feature/cld-rally-scoring-lesson`, the user's note): KEEPING
+    SCORE now names side-out as the park's way and adds rally scoring
+    (every rally scores; this game plays it; MODIFIERS, RULES, SIDE-OUT
+    switches) with a quiz.
 
 ## For you
 
