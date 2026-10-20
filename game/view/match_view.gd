@@ -20,6 +20,9 @@ const SLOTS := ["idle0", "idle1", "run0", "run1", "run2", "run3", "windup", "swi
 const INPUT_LOCK_FRAMES := 12
 
 var glide := BallGlide.new()       ## a paced ball drawn gliding (ADR-073)
+var tuning: TuningPanel            ## F2 / TUNE (ADR-074); null in the demo
+var _base_time := CourtStyle.DAY    ## the owner's time and court, before GLOW's
+var _base_court: Array = []
 var sim: Sim
 var venue := "park"
 var manifest: Dictionary
@@ -128,6 +131,8 @@ static func levels_manifest() -> Dictionary:
 func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void:
 	venue = venue_name
 	demo = is_demo
+	_base_time = time
+	_base_court = court.duplicate()
 	if cfg.modifiers & K.MOD_GLOW:
 		# SNES ADR-054: lights out (NIGHT), LIME lines
 		time = GLOW_TIME
@@ -135,6 +140,8 @@ func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void
 		court[3] = GLOW_LINES
 	manifest = levels_manifest()
 	sim = Sim.new(cfg)
+	if tuning == null and not demo:
+		tuning = TuningPanel.new().setup(self)     # before the HUD: the pause menu's TUNE
 	if demo:
 		sim.start_attract()
 	input_lock = INPUT_LOCK_FRAMES
@@ -267,6 +274,40 @@ func _build() -> void:
 	_debug = DebugOverlay.new()
 	_debug.view = self
 	add_child(_debug)
+	if tuning and tuning.get_parent() == null:
+		add_child(tuning)
+
+
+## The tuning panel's APPLY (ADR-074): the match rebuilt in place with a new
+## config, from 0-0, as RESTART does (its new records dropped). The owner's
+## fields (save, ladder, story, the venue, time and court) stay.
+func rebuild(cfg: SimTypes.MatchConfig) -> void:
+	if tuning:
+		remove_child(tuning)
+	for c in get_children():
+		remove_child(c)
+		c.queue_free()
+	sim.dispose()
+	_layers = []
+	_players = []
+	_multi_balls = []
+	for f in ["crowd", "watcher", "critter", "wind_view", "focus", "heat", "close_call",
+			"lesson_view", "_ground", "_net_text"]:
+		set(f, null)
+	glide = BallGlide.new()
+	stats = MatchStats.new()
+	actors = MatchActors.new(self)
+	input = MatchInput.new(self)
+	end = MatchEnd.new(self)
+	card_frames = -1
+	_prev_phase = -1
+	cleared = false
+	time = _base_time
+	court = _base_court.duplicate()
+	if save:
+		save.drop_new_records()
+		save.career.new_unlocks = 0
+	setup(cfg, venue, demo)
 
 
 ## Recolours the court (the title's COURT page previews on the demo).
@@ -417,6 +458,10 @@ func marker_color(slot: int) -> Color:
 
 
 func _physics_process(_delta: float) -> void:
+	if tuning and tuning.open:
+		tuning.update()                      # the match waits (ADR-074)
+		_update_visuals()
+		return
 	if initials.open:
 		end.update_initials()
 		_update_visuals()

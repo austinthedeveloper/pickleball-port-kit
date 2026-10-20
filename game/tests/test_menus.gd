@@ -241,12 +241,12 @@ func _pick(view: MatchView, row: String) -> bool:
 func test_pause_menu_rows() -> void:
 	var view := _paused_view(SimTypes.MatchConfig.singles())
 	var ids := view._hud.pause_menu.rows.map(func(r): return r["id"])
-	eq(ids, ["resume", "restart", "menu"])
+	eq(ids, ["resume", "restart", "tune", "menu"], "TUNE: the tuning panel (ADR-074)")
 	check(view._hud._paused.visible, "it shows while paused")
 	view.free()
 	var practice := _paused_view(SimTypes.MatchConfig.practice_session(Practice.DEFAULTS, 0))
 	ids = practice._hud.pause_menu.rows.map(func(r): return r["id"])
-	eq(ids, ["resume", "menu"], "practice has no RESTART")
+	eq(ids, ["resume", "tune", "menu"], "practice has no RESTART")
 	practice.free()
 
 

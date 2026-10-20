@@ -797,3 +797,40 @@ func test_course() -> void:
 	GameControls.last_device = kept[0]
 	Settings.pad_glyphs = kept[1]
 	GameControls.device_serial += 1
+
+
+## PORT-49: the tuning panel's pages over a match, at the sliders' ends
+## and with every modifier on, keyboard and pad prompts.
+func test_tuning() -> void:
+	var kept := [GameControls.last_device, Settings.pad_glyphs, Settings.ball_speed, Settings.ball_size,
+		Settings.cpu_errors]
+	for dev in [GameControls.KEYBOARD, GameControls.PAD]:
+		GameControls.last_device = dev
+		Settings.pad_glyphs = 2
+		GameControls.device_serial += 1
+		var v := MatchView.new()
+		runner.root.add_child(v)
+		v.setup(Settings.config_for(true, 3, K.DIFFICULTY_MEDIUM, 11), "park", false)
+		v.card_frames = -1
+		v.tuning.open_panel()
+		for ends in [[K.BALL_SPEED_MIN, Settings.BALL_SIZE_MIN, 0],
+				[K.BALL_SPEED_MAX, Settings.BALL_SIZE_MAX, Settings.CPU_ERRORS_MAX]]:
+			Settings.ball_speed = ends[0]
+			Settings.ball_size = ends[1]
+			Settings.cpu_errors = ends[2]
+			for id in ["tune", "modifiers", "rules"]:
+				for all_on in [false, true]:
+					v.tuning.mods = 0x7fffffff if all_on else 0
+					v.tuning._show(id)
+					v.tuning._process(0.0)
+					for f in TuningPanel.SLIDE_FRAMES:
+						v.tuning._process(0.0)
+					v.tuning.page.settle()
+					check_layout(v, "tuning %s (device %d, mods %s, %s)" % [id, dev, all_on, ends])
+		v.free()
+	GameControls.last_device = kept[0]
+	Settings.pad_glyphs = kept[1]
+	Settings.ball_speed = kept[2]
+	Settings.ball_size = kept[3]
+	Settings.cpu_errors = kept[4]
+	GameControls.device_serial += 1

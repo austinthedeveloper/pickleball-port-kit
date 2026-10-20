@@ -97,21 +97,14 @@ func build_ball() -> void:
 	var fw: int = meta["frame_size"][0]
 	v._ball_sprite.region_rect = Rect2(0, 0, fw, meta["frame_size"][1])
 	v._ball_root.add_child(v._ball_sprite)
-	if v.sim.config.modifiers & K.MOD_BIG_BALL:
-		v._ball_sprite.scale = Vector2(2, 2)        # BIG BALL reads as big
-	else:
-		v._ball_sprite.scale = Vector2.ONE * (Settings.ball_size / 100.0)   # BALL SIZE (ADR-072)
 	if v.sim.config.modifiers & K.MOD_GLOW:
 		v._ball_sprite.material = ShaderMaterial.new()
 		v._ball_sprite.material.shader = preload("res://view/glow_outline.gdshader")
 	v._actors.add_child(v._ball_root)
 	v._ball_shadow = Sprite2D.new()
 	v._ball_shadow.texture = v._tex(v.manifest["sprites"]["ball_shadow"]["file"])
-	if v.sim.config.modifiers & K.MOD_BIG_BALL:
-		v._ball_shadow.scale = Vector2(2, 1.6)
-	else:
-		v._ball_shadow.scale = Vector2.ONE * (Settings.ball_size / 100.0)
 	v._shadows.add_child(v._ball_shadow)
+	apply_ball_size()
 	# MULTI BALL (port ADR-067): the balls past the first, the same art
 	if v.sim.multi_on:
 		for k in K.MULTI_MAX - 1:
@@ -201,3 +194,17 @@ func choose_swing(p: SimTypes.Player) -> String:
 	if dy > K.to_fp(K.HIT_SWEET_Y):
 		return "reach"
 	return "standard"
+
+
+## BALL SIZE (ADR-072), display only; BIG BALL draws it at 200%. Again
+## from the tuning panel (ADR-074), live.
+func apply_ball_size() -> void:
+	var big := v.sim.config.modifiers & K.MOD_BIG_BALL != 0
+	var k := Settings.ball_size / 100.0
+	v._ball_sprite.scale = Vector2(2, 2) if big else Vector2.ONE * k
+	v._ball_shadow.scale = Vector2(2, 1.6) if big else Vector2.ONE * k
+	for mb in v._multi_balls:
+		mb[1].scale = v._ball_sprite.scale
+		mb[2].scale = v._ball_shadow.scale
+	if v.feel:
+		v.feel._ball_scale = v._ball_sprite.scale

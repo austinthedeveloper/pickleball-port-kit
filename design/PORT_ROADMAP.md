@@ -74,6 +74,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-46 | BALL SPEED slider on MODIFIERS | `feature/cld-ball-speed` | Ready to test |
 | PORT-47 | 78% ball by default, BALL SIZE | `feature/cld-ball-defaults` | Ready to test |
 | PORT-48 | Longer rallies: CPU ERRORS, the paced ball | `feature/cld-ai-rallies` | Ready to test |
+| PORT-49 | The tuning panel (F2, TUNE) | `feature/cld-tuning-panel` | Ready to test |
 
 ## Releases
 
@@ -306,6 +307,18 @@ the same request). Open: 36 and 40.
     golden and conformance traces unchanged.
   - Status: **Ready to test**: say if rallies should run longer still
     (CPU ERRORS lower) or the CPUs should reach more.
+
+### 49. `feature/cld-tuning-panel`: the tuning panel (asked for 2026-10-20)
+
+- [x] `PORT-49` (ADR-074) F2 or the pause menu's TUNE: a flyout during a
+  match, the match waiting. BALL SPEED, BALL SIZE and CPU ERRORS live
+  (and saved); every modifier and rule, with APPLY restarting the match
+  with them; DEFAULTS. Not online or in the demo.
+  - Verified: `test_tuning` (a retuned sim plays as one built so, where
+    it is, live sliders, APPLY rebuilds and plays, the pause menu);
+    `test_layout`. 397/397 plus the e2e, golden traces unchanged.
+    Screenshot over a doubles match.
+  - Status: **Ready to test**: say what else belongs on it.
 
 ## For you
 

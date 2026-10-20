@@ -968,6 +968,26 @@ func _activate_players() -> void:
 			ai.slots[i].late_period = late_period(style.late_period, config.cpu_errors)
 			ai.slots[i].reaction_frames = style.reaction
 
+## The tuning panel (port ADR-074), between frames: BALL SPEED and CPU
+## ERRORS on the live match, as if it had started with them. An input to
+## the sim, like a pad's; the view never calls it on its own.
+func retune(speed: int, errors: int) -> void:
+	config.ball_speed = speed
+	config.cpu_errors = errors
+	var was_paced := ball_paced
+	var s := ball_speed()
+	ball_paced = (config.modifiers & (K.MOD_FAST_BALL | K.MOD_POPCORN)) != 0 \
+		or ball_per_cycle(config.difficulty, s) != BALL_CYCLE
+	if ball_paced:
+		ball_pace = make_ball_pace(config.difficulty, config.modifiers, s)
+		for level in popcorn_level:
+			popcorn_add(ball_pace, level)
+		if not was_paced:
+			ball_tick = 0
+	for i in K.MAX_PLAYERS:
+		if players[i].cpu_controlled and ai.styles[i] and not (attract and i == 0):
+			ai.slots[i].late_period = late_period(ai.styles[i].late_period, errors)
+
 ## BALL SPEED's percent, within its range (port ADR-071, 073).
 func ball_speed() -> int:
 	return clampi(config.ball_speed, K.BALL_SPEED_MIN, K.BALL_SPEED_MAX)

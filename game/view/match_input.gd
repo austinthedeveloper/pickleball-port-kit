@@ -129,6 +129,8 @@ func pause_rows() -> Array:
 	var rows := [{"id": "resume", "label": "RESUME", "press": func(): pause_choice = "resume"}]
 	if not v.sim.config.practice:
 		rows.append({"id": "restart", "label": "RESTART", "press": func(): pause_choice = "restart"})
+	if v.tuning and v.tuning.available():
+		rows.append({"id": "tune", "label": "TUNE", "press": func(): pause_choice = "tune"})
 	rows.append({"id": "menu", "label": "PARK" if v.park and v.sim.config.practice else "MAIN MENU",
 		"press": func(): pause_choice = "menu"})
 	return rows
@@ -153,6 +155,9 @@ func pause_input(it: SimTypes.Intent) -> bool:
 		"resume":
 			v._sfx.play("back")
 			it.pause_pressed = 1         # the sim unpauses on its own Start
+		"tune":
+			v.tuning.open_panel()        # ADR-074: over the pause menu
+			return true
 		"restart":
 			v._sfx.play("confirm")
 			if v.save:
