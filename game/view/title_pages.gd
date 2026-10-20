@@ -63,7 +63,10 @@ static func build(t: TitleScreen) -> void:
 	var mod_rows := {"modifiers": [{"id": "ball_speed", "label": "BALL SPEED",
 		"value": func(): return "%d%%" % Settings.ball_speed,
 		"change": func(d): Settings.ball_speed = clampi(Settings.ball_speed + d, K.BALL_SPEED_MIN,
-			K.BALL_SPEED_MAX)}], "rules": []}
+			K.BALL_SPEED_MAX)},
+		{"id": "ball_size", "label": "BALL SIZE", "value": func(): return "%d%%" % Settings.ball_size,
+			"change": func(d): Settings.ball_size = clampi(Settings.ball_size + d, Settings.BALL_SIZE_MIN,
+				Settings.BALL_SIZE_MAX)}], "rules": []}
 	for m in Settings.MOD_ROWS:
 		var bit: int = m[2]
 		mod_rows[m[3]].append({"id": m[0], "label": m[1],
@@ -72,7 +75,7 @@ static func build(t: TitleScreen) -> void:
 	mod_rows["modifiers"].append({"id": "rules", "label": "RULES", "value": func(): return t._mods_label("rules"),
 		"press": func(): t.open_page("rules")})
 	# over the logo (hidden, as on CONTROLS), clear of the key legend
-	t._add_page("modifiers", "MODIFIERS", mod_rows["modifiers"], help, Rect2(300, 60, 360, 0))
+	t._add_page("modifiers", "MODIFIERS", mod_rows["modifiers"], help, Rect2(300, 20, 360, 0))
 	t._add_page("rules", "RULES", mod_rows["rules"], help, Rect2(300, 60, 360, 0))
 	# PORT-31: local (the lobby, up to four pads) or online (1 vs 1)
 	t._add_page("multi", "MULTIPLAYER", [

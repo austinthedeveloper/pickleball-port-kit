@@ -101,8 +101,50 @@ func test_the_setting() -> void:
 	for k in 100:
 		page.change(1)
 	eq(Settings.ball_speed, K.BALL_SPEED_MAX)
-	Settings.ball_speed = 100
+	Settings.ball_speed = Settings.BALL_SPEED_DEFAULT
 	eq(t._mods_label(), "NONE")
 	t.free()
 	Settings.ball_speed = kept
 	wipe_saves("user://test_ball_speed/")
+
+
+## ADR-072: 78% is the default; a 0.16.0 save that kept 100 (no choice
+## made) moves to it, one saved since keeps its choice.
+func test_the_default() -> void:
+	var kept := Settings.ball_speed
+	eq(Settings.BALL_SPEED_DEFAULT, 78)
+	eq(SimTypes.MatchConfig.new().ball_speed, 100, "the sim's own is the ROM's")
+	var sv := fresh_save("user://test_ball_speed/")
+	sv.data["settings"]["ball_speed"] = 100          # as 0.16.0 wrote it
+	Settings.load_from(sv)
+	eq(Settings.ball_speed, 78, "an untouched 0.16.0 save")
+	Settings.ball_speed = 100
+	Settings.store_to(sv)
+	Settings.ball_speed = 50
+	Settings.load_from(sv)
+	eq(Settings.ball_speed, 100, "100 chosen since is kept")
+	Settings.ball_speed = kept
+	wipe_saves("user://test_ball_speed/")
+
+
+## BALL SIZE is display only: the ball's sprite and shadow, never the sim
+## (BIG BALL's reach is its own); BIG BALL still doubles it.
+func test_ball_size() -> void:
+	var kept := Settings.ball_size
+	eq(Settings.BALL_SIZE_DEFAULT, 105)
+	Settings.ball_size = 120
+	var v := MatchView.new()
+	runner.root.add_child(v)
+	v.setup(Settings.config_for(false, 0, K.DIFFICULTY_MEDIUM, 11), "park", false)
+	eq(v._ball_sprite.scale, Vector2(1.2, 1.2), "the ball")
+	eq(v._ball_shadow.scale, Vector2(1.2, 1.2), "its shadow")
+	eq(v.sim.grow_fp, 0, "no more reach")
+	v.free()
+	var cfg := Settings.config_for(false, 0, K.DIFFICULTY_MEDIUM, 11)
+	cfg.modifiers = K.MOD_BIG_BALL
+	var b := MatchView.new()
+	runner.root.add_child(b)
+	b.setup(cfg, "park", false)
+	eq(b._ball_sprite.scale, Vector2(2, 2), "BIG BALL is still BIG BALL")
+	b.free()
+	Settings.ball_size = kept

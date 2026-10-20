@@ -25,7 +25,9 @@ func _reload() -> SaveGame:
 func _start(shot: int, target: int, rate: int, difficulty: int) -> void:
 	save = _blank_save()
 	save.data["settings"]["practice"] = [shot, target, rate, zone_setting]
-	sim = Sim.new(save.practice_config(difficulty))
+	var cfg := save.practice_config(difficulty)
+	cfg.ball_speed = 100            # the C host tests' ball (ADR-072)
+	sim = Sim.new(cfg)
 
 
 func _step_while(cond: Callable, limit: int) -> void:

@@ -72,6 +72,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-44 | Story mode: Save the Park | `feature/cld-story` | Ready to test |
 | PORT-45 | PICKLEBALL 101: the real game's rules | `feature/cld-pickleball-101` | Ready to test |
 | PORT-46 | BALL SPEED slider on MODIFIERS | `feature/cld-ball-speed` | Ready to test |
+| PORT-47 | 78% ball by default, BALL SIZE | `feature/cld-ball-defaults` | Ready to test |
 
 ## Releases
 
@@ -280,6 +281,17 @@ the same request). Open: 36 and 40.
     golden traces unchanged. Screenshot of MODIFIERS.
   - Status: **Ready to test**: try 90% to 95%; say where it feels right
     and I can make that the default.
+
+### 47. `feature/cld-ball-defaults`: the ball's defaults (asked for 2026-10-20)
+
+- [x] `PORT-47` (ADR-072) BALL SPEED defaults to 78% (the user's pick;
+  untouched 0.16.0 saves move to it); BALL SIZE, display only, 80-150%,
+  105% by default.
+  - Verified: `test_ball_speed` (the default, the migration, the size on
+    the sprite and shadow, not the reach). 388/388 plus the e2e, golden
+    and conformance traces unchanged (they run the ROM's 100%).
+    Screenshots of MODIFIERS and a match.
+  - Status: **Ready to test**.
 
 ## For you
 

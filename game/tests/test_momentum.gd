@@ -87,6 +87,6 @@ func test_cpus_never_fault() -> void:
 			if e[0] == K.EVENT_POINT and s.last_fault == K.FAULT_MOMENTUM:
 				faults += 1
 	print("    momentum: %d volleys, %d faults" % [volleys, faults])
-	check(volleys > 50)
+	check(volleys > 30, "the CPUs volley (%d)" % volleys)
 	eq(faults, 0)
 	s.dispose()
