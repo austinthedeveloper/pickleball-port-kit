@@ -182,6 +182,7 @@ func test_view_matches_a_bare_sim() -> void:
 	runner.root.add_child(v)
 	v.setup(cfg, "park", false)
 	v.sim.p1_bot = true
+	v.highlight = null                   # the match ends in here: no replay over it
 	var bare := Sim.new(cfg)
 	bare.p1_bot = true
 	var reacted := false

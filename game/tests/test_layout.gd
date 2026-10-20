@@ -834,3 +834,34 @@ func test_tuning() -> void:
 	Settings.ball_size = kept[3]
 	Settings.cpu_errors = kept[4]
 	GameControls.device_serial += 1
+
+
+## PORT-51: PLAY OF THE MATCH's card, catching up and playing, with the
+## longest caption (an 8-letter name, every ending), keyboard and pad.
+func test_highlight() -> void:
+	var kept := [GameControls.last_device, Settings.pad_glyphs]
+	for dev in [GameControls.KEYBOARD, GameControls.PAD]:
+		GameControls.last_device = dev
+		Settings.pad_glyphs = 2
+		GameControls.device_serial += 1
+		var v := MatchView.new()
+		runner.root.add_child(v)
+		v.setup(Settings.config_for(true, 4, K.DIFFICULTY_MEDIUM, 11), "park", false)
+		v.card_frames = -1
+		for f in [K.FAULT_OUT, K.FAULT_SECOND_BOUNCE, K.FAULT_NET, K.FAULT_MOMENTUM]:
+			for winner in [0, 1]:
+				v.highlight.best = {"shots": 188, "from": 0, "to": 0, "winner": winner, "fault": f,
+					"snap_from": [], "snap_to": []}
+				v.highlight.start(func(): pass)
+				v.highlight._caption[2].visible = true
+				check_layout(v, "PLAY OF THE MATCH, fault %d, team %d (device %d)" % [f, winner, dev])
+				v.highlight._state = ""
+				v.highlight.overlay.free()
+				v.highlight.overlay = null
+				v.highlight.replay.dispose()
+				v.highlight.replay = null
+				v._hud.visible = true
+		v.free()
+	GameControls.last_device = kept[0]
+	Settings.pad_glyphs = kept[1]
+	GameControls.device_serial += 1

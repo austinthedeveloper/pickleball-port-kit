@@ -163,6 +163,8 @@ func pause_input(it: SimTypes.Intent) -> bool:
 			if v.save:
 				v.save.drop_new_records()          # only a finished match asks
 				v.save.career.new_unlocks = 0
+			if v.highlight:
+				v.highlight.op(["new_match"])
 			v.sim.new_match()
 			v._prev_phase = -1
 			v.input_lock = MatchView.INPUT_LOCK_FRAMES   # the closing press doesn't serve

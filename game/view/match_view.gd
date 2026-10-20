@@ -21,6 +21,7 @@ const INPUT_LOCK_FRAMES := 12
 
 var glide := BallGlide.new()       ## a paced ball drawn gliding (ADR-073)
 var tuning: TuningPanel            ## F2 / TUNE (ADR-074); null in the demo
+var highlight: Highlight           ## PLAY OF THE MATCH (ADR-075); null when there's none
 var _base_time := CourtStyle.DAY    ## the owner's time and court, before GLOW's
 var _base_court: Array = []
 var sim: Sim
@@ -276,6 +277,9 @@ func _build() -> void:
 	add_child(_debug)
 	if tuning and tuning.get_parent() == null:
 		add_child(tuning)
+	highlight = Highlight.new(self)
+	if not highlight.wanted():
+		highlight = null
 
 
 ## The tuning panel's APPLY (ADR-074): the match rebuilt in place with a new
@@ -462,6 +466,9 @@ func _physics_process(_delta: float) -> void:
 		tuning.update()                      # the match waits (ADR-074)
 		_update_visuals()
 		return
+	if highlight and highlight.playing():
+		highlight.update()                   # PLAY OF THE MATCH (ADR-075)
+		return
 	if initials.open:
 		end.update_initials()
 		_update_visuals()
@@ -497,12 +504,16 @@ func _physics_process(_delta: float) -> void:
 		if net and net.closed():
 			finished.emit(true)
 		return                           # the pause menu took the frame, or online, the wait
+	if highlight:
+		highlight.record(human)
 	sim.step(human)
 	if net:
 		net.after_step(sim)
 	var events := sim.drain_events()
 	for e in events:
 		_on_event(e)
+	if highlight:
+		highlight.after_step(events)
 	if lesson:
 		lesson.observe(sim, events)
 		lesson_view.refresh()
@@ -514,10 +525,9 @@ func _physics_process(_delta: float) -> void:
 		if sim.phase == K.PHASE_POINT_RESULT:
 			_check_close_call()
 		if sim.phase == K.PHASE_MATCH_RESULT:
-			end.on_match_over()
-			if not demo:
-				Music.sting(Music.result_sting(sim.match_winner == my_team(), cleared,
-					sim.config.human[2] or sim.config.human[3]))
+			_prev_phase = sim.phase
+			if not (highlight and highlight.start(_match_over)):
+				_match_over()
 		_prev_phase = sim.phase
 	flair.tick()
 	if sim.rematch_requested:
@@ -527,6 +537,8 @@ func _physics_process(_delta: float) -> void:
 		if ladder and sim.match_winner == 0:
 			next_rung.emit()
 			return
+		if highlight:
+			highlight.op(["new_match"])
 		sim.new_match()
 		flair.begin()
 		Music.cue(music_track())             # the loop again after the stinger
@@ -540,6 +552,36 @@ func _physics_process(_delta: float) -> void:
 		finished.emit(true)
 		return
 	_update_visuals()
+
+
+## The match is over (after PLAY OF THE MATCH, if there was one): the
+## records and the result's sting.
+func _match_over() -> void:
+	end.on_match_over()
+	if not demo:
+		Music.sting(Music.result_sting(sim.match_winner == my_team(), cleared,
+			sim.config.human[2] or sim.config.human[3]))
+
+
+## An event of PLAY OF THE MATCH's replay: the sounds and the show, never
+## the stats, the score's animation, quips or records.
+func on_replay_event(e: Array) -> void:
+	feel.on_event(e)
+	_sfx.event(e, (sim.shot_serial - sim.rally_start) & 0xff, false)
+	match int(e[0]):
+		K.EVENT_HIT, K.EVENT_SERVE:
+			var slot: int = e[3] & 15
+			var lead := -14.0 if sim.players[slot].team else 14.0
+			var shot: int = e[3] >> 4 if e[0] == K.EVENT_HIT else K.SHOT_STANDARD
+			actors.spawn_fx("spark", CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp)
+				+ Vector2(lead, 0), 1 if shot == K.SHOT_DRIVE or shot == K.SHOT_OVERHEAD else 0)
+			if shot == K.SHOT_OVERHEAD:
+				_players[slot]["choice"] = "overhead"
+				actors.smash_pop(CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp))
+		K.EVENT_BOUNCE:
+			actors.spawn_fx("dust", CourtView.ground(K.to_fp(e[1]), K.to_fp(e[2])), 0)
+		K.EVENT_POINT:
+			crowd.cheer(90)
 
 
 func _on_event(e: Array) -> void:

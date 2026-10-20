@@ -142,6 +142,7 @@ func test_a_real_match_stings_and_the_demo_doesnt() -> void:
 		runner.root.add_child(v)
 		v.setup(cfg, "park", demo)
 		v.sim.p1_bot = true
+		v.highlight = null               # straight to the result (test_highlight has it)
 		var f := 0
 		while v.sim.phase != K.PHASE_MATCH_RESULT and f < 30000:
 			if v.sim.phase == K.PHASE_SERVE_SETUP and f % 32 == 0:

@@ -76,6 +76,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-48 | Longer rallies: CPU ERRORS, the paced ball | `feature/cld-ai-rallies` | Ready to test |
 | PORT-49 | The tuning panel (F2, TUNE) | `feature/cld-tuning-panel` | Ready to test |
 | PORT-50 | 85% ball speed, 110% ball size by default | `feature/cld-ball-defaults-2` | Ready to test |
+| PORT-51 | PLAY OF THE MATCH | `feature/cld-play-of-the-match` | Ready to test |
 
 ## Releases
 
@@ -335,6 +336,19 @@ the same request). Open: 36 and 40.
     `rally_stats` over 12 matches: doubles 9.0 to 11.2, singles 6.8 to
     10.8). 397/397 plus the e2e, golden traces unchanged.
   - Status: **Ready to test**.
+
+### 51. `feature/cld-play-of-the-match`: PLAY OF THE MATCH (dealer's choice, 2026-10-20)
+
+- [x] `PORT-51` (ADR-075) When a match ends, its longest rally replayed
+  television-style (REPLAY bug, card, half-speed finish, how it was won),
+  skippable; the real rally, re-run from the recorded inputs by a second
+  sim and checked against the live one.
+  - Verified: `test_highlight` (exact to the rally's end, through a
+    RESTART and a retune; the live match untouched; skip; where it is);
+    `test_layout`. 403/403 plus the e2e, golden traces unchanged.
+    Screenshots of the card and of a replay.
+  - Status: **Ready to test**: finish a match with a long rally. Say if
+    it should be optional (a setting), or show a second-best too.
 
 ## For you
 

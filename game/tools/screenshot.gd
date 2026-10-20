@@ -6,7 +6,7 @@
 ## the MOD_* bits. "title_options"
 ## (any page id) opens that title page; "court=S,K,R,L" sets the court
 ## colour presets; "time=N" DAY 0, DUSK 1, NIGHT 2;
-## "pad" shows the controller prompts; "save" a save with records (title); "pause" pauses the match at the end; "tune" opens the tuning panel;
+## "pad" shows the controller prompts; "save" a save with records (title); "pause" pauses the match at the end; "tune" opens the tuning panel; "potm" a bot match to its PLAY OF THE MATCH;
 ## "closecall" shows a forced close-up; "initials" the initials card;
 ## "result" plays a bot match and ends it (the stats card); "mp4" four
 ## humans on fake pads (doubles); title_lobby a lobby with three players.
@@ -323,16 +323,29 @@ func _initialize() -> void:
 					cfg.palette[slot] = PlayerSelect.PAL_BLUE
 		m.court = Settings.court.duplicate()
 		m.time = Settings.time_i
+		if "potm" in a.slice(4):
+			cfg = Settings.config_for(mode == "doubles", 2, K.DIFFICULTY_MEDIUM, 5)
 		m.setup(cfg, venue, mode == "demo")
 		if mode != "demo" and not "human" in a.slice(4):
 			m.sim.p1_bot = true
+		if "potm" in a.slice(4):
+			# PORT-51: a short bot match to its PLAY OF THE MATCH, near the
+			# rally's end (potm_title: the title card, still catching up)
+			m.card_frames = -1
+			for f in 60 * 60 * 15:
+				m._physics_process(1.0 / 60.0)
+				var h := m.highlight
+				if h and h.playing() and ("potm_title" in a.slice(4) or (h._state == "play"
+						and h._frame >= int(h.best["to"]) - 12)):
+					break
 		_view = m
 	process_frame.connect(_tick)
 
 
 func _tick() -> void:
 	_frames += 1
-	if _view is MatchView and _view.sim.p1_bot and _view.sim.phase == K.PHASE_SERVE_SETUP \
+	if _view is MatchView and _view.sim.p1_bot and not (_view.highlight and _view.highlight.playing()) \
+			and _view.sim.phase == K.PHASE_SERVE_SETUP \
 			and _view.sim.server_index == 0 and _frames % 32 == 0:
 		# the bot presses B to serve, like the test harness
 		_view.sim.intents[0].hit_pressed = 1

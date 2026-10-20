@@ -140,6 +140,8 @@ func _show(id: String) -> void:
 
 
 func _retune() -> void:
+	if view.highlight:
+		view.highlight.op(["retune", Settings.ball_speed, Settings.cpu_errors])   # replayed too
 	view.sim.retune(Settings.ball_speed, Settings.cpu_errors)
 
 

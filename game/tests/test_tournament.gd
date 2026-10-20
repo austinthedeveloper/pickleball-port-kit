@@ -204,6 +204,7 @@ func test_a_real_match_records() -> void:
 	v.card_frames = -1
 	v._hud.close_card()
 	v.sim.p1_bot = true
+	v.highlight = null                   # straight to the result (test_highlight has it)
 	var f := 0
 	while v.sim.phase != K.PHASE_MATCH_RESULT and f < 30000:
 		if v.sim.phase == K.PHASE_SERVE_SETUP and f % 32 == 0:
