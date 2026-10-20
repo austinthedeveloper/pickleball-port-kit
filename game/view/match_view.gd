@@ -86,6 +86,8 @@ const GLOW_TIME := 2
 const GLOW_LINES := 4
 var critter: Critter             ## SNES ADR-064: the venue's gull, satellite or fish
 var wind_view: WindView          ## WIND's streaks (port ADR-065)
+var heat: RallyHeat              ## PORT-43: a long rally's fire
+var focus: RallyHeat.FocusDim    ## ... and its focus
 ## This match's stats (PORT-13), from the events; display only.
 var stats := MatchStats.new()
 ## The parts (PORT-27): the people and ball, the input, the match's end.
@@ -158,6 +160,12 @@ func _build() -> void:
 	var vm: Dictionary = manifest["venues"][venue]
 	var z := 0
 	for layer in vm["layers"]:
+		if layer["name"] == "net":
+			# PORT-43: a long rally dims everything behind the net but the
+			# court (the backdrop, stands, crowd and surround)
+			focus = RallyHeat.FocusDim.new().setup(self, z)
+			add_child(focus)
+			z += 1
 		var s := Sprite2D.new()
 		s.texture = _tex(layer["file"])
 		s.centered = false
@@ -188,6 +196,8 @@ func _build() -> void:
 		if layer["name"] == "ground" and sim.config.modifiers & K.MOD_LAVA:
 			_build_lava(z)
 			z += 1
+		if layer["name"] == "front" and focus:
+			focus.dim_too(s)
 		if layer["name"] == "net":
 			_shadows = Node2D.new()
 			_shadows.z_index = z
@@ -207,12 +217,18 @@ func _build() -> void:
 	feel.setup(self)
 	flair = Flair.new().setup(sim, demo)
 	_fx.add_child(flair)
+	heat = RallyHeat.new().setup(self)
+	_fx.add_child(heat)
 	critter = Critter.for_venue(venue, sim)
 	if critter:
 		add_child(critter)
 	if sim.config.modifiers & K.MOD_WIND:
 		wind_view = WindView.new().setup(sim)
 		add_child(wind_view)
+	# the sky's critter and the wind dim with the backdrop on a long rally
+	for n: CanvasItem in [critter, wind_view]:
+		if n and focus:
+			focus.dim_too(n)
 	if sim.config.practice and not demo:
 		_shadows.add_child(PracticeView.zone(sim.practice))
 		_actors.add_child(PracticeView.machine(sim.practice))
@@ -602,6 +618,8 @@ func _update_camera() -> void:
 	var court_shift := (-cam).round()
 	_actors.position = court_shift
 	_shadows.position = court_shift
+	if focus:
+		focus.position = court_shift
 	_fx.position = court_shift
 
 
@@ -646,6 +664,10 @@ func _update_visuals() -> void:
 		_ball_sprite.region_rect.position.x = int(_ball_frame) * fw
 	_draw_multi_balls()
 	feel.update()
+	var shots := RallyHeat.rally(self)
+	heat.update()
+	if focus:
+		focus.update(shots)
 	if critter:
 		critter.update()
 	if wind_view:

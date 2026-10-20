@@ -68,6 +68,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-40 | The Pickleball '95 promises | `feature/cld-sideout` ... | In progress |
 | PORT-41 | Four swings and the short hold | `feature/cld-four-shots` | Ready to test |
 | PORT-42 | Cleanup round 4: files, code, docs | `feature/cld-cleanup` | Done |
+| PORT-43 | Rally heat: fire at 10, focus from 15 | `feature/cld-rally-heat` | Ready to test |
 
 ## Releases
 
@@ -200,6 +201,20 @@ the same request). Open: 36 and 40.
     unchanged; no broken links; screenshots of the title, lobby, park, a
     match, a result and the museum unchanged.
   - Status: **Done**.
+
+### 43. `feature/cld-rally-heat`: rally heat (asked for 2026-10-19)
+
+- [x] `PORT-43` Visual cues for a long rally (ADR-068), display only: at
+  10 shots the ball and the RALLY sign catch fire; from 15, and a step
+  darker every 5 after, everything but the court dims, the players in a
+  spotlight; the point's end lets it go. The ball speeding up as a rally
+  goes on is set aside for now.
+  - Verified: `test_rally_heat` (thresholds, the cap, fire and focus in a
+    held 40-shot rally and out after, none in the demo or MULTI BALL, a
+    match plays as a bare sim). 369/369 plus the e2e, golden traces
+    unchanged. Screenshots at 12, 25 (LAKESIDE) and 40 shots.
+  - Status: **Ready to test**: play a long rally; say if the steps should
+    come sooner, go darker, or the fire be bigger.
 
 ## For you
 

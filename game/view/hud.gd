@@ -40,6 +40,8 @@ var _serve_icons: Array = []     ## [left, right] ball icons
 var _server_mark: Node2D
 var _rally: Control
 var _rally_text: BitmapText
+var _rally_panel: NinePatchRect
+var _rally_flames: Node2D               ## PORT-43: the sign burns on a long rally
 var _rally_pop := 0
 var _last_rally := 0
 var _frame := 0
@@ -139,8 +141,13 @@ func setup(v: MatchView) -> void:
 	_rally = Control.new()
 	_rally.visible = false
 	add_child(_rally)
+	_rally_flames = Node2D.new()          # behind the panel: tongues over its top
+	_rally_flames.draw.connect(_draw_rally_flames)
+	_rally_flames.visible = false
+	_rally.add_child(_rally_flames)
 	var rp := _panel("sub", Rect2(410, 492, 140, 30))
 	rp.reparent(_rally)
+	_rally_panel = rp
 	_rally_text = _text("small", "", Vector2(480, 500), 0.5, Color("fbe46a"), _rally)
 	if view.multiplayer():
 		for slot in K.MAX_PLAYERS:
@@ -449,6 +456,17 @@ func _refresh_live() -> void:
 	if rally != _last_rally:
 		_last_rally = rally
 		_rally_pop = 10 if live else 0
+	# PORT-43: on fire from RallyHeat.FIRE_AT shots
+	var burning := _rally.visible and RallyHeat.on_fire(rally)
+	_rally_flames.visible = burning
+	if burning:
+		_rally_flames.queue_redraw()
+		var flick := 0.5 + 0.5 * sin(_frame * 0.4)
+		_rally_text.tint = Color("ffd25a").lerp(Color("ff7a2a"), flick)
+		_rally_panel.modulate = Color(1.0, 0.72, 0.55)
+	elif _rally.visible:
+		_rally_text.tint = Color("fbe46a")
+		_rally_panel.modulate = Color.WHITE
 	if _rally.visible:
 		_rally_text.text = "RALLY %d" % rally
 		if _rally_pop > 0:
@@ -456,6 +474,22 @@ func _refresh_live() -> void:
 		var rs := 1.0 + 0.35 * float(_rally_pop) / 10.0
 		_rally_text.scale = Vector2(rs, rs)
 		_rally_text.position.y = 500.0 - (rs - 1.0) * 8.0
+
+
+## Flames licking up over the RALLY sign: tongues along its top edge,
+## each flickering on its own beat (the frame count, no randomness).
+func _draw_rally_flames() -> void:
+	for k in 9:
+		var x := 418.0 + k * 15.5
+		var h := 13.0 + 7.0 * sin(_frame * 0.31 + k * 1.37) + 3.0 * sin(_frame * 0.73 + k * 2.9)
+		var sway := 2.5 * sin(_frame * 0.21 + k)
+		var base := 496.0
+		var outer := PackedVector2Array([Vector2(x - 8, base), Vector2(x + sway, base - h),
+			Vector2(x + 8, base)])
+		var inner := PackedVector2Array([Vector2(x - 4, base), Vector2(x + sway * 0.6, base - h * 0.6),
+			Vector2(x + 4, base)])
+		_rally_flames.draw_colored_polygon(outer, Color(1.0, 0.42, 0.1, 0.9))
+		_rally_flames.draw_colored_polygon(inner, Color(1.0, 0.86, 0.35, 0.95))
 
 
 func _draw_server_mark() -> void:

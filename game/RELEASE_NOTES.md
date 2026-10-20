@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.13.1`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.13.1-dirty`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-42 of 42 roadmap tasks are in.
+43 of 43 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -256,3 +256,9 @@ Status: **Ready to test**: try I / Y for the slice and hold Shift / LB with each
 Organize the files, optimize the code, clean up the docs. Docs: one heading per roadmap task (the release notes had dropped PORT-37 to 40), the finished tasks moved to the history, the SNES-era docs into `design/snes/`, 37 broken links fixed, KNOWN_ISSUES split into open, resolved and the SNES game's, the READMEs current. Code: text doesn't redraw unchanged, hidden menu pages and the hidden lobby stop working every frame, the lobby dresses a card only when it changes, palettes.json and manifest.json are read once, the host screen reads the adapters once; dead code out; `UiKit`, `PlayerLook.team_sheet` and `TestSuite.fresh_save` own what was copied; the AI's and Feel's references typed. Then the splits: `title_pages.gd` (the title's page tables), `hud_cards.gd` (the HUD's cards), `park_message.gd` (the park's panel text), `sim/multi_ball.gd` (MULTI BALL, so `sim.gd` keeps the C's shape), and `MenuPage.drive()` for the five copies of the menu keys.
 
 Status: **Done**.
+
+## PORT-43: rally heat (asked for 2026-10-19)
+
+Visual cues for a long rally (ADR-068), display only: at 10 shots the ball and the RALLY sign catch fire; from 15, and a step darker every 5 after, everything but the court dims, the players in a spotlight; the point's end lets it go. The ball speeding up as a rally goes on is set aside for now.
+
+Status: **Ready to test**: play a long rally; say if the steps should come sooner, go darker, or the fire be bigger.
