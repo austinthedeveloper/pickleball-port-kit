@@ -19,6 +19,7 @@ const SLOTS := ["idle0", "idle1", "run0", "run1", "run2", "run3", "windup", "swi
 ## started it can't also serve (playbook rule 9).
 const INPUT_LOCK_FRAMES := 12
 
+var glide := BallGlide.new()       ## a paced ball drawn gliding (ADR-073)
 var sim: Sim
 var venue := "park"
 var manifest: Dictionary
@@ -656,9 +657,10 @@ func _update_visuals() -> void:
 	_ball_root.visible = show and not ghost_hidden() and not _multi_blink_off(0)
 	_ball_shadow.visible = show
 	if show:
-		var g := CourtView.ground(b.x_fp, b.y_fp)
+		var q := glide.position(sim)         # a paced ball, gliding (ADR-073)
+		var g := CourtView.ground(q.x, q.y)
 		_ball_root.position = g.round() + Vector2(0, 1)
-		_ball_sprite.position = (CourtView.air(b.x_fp, b.y_fp, b.z_fp) - g).round()
+		_ball_sprite.position = (CourtView.air(q.x, q.y, q.z) - g).round()
 		_ball_shadow.position = g.round()
 		var speed := absf(b.vx_fp) + absf(b.vy_fp)
 		_ball_frame = fmod(_ball_frame + speed / 80.0, 4.0)

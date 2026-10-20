@@ -33,6 +33,7 @@ static func config(s: Array) -> SimTypes.MatchConfig:
 	cfg.modifiers = s[3]
 	cfg.overhead = 0
 	cfg.ball_speed = 100            # the ROM's ball (ADR-071, 072)
+	cfg.cpu_errors = 100            # and its CPUs' errors (ADR-073)
 	return cfg
 
 

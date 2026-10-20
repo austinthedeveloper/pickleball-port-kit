@@ -1,6 +1,8 @@
 # ADR-071 — Ball Speed
 
-Status: **Accepted 2026-10-20**
+Status: **Accepted 2026-10-20**; the mechanism replaced by ADR-073
+(BALL SPEED now paces the ball the ROM's way: the higher arcs below
+made balls unreachable)
 Milestone: `PORT-46` (the user's ask: a slider on MODIFIERS, at the
 ball's current speed, in 1% steps, to try it 5-10% slower).
 

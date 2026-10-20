@@ -73,6 +73,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-45 | PICKLEBALL 101: the real game's rules | `feature/cld-pickleball-101` | Ready to test |
 | PORT-46 | BALL SPEED slider on MODIFIERS | `feature/cld-ball-speed` | Ready to test |
 | PORT-47 | 78% ball by default, BALL SIZE | `feature/cld-ball-defaults` | Ready to test |
+| PORT-48 | Longer rallies: CPU ERRORS, the paced ball | `feature/cld-ai-rallies` | Ready to test |
 
 ## Releases
 
@@ -292,6 +293,19 @@ the same request). Open: 36 and 40.
     and conformance traces unchanged (they run the ROM's 100%).
     Screenshots of MODIFIERS and a match.
   - Status: **Ready to test**.
+
+### 48. `feature/cld-ai-rallies`: longer rallies (asked for 2026-10-20)
+
+- [x] `PORT-48` (ADR-073) Measured with `tools/rally_stats.gd`. BALL
+  SPEED now paces the ball as the ROM does on KID and EASY (same flights,
+  slower; ADR-071's higher arcs had made balls unreachable), drawn
+  gliding; CPU ERRORS on MATCH SETUP, 50% by default, spaces the CPUs'
+  late swings. Doubles rallies at MEDIUM: 8.1 shots (the ROM) to about
+  12.5; singles 6.4 to 9.
+  - Verified: `test_rallies`, `test_ball_speed`. 391/391 plus the e2e,
+    golden and conformance traces unchanged.
+  - Status: **Ready to test**: say if rallies should run longer still
+    (CPU ERRORS lower) or the CPUs should reach more.
 
 ## For you
 

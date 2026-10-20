@@ -5,50 +5,60 @@
 extends TestSuite
 
 
-func _ball(flight: Array) -> SimTypes.Ball:
-	var b := SimTypes.Ball.new()
-	b.active = 1
-	b.rally_state = K.BALL_RALLY_LIVE
-	b.x_fp = K.to_fp(40)
-	b.y_fp = K.to_fp(K.COURT_CENTERLINE_Y)
-	b.z_fp = K.to_fp(12)
-	b.flight = flight
-	return b
-
-
-## Frames to the first bounce, and where.
-func _fly(b: SimTypes.Ball) -> Array:
-	for f in 400:
-		if Sim.simulate_step(b) & K.BALL_EVENT_BOUNCE:
-			return [f + 1, K.from_fp(b.x_fp), K.from_fp(b.y_fp)]
-	return [-1, 0, 0]
-
-
-func test_flight() -> void:
-	var tx := K.COURT_NET_X + 60
-	var ty := K.COURT_CENTERLINE_Y + 10
-	var base := _ball([1, 1])
-	Sim.launch(base, tx, ty, 40)
-	var at100 := _fly(base)
-	var slow := _ball([100, 90])
-	Sim.launch(slow, tx, ty, 40)
-	var at90 := _fly(slow)
-	check(absi(at90[1] - tx) <= 2 and absi(at90[2] - ty) <= 2, "lands where aimed (%s)" % [at90])
-	check(absi(at100[1] - at90[1]) <= 2, "where 100% lands")
-	check(absi(at90[0] - 40 * 100 / 90) <= 2 and at90[0] > at100[0],
-		"over 100/90 the frames (%d vs %d)" % [at90[0], at100[0]])
-
-
-func test_the_sim_sets_it() -> void:
+## Since ADR-073, the ROM's own slow ball (KID and EASY's): fewer ball
+## steps a cycle, spread evenly, the flights themselves unchanged.
+func test_the_pace() -> void:
 	var cfg := SimTypes.MatchConfig.singles()
-	eq(Sim.new(cfg).ball.flight, [1, 1], "100%: untouched")
-	cfg.ball_speed = 93
-	eq(Sim.new(cfg).ball.flight, [100, 93])
-	cfg.modifiers = K.MOD_MOON
-	eq(Sim.new(cfg).ball.flight, [300, 186], "with MOON's 3/2")
-	cfg.modifiers = 0
+	var s := Sim.new(cfg)
+	check(not s.ball_paced, "100%: unpaced, as the ROM")
+	eq(s.ball.flight, [1, 1], "and the flight untouched")
+	cfg.ball_speed = 78
+	s = Sim.new(cfg)
+	check(s.ball_paced)
+	eq(s.ball.flight, [1, 1], "the same flights")
+	var n := 0
+	for k in Sim.BALL_CYCLE:
+		n += int(s.ball_pace[k])
+	eq(n, 47, "47 steps in 60 frames")
+	cfg.difficulty = K.DIFFICULTY_EASY
+	eq(Sim.ball_per_cycle(K.DIFFICULTY_EASY, 78), 35, "on EASY's slower pace")
 	cfg.ball_speed = 5
-	eq(Sim.new(cfg).ball.flight, [100, K.BALL_SPEED_MIN], "clamped")
+	cfg.difficulty = K.DIFFICULTY_MEDIUM
+	eq(Sim.new(cfg).ball_speed(), K.BALL_SPEED_MIN, "clamped")
+	cfg.ball_speed = 130
+	var fast := Sim.new(cfg)
+	n = 0
+	for k in Sim.BALL_CYCLE:
+		n += int(fast.ball_pace[k])
+	eq(n, 78, "faster: some frames take two steps")
+
+
+## A ball flies the same path at 78% as at 100%, just over more frames.
+func test_same_path() -> void:
+	var paths := []
+	for speed in [100, 78]:
+		var cfg := Settings.config_for(false, 0, K.DIFFICULTY_MEDIUM, 11)
+		cfg.ball_speed = speed
+		var s := Sim.new(cfg)
+		s.p1_bot = true
+		var path := []
+		var frames := 0
+		while s.ball.rally_state != K.BALL_RALLY_LIVE or s.ball.last_hitter == K.BALL_NO_HITTER:
+			s.step([SimTypes.Intent.new(), null, null, null])
+			s.drain_events()
+		var serial := s.shot_serial
+		var seen := -1
+		while s.shot_serial == serial and frames < 600:
+			if s.ball_steps != seen:
+				seen = s.ball_steps
+				path.append([s.ball.x_fp, s.ball.y_fp, s.ball.z_fp])
+			s.step([SimTypes.Intent.new(), null, null, null])
+			s.drain_events()
+			frames += 1
+		paths.append([path.slice(0, 20), frames])
+		s.dispose()
+	eq(paths[1][0], paths[0][0], "step for step, the same flight")
+	check(paths[1][1] > paths[0][1], "taking longer (%d vs %d frames)" % [paths[1][1], paths[0][1]])
 
 
 ## A doubles match at 90% plays out: rallies, points, a winner.

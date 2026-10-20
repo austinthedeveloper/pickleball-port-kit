@@ -51,10 +51,13 @@ static var two_players := false
 static var camera_i := 1                ## CAMERAS: 50% (since 0.9.1; was OFF)
 const BALL_SPEED_DEFAULT := 78         ## the user's pick, 2026-10-20 (ADR-072); the ROM's is 100
 const BALL_SIZE_DEFAULT := 105
+const CPU_ERRORS_MAX := 200
+const CPU_ERRORS_DEFAULT := 50        ## half the ROM's late swings: longer rallies (ADR-073)
 const BALL_SIZE_MIN := 80
 const BALL_SIZE_MAX := 150             ## BIG BALL is 200
 static var mod_bits := 0
 static var ball_speed := BALL_SPEED_DEFAULT   ## MODIFIERS > BALL SPEED, percent (ADR-071)
+static var cpu_errors := CPU_ERRORS_DEFAULT   ## CPU ERRORS, percent of the ROM's (ADR-073)
 static var ball_size := BALL_SIZE_DEFAULT     ## MODIFIERS > BALL SIZE, percent, display only (ADR-072)
 ## Window options: fullscreen, and integer scaling (crisp) or fit (fills).
 static var fullscreen := false
@@ -104,6 +107,7 @@ static func load_from(save: SaveGame) -> void:
 		speed = BALL_SPEED_DEFAULT
 	ball_speed = clampi(speed, K.BALL_SPEED_MIN, K.BALL_SPEED_MAX)
 	ball_size = clampi(int(st.get("ball_size", BALL_SIZE_DEFAULT)), BALL_SIZE_MIN, BALL_SIZE_MAX)
+	cpu_errors = clampi(int(st.get("cpu_errors", CPU_ERRORS_DEFAULT)), 0, CPU_ERRORS_MAX)
 	Sfx.setting = clampi(int(st.get("sound", 0)), 0, AudioMap.SOUND_NAMES.size() - 1)
 	Music.volume = clampi(int(st.get("music", Music.DEFAULT_VOLUME)), 0, Music.VOLUMES)
 	fullscreen = int(st.get("fullscreen", 0)) != 0
@@ -135,7 +139,7 @@ static func store_to(save: SaveGame) -> void:
 		return
 	save.data["settings"].merge({"venue": venue_i, "difficulty": difficulty_i,
 		"points": points_i, "players": 2 if two_players else 1, "opponent": opponent_i,
-		"camera": camera_i, "mod_bits": mod_bits, "ball_speed": ball_speed, "ball_speed_v": 1, "ball_size": ball_size, "sound": Sfx.setting,
+		"camera": camera_i, "mod_bits": mod_bits, "ball_speed": ball_speed, "ball_speed_v": 1, "ball_size": ball_size, "cpu_errors": cpu_errors, "sound": Sfx.setting,
 		"music": Music.volume,
 		"fullscreen": 1 if fullscreen else 0, "integer_scale": 1 if integer_scale else 0,
 		"player": [p1_choice["palette"], p1_choice["variant"], p1_choice["paddle"]],
@@ -206,6 +210,7 @@ static func config_for(doubles: bool, opponent: int, difficulty: int, points: in
 	cfg.difficulty = difficulty
 	cfg.points_to_win = points
 	cfg.ball_speed = ball_speed
+	cfg.cpu_errors = cpu_errors
 	if not p2.is_empty():
 		return cfg
 	cfg.opponent = opponent

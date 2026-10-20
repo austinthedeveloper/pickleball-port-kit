@@ -15,6 +15,7 @@ game/tools/sync_assets.sh                            # after rebuilding art/leve
 .venv/bin/python art/levels/tools/build.py           # rebuild the 960x540 art (needs .venv: numpy, pillow)
 godot --path game --resolution 960x540 -s res://tools/screenshot.gd -- <title|singles|doubles|demo|practice> <park|lakeside|sunset> <frames> <out.png>
 godot --headless --path game -s res://tools/point_log.gd -- doubles 2   # why each point ended
+godot --headless --path game -s res://tools/rally_stats.gd -- doubles 8 errors=50   # mean rally, as MATCH SETUP builds it
 game/tools/export.sh --check                         # .pck export + headless boot (refuses a dirty tree; --dev)
 python3 game/tools/release_notes.py                  # game/RELEASE_NOTES.md from the roadmap sheet
 game/tools/conformance_import.sh                     # the SNES repo's conformance traces (KEEP=1: full lines)
@@ -38,7 +39,7 @@ project lead's; the remaster is one of its artifacts and may not
 contradict it). `design/BIBLE_PLAN.md` lists what it asks of the port and
 the gaps (phase 5 in the roadmap). The SNES repo's decisions are cited as
 "SNES ADR-n": its numbers from 052 on are not this repo's. This repo keeps
-its own numbering (next: ADR-073).
+its own numbering (next: ADR-074).
 
 ## Rules of the code (game/)
 

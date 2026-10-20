@@ -237,11 +237,6 @@ func _ball_physics() -> void:
 	var mods := config.modifiers
 	ball.gravity_fp = K.MOON_GRAVITY_FP if mods & K.MOD_MOON else K.BALL_GRAVITY_FP
 	ball.flight = K.MOON_FLIGHT if mods & K.MOD_MOON else [1, 1]
-	# BALL SPEED (port ADR-071): every launch lands where it was aimed, over
-	# 100 / speed as many frames; at 100 the flight is untouched
-	var speed := clampi(config.ball_speed, K.BALL_SPEED_MIN, K.BALL_SPEED_MAX)
-	if speed != 100:
-		ball.flight = [int(ball.flight[0]) * 100, int(ball.flight[1]) * speed]
 	ball.bounce_256 = K.BOUNCY_VERTICAL_256 if mods & K.MOD_BOUNCY else K.BALL_BOUNCE_VERTICAL_256
 	ball.wind = 0
 	ball.wind_tick = 0
@@ -934,10 +929,13 @@ func _activate_players() -> void:
 	ball_tick = 0
 	ball_steps = 0
 	popcorn_level = 0
+	# BALL SPEED (port ADR-073): the ROM's own slow ball (KID, EASY), fewer
+	# ball steps a cycle, the same flights; at 100 the difficulty's pace
+	var speed := ball_speed()
 	ball_paced = (config.modifiers & (K.MOD_FAST_BALL | K.MOD_POPCORN)) != 0 \
-		or ball_per_cycle(config.difficulty) != BALL_CYCLE
+		or ball_per_cycle(config.difficulty, speed) != BALL_CYCLE
 	if ball_paced:
-		ball_pace = make_ball_pace(config.difficulty, config.modifiers)
+		ball_pace = make_ball_pace(config.difficulty, config.modifiers, speed)
 	grow_fp = K.to_fp(K.MOD_BIG_REACH) if config.modifiers & K.MOD_BIG_BALL else 0
 	ice = (config.modifiers & K.MOD_ICE) != 0       # players_set_ice
 	for i in K.MAX_PLAYERS:
@@ -967,8 +965,22 @@ func _activate_players() -> void:
 					and not config.human[i & 2] and not config.human[(i & 2) + 1]:
 				Opponents.apply_difficulty(style, config.difficulty)
 			ai.styles[i] = style
-			ai.slots[i].late_period = style.late_period
+			ai.slots[i].late_period = late_period(style.late_period, config.cpu_errors)
 			ai.slots[i].reaction_frames = style.reaction
+
+## BALL SPEED's percent, within its range (port ADR-071, 073).
+func ball_speed() -> int:
+	return clampi(config.ball_speed, K.BALL_SPEED_MIN, K.BALL_SPEED_MAX)
+
+## CPU ERRORS (port ADR-073): a CPU swings late every `period`th return;
+## at `percent` of the ROM's errors, that many times as rarely (0: never).
+## At 100 the period is the style's.
+static func late_period(period: int, percent: int) -> int:
+	if period == 0 or percent == 100:
+		return period
+	if percent <= 0:
+		return 0
+	return clampi(period * 100 / percent, 1, 255)
 
 ## Fresh match (RST-01): every module re-initialized.
 func new_match() -> void:
@@ -1040,8 +1052,8 @@ static func ball_per_cycle(difficulty: int, percent: int = 100) -> int:
 
 ## Even spreading: a step each time the running share passes a cycle.
 ## FAST BALL (ADR-033) adds a step on every 3rd tick.
-static func make_ball_pace(difficulty: int, modifiers: int = 0) -> Array:
-	var per := ball_per_cycle(difficulty)
+static func make_ball_pace(difficulty: int, modifiers: int = 0, percent: int = 100) -> Array:
+	var per := ball_per_cycle(difficulty, percent)
 	var pace := []
 	var share := 0
 	var tick := 0

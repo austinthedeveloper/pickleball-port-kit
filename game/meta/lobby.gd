@@ -272,6 +272,7 @@ func match_config(difficulty: int, points: int, modifiers: int) -> SimTypes.Matc
 	cfg.points_to_win = points
 	cfg.modifiers = modifiers
 	cfg.ball_speed = Settings.ball_speed
+	cfg.cpu_errors = Settings.cpu_errors
 	cfg.opponent = -1
 	return cfg
 

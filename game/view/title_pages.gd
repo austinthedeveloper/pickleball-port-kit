@@ -37,6 +37,8 @@ static func build(t: TitleScreen) -> void:
 		{"id": "vs", "label": "VS", "value": t._opponent_label, "change": t._change_opponent},
 		{"id": "difficulty", "label": "DIFFICULTY", "value": func(): return Settings.DIFFICULTIES[Settings.difficulty_i],
 			"change": func(d): Settings.difficulty_i = clampi(Settings.difficulty_i + d, 0, Settings.DIFFICULTIES.size() - 1)},
+		{"id": "cpu_errors", "label": "CPU ERRORS", "value": func(): return "%d%%" % Settings.cpu_errors,
+			"change": func(d): Settings.cpu_errors = clampi(Settings.cpu_errors + d * 5, 0, Settings.CPU_ERRORS_MAX)},
 		{"id": "points", "label": "POINTS", "value": func(): return str(Settings.POINTS[Settings.points_i]),
 			"change": func(d): Settings.points_i = clampi(Settings.points_i + d, 0, Settings.POINTS.size() - 1)},
 		{"id": "players", "label": "PLAYERS", "value": func(): return "2P VS" if Settings.two_players else "1P",
