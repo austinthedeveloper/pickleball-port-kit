@@ -49,8 +49,9 @@ static var points_i := 1
 static var opponent_i := -2
 static var two_players := false
 static var camera_i := 1                ## CAMERAS: 50% (since 0.9.1; was OFF)
-const BALL_SPEED_DEFAULT := 78         ## the user's pick, 2026-10-20 (ADR-072); the ROM's is 100
-const BALL_SIZE_DEFAULT := 105
+const BALL_SPEED_DEFAULT := 85         ## the user's pick for 0.18 (ADR-072; 78 in 0.17); the ROM's is 100
+const BALL_SIZE_DEFAULT := 110         ## the user's pick for 0.18 (105 in 0.17)
+const BALL_DEFAULTS_V := 2             ## the settings' "ball_speed_v": which defaults a save last saw
 const CPU_ERRORS_MAX := 200
 const CPU_ERRORS_DEFAULT := 50        ## half the ROM's late swings: longer rallies (ADR-073)
 const BALL_SIZE_MIN := 80
@@ -100,13 +101,18 @@ static func load_from(save: SaveGame) -> void:
 	var bits := int(st.get("mod_bits", -1))
 	mod_bits = (bits & MOD_SAVED) if bits >= 0 else \
 		OLD_MOD_PRESETS[clampi(int(st.get("mods", 0)), 0, OLD_MOD_PRESETS.size() - 1)]
-	# 0.16.0 saved 100 for everyone who never moved it: they get the new
-	# default (ADR-072); a choice made since is kept
+	# A save keeps the old defaults for everyone who never moved the sliders:
+	# 0.16.0's 100%, 0.17.0's 78% and 105%. Those move to today's (ADR-072);
+	# any other choice is kept.
+	var seen := int(st.get("ball_speed_v", 0))
 	var speed := int(st.get("ball_speed", BALL_SPEED_DEFAULT))
-	if int(st.get("ball_speed_v", 0)) < 1 and speed == 100:
+	if (seen < 1 and speed == 100) or (seen < 2 and speed == 78):
 		speed = BALL_SPEED_DEFAULT
 	ball_speed = clampi(speed, K.BALL_SPEED_MIN, K.BALL_SPEED_MAX)
-	ball_size = clampi(int(st.get("ball_size", BALL_SIZE_DEFAULT)), BALL_SIZE_MIN, BALL_SIZE_MAX)
+	var size := int(st.get("ball_size", BALL_SIZE_DEFAULT))
+	if seen < 2 and size == 105:
+		size = BALL_SIZE_DEFAULT
+	ball_size = clampi(size, BALL_SIZE_MIN, BALL_SIZE_MAX)
 	cpu_errors = clampi(int(st.get("cpu_errors", CPU_ERRORS_DEFAULT)), 0, CPU_ERRORS_MAX)
 	Sfx.setting = clampi(int(st.get("sound", 0)), 0, AudioMap.SOUND_NAMES.size() - 1)
 	Music.volume = clampi(int(st.get("music", Music.DEFAULT_VOLUME)), 0, Music.VOLUMES)
@@ -139,7 +145,7 @@ static func store_to(save: SaveGame) -> void:
 		return
 	save.data["settings"].merge({"venue": venue_i, "difficulty": difficulty_i,
 		"points": points_i, "players": 2 if two_players else 1, "opponent": opponent_i,
-		"camera": camera_i, "mod_bits": mod_bits, "ball_speed": ball_speed, "ball_speed_v": 1, "ball_size": ball_size, "cpu_errors": cpu_errors, "sound": Sfx.setting,
+		"camera": camera_i, "mod_bits": mod_bits, "ball_speed": ball_speed, "ball_speed_v": BALL_DEFAULTS_V, "ball_size": ball_size, "cpu_errors": cpu_errors, "sound": Sfx.setting,
 		"music": Music.volume,
 		"fullscreen": 1 if fullscreen else 0, "integer_scale": 1 if integer_scale else 0,
 		"player": [p1_choice["palette"], p1_choice["variant"], p1_choice["paddle"]],

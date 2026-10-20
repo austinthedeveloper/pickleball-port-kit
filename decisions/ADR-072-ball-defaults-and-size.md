@@ -27,3 +27,12 @@ than BIG BALL).
 scales the sprite and shadow, not the reach, and BIG BALL overrides it.
 `test_conformance` and the C-ported practice tests pin the ROM's 100%.
 At 78% the CPUs still never commit a momentum fault (`test_momentum`).
+
+## Since: 85% and 110% (2026-10-20, `PORT-50`)
+
+After playing 0.17.0 the user moved the defaults to **85%** speed and
+**110%** size. The settings' `ball_speed_v` is now 2: a save from before
+holding an old default (0.16.0's 100%, 0.17.0's 78% and 105%) moves to
+today's; any other value is kept, and so is anything saved since. At 85%
+and CPU ERRORS 50%, doubles rallies run about 11 shots (9 at the ROM's
+errors), singles about 11 (7).

@@ -21,7 +21,8 @@ aside); closing swallows its press.
   new records dropped). They're kept for the next match too, except a
   story chapter's twist. In practice and lessons, APPLY keeps them for the
   next match only.
-- **DEFAULTS** puts the three sliders back (78%, 105%, 50%).
+- **DEFAULTS** puts the three sliders back to the settings' defaults
+  (85%, 110%, 50% since PORT-50).
 - Not online (the two machines run one lockstep match) and not in the
   title's demo.
 

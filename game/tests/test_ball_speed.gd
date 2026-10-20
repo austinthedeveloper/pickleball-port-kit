@@ -118,22 +118,31 @@ func test_the_setting() -> void:
 	wipe_saves("user://test_ball_speed/")
 
 
-## ADR-072: 78% is the default; a 0.16.0 save that kept 100 (no choice
-## made) moves to it, one saved since keeps its choice.
+## ADR-072: 85% and 110% are the defaults (78% and 105% in 0.17.0, 100%
+## in 0.16.0). A save holding an old default, from before it changed,
+## moves to today's; any other value is kept, and so is a value saved since.
 func test_the_default() -> void:
-	var kept := Settings.ball_speed
-	eq(Settings.BALL_SPEED_DEFAULT, 78)
+	var kept := [Settings.ball_speed, Settings.ball_size]
+	eq([Settings.BALL_SPEED_DEFAULT, Settings.BALL_SIZE_DEFAULT], [85, 110])
 	eq(SimTypes.MatchConfig.new().ball_speed, 100, "the sim's own is the ROM's")
 	var sv := fresh_save("user://test_ball_speed/")
-	sv.data["settings"]["ball_speed"] = 100          # as 0.16.0 wrote it
-	Settings.load_from(sv)
-	eq(Settings.ball_speed, 78, "an untouched 0.16.0 save")
-	Settings.ball_speed = 100
+	var st: Dictionary = sv.data["settings"]
+	for old in [[{"ball_speed": 100}, 85, 110, "an untouched 0.16.0 save"],
+			[{"ball_speed": 78, "ball_speed_v": 1, "ball_size": 105}, 85, 110, "an untouched 0.17.0 save"],
+			[{"ball_speed": 92, "ball_speed_v": 1, "ball_size": 120}, 92, 120, "0.17.0 choices kept"],
+			[{"ball_speed": 100, "ball_speed_v": 1, "ball_size": 105}, 100, 110, "100% chosen in 0.17.0"]]:
+		for k in ["ball_speed", "ball_speed_v", "ball_size"]:
+			st.erase(k)
+		st.merge(old[0], true)
+		Settings.load_from(sv)
+		eq([Settings.ball_speed, Settings.ball_size], [old[1], old[2]], old[3])
+	Settings.ball_speed = 78
+	Settings.ball_size = 105
 	Settings.store_to(sv)
-	Settings.ball_speed = 50
 	Settings.load_from(sv)
-	eq(Settings.ball_speed, 100, "100 chosen since is kept")
-	Settings.ball_speed = kept
+	eq([Settings.ball_speed, Settings.ball_size], [78, 105], "78% and 105% chosen now are kept")
+	Settings.ball_speed = kept[0]
+	Settings.ball_size = kept[1]
 	wipe_saves("user://test_ball_speed/")
 
 
@@ -141,7 +150,6 @@ func test_the_default() -> void:
 ## (BIG BALL's reach is its own); BIG BALL still doubles it.
 func test_ball_size() -> void:
 	var kept := Settings.ball_size
-	eq(Settings.BALL_SIZE_DEFAULT, 105)
 	Settings.ball_size = 120
 	var v := MatchView.new()
 	runner.root.add_child(v)

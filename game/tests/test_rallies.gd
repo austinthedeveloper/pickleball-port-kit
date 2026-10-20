@@ -24,7 +24,7 @@ func test_late_period() -> void:
 func _mean_rally(errors: int) -> float:
 	var total := 0
 	var points := 0
-	for team in [3, 6]:
+	for team in [1, 3, 5, 7]:            # enough points to see past the noise
 		var cfg := Settings.config_for(true, team, K.DIFFICULTY_MEDIUM, 11)
 		cfg.cpu_errors = errors
 		var s := Sim.new(cfg)

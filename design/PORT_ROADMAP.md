@@ -75,6 +75,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-47 | 78% ball by default, BALL SIZE | `feature/cld-ball-defaults` | Ready to test |
 | PORT-48 | Longer rallies: CPU ERRORS, the paced ball | `feature/cld-ai-rallies` | Ready to test |
 | PORT-49 | The tuning panel (F2, TUNE) | `feature/cld-tuning-panel` | Ready to test |
+| PORT-50 | 85% ball speed, 110% ball size by default | `feature/cld-ball-defaults-2` | Ready to test |
 
 ## Releases
 
@@ -322,6 +323,18 @@ the same request). Open: 36 and 40.
     `test_layout`. 397/397 plus the e2e, golden traces unchanged.
     Screenshot over a doubles match.
   - Status: **Ready to test**: say what else belongs on it.
+
+### 50. `feature/cld-ball-defaults-2`: new ball defaults (asked for 2026-10-20)
+
+- [x] `PORT-50` (ADR-072, since) BALL SPEED 85% and BALL SIZE 110% by
+  default, the user's picks after playing 0.17.0; untouched saves move
+  to them (`ball_speed_v` 2), choices are kept.
+  - Verified: `test_ball_speed` (the defaults, saves from 0.16.0 and
+    0.17.0 untouched and chosen). `test_rallies` now samples four teams:
+    at 85%, CPU ERRORS 50% still lengthens rallies (9.6 to 12.3 there;
+    `rally_stats` over 12 matches: doubles 9.0 to 11.2, singles 6.8 to
+    10.8). 397/397 plus the e2e, golden traces unchanged.
+  - Status: **Ready to test**.
 
 ## For you
 
