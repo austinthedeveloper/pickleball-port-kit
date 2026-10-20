@@ -22,7 +22,7 @@
 ## title_career_card, title_career_edit and title_career_name (and
 ## title_career_museum: the HAT MUSEUM, half the hats won); "unlock"
 ## shows the UNLOCKED! card at the end of a match.
-## "story<ch>_<kind>_<page>" a story scene (PORT-44).
+## "story<ch>_<kind>_<page>" a story scene (PORT-44); "course..." PICKLEBALL 101 (PORT-45).
 extends SceneTree
 
 var _frames := 0
@@ -186,6 +186,28 @@ func _initialize() -> void:
 		bs.save = null                      # nothing written
 		root.add_child(bs)
 		_view = bs
+	elif mode.begins_with("course"):
+		# PORT-45: course (the list, cursor on lesson N with "at=N"),
+		# course<lesson>_<page> (a page), course<lesson>_<page>_<choice> (a
+		# quiz, answered)
+		var parts := mode.split("_")
+		var cs := CourseScreen.new().setup(null, int(parts[0].substr(6)) if parts.size() > 1 else -1)
+		root.add_child(cs)
+		if not cs.is_node_ready():
+			cs._ready()
+		if parts.size() > 1:
+			for k in int(parts[1]):
+				if Course.is_quiz(cs._page()):
+					cs.answer(int(cs._page()["answer"]))
+				cs.next_page()
+			if parts.size() > 2:
+				cs.answer(int(parts[2]))
+		for arg in a.slice(4):
+			if arg.begins_with("at="):
+				cs.list.cursor = int(arg.substr(3))
+				cs.list.refresh()
+				cs._show_preview()
+		_view = cs
 	elif mode.begins_with("story"):
 		# PORT-44: story<chapter>_<intro|win|lose|ending>_<page>, e.g.
 		# story3_intro_0 (the chapter card), story0_intro_1 (a letter)

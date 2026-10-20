@@ -1,0 +1,1737 @@
+{
+ "title": "PICKLEBALL 101",
+ "subtitle": "THE REAL GAME, FOR A REAL COURT",
+ "lessons": [
+  {
+   "id": "court",
+   "title": "THE COURT",
+   "blurb": [
+    "THE LINES, THE NET AND",
+    "THE KITCHEN."
+   ],
+   "pages": [
+    {
+     "lines": [
+      "A PICKLEBALL COURT IS 20 FEET WIDE AND 44 FEET LONG:",
+      "THE SAME SIZE AS A BADMINTON DOUBLES COURT.",
+      "YOUR TEAM PLAYS ON ONE HALF, THE OTHER TEAM ON THE OTHER."
+     ],
+     "labels": [
+      [
+       11,
+       21.6,
+       "YOUR SIDE"
+      ],
+      [
+       33,
+       21.6,
+       "THEIR SIDE"
+      ]
+     ],
+     "players": [
+      [
+       8,
+       15,
+       "you",
+       "YOU"
+      ],
+      [
+       8,
+       5,
+       "partner",
+       "PARTNER"
+      ],
+      [
+       36,
+       5,
+       "them",
+       ""
+      ],
+      [
+       36,
+       15,
+       "them",
+       ""
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "THE NET IS 36 INCHES HIGH AT THE SIDELINES AND 34 IN",
+      "THE MIDDLE. LOWER IN THE MIDDLE, SO THAT'S THE SAFER",
+      "PLACE TO HIT OVER IT."
+     ],
+     "show": [
+      "net"
+     ],
+     "labels": [
+      [
+       22,
+       -1.4,
+       "36 IN"
+      ],
+      [
+       22,
+       21.6,
+       "36 IN"
+      ]
+     ],
+     "path": [
+      [
+       4,
+       14,
+       "h"
+      ],
+      [
+       22,
+       10,
+       ""
+      ],
+      [
+       38,
+       7,
+       "b"
+      ],
+      [
+       46,
+       6,
+       ""
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "THE 7 FEET ON EACH SIDE OF THE NET IS THE NON-VOLLEY",
+      "ZONE. EVERYONE CALLS IT THE KITCHEN.",
+      "ITS LINE COUNTS AS PART OF THE KITCHEN."
+     ],
+     "show": [
+      "kitchen_near",
+      "kitchen_far"
+     ],
+     "labels": [
+      [
+       18.5,
+       -1.4,
+       "KITCHEN"
+      ],
+      [
+       25.5,
+       21.6,
+       "KITCHEN"
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "BEHIND THE KITCHEN, THE CENTERLINE SPLITS EACH SIDE",
+      "INTO A RIGHT AND A LEFT SERVICE COURT: RIGHT AND LEFT",
+      "AS YOU STAND FACING THE NET."
+     ],
+     "show": [
+      "service_near_right",
+      "service_near_left"
+     ],
+     "labels": [
+      [
+       7.5,
+       15,
+       "RIGHT"
+      ],
+      [
+       7.5,
+       5,
+       "LEFT"
+      ]
+     ],
+     "players": [
+      [
+       -1.5,
+       15,
+       "you",
+       ""
+      ]
+     ],
+     "arrows": [
+      [
+       -1.5,
+       15,
+       6,
+       15
+      ]
+     ]
+    },
+    {
+     "quiz": [
+      "HOW FAR DOES THE KITCHEN REACH FROM THE NET?"
+     ],
+     "choices": [
+      "5 FEET",
+      "7 FEET",
+      "10 FEET"
+     ],
+     "answer": 1,
+     "why": [
+      "7 FEET ON EACH SIDE, AND ITS LINE COUNTS",
+      "AS PART OF IT."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "serve",
+   "title": "THE SERVE",
+   "try": "serve",
+   "blurb": [
+    "WHERE YOU STAND, HOW YOU",
+    "SWING, WHERE IT LANDS."
+   ],
+   "pages": [
+    {
+     "lines": [
+      "THE SERVE IS UNDERHAND: HIT THE BALL BELOW YOUR WAIST,",
+      "SWINGING UPWARD, WITH THE PADDLE'S HEAD BELOW YOUR WRIST."
+     ],
+     "players": [
+      [
+       -1.5,
+       15,
+       "you",
+       "YOU"
+      ],
+      [
+       -1.5,
+       5,
+       "partner",
+       ""
+      ],
+      [
+       45,
+       5,
+       "them",
+       ""
+      ],
+      [
+       45,
+       15,
+       "them",
+       ""
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "AS YOU HIT IT, KEEP A FOOT BEHIND THE BASELINE AND",
+      "NEITHER FOOT ON IT, BETWEEN THE CENTERLINE AND THE",
+      "SIDELINE, AS IF THEY WENT ON PAST THE BASELINE."
+     ],
+     "show": [
+      "box_near_right"
+     ],
+     "players": [
+      [
+       -1.5,
+       15,
+       "you",
+       ""
+      ]
+     ],
+     "labels": [
+      [
+       -1.5,
+       21.6,
+       "STAND HERE"
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "SERVE CROSSCOURT: FROM YOUR RIGHT SERVICE COURT TO",
+      "THEIRS, DIAGONALLY ACROSS THE NET."
+     ],
+     "show": [
+      "service_far_right"
+     ],
+     "players": [
+      [
+       -1.5,
+       15,
+       "you",
+       "YOU"
+      ],
+      [
+       45,
+       5,
+       "them",
+       ""
+      ]
+     ],
+     "path": [
+      [
+       -1.5,
+       15,
+       "h"
+      ],
+      [
+       37,
+       5,
+       "b"
+      ],
+      [
+       44.5,
+       4,
+       "h"
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "IT MUST CLEAR THE KITCHEN: A SERVE THAT LANDS IN THE",
+      "KITCHEN OR ON ITS LINE IS A FAULT. THE SIDELINE,",
+      "CENTERLINE AND BASELINE ARE ALL IN."
+     ],
+     "show": [
+      "service_far_right"
+     ],
+     "bad": [
+      "kitchen_far"
+     ],
+     "players": [
+      [
+       -1.5,
+       15,
+       "you",
+       "YOU"
+      ],
+      [
+       45,
+       5,
+       "them",
+       ""
+      ]
+     ],
+     "path": [
+      [
+       -1.5,
+       15,
+       "h"
+      ],
+      [
+       27,
+       6,
+       "x"
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "YOU GET ONE TRY. A SERVE THAT CLIPS THE NET AND",
+      "STILL LANDS IN THE RIGHT SERVICE COURT IS GOOD:",
+      "PLAY ON."
+     ],
+     "show": [
+      "service_far_right"
+     ],
+     "players": [
+      [
+       -1.5,
+       15,
+       "you",
+       "YOU"
+      ],
+      [
+       45,
+       5,
+       "them",
+       ""
+      ]
+     ],
+     "path": [
+      [
+       -1.5,
+       15,
+       "h"
+      ],
+      [
+       22,
+       10.5,
+       "n"
+      ],
+      [
+       33,
+       6,
+       "b"
+      ],
+      [
+       44.5,
+       4,
+       "h"
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "OR USE THE DROP SERVE: DROP THE BALL, LET IT BOUNCE,",
+      "THEN HIT IT ANY WAY YOU LIKE. JUST DON'T TOSS IT UP",
+      "OR SPIN IT AS YOU LET GO."
+     ],
+     "players": [
+      [
+       -1.5,
+       15,
+       "you",
+       "YOU"
+      ],
+      [
+       45,
+       5,
+       "them",
+       ""
+      ]
+     ],
+     "path": [
+      [
+       -2.5,
+       15,
+       "b"
+      ],
+      [
+       -1.5,
+       15,
+       "h"
+      ],
+      [
+       37,
+       5,
+       "b"
+      ],
+      [
+       44.5,
+       4,
+       ""
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "AIM DEEP: A SERVE THAT LANDS NEAR THEIR BASELINE",
+      "KEEPS THEM BACK, AND THAT HELPS YOU ON THE SHOTS",
+      "THAT FOLLOW."
+     ],
+     "show": [
+      "deep_far_right"
+     ],
+     "players": [
+      [
+       -1.5,
+       15,
+       "you",
+       "YOU"
+      ],
+      [
+       45.5,
+       5,
+       "them",
+       ""
+      ]
+     ],
+     "path": [
+      [
+       -1.5,
+       15,
+       "h"
+      ],
+      [
+       42,
+       4,
+       "b"
+      ],
+      [
+       46,
+       3,
+       ""
+      ]
+     ]
+    },
+    {
+     "quiz": [
+      "YOUR SERVE LANDS ON THE KITCHEN LINE.",
+      "IS IT IN?"
+     ],
+     "choices": [
+      "IN",
+      "FAULT"
+     ],
+     "answer": 1,
+     "why": [
+      "THE KITCHEN LINE IS PART OF THE KITCHEN:",
+      "ON A SERVE, THAT'S A FAULT."
+     ]
+    },
+    {
+     "quiz": [
+      "YOU SERVE FROM YOUR RIGHT SERVICE COURT.",
+      "WHERE MUST THE BALL LAND?"
+     ],
+     "choices": [
+      "THE COURT STRAIGHT AHEAD",
+      "THE COURT DIAGONALLY ACROSS",
+      "ANYWHERE PAST THE KITCHEN"
+     ],
+     "answer": 1,
+     "why": [
+      "SERVES GO CROSSCOURT, INTO THE DIAGONAL",
+      "SERVICE COURT, PAST THE KITCHEN LINE."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bounces",
+   "title": "LET IT BOUNCE",
+   "try": "bounces",
+   "blurb": [
+    "THE TWO-BOUNCE RULE, AND",
+    "WHY IT MATTERS."
+   ],
+   "pages": [
+    {
+     "lines": [
+      "THE TWO-BOUNCE RULE: THE BALL MUST BOUNCE ONCE ON",
+      "EACH SIDE BEFORE ANYONE MAY HIT IT OUT OF THE AIR."
+     ],
+     "players": [
+      [
+       -1.5,
+       15,
+       "you",
+       "YOU"
+      ],
+      [
+       -1.5,
+       5,
+       "partner",
+       ""
+      ],
+      [
+       45,
+       5,
+       "them",
+       ""
+      ],
+      [
+       45,
+       15,
+       "them",
+       ""
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "BOUNCE ONE: THE SERVE. THE RETURNER MUST LET IT",
+      "BOUNCE, THEN HIT IT BACK."
+     ],
+     "players": [
+      [
+       -1.5,
+       15,
+       "you",
+       "YOU"
+      ],
+      [
+       45,
+       5,
+       "them",
+       ""
+      ]
+     ],
+     "path": [
+      [
+       -1.5,
+       15,
+       "h"
+      ],
+      [
+       37,
+       5,
+       "b"
+      ],
+      [
+       44.5,
+       4,
+       "h"
+      ],
+      [
+       6,
+       14,
+       ""
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "BOUNCE TWO: THE RETURN. THE SERVING TEAM MUST LET",
+      "IT BOUNCE TOO, BEFORE THEY HIT IT."
+     ],
+     "players": [
+      [
+       -1,
+       15,
+       "you",
+       "YOU"
+      ],
+      [
+       44.5,
+       4,
+       "them",
+       ""
+      ]
+     ],
+     "path": [
+      [
+       44.5,
+       4,
+       "h"
+      ],
+      [
+       5,
+       14,
+       "b"
+      ],
+      [
+       -1,
+       15,
+       "h"
+      ],
+      [
+       20,
+       12,
+       ""
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "AFTER THOSE TWO BOUNCES, ANYONE MAY VOLLEY: HIT THE",
+      "BALL IN THE AIR, BEFORE IT BOUNCES."
+     ],
+     "players": [
+      [
+       -1,
+       15,
+       "you",
+       "YOU"
+      ],
+      [
+       30.5,
+       6,
+       "them",
+       ""
+      ]
+     ],
+     "path": [
+      [
+       -1,
+       15,
+       "h"
+      ],
+      [
+       30.5,
+       6,
+       "v"
+      ],
+      [
+       8,
+       13,
+       "b"
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "SO AFTER YOU SERVE, STAY BACK: THE RETURN IS COMING,",
+      "AND YOU MUST LET IT BOUNCE."
+     ],
+     "players": [
+      [
+       -1.5,
+       15,
+       "you",
+       "YOU"
+      ],
+      [
+       -1.5,
+       5,
+       "partner",
+       ""
+      ],
+      [
+       45,
+       5,
+       "them",
+       ""
+      ],
+      [
+       45,
+       15,
+       "them",
+       ""
+      ]
+     ],
+     "arrows": [
+      [
+       45,
+       5,
+       31,
+       5
+      ],
+      [
+       45,
+       15,
+       31,
+       15
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "RETURNING? HIT IT DEEP, THEN WALK UP TO THE KITCHEN",
+      "LINE WHILE THEY WAIT FOR YOUR RETURN TO BOUNCE."
+     ],
+     "players": [
+      [
+       -1.5,
+       15,
+       "them",
+       ""
+      ],
+      [
+       45,
+       5,
+       "you",
+       "YOU"
+      ]
+     ],
+     "path": [
+      [
+       44.5,
+       4,
+       "h"
+      ],
+      [
+       4,
+       14,
+       "b"
+      ],
+      [
+       -1,
+       15,
+       ""
+      ]
+     ],
+     "arrows": [
+      [
+       45,
+       5,
+       31,
+       5
+      ]
+     ]
+    },
+    {
+     "quiz": [
+      "YOU SERVED, AND THE RETURN IS COMING.",
+      "MAY YOU HIT IT BEFORE IT BOUNCES?"
+     ],
+     "choices": [
+      "YES, IF IT'S HIGH",
+      "NO, LET IT BOUNCE"
+     ],
+     "answer": 1,
+     "why": [
+      "THE RETURN MUST BOUNCE: IT'S THE SECOND",
+      "OF THE TWO BOUNCES."
+     ]
+    },
+    {
+     "quiz": [
+      "THEIR SERVE IS SHORT AND SLOW.",
+      "MAY YOU VOLLEY IT?"
+     ],
+     "choices": [
+      "YES",
+      "NO, IT MUST BOUNCE"
+     ],
+     "answer": 1,
+     "why": [
+      "A SERVE MUST ALWAYS BOUNCE: IT'S THE",
+      "FIRST OF THE TWO."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "kitchen",
+   "title": "THE KITCHEN",
+   "try": "kitchen",
+   "blurb": [
+    "NO VOLLEYS IN THE",
+    "NON-VOLLEY ZONE."
+   ],
+   "pages": [
+    {
+     "lines": [
+      "NO VOLLEYS IN THE KITCHEN: YOU CAN'T HIT THE BALL OUT",
+      "OF THE AIR WHILE YOU'RE TOUCHING THE KITCHEN OR ITS",
+      "LINE."
+     ],
+     "bad": [
+      "kitchen_near"
+     ],
+     "players": [
+      [
+       18,
+       14,
+       "you",
+       "YOU"
+      ],
+      [
+       36,
+       6,
+       "them",
+       ""
+      ]
+     ],
+     "path": [
+      [
+       36,
+       6,
+       "h"
+      ],
+      [
+       18.5,
+       13,
+       "x"
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "STAND BEHIND THE LINE TO VOLLEY. YOUR PADDLE MAY",
+      "REACH OVER THE KITCHEN: IT'S WHERE YOUR FEET ARE",
+      "THAT COUNTS."
+     ],
+     "show": [
+      "kitchen_near"
+     ],
+     "players": [
+      [
+       13.5,
+       14,
+       "you",
+       "YOU"
+      ],
+      [
+       36,
+       6,
+       "them",
+       ""
+      ]
+     ],
+     "path": [
+      [
+       36,
+       6,
+       "h"
+      ],
+      [
+       14.5,
+       13.5,
+       "v"
+      ],
+      [
+       34,
+       8,
+       "b"
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "MOMENTUM COUNTS TOO: IF A VOLLEY CARRIES YOU INTO",
+      "THE KITCHEN, EVEN AFTER THE BALL IS DEAD, IT'S A",
+      "FAULT."
+     ],
+     "bad": [
+      "kitchen_near"
+     ],
+     "players": [
+      [
+       13.5,
+       14,
+       "you",
+       "YOU"
+      ]
+     ],
+     "arrows": [
+      [
+       13.5,
+       14,
+       17.5,
+       14
+      ]
+     ],
+     "marks": [
+      [
+       17.5,
+       11,
+       "x"
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "YOU MAY STEP INTO THE KITCHEN ANY TIME TO PLAY A",
+      "BALL THAT BOUNCED THERE. STEP BACK OUT BEFORE YOU",
+      "VOLLEY AGAIN."
+     ],
+     "show": [
+      "kitchen_near"
+     ],
+     "players": [
+      [
+       13.5,
+       13,
+       "you",
+       "YOU"
+      ],
+      [
+       30.5,
+       7,
+       "them",
+       ""
+      ]
+     ],
+     "path": [
+      [
+       30.5,
+       7,
+       "h"
+      ],
+      [
+       19,
+       12,
+       "b"
+      ],
+      [
+       17.5,
+       12.5,
+       "h"
+      ],
+      [
+       27,
+       8,
+       "b"
+      ]
+     ],
+     "arrows": [
+      [
+       13.5,
+       13,
+       17,
+       12.5
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "THE DINK: A SOFT SHOT THAT LANDS IN THEIR KITCHEN.",
+      "IT BOUNCES LOW, SO IT'S HARD TO HIT HARD. BE PATIENT:",
+      "DINK UNTIL SOMEONE POPS ONE UP."
+     ],
+     "show": [
+      "kitchen_near",
+      "kitchen_far"
+     ],
+     "players": [
+      [
+       13.5,
+       13,
+       "you",
+       "YOU"
+      ],
+      [
+       30.5,
+       8,
+       "them",
+       ""
+      ]
+     ],
+     "path": [
+      [
+       13.5,
+       13,
+       "h"
+      ],
+      [
+       26,
+       9,
+       "b"
+      ],
+      [
+       30.5,
+       8,
+       "h"
+      ],
+      [
+       18,
+       12,
+       "b"
+      ],
+      [
+       13.5,
+       13,
+       "h"
+      ],
+      [
+       25,
+       10,
+       "b"
+      ],
+      [
+       30.5,
+       9,
+       ""
+      ]
+     ]
+    },
+    {
+     "quiz": [
+      "THE BALL BOUNCES IN THE KITCHEN, IN FRONT",
+      "OF YOU. MAY YOU STEP IN TO HIT IT?"
+     ],
+     "choices": [
+      "YES",
+      "NO"
+     ],
+     "answer": 0,
+     "why": [
+      "YES: A BALL THAT BOUNCED MAY BE PLAYED",
+      "FROM ANYWHERE, THE KITCHEN TOO."
+     ]
+    },
+    {
+     "quiz": [
+      "YOU VOLLEY AT THE LINE, AND YOUR FOOT",
+      "LANDS ON THE KITCHEN LINE AFTER. FAULT?"
+     ],
+     "choices": [
+      "YES",
+      "NO, THE BALL WAS GONE"
+     ],
+     "answer": 0,
+     "why": [
+      "YES: THE LINE IS THE KITCHEN, AND YOUR",
+      "VOLLEY CARRIED YOU INTO IT."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "score",
+   "title": "KEEPING SCORE",
+   "blurb": [
+    "SIDE-OUT SCORING AND",
+    "THE THREE NUMBERS."
+   ],
+   "pages": [
+    {
+     "lines": [
+      "ONLY THE SERVING TEAM SCORES. A GAME GOES TO 11,",
+      "AND YOU MUST WIN BY 2."
+     ],
+     "call": "11 - 9"
+    },
+    {
+     "lines": [
+      "BEFORE EACH SERVE, THE SERVER CALLS THREE NUMBERS:",
+      "THEIR TEAM'S SCORE, THE OTHER TEAM'S, AND WHICH",
+      "SERVER THEY ARE, 1 OR 2."
+     ],
+     "call": "4 - 2 - 1"
+    },
+    {
+     "lines": [
+      "WIN THE RALLY AND YOUR TEAM SCORES. SWITCH SIDES WITH",
+      "YOUR PARTNER AND SERVE AGAIN, FROM THE OTHER SERVICE",
+      "COURT."
+     ],
+     "players": [
+      [
+       -1.5,
+       15,
+       "you",
+       "YOU"
+      ],
+      [
+       -1.5,
+       5,
+       "partner",
+       ""
+      ]
+     ],
+     "arrows": [
+      [
+       -1.5,
+       15,
+       -1.5,
+       6.5
+      ],
+      [
+       -1.5,
+       5,
+       -1.5,
+       13.5
+      ]
+     ],
+     "call": "5 - 2 - 1"
+    },
+    {
+     "lines": [
+      "LOSE A RALLY, AND YOUR PARTNER SERVES: SERVER 2.",
+      "LOSE THAT ONE TOO, AND IT'S A SIDE OUT: THE OTHER",
+      "TEAM SERVES."
+     ],
+     "call": "5 - 2 - 2"
+    },
+    {
+     "lines": [
+      "THE GAME STARTS AT 0-0-2. THE FIRST TEAM TO SERVE",
+      "GETS ONLY ONE SERVER, SO SERVING FIRST ISN'T TOO BIG",
+      "A HEAD START."
+     ],
+     "call": "0 - 0 - 2"
+    },
+    {
+     "lines": [
+      "AFTER A SIDE OUT, THE PLAYER IN THE RIGHT SERVICE",
+      "COURT SERVES FIRST: RIGHT AS THEY FACE THE NET."
+     ],
+     "show": [
+      "service_far_right"
+     ],
+     "players": [
+      [
+       45.5,
+       5,
+       "them",
+       "1"
+      ],
+      [
+       45.5,
+       15,
+       "them",
+       "2"
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "IN SINGLES, CALL TWO NUMBERS. SERVE FROM THE RIGHT",
+      "WHEN YOUR SCORE IS EVEN, FROM THE LEFT WHEN IT'S ODD."
+     ],
+     "show": [
+      "service_near_right"
+     ],
+     "players": [
+      [
+       -1.5,
+       15,
+       "you",
+       ""
+      ]
+     ],
+     "call": "6 - 3"
+    },
+    {
+     "quiz": [
+      "YOU HAVE 6, THEY HAVE 4, AND YOU'RE THE",
+      "SECOND SERVER. WHAT DO YOU CALL?"
+     ],
+     "choices": [
+      "4-6-2",
+      "6-4-2",
+      "6-4-1"
+     ],
+     "answer": 1,
+     "why": [
+      "YOUR SCORE, THEIRS, THEN YOUR SERVER",
+      "NUMBER: 6-4-2."
+     ]
+    },
+    {
+     "quiz": [
+      "THE VERY FIRST SERVE OF THE GAME.",
+      "WHAT'S THE CALL?"
+     ],
+     "choices": [
+      "0-0-1",
+      "0-0-2",
+      "0-0"
+     ],
+     "answer": 1,
+     "why": [
+      "0-0-2: THE FIRST SERVING TEAM GETS ONE",
+      "SERVER BEFORE THE FIRST SIDE OUT."
+     ]
+    },
+    {
+     "quiz": [
+      "YOU SERVE AND WIN THE RALLY.",
+      "WHAT NOW?"
+     ],
+     "choices": [
+      "SWITCH SIDES, SERVE AGAIN",
+      "YOUR PARTNER SERVES",
+      "THE OTHER TEAM SERVES"
+     ],
+     "answer": 0,
+     "why": [
+      "THE SERVER KEEPS SERVING, FROM THE OTHER",
+      "SIDE, UNTIL THEIR TEAM LOSES A RALLY."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "calls",
+   "title": "LINE CALLS",
+   "blurb": [
+    "FAULTS, AND CALLING",
+    "THE BALL IN OR OUT."
+   ],
+   "pages": [
+    {
+     "lines": [
+      "A RALLY ENDS ON A FAULT: THE BALL OUT, IN THE NET OR",
+      "BOUNCING TWICE, A VOLLEY TOO SOON OR FROM THE",
+      "KITCHEN, OR THE BALL HITTING A PLAYER."
+     ],
+     "path": [
+      [
+       4,
+       14,
+       "h"
+      ],
+      [
+       21.6,
+       10.5,
+       "n"
+      ],
+      [
+       20,
+       10.8,
+       "x"
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "THE LINE IS IN: A BALL THAT TOUCHES ANY LINE IS",
+      "GOOD. THE ONE EXCEPTION IS THE KITCHEN LINE, ON A",
+      "SERVE."
+     ],
+     "path": [
+      [
+       4,
+       14,
+       "h"
+      ],
+      [
+       44,
+       12,
+       "b"
+      ],
+      [
+       47,
+       12,
+       ""
+      ]
+     ],
+     "marks": [
+      [
+       44,
+       15,
+       "ok"
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "OUT MEANS THE BALL LANDED ALL THE WAY OUTSIDE THE",
+      "LINE, NOT TOUCHING IT AT ALL."
+     ],
+     "path": [
+      [
+       4,
+       14,
+       "h"
+      ],
+      [
+       45.6,
+       12,
+       "x"
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "YOU CALL THE LINES ON YOUR SIDE OF THE NET. CALL",
+      "OUT LOUD AND QUICK, AND POINT OR HOLD UP A FINGER."
+     ],
+     "show": [
+      "half_near"
+     ],
+     "players": [
+      [
+       3,
+       15,
+       "you",
+       "YOU"
+      ],
+      [
+       3,
+       5,
+       "partner",
+       ""
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "NOT SURE? THEN IT'S IN. IF YOU DIDN'T CLEARLY SEE",
+      "IT LAND OUT, THE OTHER TEAM GETS THE CALL."
+     ]
+    },
+    {
+     "quiz": [
+      "THEIR SHOT CLIPS THE BACK EDGE OF YOUR",
+      "BASELINE. IN OR OUT?"
+     ],
+     "choices": [
+      "IN",
+      "OUT"
+     ],
+     "answer": 0,
+     "why": [
+      "IN. A BALL ON ANY LINE IS IN, EXCEPT THE",
+      "KITCHEN LINE ON A SERVE."
+     ]
+    },
+    {
+     "quiz": [
+      "YOU'RE NOT SURE THEIR SHOT WAS OUT."
+     ],
+     "choices": [
+      "CALL IT OUT",
+      "CALL IT IN",
+      "PLAY IT AGAIN"
+     ],
+     "answer": 1,
+     "why": [
+      "IF YOU DIDN'T SEE IT OUT, IT'S IN: THE",
+      "DOUBT GOES TO THE OTHER TEAM."
+     ]
+    },
+    {
+     "quiz": [
+      "A BALL FLYING WAY OUT HITS YOUR SHOE",
+      "BEFORE IT BOUNCES. WHOSE POINT?"
+     ],
+     "choices": [
+      "YOURS, IT WAS OUT",
+      "THEIRS, IT HIT YOU"
+     ],
+     "answer": 1,
+     "why": [
+      "A BALL THAT HITS YOU IS YOUR FAULT, EVEN",
+      "ONE THAT WAS GOING OUT."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "smart",
+   "title": "PLAYING SMART",
+   "blurb": [
+    "GET TO THE LINE,",
+    "DROP, DINK AND WAIT."
+   ],
+   "pages": [
+    {
+     "lines": [
+      "GET TO THE KITCHEN LINE. THE TEAM AT THE NET USUALLY",
+      "WINS THE POINT: THEY HIT DOWN, AND THE OTHER TEAM",
+      "HAS TO HIT UP."
+     ],
+     "players": [
+      [
+       13.5,
+       15,
+       "you",
+       "YOU"
+      ],
+      [
+       13.5,
+       5,
+       "partner",
+       ""
+      ],
+      [
+       30.5,
+       5,
+       "them",
+       ""
+      ],
+      [
+       30.5,
+       15,
+       "them",
+       ""
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "SERVE DEEP AND RETURN DEEP. A DEEP RETURN GIVES YOU",
+      "TIME TO WALK UP TO THE LINE."
+     ],
+     "players": [
+      [
+       -1,
+       15,
+       "them",
+       ""
+      ],
+      [
+       45,
+       5,
+       "you",
+       "YOU"
+      ]
+     ],
+     "path": [
+      [
+       44.5,
+       4,
+       "h"
+      ],
+      [
+       4,
+       14,
+       "b"
+      ],
+      [
+       -1,
+       15,
+       ""
+      ]
+     ],
+     "arrows": [
+      [
+       45,
+       5,
+       31,
+       5
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "THE THIRD-SHOT DROP: THE SERVING TEAM HITS A SOFT",
+      "SHOT THAT FALLS INTO THE OTHER KITCHEN, THEN MOVES",
+      "UP BEHIND IT."
+     ],
+     "show": [
+      "kitchen_far"
+     ],
+     "players": [
+      [
+       -1,
+       15,
+       "you",
+       "YOU"
+      ],
+      [
+       30.5,
+       5,
+       "them",
+       ""
+      ],
+      [
+       30.5,
+       15,
+       "them",
+       ""
+      ]
+     ],
+     "path": [
+      [
+       -1,
+       15,
+       "h"
+      ],
+      [
+       26,
+       9,
+       "b"
+      ]
+     ],
+     "arrows": [
+      [
+       -1,
+       15,
+       12,
+       15
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "AT THE LINE, DINK AND WAIT. HIT HARD ONLY WHEN A",
+      "BALL COMES UP HIGH, AND KEEP YOURS LOW."
+     ],
+     "players": [
+      [
+       13.5,
+       13,
+       "you",
+       "YOU"
+      ],
+      [
+       30.5,
+       8,
+       "them",
+       ""
+      ]
+     ],
+     "path": [
+      [
+       13.5,
+       13,
+       "h"
+      ],
+      [
+       26,
+       9,
+       "b"
+      ],
+      [
+       30.5,
+       8,
+       "h"
+      ],
+      [
+       18,
+       12,
+       "b"
+      ],
+      [
+       13.5,
+       13,
+       ""
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "AIM AT FEET, AND DOWN THE MIDDLE: TWO PLAYERS CAN",
+      "BOTH LEAVE A BALL THAT GOES BETWEEN THEM."
+     ],
+     "players": [
+      [
+       13.5,
+       13,
+       "you",
+       "YOU"
+      ],
+      [
+       30.5,
+       5,
+       "them",
+       ""
+      ],
+      [
+       30.5,
+       15,
+       "them",
+       ""
+      ]
+     ],
+     "path": [
+      [
+       13.5,
+       13,
+       "h"
+      ],
+      [
+       33,
+       10,
+       "b"
+      ],
+      [
+       40,
+       10,
+       ""
+      ]
+     ]
+    },
+    {
+     "quiz": [
+      "YOU'VE JUST RETURNED THE SERVE.",
+      "NOW WHAT?"
+     ],
+     "choices": [
+      "STAY AT THE BASELINE",
+      "MOVE UP TO THE LINE"
+     ],
+     "answer": 1,
+     "why": [
+      "MOVE UP WHILE THEY LET YOUR RETURN",
+      "BOUNCE: THE NET IS THE PLACE TO BE."
+     ]
+    },
+    {
+     "quiz": [
+      "THEIR DINK BOUNCES LOW IN YOUR KITCHEN."
+     ],
+     "choices": [
+      "HIT IT HARD",
+      "DINK IT BACK, SOFT"
+     ],
+     "answer": 1,
+     "why": [
+      "A LOW BALL HIT HARD POPS UP OR SAILS OUT.",
+      "DINK IT BACK AND WAIT."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "manners",
+   "title": "COURT MANNERS",
+   "blurb": [
+    "HOW TO BE A GOOD",
+    "PARTNER AND OPPONENT."
+   ],
+   "pages": [
+    {
+     "lines": [
+      "CALL THE SCORE LOUD AND CLEAR BEFORE EVERY SERVE,",
+      "SO EVERYONE AGREES ON IT."
+     ],
+     "call": "3 - 1 - 2"
+    },
+    {
+     "lines": [
+      "BALL ON COURT! IF A STRAY BALL ROLLS ONTO YOUR COURT",
+      "DURING A POINT, ANYONE MAY CALL IT. THE POINT STOPS",
+      "AND IS PLAYED AGAIN."
+     ],
+     "path": [
+      [
+       11,
+       -2.4,
+       ""
+      ],
+      [
+       10,
+       6,
+       "x"
+      ]
+     ]
+    },
+    {
+     "lines": [
+      "DON'T WALK BEHIND OR ACROSS A COURT DURING A POINT.",
+      "WAIT FOR IT TO END, THEN CROSS QUICKLY."
+     ]
+    },
+    {
+     "lines": [
+      "AT OPEN PLAY, PUT YOUR PADDLE IN THE RACK TO WAIT",
+      "FOR A GAME, AND PLAY WITH ANYONE: THAT'S HOW YOU",
+      "MEET THE REGULARS."
+     ]
+    },
+    {
+     "lines": [
+      "AFTER THE GAME, MEET AT THE NET, TAP PADDLES AND",
+      "SAY GOOD GAME. WIN OR LOSE."
+     ],
+     "players": [
+      [
+       20.5,
+       13,
+       "you",
+       "YOU"
+      ],
+      [
+       20.5,
+       7,
+       "partner",
+       ""
+      ],
+      [
+       23.5,
+       7,
+       "them",
+       ""
+      ],
+      [
+       23.5,
+       13,
+       "them",
+       ""
+      ]
+     ]
+    },
+    {
+     "quiz": [
+      "A BALL ROLLS ONTO YOUR COURT IN THE",
+      "MIDDLE OF A POINT."
+     ],
+     "choices": [
+      "KEEP PLAYING",
+      "CALL IT, PLAY IT AGAIN"
+     ],
+     "answer": 1,
+     "why": [
+      "ANYONE MAY CALL BALL ON COURT, AND THE",
+      "POINT IS PLAYED AGAIN, SAFELY."
+     ]
+    },
+    {
+     "quiz": [
+      "THE GAME IS OVER.",
+      "WHAT NOW?"
+     ],
+     "choices": [
+      "MEET AT THE NET",
+      "WALK OFF"
+     ],
+     "answer": 0,
+     "why": [
+      "A PADDLE TAP AT THE NET AND A GOOD GAME:",
+      "THAT'S HOW EVERY GAME ENDS."
+     ]
+    }
+   ]
+  }
+ ],
+ "finale": [
+  "THAT'S THE REAL GAME. FIND A COURT NEAR YOU,",
+  "GRAB A PADDLE AND GO PLAY!"
+ ]
+}

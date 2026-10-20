@@ -70,6 +70,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-42 | Cleanup round 4: files, code, docs | `feature/cld-cleanup` | Done |
 | PORT-43 | Rally heat: fire at 10, focus from 15 | `feature/cld-rally-heat` | Ready to test |
 | PORT-44 | Story mode: Save the Park | `feature/cld-story` | Ready to test |
+| PORT-45 | PICKLEBALL 101: the real game's rules | `feature/cld-pickleball-101` | Ready to test |
 
 ## Releases
 
@@ -235,6 +236,22 @@ the same request). Open: 36 and 40.
     loudspeaker, a letter, the petition and the title's STORY row.
   - Status: **Ready to test**: play chapter 1; say what to change in
     the writing (`game/data/story.json`), the pacing, or the twists.
+
+### 45. `feature/cld-pickleball-101`: the real game (asked for 2026-10-19)
+
+- [x] `PORT-45` PICKLEBALL 101 (ADR-070), on PRACTICE: eight lessons on
+  real pickleball (the court, the serve, the two-bounce rule, the
+  kitchen, keeping score, line calls, playing smart, court manners),
+  each page with an animated court diagram, 17 quizzes, TRY IT links to
+  the matching HOW TO PLAY drills. Progress saved (DONE, PERFECT).
+  - Verified: `test_course` (the data, the real numbers, the progress, a
+    lesson, PRACTICE to the course and a drill and back); `test_layout`
+    on every page and quiz state with keyboard and pad prompts. 382/382
+    plus the e2e, golden traces unchanged. Screenshots of the list, the
+    serve's pages, the kitchen, the dink, a score call, a quiz before
+    and after, a closing page and PRACTICE.
+  - Status: **Ready to test**: read a lesson or two; say if anything
+    should be explained differently (`game/data/pickleball101.json`).
 
 ## For you
 

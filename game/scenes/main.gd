@@ -115,6 +115,7 @@ func show_title() -> void:
 	t.open_lesson.connect(show_lesson)
 	t.open_online.connect(show_online)
 	t.open_story.connect(func(): show_story(StoryMode.current(save), "intro"))
+	t.open_course.connect(show_course)
 	_swap(t)
 	park = null
 
@@ -290,19 +291,40 @@ func _on_story_match(ch: int) -> void:
 	m.setup(cfg, StoryMode.venue(ch), false)
 
 
+## PICKLEBALL 101 (ADR-070): the lessons list, its cursor on `at`. A
+## lesson's TRY IT plays the HOW TO PLAY drill, then comes back here.
+func show_course(at := -1) -> void:
+	save.save_game()
+	var c := CourseScreen.new().setup(save)
+	c.leave.connect(show_title)
+	c.try_lesson.connect(func(k: int): show_lesson(k, c.lesson))
+	_swap(c)
+	if at >= 0:
+		c.ready.connect(func():
+			c.list.cursor = at
+			c.list.refresh()
+			c._show_preview())
+
+
 ## HOW TO PLAY (PORT-30): lesson `i`, then the next, to the end (then the
 ## title). Each finished lesson is saved; MAIN MENU on the pause menu leaves.
-func show_lesson(i: int) -> void:
+## From PICKLEBALL 101 (`course`, its lesson), just the one, then back there.
+func show_lesson(i: int, course := -1) -> void:
 	save.save_game()
 	var m := MatchView.new()
 	m.lesson = Tutorial.new(i)
 	m.finished.connect(func(to_title: bool):
+		if to_title and course >= 0:
+			show_course(course)
+			return
 		if to_title:
 			show_title()
 			return
 		save.finish_lesson(i)
 		save.save_game()
-		if i + 1 < Tutorial.LESSONS.size():
+		if course >= 0:
+			show_course(course)
+		elif i + 1 < Tutorial.LESSONS.size():
 			show_lesson(i + 1)
 		else:
 			show_title())

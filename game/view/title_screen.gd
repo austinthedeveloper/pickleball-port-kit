@@ -21,6 +21,7 @@ signal open_couch_cup(entries: Array, doubles: bool)   ## PORT-29: the lobby's c
 signal open_lesson(index: int)  ## PORT-30: HOW TO PLAY from this lesson on
 signal open_online              ## PORT-31: 1 vs 1 over the internet
 signal open_story               ## ADR-069: STORY, the chapter you're on
+signal open_course              ## ADR-070: PICKLEBALL 101, the real game's rules
 
 const SWITCH_LOCK := MenuPage.TRANSITION   ## no menu input while a page slides in
 

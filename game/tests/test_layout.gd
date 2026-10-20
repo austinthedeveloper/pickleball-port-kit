@@ -749,3 +749,51 @@ func test_story() -> void:
 	GameControls.last_device = kept[0]
 	Settings.pad_glyphs = kept[1]
 	GameControls.device_serial += 1
+
+
+## PORT-45: PICKLEBALL 101, the list on every lesson (none done, all
+## perfect), and every page of every lesson: quizzes unanswered, answered
+## right and wrong, and the closing page.
+func test_course() -> void:
+	var kept := [GameControls.last_device, Settings.pad_glyphs]
+	var sv := fresh_save("user://test_layout_course/")
+	for dev in [GameControls.KEYBOARD, GameControls.PAD]:
+		GameControls.last_device = dev
+		Settings.pad_glyphs = 2
+		GameControls.device_serial += 1
+		var c := CourseScreen.new().setup(sv)
+		runner.root.add_child(c)
+		if not c.is_node_ready():
+			c._ready()
+		for pass_i in 2:
+			for i in Course.count() + 1:
+				c.list.cursor = i
+				c.list.refresh()
+				c._show_preview()
+				c.list.settle()
+				check_layout(c, "PICKLEBALL 101 list, row %d (pass %d, device %d)" % [i, pass_i, dev])
+			for i in Course.count():
+				Course.finish(sv, i, true)
+			c.show_list()
+		for i in Course.count():
+			c.open_lesson(i)
+			while true:
+				var p := c._page()
+				if c.choices:
+					c.choices.settle()
+				check_layout(c, "%s page %d (device %d)" % [Course.lesson(i)["title"], c.page, dev])
+				if Course.is_quiz(p):
+					for wrong in [true, false]:
+						c.answers[c.page] = (int(p["answer"]) + (1 if wrong else 0)) % p["choices"].size()
+						c.choices.refresh()
+						c._text()
+						check_layout(c, "%s quiz %d, answered %s" % [Course.lesson(i)["title"], c.page,
+							"wrong" if wrong else "right"])
+				if p.has("end"):
+					break
+				c.next_page()
+		c.free()
+	wipe_saves("user://test_layout_course/")
+	GameControls.last_device = kept[0]
+	Settings.pad_glyphs = kept[1]
+	GameControls.device_serial += 1

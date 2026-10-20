@@ -75,6 +75,7 @@ static func defaults() -> Dictionary:
 		"tournament": {"bracket": {}, "couch": {}},   # PORT-29: the couch cup's
 		## STORY (ADR-069): the chapter you're on, and parks saved
 		"story": {"chapter": 0, "cleared": 0},
+		"course": {"done": []},
 	}
 
 

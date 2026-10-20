@@ -82,6 +82,10 @@ static func build(t: TitleScreen) -> void:
 	], help)
 	# PORT-30: HOW TO PLAY's lessons, and the ball machine
 	t._add_page("learn", "PRACTICE", [
+		{"id": "course", "label": "PICKLEBALL 101", "value": func(): return Course.label(t.save),
+			"press": func():
+				t._store_settings()
+				t.open_course.emit()},
 		{"id": "lessons", "label": "HOW TO PLAY", "value": func(): return "%d/%d" % [
 			t.save.lessons_done() if t.save else 0, Tutorial.LESSONS.size()],
 			"press": func(): t._start_lesson(t.save.next_lesson() if t.save else 0)},
