@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.15.0-2-g285de22-dirty`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.15.1-1-gb46145a-dirty`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-45 of 45 roadmap tasks are in.
+46 of 46 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -274,3 +274,9 @@ Status: **Ready to test**: play chapter 1; say what to change in the writing (`g
 PICKLEBALL 101 (ADR-070), on PRACTICE: eight lessons on real pickleball (the court, the serve, the two-bounce rule, the kitchen, keeping score, line calls, playing smart, court manners), each page with an animated court diagram, 17 quizzes, TRY IT links to the matching HOW TO PLAY drills. Progress saved (DONE, PERFECT).
 
 Status: **Ready to test**: read a lesson or two; say if anything should be explained differently (`game/data/pickleball101.json`). - Added (`feature/cld-rally-scoring-lesson`, the user's note): KEEPING SCORE now names side-out as the park's way and adds rally scoring (every rally scores; this game plays it; MODIFIERS, RULES, SIDE-OUT switches) with a quiz.
+
+## PORT-46: ball speed (asked for 2026-10-20)
+
+BALL SPEED (ADR-071), MODIFIERS' first row: 70% to 130% in 1% steps, 100% the ball as it was. A shot lands where it was aimed over 100 / speed as many frames (so a slower ball also arcs a little higher, as MOON does). Saved; every match, drill and online game gets it.
+
+Status: **Ready to test**: try 90% to 95%; say where it feels right and I can make that the default.

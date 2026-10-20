@@ -139,6 +139,8 @@ status in the same commit. The finished tasks, in full, are in
   101 (tag `v0.15.0`, on `feature/cld-release-0.15.0`).
 - **v0.15.1** (2026-10-20): the story's paper in ink, rally scoring in
   KEEPING SCORE (tag `v0.15.1`, on `feature/cld-release-0.15.1`).
+- **v0.16.0** (2026-10-20): PORT-46 BALL SPEED (tag `v0.16.0`, on
+  `feature/cld-release-0.16.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 

@@ -4,6 +4,17 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.16.0] - 2026-10-20
+
+Set the ball's speed.
+
+### Added
+- **BALL SPEED**, the first row on MODIFIERS: 70% to 130% in 1% steps,
+  starting at 100% (the ball as it was). Shots still land where they're
+  aimed; a slower ball also arcs a little higher. It's saved, and it
+  applies to every match, practice drill and online game (online, the
+  host's setting is used).
+
 ## [0.15.1] - 2026-10-20
 
 Easier-to-read story notices, and rally scoring in PICKLEBALL 101.
