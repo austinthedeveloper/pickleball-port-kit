@@ -4,7 +4,9 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
-## [Unreleased]
+## [0.14.0] - 2026-10-19
+
+Rally heat: long rallies catch fire and put the court in a spotlight.
 
 ### Added
 - **Rally heat**: at 10 shots the ball and the RALLY sign catch fire; from
