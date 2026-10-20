@@ -31,6 +31,29 @@ static var _fonts := {}
 		align = v
 		queue_redraw()
 var spacing := -1
+## Ink on paper: the letters' fill alone, solid in the tint, no outline
+## (a dark tint on the outlined fonts runs the fill into the outline).
+@export var ink := false:
+	set(v):
+		ink = v
+		material = _ink_material() if v else null
+
+static var _ink: ShaderMaterial
+
+
+static func _ink_material() -> ShaderMaterial:
+	if _ink == null:
+		var sh := Shader.new()
+		sh.code = """shader_type canvas_item;
+varying vec4 tint;
+void vertex() { tint = COLOR; }
+void fragment() {
+	vec4 t = texture(TEXTURE, UV);
+	COLOR = vec4(tint.rgb, tint.a * t.a * step(0.4, t.r));
+}"""
+		_ink = ShaderMaterial.new()
+		_ink.shader = sh
+	return _ink
 
 
 static func load_font(name: String) -> Dictionary:

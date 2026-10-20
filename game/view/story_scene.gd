@@ -286,6 +286,7 @@ func _letter(p: Dictionary) -> Control:
 	var lines: Array = p["lines"]
 	for k in lines.size():
 		var l := UiKit.text("small", "", Vector2(480, 210 + k * 30), 0.5, INK, c)
+		l.ink = true
 		_lines[k].visible = false
 		c.set_meta("line%d" % k, l)
 	c.set_meta("count", lines.size())
@@ -304,12 +305,12 @@ func _petition() -> Control:
 	paper.size = Vector2(300, 330)
 	paper.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	c.add_child(paper)
-	UiKit.text("small", "SAVE THE PARK", Vector2(480, 46), 0.5, LETTERHEAD, c)
+	UiKit.text("small", "SAVE THE PARK", Vector2(480, 46), 0.5, LETTERHEAD, c).ink = true
 	for t in StoryMode.CHAPTERS:
 		var signed := t <= chapter
 		var team := String(Opponents.team(int(StoryMode.chapter(t)["team"]))["team"])
 		UiKit.text("small", ("+ " if signed else "  ") + team, Vector2(360, 82 + t * 34), 0.0,
-			INK if signed else Color(0.55, 0.52, 0.48), c)
+			INK if signed else Color(0.6, 0.57, 0.52), c).ink = true
 	return c
 
 

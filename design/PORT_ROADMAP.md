@@ -238,6 +238,10 @@ the same request). Open: 36 and 40.
     loudspeaker, a letter, the petition and the title's STORY row.
   - Status: **Ready to test**: play chapter 1; say what to change in
     the writing (`game/data/story.json`), the pacing, or the twists.
+  - Fix (`feature/cld-story-paper`): Grimsby's notices and the petition
+    were hard to read (the outlined fonts tinted dark ran together); the
+    paper's text is now ink: the letters' fill alone, solid, no outline
+    (`BitmapText.ink`).
 
 ### 45. `feature/cld-pickleball-101`: the real game (asked for 2026-10-19)
 
