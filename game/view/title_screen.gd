@@ -20,11 +20,12 @@ signal open_tournament          ## PORT-25: the bracket
 signal open_couch_cup(entries: Array, doubles: bool)   ## PORT-29: the lobby's cup
 signal open_lesson(index: int)  ## PORT-30: HOW TO PLAY from this lesson on
 signal open_online              ## PORT-31: 1 vs 1 over the internet
+signal open_story               ## ADR-069: STORY, the chapter you're on
 
 const SWITCH_LOCK := MenuPage.TRANSITION   ## no menu input while a page slides in
 
 ## The main page's cursor, kept across matches.
-static var main_cursor := 0
+static var main_cursor := 1             ## SINGLES (STORY is above it)
 
 var _demo: MatchView
 var _ui: CanvasLayer
@@ -252,7 +253,7 @@ func _mods_label(on_page := "") -> String:
 
 ## Dale Dawson (port ADR-066) joins VS once a ladder has been cleared.
 func dawson_unlocked() -> bool:
-	return _rec("ladder_clears") > 0
+	return _rec("ladder_clears") > 0 or StoryMode.cleared(save) > 0   # ADR-069: or the park saved
 
 
 func _change_opponent(dir: int) -> void:

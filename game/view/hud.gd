@@ -304,7 +304,7 @@ func refresh() -> void:
 			if view.cleared or (view.tournament and view.cup_finish.begins_with("CHAMPION")):
 				_banner.text = "CHAMPION!" if not view.cup_finish.begins_with("CHAMPIONS") else "CHAMPIONS!"
 			var ready := s.phase_timer >= K.POINT_RESULT_MIN_FRAMES
-			var next := "PARK" if view.park else ("NEXT OPPONENT" if (view.ladder and you) else (
+			var next := "PARK" if view.park else "CONTINUE" if view.story_mode else ("NEXT OPPONENT" if (view.ladder and you) else (
 				"BRACKET" if view.tournament else "REMATCH"))
 			_banner_sub.text = ""
 			_result_prompts.visible = ready

@@ -723,3 +723,29 @@ func test_update_screen() -> void:
 		check_layout(s, "update screen, state %d" % st)
 		s.free()
 		u.free()
+
+
+## PORT-44: every page of every story scene (the chapter cards, the talk,
+## Grimsby's letters and loudspeaker, the petition, THE END), typed out.
+func test_story() -> void:
+	var kept := [GameControls.last_device, Settings.pad_glyphs]
+	var me := PlayerLook.for_team(0, 0, 0, MatchView.levels_manifest())
+	for dev in [GameControls.KEYBOARD, GameControls.PAD]:
+		GameControls.last_device = dev
+		Settings.pad_glyphs = 2
+		GameControls.device_serial += 1
+		for ch in StoryMode.CHAPTERS:
+			for kind in ["intro", "win", "lose"] + (["ending"] if ch == StoryMode.CHAPTERS - 1 else []):
+				var s := StoryScene.new().setup(null, ch, kind, me)
+				runner.root.add_child(s)
+				for i in s.pages.size():
+					s.page = i
+					s._show_page()
+					var p := s._page()
+					s.shown = s._text_of(p).length()
+					s._type(p, s._text_of(p))
+					check_layout(s, "story chapter %d %s page %d (device %d)" % [ch + 1, kind, i, dev])
+				s.free()
+	GameControls.last_device = kept[0]
+	Settings.pad_glyphs = kept[1]
+	GameControls.device_serial += 1

@@ -87,6 +87,7 @@ Status: **have** (the port does it), **done** (a PORT task added it),
 | **Rings at each player's feet**: 1P red, 2P blue, 3P yellow, 4P green, CPU grey | 066 | **differs** | PORT-39: filled circles (the user's call), in the port's player colours (P1 blue, P2 red, P3 green, P4 gold). |
 | Close-call replay with inches | 041 | **have** | |
 | Story cards, portraits, quips | 026, 048 | **have** | |
+| **Story mode**: save the park from Mr. Grimsby with partner Pepper, a petition signed by each team | 077 | **differs** | PORT-44, ADR-069: the plot as a visual novel, eight chapters with venues, times and twists; Grimsby only a voice and letters, as canon has it. |
 | **More quips** (more lines, a better pick) | 063 | **have** | PORT-35: sixteen a team, the deck. |
 | The captain's partner watches in singles | 042 | **have** | |
 | **Celebrations** (thumbs-up, flex, en garde), slumps, diving saves, emotes (`!` `?` sweat anger star Z's), bounce dust, net shiver, squash on drives | 064 | **have** | PORT-39 (ADR-062); the practice pickle is left. |

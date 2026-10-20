@@ -114,6 +114,7 @@ func show_title() -> void:
 	t.open_couch_cup.connect(_on_couch_cup)
 	t.open_lesson.connect(show_lesson)
 	t.open_online.connect(show_online)
+	t.open_story.connect(func(): show_story(StoryMode.current(save), "intro"))
 	_swap(t)
 	park = null
 
@@ -228,6 +229,65 @@ func _on_tournament_match(cfg: SimTypes.MatchConfig, venue: String, pads: Array 
 	m.court = Settings.court.duplicate()
 	m.time = Settings.time_i
 	m.setup(cfg, venue, false)
+
+
+# --- STORY: SAVE THE PARK (ADR-069) ------------------------------------------------
+
+## Your look in the story: the active career player's, or MATCH SETUP's 1P.
+func _story_me() -> PlayerLook:
+	var manifest := MatchView.levels_manifest()
+	var me := save.career.active_player()
+	if me:
+		return PlayerLook.for_career(me, me.shirt, me.variant, me.paddle, manifest)
+	var c: Dictionary = Settings.p1_choice
+	return PlayerLook.for_team(int(c["palette"]), int(c["variant"]), int(c["paddle"]), manifest)
+
+
+## A scene of chapter `ch`; what follows it: the intro, the match; a win,
+## the next chapter (or, the last, the ending); a loss, the match again;
+## the ending, the title. Start skips a scene, never the match.
+func show_story(ch: int, kind: String) -> void:
+	save.save_game()
+	var s := StoryScene.new().setup(save, ch, kind, _story_me())
+	s.done.connect(_on_story_scene_done.bind(ch, kind))
+	_swap(s)
+
+
+func _on_story_scene_done(_skipped: bool, ch: int, kind: String) -> void:
+	if kind == "intro" or kind == "lose":
+		_on_story_match(ch)
+	elif kind == "win" and ch < StoryMode.CHAPTERS - 1:
+		show_story(ch + 1, "intro")
+	elif kind == "win":
+		show_story(ch, "ending")
+	else:
+		show_title()
+
+
+## A chapter's match at its venue and time. B on the result goes on: the
+## win scene, or Pepper's word and a rematch; MENU leaves (the chapter is
+## kept, as SNES ADR-077 has it).
+func _on_story_match(ch: int) -> void:
+	save.save_game()
+	var cfg := StoryMode.config(ch, Settings.p1_choice, save.career.active_player())
+	var m := MatchView.new()
+	m.save = save
+	m.story_mode = true
+	m.finished.connect(func(to_title: bool):
+		if to_title:
+			show_title()
+			return
+		if m.sim.match_winner == 0:
+			StoryMode.win(save, ch)
+			save.save_game()
+			show_story(ch, "win")
+		else:
+			show_story(ch, "lose"))
+	_swap(m)
+	m.camera.percent = Settings.CAMERAS[Settings.camera_i]
+	m.court = Settings.court.duplicate()
+	m.time = StoryMode.time(ch)
+	m.setup(cfg, StoryMode.venue(ch), false)
 
 
 ## HOW TO PLAY (PORT-30): lesson `i`, then the next, to the end (then the

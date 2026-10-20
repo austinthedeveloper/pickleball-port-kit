@@ -1,0 +1,163 @@
+{
+  "comment": "STORY: SAVE THE PARK (port ADR-069). The SNES story's plot and cast (bible 5.2, SNES ADR-077: Mr. Grimsby of Grimsby Parking Co. will pave the park unless someone beats the Champs; you and PEPPER win the other seven teams' signatures on the petition first; the Gym Bros are on his payroll, the Twins are his niece and nephew; the Champs play with the park as the bet; Grimsby is only ever text, never a sprite), retold for the remaster with longer scenes. A chapter is a ladder team in order: its venue, its time of day, a twist (MOD_* names), the scene before the match, the scene after a win, and Pepper's word after a loss. A page is `who` (narrator, partner, captain, mate, villain, note: a Grimsby Parking Co. letter) and 1 to 3 lines of at most 46 HUD characters: capitals, digits, spaces and !?.,:-'/%+. `petition` on a win page shows the signatures.",
+  "villain": "MR. GRIMSBY",
+  "company": "GRIMSBY PARKING CO.",
+  "partner": {
+    "name": "PEPPER", "variant": "female", "paddle": "gold", "hat": "backcap", "celebrate": "cheer", "skin": "light",
+    "hair": [28, 12, 4],
+    "shirt": [[6, 16, 2], [12, 24, 4], [20, 30, 10]],
+    "shorts": [[4, 6, 14], [8, 10, 20]],
+    "shoe": [31, 31, 31]
+  },
+  "chapters": [
+    {
+      "team": 0, "title": "THE NOTICE", "venue": "park", "time": 0, "twist": [],
+      "scene": [
+        {"who": "narrator", "lines": ["SATURDAY MORNING AT RIVERDALE PARK.", "THE COURTS ARE FULL. THE COFFEE IS HOT."]},
+        {"who": "narrator", "lines": ["THEN SOMEONE NOTICES THE NEW SIGN", "ZIP-TIED TO THE FENCE."]},
+        {"who": "note", "lines": ["NOTICE: THIS PARK WILL BE PAVED", "FOR A 400-SPACE PARKING LOT.", "HAVE A NICE DAY. - GRIMSBY PARKING CO."]},
+        {"who": "villain", "lines": ["FOUR HUNDRED SPACES! ALL MINE!", "UNLESS..."]},
+        {"who": "villain", "lines": ["UNLESS SOMEONE BEATS THE CHAMPS.", "BEAT THEM, AND I'LL LEAVE YOUR", "LITTLE COURTS ALONE. HA!"]},
+        {"who": "partner", "lines": ["THE CHAMPS ONLY PLAY THE BEST.", "SO WE BEAT EVERYONE ELSE FIRST."]},
+        {"who": "partner", "lines": ["I'M PEPPER. I'VE PLAYED HERE SINCE", "I COULD HOLD A PADDLE. YOU'RE WITH ME."]},
+        {"who": "partner", "lines": ["EVERY TEAM WE BEAT SIGNS THE PETITION.", "EIGHT NAMES, AND THE PARK STAYS."]},
+        {"who": "captain", "lines": ["SAVE THE PARK? SURE THING, SPORT!", "RIGHT AFTER YOU BEAT US."]},
+        {"who": "mate", "lines": ["DAD, THAT'S NOT A JOKE.", "THAT'S JUST A SENTENCE."]}
+      ],
+      "win": [
+        {"who": "captain", "lines": ["WELL, I'LL BE. WHERE DO WE SIGN?", "KIDDO, GRAB A PEN."]},
+        {"who": "mate", "lines": ["I'M SIGNING IN GLITTER.", "THAT'S THE RULE."]},
+        {"who": "partner", "lines": ["ONE NAME DOWN! NEXT, THE SNOWBIRDS.", "THEY'VE BEEN HERE LONGER THAN THE NETS."], "petition": true}
+      ],
+      "lose": {"who": "partner", "lines": ["SHAKE IT OFF. LET THE SERVE BOUNCE,", "THEN GET UP TO THE KITCHEN LINE."]}
+    },
+    {
+      "team": 1, "title": "THE SNOWBIRDS", "venue": "lakeside", "time": 0, "twist": [],
+      "scene": [
+        {"who": "narrator", "lines": ["DOWN BY THE LAKE, TWO LAWN CHAIRS", "AND TWO VISORS WAIT IN THE SHADE."]},
+        {"who": "captain", "lines": ["A PARKING LOT? WHERE WOULD WE", "PARK OUR LAWN CHAIRS, DEAR?"]},
+        {"who": "mate", "lines": ["WE'VE PLAYED HERE SINCE 1962.", "WE'VE PLAYED HERE SINCE 1962."]},
+        {"who": "captain", "lines": ["WALT, YOU SAID THAT TWICE."]},
+        {"who": "mate", "lines": ["IT WAS TRUE BOTH TIMES. LOSE, AND", "YOU CARRY THE CHAIRS TO THE CAR."]},
+        {"who": "partner", "lines": ["DEAL. BUT IF WE WIN, YOU SIGN.", "AND WATCH THEIR DINKS. THEY'RE SNEAKY."]}
+      ],
+      "win": [
+        {"who": "captain", "lines": ["OH, THAT WAS LOVELY. HAND ME", "THE PETITION, YOUNG LADY."]},
+        {"who": "mate", "lines": ["SIGNED IN CURSIVE. NOBODY CAN", "READ CURSIVE ANYMORE. PERFECT."]},
+        {"who": "partner", "lines": ["TWO NAMES! GRIMSBY'S GOING TO", "HEAR ABOUT THIS."], "petition": true}
+      ],
+      "lose": {"who": "partner", "lines": ["THEY WIN WITH SOFT SHOTS. DON'T", "SWING HARD AT A LOW BALL. DINK BACK."]}
+    },
+    {
+      "team": 2, "title": "MUSCLE FOR HIRE", "venue": "dinosaur", "time": 0, "twist": ["MOD_FAST_BALL"],
+      "scene": [
+        {"who": "note", "lines": ["DEAR MEDDLERS: I HAVE HIRED HELP.", "REGARDS, GRIMSBY PARKING CO."]},
+        {"who": "narrator", "lines": ["A STRETCH LIMO PULLS UP BY THE", "DINOSAUR COURTS. TWO MEN STEP OUT."]},
+        {"who": "narrator", "lines": ["THEY ARE FLEXING.", "THEY HAVE NOT STOPPED FLEXING."]},
+        {"who": "captain", "lines": ["GRIMSBY PAYS US IN PROTEIN SHAKES", "TO STOP YOU, BRO. NOTHING PERSONAL."]},
+        {"who": "mate", "lines": ["HE PROMISED US A GYM ON LEVEL 2", "OF THE PARKING LOT. LEG DAY FOREVER."]},
+        {"who": "partner", "lines": ["THEY HIT EVERYTHING HARD AND FAST.", "STAY BACK, BLOCK IT, AND LOB THEM."]}
+      ],
+      "win": [
+        {"who": "captain", "lines": ["BRO. BRO. WE GOT OUT-WORKED.", "BY A DINK."]},
+        {"who": "mate", "lines": ["THE SHAKES WERE CHALK, BRO.", "WE QUIT GRIMSBY. WHERE DO WE SIGN?"]},
+        {"who": "partner", "lines": ["THREE! AND WE GOT GRIMSBY'S", "HIRED MUSCLE ON OUR SIDE."], "petition": true}
+      ],
+      "lose": {"who": "partner", "lines": ["THE BALL'S FAST TODAY. SOFT HANDS:", "LET THEIR PACE DO THE WORK."]}
+    },
+    {
+      "team": 3, "title": "STORM ON THE LAKE", "venue": "lakeside", "time": 1, "twist": ["MOD_WIND"],
+      "scene": [
+        {"who": "narrator", "lines": ["DUSK. THE WIND PICKS UP ON THE LAKE.", "A SHIP DROPS ANCHOR BY THE COURTS."]},
+        {"who": "captain", "lines": ["ARR! A PARKING LOT, YE SAY?", "WHERE WOULD WE MOOR THE SHIP?"]},
+        {"who": "mate", "lines": ["BEAT US FAIR IN THE GALE, AND WE'LL", "FIGHT GRIMSBY AT YER SIDE!"]},
+        {"who": "partner", "lines": ["THE WIND'S PUSHING THE BALL SIDEWAYS.", "AIM FOR THE MIDDLE AND LET IT DRIFT."]},
+        {"who": "captain", "lines": ["ALL HANDS ON DECK!", "ALL PADDLES ON... ALSO DECK!"]}
+      ],
+      "win": [
+        {"who": "captain", "lines": ["BLOW ME DOWN. YE SAIL A FINE RALLY.", "BILGE! THE QUILL!"]},
+        {"who": "mate", "lines": ["WE SIGNED IT WITH AN X.", "THAT'S HOW PIRATES SIGN."]},
+        {"who": "partner", "lines": ["FOUR! HALFWAY THERE.", "AND WE HAVE A SHIP NOW, APPARENTLY."], "petition": true}
+      ],
+      "lose": {"who": "partner", "lines": ["THE WIND CHANGES EVERY SERVE.", "WATCH THE STREAKS AND AIM INTO IT."]}
+    },
+    {
+      "team": 4, "title": "LIGHTS OUT", "venue": "space", "time": 2, "twist": ["MOD_GLOW"],
+      "scene": [
+        {"who": "partner", "lines": ["NEXT, THE GOTH CLUB.", "THEY ONLY PLAY AFTER DARK. GULP."]},
+        {"who": "narrator", "lines": ["THE STARS COME OUT. THE LINES GLOW.", "TWO PALE FACES WAIT AT THE NET."]},
+        {"who": "captain", "lines": ["WE LIKE GRAY PAVEMENT.", "IT MATCHES OUR SOULS."]},
+        {"who": "mate", "lines": ["BUT A PARKING LOT HAS SUCH", "BRIGHT LIGHTS. ALL NIGHT. UGH."]},
+        {"who": "captain", "lines": ["THE KITCHEN IS OUR CRYPT.", "ENTER IF YOU DARE."]},
+        {"who": "partner", "lines": ["THEY SLICE AND DINK ALL DAY.", "BE PATIENT. WAIT FOR THE HIGH ONE."]}
+      ],
+      "win": [
+        {"who": "captain", "lines": ["YOU HAVE DEFEATED THE DARKNESS.", "THIS IS ANNOYING."]},
+        {"who": "mate", "lines": ["WE SIGNED IN PURPLE INK.", "IT'S THE ONLY INK WE OWN."]},
+        {"who": "partner", "lines": ["FIVE! SPOOKY, BUT SIGNED."], "petition": true}
+      ],
+      "lose": {"who": "partner", "lines": ["DON'T RUSH IT. THE WIN IS THE", "SHOT AFTER THE ONE THAT'S TOO HIGH."]}
+    },
+    {
+      "team": 5, "title": "UNDER THE SEA", "venue": "undersea", "time": 0, "twist": ["MOD_MOON"],
+      "scene": [
+        {"who": "narrator", "lines": ["DOWN UNDER THE WAVES, THE SURF", "CREW HAS BUILT A COURT. SOMEHOW."]},
+        {"who": "captain", "lines": ["NO PARK, NO HANGING OUT, DUDE.", "BUT YOU GOTTA EARN IT."]},
+        {"who": "mate", "lines": ["DOWN HERE THE BALL FLOATS, BRAH.", "EVERY LOB IS LIKE, A JOURNEY."]},
+        {"who": "partner", "lines": ["EVERYTHING HANGS IN THE WATER.", "TAKE YOUR TIME. YOU'VE GOT IT."]},
+        {"who": "mate", "lines": ["WIN, AND THE WHOLE BEACH COMES", "TO THE FINAL. COWABUNGA!"]}
+      ],
+      "win": [
+        {"who": "captain", "lines": ["TOTALLY TUBULAR RALLY, DUDES.", "WHERE'S THE PEN? IS IT WATERPROOF?"]},
+        {"who": "mate", "lines": ["IT IS NOW."]},
+        {"who": "partner", "lines": ["SIX! TWO TEAMS LEFT.", "AND THEN THE CHAMPS."], "petition": true}
+      ],
+      "lose": {"who": "partner", "lines": ["THE BALL HANGS FOREVER DOWN HERE.", "DON'T SWING EARLY. WAIT FOR IT."]}
+    },
+    {
+      "team": 6, "title": "DOUBLE TROUBLE", "venue": "sunset", "time": 1, "twist": [],
+      "scene": [
+        {"who": "narrator", "lines": ["SUNSET. TWO KIDS IN MATCHING CAPS", "ARE ALREADY ON THE COURT. WAITING."]},
+        {"who": "captain", "lines": ["UNCLE GRIMSBY SAYS HI."]},
+        {"who": "mate", "lines": ["HE SAYS YOU'LL NEVER GET PAST US.", "HE ALSO SAYS EAT YOUR VEGETABLES."]},
+        {"who": "partner", "lines": ["HIS NIECE AND NEPHEW?!", "OKAY. NOW IT'S PERSONAL."]},
+        {"who": "note", "lines": ["I HAVE SENT MY BEST. FAMILY.", "THEY HAVE NEVER LOST A POINT AT DINNER.", "- GRIMSBY PARKING CO."]}
+      ],
+      "win": [
+        {"who": "mate", "lines": ["UNCLE GRIMSBY IS GOING TO BE", "SO MAD. THIS IS GREAT."]},
+        {"who": "captain", "lines": ["WE'RE SIGNING. WE LIKE THE PARK.", "THE SWINGS ARE THE BEST PART."]},
+        {"who": "partner", "lines": ["SEVEN NAMES! ONE LEFT.", "THE CHAMPS."], "petition": true}
+      ],
+      "lose": {"who": "partner", "lines": ["THEY'RE QUICK AT THE NET. DROP IT", "SHORT, THEN MOVE UP TOGETHER."]}
+    },
+    {
+      "team": 7, "title": "THE CHAMPS", "venue": "sunset", "time": 2, "twist": ["MOD_WIN_BY_2"],
+      "scene": [
+        {"who": "narrator", "lines": ["THE LIGHTS COME ON OVER CENTER COURT.", "EVERY TEAM YOU BEAT HAS COME TO WATCH."]},
+        {"who": "villain", "lines": ["SO. YOU REACHED THE CHAMPS.", "THEY HAVEN'T LOST IN YEARS."]},
+        {"who": "villain", "lines": ["I'VE BET THE PARK ON THEM.", "THE WHOLE THING. TREES INCLUDED."]},
+        {"who": "captain", "lines": ["NOTHING PERSONAL.", "WE JUST REALLY LIKE WINNING."]},
+        {"who": "mate", "lines": ["WIN BY TWO TONIGHT. NO LUCKY", "POINTS. YOU'LL HAVE TO EARN IT."]},
+        {"who": "partner", "lines": ["THIS IS IT, PARTNER. EVERYTHING", "WE'VE PLAYED FOR. LET'S SAVE OUR PARK."]}
+      ],
+      "win": [
+        {"who": "captain", "lines": ["...GOOD GAME. REALLY.", "WE'LL SIGN. WE'RE NOT MONSTERS."]},
+        {"who": "mate", "lines": ["SAME TIME NEXT SUMMER?", "WE WANT A REMATCH."]},
+        {"who": "partner", "lines": ["EIGHT NAMES. EIGHT!", "THE PETITION'S FULL!"], "petition": true}
+      ],
+      "lose": {"who": "partner", "lines": ["WE'RE CLOSE. KEEP THE BALL LOW,", "STAY AT THE LINE, AND BE PATIENT."]}
+    }
+  ],
+  "ending": [
+    {"who": "narrator", "lines": ["THE CHAMPS ARE BEATEN.", "THE WHOLE PARK CHEERS."]},
+    {"who": "villain", "lines": ["FINE! FINE. A DEAL IS A DEAL.", "THE PARK STAYS."]},
+    {"who": "note", "lines": ["NOTICE: THIS PARK WILL NOT BE PAVED.", "WE ARE VERY UPSET ABOUT IT.", "- GRIMSBY PARKING CO."]},
+    {"who": "narrator", "lines": ["THE SIGN COMES DOWN. THE NETS STAY UP.", "THE NEXT GAME STARTS AT NOON."]},
+    {"who": "partner", "lines": ["WE DID IT, PARTNER.", "SEE YOU ON THE COURTS."]}
+  ],
+  "epilogue": [
+    {"who": "narrator", "lines": ["LATER, AS THE LIGHTS GO OFF, A MAN", "IN A HEADBAND STOPS AT THE FENCE."]},
+    {"who": "narrator", "lines": ["HE LOOKS A LOT LIKE THE GUY", "ON THE BOX THIS GAME CAME IN."]},
+    {"who": "narrator", "lines": ["DALE DAWSON WANTS A GAME.", "FIND HIM ON MATCH SETUP: VS."]}
+  ]
+}

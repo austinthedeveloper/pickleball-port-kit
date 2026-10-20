@@ -49,6 +49,8 @@ func my_team() -> int:
 ## From the park (ADR-034): B on the result, or PARK on practice's pause
 ## menu, goes back there (finished(false)).
 var park := false
+## STORY (ADR-069): a chapter's match; B on the result goes on (main.gd).
+var story_mode := false
 var story := Story.new()
 ## The intro card (ADR-026): the match waits under it, no sim, no AI.
 var card_frames := -1
@@ -473,7 +475,7 @@ func _physics_process(_delta: float) -> void:
 		_prev_phase = sim.phase
 	flair.tick()
 	if sim.rematch_requested:
-		if park or tournament:
+		if park or tournament or story_mode:
 			finished.emit(false)             # ADR-034: back to the park; PORT-25: the bracket
 			return
 		if ladder and sim.match_winner == 0:

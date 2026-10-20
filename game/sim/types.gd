@@ -239,7 +239,7 @@ class MatchConfig:
 	## paddle; match_slot_style and the look follow `partner`). A human on
 	## slot 1 keeps their own.
 	func set_partner(team: int) -> void:
-		partner = team if team >= 0 and team < Opponents.count() else -1
+		partner = team if Opponents.exists(team) else -1   # a ladder captain, or PEPPER
 		if partner < 0 or human[1]:
 			return
 		var m: Dictionary = Opponents.team(team)["players"][0]

@@ -7,7 +7,8 @@ extends TestSuite
 func test_after_the_ladder() -> void:
 	eq(Opponents.count(), 8, "the ladder is still eight")
 	eq(Opponents.DAWSON, Opponents.count())
-	check(Opponents.exists(Opponents.DAWSON) and not Opponents.exists(Opponents.DAWSON + 1))
+	check(Opponents.exists(Opponents.DAWSON) and Opponents.exists(Opponents.PEPPER)
+		and not Opponents.exists(Opponents.PEPPER + 1), "Dawson, then the story's Pepper")
 	check(Opponents.solo(Opponents.DAWSON) and not Opponents.solo(7))
 	eq(Opponents.team(Opponents.DAWSON)["team"], "DALE DAWSON")
 	eq(Story.rung_line(Opponents.DAWSON), "THE COVER MATCH")

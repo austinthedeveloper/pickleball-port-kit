@@ -73,6 +73,8 @@ static func defaults() -> Dictionary:
 		"career": Career.new().to_dict(),
 		## the tournament in play (PORT-25; {} = none), filled in on load
 		"tournament": {"bracket": {}, "couch": {}},   # PORT-29: the couch cup's
+		## STORY (ADR-069): the chapter you're on, and parks saved
+		"story": {"chapter": 0, "cleared": 0},
 	}
 
 

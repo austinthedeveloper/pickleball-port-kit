@@ -23,7 +23,7 @@ static func for_slot(cfg: SimTypes.MatchConfig, slot: int, manifest: Dictionary)
 	if cfg.human[slot] and cfg.palette[slot] >= 0 \
 			and not sheet_has_paddle(cfg.palette[slot], cfg.paddle[slot]):
 		return for_team(cfg.palette[slot], cfg.variant[slot], cfg.paddle[slot], manifest)
-	if slot == 1 and not cfg.human[1] and cfg.partner >= 0 and cfg.partner < Opponents.count():
+	if slot == 1 and not cfg.human[1] and Opponents.exists(cfg.partner):
 		return from_member(Opponents.team(cfg.partner)["players"][0], manifest)
 	if not Opponents.exists(cfg.opponent) or cfg.human[2] or slot < 2:
 		return null

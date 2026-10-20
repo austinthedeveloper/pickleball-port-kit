@@ -69,6 +69,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-41 | Four swings and the short hold | `feature/cld-four-shots` | Ready to test |
 | PORT-42 | Cleanup round 4: files, code, docs | `feature/cld-cleanup` | Done |
 | PORT-43 | Rally heat: fire at 10, focus from 15 | `feature/cld-rally-heat` | Ready to test |
+| PORT-44 | Story mode: Save the Park | `feature/cld-story` | Ready to test |
 
 ## Releases
 
@@ -218,10 +219,31 @@ the same request). Open: 36 and 40.
   - Status: **Ready to test**: play a long rally; say if the steps should
     come sooner, go darker, or the fire be bigger.
 
+### 44. `feature/cld-story`: story mode (asked for 2026-10-19)
+
+- [x] `PORT-44` STORY: SAVE THE PARK (ADR-069), the SNES story's plot
+  told as a visual novel: eight chapters, one per ladder team, each a
+  chapter card, a scene at its venue and time (you and Pepper, the team,
+  Grimsby on the loudspeaker or in letters), a doubles match with
+  Pepper and the chapter's twist, and the petition signed; the ending,
+  THE END, and an epilogue pointing to Dawson. Progress is saved; a
+  clear unlocks Dawson.
+  - Verified: `test_story_mode` (the script, the configs, the progress,
+    the paging, title to scene to match); `test_layout` on every page
+    with keyboard and pad prompts. 375/375 plus the e2e, golden traces
+    unchanged. Screenshots of a chapter card, a talk page, the
+    loudspeaker, a letter, the petition and the title's STORY row.
+  - Status: **Ready to test**: play chapter 1; say what to change in
+    the writing (`game/data/story.json`), the pacing, or the twists.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
+
+- **PORT-44 story:** the script is mine, from the canon plot. The bible
+  names Pepper and Grimsby but not the chapters' twists or titles; say
+  if any should change. Pepper's look is the SNES story.json's.
 
 - **PORT-40 Dale Dawson:** the bible marks his name "[PROPOSED; name
   search required]"; he's data (`game/data/dawson.json`) if it changes.

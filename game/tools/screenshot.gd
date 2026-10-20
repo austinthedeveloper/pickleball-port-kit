@@ -22,6 +22,7 @@
 ## title_career_card, title_career_edit and title_career_name (and
 ## title_career_museum: the HAT MUSEUM, half the hats won); "unlock"
 ## shows the UNLOCKED! card at the end of a match.
+## "story<ch>_<kind>_<page>" a story scene (PORT-44).
 extends SceneTree
 
 var _frames := 0
@@ -185,6 +186,17 @@ func _initialize() -> void:
 		bs.save = null                      # nothing written
 		root.add_child(bs)
 		_view = bs
+	elif mode.begins_with("story"):
+		# PORT-44: story<chapter>_<intro|win|lose|ending>_<page>, e.g.
+		# story3_intro_0 (the chapter card), story0_intro_1 (a letter)
+		var parts := mode.split("_")
+		var ch := int(parts[0].substr(5))
+		var sc := StoryScene.new().setup(null, ch, parts[1] if parts.size() > 1 else "intro",
+			PlayerLook.for_team(0, 0, 0, MatchView.levels_manifest()))
+		root.add_child(sc)
+		sc.page = int(parts[2]) if parts.size() > 2 else 0
+		sc._show_page()
+		_view = sc
 	elif mode.begins_with("title"):
 		Settings.venue_i = maxi(0, Settings.VENUES.find(venue))
 		_view = TitleScreen.new()

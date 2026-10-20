@@ -9,6 +9,11 @@ extends RefCounted
 static func build(t: TitleScreen) -> void:
 	var help := [["hit", "SELECT"], ["back", "BACK"]]
 	t._add_page("main", "", [
+		{"id": "story", "label": "STORY", "value": func(): return StoryMode.label(t.save),
+			"press": func():
+				t._store_settings()
+				TitleScreen.main_cursor = t.pages["main"].cursor
+				t.open_story.emit()},
 		{"id": "singles", "label": "SINGLES", "press": func(): t.open_select(false)},
 		{"id": "doubles", "label": "DOUBLES", "press": func(): t.open_select(true)},
 		{"id": "openplay", "label": "OPEN PLAY", "value": func(): return "THE PARK",
@@ -27,7 +32,7 @@ static func build(t: TitleScreen) -> void:
 			"press": func(): t.open_page("modifiers")},
 		{"id": "options", "label": "OPTIONS", "press": func(): t.open_page("options")},
 		{"id": "career", "label": "CAREER", "value": t._career_label, "press": t.open_career},
-	], [], Rect2(300, 146, 360, 0))
+	], [], Rect2(300, 140, 360, 0))     # STORY made it 12 rows: up, clear of the key legend
 	t._add_page("play", "MATCH SETUP", [
 		{"id": "vs", "label": "VS", "value": t._opponent_label, "change": t._change_opponent},
 		{"id": "difficulty", "label": "DIFFICULTY", "value": func(): return Settings.DIFFICULTIES[Settings.difficulty_i],

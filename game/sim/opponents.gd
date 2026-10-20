@@ -8,6 +8,10 @@ const PATH := "res://data/opponents.json"
 ## Dale Dawson (port ADR-066): the bonus team after the ladder, port-only.
 const DAWSON_PATH := "res://data/dawson.json"
 const DAWSON := 8
+## STORY's partner (ADR-069): PEPPER, from data/story.json, after Dawson; a
+## partner only (the partner style), never an opponent.
+const STORY_PATH := "res://data/story.json"
+const PEPPER := 9
 
 static var _data: Dictionary = {}
 static var _default: SimTypes.AiStyle
@@ -37,6 +41,10 @@ static func _load() -> void:
 	dawson["players"] = [dale]
 	assert(_teams.size() == DAWSON, "Dawson follows the ladder")
 	_teams.append(dawson)
+	var pepper: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(STORY_PATH))["partner"].duplicate()
+	pepper["style_obj"] = _partner
+	_teams.append({"team": pepper["name"], "venue": "PARK", "intro": "", "taunt": "", "concede": "",
+		"quips": [], "players": [pepper]})
 
 
 static func default_style() -> SimTypes.AiStyle:
@@ -49,10 +57,10 @@ static func partner_style() -> SimTypes.AiStyle:
 	return _partner.copy()
 
 
-## The ladder's teams (Dale Dawson, after them, isn't one).
+## The ladder's teams (Dale Dawson and Pepper, after them, aren't).
 static func count() -> int:
 	_load()
-	return _teams.size() - 1
+	return DAWSON
 
 
 ## A team to play: the ladder's, or Dale Dawson.
