@@ -247,6 +247,8 @@ func _play_summary() -> String:
 func _mods_label(on_page := "") -> String:
 	var on := Settings.MOD_ROWS.filter(func(m): return Settings.mod_bits & m[2] \
 		and (on_page == "" or m[3] == on_page))
+	if on_page == "" and Settings.ball_speed != 100:
+		on.append([0, "BALL %d%%" % Settings.ball_speed])     # ADR-071
 	if on.is_empty():
 		return "NONE"
 	return on[0][1] if on.size() == 1 else "%d ON" % on.size()

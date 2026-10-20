@@ -71,6 +71,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-43 | Rally heat: fire at 10, focus from 15 | `feature/cld-rally-heat` | Ready to test |
 | PORT-44 | Story mode: Save the Park | `feature/cld-story` | Ready to test |
 | PORT-45 | PICKLEBALL 101: the real game's rules | `feature/cld-pickleball-101` | Ready to test |
+| PORT-46 | BALL SPEED slider on MODIFIERS | `feature/cld-ball-speed` | Ready to test |
 
 ## Releases
 
@@ -264,6 +265,19 @@ the same request). Open: 36 and 40.
     SCORE now names side-out as the park's way and adds rally scoring
     (every rally scores; this game plays it; MODIFIERS, RULES, SIDE-OUT
     switches) with a quiz.
+
+### 46. `feature/cld-ball-speed`: ball speed (asked for 2026-10-20)
+
+- [x] `PORT-46` BALL SPEED (ADR-071), MODIFIERS' first row: 70% to 130% in
+  1% steps, 100% the ball as it was. A shot lands where it was aimed over
+  100 / speed as many frames (so a slower ball also arcs a little
+  higher, as MOON does). Saved; every match, drill and online game gets
+  it.
+  - Verified: `test_ball_speed` (the flight, the sim's setting, a match
+    at 90%, the save, lobby, online and the row). 386/386 plus the e2e,
+    golden traces unchanged. Screenshot of MODIFIERS.
+  - Status: **Ready to test**: try 90% to 95%; say where it feels right
+    and I can make that the default.
 
 ## For you
 

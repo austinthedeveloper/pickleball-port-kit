@@ -415,4 +415,5 @@ func practice_config(difficulty: int) -> SimTypes.MatchConfig:
 	var cfg := SimTypes.MatchConfig.practice_session(settings,
 		practice_saved_best(settings[Practice.ROW_ZONE]))
 	cfg.difficulty = difficulty
+	cfg.ball_speed = Settings.ball_speed        # ADR-071
 	return cfg

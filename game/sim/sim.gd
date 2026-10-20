@@ -237,6 +237,11 @@ func _ball_physics() -> void:
 	var mods := config.modifiers
 	ball.gravity_fp = K.MOON_GRAVITY_FP if mods & K.MOD_MOON else K.BALL_GRAVITY_FP
 	ball.flight = K.MOON_FLIGHT if mods & K.MOD_MOON else [1, 1]
+	# BALL SPEED (port ADR-071): every launch lands where it was aimed, over
+	# 100 / speed as many frames; at 100 the flight is untouched
+	var speed := clampi(config.ball_speed, K.BALL_SPEED_MIN, K.BALL_SPEED_MAX)
+	if speed != 100:
+		ball.flight = [int(ball.flight[0]) * 100, int(ball.flight[1]) * speed]
 	ball.bounce_256 = K.BOUNCY_VERTICAL_256 if mods & K.MOD_BOUNCY else K.BALL_BOUNCE_VERTICAL_256
 	ball.wind = 0
 	ball.wind_tick = 0

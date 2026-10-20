@@ -50,6 +50,7 @@ static var opponent_i := -2
 static var two_players := false
 static var camera_i := 1                ## CAMERAS: 50% (since 0.9.1; was OFF)
 static var mod_bits := 0
+static var ball_speed := 100            ## MODIFIERS > BALL SPEED, percent (ADR-071)
 ## Window options: fullscreen, and integer scaling (crisp) or fit (fills).
 static var fullscreen := false
 static var integer_scale := true
@@ -91,6 +92,7 @@ static func load_from(save: SaveGame) -> void:
 	var bits := int(st.get("mod_bits", -1))
 	mod_bits = (bits & MOD_SAVED) if bits >= 0 else \
 		OLD_MOD_PRESETS[clampi(int(st.get("mods", 0)), 0, OLD_MOD_PRESETS.size() - 1)]
+	ball_speed = clampi(int(st.get("ball_speed", 100)), K.BALL_SPEED_MIN, K.BALL_SPEED_MAX)
 	Sfx.setting = clampi(int(st.get("sound", 0)), 0, AudioMap.SOUND_NAMES.size() - 1)
 	Music.volume = clampi(int(st.get("music", Music.DEFAULT_VOLUME)), 0, Music.VOLUMES)
 	fullscreen = int(st.get("fullscreen", 0)) != 0
@@ -122,7 +124,7 @@ static func store_to(save: SaveGame) -> void:
 		return
 	save.data["settings"].merge({"venue": venue_i, "difficulty": difficulty_i,
 		"points": points_i, "players": 2 if two_players else 1, "opponent": opponent_i,
-		"camera": camera_i, "mod_bits": mod_bits, "sound": Sfx.setting,
+		"camera": camera_i, "mod_bits": mod_bits, "ball_speed": ball_speed, "sound": Sfx.setting,
 		"music": Music.volume,
 		"fullscreen": 1 if fullscreen else 0, "integer_scale": 1 if integer_scale else 0,
 		"player": [p1_choice["palette"], p1_choice["variant"], p1_choice["paddle"]],
@@ -192,6 +194,7 @@ static func config_for(doubles: bool, opponent: int, difficulty: int, points: in
 			K.VARIANT_MALE, Paddles.STANDARD), p2)
 	cfg.difficulty = difficulty
 	cfg.points_to_win = points
+	cfg.ball_speed = ball_speed
 	if not p2.is_empty():
 		return cfg
 	cfg.opponent = opponent

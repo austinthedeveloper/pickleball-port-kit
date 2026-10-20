@@ -177,6 +177,7 @@ func _start_match() -> void:
 	var cfg := PlayerSelect.config_select(K.MODE_SINGLES, mine, theirs)
 	cfg.points_to_win = Settings.POINTS[Settings.points_i]
 	cfg.modifiers = Settings.mod_bits
+	cfg.ball_speed = Settings.ball_speed       # the host's: the guest plays the config it's sent
 	session.begin({"cfg": OnlineSession.config_to_dict(cfg), "venue": Settings.venue(),
 		"time": Settings.time_i, "court": Settings.court.duplicate()})
 	_sfx.play("confirm")

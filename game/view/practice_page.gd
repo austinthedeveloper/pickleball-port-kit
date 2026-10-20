@@ -73,6 +73,7 @@ func config() -> SimTypes.MatchConfig:
 		cfg = SimTypes.MatchConfig.practice_session(drill if drill.size() == Practice.ROWS
 			else Practice.DEFAULTS, 0)
 		cfg.difficulty = Settings.difficulty_i
+	cfg.ball_speed = Settings.ball_speed        # ADR-071: the ball you play with
 	cfg.palette[0] = Settings.p1_choice["palette"]
 	cfg.variant[0] = Settings.p1_choice["variant"]
 	cfg.paddle[0] = Settings.p1_choice["paddle"]

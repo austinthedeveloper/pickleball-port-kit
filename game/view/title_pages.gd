@@ -59,7 +59,11 @@ static func build(t: TitleScreen) -> void:
 				Settings.court[i] = (Settings.court[i] + d + CourtStyle.count(part)) % CourtStyle.count(part)
 				t._demo.set_court(Settings.court)})
 	t._add_page("court", "COURT", court_rows, help, Rect2(590, 150, 350, 0))
-	var mod_rows := {"modifiers": [], "rules": []}
+	# ADR-071: the ball's speed, in 1% steps
+	var mod_rows := {"modifiers": [{"id": "ball_speed", "label": "BALL SPEED",
+		"value": func(): return "%d%%" % Settings.ball_speed,
+		"change": func(d): Settings.ball_speed = clampi(Settings.ball_speed + d, K.BALL_SPEED_MIN,
+			K.BALL_SPEED_MAX)}], "rules": []}
 	for m in Settings.MOD_ROWS:
 		var bit: int = m[2]
 		mod_rows[m[3]].append({"id": m[0], "label": m[1],
