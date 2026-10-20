@@ -4,6 +4,30 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.17.0] - 2026-10-20
+
+A slower, bigger ball, longer rallies, and a tuning panel during play.
+
+### Added
+- **Tuning panel**: press F2 during a match (or TUNE on the pause menu)
+  for a panel on the right; the match waits while it's open. BALL SPEED,
+  BALL SIZE and CPU ERRORS change the match as you go and are saved.
+  Every modifier and rule is there too: APPLY restarts the match with
+  them.
+- **BALL SIZE** on MODIFIERS: 80% to 150%, 105% by default. It only
+  changes how big the ball looks.
+- **CPU ERRORS** on MATCH SETUP: how often the CPUs mistime a swing,
+  50% of the original game's by default, for longer rallies (in doubles,
+  about 12 shots instead of 8).
+
+### Changed
+- **BALL SPEED defaults to 78%.** If you never moved the slider, you get
+  78%; a speed you picked is kept.
+- A slower ball now slows down the way the easier difficulties always
+  did: the same flight, just slower, so it no longer bounces too high to
+  reach. A slowed ball now glides smoothly instead of stuttering.
+- MODIFIERS sits higher on the screen to fit its new row.
+
 ## [0.16.0] - 2026-10-20
 
 Set the ball's speed.

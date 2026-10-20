@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.15.1-1-gb46145a-dirty`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.16.0-3-gfb998eb-dirty`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-46 of 46 roadmap tasks are in.
+49 of 49 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -280,3 +280,21 @@ Status: **Ready to test**: read a lesson or two; say if anything should be expla
 BALL SPEED (ADR-071), MODIFIERS' first row: 70% to 130% in 1% steps, 100% the ball as it was. A shot lands where it was aimed over 100 / speed as many frames (so a slower ball also arcs a little higher, as MOON does). Saved; every match, drill and online game gets it.
 
 Status: **Ready to test**: try 90% to 95%; say where it feels right and I can make that the default.
+
+## PORT-47: the ball's defaults (asked for 2026-10-20)
+
+(ADR-072) BALL SPEED defaults to 78% (the user's pick; untouched 0.16.0 saves move to it); BALL SIZE, display only, 80-150%, 105% by default.
+
+Status: **Ready to test**.
+
+## PORT-48: longer rallies (asked for 2026-10-20)
+
+(ADR-073) Measured with `tools/rally_stats.gd`. BALL SPEED now paces the ball as the ROM does on KID and EASY (same flights, slower; ADR-071's higher arcs had made balls unreachable), drawn gliding; CPU ERRORS on MATCH SETUP, 50% by default, spaces the CPUs' late swings. Doubles rallies at MEDIUM: 8.1 shots (the ROM) to about 12.5; singles 6.4 to 9.
+
+Status: **Ready to test**: say if rallies should run longer still (CPU ERRORS lower) or the CPUs should reach more.
+
+## PORT-49: the tuning panel (asked for 2026-10-20)
+
+(ADR-074) F2 or the pause menu's TUNE: a flyout during a match, the match waiting. BALL SPEED, BALL SIZE and CPU ERRORS live (and saved); every modifier and rule, with APPLY restarting the match with them; DEFAULTS. Not online or in the demo.
+
+Status: **Ready to test**: say what else belongs on it.

@@ -144,6 +144,9 @@ status in the same commit. The finished tasks, in full, are in
   KEEPING SCORE (tag `v0.15.1`, on `feature/cld-release-0.15.1`).
 - **v0.16.0** (2026-10-20): PORT-46 BALL SPEED (tag `v0.16.0`, on
   `feature/cld-release-0.16.0`).
+- **v0.17.0** (2026-10-20): PORT-47 78% ball and BALL SIZE, PORT-48
+  longer rallies, PORT-49 the tuning panel (tag `v0.17.0`, on
+  `feature/cld-release-0.17.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 
