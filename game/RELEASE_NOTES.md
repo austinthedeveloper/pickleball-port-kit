@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.14.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.14.0-2-g826cdcf-dirty`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-43 of 43 roadmap tasks are in.
+45 of 45 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -262,3 +262,15 @@ Status: **Done**.
 Visual cues for a long rally (ADR-068), display only: at 10 shots the ball and the RALLY sign catch fire; from 15, and a step darker every 5 after, everything but the court dims, the players in a spotlight; the point's end lets it go. The ball speeding up as a rally goes on is set aside for now.
 
 Status: **Ready to test**: play a long rally; say if the steps should come sooner, go darker, or the fire be bigger.
+
+## PORT-44: story mode (asked for 2026-10-19)
+
+STORY: SAVE THE PARK (ADR-069), the SNES story's plot told as a visual novel: eight chapters, one per ladder team, each a chapter card, a scene at its venue and time (you and Pepper, the team, Grimsby on the loudspeaker or in letters), a doubles match with Pepper and the chapter's twist, and the petition signed; the ending, THE END, and an epilogue pointing to Dawson. Progress is saved; a clear unlocks Dawson.
+
+Status: **Ready to test**: play chapter 1; say what to change in the writing (`game/data/story.json`), the pacing, or the twists.
+
+## PORT-45: the real game (asked for 2026-10-19)
+
+PICKLEBALL 101 (ADR-070), on PRACTICE: eight lessons on real pickleball (the court, the serve, the two-bounce rule, the kitchen, keeping score, line calls, playing smart, court manners), each page with an animated court diagram, 17 quizzes, TRY IT links to the matching HOW TO PLAY drills. Progress saved (DONE, PERFECT).
+
+Status: **Ready to test**: read a lesson or two; say if anything should be explained differently (`game/data/pickleball101.json`).

@@ -4,6 +4,25 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.15.0] - 2026-10-19
+
+Story mode, and a course on how to play pickleball for real.
+
+### Added
+- **STORY: SAVE THE PARK**: the first row on the title. Mr. Grimsby of
+  Grimsby Parking Co. wants to pave Riverdale Park; you and your partner
+  Pepper play all eight teams for their names on the petition. Each
+  chapter has a title card, a scene at its venue and time of day, a
+  doubles match with a twist (wind on the lake, moon gravity under the
+  sea, win by 2 against the Champs), and the petition signed. There's an
+  ending, and finishing the story also unlocks Dale Dawson. Your progress
+  is saved.
+- **PICKLEBALL 101**, on PRACTICE: eight lessons on the real game (the
+  court, the serve, the two-bounce rule, the kitchen, keeping score, line
+  calls, playing smart, court manners). Each page has an animated court
+  diagram, and each lesson ends in a quiz. The serve, bounce and kitchen
+  lessons link to their HOW TO PLAY drills.
+
 ## [0.14.0] - 2026-10-19
 
 Rally heat: long rallies catch fire and put the court in a spotlight.
