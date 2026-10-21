@@ -85,7 +85,8 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-57 | The title's RECORD line; OPEN PLAY's locations and the GYM | `feature/cld-title-record`, `feature/cld-park-locations` | Released (v0.21.0) |
 | PORT-58 | Local multiplayer: any split, the modes as tabs; the player tags | `feature/cld-lobby-sides`, `feature/cld-player-tags` | Released (v0.21.0) |
 | PORT-59 | Cleanup round 5: branches, code, docs | `feature/cld-cleanup-5` | Done |
-| PORT-60 | The park: paddles a player, winners staying said | `feature/cld-park-stacking` | Ready to test |
+| PORT-60 | The park: paddles a player, winners staying said | `feature/cld-park-stacking` | Released (v0.21.1) |
+| PORT-61 | The swing-arm ball machine | `feature/cld-ball-machine` | Ready to test |
 
 ## Releases
 
@@ -266,6 +267,20 @@ the same request). Open: 36 and 40.
   - Verified: `test_open_play` (27, with `test_staying_on_is_said`).
     424/424 plus the e2e, golden traces unchanged. Screenshots of the rack
     and the panel.
+  - Status: **Released (v0.21.1)**.
+
+### 61. `feature/cld-ball-machine`: the swing-arm ball machine (asked for 2026-10-21)
+
+- [x] `PORT-61` KNOWN_ISSUES #34: practice's machine is row C of
+  `art/concept/ball-machine.png`, a cart with a hopper of balls and a
+  launcher arm on a pivot, built in Aseprite (`art/sprites/machine`:
+  `machine.py` draws the layers, `build_machine.lua` makes
+  `machine.aseprite` and the sheet). The arm has nine angles and swings
+  through them toward the sim's pose (up, centre, down) instead of
+  snapping; it recoils along itself on a feed. Display only: the sim's
+  poses and feeds are unchanged.
+  - Verified: `test_practice.test_machine_arm_swings`; 425/425 plus the
+    e2e, golden traces unchanged. Screenshots in practice at the park.
   - Status: **Ready to test**.
 
 ## For you

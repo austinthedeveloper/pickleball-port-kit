@@ -16,6 +16,9 @@ done
 cp "$KIT/art/levels/out/manifest.json" "$KIT/art/levels/out/palettes.json" "$DST/levels/"
 # the open-play park (art/park/build_park.py)
 $SYNC "$KIT/art/park/out/" "$DST/park/"
+# the practice ball machine (art/sprites/machine, built in Aseprite)
+mkdir -p "$DST/machine"
+$SYNC "$KIT/art/sprites/machine/out/" "$DST/machine/"
 # the HD set (audio/hd-sfx/make_sfx.py) and the soundtrack
 # (audio/music/make_music.py); the SNES originals stay in audio/snes-sfx
 $SYNC --include="*.wav" --exclude="*" "$KIT/audio/hd-sfx/out/" "$KIT/audio/music/out/" "$DST/audio/"

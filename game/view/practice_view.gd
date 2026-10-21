@@ -1,18 +1,19 @@
 ## Practice on screen (ADR-028), read-only: the ball machine on the far
-## baseline and the return zone's corners. art/levels has no machine, so
-## both are drawn here: a grey body with a hopper of yellow balls, wheels,
-## and a nozzle that turns up, centre, or down toward the next feed's lane
-## and kicks back on a feed (render.c render_machine / render_zone).
+## baseline and the return zone's corners. The machine is the swing-arm cart
+## of art/sprites/machine (machine.aseprite): a body, a launcher arm in
+## ARM_FRAMES angles and the pivot cap over it. The arm swings smoothly
+## toward the sim's pose (up, centre or down: the next feed's lane) instead
+## of snapping, and kicks back on a feed (render.c render_machine / render_zone).
 class_name PracticeView
 extends RefCounted
 
-## SNES px to screen px at the machine's depth (the court's scale there).
-const S := 2.6
-const BODY := Color("9aa3ad")
-const BODY_DARK := Color("6b737e")
+const SHEET := "res://assets/machine/machine.png"
+const CELL := Vector2i(36, 26)   ## art px: cell 0 the body, 1..ARM_FRAMES the arm, then the hub
+const ARM_FRAMES := 9            ## up the screen (toward the far sideline) first
+const SCALE := 2.0               ## art px to screen px, as the players
+const ORIGIN := Vector2(-6, -50) ## the sheet's top-left from the ground under the machine
+const ARM_STEP := 0.7            ## arm frames a tick: one pose's sweep about TURN_FRAMES long
 const OUTLINE := Color("232831")
-const HOPPER := Color("4d5560")
-const BALL := Color("f0e048")
 const CORNER := Color("fbe46a")
 const CORNER_LEN := 16.0
 
@@ -21,42 +22,37 @@ const CORNER_LEN := 16.0
 class Machine:
 	extends Node2D
 	var practice: Practice
+	var sheet: Texture2D = load(SHEET)
+	var arm := -1.0                  ## the arm frame shown, easing toward the pose's
 
-	func _process(_delta: float) -> void:
+	func _ready() -> void:
+		texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
+	## The arm frame of the sim's pose: UP 0, CENTER the middle, DOWN the last.
+	func target() -> float:
+		return float(practice.pose * (ARM_FRAMES - 1) / 2)
+
+	func _process(delta: float) -> void:
+		var goal := target()
+		arm = goal if arm < 0.0 else move_toward(arm, goal, ARM_STEP * delta * 60.0)
 		queue_redraw()
 
-	func _r(x: float, y: float, w: float, h: float) -> Rect2:
-		return Rect2(x * S, y * S, w * S, h * S)
+	func _cell(i: int, at: Vector2) -> void:
+		var src := Rect2(Vector2(CELL.x * i, 0), Vector2(CELL))
+		draw_texture_rect_region(sheet, Rect2(ORIGIN + at, Vector2(CELL) * SCALE), src)
 
 	func _draw() -> void:
 		var kick := 0.0
 		if practice.kick:
 			kick = 2.0 if practice.kick > Practice.KICK_FRAMES / 2 else 1.0
-		var o := Vector2(kick * S, 0)
-		draw_set_transform(o)
-		# Shadow, wheels, body, hopper with balls.
-		draw_rect(Rect2(0.5 * S, -1.5 * S, 14 * S, 2 * S), Color(0, 0, 0, 0.28))
-		for wx in [3.5, 11.5]:
-			draw_circle(Vector2(wx * S, -2 * S), 2.2 * S, OUTLINE)
-			draw_circle(Vector2(wx * S, -2 * S), 1.1 * S, BODY_DARK)
-		draw_rect(_r(1.5, -11.5, 13, 8.5), OUTLINE)
-		draw_rect(_r(2, -11, 12, 7.5), BODY)
-		draw_rect(_r(2, -5.5, 12, 2), BODY_DARK)
-		var hopper := PackedVector2Array([Vector2(3 * S, -11 * S), Vector2(13 * S, -11 * S),
-			Vector2(15 * S, -16 * S), Vector2(1 * S, -16 * S)])
-		draw_colored_polygon(hopper, HOPPER)
-		draw_polyline(hopper + PackedVector2Array([hopper[0]]), OUTLINE, 2.0)
-		for b in [[4, -14.6], [7, -15], [10, -14.7], [13, -14.4], [5.5, -12.6], [8.6, -12.8], [11.6, -12.5]]:
-			draw_circle(Vector2(b[0] * S, b[1] * S), 1.25 * S, BALL)
-		# The nozzle: from the body's left side toward P1, tilted to the lane
-		# (up = toward the far sideline, up the screen).
-		var tilt: float = [-2.5, 0.0, 2.0][practice.pose]
-		var base := Vector2(2 * S, -8 * S)
-		var tip := Vector2(-1.5 * S, (-8 + tilt) * S)
-		draw_line(base, tip, OUTLINE, 3.6 * S)
-		draw_line(base, tip, BODY_DARK, 2.4 * S)
-		draw_circle(tip, 1.3 * S, OUTLINE)
-		draw_set_transform(Vector2.ZERO)
+		# the cart rocks back a pixel; the arm recoils further, along itself
+		var rock := Vector2(SCALE if kick > 0.0 else 0.0, 0)
+		var frame := clampi(roundi(arm), 0, ARM_FRAMES - 1)
+		var angle := deg_to_rad(32.0 - 8.0 * frame)
+		var recoil := Vector2(cos(angle), sin(angle)) * kick * SCALE
+		_cell(0, rock)
+		_cell(1 + frame, (rock + recoil).round())
+		_cell(ARM_FRAMES + 1, rock)
 
 
 ## The return zone's corners on the ground: hidden on ANY, and blinking
@@ -87,8 +83,7 @@ class Zone:
 static func machine(p: Practice) -> Machine:
 	var m := Machine.new()
 	m.practice = p
-	m.position = CourtView.ground(K.to_fp(Practice.MACHINE_X), K.to_fp(Practice.MACHINE_Y)).round() \
-		- Vector2(S, 0)
+	m.position = CourtView.ground(K.to_fp(Practice.MACHINE_X), K.to_fp(Practice.MACHINE_Y)).round()
 	return m
 
 

@@ -178,6 +178,24 @@ func test_machine_aim() -> void:
 	check(sim.ball.vy_fp < 0, "and feeds that way")
 
 
+## The swing-arm machine on screen: the arm eases between the poses'
+## angles, through the frames between, instead of snapping; display only.
+func test_machine_arm_swings() -> void:
+	_start(Practice.SHOT_MIX, Practice.TARGET_RANDOM, Practice.RATE_FAST, K.DIFFICULTY_MEDIUM)
+	var m := PracticeView.machine(sim.practice)
+	sim.practice.pose = Practice.POSE_UP
+	m._process(1.0 / 60.0)
+	eq(m.arm, 0.0, "starts on its pose: no swing in from nowhere")
+	sim.practice.pose = Practice.POSE_DOWN
+	var shown := {}
+	for f in 30:
+		m._process(1.0 / 60.0)
+		shown[roundi(m.arm)] = true
+	eq(m.arm, float(PracticeView.ARM_FRAMES - 1), "ends on the down pose")
+	eq(shown.size(), PracticeView.ARM_FRAMES - 1, "every frame between on the way")
+	m.free()
+
+
 ## P1's return lands at (x, y): what the streak does.
 func _return_to(x: int, y: int) -> bool:
 	_step_while(func(): return sim.practice.state != Practice.FEED, 400)
