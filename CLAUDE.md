@@ -20,6 +20,8 @@ game/tools/export.sh --check                         # .pck export + headless bo
 python3 game/tools/release_notes.py                  # game/RELEASE_NOTES.md from the roadmap sheet
 game/tools/conformance_import.sh                     # the SNES repo's conformance traces (KEEP=1: full lines)
 python3 game/tools/version.py set X.Y.Z              # the version, everywhere (design/VERSIONING.md)
+python3 game/tools/release.py X.Y.Z --dry-run         # cut a release: check, bump, notes, test, commit, tag (--push B...: push, watch CI)
+python3 game/tools/test_release.py                   # release.py's self-test (temp repo only)
 ```
 
 Releases are versioned (semver, tags `vX.Y.Z`, `game/CHANGELOG.md`); the
