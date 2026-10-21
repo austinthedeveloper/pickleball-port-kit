@@ -572,11 +572,11 @@ func _start_demo() -> void:
 func _refresh() -> void:
 	if save:
 		var r: Dictionary = save.data["records"]
-		_record_text = "RECORD %d-%d   LADDER S %d/%d D %d/%d   CLEARS %d" % [
-			int(r["singles_wins"]) + int(r["doubles_wins"]),
-			int(r["singles_losses"]) + int(r["doubles_losses"]),
-			_rung() + 1, Opponents.count(), _rung(true) + 1, Opponents.count(),
-			int(r["ladder_clears"])]
+		# just the record: the ladder's place resets when a ladder match is
+		# quit, so it isn't progress to show here (RECORDS has it, and the
+		# clears)
+		_record_text = "RECORD %d-%d" % [int(r["singles_wins"]) + int(r["doubles_wins"]),
+			int(r["singles_losses"]) + int(r["doubles_losses"])]
 	_refresh_record()
 
 
