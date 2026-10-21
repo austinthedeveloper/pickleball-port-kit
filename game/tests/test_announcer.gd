@@ -205,3 +205,42 @@ func test_settings() -> void:
 	t.free()
 	wipe_saves("user://test_announcer/")
 	_restore(k)
+
+
+## WIN BY 2's extension: advantage and deuce once recorded (PORT-55), "win
+## by two" until then; an achievement's line, its own or the general one.
+func test_the_second_batch() -> void:
+	var k := _kept()
+	Announcer.volume = 8
+	Sfx.setting = AudioMap.SOUND_ALL
+	var a := _voice()
+	var v := MatchView.new()
+	runner.root.add_child(v)
+	var cfg := Settings.config_for(false, 2, K.DIFFICULTY_MEDIUM, 11)
+	cfg.modifiers = K.MOD_WIN_BY_2
+	v.setup(cfg, "park", false)
+	var c := v.commentary
+	c._intro = []
+	v.sim.team_score = [10, 10]
+	check(c._extended(), "10-10 to 11, win by 2: the extension")
+	eq(c._first(["deuce", "win_by_2"]), "win_by_2" if not a.families.has("deuce") else "deuce",
+		"what's recorded is what's said")
+	# a later batch, recorded: it's said
+	a.clips["deuce_1"] = 1.0
+	a.families["deuce"] = ["deuce_1"]
+	a.clips["advantage_server_1"] = 1.0
+	a.families["advantage_server"] = ["advantage_server_1"]
+	v.sim.serving_team = 0
+	c._server_before = 0
+	v.sim.rally_start = (v.sim.shot_serial - 8) & 0xff      # an 8-shot rally, not an ace
+	c._on_point(0)
+	check(c.heard.has("deuce"), "10-10: deuce (%s)" % [c.heard])
+	a.hush()
+	v.sim.team_score = [11, 10]
+	c._on_point(0)
+	check(c.heard.has("advantage_server"), "11-10: advantage to the server (%s)" % [c.heard])
+	v.sim.team_score = [9, 10]
+	check(not c._extended(), "not before both reach game point")
+	v.free()
+	a.free()
+	_restore(k)

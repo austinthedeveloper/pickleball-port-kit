@@ -69,3 +69,13 @@ After playing 0.19.0 (the user: "it's kind of hilarious"):
 - **ANNOUNCER is a switch** (ON or OFF), and **VOICE VOLUME** its own row
   (10% to 100%: the switch is the way to silence it). A 0.19.0 save with
   the slider at OFF loads as the switch OFF.
+
+## Since: a second batch (2026-10-21, `PORT-55`)
+
+`design/announcer/ADDITIONS.md` (and `additions.csv`) is the next list to
+record: advantage and deuce under WIN BY 2's extension (both sides at
+game point or past it; three deuces bring "we could be here all night"),
+and a line as an achievement unlocks (its own, else a general one). The
+commentary asks for each and falls back to the first batch's line, or
+silence, until it's recorded: a new clip in `raw/` and a run of
+`prep.py` and `sync_assets.sh` is all it takes.

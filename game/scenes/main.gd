@@ -383,6 +383,10 @@ func _on_achievement(id: String) -> void:
 	_toast_queue.append("ACHIEVEMENT: " + String(Achievements.entry(id)[1]))
 	if _chime and Sfx.setting != AudioMap.SOUND_OFF:
 		_chime.play()
+	# the announcer says so, after the result's line (its own, else a general
+	# one; the second batch, PORT-55: nothing until it's recorded)
+	if not Announcer.speak("achievement_" + id, Announcer.TOP, 4.0):
+		Announcer.speak("achievement", Announcer.TOP, 4.0)
 
 
 ## A message in the toast (the controller toast's panel).

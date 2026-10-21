@@ -80,6 +80,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-52 | The announcer (voiced, no text) | `feature/cld-announcer-script` | Ready to test |
 | PORT-53 | Announcer trims, its switch; the replay's players move | `feature/cld-announcer-trim` | Ready to test |
 | PORT-54 | The stands' people move with the camera; achievements | `feature/cld-crowd-parallax`, `feature/cld-achievements` | Ready to test |
+| PORT-55 | The announcer's second batch (advantage, deuce, achievements) | `feature/cld-announcer-additions` | In progress |
 
 ## Releases
 
@@ -409,6 +410,19 @@ the same request). Open: 36 and 40.
     `test_layout`. 417/417 plus the e2e, golden traces unchanged.
     Screenshot of ACHIEVEMENTS.
   - Status: **Ready to test**: say which achievements to add next.
+
+### 55. `feature/cld-announcer-additions`: the announcer's second batch (asked for 2026-10-21)
+
+- [ ] `PORT-55` A second list to record, `design/announcer/ADDITIONS.md`
+  and `additions.csv` (17 lines, `make_additions.py` makes both): under
+  WIN BY 2 past game point, advantage (serving or receiving side) and
+  deuce; an achievement's line as it unlocks. The game already asks for
+  them and falls back to what it said before ("win by two", nothing) until
+  they're in `audio/announcer/raw/`. Score calls need nothing new: the
+  numbers go to twenty-five.
+  - Verified: `test_announcer` (the extension, the fallback, a recorded
+    batch said). 418/418 plus the e2e.
+  - Status: **In progress**: waiting for the recordings.
 
 ## For you
 

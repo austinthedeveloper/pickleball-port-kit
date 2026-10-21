@@ -1,0 +1,18 @@
+id,file,text,delivery,max_seconds,group
+advantage_server_1,advantage_server_1.wav,"Advantage, serving side!","Big, booming 1994 TV sports energy.",1.8,Win by two
+advantage_server_2,advantage_server_2.wav,Advantage to the server!,"Big, booming 1994 TV sports energy.",1.8,Win by two
+advantage_receiver_1,advantage_receiver_1.wav,"Advantage, receiving side!","Big, booming 1994 TV sports energy.",1.8,Win by two
+advantage_receiver_2,advantage_receiver_2.wav,Advantage to the receiver!,"Big, booming 1994 TV sports energy.",1.8,Win by two
+deuce_1,deuce_1.wav,Deuce!,"Clear and even, like an umpire calling it.",1.0,Win by two
+deuce_2,deuce_2.wav,Deuce! All square again!,"Big, booming 1994 TV sports energy.",1.8,Win by two
+deuce_3,deuce_3.wav,Back to even!,"Big, booming 1994 TV sports energy.",1.2,Win by two
+deuce_long,deuce_long.wav,"We could be here all night, folks!","Dry, playful, a little deadpan; let the pun land.",2.5,Win by two
+achievement_1,achievement_1.wav,Achievement unlocked!,"Big, booming 1994 TV sports energy.",1.5,Achievements
+achievement_2,achievement_2.wav,That's one for the trophy case!,"Big, booming 1994 TV sports energy.",2.0,Achievements
+achievement_pickled,achievement_pickled.wav,Pickled! They didn't score a single point!,"Big, booming 1994 TV sports energy.",3.0,Achievements
+achievement_first_win,achievement_first_win.wav,The first win of many!,"Warm, friendly, a smile in the voice.",2.0,Achievements
+achievement_ladder,achievement_ladder.wav,Top of the ladder!,"Big, booming 1994 TV sports energy.",1.5,Achievements
+achievement_champion,achievement_champion.wav,Champion of the tournament!,"Big, booming 1994 TV sports energy.",2.0,Achievements
+achievement_cover_man,achievement_cover_man.wav,They beat the man on the box!,"Big, booming 1994 TV sports energy.",2.2,Achievements
+achievement_globetrotter,achievement_globetrotter.wav,"Six venues, six wins. A true globetrotter!","Big, booming 1994 TV sports energy.",3.0,Achievements
+achievement_scholar,achievement_scholar.wav,Class dismissed! They know the real game now.,"Warm, friendly, a smile in the voice.",3.0,Achievements

@@ -40,6 +40,7 @@ var _was_down := [0, 0]            ## the most each team has trailed by
 var _mp_before := -1               ## the team that had match point before this point
 var _server_before := -1
 var _was_paused := false
+var _deuces := 0                   ## times level past game point (WIN BY 2)
 
 
 func _init(v: MatchView) -> void:
@@ -173,6 +174,16 @@ func _on_point(winner: int) -> void:
 	if shots <= 1 and winner == _server_before and s.last_fault in [K.FAULT_SECOND_BOUNCE, K.FAULT_NONE]:
 		line = "ace"
 		pri = Announcer.HIGH
+	elif _extended():
+		# WIN BY 2, past game point: advantage or deuce (the second batch,
+		# PORT-55; "win by two" until those are recorded)
+		if diff == 0:
+			_deuces += 1
+			line = _first(["deuce_long" if _deuces >= 3 else "deuce", "win_by_2"])
+		else:
+			line = _first(["advantage_server" if winner == s.serving_team else "advantage_receiver",
+				"win_by_2"])
+		pri = Announcer.HIGH
 	elif mp_before == loser:
 		line = "match_point_saved"
 		pri = Announcer.HIGH
@@ -185,9 +196,6 @@ func _on_point(winner: int) -> void:
 		_was_down[winner] = 0
 	elif _streak[winner] in [3, 5] and _level() >= Announcer.NORMAL:
 		line = "streak_%d" % _streak[winner]
-	elif diff == 0 and s.config.modifiers & K.MOD_WIN_BY_2 \
-			and s.team_score[winner] >= s.config.points_to_win - 1 and _level() >= Announcer.NORMAL:
-		line = "win_by_2"
 	elif _chance(POINT_CHANCE):
 		line = FAULT_LINES.get(s.last_fault, "winner")
 		if line == "out" and view.close_call:
@@ -199,6 +207,23 @@ func _on_point(winner: int) -> void:
 		_say(line, pri, 0.3)
 	if s.side_out_doubles() and s.serving_team != _server_before and _level() >= Announcer.NORMAL:
 		_say("side_out", Announcer.MID, 1.0)
+
+
+## WIN BY 2 and both sides at game point or past it: the extension.
+func _extended() -> bool:
+	var s := view.sim
+	return s.config.modifiers & K.MOD_WIN_BY_2 != 0 and not (s.config.modifiers & K.MOD_SUDDEN_DEATH) \
+		and mini(s.team_score[0], s.team_score[1]) >= s.config.points_to_win - 1
+
+
+## The first of these lines the announcer has (a later batch may not be
+## recorded yet).
+func _first(families: Array) -> String:
+	var a := Announcer.current
+	for f in families:
+		if a and (a.families.has(f) or a.clips.has(f)):
+			return f
+	return ""
 
 
 ## A phase begins: a serve's setup calls the score.
@@ -259,6 +284,7 @@ func on_match_over() -> void:
 
 func on_rematch() -> void:
 	_streak = [0, 0]
+	_deuces = 0
 	_was_down = [0, 0]
 	_mp_before = -1
 	_say("rematch", Announcer.TOP)
