@@ -4,6 +4,21 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.19.1] - 2026-10-20
+
+A trimmed announcer, a plain off switch, and a fixed replay.
+
+### Changed
+- **The announcer no longer introduces the teams** (it took too long). A
+  match opens with the venue, then the modifier or the format.
+- **ANNOUNCER is now an ON/OFF switch** on OPTIONS, and **VOICE VOLUME**
+  sets its volume. If you had the old slider at OFF, the switch is OFF.
+
+### Fixed
+- **PLAY OF THE MATCH**: the players no longer slide around frozen in
+  their end-of-match pose; they run and swing as they did in the rally.
+  The RALLY counter no longer peeks out from under the replay's caption.
+
 ## [0.19.0] - 2026-10-20
 
 The announcer.

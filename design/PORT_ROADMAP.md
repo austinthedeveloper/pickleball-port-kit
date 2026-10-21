@@ -156,6 +156,8 @@ status in the same commit. The finished tasks, in full, are in
   `feature/cld-release-0.18.0`).
 - **v0.19.0** (2026-10-20): PORT-52 the announcer (tag `v0.19.0`, on
   `feature/cld-release-0.19.0`).
+- **v0.19.1** (2026-10-20): PORT-53 announcer trims and switch, the
+  replay's players move (tag `v0.19.1`, on `feature/cld-release-0.19.1`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 
