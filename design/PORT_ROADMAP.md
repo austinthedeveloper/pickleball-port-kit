@@ -87,6 +87,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-59 | Cleanup round 5: branches, code, docs | `feature/cld-cleanup-5` | Done |
 | PORT-60 | The park: paddles a player, winners staying said | `feature/cld-park-stacking` | Released (v0.21.1) |
 | PORT-61 | The swing-arm ball machine | `feature/cld-ball-machine` | Ready to test |
+| PORT-62 | Player specials and powerups: a running design doc | `feature/cld-specials-doc` | In progress |
 
 ## Releases
 
@@ -283,10 +284,23 @@ the same request). Open: 36 and 40.
     e2e, golden traces unchanged. Screenshots in practice at the park.
   - Status: **Ready to test**.
 
+### 62. `feature/cld-specials-doc`: player specials and powerups (asked for 2026-10-21)
+
+- [ ] `PORT-62` `design/SPECIALS_AND_POWERUPS.md`, a running document:
+  a SPECIAL button with a meter (route A), powerups on the court (route
+  B), or both (route C, the pick so far); specials by paddle, with the
+  '95 overhead smash as PICKLE SMASH; the first powerup list. Nothing
+  built yet.
+  - Status: **In progress** (waiting on the questions in the doc).
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
+
+- **PORT-62 specials and powerups:** four questions at the end of
+  `design/SPECIALS_AND_POWERUPS.md` (route A, B or C; specials by paddle
+  or by character; canon '95 feature or party mode; GOLDEN BALL).
 
 - **PORT-52 announcer:** the canon bible has no announcer; this one is
   the remaster's, unnamed. Say if they should have a name, or if any line
