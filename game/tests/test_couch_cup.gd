@@ -28,11 +28,11 @@ func test_the_lobby_modes_and_entries() -> void:
 	var l := Lobby.new()
 	l.join(10)
 	eq(l.mode_name(), "DOUBLES")
-	for name in ["SINGLES CUP", "DOUBLES CUP", "DOUBLES CUP"]:
+	for name in ["SINGLES CUP", "DOUBLES CUP", "SINGLES", "DOUBLES"]:
 		l.step_mode(1)
 		eq(l.mode_name(), name)
-	l.step_mode(-3)
-	eq(l.mode_name(), "SINGLES", "and back, stopping at the ends")
+	l.step_mode(-2)
+	eq(l.mode_name(), "DOUBLES CUP", "round and round, both ways (PORT-58)")
 	var s := _lobby(3, K.MODE_SINGLES)
 	eq(s.blocker(), "", "a singles cup takes three players")
 	eq(s.entries().map(func(e): return e["name"]), ["P1", "P2", "P3"], "each player an entry")

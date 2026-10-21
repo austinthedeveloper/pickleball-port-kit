@@ -2,11 +2,13 @@
 ## each with a card. A pad presses A to join and gets the first free
 ## player number (P1..P4). On its card: SIDE (LEFT or RIGHT; a side holds
 ## one player in singles, two in doubles), SHIRT (unique), BODY, PADDLE;
-## A readies (and B un-readies, or leaves an unready card). LB / RB switch
-## SINGLES and DOUBLES. In doubles the players on a side are partners and
-## an empty place on a side goes to a CPU. Menu starts once everyone is
-## ready and the teams work: two or more players, someone on the left (the
-## sim's slot 0 is always a human), and in singles one on each side.
+## A readies (and B un-readies, or leaves an unready card). LB / RB step
+## through the modes (round and round). In doubles the players on a side
+## are partners and an empty place goes to a CPU: two players on one side
+## play two CPUs, one on each side each get a CPU partner (PORT-58). Menu
+## starts once everyone is ready and the teams work: two or more players,
+## and in singles one on each side. Humans only on the right swap ends (the
+## sim's slot 0 is always a human; the court has no better side).
 ##
 ## The couch cup (PORT-29): LB / RB step through SINGLES, DOUBLES, SINGLES
 ## CUP and DOUBLES CUP. In a cup the lobby's players enter a tournament
@@ -44,9 +46,10 @@ func mode_name() -> String:
 	return MODE_NAMES[mode_index()]
 
 
-## LB / RB: the previous or next of the four.
+## LB / RB: the previous or next of the four, round and round (PORT-58:
+## stopping at the ends left a press that seemed to do nothing).
 func step_mode(dir: int) -> void:
-	var i := clampi(mode_index() + dir, 0, MODE_NAMES.size() - 1)
+	var i := (mode_index() + dir + MODE_NAMES.size()) % MODE_NAMES.size()
 	cup = i >= 2
 	set_mode(K.MODE_DOUBLES if i % 2 == 1 else K.MODE_SINGLES)
 
@@ -181,13 +184,9 @@ func blocker() -> String:
 		return "WAITING FOR READY"
 	if cup:
 		return ""                        # every player (or side) is an entry
-	if side_count(LEFT) == 0:
-		return "SOMEONE TAKE THE LEFT SIDE"
 	if mode == K.MODE_SINGLES and (side_count(LEFT) != 1 or side_count(RIGHT) != 1):
 		return "SINGLES IS ONE ON EACH SIDE"
-	if side_count(RIGHT) == 0:
-		return "SOMEONE TAKE THE RIGHT SIDE"
-	return ""
+	return ""                            # doubles: any split (CPUs fill the rest)
 
 
 ## One pad's presses this frame (SNES bits plus GameControls.PAD_L/R).
@@ -236,8 +235,9 @@ func input(device: int, pressed: int) -> int:
 ## player-number order (singles: 0 and 2). [player index per slot or -1].
 func slot_players() -> Array:
 	var slots := [-1, -1, -1, -1]
+	var swap := side_count(LEFT) == 0 and side_count(RIGHT) > 0     # humans on the left end
 	for side in [LEFT, RIGHT]:
-		var base := 0 if side == LEFT else 2
+		var base := (0 if side == LEFT else 2) if not swap else (2 if side == LEFT else 0)
 		var n := 0
 		for i in MAX:
 			if cards[i] != null and cards[i]["side"] == side:

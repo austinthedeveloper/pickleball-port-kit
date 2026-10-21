@@ -18,7 +18,8 @@ const GOLD := Color("fbe46a")
 var lobby: Lobby
 var manifest: Dictionary
 var _cards: Array = []           ## per card: {root, empty, full, number, body, cap, labels, values, ready, bar}
-var _mode: BitmapText
+var _tabs: Array = []            ## the modes, as tabs (PORT-58)
+const TAB_GAP := 26
 var _teams: BitmapText
 var _status: BitmapText
 var _frame := 0
@@ -35,9 +36,14 @@ func setup(l: Lobby) -> LobbyScreen:
 	var title := _text("big_gold", "MULTIPLAYER", Vector2(480, 22), 0.5, Color.WHITE)
 	title.scale = Vector2(1.2, 1.2)
 	title.position.x = 480
-	_mode = _text("small", "", Vector2(480, 80), 0.5, GOLD)
-	add_child(PromptBar.new().setup([["lb", ""]], Vector2(380, 87)))
-	add_child(PromptBar.new().setup([["rb", ""]], Vector2(580, 87)))
+	# the four modes as tabs, the one on lit; LB / RB step round them
+	var x := 480.0 - _tabs_width() / 2.0
+	for k in Lobby.MODE_NAMES.size():
+		var w := BitmapText.measure("small", Lobby.MODE_NAMES[k])
+		_tabs.append(_text("small", Lobby.MODE_NAMES[k], Vector2(x + w / 2.0, 80), 0.5, DIM))
+		x += w + TAB_GAP
+	add_child(PromptBar.new().setup([["lb", ""]], Vector2(480 - _tabs_width() / 2.0 - 40, 87)))
+	add_child(PromptBar.new().setup([["rb", ""]], Vector2(480 + _tabs_width() / 2.0 + 40, 87)))
 	for i in Lobby.MAX:
 		_cards.append(_build_card(i))
 	_panel(Rect2(40, 430, 880, 42))
@@ -47,6 +53,13 @@ func setup(l: Lobby) -> LobbyScreen:
 		Vector2(480, 516)))
 	refresh()
 	return self
+
+
+func _tabs_width() -> float:
+	var w := 0.0
+	for m in Lobby.MODE_NAMES:
+		w += BitmapText.measure("small", m)
+	return w + TAB_GAP * (Lobby.MODE_NAMES.size() - 1)
 
 
 func _panel(r: Rect2) -> NinePatchRect:
@@ -123,7 +136,8 @@ func _process(_delta: float) -> void:
 func refresh() -> void:
 	if lobby == null:
 		return
-	_mode.text = lobby.mode_name()
+	for k in _tabs.size():
+		_tabs[k].tint = GOLD if k == lobby.mode_index() else DIM
 	for i in Lobby.MAX:
 		var c: Dictionary = _cards[i]
 		var card: Variant = lobby.cards[i]
@@ -177,7 +191,7 @@ func _dress(c: Dictionary, card: Dictionary) -> void:
 		s.flip_h = card["side"] == Lobby.RIGHT
 
 
-## "LEFT  P1 + P3    RIGHT  P2 + CPU"
+## "P1 + P3  VS  P2 + CPU" (PORT-58: who plays with whom, plainly)
 func _teams_line() -> String:
 	var slots := lobby.slot_players()
 	var name := func(s: int) -> String:
@@ -191,5 +205,5 @@ func _teams_line() -> String:
 		return ("ENTRIES  " if lobby.mode == K.MODE_SINGLES else "TEAMS  ") + "   ".join(names) \
 			+ "  + CPU TEAMS"
 	if lobby.mode == K.MODE_SINGLES:
-		return "LEFT  %s     RIGHT  %s" % [name.call(0) if slots[0] >= 0 else "-", name.call(2) if slots[2] >= 0 else "-"]
-	return "LEFT  %s + %s     RIGHT  %s + %s" % [name.call(0), name.call(1), name.call(2), name.call(3)]
+		return "%s   VS   %s" % [name.call(0) if slots[0] >= 0 else "-", name.call(2) if slots[2] >= 0 else "-"]
+	return "%s + %s   VS   %s + %s" % [name.call(0), name.call(1), name.call(2), name.call(3)]
