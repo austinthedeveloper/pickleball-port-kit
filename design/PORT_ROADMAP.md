@@ -83,6 +83,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-55 | The announcer's second batch (advantage, deuce, achievements) | `feature/cld-announcer-additions` | In progress |
 | PORT-56 | The near-side reach (display only) | `feature/cld-near-reach` | Ready to test |
 | PORT-57 | The title's RECORD line; OPEN PLAY's locations and the GYM | `feature/cld-title-record`, `feature/cld-park-locations` | Ready to test |
+| PORT-58 | Local multiplayer: any split, the modes as tabs; the player tags | `feature/cld-lobby-sides`, `feature/cld-player-tags` | Ready to test |
 
 ## Releases
 
@@ -450,6 +451,18 @@ the same request). Open: 36 and 40.
     venue's but the GYM's byte for byte. Screenshots of DINO PARK, THE
     GYM and a match at the GYM.
   - Status: **Ready to test**: walk both, and play a game in each.
+
+### 58. `feature/cld-lobby-sides`, `feature/cld-player-tags` (asked for 2026-10-21)
+
+- [x] `PORT-58` The lobby: doubles takes any split (two players together
+  against two CPUs, or one each side with a CPU partner; humans only on
+  the right swap ends); LB / RB go round the four modes, shown as tabs;
+  the line says who plays whom ("P1 + P2 VS CPU + CPU"). The tags over
+  the players: the text centred, the pointer in the player's colour
+  (KNOWN_ISSUES #70).
+  - Verified: `test_multiplayer`, `test_couch_cup`, `test_layout`. 423/423
+    plus the e2e. Screenshots of the lobby and the tags.
+  - Status: **Ready to test**.
 
 ## For you
 

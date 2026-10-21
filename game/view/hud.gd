@@ -395,19 +395,31 @@ func _player_name(slot: int) -> String:
 	return "P%d" % (n + 1) if n >= 0 else "CPU"
 
 
+## The tag: the player's number in a box of their colour, a pointer of the
+## same colour under it (KNOWN_ISSUES #70: the text sat low on the box's
+## edge, and the pointer was always black).
+const TAG_BOX := Rect2(-18, -13, 36, 24)
+const TAG_INK := Color(0.05, 0.06, 0.12)
+
+
 func _draw_tag(n: Node2D, player: int) -> void:
 	var col: Color = LobbyScreen.PLAYER_TINTS[player]
-	var r := Rect2(-17, -12, 34, 20)
-	n.draw_rect(r.grow(2), Color(0.05, 0.06, 0.12))
-	n.draw_rect(r, col.darkened(0.35))
-	n.draw_colored_polygon(PackedVector2Array([Vector2(-5, 10), Vector2(5, 10), Vector2(0, 16)]),
-		Color(0.05, 0.06, 0.12))
+	var fill := col.darkened(0.35)
+	var r := TAG_BOX
+	var tip := r.end.y + 7
+	n.draw_rect(r.grow(2), TAG_INK)
+	n.draw_colored_polygon(PackedVector2Array([Vector2(-8, r.end.y), Vector2(8, r.end.y), Vector2(0, tip + 2)]),
+		TAG_INK)
+	n.draw_rect(r, fill)
+	n.draw_colored_polygon(PackedVector2Array([Vector2(-5, r.end.y - 1), Vector2(5, r.end.y - 1), Vector2(0, tip)]),
+		fill)
 	var f := BitmapText.load_font("small")
 	var text := "P%d" % (player + 1)
 	var x := -BitmapText.measure("small", text) / 2.0
+	var y := r.position.y + (r.size.y - float(f["line_height"])) / 2.0     # centred in the box
 	for ch in text:
 		var g: Dictionary = f["glyphs"].get(ch, f["glyphs"][" "])
-		n.draw_texture_rect_region(f["texture"], Rect2(x, -9, g["w"], g["h"]),
+		n.draw_texture_rect_region(f["texture"], Rect2(x, y, g["w"], g["h"]),
 			Rect2(g["x"], g["y"], g["w"], g["h"]))
 		x += int(g["advance"]) - 1
 
