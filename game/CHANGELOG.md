@@ -4,6 +4,19 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.21.1] - 2026-10-21
+
+Open play's paddle rack and winners staying on, made clear.
+
+### Fixed
+- **The paddle rack** shows a pair of paddles for each team waiting, one
+  per player, as real paddle stacking reads. The panel says how many
+  teams are ahead of you ("1 TEAM AHEAD OF YOU ON COURT 2").
+- **Winners stay on** is now said: after a win you see "YOU WON 7-4
+  WINNERS STAY ON", then "YOU STAY ON COURT 1", with STEP OFF at its rack
+  if you'd rather rotate out. Before, the next game seemed to start by
+  itself.
+
 ## [0.21.0] - 2026-10-21
 
 Two new places to play, and friendlier local multiplayer.

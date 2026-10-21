@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.20.0-4-gcda9a5d-dirty`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.21.1`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-57 of 58 roadmap tasks are in.
+59 of 60 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -350,5 +350,17 @@ Status: **Ready to test**: walk both, and play a game in each.
 ## PORT-58: `feature/cld-lobby-sides`, `feature/cld-player-tags` (asked for 2026-10-21)
 
 The lobby: doubles takes any split (two players together against two CPUs, or one each side with a CPU partner; humans only on the right swap ends); LB / RB go round the four modes, shown as tabs; the line says who plays whom ("P1 + P2 VS CPU + CPU"). The tags over the players: the text centred, the pointer in the player's colour (KNOWN_ISSUES #70).
+
+Status: **Ready to test**.
+
+## PORT-59: cleanup round 5 (asked for 2026-10-21)
+
+The local branches merged into `origin/main` deleted (73; the two still checked out in agent worktrees, both merged, stay until those are cleaned up). The code: the three sliders (BALL SPEED, BALL SIZE, CPU ERRORS) defined once (`Settings.SLIDERS`, `Settings.nudge`, `view/setting_rows.gd`) for the title and the tuning panel; PLAY OF THE MATCH's event handling in `highlight.gd`, out of `match_view.gd`; a dead `Announcer.speak_ids`; `TestSuite.match_view` for the tests' match setup. The docs: PORT-42 to 58 (but 55) moved to `PORT_HISTORY.md`, the index naming each task's release; `decisions/README.md`, an index of the ADRs; the bible plan's list of the remaster's own additions; the README's file layout.
+
+Status: **Done**.
+
+## PORT-60: the park's stack and winners staying (asked for 2026-10-21)
+
+KNOWN_ISSUES #71: the rack draws a pair of paddles for each waiting team (one a player, as real stacking reads), the panel counts the teams ahead of you, and a win that keeps you on says so (WINNERS STAY ON, then YOU STAY ON COURT n with STEP OFF at its rack). The park's rules (SNES ADR-070 to 072) are unchanged.
 
 Status: **Ready to test**.
