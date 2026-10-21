@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.19.0-1-gf856c22-dirty`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.19.1-10-g2dfd3bd-dirty`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-53 of 53 roadmap tasks are in.
+55 of 56 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -322,3 +322,21 @@ Status: **Ready to test**: play a match with sound. Say if it talks too much or 
 The team intros out (too long); `design/announcer/removed.txt`, the list of lines to take out, honoured by `prep.py` (244 clips now); ANNOUNCER an ON/OFF switch, VOICE VOLUME its own row (ADR-076, since). PLAY OF THE MATCH's players were frozen in the match's end reaction: fixed (KNOWN_ISSUES #67, ADR-075, since).
 
 Status: **Ready to test**: add any line to `removed.txt` (or tell me its id).
+
+## PORT-54: `feature/cld-crowd-parallax`, `feature/cld-achievements` (asked for 2026-10-21)
+
+The crowd and the watcher move with the stands as the camera leans (KNOWN_ISSUES #68). Achievements (ADR-077): thirteen, PICKLED first; a toast and a chime as each unlocks; RECORDS > ACHIEVEMENTS lists them with how to earn each.
+
+Status: **Ready to test**: say which achievements to add next.
+
+## PORT-55: the announcer's second batch (asked for 2026-10-21) (not in this build)
+
+A second list to record, `design/announcer/ADDITIONS.md` and `additions.csv` (17 lines, `make_additions.py` makes both): under WIN BY 2 past game point, advantage (serving or receiving side) and deuce; an achievement's line as it unlocks. The game already asks for them and falls back to what it said before ("win by two", nothing) until they're in `audio/announcer/raw/`. Score calls need nothing new: the numbers go to twenty-five.
+
+Status: **In progress**: waiting for the recordings.
+
+## PORT-56: the near-side reach (asked for 2026-10-21)
+
+KNOWN_ISSUES #69, the look only (the user's call): a ball on the near side of a player gets the low reach and a step down toward it; the ROM's hit area is unchanged.
+
+Status: **Ready to test**.

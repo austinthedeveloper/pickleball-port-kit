@@ -4,6 +4,22 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.20.0] - 2026-10-21
+
+Achievements, and a few fixes.
+
+### Added
+- **Achievements**: thirteen to start, with PICKLED first (win without
+  letting the other side score). Each one pops up with a chime as you
+  earn it; RECORDS > ACHIEVEMENTS lists them all, with how to earn each.
+
+### Fixed
+- The people in the stands now move with the stands as the camera leans,
+  instead of sliding against their benches.
+- A ball coming in low on your near side is now played with a low, reaching
+  swing, with the player stepping toward it, instead of a paddle swung at
+  chest height. How the game plays is unchanged.
+
 ## [0.19.1] - 2026-10-20
 
 A trimmed announcer, a plain off switch, and a fixed replay.

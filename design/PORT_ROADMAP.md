@@ -161,6 +161,9 @@ status in the same commit. The finished tasks, in full, are in
   `feature/cld-release-0.19.0`).
 - **v0.19.1** (2026-10-20): PORT-53 announcer trims and switch, the
   replay's players move (tag `v0.19.1`, on `feature/cld-release-0.19.1`).
+- **v0.20.0** (2026-10-21): PORT-54 the stands' people and achievements,
+  PORT-55's fallbacks (its lines still to record), PORT-56 the near-side
+  reach (tag `v0.20.0`, on `feature/cld-release-0.20.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 
