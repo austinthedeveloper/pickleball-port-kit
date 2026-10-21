@@ -23,6 +23,39 @@ python3 game/tools/version.py set 0.2.0
 
 ## Cutting a release
 
+`game/tools/release.py` does steps 1 to 6 below:
+
+```sh
+python3 game/tools/release.py X.Y.Z --dry-run    # the plan, and what would stop it
+python3 game/tools/release.py X.Y.Z              # up to the tag, nothing pushed
+python3 game/tools/release.py X.Y.Z --push feature/cld-a feature/cld-b
+```
+
+Before it changes anything it checks, and stops on any failure:
+
+- the tree is clean, except `game/CHANGELOG.md` and
+  `design/PORT_ROADMAP.md`, which go into the release commit (untracked
+  files are ignored and never added);
+- tag `vX.Y.Z` exists neither here nor on `origin`, nor the release branch;
+- `game/CHANGELOG.md` has the `## [X.Y.Z] - YYYY-MM-DD` entry. You write
+  it, for players; without one it prints a template listing the roadmap
+  tasks numbered after every task a `## Releases` line names;
+- `design/PORT_ROADMAP.md` has a `- **vX.Y.Z**` line under `## Releases`,
+  or `--roadmap "summary"` adds the usual one-line stub.
+
+Then it branches `feature/cld-release-X.Y.Z` from HEAD, runs
+`version.py set`, `release_notes.py vX.Y.Z` and `game/tools/test.sh`
+(a failure stops it with nothing committed), commits exactly the version,
+CHANGELOG, release-notes and roadmap files, and tags `vX.Y.Z` (annotated,
+"Pickleball '94 X.Y.Z: " plus the CHANGELOG entry's first paragraph, or
+`--message`). `--push BRANCH...` pushes those branches and the release
+branch, then the tag, follows the Release workflow's run for the tag
+(`gh run list`/`gh run view`) to the end, prints the release's assets and
+checks `gh release view` names it the latest. `game/tools/test_release.py`
+tests it in a throwaway repository.
+
+By hand:
+
 1. Branch `feature/cld-release-X.Y.Z` from the tip of the work going in.
 2. `python3 game/tools/version.py set X.Y.Z`.
 3. Add the `## [X.Y.Z] - date` entry at the top of `game/CHANGELOG.md`.
