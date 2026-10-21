@@ -4,6 +4,23 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.19.0] - 2026-10-20
+
+The announcer.
+
+### Added
+- **The announcer**: a 1994 TV sports voice for every match, with nothing
+  added to the screen. It introduces the venue or the team, calls the
+  score at each serve, reacts to aces, long rallies, faults, streaks,
+  comebacks and match point, throws in the odd pickle pun, and calls the
+  result, close calls and PLAY OF THE MATCH. The music and crowd dip
+  while it talks.
+- **ANNOUNCER** and **COMMENTARY** on OPTIONS: its volume (or OFF), and how
+  much it says: LIGHT (the big moments), NORMAL, or LOTS.
+
+### Changed
+- OPTIONS sits higher on the screen to fit its two new rows.
+
 ## [0.18.0] - 2026-10-20
 
 PLAY OF THE MATCH, and a new standard ball.
