@@ -67,6 +67,7 @@ var cleared := false            ## this match cleared the ladder
 ## Camera (ADR-050/051): the lean toward the ball (CameraLean).
 var camera := CameraLean.new()
 var _layers: Array = []          # [Sprite2D, origin, parallax]
+var _stands_parallax := 1.0       ## the crowd and the watcher sit on the stands: they move with them
 ## Court colours (ADR-022/027): [surface, kitchen, surround, lines] presets.
 var court: Array = CourtStyle.DEFAULTS.duplicate()
 ## Time of day (ADR-045): CourtStyle.DAY, DUSK or NIGHT.
@@ -197,6 +198,7 @@ func _build() -> void:
 			s.modulate = scales[1] if layer["name"] == "net" else scales[0]
 		z += 1
 		if layer["name"] == "stands":
+			_stands_parallax = float(layer["parallax"])
 			var dark: Color = CourtStyle.time_scales(time)[0]       # they sit in the dark
 			crowd = Crowd.new().setup(manifest, venue, dark)
 			crowd.z_index = z
@@ -732,6 +734,12 @@ func _update_camera() -> void:
 	var cam := camera.update(sim.ball)
 	for l in _layers:
 		l[0].position = (l[1] - cam * l[2]).round()
+	# the people in the stands move with the stands (KNOWN_ISSUES #68)
+	var stands := (-cam * _stands_parallax).round()
+	if crowd:
+		crowd.position = stands
+	if watcher:
+		watcher.position = stands
 	var court_shift := (-cam).round()
 	_actors.position = court_shift
 	_shadows.position = court_shift

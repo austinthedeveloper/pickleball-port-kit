@@ -221,3 +221,30 @@ func test_quitting_a_ladder_match_resets_it() -> void:
 		eq([s.ladder(false), s.ladder(true)], [2, 0] if ladder else [2, 3],
 			"ladder %s: doubles reset, singles kept" % ladder if ladder else "not a ladder match: nothing moves")
 		v.free()
+
+
+## KNOWN_ISSUES #68: the people in the stands (the crowd, the watching
+## partner) move with the stands layer as the camera leans.
+func test_the_crowd_moves_with_the_stands() -> void:
+	var v := MatchView.new()
+	runner.root.add_child(v)
+	v.camera.percent = 100
+	v.setup(Settings.config_for(false, 2, K.DIFFICULTY_MEDIUM, 11), "park", false)
+	v.card_frames = -1
+	v.sim.p1_bot = true
+	var stands: Array = []
+	for l in v._layers:
+		if l[2] == v._stands_parallax and l[0].texture.resource_path.contains("stands"):
+			stands = l
+	check(not stands.is_empty(), "the stands layer")
+	var moved := false
+	for f in 900:
+		v._physics_process(1.0 / 60.0)
+		var shift: Vector2 = stands[0].position - stands[1]
+		if f % 100 == 0:
+			eq(v.crowd.position, shift, "the crowd with the stands")
+			if v.watcher:
+				eq(v.watcher.position, shift, "and the watcher")
+		moved = moved or shift != Vector2.ZERO
+	check(moved, "the camera leaned")
+	v.free()
