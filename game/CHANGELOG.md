@@ -4,6 +4,32 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.21.0] - 2026-10-21
+
+Two new places to play, and friendlier local multiplayer.
+
+### Added
+- **OPEN PLAY locations**: press Left/Right on OPEN PLAY to pick THE PARK,
+  **DINO PARK** (palms, a smoking volcano, dino statues, a ranger hut) or
+  **THE GYM** (a maple floor, divider nets, bleachers, a scoreboard).
+  Your park progress carries across all three.
+- **The GYM venue**: an indoor court with banners, a scoreboard and the
+  crowd on bleachers, always lit, with its own sound and music. THE GYM's
+  games play there, and you can pick it on COURT for any match.
+- **MAPLE** court surround colour.
+
+### Changed
+- **Local multiplayer**: two players can now team up against two CPUs, or
+  play on opposite sides with a CPU partner each. LB/RB cycle round all
+  four modes, shown as tabs, and the lobby says who plays whom.
+- The title's top line shows just your RECORD; ladder places and clears
+  are on RECORDS.
+- GLOBETROTTER now asks for a win at every venue, the GYM included.
+
+### Fixed
+- The player tags over heads: the text no longer sits low in the box,
+  and the pointer is the player's colour instead of black.
+
 ## [0.20.0] - 2026-10-21
 
 Achievements, and a few fixes.

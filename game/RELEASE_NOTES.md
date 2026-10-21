@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.19.1-10-g2dfd3bd-dirty`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.20.0-4-gcda9a5d-dirty`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-55 of 56 roadmap tasks are in.
+57 of 58 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -338,5 +338,17 @@ Status: **In progress**: waiting for the recordings.
 ## PORT-56: the near-side reach (asked for 2026-10-21)
 
 KNOWN_ISSUES #69, the look only (the user's call): a ball on the near side of a player gets the low reach and a step down toward it; the ROM's hit area is unchanged.
+
+Status: **Ready to test**.
+
+## PORT-57: `feature/cld-title-record`, `feature/cld-park-locations` (asked for 2026-10-21)
+
+The title's line under the logo is just the RECORD (the ladder's place resets on a quit, so it isn't progress; RECORDS keeps it and the clears). OPEN PLAY's locations (ADR-078): THE PARK, DINO PARK, THE GYM, one plan in three looks; THE GYM's games at the new indoor GYM venue (always lit, its own ambience and music).
+
+Status: **Ready to test**: walk both, and play a game in each.
+
+## PORT-58: `feature/cld-lobby-sides`, `feature/cld-player-tags` (asked for 2026-10-21)
+
+The lobby: doubles takes any split (two players together against two CPUs, or one each side with a CPU partner; humans only on the right swap ends); LB / RB go round the four modes, shown as tabs; the line says who plays whom ("P1 + P2 VS CPU + CPU"). The tags over the players: the text centred, the pointer in the player's colour (KNOWN_ISSUES #70).
 
 Status: **Ready to test**.

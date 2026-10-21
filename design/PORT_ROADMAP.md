@@ -166,6 +166,9 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.20.0** (2026-10-21): PORT-54 the stands' people and achievements,
   PORT-55's fallbacks (its lines still to record), PORT-56 the near-side
   reach (tag `v0.20.0`, on `feature/cld-release-0.20.0`).
+- **v0.21.0** (2026-10-21): PORT-57 the RECORD line, DINO PARK, THE GYM
+  and the GYM venue; PORT-58 the lobby's splits and tabs, the player tags
+  (tag `v0.21.0`, on `feature/cld-release-0.21.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 
