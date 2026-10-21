@@ -16,7 +16,9 @@ static func build(t: TitleScreen) -> void:
 				t.open_story.emit()},
 		{"id": "singles", "label": "SINGLES", "press": func(): t.open_select(false)},
 		{"id": "doubles", "label": "DOUBLES", "press": func(): t.open_select(true)},
-		{"id": "openplay", "label": "OPEN PLAY", "value": func(): return "THE PARK",
+		{"id": "openplay", "label": "OPEN PLAY", "value": func(): return Settings.park_name(),
+			"change": func(d): Settings.park_i = (Settings.park_i + d + Settings.PARKS.size()) \
+				% Settings.PARKS.size(),
 			"press": t._open_park},
 		{"id": "multiplayer", "label": "MULTIPLAYER", "value": func(): return "ONLINE",
 			"press": func(): t.open_page("multi")},

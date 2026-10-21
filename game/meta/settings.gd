@@ -6,8 +6,10 @@ class_name Settings
 extends RefCounted
 
 ## data/venues.json's six, in its order (ADR-024, the fun three ADR-046).
-const VENUES := ["park", "lakeside", "sunset", "dinosaur", "space", "undersea"]
-const VENUE_NAMES := ["PARK", "LAKESIDE", "SUNSET", "DINOSAUR", "SPACE", "UNDERSEA"]
+const VENUES := ["park", "lakeside", "sunset", "dinosaur", "space", "undersea", "gym"]
+const VENUE_NAMES := ["PARK", "LAKESIDE", "SUNSET", "DINOSAUR", "SPACE", "UNDERSEA", "GYM"]
+## Indoors (ADR-078): the lights are always on, whatever COURT's TIME says.
+const INDOOR := ["gym"]
 const DIFFICULTIES := ["KID", "EASY", "MEDIUM", "HARD"]
 const POINTS := [3, 5, 7, 9, 11, 15, 21]
 const CAMERAS := [0, 50, 75, 100]
@@ -57,6 +59,12 @@ const CPU_ERRORS_DEFAULT := 50        ## half the ROM's late swings: longer rall
 const BALL_SIZE_MIN := 80
 const BALL_SIZE_MAX := 150             ## BIG BALL is 200
 static var mod_bits := 0
+## OPEN PLAY's locations (ADR-078): [id, name, art folder, its games' venue].
+## One plan (the sim's), three looks.
+const PARKS := [["park", "THE PARK", "res://assets/park/", "park"],
+	["dino", "DINO PARK", "res://assets/park/dino/", "dinosaur"],
+	["gym", "THE GYM", "res://assets/park/gym/", "gym"]]
+static var park_i := 0                ## OPEN PLAY's location
 static var ball_speed := BALL_SPEED_DEFAULT   ## MODIFIERS > BALL SPEED, percent (ADR-071)
 static var cpu_errors := CPU_ERRORS_DEFAULT   ## CPU ERRORS, percent of the ROM's (ADR-073)
 static var ball_size := BALL_SIZE_DEFAULT     ## MODIFIERS > BALL SIZE, percent, display only (ADR-072)
@@ -109,6 +117,7 @@ static func load_from(save: SaveGame) -> void:
 	if (seen < 1 and speed == 100) or (seen < 2 and speed == 78):
 		speed = BALL_SPEED_DEFAULT
 	ball_speed = clampi(speed, K.BALL_SPEED_MIN, K.BALL_SPEED_MAX)
+	park_i = clampi(int(st.get("park_location", 0)), 0, PARKS.size() - 1)
 	var size := int(st.get("ball_size", BALL_SIZE_DEFAULT))
 	if seen < 2 and size == 105:
 		size = BALL_SIZE_DEFAULT
@@ -153,7 +162,7 @@ static func store_to(save: SaveGame) -> void:
 		return
 	save.data["settings"].merge({"venue": venue_i, "difficulty": difficulty_i,
 		"points": points_i, "players": 2 if two_players else 1, "opponent": opponent_i,
-		"camera": camera_i, "mod_bits": mod_bits, "ball_speed": ball_speed, "ball_speed_v": BALL_DEFAULTS_V, "ball_size": ball_size, "cpu_errors": cpu_errors, "sound": Sfx.setting,
+		"camera": camera_i, "mod_bits": mod_bits, "ball_speed": ball_speed, "park_location": park_i, "ball_speed_v": BALL_DEFAULTS_V, "ball_size": ball_size, "cpu_errors": cpu_errors, "sound": Sfx.setting,
 		"music": Music.volume, "announcer": Announcer.volume, "announcer_on": 1 if Announcer.enabled else 0, "commentary": Announcer.chatter,
 		"fullscreen": 1 if fullscreen else 0, "integer_scale": 1 if integer_scale else 0,
 		"player": [p1_choice["palette"], p1_choice["variant"], p1_choice["paddle"]],
@@ -239,3 +248,16 @@ static func config_for(doubles: bool, opponent: int, difficulty: int, points: in
 			cfg.palette[3] = -1
 			cfg.human[3] = 0
 	return cfg
+
+
+## OPEN PLAY's location (ADR-078): its name, art and its games' venue.
+static func park_name() -> String:
+	return String(PARKS[park_i][1])
+
+
+static func park_art() -> String:
+	return String(PARKS[park_i][2])
+
+
+static func park_venue() -> String:
+	return String(PARKS[park_i][3])

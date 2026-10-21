@@ -1,5 +1,6 @@
-"""The six venues as parallax layers: three from the level mocks (park,
-lakeside, sunset) and ADR-046's fun venues (dinosaur, space, undersea).
+"""The venues as parallax layers: three from the level mocks (park,
+lakeside, sunset), ADR-046's fun venues (dinosaur, space, undersea), and
+the port's indoor GYM (ADR-078, THE GYM's games).
 
 Each builder returns a Venue: named layers (back to front), each with a
 parallax factor, plus spots (spectator seats, the watcher, prop anchors).
@@ -14,7 +15,7 @@ from dataclasses import dataclass, field
 import numpy as np
 
 import court as C
-from pix import Layer, bush, fbm, hexrgb, ramp, tree
+from pix import Layer, bush, chain_link, fbm, hexrgb, ramp, stamp_text, tree
 from scenery import (OUTLINE, M, ball_icon, bin_can, bleachers, brain_coral, bubbles, hills, sailboat,
                      cloud, coral_fan, coral_tubes, dome, fence, fern_band, flowers,
                      hedge_band, house, kelp, lamp_post, moon_ridge, nebula,
@@ -629,5 +630,123 @@ def undersea() -> Venue:
     return v
 
 
+# -- Gym: indoors (ADR-078): a lit ceiling, banners and a scoreboard, bleachers
+# behind a divider net, a maple floor --------------------------------------------
+
+MAPLE_FLOOR = ramp("a06a38", "b67c46", "c88c52", "d69a5e", "e2a86c")
+
+
+def gym() -> Venue:
+    v = Venue("gym")
+    v.stands_behind_fence = True
+    # the ceiling: a dark deck, steel trusses, rows of hanging lights
+    S = Layer()
+    sky_gradient(S, [(0, "141822"), (0.5, "1e2430"), (1, "2c3442")], y0=-24, y1=130)
+    for x in range(-60, 1040, 120):
+        for k in range(0, 120, 30):
+            S.fill(S.line_mask([(x + k, 4), (x + k + 30, 40)], 2), hexrgb("3a4252"))
+        S.fill(S.rect_mask(x, 2, x + 122, 6), hexrgb("46505e"))
+        S.fill(S.rect_mask(x, 38, x + 122, 42), hexrgb("46505e"))
+    for row, (y, w) in enumerate(((54, 34), (82, 44))):
+        for k in range(8 + row):
+            x = 40 + k * (900 / (7 + row)) + (row * 30)
+            S.fill(S.rect_mask(x - 1, 42, x + 1, y - 4), hexrgb("2a303a"))
+            S.fill(S.rect_mask(x - w / 2, y - 4, x + w / 2, y + 2), hexrgb("3c4450"))
+            S.fill(S.rect_mask(x - w / 2 + 2, y + 1, x + w / 2 - 2, y + 4), hexrgb("fff4d0"))
+    v.add("sky", S, 0.2)
+    # the far wall's top: painted block, championship banners, the scoreboard
+    F = Layer()
+    wall = F.rect_mask(-48, 96, 1008, 150)
+    rows = ((np.arange(F.h) // 7) % 2)[:, None] * 0.12
+    F.fill_where(wall, np.array(ramp("aab2be", "b8c0ca", "c6ccd4"), np.uint8)[
+        np.clip(((fbm(F.h, F.w, 10, 180, 2) * 0.5 + rows + 0.2) * 3).astype(int), 0, 2)])
+    banners = (("1e3a6e", "fbe46a", "93"), ("c83a32", "f4f0e6", "92"), ("2e7a48", "fbe46a", "91"),
+               ("1e3a6e", "f4f0e6", "90"), ("c83a32", "fbe46a", "89"))
+    for k, (cloth, trim, year) in enumerate(banners):
+        x = 90 + k * 64 if k < 3 else 690 + (k - 3) * 64 + 64
+        F.fill(F.poly_mask([(x - 20, 100), (x + 20, 100), (x + 20, 136), (x, 144), (x - 20, 136)]),
+               hexrgb(cloth))
+        F.fill(F.rect_mask(x - 20, 100, x + 20, 103), hexrgb(trim))
+        stamp_text(F, year, x - 9, 116, hexrgb(trim), scale=2)
+        F.outline(OUTLINE, F.poly_mask([(x - 20, 100), (x + 20, 100), (x + 20, 136), (x, 144),
+                                        (x - 20, 136)]))
+    F.fill(F.rect_mask(380, 98, 580, 146), hexrgb("101216"))                # the scoreboard
+    F.fill(F.rect_mask(384, 102, 576, 142), hexrgb("1c2026"))
+    stamp_text(F, "HOME", 398, 106, hexrgb("e8e4da"), scale=1)
+    stamp_text(F, "GUEST", 518, 106, hexrgb("e8e4da"), scale=1)
+    stamp_text(F, "11", 398, 118, hexrgb("f84a3a"), scale=2)
+    stamp_text(F, "9", 538, 118, hexrgb("f84a3a"), scale=2)
+    stamp_text(F, "PICKLEBALL", 450, 106, hexrgb("fbe46a"), scale=1)
+    F.outline(OUTLINE, F.rect_mask(380, 98, 580, 146))
+    v.add("far", F, 0.4)
+    # the wall's foot: the stripe, the pads, an exit
+    T = Layer()
+    T.fill(T.rect_mask(-48, 146, 1008, 200), hexrgb("b8c0ca"))
+    T.fill(T.rect_mask(-48, 148, 1008, 154), hexrgb("1e3a6e"))
+    T.fill(T.rect_mask(-48, 154, 1008, 157), hexrgb("c83a32"))
+    for x in range(-48, 1008, 40):
+        T.fill(T.rect_mask(x + 1, 160, x + 39, 198), hexrgb("24427a"))
+        T.fill(T.rect_mask(x + 1, 160, x + 39, 162), hexrgb("3a5c98"))
+    T.fill(T.rect_mask(456, 158, 504, 198), hexrgb("6a727c"))              # the doors
+    T.fill(T.rect_mask(479, 158, 481, 198), hexrgb("3a4250"))
+    T.fill(T.rect_mask(466, 150, 494, 157), hexrgb("1a6a3a"))
+    stamp_text(T, "EXIT", 469, 151, hexrgb("bff0c8"), scale=1)
+    v.add("trees", T, 0.6)
+    # the bleachers, behind the divider net
+    P = Layer()
+    for (mx0, mx1) in ((40, 420), (940, 1320)):
+        x0, x1 = M(mx0, 0)[0], M(mx1, 0)[0]
+        seats = bleachers(P, x0, x1, 140, ALU, rows=4)
+        for k in range(4):
+            v.seats.append({"x": round(x0 + (k + 0.5) * (x1 - x0) / 4), "y": seats[0], "pose": "sit"})
+    v.add("stands", P, 1.0)
+    v.watcher = {"x": round(M(1180, 0)[0]), "y": 151, "pose": "sit"}
+    # the divider net: black mesh from a top band to the floor
+    B = Layer()
+    chain_link(B, -48, 118, 1008, 190, hexrgb("0e1014"), spacing=5, alpha=150)
+    B.fill(B.rect_mask(-48, 114, 1008, 119), hexrgb("1a1e24"))
+    B.fill(B.rect_mask(-48, 186, 1008, 190), hexrgb("8a5a30"))
+    B.fill(B.rect_mask(-48, 186, 1008, 187), hexrgb("b07a44"))
+    v.add("fence", B, 1.0)
+    G = ground_band(v, 188, preset_court("b05434", "2e7a48", "d8a868", "ffffff"),   # CLAY, GREEN, MAPLE
+                    seed=181, speckle=(0.002, hexrgb("a06a38")))
+    # maple boards on the surround: lines along the court, wider apart toward
+    # us (the perspective), staggered joints; darker paint, so a recoloured
+    # surround keeps them (the court shader scales by brightness)
+    floor = (v.roles == C.ROLE["surround"]) | (v.roles == C.ROLE["surround_shade"])
+    y, k, rng = 188.0, 0, random.Random(183)
+    while y < 620:
+        row = int(round(y)) + G.oy
+        if 0 <= row < G.h:
+            band = floor[row]
+            G.a[row, band, :3] = (G.a[row, band, :3] * 0.82).astype(np.uint8)
+            gap = 7 + k * 0.9
+            x = rng.randint(0, 160) - 48
+            while x < 1010:
+                col = int(x) + G.ox
+                for r in range(row, min(G.h, row + int(gap))):
+                    if 0 <= col < G.w and floor[r, col]:
+                        G.a[r, col, :3] = (G.a[r, col, :3] * 0.86).astype(np.uint8)
+                x += rng.randint(120, 220)
+        y += 7 + k * 0.9
+        k += 1
+    # the near corners: a team bench, a cooler and a ball cart
+    Fr = Layer()
+    for side, x0 in ((1, 10), (-1, 950)):
+        bx0, bx1 = (x0, x0 + 150) if side == 1 else (x0 - 150, x0)
+        Fr.fill(Fr.rect_mask(bx0, 520, bx1, 536), hexrgb("1e3a6e"))
+        Fr.fill(Fr.rect_mask(bx0, 520, bx1, 523), hexrgb("3a5c98"))
+        for lx in (bx0 + 8, bx1 - 14):
+            Fr.fill(Fr.rect_mask(lx, 536, lx + 6, 560), hexrgb("2a303a"))
+        cx = bx1 + 34 if side == 1 else bx0 - 34
+        Fr.fill(Fr.rect_mask(cx - 9, 524, cx + 9, 560), hexrgb("e6e8ea"))
+        Fr.fill(Fr.ellipse_mask(cx, 515, 8, 12), hexrgb("5aa0d8"))
+        Fr.fill(Fr.ellipse_mask(cx - 3, 511, 2, 5), hexrgb("a8d4f2"))
+    Fr.outline(OUTLINE)
+    v.add("front", Fr, 1.3)
+    verge(v, MAPLE_FLOOR, hexrgb("8a5a30"), seed=182)
+    return v
+
+
 VENUES = {"park": park, "lakeside": lakeside, "sunset": sunset,
-          "dinosaur": dinosaur, "space": space, "undersea": undersea}
+          "dinosaur": dinosaur, "space": space, "undersea": undersea, "gym": gym}

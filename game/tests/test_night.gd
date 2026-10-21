@@ -127,6 +127,8 @@ func test_night_view() -> void:
 ## the onlookers dim, the court is lit, the crickets play at NIGHT.
 func test_every_venue_at_night() -> void:
 	for venue in Settings.VENUES:
+		if venue in Settings.INDOOR:
+			continue                         # test_indoors_is_always_lit
 		for t in [CourtStyle.DUSK, CourtStyle.NIGHT]:
 			var view := MatchView.new()
 			view.time = t
@@ -165,3 +167,18 @@ func test_time_row_and_save() -> void:
 	eq(int(save.data["settings"]["time"]), CourtStyle.NIGHT, "saved")
 	t.free()
 	Settings.time_i = kept
+
+
+## ADR-078: indoors (THE GYM's venue) the lights are on whatever TIME says:
+## the backdrop and the crowd keep their colours, the gym's own ambience.
+func test_indoors_is_always_lit() -> void:
+	for venue in Settings.INDOOR:
+		for t in [CourtStyle.DUSK, CourtStyle.NIGHT]:
+			var view := MatchView.new()
+			view.time = t
+			runner.root.add_child(view)
+			view.setup(SimTypes.MatchConfig.singles(), venue, false)
+			eq(view.time, CourtStyle.DAY, "%s t%d: lit" % [venue, t])
+			check(view.crowd.people.all(func(c): return c[0].modulate == Color.WHITE), "the crowd in the light")
+			eq(view._sfx.ambience_name, venue, "its own ambience")
+			view.free()

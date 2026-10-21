@@ -22,6 +22,10 @@ G = [
         ("deuce_3", "Back to even!", HYPE, 1.2),
         ("deuce_long", "We could be here all night, folks!", WRY, 2.5),
     ]),
+    ("The gym", "As a match at THE GYM (the indoor venue, ADR-078) begins.", [
+        ("venue_gym_1", "Welcome to the gym! The lights are bright and the floor is squeaky.", WARM, 4.0),
+        ("venue_gym_2", "We're indoors today, folks. No wind, no excuses!", WRY, 3.0),
+    ]),
     ("Achievements", "As an achievement unlocks (after the match's result): its own line "
      "if it has one, else a general one.", [
         ("achievement_1", "Achievement unlocked!", HYPE, 1.5),

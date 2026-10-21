@@ -30,6 +30,12 @@
       "name": "UNDERSEA", "scene": "venue_undersea.png", "ambience": "bubbles",
       "watcher": [200, 62, "stand"],
       "ground": {"surface": "AQUA", "kitchen": "NAVY", "surround": "SAND", "lines": "WHITE"}
+    },
+    {
+      "comment": "The port's own (ADR-078, THE GYM's games): indoors, no SNES scene.",
+      "name": "GYM", "scene": "", "ambience": "gym",
+      "watcher": [194, 64, "sit"],
+      "ground": {"surface": "CLAY", "kitchen": "GREEN", "surround": "MAPLE", "lines": "WHITE"}
     }
   ]
 }

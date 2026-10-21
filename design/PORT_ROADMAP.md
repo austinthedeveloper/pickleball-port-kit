@@ -82,6 +82,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-54 | The stands' people move with the camera; achievements | `feature/cld-crowd-parallax`, `feature/cld-achievements` | Ready to test |
 | PORT-55 | The announcer's second batch (advantage, deuce, achievements) | `feature/cld-announcer-additions` | In progress |
 | PORT-56 | The near-side reach (display only) | `feature/cld-near-reach` | Ready to test |
+| PORT-57 | The title's RECORD line; OPEN PLAY's locations and the GYM | `feature/cld-title-record`, `feature/cld-park-locations` | Ready to test |
 
 ## Releases
 
@@ -436,6 +437,19 @@ the same request). Open: 36 and 40.
   - Verified: `test_view` (`test_near_side_reach`). 419/419 plus the e2e,
     golden traces unchanged.
   - Status: **Ready to test**.
+
+### 57. `feature/cld-title-record`, `feature/cld-park-locations` (asked for 2026-10-21)
+
+- [x] `PORT-57` The title's line under the logo is just the RECORD (the
+  ladder's place resets on a quit, so it isn't progress; RECORDS keeps it
+  and the clears). OPEN PLAY's locations (ADR-078): THE PARK, DINO PARK,
+  THE GYM, one plan in three looks; THE GYM's games at the new indoor GYM
+  venue (always lit, its own ambience and music).
+  - Verified: `test_park_locations`, `test_night`, `test_court`. 423/423
+    plus the e2e, golden traces unchanged; the park's art and every
+    venue's but the GYM's byte for byte. Screenshots of DINO PARK, THE
+    GYM and a match at the GYM.
+  - Status: **Ready to test**: walk both, and play a game in each.
 
 ## For you
 

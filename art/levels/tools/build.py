@@ -282,7 +282,7 @@ def build_venue(name, crowd_rows):
     stand = [i for i, (p, _) in enumerate(crowd_rows) if p == "stand"]
     k = {"sit": 0, "stand": 0}
     offset = {"park": 0, "lakeside": 5, "sunset": 8, "dinosaur": 2,
-              "space": 6, "undersea": 10}[name]
+              "space": 6, "undersea": 10, "gym": 3}[name]
     for s in v.seats:
         pool = sit if s["pose"] == "sit" else stand
         person = pool[(k[s["pose"]] + offset) % len(pool)]
@@ -508,8 +508,9 @@ def main():
     for name, (v, vm) in built.items():
         img = scene(name, v, vm, umeta, fmeta)
         save(img, f"previews/{name}.png")
-        save(preview.side_by_side(img, KIT / "art/concept" / MOCKS[name]),
-             f"previews/{name}_vs_mock.png")
+        if name in MOCKS:                  # the gym (ADR-078) has no mock to compare
+            save(preview.side_by_side(img, KIT / "art/concept" / MOCKS[name]),
+                 f"previews/{name}_vs_mock.png")
     print("built", OUT)
 
 

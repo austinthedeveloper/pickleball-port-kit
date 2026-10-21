@@ -565,9 +565,34 @@ def amb_undersea(rng):
     return reverb(out, rng, wet=0.3, seconds=1.5, decay=0.5, brightness=2500, stereo=True)
 
 
+def squeak(rng):
+    """A sneaker on a gym floor: a quick bright rubber chirp."""
+    f0 = rng.uniform(1800, 2600)
+    return chirp(rng, f0, f0 * rng.uniform(1.15, 1.4), rng.uniform(0.05, 0.09), warble=0.04,
+                 warble_rate=90.0, harm=0.35)
+
+
+def amb_gym(rng):
+    """THE GYM (ADR-078): a hall's echoey murmur and the ventilation's hum,
+    sneakers squeaking and balls bouncing on other courts."""
+    s = LOOP + FADE
+    out = murmur(rng, s, 0.2)
+    out += band(pink(rng, s, 2), 60, 180) * 0.07         # the air handlers
+    tt = 0.2
+    while tt < s - 1:
+        if rng.random() < 0.6:
+            place(out, squeak(rng), tt, rng.uniform(-0.9, 0.9), rng.uniform(0.04, 0.09))
+        else:
+            place(out, fit(court_bounce(rng), int(0.25 * SR)), tt, rng.uniform(-0.9, 0.9),
+                  rng.uniform(0.05, 0.1))
+        tt += rng.uniform(0.35, 1.4)
+    return reverb(out, rng, wet=0.35, seconds=1.2, decay=0.45, brightness=5000, stereo=True)
+
+
 AMBIENCE = {"ambience_park": amb_park, "ambience_lakeside": amb_lakeside,
             "ambience_sunset": amb_sunset, "ambience_dinosaur": amb_jungle,
-            "ambience_space": amb_space, "ambience_undersea": amb_undersea}
+            "ambience_space": amb_space, "ambience_undersea": amb_undersea,
+            "ambience_gym": amb_gym}
 
 
 def rms_db(x):

@@ -6,7 +6,7 @@
 ## the MOD_* bits. "title_options"
 ## (any page id) opens that title page; "court=S,K,R,L" sets the court
 ## colour presets; "time=N" DAY 0, DUSK 1, NIGHT 2;
-## "pad" shows the controller prompts; "save" a save with records (title); "pause" pauses the match at the end; "tune" opens the tuning panel; "debug" the F3 overlay (hit volumes); "potm" a bot match to its PLAY OF THE MATCH; "nearreach" a near-side reach mid-step;
+## "pad" shows the controller prompts; "save" a save with records (title); "pause" pauses the match at the end; "tune" opens the tuning panel; "debug" the F3 overlay (hit volumes); "location=N" OPEN PLAY's location; "potm" a bot match to its PLAY OF THE MATCH; "nearreach" a near-side reach mid-step;
 ## "closecall" shows a forced close-up; "initials" the initials card;
 ## "result" plays a bot match and ends it (the stats card); "mp4" four
 ## humans on fake pads (doubles); title_lobby a lobby with three players.
@@ -76,6 +76,8 @@ func _initialize() -> void:
 			u.latest = "0.9.0"
 		if arg.begins_with("icons="):           # PORT-28: 1 XBOX, 2 PLAYSTATION, 3 NINTENDO
 			Settings.pad_glyphs = int(arg.substr(6))
+		if arg.begins_with("location="):        # ADR-078: OPEN PLAY's location (0 park, 1 dino, 2 gym)
+			Settings.park_i = int(arg.substr(9))
 		if arg.begins_with("time="):
 			Settings.time_i = int(arg.substr(5))
 		if arg.begins_with("court="):

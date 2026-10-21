@@ -37,9 +37,10 @@ func test_a_match() -> void:
 	eq(Achievements.check_match(sv, _match({"won": false, "behind": 6})), [], "a comeback needs the win")
 	eq(Achievements.check_match(sv, _match({"behind": 5, "longest": 31})), ["on_fire", "comeback"])
 	eq(Achievements.check_match(sv, _match({"mods": K.MOD_WIND | K.MOD_MOON | K.MOD_ICE})), ["mad_scientist"])
-	for v in Settings.VENUES.slice(0, 5):
-		eq(Achievements.check_match(sv, _match({"venue": v})), [], "not all six yet (%s)" % v)
-	eq(Achievements.check_match(sv, _match({"venue": Settings.VENUES[5]})), ["globetrotter"], "all six")
+	var last := Settings.VENUES.size() - 1
+	for v in Settings.VENUES.slice(0, last):
+		eq(Achievements.check_match(sv, _match({"venue": v})), [], "not every venue yet (%s)" % v)
+	eq(Achievements.check_match(sv, _match({"venue": Settings.VENUES[last]})), ["globetrotter"], "every one")
 	eq(Achievements.check_match(sv, _match({"cleared": true, "opponent": Opponents.DAWSON})),
 		["ladder", "cover_man"])
 	eq(heard, ["first_win", "pickled", "ace", "marathon", "on_fire", "comeback", "mad_scientist",

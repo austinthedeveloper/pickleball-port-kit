@@ -1,0 +1,272 @@
+{
+ "doc": "art/park/build_park.py. world = ((x + margin_x) * scale_x, (y + margin_top) * scale_y) for park px (x, y); sprites: their top-left in the world, `sort` the depth (world y); `slice`: cut into depth slices of the given length; `fade_inside`: fades while you're in the clubhouse.",
+ "world": [
+  2240,
+  870
+ ],
+ "scale": [
+  4,
+  3
+ ],
+ "margin": [
+  24,
+  40,
+  26
+ ],
+ "height_scale": 4,
+ "sprites": [
+  {
+   "file": "gym_wall.png",
+   "x": 0,
+   "y": 0,
+   "sort": 162
+  },
+  {
+   "file": "gym_side_l.png",
+   "x": 5,
+   "y": 57,
+   "sort": 870,
+   "slice": true,
+   "length": 708
+  },
+  {
+   "file": "gym_side_r.png",
+   "x": 2203,
+   "y": 57,
+   "sort": 870,
+   "slice": true,
+   "length": 708
+  },
+  {
+   "file": "cart_0.png",
+   "x": 85,
+   "y": 588,
+   "sort": 646
+  },
+  {
+   "file": "cart_1.png",
+   "x": 1221,
+   "y": 588,
+   "sort": 646
+  },
+  {
+   "file": "cart_2.png",
+   "x": 2061,
+   "y": 588,
+   "sort": 646
+  },
+  {
+   "file": "cooler_0.png",
+   "x": 81,
+   "y": 565,
+   "sort": 652
+  },
+  {
+   "file": "cooler_1.png",
+   "x": 753,
+   "y": 565,
+   "sort": 652
+  },
+  {
+   "file": "cooler_2.png",
+   "x": 1281,
+   "y": 565,
+   "sort": 652
+  },
+  {
+   "file": "fence_back_0.png",
+   "x": 161,
+   "y": 189,
+   "sort": 255
+  },
+  {
+   "file": "fence_front_0.png",
+   "x": 161,
+   "y": 543,
+   "sort": 609
+  },
+  {
+   "file": "fence_l_0.png",
+   "x": 162,
+   "y": 190,
+   "sort": 609,
+   "slice": true,
+   "length": 354
+  },
+  {
+   "file": "fence_r_0.png",
+   "x": 410,
+   "y": 190,
+   "sort": 609,
+   "slice": true,
+   "length": 354
+  },
+  {
+   "file": "net_0.png",
+   "x": 168,
+   "y": 406,
+   "sort": 432
+  },
+  {
+   "file": "rack_0.png",
+   "x": 251,
+   "y": 581,
+   "sort": 630
+  },
+  {
+   "file": "bench_0.png",
+   "x": 145,
+   "y": 603,
+   "sort": 634
+  },
+  {
+   "file": "fence_back_1.png",
+   "x": 481,
+   "y": 189,
+   "sort": 255
+  },
+  {
+   "file": "fence_front_1.png",
+   "x": 481,
+   "y": 543,
+   "sort": 609
+  },
+  {
+   "file": "fence_l_1.png",
+   "x": 482,
+   "y": 190,
+   "sort": 609,
+   "slice": true,
+   "length": 354
+  },
+  {
+   "file": "fence_r_1.png",
+   "x": 730,
+   "y": 190,
+   "sort": 609,
+   "slice": true,
+   "length": 354
+  },
+  {
+   "file": "net_1.png",
+   "x": 488,
+   "y": 406,
+   "sort": 432
+  },
+  {
+   "file": "rack_1.png",
+   "x": 571,
+   "y": 581,
+   "sort": 630
+  },
+  {
+   "file": "bench_1.png",
+   "x": 465,
+   "y": 603,
+   "sort": 634
+  },
+  {
+   "file": "fence_back_2.png",
+   "x": 801,
+   "y": 189,
+   "sort": 255
+  },
+  {
+   "file": "fence_front_2.png",
+   "x": 801,
+   "y": 543,
+   "sort": 609
+  },
+  {
+   "file": "fence_l_2.png",
+   "x": 802,
+   "y": 190,
+   "sort": 609,
+   "slice": true,
+   "length": 354
+  },
+  {
+   "file": "fence_r_2.png",
+   "x": 1050,
+   "y": 190,
+   "sort": 609,
+   "slice": true,
+   "length": 354
+  },
+  {
+   "file": "net_2.png",
+   "x": 808,
+   "y": 406,
+   "sort": 432
+  },
+  {
+   "file": "rack_2.png",
+   "x": 891,
+   "y": 581,
+   "sort": 630
+  },
+  {
+   "file": "bench_2.png",
+   "x": 785,
+   "y": 603,
+   "sort": 634
+  },
+  {
+   "file": "house_back.png",
+   "x": 1280,
+   "y": 153,
+   "sort": 257
+  },
+  {
+   "file": "house_left.png",
+   "x": 1280,
+   "y": 135,
+   "sort": 624,
+   "slice": true,
+   "length": 384
+  },
+  {
+   "file": "house_right.png",
+   "x": 2024,
+   "y": 135,
+   "sort": 624,
+   "slice": true,
+   "length": 384
+  },
+  {
+   "file": "house_front.png",
+   "x": 1279,
+   "y": 519,
+   "sort": 624,
+   "fade_inside": true
+  },
+  {
+   "file": "house_roof.png",
+   "x": 1265,
+   "y": 129,
+   "sort": 625,
+   "fade_inside": true,
+   "roof": true
+  },
+  {
+   "file": "machine.png",
+   "x": 1867,
+   "y": 301,
+   "sort": 372
+  },
+  {
+   "file": "bench_house.png",
+   "x": 1431,
+   "y": 491,
+   "sort": 522
+  },
+  {
+   "file": "plant.png",
+   "x": 1962,
+   "y": 529,
+   "sort": 588
+  }
+ ],
+ "theme": "gym",
+ "bg": "b07a44"
+}

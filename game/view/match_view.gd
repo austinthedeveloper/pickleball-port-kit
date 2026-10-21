@@ -134,6 +134,8 @@ static func levels_manifest() -> Dictionary:
 func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void:
 	venue = venue_name
 	demo = is_demo
+	if venue in Settings.INDOOR:
+		time = CourtStyle.DAY                 # ADR-078: indoors, always lit
 	_base_time = time
 	_base_court = court.duplicate()
 	if cfg.modifiers & K.MOD_GLOW:

@@ -26,7 +26,7 @@ const JITTER := {"hit": 0.03, "hit_drive": 0.03, "hit_smash": 0.03, "hit_slice":
 const TRIM_DB := {"whistle": -3.0, "applause": 1.0, "net": -1.0, "hit_soft": 1.0}
 const AMBIENCE := {"park": "ambience_park", "lakeside": "ambience_lakeside",
 	"sunset": "ambience_sunset", "dinosaur": "ambience_dinosaur", "space": "ambience_space",
-	"undersea": "ambience_undersea"}
+	"undersea": "ambience_undersea", "gym": "ambience_gym"}
 const VOICES := 3                  ## overlapping copies per effect
 const AMBIENCE_DB := -12.0
 const FADE_IN := 0.6

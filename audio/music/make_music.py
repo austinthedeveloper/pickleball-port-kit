@@ -809,6 +809,48 @@ def match_park():
     return s.render(rt60=1.6, echo_beats=0.75, echo_fb=0.32, target_rms=-20.0)
 
 
+def match_gym():
+    """Under play in THE GYM (ADR-078): a punchy E minor funk, 112 BPM, in a
+    big echoey hall. Clavinet-ish electric piano stabs, a busy octave bass,
+    brass hits, a tight kit with claps that ring off the walls; a whistle
+    lead in the second half."""
+    s = Song(112, 16, seed=707, swing=0.02)
+    prog = progression("Em9 A9 Em9 A9 Cmaj7 B7 Em9 A9 "
+                       "Em9 A9 Gmaj7 F#7 Cmaj7 Am7 B7sus4:2 B7:2")
+    s.bus("keys", reverb=0.25)
+    s.comp("keys", prog, bars_of(("x.x..x.x..x.x...", 15), ("x.x..x.x.x.x.x.x", 1)),
+           v_epiano, center=64, gain=0.2, vel=0.7)
+    s.bus("bass", reverb=0.04)
+    s.bass("bass", prog, bars_of(("R.O.R..OR.5.O.R.", 7), ("R.O.R..O5.3.O.a.", 1),
+                                 ("R.O.R..OR.5.O.R.", 7), ("R.R.5.5.O.O.5.a.", 1)),
+           gain=0.6, bright=1.0)
+    s.bus("brass", reverb=0.35)
+    s.comp("brass", prog, bars_of(("................", 4), ("X..........x....", 4),
+                                  ("X..........x....", 7), ("X.x.x.x.........", 1)),
+           v_brass, center=67, gain=0.12)
+    s.bus("pads", reverb=0.4)
+    s.pads("pads", prog, center=60, gain=0.06, cutoff=900)
+    wh = melody("r:1 B5:1/2 D6:1/2 E6:1 D6:1/2 B5:1/2 "
+                "A5:1 C#6:1/2 E6:1/2 G6:1 E6:1 "
+                "r:1/2 B5:1/2 D6:1/2 E6:1/2 G6:1 F#6:1/2 E6:1/2 "
+                "C#6:3/2 A5:1/2 B5:2 "
+                "r:1 G5:1/2 B5:1/2 D6:1 B5:1 "
+                "A#5:1 C#6:1/2 F#6:1/2 E6:2 "
+                "E6:1 D6:1/2 B5:1/2 C6:1 A5:1 "
+                "B5:3/2 F#5:1/2 B5:2")
+    bars_long(wh, 8)
+    s.bus("whistle", reverb=0.45, echo=0.2)
+    s.notes("whistle", v_whistle, wh, 8, gain=0.17, pan=0.1)
+    groove = {"kick": "x.....x...x..x..", "snare": "....x.......x...",
+              "hat": "x.x.x.x.x.x.x.x.", "clap": "....o.......o..."}
+    fill = dict(groove, snare="....x.......x.xx", tom="..........x.x...")
+    s.bus("drums", reverb=0.28)
+    s.drums("drums", [groove] * 7 + [fill] + [groove] * 7 + [fill],
+            {"kick": 0.65, "snare": 0.35, "hat": 0.09, "clap": 0.18, "tom": 0.25})
+    s.sidechain("pads", 0.3)
+    return s.render(rt60=2.4, echo_beats=0.5, echo_fb=0.3, target_rms=-20.0)
+
+
 def match_lakeside():
     """Under play by the lake: a breezy A major float, 94 BPM. Rolling
     marimba sixteenths, soft pads, long bass notes, shaker and finger
@@ -1103,7 +1145,8 @@ def stinger_cleared():
 STINGERS = ("music_won", "music_lost", "music_cleared")
 TRACKS = {"music_title": title, "music_match_park": match_park, "music_match_lakeside": match_lakeside,
           "music_match_sunset": match_sunset, "music_match_dinosaur": match_dinosaur,
-          "music_match_space": match_space, "music_match_undersea": match_undersea, "music_park": park, "music_won": stinger_won,
+          "music_match_space": match_space, "music_match_undersea": match_undersea,
+          "music_match_gym": match_gym, "music_park": park, "music_won": stinger_won,
           "music_lost": stinger_lost, "music_cleared": stinger_cleared}
 
 

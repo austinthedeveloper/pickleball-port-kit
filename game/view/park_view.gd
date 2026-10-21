@@ -43,7 +43,8 @@ var anim := 0
 var result_timer := 0
 var input_lock := INPUT_LOCK_FRAMES
 var cam := Vector2.ZERO              ## the view's top-left, in world px
-var layout: Dictionary               ## assets/park/park.json
+var layout: Dictionary               ## assets/park/park.json (or a location's)
+var art := ART                        ## the location's art folder (ADR-078)
 var _world: Node2D                   ## everything that scrolls
 var _fading: Array = []              ## sprites that fade while you're inside
 var _canopies: Array = []            ## [holder, rect in world]: trees that fade over you
@@ -109,15 +110,16 @@ func rate_park() -> void:
 
 
 func _build() -> void:
-	layout = JSON.parse_string(FileAccess.get_file_as_string(ART + "park.json"))
+	art = Settings.park_art()                 # ADR-078: THE PARK, DINO PARK or THE GYM
+	layout = JSON.parse_string(FileAccess.get_file_as_string(art + "park.json"))
 	var bg := ColorRect.new()
-	bg.color = Color("356b2a")
+	bg.color = Color(String(layout.get("bg", "356b2a")))
 	bg.size = VIEW
 	add_child(bg)
 	_world = Node2D.new()
 	add_child(_world)
 	var ground := Sprite2D.new()
-	ground.texture = load(ART + "ground.png")
+	ground.texture = load(art + "ground.png")
 	ground.centered = false
 	_world.add_child(ground)
 	_actors = Node2D.new()
@@ -151,7 +153,7 @@ func _build() -> void:
 ## the people; a long one running into the picture (a side fence or wall)
 ## is cut into slices, each sorted by its own depth.
 func _add_prop(spr: Dictionary) -> void:
-	var tex: Texture2D = load(ART + String(spr["file"]))
+	var tex: Texture2D = load(art + String(spr["file"]))
 	var top := Vector2(spr["x"], spr["y"])
 	var sort := float(spr["sort"])
 	var pieces := []

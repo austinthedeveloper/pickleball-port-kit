@@ -17,7 +17,7 @@ const LIST := [
 	["on_fire", "ON FIRE", "PLAY A 30-SHOT RALLY"],
 	["comeback", "COMEBACK KID", "WIN AFTER TRAILING BY 5"],
 	["mad_scientist", "MAD SCIENTIST", "WIN WITH 3 MODIFIERS ON"],
-	["globetrotter", "GLOBETROTTER", "WIN AT ALL SIX VENUES"],
+	["globetrotter", "GLOBETROTTER", "WIN AT EVERY VENUE"],
 	["ladder", "TOP OF THE LADDER", "BEAT ALL EIGHT TEAMS IN A ROW"],
 	["cover_man", "THE COVER MAN", "BEAT DALE DAWSON"],
 	["champion", "CHAMPION", "WIN A TOURNAMENT"],

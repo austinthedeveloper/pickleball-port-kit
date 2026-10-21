@@ -89,8 +89,8 @@ func begin() -> void:
 	_intro = []
 	if view.story_mode:
 		_intro.append("story_stakes_1")
-	else:
-		_intro.append("venue_" + view.venue)
+	elif _first(["venue_" + view.venue]) != "":
+		_intro.append("venue_" + view.venue)  # (the GYM's is still to record: PORT-55)
 	for m in MOD_LINES:
 		if cfg.modifiers & int(m[0]):
 			_intro.append(m[1])

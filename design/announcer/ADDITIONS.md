@@ -1,6 +1,6 @@
 # The Announcer: additions to record
 
-The second batch: **17 lines**, the same voice and settings as the first
+The second batch: **19 lines**, the same voice and settings as the first
 (`SCRIPT.md`, whose recording spec holds here too). `additions.csv` has
 one row per file. Put the recordings in `audio/announcer/raw/` beside the
 first batch; the game already asks for these and uses each once it's
@@ -24,6 +24,15 @@ covered (a game past 25-all is called by the score on the board).
 | `deuce_2` | Deuce! All square again! | Big, booming 1994 TV sports energy. | 1.8 |
 | `deuce_3` | Back to even! | Big, booming 1994 TV sports energy. | 1.2 |
 | `deuce_long` | We could be here all night, folks! | Dry, playful, a little deadpan; let the pun land. | 2.5 |
+
+## The gym
+
+*As a match at THE GYM (the indoor venue, ADR-078) begins.*
+
+| id | line | delivery | max s |
+|---|---|---|---|
+| `venue_gym_1` | Welcome to the gym! The lights are bright and the floor is squeaky. | Warm, friendly, a smile in the voice. | 4.0 |
+| `venue_gym_2` | We're indoors today, folks. No wind, no excuses! | Dry, playful, a little deadpan; let the pun land. | 3.0 |
 
 ## Achievements
 

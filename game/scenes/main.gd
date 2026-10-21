@@ -167,7 +167,7 @@ func _on_park_match(cfg: SimTypes.MatchConfig, is_practice: bool) -> void:
 	m.camera.percent = Settings.CAMERAS[Settings.camera_i]
 	m.court = Settings.court.duplicate()
 	m.time = Settings.time_i
-	m.setup(cfg, "park", false)
+	m.setup(cfg, Settings.park_venue(), false)    # ADR-078: the location's venue
 
 
 func _on_start(cfg: SimTypes.MatchConfig, venue: String, ladder: bool, pads: Array = [],
