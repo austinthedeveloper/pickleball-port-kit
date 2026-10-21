@@ -181,7 +181,7 @@ func update() -> void:
 	if not slow or _shown % 2 == 0:
 		if _frame < mini(to + AFTER_FRAMES, frames()):
 			for e in _step_replay():
-				view.on_replay_event(e)
+				_replay_event(e)
 		else:
 			_finish()
 			return
@@ -217,6 +217,28 @@ func _finish() -> void:
 		replay = null
 	view._update_visuals()
 	_done.call()
+
+
+## An event of PLAY OF THE MATCH's replay: the sounds and the show, never
+## the stats, the score's animation, quips or records.
+func _replay_event(e: Array) -> void:
+	view.feel.on_event(e)
+	var sim := view.sim
+	view._sfx.event(e, (sim.shot_serial - sim.rally_start) & 0xff, false)
+	match int(e[0]):
+		K.EVENT_HIT, K.EVENT_SERVE:
+			var slot: int = e[3] & 15
+			var lead := -14.0 if sim.players[slot].team else 14.0
+			var shot: int = e[3] >> 4 if e[0] == K.EVENT_HIT else K.SHOT_STANDARD
+			view.actors.spawn_fx("spark", CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp)
+				+ Vector2(lead, 0), 1 if shot == K.SHOT_DRIVE or shot == K.SHOT_OVERHEAD else 0)
+			if shot == K.SHOT_OVERHEAD:
+				view._players[slot]["choice"] = "overhead"
+				view.actors.smash_pop(CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp))
+		K.EVENT_BOUNCE:
+			view.actors.spawn_fx("dust", CourtView.ground(K.to_fp(e[1]), K.to_fp(e[2])), 0)
+		K.EVENT_POINT:
+			view.crowd.cheer(90)
 
 
 # --- The overlay ------------------------------------------------------------------------

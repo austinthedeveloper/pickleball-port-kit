@@ -102,10 +102,6 @@ static func speak(family: String, priority := MID, wait := 0.0) -> bool:
 	return current.say(family, priority, wait) if current else false
 
 
-static func speak_ids(ids: Array, priority := MID, wait := 0.0) -> bool:
-	return current.say_ids(ids, priority, wait) if current else false
-
-
 func busy() -> bool:
 	return _busy > 0.0
 

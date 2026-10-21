@@ -132,11 +132,7 @@ func test_a_match() -> void:
 		Announcer.chatter = level
 		var a := _voice()
 		var cfg := Settings.config_for(true, 2, K.DIFFICULTY_MEDIUM, 5)
-		var v := MatchView.new()
-		runner.root.add_child(v)
-		v.setup(cfg, "park", false)
-		v.card_frames = -1
-		v.sim.p1_bot = true
+		var v := match_view(cfg)
 		v.highlight = null
 		v.commentary.rng.seed = 7
 		var bare := Sim.new(cfg)

@@ -8,7 +8,6 @@ extends CanvasLayer
 
 const AREA := Rect2(612, 14, 336, 0)
 const SLIDE_FRAMES := 8
-const CPU_STEP := 5
 
 var view: MatchView
 var open := false
@@ -28,18 +27,9 @@ func setup(v: MatchView) -> TuningPanel:
 	_shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_shade)
 	_add("tune", "TUNING", [
-		{"id": "ball_speed", "label": "BALL SPEED", "value": func(): return "%d%%" % Settings.ball_speed,
-			"change": func(d):
-				Settings.ball_speed = clampi(Settings.ball_speed + d, K.BALL_SPEED_MIN, K.BALL_SPEED_MAX)
-				_retune()},
-		{"id": "ball_size", "label": "BALL SIZE", "value": func(): return "%d%%" % Settings.ball_size,
-			"change": func(d):
-				Settings.ball_size = clampi(Settings.ball_size + d, Settings.BALL_SIZE_MIN, Settings.BALL_SIZE_MAX)
-				view.actors.apply_ball_size()},
-		{"id": "cpu_errors", "label": "CPU ERRORS", "value": func(): return "%d%%" % Settings.cpu_errors,
-			"change": func(d):
-				Settings.cpu_errors = clampi(Settings.cpu_errors + d * CPU_STEP, 0, Settings.CPU_ERRORS_MAX)
-				_retune()},
+		SettingRows.slider("ball_speed", _retune),
+		SettingRows.slider("ball_size", func(): view.actors.apply_ball_size()),
+		SettingRows.slider("cpu_errors", _retune),
 		{"id": "modifiers", "label": "MODIFIERS", "value": _count.bind("modifiers"),
 			"press": func(): _show("modifiers")},
 		{"id": "rules", "label": "RULES", "value": _count.bind("rules"), "press": func(): _show("rules")},

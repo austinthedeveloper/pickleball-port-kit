@@ -18,12 +18,7 @@ func test_thresholds() -> void:
 
 
 func _view(cfg: SimTypes.MatchConfig, demo := false) -> MatchView:
-	var v := MatchView.new()
-	runner.root.add_child(v)
-	v.setup(cfg, "park", demo)
-	v.sim.p1_bot = true
-	v.card_frames = -1
-	return v
+	return match_view(cfg, "park", demo)
 
 
 ## A live point held at a long rally's count (a test may write to the sim):

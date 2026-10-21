@@ -68,22 +68,23 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-40 | The Pickleball '95 promises | `feature/cld-sideout` ... | In progress |
 | PORT-41 | Four swings and the short hold | `feature/cld-four-shots` | Ready to test |
 | PORT-42 | Cleanup round 4: files, code, docs | `feature/cld-cleanup` | Done |
-| PORT-43 | Rally heat: fire at 10, focus from 15 | `feature/cld-rally-heat` | Ready to test |
-| PORT-44 | Story mode: Save the Park | `feature/cld-story` | Ready to test |
-| PORT-45 | PICKLEBALL 101: the real game's rules | `feature/cld-pickleball-101` | Ready to test |
-| PORT-46 | BALL SPEED slider on MODIFIERS | `feature/cld-ball-speed` | Ready to test |
-| PORT-47 | 78% ball by default, BALL SIZE | `feature/cld-ball-defaults` | Ready to test |
-| PORT-48 | Longer rallies: CPU ERRORS, the paced ball | `feature/cld-ai-rallies` | Ready to test |
-| PORT-49 | The tuning panel (F2, TUNE) | `feature/cld-tuning-panel` | Ready to test |
-| PORT-50 | 85% ball speed, 110% ball size by default | `feature/cld-ball-defaults-2` | Ready to test |
-| PORT-51 | PLAY OF THE MATCH | `feature/cld-play-of-the-match` | Ready to test |
-| PORT-52 | The announcer (voiced, no text) | `feature/cld-announcer-script` | Ready to test |
-| PORT-53 | Announcer trims, its switch; the replay's players move | `feature/cld-announcer-trim` | Ready to test |
-| PORT-54 | The stands' people move with the camera; achievements | `feature/cld-crowd-parallax`, `feature/cld-achievements` | Ready to test |
+| PORT-43 | Rally heat: fire at 10, focus from 15 | `feature/cld-rally-heat` | Released (v0.14.0) |
+| PORT-44 | Story mode: Save the Park | `feature/cld-story` | Released (v0.15.0) |
+| PORT-45 | PICKLEBALL 101: the real game's rules | `feature/cld-pickleball-101` | Released (v0.15.0) |
+| PORT-46 | BALL SPEED slider on MODIFIERS | `feature/cld-ball-speed` | Released (v0.16.0) |
+| PORT-47 | 78% ball by default, BALL SIZE | `feature/cld-ball-defaults` | Released (v0.17.0) |
+| PORT-48 | Longer rallies: CPU ERRORS, the paced ball | `feature/cld-ai-rallies` | Released (v0.17.0) |
+| PORT-49 | The tuning panel (F2, TUNE) | `feature/cld-tuning-panel` | Released (v0.17.0) |
+| PORT-50 | 85% ball speed, 110% ball size by default | `feature/cld-ball-defaults-2` | Released (v0.18.0) |
+| PORT-51 | PLAY OF THE MATCH | `feature/cld-play-of-the-match` | Released (v0.18.0) |
+| PORT-52 | The announcer (voiced, no text) | `feature/cld-announcer-script` | Released (v0.19.0) |
+| PORT-53 | Announcer trims, its switch; the replay's players move | `feature/cld-announcer-trim` | Released (v0.19.1) |
+| PORT-54 | The stands' people move with the camera; achievements | `feature/cld-crowd-parallax`, `feature/cld-achievements` | Released (v0.20.0) |
 | PORT-55 | The announcer's second batch (advantage, deuce, achievements) | `feature/cld-announcer-additions` | In progress |
-| PORT-56 | The near-side reach (display only) | `feature/cld-near-reach` | Ready to test |
-| PORT-57 | The title's RECORD line; OPEN PLAY's locations and the GYM | `feature/cld-title-record`, `feature/cld-park-locations` | Ready to test |
-| PORT-58 | Local multiplayer: any split, the modes as tabs; the player tags | `feature/cld-lobby-sides`, `feature/cld-player-tags` | Ready to test |
+| PORT-56 | The near-side reach (display only) | `feature/cld-near-reach` | Released (v0.20.0) |
+| PORT-57 | The title's RECORD line; OPEN PLAY's locations and the GYM | `feature/cld-title-record`, `feature/cld-park-locations` | Released (v0.21.0) |
+| PORT-58 | Local multiplayer: any split, the modes as tabs; the player tags | `feature/cld-lobby-sides`, `feature/cld-player-tags` | Released (v0.21.0) |
+| PORT-59 | Cleanup round 5: branches, code, docs | `feature/cld-cleanup-5` | Done |
 
 ## Releases
 
@@ -220,206 +221,6 @@ the same request). Open: 36 and 40.
     BALL). Left: the line judge, the club manager.
   - Status: **In progress**.
 
-### 42. `feature/cld-cleanup`: cleanup round 4 (asked for 2026-10-19)
-
-- [x] `PORT-42` Organize the files, optimize the code, clean up the docs.
-  Docs: one heading per roadmap task (the release notes had dropped
-  PORT-37 to 40), the finished tasks moved to the history, the SNES-era
-  docs into `design/snes/`, 37 broken links fixed, KNOWN_ISSUES split
-  into open, resolved and the SNES game's, the READMEs current. Code: text
-  doesn't redraw unchanged, hidden menu pages and the hidden lobby stop
-  working every frame, the lobby dresses a card only when it changes,
-  palettes.json and manifest.json are read once, the host screen reads
-  the adapters once; dead code out; `UiKit`, `PlayerLook.team_sheet` and
-  `TestSuite.fresh_save` own what was copied; the AI's and Feel's
-  references typed. Then the splits: `title_pages.gd` (the title's page
-  tables), `hud_cards.gd` (the HUD's cards), `park_message.gd` (the park's
-  panel text), `sim/multi_ball.gd` (MULTI BALL, so `sim.gd` keeps the C's
-  shape), and `MenuPage.drive()` for the five copies of the menu keys.
-  - Verified: 365/365 plus the e2e, golden and conformance traces
-    unchanged; no broken links; screenshots of the title, lobby, park, a
-    match, a result and the museum unchanged.
-  - Status: **Done**.
-
-### 43. `feature/cld-rally-heat`: rally heat (asked for 2026-10-19)
-
-- [x] `PORT-43` Visual cues for a long rally (ADR-068), display only: at
-  10 shots the ball and the RALLY sign catch fire; from 15, and a step
-  darker every 5 after, everything but the court dims, the players in a
-  spotlight; the point's end lets it go. The ball speeding up as a rally
-  goes on is set aside for now.
-  - Verified: `test_rally_heat` (thresholds, the cap, fire and focus in a
-    held 40-shot rally and out after, none in the demo or MULTI BALL, a
-    match plays as a bare sim). 369/369 plus the e2e, golden traces
-    unchanged. Screenshots at 12, 25 (LAKESIDE) and 40 shots.
-  - Status: **Ready to test**: play a long rally; say if the steps should
-    come sooner, go darker, or the fire be bigger.
-
-### 44. `feature/cld-story`: story mode (asked for 2026-10-19)
-
-- [x] `PORT-44` STORY: SAVE THE PARK (ADR-069), the SNES story's plot
-  told as a visual novel: eight chapters, one per ladder team, each a
-  chapter card, a scene at its venue and time (you and Pepper, the team,
-  Grimsby on the loudspeaker or in letters), a doubles match with
-  Pepper and the chapter's twist, and the petition signed; the ending,
-  THE END, and an epilogue pointing to Dawson. Progress is saved; a
-  clear unlocks Dawson.
-  - Verified: `test_story_mode` (the script, the configs, the progress,
-    the paging, title to scene to match); `test_layout` on every page
-    with keyboard and pad prompts. 375/375 plus the e2e, golden traces
-    unchanged. Screenshots of a chapter card, a talk page, the
-    loudspeaker, a letter, the petition and the title's STORY row.
-  - Status: **Ready to test**: play chapter 1; say what to change in
-    the writing (`game/data/story.json`), the pacing, or the twists.
-  - Fix (`feature/cld-story-paper`): Grimsby's notices and the petition
-    were hard to read (the outlined fonts tinted dark ran together); the
-    paper's text is now ink: the letters' fill alone, solid, no outline
-    (`BitmapText.ink`).
-
-### 45. `feature/cld-pickleball-101`: the real game (asked for 2026-10-19)
-
-- [x] `PORT-45` PICKLEBALL 101 (ADR-070), on PRACTICE: eight lessons on
-  real pickleball (the court, the serve, the two-bounce rule, the
-  kitchen, keeping score, line calls, playing smart, court manners),
-  each page with an animated court diagram, 17 quizzes, TRY IT links to
-  the matching HOW TO PLAY drills. Progress saved (DONE, PERFECT).
-  - Verified: `test_course` (the data, the real numbers, the progress, a
-    lesson, PRACTICE to the course and a drill and back); `test_layout`
-    on every page and quiz state with keyboard and pad prompts. 382/382
-    plus the e2e, golden traces unchanged. Screenshots of the list, the
-    serve's pages, the kitchen, the dink, a score call, a quiz before
-    and after, a closing page and PRACTICE.
-  - Status: **Ready to test**: read a lesson or two; say if anything
-    should be explained differently (`game/data/pickleball101.json`).
-  - Added (`feature/cld-rally-scoring-lesson`, the user's note): KEEPING
-    SCORE now names side-out as the park's way and adds rally scoring
-    (every rally scores; this game plays it; MODIFIERS, RULES, SIDE-OUT
-    switches) with a quiz.
-
-### 46. `feature/cld-ball-speed`: ball speed (asked for 2026-10-20)
-
-- [x] `PORT-46` BALL SPEED (ADR-071), MODIFIERS' first row: 70% to 130% in
-  1% steps, 100% the ball as it was. A shot lands where it was aimed over
-  100 / speed as many frames (so a slower ball also arcs a little
-  higher, as MOON does). Saved; every match, drill and online game gets
-  it.
-  - Verified: `test_ball_speed` (the flight, the sim's setting, a match
-    at 90%, the save, lobby, online and the row). 386/386 plus the e2e,
-    golden traces unchanged. Screenshot of MODIFIERS.
-  - Status: **Ready to test**: try 90% to 95%; say where it feels right
-    and I can make that the default.
-
-### 47. `feature/cld-ball-defaults`: the ball's defaults (asked for 2026-10-20)
-
-- [x] `PORT-47` (ADR-072) BALL SPEED defaults to 78% (the user's pick;
-  untouched 0.16.0 saves move to it); BALL SIZE, display only, 80-150%,
-  105% by default.
-  - Verified: `test_ball_speed` (the default, the migration, the size on
-    the sprite and shadow, not the reach). 388/388 plus the e2e, golden
-    and conformance traces unchanged (they run the ROM's 100%).
-    Screenshots of MODIFIERS and a match.
-  - Status: **Ready to test**.
-
-### 48. `feature/cld-ai-rallies`: longer rallies (asked for 2026-10-20)
-
-- [x] `PORT-48` (ADR-073) Measured with `tools/rally_stats.gd`. BALL
-  SPEED now paces the ball as the ROM does on KID and EASY (same flights,
-  slower; ADR-071's higher arcs had made balls unreachable), drawn
-  gliding; CPU ERRORS on MATCH SETUP, 50% by default, spaces the CPUs'
-  late swings. Doubles rallies at MEDIUM: 8.1 shots (the ROM) to about
-  12.5; singles 6.4 to 9.
-  - Verified: `test_rallies`, `test_ball_speed`. 391/391 plus the e2e,
-    golden and conformance traces unchanged.
-  - Status: **Ready to test**: say if rallies should run longer still
-    (CPU ERRORS lower) or the CPUs should reach more.
-
-### 49. `feature/cld-tuning-panel`: the tuning panel (asked for 2026-10-20)
-
-- [x] `PORT-49` (ADR-074) F2 or the pause menu's TUNE: a flyout during a
-  match, the match waiting. BALL SPEED, BALL SIZE and CPU ERRORS live
-  (and saved); every modifier and rule, with APPLY restarting the match
-  with them; DEFAULTS. Not online or in the demo.
-  - Verified: `test_tuning` (a retuned sim plays as one built so, where
-    it is, live sliders, APPLY rebuilds and plays, the pause menu);
-    `test_layout`. 397/397 plus the e2e, golden traces unchanged.
-    Screenshot over a doubles match.
-  - Status: **Ready to test**: say what else belongs on it.
-
-### 50. `feature/cld-ball-defaults-2`: new ball defaults (asked for 2026-10-20)
-
-- [x] `PORT-50` (ADR-072, since) BALL SPEED 85% and BALL SIZE 110% by
-  default, the user's picks after playing 0.17.0; untouched saves move
-  to them (`ball_speed_v` 2), choices are kept.
-  - Verified: `test_ball_speed` (the defaults, saves from 0.16.0 and
-    0.17.0 untouched and chosen). `test_rallies` now samples four teams:
-    at 85%, CPU ERRORS 50% still lengthens rallies (9.6 to 12.3 there;
-    `rally_stats` over 12 matches: doubles 9.0 to 11.2, singles 6.8 to
-    10.8). 397/397 plus the e2e, golden traces unchanged.
-  - Status: **Ready to test**.
-
-### 51. `feature/cld-play-of-the-match`: PLAY OF THE MATCH (dealer's choice, 2026-10-20)
-
-- [x] `PORT-51` (ADR-075) When a match ends, its longest rally replayed
-  television-style (REPLAY bug, card, half-speed finish, how it was won),
-  skippable; the real rally, re-run from the recorded inputs by a second
-  sim and checked against the live one.
-  - Verified: `test_highlight` (exact to the rally's end, through a
-    RESTART and a retune; the live match untouched; skip; where it is);
-    `test_layout`. 403/403 plus the e2e, golden traces unchanged.
-    Screenshots of the card and of a replay.
-  - Status: **Ready to test**: finish a match with a long rally. Say if
-    it should be optional (a setting), or show a second-best too.
-
-### 52. `feature/cld-announcer-script`: the announcer (asked for 2026-10-20)
-
-- [x] `PORT-52` A voiced 1994 TV announcer, with no text on screen (the
-  user: captions would clutter it). Step 1 done: the script,
-  `design/announcer/SCRIPT.md` and `lines.csv` (253 lines by trigger:
-  the title, venues, teams by their canon players, modifiers, serves and
-  aces, score calls built from numbers, rally shots, long rallies, how
-  each point ended, streaks and match point, pickle puns, pauses and
-  replays, the match's end, the ladder, bracket and story), with the
-  recording spec. `make_script.py` makes both. Step 2: the user records
-  them with an AI voiceover. Step 3: wiring them to the events, with a
-  volume, how often it talks, and ducking.
-  - Step 2: the user's recordings, `audio/announcer/raw/` (253, all
-    there); `audio/announcer/prep.py` trims them, evens their loudness
-    and halves the rate for the game.
-  - Step 3 (ADR-076): `view/announcer.gd` (the voice: one line at a
-    time by priority, stale lines dropped, variants, the music and crowd
-    ducked) and `view/commentary.gd` (what it says, from the match's
-    events); ANNOUNCER and COMMENTARY on OPTIONS.
-  - Verified: `test_announcer`. 408/408 plus the e2e, golden traces
-    unchanged. Screenshot of OPTIONS. Nothing heard here (headless):
-    the timing is checked, the sound isn't.
-  - Status: **Ready to test**: play a match with sound. Say if it talks
-    too much or too little (COMMENTARY), or a line should go.
-
-### 53. `feature/cld-announcer-trim`: after playing 0.19.0 (asked for 2026-10-20)
-
-- [x] `PORT-53` The team intros out (too long); `design/announcer/removed.txt`,
-  the list of lines to take out, honoured by `prep.py` (244 clips now);
-  ANNOUNCER an ON/OFF switch, VOICE VOLUME its own row (ADR-076, since).
-  PLAY OF THE MATCH's players were frozen in the match's end reaction:
-  fixed (KNOWN_ISSUES #67, ADR-075, since).
-  - Verified: `test_announcer` (no team lines, the switch, a 0.19.0
-    save's OFF), `test_highlight` (the replayed players animate; it
-    fails without the fix). 409/409 plus the e2e, golden traces
-    unchanged. Screenshots of OPTIONS and a replay.
-  - Status: **Ready to test**: add any line to `removed.txt` (or tell me
-    its id).
-
-### 54. `feature/cld-crowd-parallax`, `feature/cld-achievements` (asked for 2026-10-21)
-
-- [x] `PORT-54` The crowd and the watcher move with the stands as the
-  camera leans (KNOWN_ISSUES #68). Achievements (ADR-077): thirteen,
-  PICKLED first; a toast and a chime as each unlocks; RECORDS >
-  ACHIEVEMENTS lists them with how to earn each.
-  - Verified: `test_view` (the stands' people), `test_achievements`,
-    `test_layout`. 417/417 plus the e2e, golden traces unchanged.
-    Screenshot of ACHIEVEMENTS.
-  - Status: **Ready to test**: say which achievements to add next.
-
 ### 55. `feature/cld-announcer-additions`: the announcer's second batch (asked for 2026-10-21)
 
 - [ ] `PORT-55` A second list to record, `design/announcer/ADDITIONS.md`
@@ -433,39 +234,24 @@ the same request). Open: 36 and 40.
     batch said). 418/418 plus the e2e.
   - Status: **In progress**: waiting for the recordings.
 
-### 56. `feature/cld-near-reach`: the near-side reach (asked for 2026-10-21)
 
-- [x] `PORT-56` KNOWN_ISSUES #69, the look only (the user's call): a ball on
-  the near side of a player gets the low reach and a step down toward it;
-  the ROM's hit area is unchanged.
-  - Verified: `test_view` (`test_near_side_reach`). 419/419 plus the e2e,
-    golden traces unchanged.
-  - Status: **Ready to test**.
+### 59. `feature/cld-cleanup-5`: cleanup round 5 (asked for 2026-10-21)
 
-### 57. `feature/cld-title-record`, `feature/cld-park-locations` (asked for 2026-10-21)
-
-- [x] `PORT-57` The title's line under the logo is just the RECORD (the
-  ladder's place resets on a quit, so it isn't progress; RECORDS keeps it
-  and the clears). OPEN PLAY's locations (ADR-078): THE PARK, DINO PARK,
-  THE GYM, one plan in three looks; THE GYM's games at the new indoor GYM
-  venue (always lit, its own ambience and music).
-  - Verified: `test_park_locations`, `test_night`, `test_court`. 423/423
-    plus the e2e, golden traces unchanged; the park's art and every
-    venue's but the GYM's byte for byte. Screenshots of DINO PARK, THE
-    GYM and a match at the GYM.
-  - Status: **Ready to test**: walk both, and play a game in each.
-
-### 58. `feature/cld-lobby-sides`, `feature/cld-player-tags` (asked for 2026-10-21)
-
-- [x] `PORT-58` The lobby: doubles takes any split (two players together
-  against two CPUs, or one each side with a CPU partner; humans only on
-  the right swap ends); LB / RB go round the four modes, shown as tabs;
-  the line says who plays whom ("P1 + P2 VS CPU + CPU"). The tags over
-  the players: the text centred, the pointer in the player's colour
-  (KNOWN_ISSUES #70).
-  - Verified: `test_multiplayer`, `test_couch_cup`, `test_layout`. 423/423
-    plus the e2e. Screenshots of the lobby and the tags.
-  - Status: **Ready to test**.
+- [x] `PORT-59` The local branches merged into `origin/main` deleted (73;
+  the two still checked out in agent worktrees, both merged, stay until
+  those are cleaned up). The code: the three sliders (BALL SPEED, BALL
+  SIZE, CPU ERRORS) defined once (`Settings.SLIDERS`, `Settings.nudge`,
+  `view/setting_rows.gd`) for the title and the tuning panel; PLAY OF THE
+  MATCH's event handling in `highlight.gd`, out of `match_view.gd`; a
+  dead `Announcer.speak_ids`; `TestSuite.match_view` for the tests' match
+  setup. The docs: PORT-42 to 58 (but 55) moved to `PORT_HISTORY.md`, the
+  index naming each task's release; `decisions/README.md`, an index of
+  the ADRs; the bible plan's list of the remaster's own additions; the
+  README's file layout.
+  - Verified: 423/423 plus the e2e, golden traces unchanged; the release
+    notes regenerate the same (57 of 58 tasks); MODIFIERS and the tuning
+    panel unchanged on screen.
+  - Status: **Done**.
 
 ## For you
 

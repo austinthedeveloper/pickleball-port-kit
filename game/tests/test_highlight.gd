@@ -6,12 +6,7 @@ extends TestSuite
 
 
 func _view(points := 5) -> MatchView:
-	var v := MatchView.new()
-	runner.root.add_child(v)
-	v.setup(Settings.config_for(false, 2, K.DIFFICULTY_MEDIUM, points), "park", false)
-	v.card_frames = -1
-	v.sim.p1_bot = true
-	return v
+	return match_view(Settings.config_for(false, 2, K.DIFFICULTY_MEDIUM, points))
 
 
 ## Frames until the match ends (a bot for P1, who serves on its own).

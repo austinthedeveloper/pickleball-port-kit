@@ -39,8 +39,7 @@ static func build(t: TitleScreen) -> void:
 		{"id": "vs", "label": "VS", "value": t._opponent_label, "change": t._change_opponent},
 		{"id": "difficulty", "label": "DIFFICULTY", "value": func(): return Settings.DIFFICULTIES[Settings.difficulty_i],
 			"change": func(d): Settings.difficulty_i = clampi(Settings.difficulty_i + d, 0, Settings.DIFFICULTIES.size() - 1)},
-		{"id": "cpu_errors", "label": "CPU ERRORS", "value": func(): return "%d%%" % Settings.cpu_errors,
-			"change": func(d): Settings.cpu_errors = clampi(Settings.cpu_errors + d * 5, 0, Settings.CPU_ERRORS_MAX)},
+		SettingRows.slider("cpu_errors"),          # ADR-073
 		{"id": "points", "label": "POINTS", "value": func(): return str(Settings.POINTS[Settings.points_i]),
 			"change": func(d): Settings.points_i = clampi(Settings.points_i + d, 0, Settings.POINTS.size() - 1)},
 		{"id": "players", "label": "PLAYERS", "value": func(): return "2P VS" if Settings.two_players else "1P",
@@ -64,13 +63,8 @@ static func build(t: TitleScreen) -> void:
 				t._demo.set_court(Settings.court)})
 	t._add_page("court", "COURT", court_rows, help, Rect2(590, 150, 350, 0))
 	# ADR-071: the ball's speed, in 1% steps
-	var mod_rows := {"modifiers": [{"id": "ball_speed", "label": "BALL SPEED",
-		"value": func(): return "%d%%" % Settings.ball_speed,
-		"change": func(d): Settings.ball_speed = clampi(Settings.ball_speed + d, K.BALL_SPEED_MIN,
-			K.BALL_SPEED_MAX)},
-		{"id": "ball_size", "label": "BALL SIZE", "value": func(): return "%d%%" % Settings.ball_size,
-			"change": func(d): Settings.ball_size = clampi(Settings.ball_size + d, Settings.BALL_SIZE_MIN,
-				Settings.BALL_SIZE_MAX)}], "rules": []}
+	var mod_rows := {"modifiers": [SettingRows.slider("ball_speed"), SettingRows.slider("ball_size")],
+		"rules": []}
 	for m in Settings.MOD_ROWS:
 		var bit: int = m[2]
 		mod_rows[m[3]].append({"id": m[0], "label": m[1],

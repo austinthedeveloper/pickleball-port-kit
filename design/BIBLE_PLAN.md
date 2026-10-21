@@ -119,6 +119,24 @@ cartridge": poses nothing draws) is no longer true of the ROM. That is a
 bible question for the project lead; the remaster's smash (PORT-24) is
 unaffected.
 
+## The remaster's own additions (since the plan)
+
+Things the bible doesn't have, added at the user's asks after the plan
+was written; none contradicts it, and each is the remaster's only (the
+ROM has none of them). Canon questions about them go in the roadmap's For
+you.
+
+| Addition | ADR | Canon notes |
+|---|---|---|
+| Rally heat: a long rally's fire and focus | 068 | Display only. |
+| STORY: SAVE THE PARK as a visual novel | 069 | The bible's plot (§5.2); Grimsby stays text and voice, never a sprite. |
+| PICKLEBALL 101: the real game's rules | 070 | Teaches the sport, not the ROM. |
+| BALL SPEED, BALL SIZE, CPU ERRORS, the tuning panel | 071-074 | At their defaults the matches are the remaster's; the ROM's own values (100%, 100%) are what the conformance traces run. |
+| PLAY OF THE MATCH | 075 | Display only: the match replayed from its inputs. |
+| The announcer | 076 | Unnamed; the bible has no announcer (For you). |
+| Achievements | 077 | |
+| OPEN PLAY's locations (DINO PARK, THE GYM) and the GYM venue | 078 | The park is still Riverdale's (its sign is a For you question); the others are the remaster's. |
+
 ## The plan
 
 Phase 5 in `design/PORT_ROADMAP.md`, in this order. The first is the

@@ -594,27 +594,6 @@ func _match_over() -> void:
 			sim.config.human[2] or sim.config.human[3]))
 
 
-## An event of PLAY OF THE MATCH's replay: the sounds and the show, never
-## the stats, the score's animation, quips or records.
-func on_replay_event(e: Array) -> void:
-	feel.on_event(e)
-	_sfx.event(e, (sim.shot_serial - sim.rally_start) & 0xff, false)
-	match int(e[0]):
-		K.EVENT_HIT, K.EVENT_SERVE:
-			var slot: int = e[3] & 15
-			var lead := -14.0 if sim.players[slot].team else 14.0
-			var shot: int = e[3] >> 4 if e[0] == K.EVENT_HIT else K.SHOT_STANDARD
-			actors.spawn_fx("spark", CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp)
-				+ Vector2(lead, 0), 1 if shot == K.SHOT_DRIVE or shot == K.SHOT_OVERHEAD else 0)
-			if shot == K.SHOT_OVERHEAD:
-				_players[slot]["choice"] = "overhead"
-				actors.smash_pop(CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp))
-		K.EVENT_BOUNCE:
-			actors.spawn_fx("dust", CourtView.ground(K.to_fp(e[1]), K.to_fp(e[2])), 0)
-		K.EVENT_POINT:
-			crowd.cheer(90)
-
-
 func _on_event(e: Array) -> void:
 	feel.on_event(e)
 	flair.on_event(e)

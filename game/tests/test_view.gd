@@ -270,11 +270,7 @@ func test_near_side_reach() -> void:
 	eq(v.actors.choose_swing(p), "standard", "one just behind the feet: the swing")
 	v.free()
 	# a match: some reaches step down; it plays as a bare sim does
-	var m := MatchView.new()
-	runner.root.add_child(m)
-	m.setup(cfg, "park", false)
-	m.card_frames = -1
-	m.sim.p1_bot = true
+	var m := match_view(cfg)
 	m.highlight = null
 	var bare := Sim.new(cfg)
 	bare.p1_bot = true

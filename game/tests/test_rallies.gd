@@ -54,11 +54,7 @@ func test_longer_rallies() -> void:
 func test_the_glide() -> void:
 	var cfg := Settings.config_for(false, 2, K.DIFFICULTY_MEDIUM, 11)
 	cfg.ball_speed = 78
-	var v := MatchView.new()
-	runner.root.add_child(v)
-	v.setup(cfg, "park", false)
-	v.sim.p1_bot = true
-	v.card_frames = -1
+	var v := match_view(cfg)
 	var bare := Sim.new(cfg)
 	bare.p1_bot = true
 	var flying := 0

@@ -24,6 +24,17 @@ static func fresh_save(dir: String) -> SaveGame:
 	return s
 
 
+## A match on screen, as a test drives one: no intro card, a bot for P1
+## (it serves and plays as the CPUs do), in the runner's tree.
+func match_view(cfg: SimTypes.MatchConfig, venue := "park", demo := false) -> MatchView:
+	var v := MatchView.new()
+	runner.root.add_child(v)
+	v.setup(cfg, venue, demo)
+	v.card_frames = -1
+	v.sim.p1_bot = true
+	return v
+
+
 func check(cond: bool, msg: String = "check failed") -> bool:
 	asserts += 1
 	if not cond:

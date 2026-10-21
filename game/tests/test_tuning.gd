@@ -6,12 +6,7 @@ extends TestSuite
 
 
 func _view(cfg: SimTypes.MatchConfig = null) -> MatchView:
-	var v := MatchView.new()
-	runner.root.add_child(v)
-	v.setup(cfg if cfg else Settings.config_for(false, 2, K.DIFFICULTY_MEDIUM, 11), "park", false)
-	v.card_frames = -1
-	v.sim.p1_bot = true
-	return v
+	return match_view(cfg if cfg else Settings.config_for(false, 2, K.DIFFICULTY_MEDIUM, 11))
 
 
 func _kept() -> Array:

@@ -251,6 +251,36 @@ static func config_for(doubles: bool, opponent: int, difficulty: int, points: in
 
 
 ## OPEN PLAY's location (ADR-078): its name, art and its games' venue.
+## The sliders (BALL SPEED ADR-071, BALL SIZE ADR-072, CPU ERRORS ADR-073):
+## [min, max, step], read by their rows on the title and the tuning panel.
+const SLIDERS := {"ball_speed": [K.BALL_SPEED_MIN, K.BALL_SPEED_MAX, 1],
+	"ball_size": [BALL_SIZE_MIN, BALL_SIZE_MAX, 1], "cpu_errors": [0, CPU_ERRORS_MAX, 5]}
+
+
+static func slider(id: String) -> int:
+	match id:
+		"ball_speed":
+			return ball_speed
+		"ball_size":
+			return ball_size
+		"cpu_errors":
+			return cpu_errors
+	return 0
+
+
+## A slider `d` steps along, within its range.
+static func nudge(id: String, d: int) -> void:
+	var r: Array = SLIDERS[id]
+	var v := clampi(slider(id) + d * int(r[2]), int(r[0]), int(r[1]))
+	match id:
+		"ball_speed":
+			ball_speed = v
+		"ball_size":
+			ball_size = v
+		"cpu_errors":
+			cpu_errors = v
+
+
 static func park_name() -> String:
 	return String(PARKS[park_i][1])
 
