@@ -72,8 +72,13 @@ func music_track() -> String:
 	return "title"
 
 
+static var _greeted := false       ## the announcer has said the name this session
+
 func _ready() -> void:
 	_load_settings()
+	if not _greeted:
+		_greeted = true                  # ADR-076: once a session, as the logo comes up
+		Announcer.speak("title_logo", Announcer.TOP)
 	_start_demo()
 	_ui = CanvasLayer.new()
 	_ui.layer = 20
@@ -289,7 +294,7 @@ func _show(id: String) -> void:
 	if hat_museum:
 		hat_museum.visible = id == "museum"
 	for n in _header:
-		n.visible = not id in ["select", "records", "controls", "modifiers", "rules", "lobby", "museum", "career_card", "career_edit",
+		n.visible = not id in ["select", "records", "controls", "options", "modifiers", "rules", "lobby", "museum", "career_card", "career_edit",
 			"career_name"]
 	if lobby_screen:
 		lobby_screen.visible = id == "lobby"

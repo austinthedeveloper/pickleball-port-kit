@@ -19,4 +19,7 @@ $SYNC "$KIT/art/park/out/" "$DST/park/"
 # the HD set (audio/hd-sfx/make_sfx.py) and the soundtrack
 # (audio/music/make_music.py); the SNES originals stay in audio/snes-sfx
 $SYNC --include="*.wav" --exclude="*" "$KIT/audio/hd-sfx/out/" "$KIT/audio/music/out/" "$DST/audio/"
+# the announcer (audio/announcer/prep.py, from the recordings in raw/)
+mkdir -p "$DST/audio/announcer"
+$SYNC --include="*.wav" --exclude="*" "$KIT/audio/announcer/out/" "$DST/audio/announcer/"
 echo "synced assets into $DST"

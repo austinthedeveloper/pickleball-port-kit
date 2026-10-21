@@ -116,6 +116,8 @@ static func load_from(save: SaveGame) -> void:
 	cpu_errors = clampi(int(st.get("cpu_errors", CPU_ERRORS_DEFAULT)), 0, CPU_ERRORS_MAX)
 	Sfx.setting = clampi(int(st.get("sound", 0)), 0, AudioMap.SOUND_NAMES.size() - 1)
 	Music.volume = clampi(int(st.get("music", Music.DEFAULT_VOLUME)), 0, Music.VOLUMES)
+	Announcer.volume = clampi(int(st.get("announcer", Announcer.DEFAULT_VOLUME)), 0, Announcer.VOLUMES)
+	Announcer.chatter = clampi(int(st.get("commentary", Announcer.NORMAL)), Announcer.LIGHT, Announcer.LOTS)
 	fullscreen = int(st.get("fullscreen", 0)) != 0
 	integer_scale = int(st.get("integer_scale", 1)) != 0
 	var ct: Array = st.get("court", CourtStyle.DEFAULTS)
@@ -146,7 +148,7 @@ static func store_to(save: SaveGame) -> void:
 	save.data["settings"].merge({"venue": venue_i, "difficulty": difficulty_i,
 		"points": points_i, "players": 2 if two_players else 1, "opponent": opponent_i,
 		"camera": camera_i, "mod_bits": mod_bits, "ball_speed": ball_speed, "ball_speed_v": BALL_DEFAULTS_V, "ball_size": ball_size, "cpu_errors": cpu_errors, "sound": Sfx.setting,
-		"music": Music.volume,
+		"music": Music.volume, "announcer": Announcer.volume, "commentary": Announcer.chatter,
 		"fullscreen": 1 if fullscreen else 0, "integer_scale": 1 if integer_scale else 0,
 		"player": [p1_choice["palette"], p1_choice["variant"], p1_choice["paddle"]],
 		"court": court.duplicate(), "time": time_i,

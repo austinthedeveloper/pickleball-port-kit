@@ -32,6 +32,8 @@ const FADE_IN := 0.6
 
 ## SOUND setting (AudioMap.SOUND_*), shared by every screen.
 static var setting := AudioMap.SOUND_ALL
+## Ticks (ms) until the announcer stops talking: the crowd's bed dips under it (ADR-076).
+static var voice_until := 0
 
 var _players := {}                 # effect -> [AudioStreamPlayer2D...]
 var _streams := {}                 # effect -> [AudioStream...] (its variants)
@@ -123,5 +125,7 @@ func update_ambience(live: bool, rally: int, match_point: bool, delta: float) ->
 		return
 	_fade = minf(1.0, _fade + delta / FADE_IN)
 	var want := AudioMap.ambience_level(setting, live, rally, match_point)
+	if Time.get_ticks_msec() < voice_until:
+		want *= 0.5                      # under the announcer
 	_amb_level = lerpf(_amb_level, want, 0.05)
 	_amb.volume_db = AMBIENCE_DB + linear_to_db(maxf(_amb_level * _fade, 0.001))

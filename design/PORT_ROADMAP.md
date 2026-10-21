@@ -77,6 +77,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-49 | The tuning panel (F2, TUNE) | `feature/cld-tuning-panel` | Ready to test |
 | PORT-50 | 85% ball speed, 110% ball size by default | `feature/cld-ball-defaults-2` | Ready to test |
 | PORT-51 | PLAY OF THE MATCH | `feature/cld-play-of-the-match` | Ready to test |
+| PORT-52 | The announcer (voiced, no text) | `feature/cld-announcer-script` | Ready to test |
 
 ## Releases
 
@@ -353,10 +354,39 @@ the same request). Open: 36 and 40.
   - Status: **Ready to test**: finish a match with a long rally. Say if
     it should be optional (a setting), or show a second-best too.
 
+### 52. `feature/cld-announcer-script`: the announcer (asked for 2026-10-20)
+
+- [x] `PORT-52` A voiced 1994 TV announcer, with no text on screen (the
+  user: captions would clutter it). Step 1 done: the script,
+  `design/announcer/SCRIPT.md` and `lines.csv` (253 lines by trigger:
+  the title, venues, teams by their canon players, modifiers, serves and
+  aces, score calls built from numbers, rally shots, long rallies, how
+  each point ended, streaks and match point, pickle puns, pauses and
+  replays, the match's end, the ladder, bracket and story), with the
+  recording spec. `make_script.py` makes both. Step 2: the user records
+  them with an AI voiceover. Step 3: wiring them to the events, with a
+  volume, how often it talks, and ducking.
+  - Step 2: the user's recordings, `audio/announcer/raw/` (253, all
+    there); `audio/announcer/prep.py` trims them, evens their loudness
+    and halves the rate for the game.
+  - Step 3 (ADR-076): `view/announcer.gd` (the voice: one line at a
+    time by priority, stale lines dropped, variants, the music and crowd
+    ducked) and `view/commentary.gd` (what it says, from the match's
+    events); ANNOUNCER and COMMENTARY on OPTIONS.
+  - Verified: `test_announcer`. 408/408 plus the e2e, golden traces
+    unchanged. Screenshot of OPTIONS. Nothing heard here (headless):
+    the timing is checked, the sound isn't.
+  - Status: **Ready to test**: play a match with sound. Say if it talks
+    too much or too little (COMMENTARY), or a line should go.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
+
+- **PORT-52 announcer:** the canon bible has no announcer; this one is
+  the remaster's, unnamed. Say if they should have a name, or if any line
+  doesn't suit the game. The lines are in `design/announcer/SCRIPT.md`.
 
 - **PORT-44 story:** the script is mine, from the canon plot. The bible
   names Pepper and Grimsby but not the chapters' twists or titles; say

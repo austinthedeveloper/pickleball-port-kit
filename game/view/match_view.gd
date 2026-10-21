@@ -22,6 +22,7 @@ const INPUT_LOCK_FRAMES := 12
 var glide := BallGlide.new()       ## a paced ball drawn gliding (ADR-073)
 var tuning: TuningPanel            ## F2 / TUNE (ADR-074); null in the demo
 var highlight: Highlight           ## PLAY OF THE MATCH (ADR-075); null when there's none
+var commentary: Commentary         ## the announcer's lines (ADR-076); null in the demo
 var _base_time := CourtStyle.DAY    ## the owner's time and court, before GLOW's
 var _base_court: Array = []
 var sim: Sim
@@ -161,6 +162,9 @@ func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE and sim:
 		sim.dispose()
+	if what == NOTIFICATION_EXIT_TREE and commentary and Announcer.current \
+			and Announcer.current._priority < Announcer.TOP:
+		Announcer.current.hush()           # leaving mid-line (a match's end line plays on)
 
 
 func _tex(rel: String) -> Texture2D:
@@ -280,6 +284,9 @@ func _build() -> void:
 	highlight = Highlight.new(self)
 	if not highlight.wanted():
 		highlight = null
+	commentary = null if demo else Commentary.new(self)
+	if commentary:
+		commentary.begin()
 
 
 ## The tuning panel's APPLY (ADR-074): the match rebuilt in place with a new
@@ -345,6 +352,8 @@ func _check_close_call() -> void:
 		return
 	close_call = CloseCall.new().setup(self, c)
 	_hud.add_child(close_call)
+	if commentary:
+		commentary.on_close_call()
 	_hud.move_child(close_call, 0)
 
 
@@ -497,6 +506,8 @@ func _physics_process(_delta: float) -> void:
 		if net.closed():
 			finished.emit(true)              # main says why
 			return
+	if commentary:
+		commentary.tick(1.0 / 60.0)
 	var human: Variant = input.read()
 	if net:
 		_net_refresh(human == null)
@@ -512,6 +523,8 @@ func _physics_process(_delta: float) -> void:
 	var events := sim.drain_events()
 	for e in events:
 		_on_event(e)
+		if commentary:
+			commentary.on_event(e)
 	if highlight:
 		highlight.after_step(events)
 	if lesson:
@@ -520,13 +533,18 @@ func _physics_process(_delta: float) -> void:
 		if sim.phase == K.PHASE_MATCH_RESULT:
 			sim.new_match()                  # a lesson's match goes on
 	if sim.phase != _prev_phase:
+		if commentary:
+			commentary.on_phase(sim.phase)
 		if _prev_phase == K.PHASE_POINT_RESULT:
 			_end_close_call()
 		if sim.phase == K.PHASE_POINT_RESULT:
 			_check_close_call()
 		if sim.phase == K.PHASE_MATCH_RESULT:
 			_prev_phase = sim.phase
-			if not (highlight and highlight.start(_match_over)):
+			if highlight and highlight.start(_match_over):
+				if commentary:
+					commentary.on_highlight()
+			else:
 				_match_over()
 		_prev_phase = sim.phase
 	flair.tick()
@@ -540,6 +558,8 @@ func _physics_process(_delta: float) -> void:
 		if highlight:
 			highlight.op(["new_match"])
 		sim.new_match()
+		if commentary:
+			commentary.on_rematch()
 		flair.begin()
 		Music.cue(music_track())             # the loop again after the stinger
 		if save:
@@ -557,6 +577,8 @@ func _physics_process(_delta: float) -> void:
 ## The match is over (after PLAY OF THE MATCH, if there was one): the
 ## records and the result's sting.
 func _match_over() -> void:
+	if commentary:
+		commentary.on_match_over()
 	end.on_match_over()
 	if not demo:
 		Music.sting(Music.result_sting(sim.match_winner == my_team(), cleared,

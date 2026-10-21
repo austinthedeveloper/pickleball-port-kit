@@ -150,6 +150,12 @@ func start_duck() -> void:
 	_duck_left = DUCK_HOLD
 
 
+## Under the announcer (ADR-076): ducked for as long as the line lasts.
+static func voice_duck(seconds: float) -> void:
+	if current:
+		current._duck_left = maxf(current._duck_left, seconds)
+
+
 func _fade_deck(i: int, to: float, rate: float) -> void:
 	_target[i] = to
 	_rate[i] = rate

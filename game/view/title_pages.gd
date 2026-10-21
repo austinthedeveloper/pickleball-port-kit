@@ -112,6 +112,11 @@ static func build(t: TitleScreen) -> void:
 			"change": func(d): Sfx.setting = (Sfx.setting + d + 3) % 3},
 		{"id": "music", "label": "MUSIC", "value": func(): return Music.volume_name(),
 			"change": func(d): Music.volume = clampi(Music.volume + d, 0, Music.VOLUMES)},
+		# ADR-076: the announcer's volume, and how much it says
+		{"id": "announcer", "label": "ANNOUNCER", "value": func(): return Announcer.volume_name(),
+			"change": func(d): Announcer.volume = clampi(Announcer.volume + d, 0, Announcer.VOLUMES)},
+		{"id": "commentary", "label": "COMMENTARY", "value": func(): return Announcer.CHATTER_NAMES[Announcer.chatter],
+			"change": func(d): Announcer.chatter = clampi(Announcer.chatter + d, Announcer.LIGHT, Announcer.LOTS)},
 		{"id": "fullscreen", "label": "FULLSCREEN", "value": func(): return "ON" if Settings.fullscreen else "OFF",
 			"change": func(_d): Settings.fullscreen = not Settings.fullscreen; Settings.apply_window(t.get_window())},
 		{"id": "scale", "label": "SCALE", "value": func(): return "PIXEL" if Settings.integer_scale else "FILL",
@@ -124,7 +129,7 @@ static func build(t: TitleScreen) -> void:
 			"press": func():
 				if Updater.instance:
 					Updater.instance.press()},
-	], [], Rect2(300, 146, 360, 0))
+	], [], Rect2(300, 60, 360, 0))     # ADR-076 made it 14 rows: over the logo, hidden
 	var onoff := func(on: bool) -> String: return "ON" if on else "OFF"
 	t._add_page("access", "ACCESSIBILITY", [
 		{"id": "shake", "label": "SCREEN SHAKE",
