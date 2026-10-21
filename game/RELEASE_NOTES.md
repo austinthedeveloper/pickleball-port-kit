@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.16.0-3-gfb998eb-dirty`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.17.0-2-g40ed87d-dirty`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-49 of 49 roadmap tasks are in.
+51 of 51 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -298,3 +298,15 @@ Status: **Ready to test**: say if rallies should run longer still (CPU ERRORS lo
 (ADR-074) F2 or the pause menu's TUNE: a flyout during a match, the match waiting. BALL SPEED, BALL SIZE and CPU ERRORS live (and saved); every modifier and rule, with APPLY restarting the match with them; DEFAULTS. Not online or in the demo.
 
 Status: **Ready to test**: say what else belongs on it.
+
+## PORT-50: new ball defaults (asked for 2026-10-20)
+
+(ADR-072, since) BALL SPEED 85% and BALL SIZE 110% by default, the user's picks after playing 0.17.0; untouched saves move to them (`ball_speed_v` 2), choices are kept.
+
+Status: **Ready to test**.
+
+## PORT-51: PLAY OF THE MATCH (dealer's choice, 2026-10-20)
+
+(ADR-075) When a match ends, its longest rally replayed television-style (REPLAY bug, card, half-speed finish, how it was won), skippable; the real rally, re-run from the recorded inputs by a second sim and checked against the live one.
+
+Status: **Ready to test**: finish a match with a long rally. Say if it should be optional (a setting), or show a second-best too.

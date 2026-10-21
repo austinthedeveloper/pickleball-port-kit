@@ -4,6 +4,21 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.18.0] - 2026-10-20
+
+PLAY OF THE MATCH, and a new standard ball.
+
+### Added
+- **PLAY OF THE MATCH**: when a match ends, its longest rally plays again
+  like a TV replay, with a REPLAY sign, the rally's length, a half-speed
+  finish and how it was won. Press HIT or START to skip it. It's the real
+  rally, run again from the match itself.
+
+### Changed
+- **BALL SPEED defaults to 85% and BALL SIZE to 110%.** If you never
+  moved those sliders you get the new defaults; a setting you picked is
+  kept.
+
 ## [0.17.0] - 2026-10-20
 
 A slower, bigger ball, longer rallies, and a tuning panel during play.
