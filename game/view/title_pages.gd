@@ -113,8 +113,10 @@ static func build(t: TitleScreen) -> void:
 		{"id": "music", "label": "MUSIC", "value": func(): return Music.volume_name(),
 			"change": func(d): Music.volume = clampi(Music.volume + d, 0, Music.VOLUMES)},
 		# ADR-076: the announcer's volume, and how much it says
-		{"id": "announcer", "label": "ANNOUNCER", "value": func(): return Announcer.volume_name(),
-			"change": func(d): Announcer.volume = clampi(Announcer.volume + d, 0, Announcer.VOLUMES)},
+		{"id": "announcer", "label": "ANNOUNCER", "value": func(): return "ON" if Announcer.enabled else "OFF",
+			"change": func(_d): Announcer.enabled = not Announcer.enabled},
+		{"id": "voice", "label": "VOICE VOLUME", "value": func(): return Announcer.volume_name(),
+			"change": func(d): Announcer.volume = clampi(Announcer.volume + d, 1, Announcer.VOLUMES)},
 		{"id": "commentary", "label": "COMMENTARY", "value": func(): return Announcer.CHATTER_NAMES[Announcer.chatter],
 			"change": func(d): Announcer.chatter = clampi(Announcer.chatter + d, Announcer.LIGHT, Announcer.LOTS)},
 		{"id": "fullscreen", "label": "FULLSCREEN", "value": func(): return "ON" if Settings.fullscreen else "OFF",

@@ -14,19 +14,21 @@ func _voice() -> Announcer:
 
 
 func _kept() -> Array:
-	return [Announcer.volume, Announcer.chatter, Sfx.setting]
+	return [Announcer.volume, Announcer.chatter, Sfx.setting, Announcer.enabled]
 
 
 func _restore(k: Array) -> void:
 	Announcer.volume = k[0]
 	Announcer.chatter = k[1]
 	Sfx.setting = k[2]
+	Announcer.enabled = k[3]
 
 
 ## Every clip is there, and every line the commentary can ask for.
 func test_the_clips() -> void:
 	var a := _voice()
-	eq(a.clips.size(), 253, "the 253 recorded lines")
+	eq(a.clips.size(), 244, "the 253 recorded, less the 9 removed (design/announcer/removed.txt)")
+	check(a.families.keys().filter(func(f): return f.begins_with("team_")).is_empty(), "no team intros")
 	var missing := []
 	for id in a.clips:
 		if not ResourceLoader.exists(Announcer.DIR + id + ".wav"):
@@ -35,7 +37,7 @@ func test_the_clips() -> void:
 		"streak_3", "streak_5", "win_by_2", "quip", "side_out", "close_call", "potm", "match_win",
 		"match_loss", "match_win_shutout", "match_win_close", "ladder_cleared", "story_saved",
 		"story_stakes_1", "story_stakes_2", "rematch", "pause", "resume", "title_logo", "winner",
-		"match_doubles", "match_singles", "team_dawson", "shot_drive", "shot_slice", "shot_smash",
+		"match_doubles", "match_singles", "shot_drive", "shot_slice", "shot_smash",
 		"shot_lob", "shot_dink", "shot_volley"]
 	wanted.append_array(Commentary.FAULT_LINES.values())
 	for m in Commentary.MOD_LINES:
@@ -44,8 +46,6 @@ func test_the_clips() -> void:
 		wanted.append("rally_%d" % n)
 	for v in Settings.VENUES:
 		wanted.append("venue_" + v)
-	for t in Opponents.count():
-		wanted.append("team_" + String(Opponents.team(t)["team"]).to_lower().replace(" ", "_"))
 	for n in 26:
 		wanted.append_array(["num_%02d_up" % n, "num_%02d_down" % n])
 	for f in wanted:
@@ -54,7 +54,7 @@ func test_the_clips() -> void:
 	eq(missing, [], "nothing asked for that wasn't recorded")
 	eq(a.family_of("ace_3"), "ace")
 	eq(a.family_of("num_04_up"), "num_04_up")
-	eq(a.family_of("team_gym_bros"), "team_gym_bros")
+	eq(a.family_of("venue_park_1"), "venue_park")
 	eq(a.family_of("rally_25"), "rally_25")
 	eq(a.family_of("mod_win_by_2"), "mod_win_by_2")
 	a.free()
@@ -93,9 +93,9 @@ func test_the_voice() -> void:
 	eq(a.said.slice(start), ["num_04_up", "num_02_down"], "four... two")
 	# OFF, and SOUND OFF
 	a.hush()
-	Announcer.volume = 0
+	Announcer.enabled = false
 	check(not a.say("ace", Announcer.TOP), "ANNOUNCER OFF")
-	Announcer.volume = 8
+	Announcer.enabled = true
 	Sfx.setting = AudioMap.SOUND_OFF
 	check(not a.say("ace", Announcer.TOP), "SOUND OFF")
 	a.free()
@@ -148,7 +148,7 @@ func test_a_match() -> void:
 			if v.sim.phase == K.PHASE_MATCH_RESULT:
 				break
 		var heard := v.commentary.heard
-		eq(heard[0], "team_gym_bros", "the GYM BROS introduced")
+		eq(heard[0], "venue_park", "the venue introduced (no team intros)")
 		check(heard[-1].begins_with("match_"), "the result (%s)" % heard[-1])
 		if level == Announcer.NORMAL:
 			check(heard.count("score") >= 3, "scores called (%d)" % heard.count("score"))
@@ -166,13 +166,20 @@ func test_a_match() -> void:
 func test_settings() -> void:
 	var k := _kept()
 	var sv := fresh_save("user://test_announcer/")
+	Announcer.enabled = false
 	Announcer.volume = 3
 	Announcer.chatter = Announcer.LOTS
 	Settings.store_to(sv)
+	Announcer.enabled = true
 	Announcer.volume = 8
 	Announcer.chatter = Announcer.NORMAL
 	Settings.load_from(sv)
-	eq([Announcer.volume, Announcer.chatter], [3, Announcer.LOTS], "saved")
+	eq([Announcer.enabled, Announcer.volume, Announcer.chatter], [false, 3, Announcer.LOTS], "saved")
+	# a 0.19.0 save with the slider at OFF: the switch is OFF, the volume back
+	sv.data["settings"].erase("announcer_on")
+	sv.data["settings"]["announcer"] = 0
+	Settings.load_from(sv)
+	eq([Announcer.enabled, Announcer.volume], [false, Announcer.DEFAULT_VOLUME], "0.19.0's OFF")
 	var t := TitleScreen.new()
 	t.save = sv
 	runner.root.add_child(t)
@@ -180,12 +187,19 @@ func test_settings() -> void:
 		t._ready()
 	var page: MenuPage = t.pages["options"]
 	page.select("announcer")
+	page.change(1)
+	eq(page.value_of("announcer"), "ON", "ANNOUNCER: ON or OFF")
+	page.change(1)
+	eq(page.value_of("announcer"), "OFF")
+	page.select("voice")
+	Announcer.volume = 3
 	page.change(-1)
-	eq(page.value_of("announcer"), "20%")
+	eq(page.value_of("voice"), "20%")
 	for i in 5:
 		page.change(-1)
-	eq(page.value_of("announcer"), "OFF")
+	eq(page.value_of("voice"), "10%", "the volume never reaches OFF: that's the switch")
 	page.select("commentary")
+	Announcer.chatter = Announcer.LOTS
 	page.change(-1)
 	eq(page.value_of("commentary"), "NORMAL")
 	t.free()

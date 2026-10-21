@@ -1,0 +1,7 @@
+# Lines taken out of the game, by id or pattern (fnmatch: team_* is every
+# team_ line), with why. audio/announcer/prep.py leaves them out of the
+# game; the recordings stay in audio/announcer/raw/ in case one comes back.
+# Add an id here, then:
+#   .venv/bin/python audio/announcer/prep.py && game/tools/sync_assets.sh
+
+team_*            # 2026-10-20, the user: the team intros take too long

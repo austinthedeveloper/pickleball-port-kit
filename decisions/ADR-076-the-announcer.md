@@ -55,3 +55,17 @@ first, "all", side-out's three numbers); a bot match at NORMAL (the team
 introduced, scores called, the result) and LIGHT (no score calls), the
 match playing as a bare sim does; the settings saved and the OPTIONS
 rows.
+
+## Since: trimmed, and a switch (2026-10-20, `PORT-53`)
+
+After playing 0.19.0 (the user: "it's kind of hilarious"):
+
+- **No team intros.** They took too long. A match opens with the venue
+  (a story chapter: its stakes), then the first modifier or the format.
+- **A list of lines to take out**, `design/announcer/removed.txt` (ids
+  or patterns, with why): `prep.py` leaves them out of the game, so the
+  commentary can't ask for them; the recordings stay in `raw/`. The nine
+  `team_*` lines are its first entry: 244 clips in the game.
+- **ANNOUNCER is a switch** (ON or OFF), and **VOICE VOLUME** its own row
+  (10% to 100%: the switch is the way to silence it). A 0.19.0 save with
+  the slider at OFF loads as the switch OFF.

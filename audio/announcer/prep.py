@@ -11,6 +11,7 @@ the game times its lines by it.
 
     .venv/bin/python audio/announcer/prep.py
 """
+import fnmatch
 import glob
 import json
 import os
@@ -23,6 +24,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 RAW = os.path.join(HERE, "raw")
 OUT = os.path.join(HERE, "out")
 INDEX = os.path.join(HERE, "..", "..", "game", "data", "announcer.json")
+REMOVED = os.path.join(HERE, "..", "..", "design", "announcer", "removed.txt")
 RATE = 24000
 TARGET_DB = -20.0
 KNEE = 0.5                       ## the soft limiter starts here (-6 dBFS)
@@ -88,9 +90,23 @@ def write(path, a):
     w.close()
 
 
+def removed():
+    """The ids and patterns in design/announcer/removed.txt."""
+    out = []
+    for line in open(REMOVED):
+        line = line.split("#", 1)[0].strip()
+        if line:
+            out.append(line)
+    return out
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
-    files = sorted(glob.glob(os.path.join(RAW, "*.wav")))
+    for old in glob.glob(os.path.join(OUT, "*.wav")):
+        os.remove(old)                   # a line taken out leaves no clip behind
+    cut = removed()
+    files = [p for p in sorted(glob.glob(os.path.join(RAW, "*.wav")))
+             if not any(fnmatch.fnmatch(os.path.basename(p)[:-4], c) for c in cut)]
     total = 0.0
     index = {}
     for p in files:
@@ -103,7 +119,8 @@ def main():
         json.dump({"comment": "The announcer's clips and their lengths in seconds "
                    "(audio/announcer/prep.py writes this; PORT-52, ADR-076).", "clips": index},
                   f, indent=1, sort_keys=True)
-    print("%d clips, %.0f s, into %s; index %s" % (len(files), total, OUT, os.path.normpath(INDEX)))
+    print("%d clips (%d removed), %.0f s, into %s; index %s" % (len(files),
+          len(glob.glob(os.path.join(RAW, "*.wav"))) - len(files), total, OUT, os.path.normpath(INDEX)))
 
 
 if __name__ == "__main__":

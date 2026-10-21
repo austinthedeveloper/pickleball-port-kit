@@ -78,6 +78,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-50 | 85% ball speed, 110% ball size by default | `feature/cld-ball-defaults-2` | Ready to test |
 | PORT-51 | PLAY OF THE MATCH | `feature/cld-play-of-the-match` | Ready to test |
 | PORT-52 | The announcer (voiced, no text) | `feature/cld-announcer-script` | Ready to test |
+| PORT-53 | Announcer trims, its switch; the replay's players move | `feature/cld-announcer-trim` | Ready to test |
 
 ## Releases
 
@@ -380,6 +381,20 @@ the same request). Open: 36 and 40.
     the timing is checked, the sound isn't.
   - Status: **Ready to test**: play a match with sound. Say if it talks
     too much or too little (COMMENTARY), or a line should go.
+
+### 53. `feature/cld-announcer-trim`: after playing 0.19.0 (asked for 2026-10-20)
+
+- [x] `PORT-53` The team intros out (too long); `design/announcer/removed.txt`,
+  the list of lines to take out, honoured by `prep.py` (244 clips now);
+  ANNOUNCER an ON/OFF switch, VOICE VOLUME its own row (ADR-076, since).
+  PLAY OF THE MATCH's players were frozen in the match's end reaction:
+  fixed (KNOWN_ISSUES #67, ADR-075, since).
+  - Verified: `test_announcer` (no team lines, the switch, a 0.19.0
+    save's OFF), `test_highlight` (the replayed players animate; it
+    fails without the fix). 409/409 plus the e2e, golden traces
+    unchanged. Screenshots of OPTIONS and a replay.
+  - Status: **Ready to test**: add any line to `removed.txt` (or tell me
+    its id).
 
 ## For you
 

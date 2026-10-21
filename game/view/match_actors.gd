@@ -142,7 +142,9 @@ func spawn_fx(kind: String, at: Vector2, start: int) -> void:
 func frame_for(i: int) -> String:
 	var p: SimTypes.Player = v.sim.players[i]
 	var entry: Dictionary = v._players[i]
-	var react: String = v.flair.body_frame(i) if v.flair else ""
+	# not during PLAY OF THE MATCH: the live match's end reaction (a held
+	# celebration or slump) isn't the replayed rally's
+	var react: String = v.flair.body_frame(i) if v.flair and not v.replaying() else ""
 	if react != "":
 		return react                     # a point's reaction (SNES ADR-064)
 	if p.pose == K.POSE_TOSS:

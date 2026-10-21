@@ -22,4 +22,8 @@ $SYNC --include="*.wav" --exclude="*" "$KIT/audio/hd-sfx/out/" "$KIT/audio/music
 # the announcer (audio/announcer/prep.py, from the recordings in raw/)
 mkdir -p "$DST/audio/announcer"
 $SYNC --include="*.wav" --exclude="*" "$KIT/audio/announcer/out/" "$DST/audio/announcer/"
+# a line removed (design/announcer/removed.txt) leaves its .import behind
+for imp in "$DST/audio/announcer/"*.wav.import; do
+  [ -e "${imp%.import}" ] || rm -f "$imp"
+done
 echo "synced assets into $DST"

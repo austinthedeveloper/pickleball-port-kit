@@ -452,7 +452,8 @@ func _refresh_live() -> void:
 	# the rally counter on a long rally, popping on each shot
 	var rally: int = (s.shot_serial - s.rally_start) & 0xff
 	var live := s.phase == K.PHASE_LIVE and rally >= RALLY_SHOW and not s.config.practice
-	_rally.visible = live and not view.demo
+	# not under PLAY OF THE MATCH's card (it says the rally's length)
+	_rally.visible = live and not view.demo and not view.replaying()
 	if rally != _last_rally:
 		_last_rally = rally
 		_rally_pop = 10 if live else 0

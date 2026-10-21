@@ -43,3 +43,11 @@ follows; exact through a RESTART and a retune; skipping; none without a
 long rally; the caption. `test_layout`: the card with the longest
 caption, every ending, keyboard and pad. The tests that run a match past
 its end for other reasons (flair, music, the tournament) switch it off.
+
+## Since: the players move (2026-10-20, `PORT-53`)
+
+The replayed players were drawn in the live match's end reaction (a
+celebration or slump held by flair, which waits while the replay plays),
+so they slid around frozen in it (KNOWN_ISSUES #67). While the replay
+plays, no flair reaction or emote is drawn, and the HUD's RALLY sign
+(under the caption card) hides; the live ones resume after it.
