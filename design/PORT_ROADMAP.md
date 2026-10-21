@@ -153,6 +153,8 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.18.0** (2026-10-20): PORT-50 85% ball and 110% size by default,
   PORT-51 PLAY OF THE MATCH (tag `v0.18.0`, on
   `feature/cld-release-0.18.0`).
+- **v0.19.0** (2026-10-20): PORT-52 the announcer (tag `v0.19.0`, on
+  `feature/cld-release-0.19.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 

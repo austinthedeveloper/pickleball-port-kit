@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.17.0-2-g40ed87d-dirty`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.18.0-2-g3a321ae-dirty`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-51 of 51 roadmap tasks are in.
+52 of 52 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -310,3 +310,9 @@ Status: **Ready to test**.
 (ADR-075) When a match ends, its longest rally replayed television-style (REPLAY bug, card, half-speed finish, how it was won), skippable; the real rally, re-run from the recorded inputs by a second sim and checked against the live one.
 
 Status: **Ready to test**: finish a match with a long rally. Say if it should be optional (a setting), or show a second-best too.
+
+## PORT-52: the announcer (asked for 2026-10-20)
+
+A voiced 1994 TV announcer, with no text on screen (the user: captions would clutter it). Step 1 done: the script, `design/announcer/SCRIPT.md` and `lines.csv` (253 lines by trigger: the title, venues, teams by their canon players, modifiers, serves and aces, score calls built from numbers, rally shots, long rallies, how each point ended, streaks and match point, pickle puns, pauses and replays, the match's end, the ladder, bracket and story), with the recording spec. `make_script.py` makes both. Step 2: the user records them with an AI voiceover. Step 3: wiring them to the events, with a volume, how often it talks, and ducking.
+
+Status: **Ready to test**: play a match with sound. Say if it talks too much or too little (COMMENTARY), or a line should go.
