@@ -602,12 +602,15 @@ class ParkOverlay:
 				draw_circle(ground - Vector2(0, at.z * 4.0), 5.0, Color("e8f04a"))
 				draw_arc(ground - Vector2(0, at.z * 4.0), 5.0, 0, TAU, 12, Color(0.1, 0.12, 0.1), 1.0)
 			var ct: OpenPlay.OpenCourt = view.op.court[c]
-			# the paddles waiting in the rack: yours in your colour
+			# the paddles waiting in the rack, a pair for each team waiting
+			# (one a player, as real paddle stacking reads; PORT-60), the
+			# teams a little apart, yours in your colour
 			var base := view.to_world(Vector2(OpenPlay.rack_x(c), OpenPlay.RACK_Y))
 			for i in ct.stack_count:
 				var mine: bool = ct.stack[i] == OpenPlay.YOU
 				var col := ParkView.YOU_TINT if mine else Color("b8bcc4")
-				var top := base + Vector2(-27 + i * 15, -46)
-				draw_rect(Rect2(top, Vector2(12, 20)), col)
-				draw_rect(Rect2(top, Vector2(12, 20)), Color(0.1, 0.12, 0.16), false, 1.0)
-				draw_rect(Rect2(top + Vector2(4, 20), Vector2(4, 12)), Color("4a3a2a"))
+				for k in 2:
+					var top := base + Vector2(-31 + i * 16 + k * 7, -46 + k * 2)
+					draw_rect(Rect2(top, Vector2(7, 17)), col if k == 0 else col.darkened(0.12))
+					draw_rect(Rect2(top, Vector2(7, 17)), Color(0.1, 0.12, 0.16), false, 1.0)
+					draw_rect(Rect2(top + Vector2(2, 17), Vector2(3, 11)), Color("4a3a2a"))

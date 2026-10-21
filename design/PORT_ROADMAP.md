@@ -85,6 +85,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-57 | The title's RECORD line; OPEN PLAY's locations and the GYM | `feature/cld-title-record`, `feature/cld-park-locations` | Released (v0.21.0) |
 | PORT-58 | Local multiplayer: any split, the modes as tabs; the player tags | `feature/cld-lobby-sides`, `feature/cld-player-tags` | Released (v0.21.0) |
 | PORT-59 | Cleanup round 5: branches, code, docs | `feature/cld-cleanup-5` | Done |
+| PORT-60 | The park: paddles a player, winners staying said | `feature/cld-park-stacking` | Ready to test |
 
 ## Releases
 
@@ -252,6 +253,18 @@ the same request). Open: 36 and 40.
     notes regenerate the same (57 of 58 tasks); MODIFIERS and the tuning
     panel unchanged on screen.
   - Status: **Done**.
+
+### 60. `feature/cld-park-stacking`: the park's stack and winners staying (asked for 2026-10-21)
+
+- [x] `PORT-60` KNOWN_ISSUES #71: the rack draws a pair of paddles for
+  each waiting team (one a player, as real stacking reads), the panel
+  counts the teams ahead of you, and a win that keeps you on says so
+  (WINNERS STAY ON, then YOU STAY ON COURT n with STEP OFF at its rack).
+  The park's rules (SNES ADR-070 to 072) are unchanged.
+  - Verified: `test_open_play` (27, with `test_staying_on_is_said`).
+    424/424 plus the e2e, golden traces unchanged. Screenshots of the rack
+    and the panel.
+  - Status: **Ready to test**.
 
 ## For you
 

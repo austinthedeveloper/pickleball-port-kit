@@ -37,7 +37,10 @@ func panel() -> Array:
 	if v.result_timer and v.op.last_won != OpenPlay.NONE:
 		var s := "YOU %s %d-%d" % ["WON" if v.op.last_won else "LOST", v.op.last_score[0],
 			v.op.last_score[1]]
-		if v.op.last_won and v.op.last_streak >= OpenPlay.STAY_MAX and (v.op.rating == OpenPlay.RATING_NONE
+		if v.op.stay_court != OpenPlay.NONE and (v.op.rating == OpenPlay.RATING_NONE
+				or v.result_timer > ParkView.RESULT_FRAMES / 2):
+			s += "  WINNERS STAY ON"          # PORT-60: you're on again (SNES ADR-071)
+		elif v.op.last_won and v.op.last_streak >= OpenPlay.STAY_MAX and (v.op.rating == OpenPlay.RATING_NONE
 				or v.result_timer > ParkView.RESULT_FRAMES / 2):
 			s += "  %d IN A ROW" % v.op.last_streak
 		elif v.op.rating != OpenPlay.RATING_NONE:
@@ -54,6 +57,13 @@ func panel() -> Array:
 		if v.op.waiting_team(1) != OpenPlay.NONE:
 			s += " AND " + v._team_name(v.op.waiting_team(1))
 		return [s + " WAIT", [], false]
+	# PORT-60: a winner staying on: where, and (at its rack) how to step off
+	# (the rack's press gives up the place and stacks you at the back)
+	if v.op.stay_court != OpenPlay.NONE:
+		if rack == v.op.stay_court:
+			return ["YOU STAY ON COURT %d" % (rack + 1), [["hit", "STEP OFF"]], true]
+		if rack == OpenPlay.NONE:
+			return ["YOU STAY ON COURT %d" % (v.op.stay_court + 1), [], true]
 	if rack != OpenPlay.NONE:
 		if v.op.your_court == rack:
 			# Teams to pick from, and no 2P (SNES ADR-072).
@@ -74,10 +84,13 @@ func panel() -> Array:
 			and v.op.court[court].state == OpenPlay.COURT_PLAYING:
 		return [v._team_name(v.op.court[court].playing[0]) + " VS " + v._team_name(v.op.court[court].playing[1]),
 			[], false]
-	var wait := v.op.your_wait()
-	if wait != OpenPlay.NONE:
-		return ["YOU'RE NEXT ON COURT %d" % (v.op.your_court + 1) if wait == 0
-			else "WAITING ON COURT %d" % (v.op.your_court + 1), [], false]
+	# PORT-60: the teams ahead of you, exactly (a paddle pair is a team)
+	var ahead := v.op.teams_ahead()
+	if ahead != OpenPlay.NONE:
+		if ahead == 0:
+			return ["YOU'RE NEXT ON COURT %d" % (v.op.your_court + 1), [], false]
+		return ["%d TEAM%s AHEAD OF YOU ON COURT %d" % [ahead, "" if ahead == 1 else "S",
+			v.op.your_court + 1], [], false]
 	if v.op.in_house():
 		return ["THE CLUBHOUSE", [["start", "EXIT"]], false]
 	# "OPEN PLAY 14 PTS": your points, when rated.

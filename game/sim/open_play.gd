@@ -343,6 +343,19 @@ func your_wait() -> int:
 	return NONE
 
 
+## The teams ahead of your paddle in its stack (0: yours is at the front),
+## or NONE when you're not stacked (PORT-60: the panel says it as it is;
+## your_wait's "two entries a game" is wrong whenever winners stay on).
+func teams_ahead() -> int:
+	if your_court == NONE:
+		return NONE
+	var ct: OpenCourt = court[your_court]
+	for i in ct.stack_count:
+		if ct.stack[i] == YOU:
+			return i
+	return NONE
+
+
 ## The first entry in a stack that is not skip, taken out (NONE skips
 ## nothing: the front).
 func _stack_take(ct: OpenCourt, skip: int) -> int:

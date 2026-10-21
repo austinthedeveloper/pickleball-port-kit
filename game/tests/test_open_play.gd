@@ -849,8 +849,10 @@ func test_panel_lines() -> void:
 	op.update(0, 0, true)
 	eq(view.panel()[1], [["hit", "TAKE YOUR PADDLE"]])
 	_place_you(OpenPlay.START_X, OpenPlay.START_Y)
-	var wait := op.your_wait()
-	eq(view.panel()[0], ("YOU'RE NEXT ON COURT 2" if wait == 0 else "WAITING ON COURT 2"))
+	var ahead := op.teams_ahead()
+	eq(ahead, op.court[1].stack_count - 1, "behind every team already there")
+	eq(view.panel()[0], "YOU'RE NEXT ON COURT 2" if ahead == 0
+		else "%d TEAM%s AHEAD OF YOU ON COURT 2" % [ahead, "" if ahead == 1 else "S"])
 	_place_you(OpenPlay.court_left(0) - 6, OpenPlay.COURT_TOP + 40)
 	eq(view.panel()[0], "%s VS %s" % [Opponents.team(op.court[0].playing[0])["team"],
 		Opponents.team(op.court[0].playing[1])["team"]], "the peek")
@@ -940,7 +942,8 @@ func test_main_reaches_the_park_and_back() -> void:
 	_settle(main)
 	var back: ParkView = main._screen
 	check(back is ParkView and back.op == o, "the same park")
-	eq(back.message, "YOU WON 5-3")
+	eq(back.message, "YOU WON 5-3  WINNERS STAY ON" if o.stay_court != OpenPlay.NONE else "YOU WON 5-3",
+		"the result, and that you stay on (PORT-60)")
 	eq(o.court[0].state, OpenPlay.COURT_CHANGEOVER, "your court changes over")
 	eq(int(main.save.data["records"]["ladder_rung"]), 0, "no ladder change")
 	# Start: the title.
@@ -982,3 +985,30 @@ func test_ball_machine_practice() -> void:
 	eq(o.snapshot(), before, "the park waited")
 	main.free()
 	SaveGame.default_dir = kept
+
+
+## PORT-60: a winner staying on is told so, and how to step off: the result
+## says WINNERS STAY ON; at the court's rack the panel offers STEP OFF (the
+## rack's press gives up the place and stacks you at the back); away from
+## it, where you stay. Without that, the rack read STACK YOUR PADDLE.
+func test_staying_on_is_said() -> void:
+	var c := 0
+	op = OpenPlay.new()
+	op.begin(99, false)
+	_wait_for_call(c)
+	var view := ParkView.new().setup(op, null, false)
+	op.return_from_match(true, 7, 4)
+	view.result_timer = ParkView.RESULT_FRAMES
+	eq(op.stay_court, c)
+	eq(view.panel()[0], "YOU WON 7-4  WINNERS STAY ON")
+	view.result_timer = 0
+	_place_you(OpenPlay.rack_x(c), OpenPlay.RACK_Y)
+	eq(view.panel()[0], "YOU STAY ON COURT 1")
+	eq(view.panel()[1], [["hit", "STEP OFF"]], "how to give it up")
+	_place_you(OpenPlay.START_X, OpenPlay.START_Y)
+	eq(view.panel()[0], "YOU STAY ON COURT 1", "away from the rack too")
+	_place_you(OpenPlay.rack_x(c), OpenPlay.RACK_Y)
+	eq(op.update(0, 0, true), OpenPlay.EVENT_STACKED, "stepping off stacks you")
+	eq(op.stay_court, OpenPlay.NONE, "off")
+	eq(op.teams_ahead(), op.court[c].stack_count - 1, "at the back")
+	view.free()
