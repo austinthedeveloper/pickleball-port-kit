@@ -248,3 +248,45 @@ func test_the_crowd_moves_with_the_stands() -> void:
 		moved = moved or shift != Vector2.ZERO
 	check(moved, "the camera leaned")
 	v.free()
+
+
+## KNOWN_ISSUES #69, display only: a ball on the near side (below the feet
+## on screen, where the ROM's hit area reaches) gets the low reach, and the
+## drawn player steps toward it; the sim's player never moves for it.
+func test_near_side_reach() -> void:
+	var v := MatchView.new()
+	runner.root.add_child(v)
+	var cfg := Settings.config_for(true, 3, K.DIFFICULTY_MEDIUM, 11)
+	v.setup(cfg, "park", false)
+	v.card_frames = -1
+	v.sim.p1_bot = true
+	v.highlight = null
+	var p: SimTypes.Player = v.sim.players[0]
+	v.sim.ball.rally_state = K.BALL_RALLY_LIVE
+	v.sim.ball.z_fp = K.to_fp(10)
+	v.sim.ball.y_fp = p.y_fp + K.to_fp(12)
+	eq(v.actors.choose_swing(p), "reach", "a ball on the near side: the low reach")
+	v.sim.ball.y_fp = p.y_fp - K.to_fp(4)
+	eq(v.actors.choose_swing(p), "standard", "one just behind the feet: the swing")
+	v.free()
+	# a match: some reaches step down; it plays as a bare sim does
+	var m := MatchView.new()
+	runner.root.add_child(m)
+	m.setup(cfg, "park", false)
+	m.card_frames = -1
+	m.sim.p1_bot = true
+	m.highlight = null
+	var bare := Sim.new(cfg)
+	bare.p1_bot = true
+	var most := 0.0
+	for f in 4000:
+		m._physics_process(1.0 / 60.0)
+		bare.step([SimTypes.Intent.new(), null, null, null])
+		bare.drain_events()
+		for i in K.MAX_PLAYERS:
+			most = maxf(most, float(m._players[i].get("lean", 0.0)))
+	check(most > 4.0, "a near-side reach stepped toward the ball (%.1f px)" % most)
+	check(most <= MatchActors.LEAN_MAX + 0.01, "never past the cap")
+	eq(m.sim.snapshot(), bare.snapshot(), "display only")
+	bare.dispose()
+	m.free()

@@ -81,6 +81,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-53 | Announcer trims, its switch; the replay's players move | `feature/cld-announcer-trim` | Ready to test |
 | PORT-54 | The stands' people move with the camera; achievements | `feature/cld-crowd-parallax`, `feature/cld-achievements` | Ready to test |
 | PORT-55 | The announcer's second batch (advantage, deuce, achievements) | `feature/cld-announcer-additions` | In progress |
+| PORT-56 | The near-side reach (display only) | `feature/cld-near-reach` | Ready to test |
 
 ## Releases
 
@@ -423,6 +424,15 @@ the same request). Open: 36 and 40.
   - Verified: `test_announcer` (the extension, the fallback, a recorded
     batch said). 418/418 plus the e2e.
   - Status: **In progress**: waiting for the recordings.
+
+### 56. `feature/cld-near-reach`: the near-side reach (asked for 2026-10-21)
+
+- [x] `PORT-56` KNOWN_ISSUES #69, the look only (the user's call): a ball on
+  the near side of a player gets the low reach and a step down toward it;
+  the ROM's hit area is unchanged.
+  - Verified: `test_view` (`test_near_side_reach`). 419/419 plus the e2e,
+    golden traces unchanged.
+  - Status: **Ready to test**.
 
 ## For you
 

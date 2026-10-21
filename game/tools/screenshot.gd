@@ -6,7 +6,7 @@
 ## the MOD_* bits. "title_options"
 ## (any page id) opens that title page; "court=S,K,R,L" sets the court
 ## colour presets; "time=N" DAY 0, DUSK 1, NIGHT 2;
-## "pad" shows the controller prompts; "save" a save with records (title); "pause" pauses the match at the end; "tune" opens the tuning panel; "debug" the F3 overlay (hit volumes); "potm" a bot match to its PLAY OF THE MATCH;
+## "pad" shows the controller prompts; "save" a save with records (title); "pause" pauses the match at the end; "tune" opens the tuning panel; "debug" the F3 overlay (hit volumes); "potm" a bot match to its PLAY OF THE MATCH; "nearreach" a near-side reach mid-step;
 ## "closecall" shows a forced close-up; "initials" the initials card;
 ## "result" plays a bot match and ends it (the stats card); "mp4" four
 ## humans on fake pads (doubles); title_lobby a lobby with three players.
@@ -328,6 +328,16 @@ func _initialize() -> void:
 		m.setup(cfg, venue, mode == "demo")
 		if mode != "demo" and not "human" in a.slice(4):
 			m.sim.p1_bot = true
+		if "nearreach" in a.slice(4):
+			# KNOWN_ISSUES #69: run until a near-side reach has stepped down
+			m.card_frames = -1
+			for f in 60 * 60 * 5:
+				m._physics_process(1.0 / 60.0)
+				var hit := false
+				for i in K.MAX_PLAYERS:
+					hit = hit or float(m._players[i].get("lean", 0.0)) >= 10.0
+				if hit:
+					break
 		if "potm" in a.slice(4):
 			# PORT-51: a short bot match to its PLAY OF THE MATCH, near the
 			# rally's end (potm_title: the title card, still catching up)

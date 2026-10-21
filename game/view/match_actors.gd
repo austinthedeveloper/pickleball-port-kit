@@ -184,13 +184,17 @@ func smash_pop(at: Vector2) -> void:
 	tw.tween_callback(t.queue_free)
 
 
-## Display-only choice of swing animation: an overhead at a high ball, a
-## scoop for a soft shot at a low one, a reach when the ball is wide.
+## Display-only choice of swing animation: an overhead at a high ball, the
+## low reach at one on the near side (below the feet on screen: the ROM's
+## hit area reaches there, KNOWN_ISSUES #69), a scoop for a soft shot at a
+## low one, a reach when the ball is wide.
 func choose_swing(p: SimTypes.Player) -> String:
 	var b := v.sim.ball
 	var dy := absi(b.y_fp - p.y_fp)
 	if b.rally_state == K.BALL_RALLY_LIVE and b.z_fp > K.to_fp(K.HIT_OVERHEAD_Z - 3):
 		return "overhead"
+	if b.y_fp - p.y_fp > K.to_fp(NEAR_SIDE):
+		return "reach"
 	if p.shot_type == K.SHOT_SOFT and b.z_fp < K.to_fp(6):
 		return "scoop"
 	if dy > K.to_fp(K.HIT_SWEET_Y):
@@ -210,3 +214,29 @@ func apply_ball_size() -> void:
 		mb[2].scale = v._ball_shadow.scale
 	if v.feel:
 		v.feel._ball_scale = v._ball_sprite.scale
+
+
+## A ball this far (world px) nearer the camera than the feet is on the
+## near side: the low reach, and a step toward it.
+const NEAR_SIDE := 5
+const LEAN_MAX := 18.0             ## screen px, at most
+const LEAN_IN := 0.35
+const LEAN_OUT := 0.18
+
+
+## Display only (KNOWN_ISSUES #69): during a reach at a ball on the near
+## side, the drawn player steps down toward it, easing in through the
+## windup and the contact, back out after; never the sim's player.
+func swing_lean(i: int, feet: Vector2) -> Vector2:
+	var p: SimTypes.Player = v.sim.players[i]
+	var e: Dictionary = v._players[i]
+	var target := 0.0
+	if e.get("choice", "") == "reach" and p.state in [K.STATE_WINDUP, K.STATE_ACTIVE]:
+		var b := v.sim.ball
+		target = clampf(CourtView.ground(b.x_fp, b.y_fp).y - feet.y - 4.0, 0.0, LEAN_MAX)
+	var now: float = e.get("lean", 0.0)
+	now = lerpf(now, target, LEAN_IN if target > now else LEAN_OUT)
+	if absf(now) < 0.3:
+		now = 0.0
+	e["lean"] = now
+	return Vector2(0, roundf(now))

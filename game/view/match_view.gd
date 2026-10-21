@@ -762,6 +762,7 @@ func _update_visuals() -> void:
 		if not p.active:
 			continue
 		var feet := CourtView.ground(p.x_fp, p.y_fp).round()
+		feet += actors.swing_lean(i, feet)       # a near-side reach steps toward the ball
 		root.position = feet
 		e["shadow"].position = feet
 		e["marker"].position = feet
