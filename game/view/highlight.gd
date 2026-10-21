@@ -197,6 +197,7 @@ func _swap_in() -> void:
 	_live_glide = view.glide
 	view.sim = replay
 	view.glide = BallGlide.new()
+	view.flair.visible = false           # the live match's reactions and emotes wait
 	view._hud.visible = true             # the rally's own score, from the replay
 
 
@@ -204,6 +205,7 @@ func _finish() -> void:
 	if _live:
 		view.sim = _live
 		view.glide = _live_glide
+		view.flair.visible = true
 		_live = null
 	_state = ""
 	view._hud.visible = true

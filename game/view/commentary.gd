@@ -80,14 +80,14 @@ func _chance(table: Array) -> bool:
 
 # --- The match --------------------------------------------------------------------------
 
-## As the match starts: the venue or the team, and its twist.
+## As the match starts: the venue (a story chapter: its stakes), then the
+## first modifier or the format. No team intros: the user found them too
+## long (design/announcer/removed.txt).
 func begin() -> void:
 	var cfg := view.sim.config
 	_intro = []
 	if view.story_mode:
 		_intro.append("story_stakes_1")
-	elif cfg.opponent >= 0 and not cfg.human[2]:
-		_intro.append(_team_line(cfg.opponent))
 	else:
 		_intro.append("venue_" + view.venue)
 	for m in MOD_LINES:
@@ -97,12 +97,6 @@ func begin() -> void:
 	if _intro.size() == 1:
 		_intro.append("match_doubles" if cfg.mode == K.MODE_DOUBLES else "match_singles")
 	_server_before = view.sim.serving_team
-
-
-func _team_line(opponent: int) -> String:
-	if opponent == Opponents.DAWSON:
-		return "team_dawson"
-	return "team_" + String(Opponents.team(opponent)["team"]).to_lower().replace(" ", "_")
 
 
 ## Once a frame (the introduction waits for a free voice).

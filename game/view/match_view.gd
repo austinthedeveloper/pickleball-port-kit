@@ -574,6 +574,11 @@ func _physics_process(_delta: float) -> void:
 	_update_visuals()
 
 
+## PLAY OF THE MATCH is on screen (the replay's sim is the one drawn).
+func replaying() -> bool:
+	return highlight != null and highlight.playing() and highlight.replay != null and sim == highlight.replay
+
+
 ## The match is over (after PLAY OF THE MATCH, if there was one): the
 ## records and the result's sting.
 func _match_over() -> void:

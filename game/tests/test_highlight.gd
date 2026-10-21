@@ -126,3 +126,35 @@ func test_caption() -> void:
 	v.highlight.best["winner"] = 1
 	check(v.highlight.ending().ends_with(": NO ONE GOT TO IT"))
 	v.free()
+
+
+## The replayed players animate (the live match's end reaction, held by
+## flair, isn't drawn over them), and the reaction is back after.
+func test_players_move_in_the_replay() -> void:
+	var v := _view()
+	check(_play_out(v))
+	var h := v.highlight
+	var held := []
+	for slot in K.MAX_PLAYERS:
+		held.append(v.flair.body_frame(slot))
+	var frames := {}
+	for f in 20000:
+		if not h.playing():
+			break
+		v._physics_process(1.0 / 60.0)
+		if v.replaying():
+			check(not v.flair.visible, "flair waits")
+			check(not v._hud._rally.visible, "the RALLY sign is under the card: hidden")
+			for slot in [0, 2]:
+				if not frames.has(slot):
+					frames[slot] = {}
+				frames[slot][v.actors.frame_for(slot)] = true
+	for slot in [0, 2]:
+		check(frames.has(slot) and frames[slot].size() >= 4,
+			"slot %d runs, swings, stands (%s)" % [slot, frames.get(slot, {}).keys()])
+	check(v.flair.visible, "and back")
+	var after := []
+	for slot in K.MAX_PLAYERS:
+		after.append(v.flair.body_frame(slot))
+	eq(after, held, "the live reaction resumes")
+	v.free()

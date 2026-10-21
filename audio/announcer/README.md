@@ -15,5 +15,6 @@ game/tools/sync_assets.sh                  # out/ -> game/assets/audio/announcer
   -1 dBFS), 24 kHz. These are what the game plays.
 
 A re-recorded line: replace its file in `raw/` (same id), run both
-commands. A new line: add it to `design/announcer/make_script.py`,
+commands. A line taken out: add its id to `design/announcer/removed.txt`
+(with why), run both; the recording stays here. A new line: add it to `design/announcer/make_script.py`,
 record it, and give `view/commentary.gd` a reason to say it.

@@ -5,8 +5,8 @@
 ## waiting behind a busy voice goes stale and is dropped (a call about the
 ## last shot is no use two shots later), and one of a higher priority cuts
 ## a lower one off. While it talks, the music ducks and the crowd's bed
-## dips. ANNOUNCER (its volume, OFF) and COMMENTARY (how much it says) are
-## on OPTIONS, saved in Settings; SOUND OFF silences it. Headless, nothing
+## dips. ANNOUNCER (ON or OFF), VOICE VOLUME and COMMENTARY (how much it
+## says) are on OPTIONS, saved in Settings; SOUND OFF silences it. Headless, nothing
 ## plays, but the timing (and `said`, for the tests) still runs.
 class_name Announcer
 extends Node
@@ -28,7 +28,8 @@ const MID := 1                     ## how a point ended, a score call
 const HIGH := 2                    ## match point, an ace, a long rally
 const TOP := 3                     ## the match's start and end, replays
 
-static var volume := DEFAULT_VOLUME
+static var enabled := true          ## ANNOUNCER: ON or OFF
+static var volume := DEFAULT_VOLUME  ## VOICE VOLUME, 1 .. VOLUMES
 static var chatter := NORMAL
 static var current: Announcer      ## the session's (null in most tests)
 
@@ -88,7 +89,7 @@ func family_of(id: String) -> String:
 
 ## No voice at all: ANNOUNCER OFF, or SOUND OFF.
 static func muted() -> bool:
-	return volume <= 0 or Sfx.setting == AudioMap.SOUND_OFF
+	return not enabled or volume <= 0 or Sfx.setting == AudioMap.SOUND_OFF
 
 
 static func volume_name() -> String:
