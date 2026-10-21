@@ -41,6 +41,7 @@ func _ready() -> void:
 	_toast_text = UiKit.text("small", "", Vector2(480, 470), 0.5, Color.WHITE, _toast)
 	music = Music.new()
 	add_child(music)
+	add_child(Announcer.new())             # ADR-076: the voice, for the session
 	save.load_game()
 	Updater.mark_good()                # PORT-32: an updated launch reached the title
 	if UpdateScreen.wanted():
