@@ -72,6 +72,7 @@ func music_track() -> String:
 	return "title"
 
 
+var achieve_how: BitmapText          ## under ACHIEVEMENTS (ADR-077)
 static var _greeted := false       ## the announcer has said the name this session
 
 func _ready() -> void:
@@ -294,7 +295,7 @@ func _show(id: String) -> void:
 	if hat_museum:
 		hat_museum.visible = id == "museum"
 	for n in _header:
-		n.visible = not id in ["select", "records", "controls", "options", "modifiers", "rules", "lobby", "museum", "career_card", "career_edit",
+		n.visible = not id in ["select", "records", "achievements", "controls", "options", "modifiers", "rules", "lobby", "museum", "career_card", "career_edit",
 			"career_name"]
 	if lobby_screen:
 		lobby_screen.visible = id == "lobby"
@@ -651,11 +652,30 @@ func _input(event: InputEvent) -> void:
 			_sfx.play("confirm")
 
 
+## ADR-077: under ACHIEVEMENTS, how to earn the one selected (and the day
+## it was, once it's done).
+func _refresh_achievement() -> void:
+	if achieve_how == null:
+		return
+	achieve_how.visible = page == "achievements"
+	if not achieve_how.visible:
+		return
+	var p: MenuPage = pages["achievements"]
+	var id := p.current_id()
+	var a := Achievements.entry(id)
+	if a.is_empty():
+		achieve_how.text = Achievements.label(save) + " DONE"
+		return
+	var day := Achievements.day(save, id)
+	achieve_how.text = String(a[2]) + ("" if day == "" else "  " + day)
+
+
 func _process(_delta: float) -> void:
 	# a window-mode change in _ready can run a frame before the demo exists
 	if _demo == null or _demo.sim == null:
 		return
 	_refresh_record()
+	_refresh_achievement()
 	if page == "options" and Updater.instance and Updater.instance.label() != _updates_label:
 		_updates_label = Updater.instance.label()
 		pages["options"].refresh()       # the download's percentage, and when it's done

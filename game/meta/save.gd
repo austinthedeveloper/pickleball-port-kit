@@ -76,6 +76,7 @@ static func defaults() -> Dictionary:
 		## STORY (ADR-069): the chapter you're on, and parks saved
 		"story": {"chapter": 0, "cleared": 0},
 		"course": {"done": []},
+		"achievements": {},
 	}
 
 

@@ -86,11 +86,21 @@ func on_match_over() -> void:
 		if v.tournament:
 			record_tournament(won)
 		v.save.record_stats(v.stats)
+		check_achievements(won)
 	v.save.save_game()
 	initials.begin(v.save)
 	# then what the career player unlocked (after the initials, if any)
 	if v.save.career.new_unlocks:
 		unlock_frames = 0
+
+
+## ADR-077: this match's achievements, for P1's side.
+func check_achievements(won: bool) -> Array:
+	var s := v.sim
+	return Achievements.check_match(v.save, {"won": won, "scores": [s.team_score[0], s.team_score[1]],
+		"aces": int(v.stats.teams[0]["aces"]), "longest": v.stats.longest_rally(),
+		"behind": v.stats.behind[0], "mods": s.config.modifiers, "opponent": s.config.opponent,
+		"venue": v.venue, "cleared": v.cleared})
 
 
 ## PORT-25: the bracket takes this result (and decides the round's other
@@ -105,3 +115,5 @@ func record_tournament(won: bool) -> void:
 		return                             # friends' cups don't go in the records
 	cup_finish = t.finish()
 	v.save.record_cup(cup_finish)
+	if t.champion() == Tournament.YOU:
+		Achievements.unlock(v.save, "champion")     # ADR-077

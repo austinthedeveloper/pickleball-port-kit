@@ -601,6 +601,9 @@ def main():
     made["5_blip"] = ui_tone(np.random.default_rng(600), [1046.5], 0.0, 0.035, 0.25)
     made["6_confirm"] = ui_tone(np.random.default_rng(601), [1046.5, 1568.0], 0.07, 0.07, 0.35)
     made["7_back"] = ui_tone(np.random.default_rng(602), [987.8, 659.3], 0.055, 0.05, 0.25)
+    # ADR-077: an achievement, a rising C major arpeggio to the octave
+    made["8_achievement"] = ui_tone(np.random.default_rng(603), [1046.5, 1318.5, 1568.0, 2093.0],
+                                    0.075, 0.12, 0.4)
     for name, fn in AMBIENCE.items():
         a = seamless(fn(np.random.default_rng(700 + len(name))))
         a = a - np.mean(a, axis=0)

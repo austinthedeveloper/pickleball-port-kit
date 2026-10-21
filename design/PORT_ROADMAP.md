@@ -79,6 +79,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-51 | PLAY OF THE MATCH | `feature/cld-play-of-the-match` | Ready to test |
 | PORT-52 | The announcer (voiced, no text) | `feature/cld-announcer-script` | Ready to test |
 | PORT-53 | Announcer trims, its switch; the replay's players move | `feature/cld-announcer-trim` | Ready to test |
+| PORT-54 | The stands' people move with the camera; achievements | `feature/cld-crowd-parallax`, `feature/cld-achievements` | Ready to test |
 
 ## Releases
 
@@ -397,6 +398,17 @@ the same request). Open: 36 and 40.
     unchanged. Screenshots of OPTIONS and a replay.
   - Status: **Ready to test**: add any line to `removed.txt` (or tell me
     its id).
+
+### 54. `feature/cld-crowd-parallax`, `feature/cld-achievements` (asked for 2026-10-21)
+
+- [x] `PORT-54` The crowd and the watcher move with the stands as the
+  camera leans (KNOWN_ISSUES #68). Achievements (ADR-077): thirteen,
+  PICKLED first; a toast and a chime as each unlocks; RECORDS >
+  ACHIEVEMENTS lists them with how to earn each.
+  - Verified: `test_view` (the stands' people), `test_achievements`,
+    `test_layout`. 417/417 plus the e2e, golden traces unchanged.
+    Screenshot of ACHIEVEMENTS.
+  - Status: **Ready to test**: say which achievements to add next.
 
 ## For you
 

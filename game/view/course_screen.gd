@@ -274,6 +274,8 @@ func _perfect() -> bool:
 ## The closing page: saved as done; on to the next, the drill, or the list.
 func _end_page() -> void:
 	Course.finish(save, lesson, _perfect())
+	if Course.done_count(save) == Course.count():
+		Achievements.unlock(save, "scholar")        # ADR-077
 	if save:
 		save.save_game()
 	var rows := []

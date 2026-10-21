@@ -12,6 +12,7 @@ const SHOT_NAMES := ["STD", "DRIVE", "SOFT", "SLICE", "SMASH"]   ## by K.SHOT_*
 
 var teams: Array = [_team(), _team()]
 var rallies: Array = []
+var behind := [0, 0]             ## the most each side trailed by (ADR-077's COMEBACK KID)
 var _serving := 0
 var _rally := 0
 var _last_team := -1
@@ -143,3 +144,10 @@ func rows() -> Array:
 
 func rally_line() -> String:
 	return "LONGEST RALLY %d   AVERAGE %.1f" % [longest_rally(), average_rally()]
+
+
+## The score after a point (the view passes the sim's, which side-out
+## scoring keeps): how far behind each side has been.
+func note_score(scores: Array) -> void:
+	for t in 2:
+		behind[t] = maxi(behind[t], int(scores[1 - t]) - int(scores[t]))

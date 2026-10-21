@@ -6,7 +6,7 @@
 ## the MOD_* bits. "title_options"
 ## (any page id) opens that title page; "court=S,K,R,L" sets the court
 ## colour presets; "time=N" DAY 0, DUSK 1, NIGHT 2;
-## "pad" shows the controller prompts; "save" a save with records (title); "pause" pauses the match at the end; "tune" opens the tuning panel; "potm" a bot match to its PLAY OF THE MATCH;
+## "pad" shows the controller prompts; "save" a save with records (title); "pause" pauses the match at the end; "tune" opens the tuning panel; "debug" the F3 overlay (hit volumes); "potm" a bot match to its PLAY OF THE MATCH;
 ## "closecall" shows a forced close-up; "initials" the initials card;
 ## "result" plays a bot match and ends it (the stats card); "mp4" four
 ## humans on fake pads (doubles); title_lobby a lobby with three players.
@@ -352,6 +352,8 @@ func _tick() -> void:
 		_view.sim.serve_requested = 1
 	if _frames == _target - 10 and _view is MatchView and "pause" in OS.get_cmdline_user_args():
 		_view.sim.paused = 1
+	if _frames == 2 and _view is MatchView and "debug" in OS.get_cmdline_user_args():
+		_view._debug.visible = true        # F3: positions, hit volumes, landing marks
 	if _frames == _target - 20 and _view is MatchView and "tune" in OS.get_cmdline_user_args():
 		_view.tuning.open_panel()         # PORT-49: the tuning panel, slid in
 	if _frames == _target - 50 and _view is MatchView and "closecall" in OS.get_cmdline_user_args():

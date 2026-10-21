@@ -617,6 +617,8 @@ func _on_event(e: Array) -> void:
 	feel.on_event(e)
 	flair.on_event(e)
 	stats.on_event(e)
+	if e[0] == K.EVENT_POINT:
+		stats.note_score(sim.team_score)
 	var kind: int = e[0]
 	var at := CourtView.ground(K.to_fp(e[1]), K.to_fp(e[2]))
 	var rally: int = (sim.shot_serial - sim.rally_start) & 0xff

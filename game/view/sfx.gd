@@ -18,7 +18,8 @@ const EFFECTS := {
 	"hit_soft": ["0_hit_soft", "0_hit_soft_2", "0_hit_soft_3", "0_hit_soft_4"],
 	"bounce": ["1_bounce", "1_bounce_2", "1_bounce_3"],
 	"net": ["2_net"], "whistle": ["3_whistle"], "applause": ["4_applause"],
-	"blip": ["5_blip"], "confirm": ["6_confirm"], "back": ["7_back"]}
+	"blip": ["5_blip"], "confirm": ["6_confirm"], "back": ["7_back"],
+	"achievement": ["8_achievement"]}
 ## Pitch spread per play (a fraction either way).
 const JITTER := {"hit": 0.03, "hit_drive": 0.03, "hit_smash": 0.03, "hit_slice": 0.03, "hit_soft": 0.03, "bounce": 0.04}
 ## Per-effect level trims (dB) for the HD set's mix.

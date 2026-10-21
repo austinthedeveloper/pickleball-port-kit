@@ -177,8 +177,20 @@ static func build(t: TitleScreen) -> void:
 		{"id": "ladder", "label": "LADDER", "value": func(): return "S %d/%d  D %d/%d  CLEARS %d" % [
 			t._rung() + 1, Opponents.count(), t._rung(true) + 1, Opponents.count(), t._rec("ladder_clears")]},
 		{"id": "practice", "label": "PRACTICE BEST", "value": func(): return str(t._rec("practice_best"))},
+		{"id": "achievements", "label": "ACHIEVEMENTS", "value": func(): return Achievements.label(t.save),
+			"press": func(): t.open_page("achievements")},      # ADR-077
 		{"id": "vs", "label": "VS", "value": t._vs_label,
 			"change": func(d): t.vs_i = (t.vs_i + d + Opponents.count()) % Opponents.count()},
 		{"id": "erase", "label": "ERASE RECORDS", "value": func(): return "B AGAIN" if t._erase_armed else "",
 			"press": t._erase},
 	], [["back", "BACK"]], Rect2(230, 46, 500, 0))   # wide: LADDER shows both modes
+	# ADR-077: every achievement, DONE or not; how to earn the one selected
+	# shows under the panel
+	var achieve_rows := []
+	for a in Achievements.LIST:
+		var id: String = a[0]
+		achieve_rows.append({"id": id, "label": a[1],
+			"value": func(): return "DONE" if Achievements.unlocked(t.save, id) else ""})
+	t._add_page("achievements", "ACHIEVEMENTS", achieve_rows, [], Rect2(230, 16, 500, 0))
+	t.achieve_how = UiKit.text("small", "", Vector2(480, 486), 0.5, Color("fbe46a"), t._ui)
+	t.achieve_how.visible = false

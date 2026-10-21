@@ -18,6 +18,8 @@ var _toast: Control
 var _toast_text: BitmapText
 var _toast_panel: NinePatchRect
 var _toast_frames := 0
+var _toast_queue: Array = []       ## achievements waiting for the toast
+var _chime: AudioStreamPlayer      ## an achievement's sound
 var _news_seen := GameControls.news_serial
 ## Open play (ADR-034): the park waits here while you play; fresh each time
 ## it's entered from the title.
@@ -42,6 +44,11 @@ func _ready() -> void:
 	music = Music.new()
 	add_child(music)
 	add_child(Announcer.new())             # ADR-076: the voice, for the session
+	Achievements.on_unlock = _on_achievement
+	_chime = AudioStreamPlayer.new()
+	_chime.stream = load(Sfx.DIR + "8_achievement.wav")
+	_chime.volume_db = -4.0
+	add_child(_chime)
 	save.load_game()
 	Updater.mark_good()                # PORT-32: an updated launch reached the title
 	if UpdateScreen.wanted():
@@ -84,6 +91,9 @@ func _update_toast() -> void:
 		_toast_text.tint = Color("60e060") if news[0] == "CONNECTED" else Color("ff7060")
 		_toast_frames = TOAST_FRAMES
 		_fit_toast()
+	if _toast_frames <= 0 and not _toast_queue.is_empty():
+		toast(_toast_queue.pop_front())
+		_toast_text.tint = Color("fbe46a")
 	if _toast_frames > 0:
 		_toast_frames -= 1
 	_toast.visible = _toast_frames > 0
@@ -280,7 +290,8 @@ func _on_story_match(ch: int) -> void:
 			show_title()
 			return
 		if m.sim.match_winner == 0:
-			StoryMode.win(save, ch)
+			if StoryMode.win(save, ch):
+				Achievements.unlock(save, "park_saved")    # ADR-077
 			save.save_game()
 			show_story(ch, "win")
 		else:
@@ -364,6 +375,14 @@ func _on_online_match(session: OnlineSession) -> void:
 	m.court = court.map(func(x): return int(x))
 	m.time = int(info.get("time", 0))
 	m.setup(OnlineSession.config_from_dict(info["cfg"]), String(info.get("venue", "park")), false)
+
+
+## ADR-077: an achievement unlocked, as a toast (several wait their turn)
+## and its chime.
+func _on_achievement(id: String) -> void:
+	_toast_queue.append("ACHIEVEMENT: " + String(Achievements.entry(id)[1]))
+	if _chime and Sfx.setting != AudioMap.SOUND_OFF:
+		_chime.play()
 
 
 ## A message in the toast (the controller toast's panel).

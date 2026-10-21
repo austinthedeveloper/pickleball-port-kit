@@ -865,3 +865,20 @@ func test_highlight() -> void:
 	GameControls.last_device = kept[0]
 	Settings.pad_glyphs = kept[1]
 	GameControls.device_serial += 1
+
+
+## PORT-54: ACHIEVEMENTS with each row selected, done (with its day) and not.
+func test_achievements() -> void:
+	var t := _title()
+	t.open_page("achievements")
+	var p: MenuPage = t.pages["achievements"]
+	p.settle()
+	for done in [false, true]:
+		for a in Achievements.LIST:
+			if done:
+				Achievements.unlock(t.save, a[0])
+			p.select(a[0])
+			p.refresh()
+			t._refresh_achievement()
+			check_layout(t, "ACHIEVEMENTS: %s (%s)" % [a[0], "done" if done else "not yet"])
+	t.free()
