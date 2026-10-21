@@ -4,7 +4,16 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
-## [0.21.1] - 2026-10-21
+## [0.22.0] - 2026-10-21
+
+A new ball machine for practice.
+
+### Changed
+- **The ball machine** is redrawn: a cart with a hopper full of balls and
+  a launcher arm on a swivel. The arm swings smoothly toward where the
+  next ball is going instead of snapping, and kicks back as it fires.
+
+ - 2026-10-21
 
 Open play's paddle rack and winners staying on, made clear.
 

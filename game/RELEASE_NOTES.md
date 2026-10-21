@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.21.1`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.22.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-59 of 60 roadmap tasks are in.
+60 of 62 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -363,4 +363,16 @@ Status: **Done**.
 
 KNOWN_ISSUES #71: the rack draws a pair of paddles for each waiting team (one a player, as real stacking reads), the panel counts the teams ahead of you, and a win that keeps you on says so (WINNERS STAY ON, then YOU STAY ON COURT n with STEP OFF at its rack). The park's rules (SNES ADR-070 to 072) are unchanged.
 
+Status: **Released (v0.21.1)**.
+
+## PORT-61: the swing-arm ball machine (asked for 2026-10-21)
+
+KNOWN_ISSUES #34: practice's machine is row C of `art/concept/ball-machine.png`, a cart with a hopper of balls and a launcher arm on a pivot, built in Aseprite (`art/sprites/machine`: `machine.py` draws the layers, `build_machine.lua` makes `machine.aseprite` and the sheet). The arm has nine angles and swings through them toward the sim's pose (up, centre, down) instead of snapping; it recoils along itself on a feed. Display only: the sim's poses and feeds are unchanged.
+
 Status: **Ready to test**.
+
+## PORT-62: player specials and powerups (asked for 2026-10-21) (not in this build)
+
+`design/SPECIALS_AND_POWERUPS.md`, a running document: a SPECIAL button with a meter (route A), powerups on the court (route B), or both (route C, the pick so far); specials by paddle, with the '95 overhead smash as PICKLE SMASH; the first powerup list. Nothing built yet.
+
+Status: **In progress** (waiting on the questions in the doc).

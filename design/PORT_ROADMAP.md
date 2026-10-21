@@ -86,7 +86,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-58 | Local multiplayer: any split, the modes as tabs; the player tags | `feature/cld-lobby-sides`, `feature/cld-player-tags` | Released (v0.21.0) |
 | PORT-59 | Cleanup round 5: branches, code, docs | `feature/cld-cleanup-5` | Done |
 | PORT-60 | The park: paddles a player, winners staying said | `feature/cld-park-stacking` | Released (v0.21.1) |
-| PORT-61 | The swing-arm ball machine | `feature/cld-ball-machine` | Ready to test |
+| PORT-61 | The swing-arm ball machine | `feature/cld-ball-machine` | Released (v0.22.0) |
 | PORT-62 | Player specials and powerups: a running design doc | `feature/cld-specials-doc` | In progress |
 
 ## Releases
@@ -175,6 +175,8 @@ status in the same commit. The finished tasks, in full, are in
   (tag `v0.21.0`, on `feature/cld-release-0.21.0`).
 - **v0.21.1** (2026-10-21): PORT-60 the park's paddles a player, winners
   staying said (tag `v0.21.1`, on `feature/cld-release-0.21.1`).
+- **v0.22.0** (2026-10-21): PORT-61 the swing-arm ball machine (tag
+  `v0.22.0`, on `feature/cld-release-0.22.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 
