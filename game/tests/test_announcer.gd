@@ -27,7 +27,7 @@ func _restore(k: Array) -> void:
 ## Every clip is there, and every line the commentary can ask for.
 func test_the_clips() -> void:
 	var a := _voice()
-	eq(a.clips.size(), 244, "the 253 recorded, less the 9 removed (design/announcer/removed.txt)")
+	eq(a.clips.size(), 298, "the full script recorded (lines.csv: the first batch and the additions, less removed.txt)")
 	check(a.families.keys().filter(func(f): return f.begins_with("team_")).is_empty(), "no team intros")
 	var missing := []
 	for id in a.clips:
@@ -40,14 +40,17 @@ func test_the_clips() -> void:
 		"match_doubles", "match_singles", "shot_drive", "shot_slice", "shot_smash",
 		"shot_lob", "shot_dink", "shot_volley"]
 	wanted.append_array(Commentary.FAULT_LINES.values())
+	# the second batch (PORT-55), recorded with the rest in 2026-10
+	wanted.append_array(["deuce", "deuce_long", "advantage_server", "advantage_receiver", "special_ready",
+		"pickle_smash", "smash_return", "smash_winner", "smash_finish", "achievement"])
+	for ach in Achievements.LIST:
+		wanted.append("achievement_" + ach[0])
 	for m in Commentary.MOD_LINES:
-		if m[1] != "mod_specials":
-			wanted.append(m[1])              # SPECIALS' is in the second batch (another mod's is said)
+		wanted.append(m[1])
 	for n in Commentary.RALLY_CALLS:
 		wanted.append("rally_%d" % n)
 	for v in Settings.VENUES:
-		if not v in Settings.INDOOR:
-			wanted.append("venue_" + v)      # the GYM's is in the second batch (falls back)
+		wanted.append("venue_" + v)
 	for n in 26:
 		wanted.append_array(["num_%02d_up" % n, "num_%02d_down" % n])
 	for f in wanted:

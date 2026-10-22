@@ -80,7 +80,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-52 | The announcer (voiced, no text) | `feature/cld-announcer-script` | Released (v0.19.0) |
 | PORT-53 | Announcer trims, its switch; the replay's players move | `feature/cld-announcer-trim` | Released (v0.19.1) |
 | PORT-54 | The stands' people move with the camera; achievements | `feature/cld-crowd-parallax`, `feature/cld-achievements` | Released (v0.20.0) |
-| PORT-55 | The announcer's second batch (advantage, deuce, achievements, specials, power-ups) | `feature/cld-announcer-additions`, `feature/cld-announcer-specials` | In progress |
+| PORT-55 | The announcer's second batch (advantage, deuce, achievements, specials, power-ups) | `feature/cld-announcer-additions`, `feature/cld-announcer-specials`, `feature/cld-voices-ash` | Done |
 | PORT-56 | The near-side reach (display only) | `feature/cld-near-reach` | Released (v0.20.0) |
 | PORT-57 | The title's RECORD line; OPEN PLAY's locations and the GYM | `feature/cld-title-record`, `feature/cld-park-locations` | Released (v0.21.0) |
 | PORT-58 | Local multiplayer: any split, the modes as tabs; the player tags | `feature/cld-lobby-sides`, `feature/cld-player-tags` | Released (v0.21.0) |
@@ -255,7 +255,13 @@ the same request). Open: 36 and 40.
     twelve power-up lines for later (not wired: power-ups aren't built).
     GLOBETROTTER's line no longer counts venues (there are seven now).
     `test_announcer.test_the_specials_lines`.
-  - Status: **In progress**: waiting for the recordings.
+  - 2026-10-21, `feature/cld-voices-ash`: the user re-recorded the whole
+    script in one voice (298 clips: the first batch and the additions,
+    no team intros) and they replace the old ones. The new takes run
+    longer, so the big in-rally calls get more room (rally counts up to
+    4 s, PICKLE SMASH 3 s; a shot's call still 1.3 s). `test_announcer`
+    now asks for every second-batch line.
+  - Status: **Done** (the power-up lines wait for power-ups).
 
 
 ### 59. `feature/cld-cleanup-5`: cleanup round 5 (asked for 2026-10-21)

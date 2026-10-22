@@ -1,9 +1,11 @@
 # The announcer
 
 The voice of the remaster's announcer (PORT-52, ADR-076). The script is
-`design/announcer/SCRIPT.md` (and `lines.csv`, one row per clip); the
-user recorded it with an AI voiceover (the voice and model of each clip
-are in `raw/manifest.json`).
+`design/announcer/SCRIPT.md` (and `lines.csv`, one row per clip: the
+first batch and `make_additions.py`'s, less `removed.txt`); the user
+recorded it with an AI voiceover (the voice and model of each clip are
+in `raw/manifest.json`). The whole script was re-recorded in one voice
+("ash", the booth profile) on 2026-10-21: 298 clips.
 
 ```sh
 .venv/bin/python audio/announcer/prep.py   # raw/ -> out/, and game/data/announcer.json

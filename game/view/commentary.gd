@@ -12,6 +12,10 @@ extends RefCounted
 const RALLY_CALLS := [10, 15, 20, 25, 30]
 const SHOT_GAP := 1.6              ## seconds between two calls in a rally, at least
 const SHORT := 1.3                 ## a call in a rally fits between shots
+## Big moments in a rally may run longer: they don't go stale like a call
+## about the last shot (the 2026-10 recordings run long)
+const MILESTONE := 4.0             ## the 10, 15, 20, 25 and 30-shot calls
+const SMASH_CALL := 3.0            ## PICKLE SMASH
 ## Chances, by COMMENTARY (LIGHT, NORMAL, LOTS)
 const SHOT_CHANCE := [0.0, 0.12, 0.3]
 const SMASH_CHANCE := [0.0, 0.5, 0.8]
@@ -154,18 +158,18 @@ func _on_hit(e: Array) -> void:
 	_last_smash = int(e[3]) >> 4 == K.SHOT_SPECIAL
 	if _last_smash:
 		_smash_by = team
-		if _say(_first(["pickle_smash", "shot_smash"]), Announcer.HIGH, 0.0, SHORT):
+		if _say(_first(["pickle_smash", "shot_smash"]), Announcer.HIGH, 0.0, SMASH_CALL):
 			_since_call = 0.0
 		return
 	if was_smash and team != _smash_by and _first(["smash_return"]) != "":
-		if _say("smash_return", Announcer.MID, 0.0, SHORT):
+		if _say("smash_return", Announcer.MID, 0.0, SHORT * 1.5):
 			_since_call = 0.0
 		return
 	for n in RALLY_CALLS:
 		if shots >= n and not _called.has(n):
 			_called[n] = true
 			if n == shots and (n >= 15 or _level() >= Announcer.NORMAL):
-				if _say("rally_%d" % n, Announcer.HIGH, 0.4, SHORT * 2):
+				if _say("rally_%d" % n, Announcer.HIGH, 0.4, MILESTONE):
 					_since_call = 0.0
 					return
 	if _since_call < SHOT_GAP or Announcer.current == null or Announcer.current.busy():
