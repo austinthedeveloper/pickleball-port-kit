@@ -226,3 +226,79 @@ func test_save_play_of_the_match() -> void:
 	s.highlight.best = {"shots": 9}
 	eq(s.highlight.best_state(), "", "a saved replay's card has no SAVE")
 	s.free()
+
+
+## One frame as MatchView plays it (recorded, then stepped), P1 a human
+## who serves when it's theirs after standing four seconds (then a press
+## every half second) and otherwise stands, with Start pressed when
+## `pause` (a pause or an unpause).
+func _frame(v: MatchView, pause := false) -> void:
+	var it := SimTypes.Intent.new()
+	it.pause_pressed = 1 if pause else 0
+	if v.sim.phase == K.PHASE_SERVE_SETUP and v.sim.server_index == 0 and not v.sim.paused \
+			and v.sim.phase_timer >= 240 and v.highlight.frames() % 30 == 0:
+		it.hit_pressed = 1
+	var human := [it, null, null, null]
+	v.highlight.record(human)
+	v.sim.step(human)
+	v.highlight.after_step(v.sim.drain_events())
+
+
+## PORT-71: a replay starts a moment before the serve is struck and ends
+## soon after the ball is dead; a pause in the rally (and the wait in the
+## menu) is never shown. The rally is still exact.
+func test_trimmed_to_the_rally() -> void:
+	wipe_replays()
+	var v := _view()
+	v.sim.p1_bot = false                 # a bot's intent drops the pause bit (sim.gd)
+	var paused_at := -1
+	for f in 60 * 60 * 3:
+		var live := v.sim.phase == K.PHASE_LIVE
+		if paused_at < 0 and live and (v.sim.shot_serial - v.sim.rally_start) & 0xff >= 1:
+			paused_at = v.highlight.frames()
+			_frame(v, true)
+			check(v.sim.paused != 0, "paused mid-rally")
+			for w in 600:                       # ten seconds on the pause menu
+				_frame(v)
+			_frame(v, true)
+			check(v.sim.paused == 0, "and back")
+			continue
+		_frame(v)
+		if paused_at >= 0 and not v.highlight.last.is_empty() \
+				and int(v.highlight.last["from"]) < paused_at:
+			break
+	var rally: Dictionary = v.highlight.last
+	check(paused_at >= 0 and not rally.is_empty(), "a rally with a pause in it")
+	check(int(rally["serve"]) - int(rally["from"]) >= 240, "a long wait before the serve")
+	check(v.save_rally(), "saved")
+	var data := SavedReplays.load_replay(SavedReplays.list()[0]["name"])
+	v.free()
+	var d := MatchView.new()
+	runner.root.add_child(d)
+	d.setup(OnlineSession.config_from_dict(data["cfg"]), "park", true)
+	var h := Highlight.from_saved(d, data)
+	d.highlight = h
+	check(h.start(func(): pass))
+	var first := -1
+	var drawn := 0
+	var paused_drawn := 0
+	var at_end: Array = []
+	for f in 20000:
+		if not h.playing():
+			break
+		d._physics_process(1.0 / 60.0)
+		if d.replaying():
+			if first < 0:
+				first = h._frame
+			drawn += 1
+			if h.replay.paused != 0:
+				paused_drawn += 1
+			if h._frame == int(rally["to"]) + 1 and at_end.is_empty():
+				at_end = h.replay.snapshot()
+	eq(first, int(rally["serve"]) - Highlight.LEAD_FRAMES, "it opens just before the serve, not the wait")
+	eq(paused_drawn, 0, "the pause is never shown")
+	check(drawn < int(rally["to"]) - int(rally["from"]) - 600 + Highlight.AFTER_FRAMES + Highlight.SLOW_FRAMES,
+		"nor its ten seconds (%d frames drawn)" % drawn)
+	eq(at_end, rally["snap_to"], "still the rally, exactly")
+	d.free()
+	wipe_replays()

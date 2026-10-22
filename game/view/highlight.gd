@@ -17,7 +17,8 @@ const MIN_SHOTS := 6             ## a rally worth showing, serve included
 const SEEK_PER_FRAME := 600      ## replay frames run a drawn frame, catching up
 const TITLE_FRAMES := 50         ## the card shows at least this long
 const SLOW_FRAMES := 40          ## the end of the rally, at half speed
-const AFTER_FRAMES := 80         ## the point's result, after it
+const AFTER_FRAMES := 50         ## the point's result, after it
+const LEAD_FRAMES := 45          ## shown before the serve is struck (PORT-71)
 const SKIP_LOCK := 15
 
 var view: MatchView
@@ -28,6 +29,7 @@ var _inputs := PackedInt32Array()   ## 8 a frame: per slot, [moves and aims, but
 var _ops := {}                   ## frame -> [["new_match"] or ["retune", speed, errors]]
 var _serve_at := 0               ## the frame the current point's serve began
 var _serve_snap: Array = []
+var _serve_hit := -1             ## the frame the serve was struck (PORT-71)
 var best := {}                   ## the longest rally of this match so far
 var last := {}                   ## the rally that ended last (SAVE LAST RALLY)
 var saved_last := false          ## that one is saved already
@@ -123,12 +125,16 @@ func after_step(events: Array) -> void:
 	if s.phase == K.PHASE_SERVE_SETUP and _serve_at != frames() - 1 and _serve_snap.is_empty():
 		_serve_at = frames() - 1
 		_serve_snap = s.snapshot()
+		_serve_hit = -1
 	for e in events:
+		if e[0] == K.EVENT_SERVE and _serve_hit < _serve_at:
+			_serve_hit = frames() - 1
 		if e[0] != K.EVENT_POINT:
 			continue
 		var shots: int = (s.shot_serial - s.rally_start) & 0xff
 		var rally := {"shots": shots, "from": _serve_at, "to": frames() - 1, "winner": e[3],
-			"fault": s.last_fault, "snap_from": _serve_snap, "snap_to": s.snapshot()}
+			"fault": s.last_fault, "snap_from": _serve_snap, "snap_to": s.snapshot(),
+			"serve": maxi(_serve_hit, _serve_at)}
 		if shots >= 1 and not _serve_snap.is_empty():
 			last = rally
 			saved_last = false
@@ -247,15 +253,19 @@ func update() -> void:
 	if not quiet and _shown > SKIP_LOCK and Input.is_action_just_pressed("soft"):
 		on_save()
 	if _state == "seek":
+		# catch up unseen to just before the serve, checking the sim at the
+		# serve's setup on the way
 		var n := 0
-		while _frame <= int(best["from"]) and n < SEEK_PER_FRAME:
+		var start := start_frame()
+		while _frame < start and n < SEEK_PER_FRAME:
 			_step_replay()
 			n += 1
-		if _frame > int(best["from"]):
-			if replay.snapshot() != best["snap_from"]:
+			if _frame == int(best["from"]) + 1 and replay.snapshot() != best["snap_from"]:
 				push_warning("PLAY OF THE MATCH: the replay differs; not shown")
 				_finish()
 				return
+		if _frame >= start:
+			_skip_paused()
 			if _shown >= TITLE_FRAMES or quiet:
 				_swap_in()
 		if skip:
@@ -265,9 +275,10 @@ func update() -> void:
 	var to: int = best["to"]
 	var slow := _frame > to - SLOW_FRAMES and _frame <= to
 	if not slow or _shown % 2 == 0:
-		if _frame < mini(to + AFTER_FRAMES, frames()):
+		if _frame < end_frame():
 			for e in _step_replay():
 				_replay_event(e)
+			_skip_paused()
 		else:
 			_finish()
 			return
@@ -276,6 +287,26 @@ func update() -> void:
 	view._update_visuals()
 	if skip:
 		_finish()
+
+
+## The first frame shown (PORT-71): a moment before the serve is struck,
+## not the wait at the serve's setup. A replay saved before PORT-71 has no
+## "serve", and starts at the setup.
+func start_frame() -> int:
+	var from := int(best["from"]) + 1
+	return maxi(from, int(best["serve"]) - LEAD_FRAMES) if best.has("serve") else from
+
+
+func end_frame() -> int:
+	return mini(int(best["to"]) + AFTER_FRAMES, frames())
+
+
+## Paused frames were recorded (the sim steps while paused, to take the
+## unpause): they run unseen, so a replay never shows the pause menu or
+## the wait in it (PORT-71).
+func _skip_paused() -> void:
+	while replay.paused != 0 and _frame < end_frame():
+		_step_replay()
 
 
 func _swap_in() -> void:

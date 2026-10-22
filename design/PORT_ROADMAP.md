@@ -96,6 +96,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-68 | SPECIALS' meters under the players | `feature/cld-meters-under-players` | Released (v0.28.0) |
 | PORT-69 | Saved replays: SAVE LAST RALLY, REPLAYS, and in the demo | `feature/cld-saved-replays` | Released (v0.28.0) |
 | PORT-70 | SAVE on PLAY OF THE MATCH | `feature/cld-potm-save` | Released (v0.29.0) |
+| PORT-71 | Replays trimmed to the rally: from the serve, no pauses | `feature/cld-replay-trim` | Ready to test |
 
 ## Releases
 
@@ -460,6 +461,23 @@ the same request). Open: 36 and 40.
     Screenshots of the card before and after SAVE
     (`screenshot.gd ... potm potmsave replays`).
   - Status: **Ready to test**.
+
+### 71. `feature/cld-replay-trim`: replays trimmed to the rally (asked for 2026-10-22)
+
+- [x] `PORT-71` ADR-081, amended: a replay (saved, or PLAY OF THE MATCH)
+  opens just before the serve is struck, not at the serve's setup; any
+  pause in the rally runs unseen (the sim steps while paused, so the
+  pause menu used to show in the replay); and it ends 50 frames after the
+  point (was 80). The recording is unchanged, so the replay is still
+  exact. Replays saved before this have no serve frame and still open at
+  the setup, but skip their pauses.
+  - Verified: `test_saved_replays` (P1 a human who waits four seconds to
+    serve and pauses ten seconds mid-rally: the replay opens 45 frames
+    before the serve, never draws a paused frame, and still ends on the
+    rally's exact snapshot), `test_highlight`; 449/449 plus the e2e,
+    golden traces unchanged. Screenshot of a replay's opening frame.
+  - Status: **Ready to test**: save a rally you paused in, and one you
+    waited to serve, and watch them from REPLAYS.
 
 ## For you
 

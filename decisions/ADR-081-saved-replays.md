@@ -51,6 +51,24 @@ leaves the prompts; with six saved it reads REPLAYS FULL, and SAVE isn't
 offered. It's the same rally as SAVE LAST RALLY's when the match ended on
 it, so it's never saved twice. A saved replay's own card has no SAVE.
 
+### Amended 2026-10-22 (PORT-71): just the rally
+
+The user, after v0.29.0: replays "capture the entire time from the
+beginning of the point til the end. That means it captures pause menus
+and me sitting around on the menu." The sim steps while paused (to take
+the unpause), so paused frames are in the recording, and the replay
+paused too, menu and all; and it opened at the serve's setup, however
+long the server stood there. The recording stays whole (the replay has
+to re-run it exactly); playback now trims it:
+
+- it opens **LEAD_FRAMES (45) before the serve is struck**, catching up
+  unseen to there (a rally keeps its `serve` frame; a replay saved before
+  this has none and opens at the setup, as before);
+- **paused frames run unseen**, so the pause menu and the wait in it never
+  show (in PLAY OF THE MATCH too);
+- it ends **AFTER_FRAMES (50, was 80) after the point**, so just the ball
+  dying and the result line, not the walk back.
+
 ## Why
 
 The sim is exact, and PLAY OF THE MATCH already records everything a
