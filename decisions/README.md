@@ -70,3 +70,4 @@ first decisions, are rows in `design/07_DECISIONS_AND_RISKS.md`.
 | 077 | [Achievements](ADR-077-achievements.md) | Accepted 2026-10-21 |
 | 078 | [OPEN PLAY's Locations, and the GYM](ADR-078-park-locations.md) | Accepted 2026-10-21 |
 | 079 | [The Title Menu, Regrouped](ADR-079-menu-regroup.md) | Accepted 2026-10-21 |
+| 080 | [SPECIALS: a Meter and PICKLE SMASH](ADR-080-specials.md) | Accepted 2026-10-21 |

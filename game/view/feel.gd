@@ -48,7 +48,7 @@ func on_event(e: Array) -> void:
 		K.EVENT_HIT:
 			var shot: int = e[3] >> 4
 			if ON["shake"] and Settings.shake_i > 0:
-				if shot == K.SHOT_OVERHEAD:
+				if shot == K.SHOT_OVERHEAD or shot == K.SHOT_SPECIAL:
 					_shake(SHAKE_SMASH)
 				elif view.sim.ball.z_fp >= K.to_fp(PUTAWAY_Z) or (shot == K.SHOT_DRIVE
 						and view.sim.ball.z_fp >= K.to_fp(PUTAWAY_Z - 4)):

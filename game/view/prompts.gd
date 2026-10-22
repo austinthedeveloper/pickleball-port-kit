@@ -98,6 +98,8 @@ const PAD_ONLY := {"pad_a": JOY_BUTTON_A, "pad_b": JOY_BUTTON_B, "pad_x": JOY_BU
 static func glyph(action: String, device := -1) -> Dictionary:
 	if PAD_ONLY.has(action):
 		return button_glyph(PAD_ONLY[action])
+	if action == "rt":
+		return trigger_glyph()
 	if device < 0:
 		device = GameControls.last_device
 	if device == GameControls.KEYBOARD:
@@ -111,7 +113,16 @@ static func glyph(action: String, device := -1) -> Dictionary:
 		return {"kind": "dpad", "text": "", "dir": -1}
 	if action == "back":
 		action = "drive"                 # B backs out on a pad
+	if action == "special" and first_button(action) < 0:
+		return trigger_glyph()
 	return button_glyph(first_button(action))
+
+
+## The right trigger (SPECIAL, port ADR-080), as each family names it.
+static func trigger_glyph(fam := "") -> Dictionary:
+	if fam == "":
+		fam = family()
+	return {"kind": "pill", "text": {PLAYSTATION: "R2", NINTENDO: "ZR"}.get(fam, "RT")}
 
 
 static func button_glyph(b: int, fam := "") -> Dictionary:

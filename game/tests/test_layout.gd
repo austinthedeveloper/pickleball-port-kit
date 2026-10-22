@@ -256,6 +256,19 @@ func test_hud() -> void:
 	var p := _view(SimTypes.MatchConfig.practice_session(Practice.DEFAULTS, 40))
 	check_layout(p, "hud practice")
 	p.free()
+	# SPECIALS (port ADR-080): the meters full, the prompts up, at match point
+	for doubles in [false, true]:
+		var cfg := Settings.config_for(doubles, -1, K.DIFFICULTY_MEDIUM, 11)
+		cfg.modifiers |= K.MOD_SPECIALS
+		cfg.human[2] = 1                      # both sides' prompts
+		var sv := _view(cfg)
+		sv.sim.meter = [K.SPECIAL_METER_MAX, K.SPECIAL_METER_MAX, K.SPECIAL_METER_MAX, K.SPECIAL_METER_MAX]
+		sv.sim.phase = K.PHASE_LIVE
+		sv.sim.team_score = [10, 10]
+		sv._hud.refresh()
+		check(sv._hud.specials.prompts[0].visible, "the PICKLE SMASH prompt is up")
+		check_layout(sv, "hud specials %s" % ("doubles" if doubles else "singles"))
+		sv.free()
 
 
 ## CAREER (ADR-047): the slots, the card, the editor with every value of

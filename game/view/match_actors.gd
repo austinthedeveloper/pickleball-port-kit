@@ -173,10 +173,11 @@ func frame_for(i: int) -> String:
 
 ## SMASH! over an overhead's contact (ADR-053): rises and fades in half a
 ## second. Display only; skipped in the demo's quiet and when effects are off.
-func smash_pop(at: Vector2) -> void:
+func smash_pop(at: Vector2, special := false) -> void:
 	if not Feel.ON["shake"]:
 		return
-	var t := UiKit.text("small", "SMASH!", at + Vector2(0, -26), 0.5, Color("fbe46a"), v._fx)
+	var t := UiKit.text("big_gold" if special else "small", "PICKLE SMASH!" if special else "SMASH!",
+		at + Vector2(0, -40 if special else -26), 0.5, Color.WHITE if special else Color("fbe46a"), v._fx)
 	t.z_index = 5
 	var tw := v.create_tween()
 	tw.tween_property(t, "position:y", t.position.y - 18.0, 0.5).set_ease(Tween.EASE_OUT)

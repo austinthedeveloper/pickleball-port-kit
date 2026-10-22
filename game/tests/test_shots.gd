@@ -121,6 +121,15 @@ func test_slice_and_short_hold() -> void:
 	GameControls.fake_pads[dev]["buttons"] = [JOY_BUTTON_B, JOY_BUTTON_RIGHT_SHOULDER, JOY_BUTTON_DPAD_LEFT]
 	it = GameControls.read_pad_intent(dev, 1)
 	eq([it.shot, it.aim_x, it.move_x], [K.SHOT_DRIVE, 1, -1], "the right team: RB aims away (+1), the D-pad still moves")
+	GameControls.fake_pads[dev] = {"buttons": []}
+	GameControls.read_pad_intent(dev, 1)
+	GameControls.fake_pads[dev] = {"buttons": [], "rt": 1.0}
+	it = GameControls.read_pad_intent(dev, 1)
+	eq([it.hit_pressed, it.shot], [1, K.SHOT_SPECIAL], "the right trigger is SPECIAL (port ADR-080)")
+	it = GameControls.read_pad_intent(dev, 1)
+	eq(it.hit_pressed, 0, "held, it doesn't swing again")
+	GameControls.fake_pads[dev] = {"buttons": []}
+	GameControls.read_pad_intent(dev, 0)
 	GameControls.fake_pads[dev]["buttons"] = [JOY_BUTTON_LEFT_SHOULDER, JOY_BUTTON_DPAD_RIGHT, JOY_BUTTON_DPAD_UP]
 	it = GameControls.read_pad_intent(dev, 0)
 	eq(it.hit_pressed, 0, "SHORT alone isn't a swing")
@@ -132,14 +141,21 @@ func test_slice_and_short_hold() -> void:
 
 
 ## The keyboard and P1's pad through the input map: SLICE and SHORT are
-## actions (remappable on CONTROLS), RB is SHORT too, SLICE is I.
+## actions (remappable on CONTROLS), RB is SHORT too, SLICE is I;
+## SPECIAL is O and the right trigger.
 func test_the_input_map() -> void:
-	for a in ["slice", "short"]:
+	for a in ["slice", "short", "special"]:
 		check(InputMap.has_action(a), "%s is an action" % a)
 		check(a in Bindings.ACTIONS, "and on CONTROLS")
 	var pads := InputMap.action_get_events("short").filter(func(e): return e is InputEventJoypadButton) \
 		.map(func(e): return e.button_index)
 	check(JOY_BUTTON_LEFT_SHOULDER in pads and JOY_BUTTON_RIGHT_SHOULDER in pads, "SHORT is LB or RB")
+	var sp := InputMap.action_get_events("special").filter(func(e): return e is InputEventJoypadMotion) \
+		.map(func(e): return e.axis)
+	check(JOY_AXIS_TRIGGER_RIGHT in sp, "SPECIAL is the right trigger")
+	eq(Prompts.trigger_glyph(Prompts.XBOX)["text"], "RT")
+	eq(Prompts.trigger_glyph(Prompts.PLAYSTATION)["text"], "R2")
+	eq(Prompts.trigger_glyph(Prompts.NINTENDO)["text"], "ZR")
 	# (the aim rule itself is the pad test's: pressing actions here would leave
 	# "just pressed" set for every later suite, which never advances a frame)
 	var keys := InputMap.action_get_events("slice").filter(func(e): return e is InputEventKey) \

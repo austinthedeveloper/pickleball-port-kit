@@ -6,9 +6,10 @@
 class_name Bindings
 extends RefCounted
 
-const ACTIONS := ["hit", "drive", "soft", "slice", "short", "start", "move_up", "move_down",
+const ACTIONS := ["hit", "drive", "soft", "slice", "short", "special", "start", "move_up", "move_down",
 	"move_left", "move_right"]
-const NAMES := {"hit": "HIT", "drive": "DRIVE", "soft": "SOFT", "slice": "SLICE", "short": "SHORT", "start": "START",
+const NAMES := {"hit": "HIT", "drive": "DRIVE", "soft": "SOFT", "slice": "SLICE", "short": "SHORT",
+	"special": "SPECIAL", "start": "START",
 	"move_up": "UP", "move_down": "DOWN", "move_left": "LEFT", "move_right": "RIGHT"}
 
 ## action -> {"keys": [physical keycodes], "pad": JOY_BUTTON_*}
@@ -34,15 +35,20 @@ static func apply() -> void:
 			var k := InputEventKey.new()
 			k.physical_keycode = code
 			InputMap.action_add_event(a, k)
-		var b := InputEventJoypadButton.new()
-		b.button_index = current[a]["pad"]
-		b.device = GameControls.p1_device()
-		InputMap.action_add_event(a, b)
+		if current[a]["pad"] >= 0:
+			var b := InputEventJoypadButton.new()
+			b.button_index = current[a]["pad"]
+			b.device = GameControls.p1_device()
+			InputMap.action_add_event(a, b)
 		if a == "short" and current[a]["pad"] == JOY_BUTTON_LEFT_SHOULDER:
 			var rb := InputEventJoypadButton.new()   # either shoulder, as on the SNES
 			rb.button_index = JOY_BUTTON_RIGHT_SHOULDER
 			rb.device = GameControls.p1_device()
 			InputMap.action_add_event(a, rb)
+		if a == "special":
+			var rt := GameControls.special_trigger()   # always the trigger, and any button given
+			rt.device = GameControls.p1_device()
+			InputMap.action_add_event(a, rt)
 	GameControls.binding_serial += 1
 
 
@@ -79,7 +85,8 @@ static func _taken(code: int, except: String) -> bool:
 static func rebind_pad(action: String, button: int) -> void:
 	var old: int = current[action]["pad"]
 	for a in ACTIONS:
-		if a != action and current[a]["pad"] == button:
+		# a swap, unless there's nothing to give back (SPECIAL: the trigger)
+		if a != action and current[a]["pad"] == button and old >= 0:
 			current[a]["pad"] = old
 	current[action]["pad"] = button
 	apply()

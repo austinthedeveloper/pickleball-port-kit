@@ -24,6 +24,7 @@ game/tools/test.sh           # all tests, headless
 | Soft (lob; dink aimed away from the net) | L | X |
 | Slice (slow, never deep, steady off a stretch) | I | Y |
 | Short (hold: any swing goes short) | Shift or U | LB or RB |
+| Special (SPECIALS on: PICKLE SMASH with a full meter) | O | RT |
 | Pause; on the result, back to the title | Enter / Esc | Menu |
 
 Any controller works (Xbox, PlayStation, Switch Pro, most others), by
@@ -115,7 +116,7 @@ your return streak. **COURT**: VENUE (PARK, LAKESIDE, SUNSET, DINOSAUR,
 SPACE, UNDERSEA), TIME (DAY, DUSK, NIGHT), SURFACE, KITCHEN, SURROUND,
 LINES, previewed on the demo. **MODIFIERS**: BIG BALL, FAST BALL, GHOST
 BALL, POPCORN, ICE, GLOW, INVERSE, MOON, BOUNCY, WIND, and **RULES**: WIN
-BY 2, LAVA, SIDE-OUT, MOMENTUM, DINK OR DIE, SUDDEN DEATH, MULTI BALL
+BY 2, LAVA, SIDE-OUT, MOMENTUM, DINK OR DIE, SUDDEN DEATH, MULTI BALL, and **SPECIALS** (ADR-080: a meter, and PICKLE SMASH on SPECIAL)
 (ADR-063 to 067). **OPTIONS**: CAMERA, SOUND, MUSIC, FULLSCREEN, SCALE,
 CONTROLS, ACCESSIBILITY (SCREEN SHAKE strength, FLASHES, HUD TEXT, SERVE
 ASSIST, VIBRATION), UPDATES. **CAREER** (ADR-047): three player slots,

@@ -40,7 +40,7 @@ func _init(local := 0, remote := 2, frames := DELAY) -> void:
 static func pack(it: SimTypes.Intent) -> int:
 	return (it.move_x + 1) | ((it.move_y + 1) << 2) | ((it.aim_x + 1) << 4) \
 		| ((it.aim_y + 1) << 6) | (it.hit_pressed << 8) | (it.shot << 9) \
-		| (it.pause_pressed << 11) | (it.hit_held << 12) | (1 << 13)
+		| (it.pause_pressed << 11) | (it.hit_held << 12) | (1 << 13) | ((it.shot >> 2) << 14)
 
 
 static func unpack(v: int) -> SimTypes.Intent:
@@ -52,7 +52,7 @@ static func unpack(v: int) -> SimTypes.Intent:
 	it.aim_x = ((v >> 4) & 3) - 1
 	it.aim_y = ((v >> 6) & 3) - 1
 	it.hit_pressed = (v >> 8) & 1
-	it.shot = (v >> 9) & 3
+	it.shot = ((v >> 9) & 3) | (((v >> 14) & 1) << 2)     # SHOT_SPECIAL needs the third bit
 	it.pause_pressed = (v >> 11) & 1
 	it.hit_held = (v >> 12) & 1
 	return it

@@ -231,10 +231,11 @@ func _replay_event(e: Array) -> void:
 			var lead := -14.0 if sim.players[slot].team else 14.0
 			var shot: int = e[3] >> 4 if e[0] == K.EVENT_HIT else K.SHOT_STANDARD
 			view.actors.spawn_fx("spark", CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp)
-				+ Vector2(lead, 0), 1 if shot == K.SHOT_DRIVE or shot == K.SHOT_OVERHEAD else 0)
-			if shot == K.SHOT_OVERHEAD:
+				+ Vector2(lead, 0), 1 if shot in [K.SHOT_DRIVE, K.SHOT_OVERHEAD, K.SHOT_SPECIAL] else 0)
+			if shot == K.SHOT_OVERHEAD or shot == K.SHOT_SPECIAL:
 				view._players[slot]["choice"] = "overhead"
-				view.actors.smash_pop(CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp))
+				view.actors.smash_pop(CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp),
+					shot == K.SHOT_SPECIAL)
 		K.EVENT_BOUNCE:
 			view.actors.spawn_fx("dust", CourtView.ground(K.to_fp(e[1]), K.to_fp(e[2])), 0)
 		K.EVENT_POINT:

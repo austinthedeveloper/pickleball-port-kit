@@ -42,6 +42,10 @@ var hit_stop := 0
 var contact_volley := 0
 ## MOMENTUM: the slot whose volley is still carrying them (-1: none).
 var momentum_slot := -1
+## SPECIALS (port ADR-080): each slot's meter, 0 .. SPECIAL_METER_MAX,
+## and the team whose PICKLE SMASH is in the air (-1: none).
+var meter := [0, 0, 0, 0]
+var smash_team := -1
 var shot_serial := 0            # u8
 var frame_count := 0            # u16
 
@@ -311,8 +315,13 @@ static func apply_targeted_shot(b: Ball, p: Player, intent: Intent, grow: int = 
 			max_frames = K.HIT_OVERHEAD_MAX_FRAMES
 			wide = K.HIT_OVERHEAD_STRETCH_WIDE
 			longer = K.HIT_OVERHEAD_STRETCH_LONG
+		elif shot == K.SHOT_SPECIAL:
+			pace = K.HIT_PACE_SPECIAL_FP
+			min_frames = K.HIT_SPECIAL_MIN_FRAMES
+			max_frames = K.HIT_SPECIAL_MAX_FRAMES
 	pace = (pace * Paddles.power_mul(p.paddle)) >> 6
-	if not in_sweet_spot(p, b, grow):
+	# PICKLE SMASH is never stretched: it goes where it's aimed
+	if not in_sweet_spot(p, b, grow) and shot != K.SHOT_SPECIAL:
 		wide = (wide * Paddles.control_mul(p.paddle)) >> 6
 		longer = (longer * Paddles.control_mul(p.paddle)) >> 6
 		if ty < K.HIT_TARGET_LANE_CENTER \
@@ -326,6 +335,9 @@ static func apply_targeted_shot(b: Ball, p: Player, intent: Intent, grow: int = 
 	var flight := clampi(distance / pace, min_frames, max_frames)
 	if shot == K.SHOT_OVERHEAD:
 		flight = overhead_flight(b, tx, ty, flight, max_frames)
+	elif shot == K.SHOT_SPECIAL:
+		# PICKLE SMASH always clears the net, however low the ball
+		flight = overhead_flight(b, tx, ty, flight, K.HIT_FLIGHT_MAX_FRAMES)
 	launch(b, tx, ty, flight)
 
 ## A smash steep enough to land fast but not into the tape (ADR-053): the
@@ -377,13 +389,19 @@ func resolve_player_hits() -> int:
 		ball.last_hitter = i
 		contact_volley = 1 if ball.bounce_count == 0 else 0
 		ball.bounce_count = 0
+		# PICKLE SMASH knocks its returner back: their return pops up soft
+		var returned := smash_team >= 0 and p.team != smash_team
+		if returned:
+			p.shot_type = K.SHOT_SOFT
+		smash_team = p.team if p.shot_type == K.SHOT_SPECIAL else -1
 		# a swing at a falling ball overhead is a smash (ADR-053)
 		if config.overhead and not (config.modifiers & K.MOD_DINK_OR_DIE) \
 				and (p.shot_type == K.SHOT_STANDARD or p.shot_type == K.SHOT_DRIVE) \
 				and ball.vz_fp < 0 \
 				and ball.z_fp >= K.to_fp(K.HIT_OVERHEAD_Z):
 			p.shot_type = K.SHOT_OVERHEAD
-		apply_targeted_shot(ball, p, intents[i], grow_fp)
+		apply_targeted_shot(ball, p, special_aim(i) if p.shot_type == K.SHOT_SPECIAL
+			else (pop_up_aim(i) if returned else intents[i]), grow_fp)
 		return i + 1
 	return 0
 
@@ -789,10 +807,14 @@ func resolve_point(losing_team: int, fault: int) -> void:
 	point_winner = winner
 	last_fault = fault
 	momentum_slot = -1
+	smash_team = -1
 	# SIDE-OUT: only the serving side scores
 	point_scored = not (config.modifiers & K.MOD_SIDE_OUT) or winner == serving_team
 	if point_scored:
 		team_score[winner] += 1
+	for i in K.MAX_PLAYERS:
+		if players[i].active and players[i].team == winner:
+			fill_meter(i, K.SPECIAL_FILL_POINT)
 	if fault != K.FAULT_SECOND_BOUNCE and fault != K.FAULT_NONE:
 		emit(K.EVENT_FAULT, K.from_fp(ball.x_fp), K.from_fp(ball.y_fp), fault)
 	emit(K.EVENT_POINT, K.from_fp(ball.x_fp), K.from_fp(ball.y_fp), winner)
@@ -1004,6 +1026,8 @@ static func late_period(period: int, percent: int) -> int:
 
 ## Fresh match (RST-01): every module re-initialized.
 func new_match() -> void:
+	meter = [0, 0, 0, 0]
+	smash_team = -1
 	rematch_requested = false
 	title_requested = false
 	_players_initialize()
@@ -1031,6 +1055,10 @@ func start_attract() -> void:
 
 func contact(slot: int) -> void:
 	var p: Player = players[slot]
+	if p.shot_type == K.SHOT_SPECIAL:
+		meter[slot] = 0                  # PICKLE SMASH spends the meter
+	else:
+		fill_meter(slot, K.SPECIAL_FILL_HIT)
 	shot_serial = (shot_serial + 1) & 0xff
 	p.flash_timer = K.HIT_FLASH_FRAMES
 	hit_stop = K.HIT_STOP_FRAMES
@@ -1138,6 +1166,10 @@ static func momentum_in_kitchen(x_fp: int, y_fp: int, team: int) -> bool:
 	return in_kitchen(x_fp + (grace if team else -grace), y_fp, team)
 
 func _update_live() -> void:
+	if specials_on() and frame_count % K.SPECIAL_FILL_PERIOD == 0:
+		for i in K.MAX_PLAYERS:
+			if players[i].active:
+				fill_meter(i, 1)
 	if config.modifiers & K.MOD_LAVA:
 		for p in players:
 			if p.active and in_kitchen(p.x_fp, p.y_fp, p.team):
@@ -1304,6 +1336,18 @@ func step(human: Array = []) -> void:
 				_ai_update(slot)
 			else:
 				ai.hold_intent(slot, intents[slot])
+	# SPECIALS: a CPU (and the bot) with a full meter smashes its next
+	# standard or drive; a SPECIAL press without one is a standard hit
+	# in a rally only (a serve isn't a smash)
+	for slot in K.MAX_PLAYERS:
+		var it: Intent = intents[slot]
+		var ready := special_ready(slot) and phase == K.PHASE_LIVE
+		if (owners[slot] == K.OWNER_CPU or (slot == 0 and (p1_bot or attract))) \
+				and ready and it.hit_pressed \
+				and (it.shot == K.SHOT_STANDARD or it.shot == K.SHOT_DRIVE):
+			it.shot = K.SHOT_SPECIAL
+		if it.shot == K.SHOT_SPECIAL and not ready:
+			it.shot = K.SHOT_STANDARD
 	# DINK OR DIE: the CPUs (and the bot) play the soft shot for a drive
 	if config.modifiers & K.MOD_DINK_OR_DIE:
 		for slot in K.MAX_PLAYERS:
@@ -1312,6 +1356,50 @@ func step(human: Array = []) -> void:
 				intents[slot].shot = K.SHOT_SOFT
 	game_update()
 	loop_count = (loop_count + 1) & 0xffff
+
+
+# --- SPECIALS (port ADR-080) --------------------------------------------------------------
+
+## SPECIALS is on for this match (not practice or MULTI BALL: no rallies
+## of one ball to win).
+func specials_on() -> bool:
+	return config.modifiers & K.MOD_SPECIALS != 0 and not config.practice and not multi_on
+
+
+## The slot's meter is full: SPECIAL plays PICKLE SMASH.
+func special_ready(slot: int) -> bool:
+	return specials_on() and meter[slot] >= K.SPECIAL_METER_MAX
+
+
+## PICKLE SMASH's aim: deep, down the sideline away from the other side
+## (the lane their players are furthest from), whatever was held.
+func special_aim(slot: int) -> Intent:
+	var team: int = players[slot].team
+	var it := Intent.new()
+	it.aim_x = -1 if team else 1
+	var sum := 0
+	var n := 0
+	for p in players:
+		if p.active and p.team != team:
+			sum += p.y_fp
+			n += 1
+	var their_y := sum / maxi(n, 1)
+	it.aim_y = 1 if their_y < K.to_fp(K.COURT_CENTERLINE_Y) else -1
+	return it
+
+
+## A PICKLE SMASH's return: a lob to the middle of the court, whatever was
+## held (the paddle was knocked back).
+func pop_up_aim(slot: int) -> Intent:
+	var it := Intent.new()
+	it.aim_x = 0
+	it.aim_y = 0
+	return it
+
+
+func fill_meter(slot: int, n: int) -> void:
+	if specials_on():
+		meter[slot] = mini(meter[slot] + n, K.SPECIAL_METER_MAX)
 
 
 # --- MULTI BALL (port ADR-067): sim/multi_ball.gd --------------------------------------------
@@ -1351,6 +1439,9 @@ func snapshot() -> Array:
 		s.append_array([server_number, first_server, point_scored, opening])
 	if config.modifiers & K.MOD_MOMENTUM:
 		s.append(momentum_slot)
+	if config.modifiers & K.MOD_SPECIALS:
+		s.append_array(meter)
+		s.append(smash_team)
 	if multi_on:
 		s.append_array([mb.timer, mb.launched])
 		for m: MultiBallPlay.Entry in mb.balls:

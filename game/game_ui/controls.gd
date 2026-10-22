@@ -19,6 +19,7 @@ const ACTIONS := {
 	"soft": [KEY_L],
 	"slice": [KEY_I],                  # SNES X (SNES ADR-056)
 	"short": [KEY_SHIFT, KEY_U],       # SNES L or R held: any shot goes short
+	"special": [KEY_O],                # SPECIALS' PICKLE SMASH (port ADR-080)
 	"start": [KEY_ENTER, KEY_ESCAPE],
 }
 const PAD_BUTTONS := {
@@ -27,6 +28,7 @@ const PAD_BUTTONS := {
 	"soft": JOY_BUTTON_X,
 	"slice": JOY_BUTTON_Y,
 	"short": JOY_BUTTON_LEFT_SHOULDER,   # RB too (added in _ready)
+	"special": -1,                       # no button: the right trigger (port ADR-080)
 	"start": JOY_BUTTON_START,
 	"move_up": JOY_BUTTON_DPAD_UP,
 	"move_down": JOY_BUTTON_DPAD_DOWN,
@@ -157,14 +159,16 @@ func _ready() -> void:
 			var e := InputEventKey.new()
 			e.physical_keycode = key
 			InputMap.action_add_event(action, e)
-		if PAD_BUTTONS.has(action):
+		if PAD_BUTTONS.get(action, -1) >= 0:
 			var b := InputEventJoypadButton.new()
 			b.button_index = PAD_BUTTONS[action]
 			InputMap.action_add_event(action, b)
-	# SHORT is either shoulder, as on the SNES (L or R)
+	# SHORT is either shoulder, as on the SNES (L or R); SPECIAL, which the
+	# SNES pad never had, is the right trigger (port ADR-080)
 	var rb := InputEventJoypadButton.new()
 	rb.button_index = JOY_BUTTON_RIGHT_SHOULDER
 	InputMap.action_add_event("short", rb)
+	InputMap.action_add_event("special", special_trigger())
 	for pair in [["move_left", JOY_AXIS_LEFT_X, -1.0], ["move_right", JOY_AXIS_LEFT_X, 1.0],
 			["move_up", JOY_AXIS_LEFT_Y, -1.0], ["move_down", JOY_AXIS_LEFT_Y, 1.0]]:
 		var m := InputEventJoypadMotion.new()
@@ -177,7 +181,7 @@ func _ready() -> void:
 ## Presses latched from input events until the next sim step reads them,
 ## so a tap shorter than a physics tick (fast frames, high refresh) is
 ## never lost.
-const LATCHED := ["hit", "drive", "soft", "slice", "start"]
+const LATCHED := ["hit", "drive", "soft", "slice", "special", "start"]
 static var _latch := {}
 
 
@@ -272,10 +276,14 @@ static func read_intent(team := 0) -> SimTypes.Intent:
 	var a := _pressed("drive")
 	var y := _pressed("soft")
 	var x := _pressed("slice")
-	it.hit_pressed = 1 if (a or b or y or x) else 0
+	var sp := _pressed("special")
+	it.hit_pressed = 1 if (a or b or y or x or sp) else 0
 	it.hit_held = 1 if (Input.is_action_pressed("hit") or Input.is_action_pressed("drive")
-		or Input.is_action_pressed("soft") or Input.is_action_pressed("slice")) else 0
-	if a:
+		or Input.is_action_pressed("soft") or Input.is_action_pressed("slice")
+		or Input.is_action_pressed("special")) else 0
+	if sp:
+		it.shot = K.SHOT_SPECIAL         # a standard hit unless the meter is full
+	elif a:
 		it.shot = K.SHOT_DRIVE
 	elif y:
 		it.shot = K.SHOT_SOFT
@@ -314,11 +322,22 @@ static func joy_axis(device: int, axis: int) -> float:
 	if not fake_pads.is_empty():
 		if not fake_pads.has(device):
 			return 0.0
+		if axis == JOY_AXIS_TRIGGER_RIGHT:
+			return float(fake_pads[device].get("rt", 0.0))
 		return float(fake_pads[device].get("x" if axis == JOY_AXIS_LEFT_X else "y", 0.0))
 	return Input.get_joy_axis(device, axis)
 
 
 static var _pad_prev := {}
+const TRIGGER_RIGHT := -2           ## the right trigger, as a key of a pad's held buttons
+
+
+## SPECIAL's pad input: the right trigger pulled (port ADR-080).
+static func special_trigger() -> InputEventJoypadMotion:
+	var m := InputEventJoypadMotion.new()
+	m.axis = JOY_AXIS_TRIGGER_RIGHT
+	m.axis_value = 1.0
+	return m
 
 ## A pad's intent this frame (2P and multiplayer). Menu is the pause.
 static func read_pad_intent(device: int, team := 0) -> SimTypes.Intent:
@@ -341,15 +360,18 @@ static func read_pad_intent(device: int, team := 0) -> SimTypes.Intent:
 	var held := {}
 	for b in [JOY_BUTTON_A, JOY_BUTTON_B, JOY_BUTTON_X, JOY_BUTTON_Y, JOY_BUTTON_START]:
 		held[b] = joy_button(device, b)
+	held[TRIGGER_RIGHT] = joy_axis(device, JOY_AXIS_TRIGGER_RIGHT) > 0.5
 	var prev: Dictionary = _pad_prev.get(device, {})
 	var pressed := {}
 	for b in held:
 		pressed[b] = held[b] and not prev.get(b, false)
 	_pad_prev[device] = held
-	var swings := [JOY_BUTTON_A, JOY_BUTTON_B, JOY_BUTTON_X, JOY_BUTTON_Y]
+	var swings := [JOY_BUTTON_A, JOY_BUTTON_B, JOY_BUTTON_X, JOY_BUTTON_Y, TRIGGER_RIGHT]
 	it.hit_pressed = 1 if swings.any(func(b): return pressed[b]) else 0
 	it.hit_held = 1 if swings.any(func(b): return held[b]) else 0
-	if pressed[JOY_BUTTON_B]:
+	if pressed[TRIGGER_RIGHT]:
+		it.shot = K.SHOT_SPECIAL
+	elif pressed[JOY_BUTTON_B]:
 		it.shot = K.SHOT_DRIVE
 	elif pressed[JOY_BUTTON_X]:
 		it.shot = K.SHOT_SOFT

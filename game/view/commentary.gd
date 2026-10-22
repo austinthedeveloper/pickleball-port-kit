@@ -144,9 +144,9 @@ func _on_hit(e: Array) -> void:
 			fam = "shot_drive"
 		K.SHOT_SLICE:
 			fam = "shot_slice"
-		K.SHOT_OVERHEAD:
+		K.SHOT_OVERHEAD, K.SHOT_SPECIAL:
 			fam = "shot_smash"
-			chance = SMASH_CHANCE
+			chance = SMASH_CHANCE if shot == K.SHOT_OVERHEAD else [0.0, 1.0, 1.0]   # PICKLE SMASH: always
 		K.SHOT_SOFT:
 			fam = "shot_lob" if s.ball.vz_fp > 40 else "shot_dink"
 		_:

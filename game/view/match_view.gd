@@ -424,7 +424,8 @@ func _rumble_hit(slot: int, shot: int) -> void:
 	if demo or sim.config.human[slot] == 0:
 		return
 	var strength: Array = {K.SHOT_DRIVE: [0.3, 0.7, 0.12], K.SHOT_SOFT: [0.2, 0.0, 0.06],
-		K.SHOT_OVERHEAD: [0.5, 1.0, 0.18], K.SHOT_SLICE: [0.15, 0.1, 0.06]}.get(
+		K.SHOT_OVERHEAD: [0.5, 1.0, 0.18], K.SHOT_SPECIAL: [0.7, 1.0, 0.25],
+		K.SHOT_SLICE: [0.15, 0.1, 0.06]}.get(
 		shot, [0.35, 0.25, 0.08])
 	if net:                              # online: this machine's own player only, on P1's pad
 		if slot == my_team() * 2:
@@ -614,10 +615,11 @@ func _on_event(e: Array) -> void:
 			var lead := -14.0 if sim.players[slot].team else 14.0
 			var shot: int = e[3] >> 4 if kind == K.EVENT_HIT else K.SHOT_STANDARD
 			actors.spawn_fx("spark", CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp)
-				+ Vector2(lead, 0), 1 if shot == K.SHOT_DRIVE or shot == K.SHOT_OVERHEAD else 0)
-			if shot == K.SHOT_OVERHEAD:
+				+ Vector2(lead, 0), 1 if shot in [K.SHOT_DRIVE, K.SHOT_OVERHEAD, K.SHOT_SPECIAL] else 0)
+			if shot == K.SHOT_OVERHEAD or shot == K.SHOT_SPECIAL:
 				_players[slot]["choice"] = "overhead"   # whatever the windup guessed
-				actors.smash_pop(CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp))
+				actors.smash_pop(CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp),
+					shot == K.SHOT_SPECIAL)
 		K.EVENT_BOUNCE:
 			actors.spawn_fx("dust", at, 0)
 		K.EVENT_CROWD:

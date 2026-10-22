@@ -47,6 +47,7 @@ var _last_rally := 0
 var _frame := 0
 ## Multiplayer (PORT-16): a P1..P4 tag over each human, in their colour.
 var _tags: Array = []            ## [slot, Node2D]
+var specials: SpecialMeters      ## SPECIALS' meters (port ADR-080); null when it's off
 var _banner_y := 250.0
 var _result_y := 316.0
 
@@ -114,6 +115,10 @@ func setup(v: MatchView) -> void:
 	_panel(pan_r, Rect2(480 + tw / 2 + 18, y, rw, h))
 	_right_label = _text("big", right_name, Vector2(480 + tw / 2 + 18 + 12, y + 8), 0, right_tint)
 	_right_score = _text("big", "0", Vector2(480 + tw / 2 + 18 + rw - 10 - dig / 2.0, y + 8), 0.5)
+	if view.sim.specials_on():
+		specials = SpecialMeters.new().setup(view, Rect2(480 - tw / 2 - 18 - lw, y, lw, h),
+			Rect2(480 + tw / 2 + 18, y, rw, h))
+		add_child(specials)
 	_panel("doubles" if doubles else "title", Rect2(480 - tw / 2, y, tw, h))
 	_text("big_gold", title, Vector2(480, y + 8), 0.5)
 	if doubles:
@@ -261,6 +266,8 @@ func refresh() -> void:
 	_subtitle.visible = mp and not view.demo
 	_frame += 1
 	_refresh_live()
+	if specials:
+		specials.refresh()
 	var human_serving: bool = not view.demo and s.owners[s.server_index] == K.OWNER_HUMAN
 	_prompt.visible = human_serving and s.phase == K.PHASE_SERVE_SETUP \
 		and s.phase_timer >= K.SERVE_READY_FRAMES and not s.charge_charging

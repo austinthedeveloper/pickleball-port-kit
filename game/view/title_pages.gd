@@ -175,7 +175,7 @@ static func build(t: TitleScreen) -> void:
 		Bindings.reset()
 		t._store_settings()})
 	t._add_page("controls", "CONTROLS", control_rows, [["hit", "REBIND"], ["back", "BACK"]],
-		Rect2(250, 34, 460, 0))          # high: SLICE and SHORT made it 13 rows
+		Rect2(250, 8, 460, 0))           # high: SLICE, SHORT and SPECIAL made it 14 rows
 	t.career.build_pages()
 	t._add_page("records", "RECORDS", [
 		{"id": "singles", "label": "SINGLES", "value": func(): return t._wl("singles")},

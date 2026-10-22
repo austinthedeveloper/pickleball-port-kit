@@ -6,6 +6,7 @@
 ## the MOD_* bits. "title_options"
 ## (any page id) opens that title page; "court=S,K,R,L" sets the court
 ## colour presets; "time=N" DAY 0, DUSK 1, NIGHT 2;
+## "meterfull" keeps P1's SPECIALS meter full (with mods=131072), "picklesmash" shoots a PICKLE SMASH;
 ## "pad" shows the controller prompts; "save" a save with records (title); "pause" pauses the match at the end; "tune" opens the tuning panel; "debug" the F3 overlay (hit volumes); "location=N" OPEN PLAY's location; "potm" a bot match to its PLAY OF THE MATCH; "nearreach" a near-side reach mid-step;
 ## "closecall" shows a forced close-up; "initials" the initials card;
 ## "result" plays a bot match and ends it (the stats card); "mp4" four
@@ -418,6 +419,16 @@ func _tick() -> void:
 		for pl in _view.sim.players:
 			if _frames > _target / 2 and pl.shot_type == K.SHOT_OVERHEAD and pl.contact_consumed \
 					and pl.state == K.STATE_ACTIVE:
+				_target = _frames + 4
+	if _view is MatchView and "meterfull" in OS.get_cmdline_user_args() and _view.sim.specials_on():
+		# SPECIALS (port ADR-080): P1's meter kept full, so the prompt shows
+		# and the bot plays PICKLE SMASH; "picklesmash" shoots 4 frames after
+		# the first one past <frames>/2
+		_view.sim.meter[0] = K.SPECIAL_METER_MAX
+		for pl in _view.sim.players:
+			if "picklesmash" in OS.get_cmdline_user_args() and _frames > _target / 2 \
+					and pl.shot_type == K.SHOT_SPECIAL and pl.contact_consumed and pl.state == K.STATE_ACTIVE \
+					and _target > _frames + 6:
 				_target = _frames + 4
 	if _frames == _target - 3 and _view is MatchView and "score10" in OS.get_cmdline_user_args():
 		_view.sim.team_score = [10, 10]

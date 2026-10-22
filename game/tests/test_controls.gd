@@ -46,7 +46,10 @@ func test_conflicts_swap() -> void:
 	Bindings.rebind_pad("hit", JOY_BUTTON_B)  # drive's button
 	eq([_pad("hit"), _pad("drive")], [JOY_BUTTON_B, JOY_BUTTON_A], "the buttons swap")
 	for a in Bindings.ACTIONS:
-		check(not _keys(a).is_empty() and _pad(a) >= 0, "%s is still bound" % a)
+		# SPECIAL's pad input is the right trigger (port ADR-080), no button
+		check(not _keys(a).is_empty() and (_pad(a) >= 0 or a == "special"), "%s is still bound" % a)
+	Bindings.rebind_pad("special", JOY_BUTTON_X)    # soft's button: soft keeps it (nothing to swap)
+	eq([_pad("special"), _pad("soft")], [JOY_BUTTON_X, JOY_BUTTON_X], "nobody is left without a button")
 	check(not Bindings.is_default())
 	Bindings.reset()
 	check(Bindings.is_default(), "reset")
@@ -93,8 +96,8 @@ func test_controls_page_listens() -> void:
 	var t := _title()
 	t.open_page("controls")
 	var p: MenuPage = t.pages["controls"]
-	eq(p.rows.map(func(r): return r["id"]).slice(0, 6), ["hit", "drive", "soft", "slice", "short", "start"],
-		"the four swings, SHORT (SNES ADR-056), then START")
+	eq(p.rows.map(func(r): return r["id"]).slice(0, 7), ["hit", "drive", "soft", "slice", "short", "special", "start"],
+		"the four swings, SHORT (SNES ADR-056), SPECIAL (port ADR-080), then START")
 	p.select("soft")
 	p.press()
 	eq(t.listening, "soft", "B on a row listens")

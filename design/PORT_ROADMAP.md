@@ -90,6 +90,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-62 | Player specials and powerups: a running design doc | `feature/cld-specials-doc` | In progress |
 | PORT-63 | Practice without the announcer | `feature/cld-practice-quiet` | Released (v0.22.1) |
 | PORT-64 | The title menu regrouped: five places to go | `feature/cld-menu-regroup` | Released (v0.23.0) |
+| PORT-65 | SPECIALS: the meter and PICKLE SMASH | `feature/cld-specials` | Ready to test |
 
 ## Releases
 
@@ -325,12 +326,35 @@ the same request). Open: 36 and 40.
     (`TitleScreen.reveal`), `test_layout` on every page; 427/427 plus the
     e2e (now through MATCH SETUP), golden traces unchanged. Screenshots
     of MAIN, PLAY, MATCH SETUP and PLAYER.
+  - Status: **Released (v0.23.0)**.
+
+### 65. `feature/cld-specials`: SPECIALS, the meter and PICKLE SMASH (asked for 2026-10-21)
+
+- [x] `PORT-65` ADR-080: SPECIALS on RULES (off by default, off in the
+  ROM's game). Each player's meter fills with shots, points won and time
+  in a rally; SPECIAL (O, the right trigger) spends a full one on PICKLE
+  SMASH: twice a drive's pace, never stretched, always over the net,
+  aimed deep away from the other side, and its return pops up soft (the
+  knock-back). The CPUs use it too. Meters under the score panels, a
+  PICKLE SMASH prompt, the PICKLE SMASH! pop.
+  - Verified: `test_specials` (10: off by default, the fills, spending,
+    the flight, the knock-back, the CPUs, not in practice or MULTI BALL,
+    online's packing, the meters display only), `test_shots` and
+    `test_controls` (the trigger, SHORT still LB or RB), `test_layout`
+    (the meters and prompts); 436/436 plus the e2e, golden traces
+    unchanged. `rally_stats` with mods=131072: the smasher's side wins 56%
+    (doubles) and 79% (singles) of rallies with a smash. Screenshots of
+    the meters and a PICKLE SMASH.
   - Status: **Ready to test**.
 
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
+
+- **PORT-65 SPECIALS:** PICKLE SMASH's strength is a first guess
+  (ADR-080 has the numbers and the knobs). Say if it should win more or
+  less often, or fill faster or slower.
 
 - **PORT-62 specials and powerups:** four questions at the end of
   `design/SPECIALS_AND_POWERUPS.md` (route A, B or C; specials by paddle

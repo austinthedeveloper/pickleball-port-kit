@@ -112,6 +112,19 @@ const SHOT_DRIVE := 1
 const SHOT_SOFT := 2
 const SHOT_SLICE := 3      ## X: slow, never deep, steady off a stretch (SNES ADR-056)
 const SHOT_OVERHEAD := 4   ## never asked for: a high contact makes it (ADR-053; the port's)
+## SPECIAL with a full meter (SPECIALS, port ADR-080): PICKLE SMASH, a smash
+## from any height. Without a full meter the press is a standard hit.
+const SHOT_SPECIAL := 5
+const HIT_PACE_SPECIAL_FP := 128         ## twice a drive's pace
+const HIT_SPECIAL_MIN_FRAMES := 10
+const HIT_SPECIAL_MAX_FRAMES := 20
+## SPECIALS' meter, one a player: full at SPECIAL_METER_MAX. It fills by
+## SPECIAL_FILL_HIT a shot you hit, SPECIAL_FILL_POINT a point your side
+## wins, and one every SPECIAL_FILL_PERIOD frames of a live rally.
+const SPECIAL_METER_MAX := 96
+const SPECIAL_FILL_HIT := 4
+const SPECIAL_FILL_POINT := 8
+const SPECIAL_FILL_PERIOD := 40
 
 const OWNER_NONE := 0
 const OWNER_HUMAN := 1
@@ -253,6 +266,9 @@ const MOD_BOUNCY := 4096        ## the ball keeps more height on each bounce
 const MOD_WIND := 8192          ## a crosswind, a new one each serve
 const MOD_DINK_OR_DIE := 16384  ## a drive loses the point (DRIVE!)
 const MOD_SUDDEN_DEATH := 32768 ## one point takes the match
+## SPECIALS (port ADR-080), remaster-only: a meter that fills with play and
+## a SPECIAL button that spends it on PICKLE SMASH.
+const MOD_SPECIALS := 131072
 const MOON_GRAVITY_FP := -2     ## a third less than BALL_GRAVITY_FP
 const MOON_FLIGHT := [3, 2]     ## a shot's frames, times 3/2
 const BALL_SPEED_MIN := 70       ## MODIFIERS > BALL SPEED, percent (port ADR-071)

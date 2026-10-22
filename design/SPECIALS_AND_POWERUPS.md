@@ -29,10 +29,11 @@ line in the bible's §5 in the same branch.
 Each player has a meter that fills with good play. When it's full, the
 SPECIAL button spends it on the next shot.
 
-- **The button.** The SNES pad has X, L and R free: B is the standard hit,
-  Y soft, A drive. X is the natural SPECIAL; L/R stay free for a later
-  "taunt" or the lobby. On keyboards and modern pads it's one more action
-  in the remap list, shown through `PromptBar` like the rest.
+- **The button.** The SNES pad has none free: B hits, Y soft, A drive, X
+  SLICE, and L or R held is SHORT (all canon, SNES ADR-056). So SPECIAL is
+  something the SNES never had: the right trigger on a modern pad, O on the
+  keyboard, remappable on CONTROLS and shown through `PromptBar` like the
+  rest (built: ADR-080).
 - **What fills it:** rallies you win, a long rally (any outcome), a clean
   dink exchange, a return from deep. Not aces: they shouldn't snowball.
   A side that's behind could fill faster (a catch-up rule), to be tuned.
@@ -117,3 +118,8 @@ pickups work as a party mode on top.
 
 - 2026-10-21: started. Routes A/B/C, specials by paddle, the first
   powerup list, where it touches the rest of the game.
+- 2026-10-21: route A's first special built (PORT-65, ADR-080): SPECIALS
+  on RULES, a meter for each player, PICKLE SMASH on O / the right
+  trigger (not X: X became SLICE, SNES ADR-056; not the shoulders: they're
+  SHORT in the bible). A smash's return pops up (the knock-back). Next:
+  the other paddles' specials, if PICKLE SMASH plays well.
