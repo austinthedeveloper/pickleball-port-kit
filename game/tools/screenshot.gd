@@ -8,7 +8,7 @@
 ## colour presets; "time=N" DAY 0, DUSK 1, NIGHT 2;
 ## "meterfull" keeps P1's SPECIALS meter full (with mods=131072), "picklesmash" shoots a PICKLE SMASH;
 ## "camflash" a burst of the crowd's camera flashes (PORT-66);
-## "pad" shows the controller prompts; "save" a save with records (title); "pause" pauses the match at the end; "tune" opens the tuning panel; "debug" the F3 overlay (hit volumes); "location=N" OPEN PLAY's location; "potm" a bot match to its PLAY OF THE MATCH; "nearreach" a near-side reach mid-step;
+## "pad" shows the controller prompts; "save" a save with records (title); "pause" pauses the match at the end; "tune" opens the tuning panel; "debug" the F3 overlay (hit volumes); "location=N" OPEN PLAY's location; "potm" a bot match to its PLAY OF THE MATCH ("potmsave" presses its SAVE); "nearreach" a near-side reach mid-step;
 ## "closecall" shows a forced close-up; "initials" the initials card;
 ## "result" plays a bot match and ends it (the stats card); "mp4" four
 ## humans on fake pads (doubles); title_lobby a lobby with three players.
@@ -358,6 +358,8 @@ func _initialize() -> void:
 				if h and h.playing() and ("potm_title" in a.slice(4) or (h._state == "play"
 						and h._frame >= int(h.best["to"]) - 12)):
 					break
+			if "potmsave" in a.slice(4) and m.highlight and m.highlight.playing():
+				m.highlight.on_save()        # PORT-70: its SAVE (with "replays": not the player's)
 		_view = m
 	process_frame.connect(_tick)
 

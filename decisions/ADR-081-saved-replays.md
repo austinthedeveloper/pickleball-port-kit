@@ -41,6 +41,16 @@ Builds on: ADR-075 (PLAY OF THE MATCH).
   version is caught by the snapshot check, which drops the replay quietly
   (the warning PLAY OF THE MATCH already gives).
 
+### Amended 2026-10-22 (PORT-70): SAVE at the end of the match
+
+The user, after v0.28.0: "what about saving the replay at the end of the
+game?" While PLAY OF THE MATCH plays, **SAVE** (soft: X on a pad, L on
+the keyboard, beside SKIP on hit) keeps its rally, the longest of the
+match. The card's rally line then reads "14-SHOT RALLY, SAVED" and SAVE
+leaves the prompts; with six saved it reads REPLAYS FULL, and SAVE isn't
+offered. It's the same rally as SAVE LAST RALLY's when the match ended on
+it, so it's never saved twice. A saved replay's own card has no SAVE.
+
 ## Why
 
 The sim is exact, and PLAY OF THE MATCH already records everything a

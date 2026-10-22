@@ -7,8 +7,9 @@
 ##
 ## Saved replays (PORT-69, ADR-081) are the same recording cut after one
 ## rally: the pause menu's SAVE LAST RALLY writes `export(last)` through
-## SavedReplays, and `from_saved` plays one back, from REPLAYS on the
-## title or quietly in its demo.
+## SavedReplays, as SAVE does here while PLAY OF THE MATCH plays (PORT-70),
+## and `from_saved` plays one back, from REPLAYS on the title or quietly
+## in its demo.
 class_name Highlight
 extends RefCounted
 
@@ -30,6 +31,7 @@ var _serve_snap: Array = []
 var best := {}                   ## the longest rally of this match so far
 var last := {}                   ## the rally that ended last (SAVE LAST RALLY)
 var saved_last := false          ## that one is saved already
+var saved_best := false          ## PLAY OF THE MATCH's rally is saved (its SAVE)
 var saved := false               ## a saved replay, not this match's (from_saved)
 var quiet := false               ## in the title's demo: no card, no skip, no score
 
@@ -110,6 +112,7 @@ func op(o: Array) -> void:
 	_ops[frames()].append(o)
 	if o[0] == "new_match":
 		best = {}
+		saved_best = false
 
 
 ## After the live step: a serve's start, a point's end (the longest rally
@@ -131,6 +134,7 @@ func after_step(events: Array) -> void:
 			saved_last = false
 		if shots >= MIN_SHOTS and shots >= int(best.get("shots", 0)):
 			best = rally
+			saved_best = false
 		_serve_snap = []
 
 
@@ -155,6 +159,27 @@ func export(rally: Dictionary) -> Dictionary:
 		"cfg": _cfg.duplicate(true), "career": _career.to_dict() if _career else {},
 		"bot": _bot, "ops": ops, "inputs": _inputs.slice(0, end * 8),
 		"rally": rally.duplicate(true)}
+
+
+## PLAY OF THE MATCH's SAVE (PORT-70): its rally to SavedReplays, once
+## (it's the same rally as SAVE LAST RALLY's when the match ended on it).
+func save_best() -> bool:
+	if best_state() != "SAVE":
+		return false
+	saved_best = SavedReplays.save(export(best)) != ""
+	if saved_best and int(last.get("from", -1)) == int(best["from"]):
+		saved_last = true
+	return saved_best
+
+
+## What SAVE would do: SAVE, SAVED (already), FULL, or "" (nothing to,
+## or a saved replay playing).
+func best_state() -> String:
+	if saved or best.is_empty():
+		return ""
+	if saved_best or (saved_last and int(last.get("from", -1)) == int(best["from"])):
+		return "SAVED"
+	return "FULL" if SavedReplays.full() else "SAVE"
 
 
 ## A saved replay (`export`'s dictionary), ready to `start` on a view set
@@ -219,6 +244,8 @@ func update() -> void:
 		_bug.queue_redraw()                # the REPLAY dot blinks
 	var skip := not quiet and _shown > SKIP_LOCK and (Input.is_action_just_pressed("hit")
 		or Input.is_action_just_pressed("start"))
+	if not quiet and _shown > SKIP_LOCK and Input.is_action_just_pressed("soft"):
+		on_save()
 	if _state == "seek":
 		var n := 0
 		while _frame <= int(best["from"]) and n < SEEK_PER_FRAME:
@@ -333,12 +360,34 @@ func _build_overlay() -> void:
 	UiKit.panel(Rect2(200, 392, 560, 104), card)
 	_caption = [UiKit.text("big_gold", "SAVED REPLAY" if saved else "PLAY OF THE MATCH",
 			Vector2(480, 404), 0.5, Color.WHITE, card),
-		UiKit.text("small", "%d-SHOT RALLY" % int(best["shots"]), Vector2(480, 440), 0.5,
-			Color(0.85, 0.88, 0.95), card),
+		UiKit.text("small", "", Vector2(480, 440), 0.5, Color(0.85, 0.88, 0.95), card),
 		UiKit.text("small", ending(), Vector2(480, 466), 0.5, Color("fbe46a"), card)]
 	_caption[2].visible = false
-	overlay.add_child(PromptBar.new().setup([["hit", "SKIP"]], Vector2(480, 516)))
+	_prompts = PromptBar.new().setup([], Vector2(480, 516))
+	overlay.add_child(_prompts)
 	_bug = bug
+	_refresh_save()
 
 
 var _bug: Node2D
+var _prompts: PromptBar
+
+
+## SAVE pressed (soft: X, or L): saved, or why not.
+func on_save() -> void:
+	var state := best_state()
+	if state == "":
+		return
+	view._sfx.play("confirm" if save_best() else "back")
+	_refresh_save()
+
+
+## The card's rally line ("14-SHOT RALLY, SAVED") and its prompts: SAVE
+## while it can be.
+func _refresh_save() -> void:
+	if overlay == null:
+		return
+	var state := best_state()
+	_caption[1].text = "%d-SHOT RALLY" % int(best["shots"]) + {"SAVED": ", SAVED",
+		"FULL": ", REPLAYS FULL"}.get(state, "")
+	_prompts.set_items([["hit", "SKIP"], ["soft", "SAVE"]] if state == "SAVE" else [["hit", "SKIP"]])

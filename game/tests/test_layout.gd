@@ -905,6 +905,18 @@ func test_highlight() -> void:
 				v.highlight.start(func(): pass)
 				v.highlight._caption[2].visible = true
 				check_layout(v, "PLAY OF THE MATCH, fault %d, team %d (device %d)" % [f, winner, dev])
+				if not v.highlight.saved:            # PORT-70: SAVE, then SAVED; and FULL
+					v.highlight.saved_best = true
+					v.highlight._refresh_save()
+					check_layout(v, "PLAY OF THE MATCH, SAVED (device %d)" % dev)
+					v.highlight.saved_best = false
+					for i in SavedReplays.MAX:
+						SavedReplays.save({"format": SavedReplays.FORMAT, "tuning": K.TUNING_VERSION,
+							"saved": i, "cfg": {}, "inputs": PackedInt32Array(), "ops": {},
+							"rally": {"shots": 1}})
+					v.highlight._refresh_save()
+					check_layout(v, "PLAY OF THE MATCH, REPLAYS FULL (device %d)" % dev)
+					wipe_replays()
 				v.highlight._state = ""
 				v.highlight.overlay.free()
 				v.highlight.overlay = null

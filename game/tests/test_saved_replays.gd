@@ -179,3 +179,50 @@ func test_demo_takes_turns() -> void:
 	Settings.replays_in_demo = kept
 	t.free()
 	wipe_replays()
+
+
+## PORT-70: SAVE while PLAY OF THE MATCH plays keeps its rally (once; the
+## card says so), FULL says why not, and a saved replay's card has none.
+func test_save_play_of_the_match() -> void:
+	wipe_replays()
+	var v := _view()
+	var over := false
+	for f in 60 * 60 * 10:
+		v._physics_process(1.0 / 60.0)
+		if v.highlight.playing():
+			over = true
+			break
+	check(over, "PLAY OF THE MATCH (%d shots)" % int(v.highlight.best.get("shots", 0)))
+	var h := v.highlight
+	eq(h.best_state(), "SAVE")
+	eq(h._prompts.items.size(), 2, "SKIP and SAVE")
+	var live: Array = h._live.snapshot() if h._live else v.sim.snapshot()
+	h.on_save()
+	eq(h.best_state(), "SAVED")
+	check(h._caption[1].text.ends_with(", SAVED"), h._caption[1].text)
+	eq(h._prompts.items.size(), 1, "SAVE goes")
+	h.on_save()
+	eq(SavedReplays.list().size(), 1, "saved once")
+	var data := SavedReplays.load_replay(SavedReplays.list()[0]["name"])
+	var rally: Dictionary = h.best.duplicate(true)
+	h._finish()
+	eq(v.sim.snapshot(), live, "the live match never moved")
+	v.free()
+	var r := _play_saved(data)
+	eq(r[0], rally["snap_to"], "the saved rally, exactly")
+	wipe_replays()
+	var w := _view()
+	w.highlight.best = {"shots": 9, "from": 0, "to": 0, "winner": 0, "fault": K.FAULT_OUT,
+		"snap_from": [], "snap_to": []}
+	for i in SavedReplays.MAX:
+		SavedReplays.save({"format": SavedReplays.FORMAT, "tuning": K.TUNING_VERSION,
+			"saved": i, "cfg": {}, "inputs": PackedInt32Array(), "ops": {}, "rally": {"shots": 1}})
+	eq(w.highlight.best_state(), "FULL")
+	check(not w.highlight.save_best(), "no seventh")
+	w.free()
+	wipe_replays()
+	var s := _view()
+	s.highlight.saved = true
+	s.highlight.best = {"shots": 9}
+	eq(s.highlight.best_state(), "", "a saved replay's card has no SAVE")
+	s.free()

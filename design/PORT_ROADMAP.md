@@ -95,6 +95,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-67 | The players' new body: a V torso, longer legs, a forehand with the body in it | `feature/cld-player-hd-body-v2` | Released (v0.27.0) |
 | PORT-68 | SPECIALS' meters under the players | `feature/cld-meters-under-players` | Released (v0.28.0) |
 | PORT-69 | Saved replays: SAVE LAST RALLY, REPLAYS, and in the demo | `feature/cld-saved-replays` | Released (v0.28.0) |
+| PORT-70 | SAVE on PLAY OF THE MATCH | `feature/cld-potm-save` | Ready to test |
 
 ## Releases
 
@@ -443,6 +444,20 @@ the same request). Open: 36 and 40.
   - Status: **Ready to test**: save a good rally from the pause menu, then
     watch it from PLAYER, REPLAYS, and let the title sit to see it in the
     demo.
+
+### 70. `feature/cld-potm-save`: SAVE on PLAY OF THE MATCH (asked for 2026-10-22)
+
+- [x] `PORT-70` ADR-081, amended: while PLAY OF THE MATCH plays, SAVE
+  (soft: X or L, beside SKIP) keeps the match's best rally in REPLAYS.
+  The card says SAVED (and SAVE goes) or REPLAYS FULL; never twice, and
+  not on a saved replay's own card.
+  - Verified: `test_saved_replays` (SAVE during PLAY OF THE MATCH, played
+    back exactly from the file; once; FULL; none on a saved replay),
+    `test_layout` (the card with SAVE, SAVED and REPLAYS FULL),
+    `test_highlight`; 448/448 plus the e2e, golden traces unchanged.
+    Screenshots of the card before and after SAVE
+    (`screenshot.gd ... potm potmsave replays`).
+  - Status: **Ready to test**.
 
 ## For you
 
