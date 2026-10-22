@@ -397,8 +397,7 @@ func test_main_opens_online() -> void:
 	var title: TitleScreen = main._screen
 	if not title.is_node_ready():
 		title._ready()
-	title.pages["main"].select("multiplayer")
-	title.pages["main"].press()
+	title.reveal("multiplayer").press()
 	check(title.pages["multi"].select("online"), "ONLINE on MULTIPLAYER")
 	title.pages["multi"].press()
 	settle.call()

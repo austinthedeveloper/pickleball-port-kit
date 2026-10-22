@@ -217,12 +217,14 @@ func test_title_select_flow() -> void:
 		t._ready()
 	var started := []
 	t.start_match.connect(func(cfg, _v, _l, _p, _n): started.append(cfg))
-	t.pages["main"].select("doubles")
-	t.pages["main"].press()
-	eq(t.page, "select", "DOUBLES opens Player Select")
+	Settings.quick_doubles = true
+	t.reveal("start").press()
+	eq(t.page, "select", "MATCH SETUP's START opens Player Select")
+	eq(t.select.mode, K.MODE_DOUBLES, "for DOUBLES")
+	Settings.quick_doubles = false
 	check(t.select_screen.visible and not t._header[0].visible, "the select screen replaces the logo")
 	t.select_input(Y)
-	eq(t.page, "main", "Y on the top row goes back")
+	eq(t.page, "setup", "Y on the top row goes back to MATCH SETUP")
 	t.open_select(true)
 	t.select_input(DOWN)
 	t.select_input(LEFT)                 # GOLD

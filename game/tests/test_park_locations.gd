@@ -44,9 +44,8 @@ func test_the_row() -> void:
 	runner.root.add_child(t)
 	if not t.is_node_ready():
 		t._ready()
-	var p: MenuPage = t.pages["main"]
 	Settings.park_i = 0
-	p.select("openplay")
+	var p: MenuPage = t.reveal("openplay")
 	eq(p.value_of("openplay"), "THE PARK")
 	p.change(1)
 	eq(p.value_of("openplay"), "DINO PARK")

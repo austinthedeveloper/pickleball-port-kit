@@ -282,7 +282,7 @@ func _initialize() -> void:
 						t.career_page.pick_key(14)
 						t.career_keyboard.refresh()
 				else:
-					_view.open_page(mode.substr(6)))
+					_view.reveal_page(mode.substr(6)))
 	else:
 		var m := MatchView.new()
 		root.add_child(m)

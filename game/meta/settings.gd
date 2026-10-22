@@ -50,6 +50,7 @@ static var points_i := 1
 ## -2 = the ladder's current rung, -1 = the default CPU, else a team.
 static var opponent_i := -2
 static var two_players := false
+static var quick_doubles := false       ## QUICK MATCH's MODE (ADR-079)
 static var camera_i := 1                ## CAMERAS: 50% (since 0.9.1; was OFF)
 const BALL_SPEED_DEFAULT := 85         ## the user's pick for 0.18 (ADR-072; 78 in 0.17); the ROM's is 100
 const BALL_SIZE_DEFAULT := 110         ## the user's pick for 0.18 (105 in 0.17)
@@ -104,6 +105,7 @@ static func load_from(save: SaveGame) -> void:
 	difficulty_i = clampi(int(st["difficulty"]), 0, DIFFICULTIES.size() - 1)
 	points_i = clampi(int(st["points"]), 0, POINTS.size() - 1)
 	two_players = int(st["players"]) == 2
+	quick_doubles = int(st.get("quick_doubles", 0)) != 0
 	opponent_i = clampi(int(st["opponent"]), -2, Opponents.DAWSON)
 	camera_i = clampi(int(st.get("camera", 1)), 0, CAMERAS.size() - 1)
 	var bits := int(st.get("mod_bits", -1))
@@ -161,7 +163,7 @@ static func store_to(save: SaveGame) -> void:
 	if save == null:
 		return
 	save.data["settings"].merge({"venue": venue_i, "difficulty": difficulty_i,
-		"points": points_i, "players": 2 if two_players else 1, "opponent": opponent_i,
+		"points": points_i, "players": 2 if two_players else 1, "quick_doubles": 1 if quick_doubles else 0, "opponent": opponent_i,
 		"camera": camera_i, "mod_bits": mod_bits, "ball_speed": ball_speed, "park_location": park_i, "ball_speed_v": BALL_DEFAULTS_V, "ball_size": ball_size, "cpu_errors": cpu_errors, "sound": Sfx.setting,
 		"music": Music.volume, "announcer": Announcer.volume, "announcer_on": 1 if Announcer.enabled else 0, "commentary": Announcer.chatter,
 		"fullscreen": 1 if fullscreen else 0, "integer_scale": 1 if integer_scale else 0,

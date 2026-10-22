@@ -244,9 +244,9 @@ func test_main_loop() -> void:
 	var title: TitleScreen = main._screen
 	if not title.is_node_ready():
 		title._ready()
-	check(title.pages["main"].select("tournament"), "TOURNAMENT is on MAIN")
-	eq(title.pages["main"].value_of("tournament"), "8 TEAMS")
-	title.pages["main"].press()
+	check(title.reveal("tournament") == title.pages["play"], "TOURNAMENT is on PLAY")
+	eq(title.pages["play"].value_of("tournament"), "8 TEAMS")
+	title.pages["play"].press()
 	settle.call()
 	check(main._screen is BracketScreen, "the bracket")
 	var b: BracketScreen = main._screen
@@ -264,6 +264,7 @@ func test_main_loop() -> void:
 	settle.call()
 	if not main._screen.is_node_ready():
 		main._screen._ready()
-	eq(main._screen.pages["main"].value_of("tournament"), "QF", "the title shows your round")
+	eq(main._screen.pages["play"].value_of("tournament"), "QF", "the title shows your round")
+	eq(main._screen.page, "play", "back on PLAY")
 	main.free()
 	SaveGame.default_dir = kept

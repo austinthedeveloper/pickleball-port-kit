@@ -92,8 +92,11 @@ button on the result is the rematch.
 
 ## The title menu
 
-MAIN: **SINGLES** / **DOUBLES** open Player Select (shirt, body, paddle
-with POWER / CONTROL / SPEED; 2P picks next on pad 2), then the match.
+MAIN (ADR-079): **STORY**, **PLAY**, **PRACTICE**, **PLAYER** (the
+career players, RECORDS, ACHIEVEMENTS, the HAT MUSEUM), **OPTIONS**. PLAY:
+**QUICK MATCH** (SINGLES or DOUBLES) opens MATCH SETUP, whose START opens
+Player Select (shirt, body, paddle with POWER / CONTROL / SPEED; 2P picks
+next on pad 2), then the match.
 **OPEN PLAY** walks the park (ADR-034): put your paddle in a court's
 stack and play when your turn comes. The courts are ROOKIE, CLUB and
 CHAMP; a career player earns park points that open the upper two, winners
@@ -101,7 +104,7 @@ stay on for two games, and SLICE at your rack picks a partner from the
 teams you've beaten (ADR-060). **MULTIPLAYER**: the four-pad lobby
 (above). **TOURNAMENT** (ADR-054): an eight-entry knockout against the
 ladder teams, each match at the opponent's home court, between matches the
-bracket. **MATCH SETUP**: VS (LADDER plays your saved rung at the team's
+bracket. **MATCH SETUP** (QUICK MATCH's page; COURT and MODIFIERS are on it): MODE, VS (LADDER plays your saved rung at the team's
 home court, with their intro card; the default CPU; any team; and, once
 you've cleared a ladder, DALE DAWSON, who plays doubles alone: ADR-066),
 DIFFICULTY, POINTS, PLAYERS (1P, 2P versus). **PRACTICE**: **HOW TO PLAY** (PORT-30), six short lessons (rally,

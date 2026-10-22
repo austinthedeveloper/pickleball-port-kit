@@ -902,8 +902,8 @@ func test_main_reaches_the_park_and_back() -> void:
 	var title: TitleScreen = main._screen
 	if not title.is_node_ready():
 		title._ready()              # the runner's root isn't ready during the suites
-	var p: MenuPage = title.pages["main"]
-	check(p.select("openplay"), "OPEN PLAY is on MAIN")
+	var p: MenuPage = title.reveal("openplay")
+	check(p == title.pages["play"], "OPEN PLAY is on PLAY")
 	p.press()
 	_settle(main)
 	var park: ParkView = main._screen

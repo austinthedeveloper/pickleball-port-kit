@@ -8,45 +8,60 @@ extends RefCounted
 
 static func build(t: TitleScreen) -> void:
 	var help := [["hit", "SELECT"], ["back", "BACK"]]
+	# ADR-079: five places to go; a match's settings are on MATCH SETUP, on
+	# the way to the match, not beside the modes
 	t._add_page("main", "", [
 		{"id": "story", "label": "STORY", "value": func(): return StoryMode.label(t.save),
 			"press": func():
 				t._store_settings()
 				TitleScreen.main_cursor = t.pages["main"].cursor
 				t.open_story.emit()},
-		{"id": "singles", "label": "SINGLES", "press": func(): t.open_select(false)},
-		{"id": "doubles", "label": "DOUBLES", "press": func(): t.open_select(true)},
+		{"id": "play", "label": "PLAY", "press": func(): t.open_page("play")},
+		{"id": "practice", "label": "PRACTICE", "value": t._learn_label,
+			"press": func(): t.open_page("learn")},
+		{"id": "player", "label": "PLAYER", "value": t._career_label, "press": func(): t.open_page("player")},
+		{"id": "options", "label": "OPTIONS", "press": func(): t.open_page("options")},
+	], [], Rect2(300, 214, 360, 0))
+	t._add_page("play", "PLAY", [
+		{"id": "quick", "label": "QUICK MATCH", "value": func(): return "DOUBLES" if Settings.quick_doubles else "SINGLES",
+			"change": func(_d): Settings.quick_doubles = not Settings.quick_doubles,
+			"press": func(): t.open_page("setup")},
+		{"id": "tournament", "label": "TOURNAMENT", "value": t._cup_label, "press": t._open_tournament},
 		{"id": "openplay", "label": "OPEN PLAY", "value": func(): return Settings.park_name(),
 			"change": func(d): Settings.park_i = (Settings.park_i + d + Settings.PARKS.size()) \
 				% Settings.PARKS.size(),
 			"press": t._open_park},
-		{"id": "multiplayer", "label": "MULTIPLAYER", "value": func(): return "ONLINE",
+		{"id": "multiplayer", "label": "MULTIPLAYER",
 			"press": func(): t.open_page("multi")},
-		{"id": "tournament", "label": "TOURNAMENT", "value": t._cup_label, "press": t._open_tournament},
-		{"id": "play", "label": "MATCH SETUP", "value": t._play_summary,
-			"press": func(): t.open_page("play")},
-		{"id": "practice", "label": "PRACTICE", "value": t._learn_label,
-			"press": func(): t.open_page("learn")},
-		{"id": "court", "label": "COURT", "value": func(): return Settings.VENUE_NAMES[Settings.venue_i] + (
-			"" if Settings.time_i == 0 else " " + CourtStyle.time_names()[Settings.time_i]),
-			"press": func(): t.open_page("court")},
-		{"id": "modifiers", "label": "MODIFIERS", "value": t._mods_label,
-			"press": func(): t.open_page("modifiers")},
-		{"id": "options", "label": "OPTIONS", "press": func(): t.open_page("options")},
-		{"id": "career", "label": "CAREER", "value": t._career_label, "press": t.open_career},
-	], [], Rect2(300, 140, 360, 0))     # STORY made it 12 rows: up, clear of the key legend
-	t._add_page("play", "MATCH SETUP", [
+	], help, Rect2(300, 172, 360, 0))
+	t._add_page("setup", "MATCH SETUP", [
+		{"id": "start", "label": "START", "press": func(): t.open_select(Settings.quick_doubles)},
+		{"id": "mode", "label": "MODE", "value": func(): return "DOUBLES" if Settings.quick_doubles else "SINGLES",
+			"change": func(_d): Settings.quick_doubles = not Settings.quick_doubles},
+		{"id": "players", "label": "PLAYERS", "value": func(): return "2P VS" if Settings.two_players else "1P",
+			"change": func(_d):
+				Settings.two_players = not Settings.two_players
+				GameControls.refresh_pads()},
 		{"id": "vs", "label": "VS", "value": t._opponent_label, "change": t._change_opponent},
 		{"id": "difficulty", "label": "DIFFICULTY", "value": func(): return Settings.DIFFICULTIES[Settings.difficulty_i],
 			"change": func(d): Settings.difficulty_i = clampi(Settings.difficulty_i + d, 0, Settings.DIFFICULTIES.size() - 1)},
 		SettingRows.slider("cpu_errors"),          # ADR-073
 		{"id": "points", "label": "POINTS", "value": func(): return str(Settings.POINTS[Settings.points_i]),
 			"change": func(d): Settings.points_i = clampi(Settings.points_i + d, 0, Settings.POINTS.size() - 1)},
-		{"id": "players", "label": "PLAYERS", "value": func(): return "2P VS" if Settings.two_players else "1P",
-			"change": func(_d):
-				Settings.two_players = not Settings.two_players
-				GameControls.refresh_pads()},
-	], help)
+		{"id": "court", "label": "COURT", "value": func(): return Settings.VENUE_NAMES[Settings.venue_i] + (
+			"" if Settings.time_i == 0 else " " + CourtStyle.time_names()[Settings.time_i]),
+			"press": func(): t.open_page("court")},
+		{"id": "modifiers", "label": "MODIFIERS", "value": t._mods_label,
+			"press": func(): t.open_page("modifiers")},
+	], [["hit", "SELECT"], ["back", "BACK"]], Rect2(270, 66, 420, 0))
+	t._add_page("player", "PLAYER", [
+		{"id": "career", "label": "PLAYERS", "value": t._career_label, "press": t.open_career},
+		{"id": "records", "label": "RECORDS", "press": func(): t.open_page("records")},
+		{"id": "achievements", "label": "ACHIEVEMENTS", "value": func(): return Achievements.label(t.save),
+			"press": func(): t.open_page("achievements")},
+		{"id": "hats", "label": "HAT MUSEUM", "value": func(): return "" if t._career().active_player() else "NO PLAYER",
+			"press": t.open_player_museum},
+	], help, Rect2(300, 172, 360, 0))
 	var court_rows := [{"id": "venue", "label": "VENUE", "value": func(): return Settings.VENUE_NAMES[Settings.venue_i],
 		"change": func(d): Settings.venue_i = (Settings.venue_i + d + Settings.VENUES.size()) % Settings.VENUES.size(); t._start_demo()},
 		{"id": "time", "label": "TIME", "value": func(): return CourtStyle.time_names()[Settings.time_i],
@@ -83,6 +98,7 @@ static func build(t: TitleScreen) -> void:
 				t._sfx.play("confirm")
 			t._store_settings()
 			TitleScreen.main_cursor = t.pages["main"].cursor
+			TitleScreen.return_to = "multi"
 			t.open_online.emit()},
 	], help)
 	# PORT-30: HOW TO PLAY's lessons, and the ball machine

@@ -36,7 +36,7 @@ var career := Career.new()
 static func defaults() -> Dictionary:
 	return {
 		"settings": {"venue": 0, "difficulty": K.DIFFICULTY_MEDIUM, "points": 1,
-			"players": 1, "opponent": -2, "camera": 1, "camera_rev": 1, "mods": 0, "sound": 0,
+			"players": 1, "quick_doubles": 0, "opponent": -2, "camera": 1, "camera_rev": 1, "mods": 0, "sound": 0,
 			"practice": Practice.DEFAULTS.duplicate(),
 			# menus (PORT-03): modifiers as bits (-1: take the old "mods"
 			# preset), window options. New keys fill from these defaults on

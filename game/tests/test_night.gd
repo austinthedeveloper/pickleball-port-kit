@@ -162,7 +162,7 @@ func test_time_row_and_save() -> void:
 	p.change(-1)
 	eq(p.value_of("time"), "NIGHT", "wraps")
 	eq(t._demo.time, CourtStyle.NIGHT, "the demo goes to night")
-	eq(t.pages["main"].value_of("court"), "PARK NIGHT")
+	eq(t.pages["setup"].value_of("court"), "PARK NIGHT")
 	t._store_settings()
 	eq(int(save.data["settings"]["time"]), CourtStyle.NIGHT, "saved")
 	t.free()

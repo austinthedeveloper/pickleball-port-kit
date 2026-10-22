@@ -1,9 +1,11 @@
 ## Title: the logo and the menu over a live CPU demo at the chosen venue.
-## The menu is a tree of MenuPages (ADR-025/030): MAIN opens MATCH SETUP,
-## COURT, MODIFIERS, OPTIONS and CAREER (ADR-047: the players, their
-## cards and editor, and the records); SINGLES and DOUBLES open Player
-## Select (ADR-020), PRACTICE the drill editor (PracticePage, ADR-028),
-## OPEN PLAY the park (ParkView, ADR-034).
+## The menu is a tree of MenuPages (ADR-025/030, regrouped by ADR-079):
+## MAIN has STORY, PLAY, PRACTICE, PLAYER and OPTIONS. PLAY has QUICK
+## MATCH (MATCH SETUP: the mode, VS, COURT, MODIFIERS..., then START to
+## Player Select, ADR-020), TOURNAMENT, OPEN PLAY (the park, ADR-034) and
+## MULTIPLAYER; PLAYER has CAREER's players (ADR-047), the records, the
+## achievements and the HAT MUSEUM; PRACTICE the lessons and the drill
+## editor (PracticePage, ADR-028).
 ## Up/Down pick a row, Left/Right change it, B/Start press it, Y goes
 ## back; every page change swallows the press that made it (rule 9). The
 ## values themselves live in Settings.
@@ -26,7 +28,16 @@ signal open_course              ## ADR-070: PICKLEBALL 101, the real game's rule
 const SWITCH_LOCK := MenuPage.TRANSITION   ## no menu input while a page slides in
 
 ## The main page's cursor, kept across matches.
-static var main_cursor := 1             ## SINGLES (STORY is above it)
+static var main_cursor := 1             ## PLAY (STORY is above it)
+## The page to come back to after a match ("" MAIN): MATCH SETUP after a
+## quick match, PLAY after the other modes there.
+static var return_to := ""
+## Where each page sits in the menu: BACK goes to the page it was opened
+## from (and its row), else to its place here.
+const TREE := {"play": "main", "setup": "play", "multi": "play", "court": "setup",
+	"modifiers": "setup", "rules": "modifiers", "learn": "main", "options": "main",
+	"controls": "options", "access": "options", "player": "main", "records": "player",
+	"achievements": "player"}
 
 var _demo: MatchView
 var _ui: CanvasLayer
@@ -55,6 +66,8 @@ var career_preview: CareerPreview
 var museum := Museum.new()
 var hat_museum: HatMuseum
 var _spare_career := Career.new()      ## no save (some tests): nobody
+var _parents := {}               ## page -> [the page it was opened from, its row]
+var _museum_from := "career_card"   ## where the HAT MUSEUM goes back to
 
 
 func _load_settings() -> void:
@@ -149,6 +162,9 @@ func _ready() -> void:
 	_sfx.setup("", false)
 	pages["main"].cursor = clampi(main_cursor, 0, pages["main"].rows.size() - 1)
 	_show("main")
+	if return_to != "" and pages.has(return_to):
+		reveal_page(return_to)
+	return_to = ""
 	Settings.apply_window(get_window())    # last: a mode change can run a frame
 
 
@@ -160,7 +176,7 @@ func _add_page(id: String, title: String, rows: Array, help: Array,
 	# (MAIN has none: the key legend under it says HIT, and its rows need the room)
 	var h := 18 + rows.size() * MenuPage.ROW_H + (52 if not help.is_empty() else 12) \
 		+ (46 if title != "" else 0)
-	at.size.y = maxi(h, 300)
+	at.size.y = h if id in ["main", "play", "player"] else maxi(h, 300)     # the short ones fit their rows
 	var p := MenuPage.new().setup(id, title, rows, at, help)
 	# the mouse: hover selects, click presses, wheel changes, right click backs
 	p.pressed.connect(func(row): _after_press(row))
@@ -205,7 +221,7 @@ func _career_input(bits: int) -> void:
 
 
 func _after_press(id: String) -> void:
-	if id not in ["singles", "doubles", "back"]:
+	if id not in ["start", "back"]:
 		_sfx.play("confirm")
 	_refresh()
 
@@ -243,10 +259,6 @@ func _erase() -> void:
 
 func _wl(mode: String) -> String:
 	return "%d-%d" % [_rec(mode + "_wins"), _rec(mode + "_losses")]
-
-
-func _play_summary() -> String:
-	return "%s  %d" % [Settings.DIFFICULTIES[Settings.difficulty_i], Settings.POINTS[Settings.points_i]]
 
 
 ## How many toggles are on (one: its name), on a page or all of them.
@@ -295,7 +307,7 @@ func _show(id: String) -> void:
 	if hat_museum:
 		hat_museum.visible = id == "museum"
 	for n in _header:
-		n.visible = not id in ["select", "records", "achievements", "controls", "options", "modifiers", "rules", "lobby", "museum", "career_card", "career_edit",
+		n.visible = not id in ["select", "setup", "records", "achievements", "controls", "options", "modifiers", "rules", "lobby", "museum", "career_card", "career_edit",
 			"career_name"]
 	if lobby_screen:
 		lobby_screen.visible = id == "lobby"
@@ -309,27 +321,30 @@ func _show(id: String) -> void:
 func open_page(id: String) -> void:
 	if not pages.has(id):
 		return
+	if pages.has(page) and page != id:
+		_parents[id] = [page, pages[page].current_id()]
 	_show(id)
 	pages[id].appear(1)
 	_lock = SWITCH_LOCK
 	GameControls.clear_latch()
 
 
-## Y or BACK: a sub-page returns to MAIN, its cursor on the page's row.
+## Y or BACK: a page returns to the one it was opened from, the cursor on
+## the row that opened it.
 func back() -> void:
 	if page == "main":
 		return
 	# CAREER's pages and its records go back through the page's logic (Y)
-	if page.begins_with("career") or page == "records":
+	if page.begins_with("career") or (page == "records" and career_page.view == CareerPage.VIEW_RECORDS):
 		_career_input(CareerPage.PAD_Y)
 		if _sfx:
 			_sfx.play("back")
 		return
 	var from := page
-	# RULES is MODIFIERS' sub-page: back to its row there
-	var parent := "modifiers" if from == "rules" else "main"
+	var to: Array = _parents.get(from, [TREE.get(from, "main"), from])
+	var parent: String = to[0]
 	_show(parent)
-	pages[parent].select(from)
+	pages[parent].select(to[1])
 	pages[parent].appear(-1)
 	_lock = SWITCH_LOCK
 	GameControls.clear_latch()
@@ -339,6 +354,51 @@ func back() -> void:
 
 func page_open() -> bool:
 	return page == "practice"
+
+
+## Opens a page where it sits in the menu (its parents first, each with the
+## cursor on the row that leads on), as if the rows had been pressed.
+func reveal_page(id: String) -> MenuPage:
+	var chain := [id]
+	while TREE.has(chain[0]):
+		chain.push_front(TREE[chain[0]])
+	_show("main")
+	for i in range(1, chain.size()):
+		var from: String = chain[i - 1]
+		var row := _row_to(from, chain[i])
+		pages[from].select(row)
+		_parents[chain[i]] = [from, row]
+	_show(id)
+	return pages[id]
+
+
+## The row on `from` that opens `to` (its id, for the pages whose row is
+## named otherwise).
+func _row_to(from: String, to: String) -> String:
+	var named := {"learn": "practice", "setup": "quick", "multi": "multiplayer"}
+	return named.get(to, to) if pages[from].index_of(named.get(to, to)) >= 0 else to
+
+
+## A row anywhere in the menu: its page opened (reveal_page) with the
+## cursor on it. Tests use this to reach a row by id.
+func reveal(row: String) -> MenuPage:
+	for id in ["main", "play", "setup", "player", "learn", "options", "multi", "modifiers", "rules", "court",
+			"controls", "access", "records"]:
+		if pages.has(id) and pages[id].index_of(row) >= 0:
+			var p := reveal_page(id)
+			p.select(row)
+			return p
+	return null
+
+
+## PLAYER's HAT MUSEUM: the active player's (nobody: nothing).
+func open_player_museum() -> void:
+	var me := _career().active_player()
+	if me == null:
+		return
+	career_page.slot = _career().players.find(me)
+	_museum_from = "player"
+	open_museum()
 
 
 ## HAT MUSEUM on the career card: the player's hats in their cases.
@@ -360,10 +420,16 @@ func museum_input(pressed: int) -> void:
 	if result != Museum.STAY:
 		if result == Museum.CLOSE_SAVE and save:
 			save.save_game()
-		_show("career_card")
-		pages["career_card"].select("hats")
-		pages["career_card"].appear(-1)
-		career.sync(false)
+		if _museum_from == "player":
+			_show("player")
+			pages["player"].select("hats")
+			pages["player"].appear(-1)
+		else:
+			_show("career_card")
+			pages["career_card"].select("hats")
+			pages["career_card"].appear(-1)
+			career.sync(false)
+		_museum_from = "career_card"
 		_lock = SWITCH_LOCK
 		GameControls.clear_latch()
 		_sfx.play("back")
@@ -398,7 +464,8 @@ func select_input(pressed: int) -> void:
 	var was := [select.row, select.current]
 	var result := select.input(pressed)
 	if result == PlayerSelect.BACK:
-		_show("main")
+		_show("setup")
+		pages["setup"].appear(-1)
 		_lock = SWITCH_LOCK
 		GameControls.clear_latch()
 		_sfx.play("back")
@@ -457,9 +524,9 @@ func _update_lobby() -> void:
 
 
 func _leave_lobby() -> void:
-	_show("main")
-	pages["main"].select("multiplayer")
-	pages["main"].appear(-1)
+	_show("multi")
+	pages["multi"].select("local")
+	pages["multi"].appear(-1)
 	_lock = SWITCH_LOCK
 	GameControls.clear_latch()
 	_sfx.play("back")
@@ -470,6 +537,7 @@ func _leave_lobby() -> void:
 func start_lobby_match() -> void:
 	_sfx.play("confirm")
 	_store_settings()
+	return_to = "multi"
 	if lobby.cup:
 		open_couch_cup.emit(lobby.entries(), lobby.mode == K.MODE_DOUBLES)
 		return
@@ -483,6 +551,7 @@ func _start(doubles: bool) -> void:
 		_sfx.play("confirm")
 	_store_settings()
 	main_cursor = pages["main"].cursor
+	return_to = "setup"
 	start_match.emit(config(doubles), Settings.venue(), Settings.opponent_i == -2 and not Settings.two_players, [], [])
 
 
@@ -500,12 +569,14 @@ func _open_tournament() -> void:
 		_sfx.play("confirm")
 	_store_settings()
 	main_cursor = pages["main"].cursor
+	return_to = "play"
 	open_tournament.emit()
 
 
 func _open_park() -> void:
 	_store_settings()
 	main_cursor = pages["main"].cursor
+	return_to = "play"
 	open_park.emit(Settings.two_players)
 
 

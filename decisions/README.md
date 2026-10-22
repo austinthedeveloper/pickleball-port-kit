@@ -69,3 +69,4 @@ first decisions, are rows in `design/07_DECISIONS_AND_RISKS.md`.
 | 076 | [The Announcer](ADR-076-the-announcer.md) | Accepted 2026-10-20 |
 | 077 | [Achievements](ADR-077-achievements.md) | Accepted 2026-10-21 |
 | 078 | [OPEN PLAY's Locations, and the GYM](ADR-078-park-locations.md) | Accepted 2026-10-21 |
+| 079 | [The Title Menu, Regrouped](ADR-079-menu-regroup.md) | Accepted 2026-10-21 |

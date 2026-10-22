@@ -146,7 +146,7 @@ func input(bits: int) -> void:
 	if result == CareerPage.SAVE and t.save:
 		t.save.save_game()
 	if result == CareerPage.CLOSE:
-		back_to_main("career")
+		back_to_player()
 		return
 	var now := page_id()
 	sync(now != was, 1 if depth(now) > depth(was) else -1)
@@ -199,11 +199,11 @@ func sync(changed: bool, dir := 1) -> void:
 	t.pages["main"].refresh()
 
 
-## Back to MAIN with the cursor on a row (Y from CAREER's slots).
-func back_to_main(row: String) -> void:
-	t._show("main")
-	t.pages["main"].select(row)
-	t.pages["main"].appear(-1)
+## Back to PLAYER with the cursor on PLAYERS (Y from CAREER's slots).
+func back_to_player() -> void:
+	t._show("player")
+	t.pages["player"].select("career")
+	t.pages["player"].appear(-1)
 	t._lock = t.SWITCH_LOCK
 	GameControls.clear_latch()
 

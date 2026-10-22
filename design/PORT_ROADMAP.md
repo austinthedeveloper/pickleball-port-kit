@@ -89,6 +89,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-61 | The swing-arm ball machine | `feature/cld-ball-machine` | Released (v0.22.0) |
 | PORT-62 | Player specials and powerups: a running design doc | `feature/cld-specials-doc` | In progress |
 | PORT-63 | Practice without the announcer | `feature/cld-practice-quiet` | Released (v0.22.1) |
+| PORT-64 | The title menu regrouped: five places to go | `feature/cld-menu-regroup` | Ready to test |
 
 ## Releases
 
@@ -305,6 +306,23 @@ the same request). Open: 36 and 40.
   not, as one long rally. Lessons and matches are unchanged.
   - Verified: `test_announcer.test_practice_is_quiet`; 426/426 plus the
     e2e, golden traces unchanged.
+  - Status: **Released (v0.22.1)**.
+
+### 64. `feature/cld-menu-regroup`: the title menu regrouped (asked for 2026-10-21)
+
+- [x] `PORT-64` ADR-079: MAIN is STORY, PLAY, PRACTICE, PLAYER and
+  OPTIONS (was twelve rows). PLAY has QUICK MATCH (SINGLES or DOUBLES,
+  one row), TOURNAMENT, OPEN PLAY and MULTIPLAYER; QUICK MATCH opens
+  MATCH SETUP (START, MODE, PLAYERS, VS, DIFFICULTY, CPU ERRORS, POINTS,
+  COURT, MODIFIERS); PLAYER has the players, RECORDS, ACHIEVEMENTS and
+  the HAT MUSEUM. BACK goes to the page you came from; after a match the
+  title opens where it started (MATCH SETUP after a quick match).
+  Mocked up first with the game's panels, then built as mocked.
+  - Verified: `test_menus` (the whole tree, and coming back after a
+    match), the suites that walked MAIN now reach rows by id
+    (`TitleScreen.reveal`), `test_layout` on every page; 427/427 plus the
+    e2e (now through MATCH SETUP), golden traces unchanged. Screenshots
+    of MAIN, PLAY, MATCH SETUP and PLAYER.
   - Status: **Ready to test**.
 
 ## For you

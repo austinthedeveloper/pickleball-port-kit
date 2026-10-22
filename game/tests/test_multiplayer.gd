@@ -207,8 +207,7 @@ func test_lobby_on_the_title() -> void:
 		t._ready()
 	var started := []
 	t.start_match.connect(func(cfg, _v, _l, pads, players): started.append([cfg, pads, players]))
-	t.pages["main"].select("multiplayer")
-	t.pages["main"].press()
+	t.reveal("multiplayer").press()
 	eq(t.page, "multi", "MULTIPLAYER: LOCAL or ONLINE (PORT-31)")
 	t.pages["multi"].select("local")
 	t.pages["multi"].press()

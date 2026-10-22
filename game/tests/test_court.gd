@@ -142,8 +142,7 @@ func test_court_page_and_save() -> void:
 	runner.root.add_child(t)
 	if not t.is_node_ready():
 		t._ready()
-	t.pages["main"].select("court")
-	t.pages["main"].press()
+	t.reveal("court").press()
 	eq(t.page, "court")
 	var p: MenuPage = t.pages["court"]
 	p.select("surface")

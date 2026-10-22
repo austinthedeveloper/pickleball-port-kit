@@ -97,10 +97,11 @@ func _tick() -> void:
 				_expect(_title().pages["main"].current_id() == "options",
 					"back lands on the page's row")
 			if _frame == 72:
-				_title().pages["main"].select("singles")
-				_press("hit")              # SINGLES: Player Select
+				Settings.quick_doubles = false
+				_title().reveal("start")
+				_press("hit")              # MATCH SETUP's START: Player Select
 			if _frame == 84:
-				_expect(_title().page == "select", "SINGLES opens Player Select")
+				_expect(_title().page == "select", "START opens Player Select")
 			if _frame == 90:
 				_press("move_down")        # to the colour row
 			if _frame == 94:
@@ -201,8 +202,8 @@ func _tick() -> void:
 		7:
 			if _t == 16:
 				_expect(_screen() is TitleScreen, "MAIN MENU returns to the title")
-				_expect(_title().pages["main"].current_id() == "singles",
-					"the title remembers the row that started the match")
+				_expect(_title().page == "setup" and _title().pages["setup"].current_id() == "start",
+					"the title comes back to MATCH SETUP, on START")
 				var s := SaveGame.new()
 				s.load_game()
 				_expect(int(s.data["settings"]["sound"]) == AudioMap.SOUND_NO_CROWD,
