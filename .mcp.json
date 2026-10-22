@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "aseprite": {
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "--directory",
+        "${ASEPRITE_MCP_DIR}",
+        "run",
+        "-m",
+        "aseprite_mcp"
+      ]
+    }
+  }
+}
