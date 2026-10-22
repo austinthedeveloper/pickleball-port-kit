@@ -95,7 +95,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-67 | The players' new body: a V torso, longer legs, a forehand with the body in it | `feature/cld-player-hd-body-v2` | Released (v0.27.0) |
 | PORT-68 | SPECIALS' meters under the players | `feature/cld-meters-under-players` | Released (v0.28.0) |
 | PORT-69 | Saved replays: SAVE LAST RALLY, REPLAYS, and in the demo | `feature/cld-saved-replays` | Released (v0.28.0) |
-| PORT-70 | SAVE on PLAY OF THE MATCH | `feature/cld-potm-save` | Ready to test |
+| PORT-70 | SAVE on PLAY OF THE MATCH | `feature/cld-potm-save` | Released (v0.29.0) |
 
 ## Releases
 
@@ -199,6 +199,8 @@ status in the same commit. The finished tasks, in full, are in
   (tag `v0.27.0`, on `feature/cld-release-0.27.0`).
 - **v0.28.0** (2026-10-22): PORT-68 the SPECIALS meters under the players,
   PORT-69 saved replays (tag `v0.28.0`, on `feature/cld-release-0.28.0`).
+- **v0.29.0** (2026-10-22): PORT-70 SAVE on PLAY OF THE MATCH (tag
+  `v0.29.0`, on `feature/cld-release-0.29.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 

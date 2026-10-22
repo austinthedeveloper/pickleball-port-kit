@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.28.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.29.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-67 of 69 roadmap tasks are in.
+68 of 70 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -418,3 +418,9 @@ Status: **Ready to test**: play a match with SPECIALS on (RULES) and say if the 
 ADR-081: **SAVE LAST RALLY** on the pause menu keeps the rally that ended last (PLAY OF THE MATCH's recording, cut after it) as a file under `user://replays/`, six at most. **REPLAYS** on PLAYER lists them, newest first; a press watches one full screen with a SAVED REPLAY card (or, with ON PRESS set to DELETE, deletes it). **IN THE DEMO** (on) lets the title's demo play them, every other time, between live matches. A replay from another sim lists as OLD VERSION.
 
 Status: **Ready to test**: save a good rally from the pause menu, then watch it from PLAYER, REPLAYS, and let the title sit to see it in the demo.
+
+## PORT-70: SAVE on PLAY OF THE MATCH (asked for 2026-10-22)
+
+ADR-081, amended: while PLAY OF THE MATCH plays, SAVE (soft: X or L, beside SKIP) keeps the match's best rally in REPLAYS. The card says SAVED (and SAVE goes) or REPLAYS FULL; never twice, and not on a saved replay's own card.
+
+Status: **Ready to test**.

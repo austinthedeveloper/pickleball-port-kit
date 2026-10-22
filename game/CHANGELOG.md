@@ -4,6 +4,15 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.29.0] - 2026-10-22
+
+Keep the play of the match.
+
+### Added
+- **SAVE on PLAY OF THE MATCH**: while the match's best rally replays at
+  the end, press SAVE (X on a pad, L on the keyboard) to keep it in
+  REPLAYS. The card tells you it's saved, or that REPLAYS is full.
+
 ## [0.28.0] - 2026-10-22
 
 Save your best rallies, and keep an eye on your meter.
