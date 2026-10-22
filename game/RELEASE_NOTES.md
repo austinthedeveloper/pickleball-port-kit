@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.27.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.28.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-65 of 67 roadmap tasks are in.
+67 of 69 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -406,3 +406,15 @@ Status: **Ready to test**.
 A side-by-side test first (`art/sprites/hd/v2/`: v2 `.aseprite` copies of the 48 px players, old-vs-v2 GIFs and a still), then the same changes in the game's players (`art/levels/tools/players.py`): the shirt tapers from the shoulders to the waist (a V, not a bean), the hips sit higher (a shorter torso, longer legs), the shorts are narrower at the waist and a little longer. The forehand uses the body: the windup coils the shoulders and loads the back leg, contact drives onto the front knee with the back heel up, and the follow-through wraps the paddle up (tilted forward, clear of the face) with the back foot dragging on its toe. The head is left alone: no head code changed and every pose keeps its neck, so heads, caps and hats are pixel-identical (every cap and hat overlay sheet is byte-identical to before).
 
 Status: **Ready to test**.
+
+## PORT-68: the SPECIALS meters under the players (asked for 2026-10-22)
+
+ADR-080, amended: each player's SPECIALS meter is a small fixed-width bar under their feet (in their colour, gold when full), following them, flipped or not, all four in doubles, instead of a bar under the score panel that grew with the team name. The PICKLE SMASH prompt stays under the score panel. Display only.
+
+Status: **Ready to test**: play a match with SPECIALS on (RULES) and say if the bars read at a glance and sit well under the feet.
+
+## PORT-69: saved replays (asked for 2026-10-22)
+
+ADR-081: **SAVE LAST RALLY** on the pause menu keeps the rally that ended last (PLAY OF THE MATCH's recording, cut after it) as a file under `user://replays/`, six at most. **REPLAYS** on PLAYER lists them, newest first; a press watches one full screen with a SAVED REPLAY card (or, with ON PRESS set to DELETE, deletes it). **IN THE DEMO** (on) lets the title's demo play them, every other time, between live matches. A replay from another sim lists as OLD VERSION.
+
+Status: **Ready to test**: save a good rally from the pause menu, then watch it from PLAYER, REPLAYS, and let the title sit to see it in the demo.

@@ -93,8 +93,8 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-65 | SPECIALS: the meter and PICKLE SMASH | `feature/cld-specials` | Released (v0.24.0) |
 | PORT-66 | Effects: bounce marks, camera flashes, the net cord | `feature/cld-effects` | Released (v0.26.0) |
 | PORT-67 | The players' new body: a V torso, longer legs, a forehand with the body in it | `feature/cld-player-hd-body-v2` | Released (v0.27.0) |
-| PORT-68 | SPECIALS' meters under the players | `feature/cld-meters-under-players` | Ready to test |
-| PORT-69 | Saved replays: SAVE LAST RALLY, REPLAYS, and in the demo | `feature/cld-saved-replays` | Ready to test |
+| PORT-68 | SPECIALS' meters under the players | `feature/cld-meters-under-players` | Released (v0.28.0) |
+| PORT-69 | Saved replays: SAVE LAST RALLY, REPLAYS, and in the demo | `feature/cld-saved-replays` | Released (v0.28.0) |
 
 ## Releases
 
@@ -196,6 +196,8 @@ status in the same commit. The finished tasks, in full, are in
   cord (tag `v0.26.0`, on `feature/cld-release-0.26.0`).
 - **v0.27.0** (2026-10-22): PORT-67 the players' new body and forehand
   (tag `v0.27.0`, on `feature/cld-release-0.27.0`).
+- **v0.28.0** (2026-10-22): PORT-68 the SPECIALS meters under the players,
+  PORT-69 saved replays (tag `v0.28.0`, on `feature/cld-release-0.28.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 

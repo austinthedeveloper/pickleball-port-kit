@@ -4,6 +4,22 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.28.0] - 2026-10-22
+
+Save your best rallies, and keep an eye on your meter.
+
+### Added
+- **Saved replays**: pause after a great point and pick SAVE LAST RALLY
+  to keep it. PLAYER, REPLAYS lists your saved rallies (up to six) to
+  watch again or delete, and the title screen's demo shows them off
+  between its own matches (IN THE DEMO turns that off).
+
+### Changed
+- **The SPECIALS meters** sit under each player's feet now and follow
+  them around the court, instead of under the score panels, so you can
+  see yours without looking away from the play. They're the same size
+  whatever the team's name.
+
 ## [0.27.0] - 2026-10-22
 
 The players get a new build and a proper forehand.
