@@ -80,7 +80,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-52 | The announcer (voiced, no text) | `feature/cld-announcer-script` | Released (v0.19.0) |
 | PORT-53 | Announcer trims, its switch; the replay's players move | `feature/cld-announcer-trim` | Released (v0.19.1) |
 | PORT-54 | The stands' people move with the camera; achievements | `feature/cld-crowd-parallax`, `feature/cld-achievements` | Released (v0.20.0) |
-| PORT-55 | The announcer's second batch (advantage, deuce, achievements) | `feature/cld-announcer-additions` | In progress |
+| PORT-55 | The announcer's second batch (advantage, deuce, achievements, specials, power-ups) | `feature/cld-announcer-additions`, `feature/cld-announcer-specials` | In progress |
 | PORT-56 | The near-side reach (display only) | `feature/cld-near-reach` | Released (v0.20.0) |
 | PORT-57 | The title's RECORD line; OPEN PLAY's locations and the GYM | `feature/cld-title-record`, `feature/cld-park-locations` | Released (v0.21.0) |
 | PORT-58 | Local multiplayer: any split, the modes as tabs; the player tags | `feature/cld-lobby-sides`, `feature/cld-player-tags` | Released (v0.21.0) |
@@ -248,6 +248,13 @@ the same request). Open: 36 and 40.
   numbers go to twenty-five.
   - Verified: `test_announcer` (the extension, the fallback, a recorded
     batch said). 418/418 plus the e2e.
+  - 2026-10-21, `feature/cld-announcer-specials`: now 54 lines. Added
+    SPECIALS' (the intro, a meter filling, PICKLE SMASH, its pop-up
+    return, a smash that wins or sets up the point; wired, with a smash's
+    line as the fallback), the other six achievements' own lines, and
+    twelve power-up lines for later (not wired: power-ups aren't built).
+    GLOBETROTTER's line no longer counts venues (there are seven now).
+    `test_announcer.test_the_specials_lines`.
   - Status: **In progress**: waiting for the recordings.
 
 

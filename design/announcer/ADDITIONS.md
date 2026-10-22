@@ -1,10 +1,14 @@
 # The Announcer: additions to record
 
-The second batch: **19 lines**, the same voice and settings as the first
+The second batch: **54 lines**, the same voice and settings as the first
 (`SCRIPT.md`, whose recording spec holds here too). `additions.csv` has
 one row per file. Put the recordings in `audio/announcer/raw/` beside the
-first batch; the game already asks for these and uses each once it's
-there (until then it says what it said before).
+first batch; the game already asks for these (all but the power-ups, which
+aren't built yet) and uses each once it's there (until then it says what
+it said before).
+
+Re-recording everything: `SCRIPT.md` is the first batch. Leave out the
+lines in `removed.txt` (the team intros, `team_*`).
 
 Score calls need nothing new: the numbers were recorded from zero to
 twenty-five, rising and falling, so any game to 11, 15 or 21 is
@@ -47,5 +51,54 @@ covered (a game past 25-all is called by the score on the board).
 | `achievement_ladder` | Top of the ladder! | Big, booming 1994 TV sports energy. | 1.5 |
 | `achievement_champion` | Champion of the tournament! | Big, booming 1994 TV sports energy. | 2.0 |
 | `achievement_cover_man` | They beat the man on the box! | Big, booming 1994 TV sports energy. | 2.2 |
-| `achievement_globetrotter` | Six venues, six wins. A true globetrotter! | Big, booming 1994 TV sports energy. | 3.0 |
+| `achievement_globetrotter` | A win at every venue! A true globetrotter! | Big, booming 1994 TV sports energy. | 3.0 |
 | `achievement_scholar` | Class dismissed! They know the real game now. | Warm, friendly, a smile in the voice. | 3.0 |
+| `achievement_ace` | An ace for the record books! | Big, booming 1994 TV sports energy. | 2.2 |
+| `achievement_marathon` | Twenty shots! That's a marathon! | Big, booming 1994 TV sports energy. | 2.2 |
+| `achievement_on_fire` | Thirty shots! They're on fire! | Big, booming 1994 TV sports energy. | 2.2 |
+| `achievement_comeback` | Down five and came back! The comeback kid! | Big, booming 1994 TV sports energy. | 3.0 |
+| `achievement_mad_scientist` | Three modifiers at once? That's mad science! | Dry, playful, a little deadpan; let the pun land. | 2.8 |
+| `achievement_park_saved` | The park is saved! Riverdale thanks you! | Warm, friendly, a smile in the voice. | 2.8 |
+
+## Specials
+
+*With SPECIALS on (ADR-080): the match's introduction, a player's meter filling up, PICKLE SMASH itself, its return popping up (the knock-back), and a smash that wins the point or sets up the side's next shot to win it.*
+
+| id | line | delivery | max s |
+|---|---|---|---|
+| `mod_specials_1` | Specials are on! Keep an eye on those meters! | Big, booming 1994 TV sports energy. | 3.0 |
+| `mod_specials_2` | Specials today, folks. Somebody's getting smashed! | Dry, playful, a little deadpan; let the pun land. | 3.0 |
+| `special_ready_1` | The meter's full! | Big, booming 1994 TV sports energy. | 1.5 |
+| `special_ready_2` | Special's ready! | Big, booming 1994 TV sports energy. | 1.5 |
+| `special_ready_3` | They're all charged up! | Big, booming 1994 TV sports energy. | 1.8 |
+| `pickle_smash_1` | Pickle smash! | Big, booming 1994 TV sports energy. | 1.2 |
+| `pickle_smash_2` | Pickle... SMASH! | Big, booming 1994 TV sports energy. | 1.6 |
+| `pickle_smash_3` | Kaboom! Pickle smash! | Big, booming 1994 TV sports energy. | 1.8 |
+| `pickle_smash_4` | They're in a pickle now! | Dry, playful, a little deadpan; let the pun land. | 1.8 |
+| `smash_return_1` | They got a paddle on it! | Big, booming 1994 TV sports energy. | 1.5 |
+| `smash_return_2` | Just barely! | Big, booming 1994 TV sports energy. | 1.0 |
+| `smash_return_3` | That one rattled the paddle! | Dry, playful, a little deadpan; let the pun land. | 1.8 |
+| `smash_winner_1` | Untouchable! | Big, booming 1994 TV sports energy. | 1.0 |
+| `smash_winner_2` | Nobody's getting that one! | Big, booming 1994 TV sports energy. | 1.8 |
+| `smash_winner_3` | Smashed to bits! | Dry, playful, a little deadpan; let the pun land. | 1.5 |
+| `smash_finish_1` | Set it up and knock it down! | Big, booming 1994 TV sports energy. | 2.0 |
+| `smash_finish_2` | And they finish the job! | Big, booming 1994 TV sports energy. | 1.8 |
+
+## Power-ups (for later)
+
+*Not in the game yet: the power-ups in design/SPECIALS_AND_POWERUPS.md (route B). Recording them now saves a session later; the game will use them when power-ups are built.*
+
+| id | line | delivery | max s |
+|---|---|---|---|
+| `powerup_appear_1` | Power-up on the court! | Big, booming 1994 TV sports energy. | 1.8 |
+| `powerup_appear_2` | Ooh, what's that? | Dry, playful, a little deadpan; let the pun land. | 1.2 |
+| `powerup_grab_1` | Got it! | Big, booming 1994 TV sports energy. | 0.8 |
+| `powerup_grab_2` | Snagged it! | Big, booming 1994 TV sports energy. | 1.0 |
+| `powerup_big_paddle` | Big paddle! | Big, booming 1994 TV sports energy. | 1.2 |
+| `powerup_sneakers` | Speed shoes! | Big, booming 1994 TV sports energy. | 1.2 |
+| `powerup_ice_patch` | Slippery out there! | Dry, playful, a little deadpan; let the pun land. | 1.5 |
+| `powerup_slow_mo` | Slow... motion! | Dry, playful, a little deadpan; let the pun land. | 1.8 |
+| `powerup_magnet` | Magnet ball! | Big, booming 1994 TV sports energy. | 1.2 |
+| `powerup_golden_ball` | Golden ball! This one's worth two! | Big, booming 1994 TV sports energy. | 2.5 |
+| `powerup_banana` | Watch your step! | Dry, playful, a little deadpan; let the pun land. | 1.2 |
+| `powerup_pickle_jar` | Pickle jar! Smash time! | Big, booming 1994 TV sports energy. | 1.8 |

@@ -23,7 +23,7 @@ const FAULT_LINES := {K.FAULT_NET: "net", K.FAULT_KITCHEN: "kitchen", K.FAULT_WR
 	K.FAULT_OUT: "out", K.FAULT_SECOND_BOUNCE: "two_bounces", K.FAULT_EARLY_VOLLEY: "early_volley",
 	K.FAULT_LAVA: "lava", K.FAULT_MOMENTUM: "momentum", K.FAULT_DRIVE: "drive_banned"}
 const MOD_LINES := [[K.MOD_SUDDEN_DEATH, "mod_sudden_death"], [K.MOD_MULTI_BALL, "mod_multi_ball"],
-	[K.MOD_DINK_OR_DIE, "mod_dink_or_die"], [K.MOD_LAVA, "mod_lava"], [K.MOD_BIG_BALL, "mod_big_ball"],
+	[K.MOD_DINK_OR_DIE, "mod_dink_or_die"], [K.MOD_SPECIALS, "mod_specials"], [K.MOD_LAVA, "mod_lava"], [K.MOD_BIG_BALL, "mod_big_ball"],
 	[K.MOD_FAST_BALL, "mod_fast_ball"], [K.MOD_GHOST_BALL, "mod_ghost_ball"], [K.MOD_POPCORN, "mod_popcorn"],
 	[K.MOD_ICE, "mod_ice"], [K.MOD_GLOW, "mod_glow"], [K.MOD_INVERSE, "mod_inverse"],
 	[K.MOD_MOON, "mod_moon"], [K.MOD_BOUNCY, "mod_bouncy"], [K.MOD_WIND, "mod_wind"],
@@ -41,6 +41,11 @@ var _mp_before := -1               ## the team that had match point before this 
 var _server_before := -1
 var _was_paused := false
 var _deuces := 0                   ## times level past game point (WIN BY 2)
+## SPECIALS (ADR-080): the team whose PICKLE SMASH came this rally (-1
+## none), whether the last shot was one, and each slot's meter last frame
+var _smash_by := -1
+var _last_smash := false
+var _ready := [false, false, false, false]
 
 
 func _init(v: MatchView) -> void:
@@ -92,7 +97,7 @@ func begin() -> void:
 	elif _first(["venue_" + view.venue]) != "":
 		_intro.append("venue_" + view.venue)  # (the GYM's is still to record: PORT-55)
 	for m in MOD_LINES:
-		if cfg.modifiers & int(m[0]):
+		if cfg.modifiers & int(m[0]) and _first([m[1]]) != "":    # (SPECIALS' is still to record)
 			_intro.append(m[1])
 			break
 	if _intro.size() == 1:
@@ -105,6 +110,7 @@ func tick(delta: float) -> void:
 	_since_call += delta
 	if not _intro.is_empty() and Announcer.current and not Announcer.current.busy():
 		_say(_intro.pop_front(), Announcer.TOP)
+	_meters()
 	var paused := view.sim.paused != 0
 	if paused != _was_paused:
 		_was_paused = paused
@@ -118,15 +124,43 @@ func on_event(e: Array) -> void:
 		K.EVENT_SERVE:
 			_called = {}
 			_server_before = s.serving_team
+			_smash_by = -1
+			_last_smash = false
 		K.EVENT_HIT:
 			_on_hit(e)
 		K.EVENT_POINT:
 			_on_point(int(e[3]))
 
 
+## A human's meter filling up (SPECIALS): once, when it does.
+func _meters() -> void:
+	var s := view.sim
+	if not s.specials_on():
+		return
+	for slot in K.MAX_PLAYERS:
+		var full := s.special_ready(slot)
+		if full and not _ready[slot] and s.config.human[slot] and not view.demo:
+			_say(_first(["special_ready"]), Announcer.LOW, 2.0, SHORT * 2)
+		_ready[slot] = full
+
+
 func _on_hit(e: Array) -> void:
 	var s := view.sim
 	var shots: int = (s.shot_serial - s.rally_start) & 0xff
+	# SPECIALS: PICKLE SMASH (until its lines are recorded, a smash's), and
+	# the knock-back's pop-up
+	var team := 1 if (int(e[3]) & 15) >= 2 else 0
+	var was_smash := _last_smash
+	_last_smash = int(e[3]) >> 4 == K.SHOT_SPECIAL
+	if _last_smash:
+		_smash_by = team
+		if _say(_first(["pickle_smash", "shot_smash"]), Announcer.HIGH, 0.0, SHORT):
+			_since_call = 0.0
+		return
+	if was_smash and team != _smash_by and _first(["smash_return"]) != "":
+		if _say("smash_return", Announcer.MID, 0.0, SHORT):
+			_since_call = 0.0
+		return
 	for n in RALLY_CALLS:
 		if shots >= n and not _called.has(n):
 			_called[n] = true
@@ -144,9 +178,9 @@ func _on_hit(e: Array) -> void:
 			fam = "shot_drive"
 		K.SHOT_SLICE:
 			fam = "shot_slice"
-		K.SHOT_OVERHEAD, K.SHOT_SPECIAL:
+		K.SHOT_OVERHEAD:
 			fam = "shot_smash"
-			chance = SMASH_CHANCE if shot == K.SHOT_OVERHEAD else [0.0, 1.0, 1.0]   # PICKLE SMASH: always
+			chance = SMASH_CHANCE
 		K.SHOT_SOFT:
 			fam = "shot_lob" if s.ball.vz_fp > 40 else "shot_dink"
 		_:
@@ -174,6 +208,11 @@ func _on_point(winner: int) -> void:
 	if shots <= 1 and winner == _server_before and s.last_fault in [K.FAULT_SECOND_BOUNCE, K.FAULT_NONE]:
 		line = "ace"
 		pri = Announcer.HIGH
+	elif _last_smash and winner == _smash_by and _first(["smash_winner"]) != "":
+		line = "smash_winner"              # SPECIALS: a PICKLE SMASH they never returned
+		pri = Announcer.HIGH
+	elif _smash_by == winner and _first(["smash_finish"]) != "" and _chance(POINT_CHANCE):
+		line = "smash_finish"              # ... or set up the point
 	elif _extended():
 		# WIN BY 2, past game point: advantage or deuce (the second batch,
 		# PORT-55; "win by two" until those are recorded)

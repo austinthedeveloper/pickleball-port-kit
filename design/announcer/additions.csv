@@ -16,5 +16,40 @@ achievement_first_win,achievement_first_win.wav,The first win of many!,"Warm, fr
 achievement_ladder,achievement_ladder.wav,Top of the ladder!,"Big, booming 1994 TV sports energy.",1.5,Achievements
 achievement_champion,achievement_champion.wav,Champion of the tournament!,"Big, booming 1994 TV sports energy.",2.0,Achievements
 achievement_cover_man,achievement_cover_man.wav,They beat the man on the box!,"Big, booming 1994 TV sports energy.",2.2,Achievements
-achievement_globetrotter,achievement_globetrotter.wav,"Six venues, six wins. A true globetrotter!","Big, booming 1994 TV sports energy.",3.0,Achievements
+achievement_globetrotter,achievement_globetrotter.wav,A win at every venue! A true globetrotter!,"Big, booming 1994 TV sports energy.",3.0,Achievements
 achievement_scholar,achievement_scholar.wav,Class dismissed! They know the real game now.,"Warm, friendly, a smile in the voice.",3.0,Achievements
+achievement_ace,achievement_ace.wav,An ace for the record books!,"Big, booming 1994 TV sports energy.",2.2,Achievements
+achievement_marathon,achievement_marathon.wav,Twenty shots! That's a marathon!,"Big, booming 1994 TV sports energy.",2.2,Achievements
+achievement_on_fire,achievement_on_fire.wav,Thirty shots! They're on fire!,"Big, booming 1994 TV sports energy.",2.2,Achievements
+achievement_comeback,achievement_comeback.wav,Down five and came back! The comeback kid!,"Big, booming 1994 TV sports energy.",3.0,Achievements
+achievement_mad_scientist,achievement_mad_scientist.wav,Three modifiers at once? That's mad science!,"Dry, playful, a little deadpan; let the pun land.",2.8,Achievements
+achievement_park_saved,achievement_park_saved.wav,The park is saved! Riverdale thanks you!,"Warm, friendly, a smile in the voice.",2.8,Achievements
+mod_specials_1,mod_specials_1.wav,Specials are on! Keep an eye on those meters!,"Big, booming 1994 TV sports energy.",3.0,Specials
+mod_specials_2,mod_specials_2.wav,"Specials today, folks. Somebody's getting smashed!","Dry, playful, a little deadpan; let the pun land.",3.0,Specials
+special_ready_1,special_ready_1.wav,The meter's full!,"Big, booming 1994 TV sports energy.",1.5,Specials
+special_ready_2,special_ready_2.wav,Special's ready!,"Big, booming 1994 TV sports energy.",1.5,Specials
+special_ready_3,special_ready_3.wav,They're all charged up!,"Big, booming 1994 TV sports energy.",1.8,Specials
+pickle_smash_1,pickle_smash_1.wav,Pickle smash!,"Big, booming 1994 TV sports energy.",1.2,Specials
+pickle_smash_2,pickle_smash_2.wav,Pickle... SMASH!,"Big, booming 1994 TV sports energy.",1.6,Specials
+pickle_smash_3,pickle_smash_3.wav,Kaboom! Pickle smash!,"Big, booming 1994 TV sports energy.",1.8,Specials
+pickle_smash_4,pickle_smash_4.wav,They're in a pickle now!,"Dry, playful, a little deadpan; let the pun land.",1.8,Specials
+smash_return_1,smash_return_1.wav,They got a paddle on it!,"Big, booming 1994 TV sports energy.",1.5,Specials
+smash_return_2,smash_return_2.wav,Just barely!,"Big, booming 1994 TV sports energy.",1.0,Specials
+smash_return_3,smash_return_3.wav,That one rattled the paddle!,"Dry, playful, a little deadpan; let the pun land.",1.8,Specials
+smash_winner_1,smash_winner_1.wav,Untouchable!,"Big, booming 1994 TV sports energy.",1.0,Specials
+smash_winner_2,smash_winner_2.wav,Nobody's getting that one!,"Big, booming 1994 TV sports energy.",1.8,Specials
+smash_winner_3,smash_winner_3.wav,Smashed to bits!,"Dry, playful, a little deadpan; let the pun land.",1.5,Specials
+smash_finish_1,smash_finish_1.wav,Set it up and knock it down!,"Big, booming 1994 TV sports energy.",2.0,Specials
+smash_finish_2,smash_finish_2.wav,And they finish the job!,"Big, booming 1994 TV sports energy.",1.8,Specials
+powerup_appear_1,powerup_appear_1.wav,Power-up on the court!,"Big, booming 1994 TV sports energy.",1.8,Power-ups (for later)
+powerup_appear_2,powerup_appear_2.wav,"Ooh, what's that?","Dry, playful, a little deadpan; let the pun land.",1.2,Power-ups (for later)
+powerup_grab_1,powerup_grab_1.wav,Got it!,"Big, booming 1994 TV sports energy.",0.8,Power-ups (for later)
+powerup_grab_2,powerup_grab_2.wav,Snagged it!,"Big, booming 1994 TV sports energy.",1.0,Power-ups (for later)
+powerup_big_paddle,powerup_big_paddle.wav,Big paddle!,"Big, booming 1994 TV sports energy.",1.2,Power-ups (for later)
+powerup_sneakers,powerup_sneakers.wav,Speed shoes!,"Big, booming 1994 TV sports energy.",1.2,Power-ups (for later)
+powerup_ice_patch,powerup_ice_patch.wav,Slippery out there!,"Dry, playful, a little deadpan; let the pun land.",1.5,Power-ups (for later)
+powerup_slow_mo,powerup_slow_mo.wav,Slow... motion!,"Dry, playful, a little deadpan; let the pun land.",1.8,Power-ups (for later)
+powerup_magnet,powerup_magnet.wav,Magnet ball!,"Big, booming 1994 TV sports energy.",1.2,Power-ups (for later)
+powerup_golden_ball,powerup_golden_ball.wav,Golden ball! This one's worth two!,"Big, booming 1994 TV sports energy.",2.5,Power-ups (for later)
+powerup_banana,powerup_banana.wav,Watch your step!,"Dry, playful, a little deadpan; let the pun land.",1.2,Power-ups (for later)
+powerup_pickle_jar,powerup_pickle_jar.wav,Pickle jar! Smash time!,"Big, booming 1994 TV sports energy.",1.8,Power-ups (for later)

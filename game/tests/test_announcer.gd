@@ -41,7 +41,8 @@ func test_the_clips() -> void:
 		"shot_lob", "shot_dink", "shot_volley"]
 	wanted.append_array(Commentary.FAULT_LINES.values())
 	for m in Commentary.MOD_LINES:
-		wanted.append(m[1])
+		if m[1] != "mod_specials":
+			wanted.append(m[1])              # SPECIALS' is in the second batch (another mod's is said)
 	for n in Commentary.RALLY_CALLS:
 		wanted.append("rally_%d" % n)
 	for v in Settings.VENUES:
@@ -221,6 +222,52 @@ func test_settings() -> void:
 
 ## WIN BY 2's extension: advantage and deuce once recorded (PORT-55), "win
 ## by two" until then; an achievement's line, its own or the general one.
+## SPECIALS' lines (the second batch): PICKLE SMASH, its pop-up return,
+## a smash that wins, and a meter filling up; before they're recorded, a
+## smash's line.
+func test_the_specials_lines() -> void:
+	var k := _kept()
+	Announcer.volume = 8
+	Sfx.setting = AudioMap.SOUND_ALL
+	var a := _voice()
+	var v := MatchView.new()
+	runner.root.add_child(v)
+	var cfg := Settings.config_for(false, 2, K.DIFFICULTY_MEDIUM, 11)
+	cfg.modifiers = K.MOD_SPECIALS
+	v.setup(cfg, "park", false)
+	var c := v.commentary
+	c._intro = []
+	var smash := [K.EVENT_HIT, 100, 100, 0 | (K.SHOT_SPECIAL << 4)]
+	if not a.families.has("pickle_smash"):
+		c._on_hit(smash)
+		eq(c.heard.back(), "shot_smash", "not recorded yet: a smash's line")
+		a.hush()
+	for fam in ["pickle_smash", "smash_return", "smash_winner", "special_ready"]:
+		a.clips[fam + "_1"] = 0.5
+		a.families[fam] = [fam + "_1"]
+	c._on_hit(smash)
+	eq(c.heard.back(), "pickle_smash", "PICKLE SMASH")
+	a.hush()
+	c._on_hit([K.EVENT_HIT, 300, 100, 2 | (K.SHOT_SOFT << 4)])
+	eq(c.heard.back(), "smash_return", "the pop-up")
+	a.hush()
+	c._on_hit(smash)
+	a.hush()
+	v.sim.rally_start = (v.sim.shot_serial - 8) & 0xff
+	c._on_point(0)
+	eq(c.heard.back(), "smash_winner", "never returned: a winner")
+	a.hush()
+	v.sim.meter[0] = K.SPECIAL_METER_MAX
+	c._meters()
+	eq(c.heard.back(), "special_ready", "P1's meter filled up")
+	a.hush()
+	c._meters()
+	eq(c.heard.count("special_ready"), 1, "once")
+	v.free()
+	a.free()
+	_restore(k)
+
+
 func test_the_second_batch() -> void:
 	var k := _kept()
 	Announcer.volume = 8
