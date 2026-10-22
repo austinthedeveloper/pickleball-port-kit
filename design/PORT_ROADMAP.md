@@ -91,6 +91,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-63 | Practice without the announcer | `feature/cld-practice-quiet` | Released (v0.22.1) |
 | PORT-64 | The title menu regrouped: five places to go | `feature/cld-menu-regroup` | Released (v0.23.0) |
 | PORT-65 | SPECIALS: the meter and PICKLE SMASH | `feature/cld-specials` | Released (v0.24.0) |
+| PORT-66 | Effects: bounce marks, camera flashes, the net cord | `feature/cld-effects` | Ready to test |
 
 ## Releases
 
@@ -362,6 +363,21 @@ the same request). Open: 36 and 40.
     unchanged. `rally_stats` with mods=131072: the smasher's side wins 56%
     (doubles) and 79% (singles) of rallies with a smash. Screenshots of
     the meters and a PICKLE SMASH.
+  - Status: **Released (v0.24.0)**.
+
+### 66. `feature/cld-effects`: three light effects (asked for 2026-10-22)
+
+- [x] `PORT-66` `view/court_effects.gd`, display only and deterministic:
+  a scuff where the ball bounces, fading over four seconds (a dozen at
+  most); camera flashes among the crowd at the big moments (a 15, 20, 25
+  or 30-shot rally, PICKLE SMASH, match point, the match won), none with
+  FLASHES off or in the demo; the net wobbles (a couple of pixels) when a
+  ball clips the tape and carries over, with the net's sound, and when one
+  goes into it. A few shapes a frame each, no new shaders or particles.
+  - Verified: `test_feel` (the marks, the flashes and FLASHES off, the net
+    cord and settling; the view against a bare sim); 440/440 plus the
+    e2e, golden traces unchanged. Screenshots of the marks and a burst of
+    flashes (`screenshot.gd ... camflash`).
   - Status: **Ready to test**.
 
 ## For you

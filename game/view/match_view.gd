@@ -90,6 +90,8 @@ var _sfx: Sfx
 var _debug: DebugOverlay
 var feel: Feel
 var flair: Flair                 ## SNES ADR-064: reactions, emotes, the net's shiver
+var effects: CourtEffects        ## PORT-66: bounce marks, camera flashes, the net's wobble
+var _net_layer: Sprite2D
 ## SNES ADR-054: GLOW plays at NIGHT with the LINES preset LIME.
 const GLOW_TIME := 2
 const GLOW_LINES := 4
@@ -191,6 +193,8 @@ func _build() -> void:
 		s.z_index = z
 		add_child(s)
 		_layers.append([s, s.position, float(layer["parallax"])])
+		if layer["name"] == "net":
+			_net_layer = s
 		var scales := CourtStyle.time_scales(time)
 		if layer["name"] == "ground":
 			_ground = s
@@ -238,6 +242,7 @@ func _build() -> void:
 	_fx.add_child(flair)
 	heat = RallyHeat.new().setup(self)
 	_fx.add_child(heat)
+	effects = CourtEffects.new().setup(self, _shadows, crowd)
 	critter = Critter.for_venue(venue, sim)
 	if critter:
 		add_child(critter)
@@ -309,7 +314,7 @@ func rebuild(cfg: SimTypes.MatchConfig) -> void:
 	_players = []
 	_multi_balls = []
 	for f in ["crowd", "watcher", "critter", "wind_view", "focus", "heat", "close_call",
-			"lesson_view", "_ground", "_net_text"]:
+			"lesson_view", "_ground", "_net_text", "effects", "_net_layer"]:
 		set(f, null)
 	glide = BallGlide.new()
 	stats = MatchStats.new()
@@ -600,6 +605,7 @@ func _match_over() -> void:
 func _on_event(e: Array) -> void:
 	feel.on_event(e)
 	flair.on_event(e)
+	effects.on_event(e)
 	stats.on_event(e)
 	if e[0] == K.EVENT_POINT:
 		stats.note_score(sim.team_score)
@@ -721,6 +727,8 @@ func _update_camera() -> void:
 	var cam := camera.update(sim.ball)
 	for l in _layers:
 		l[0].position = (l[1] - cam * l[2]).round()
+	if _net_layer and effects:
+		_net_layer.position += effects.net_offset()      # PORT-66: a net cord shakes it
 	# the people in the stands move with the stands (KNOWN_ISSUES #68)
 	var stands := (-cam * _stands_parallax).round()
 	if crowd:
@@ -778,6 +786,7 @@ func _update_visuals() -> void:
 		_ball_sprite.region_rect.position.x = int(_ball_frame) * fw
 	_draw_multi_balls()
 	feel.update()
+	effects.update()
 	var shots := RallyHeat.rally(self)
 	heat.update()
 	if focus:

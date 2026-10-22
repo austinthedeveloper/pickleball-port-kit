@@ -80,3 +80,77 @@ func test_feel_leaves_the_sim_alone() -> void:
 		bare.drain_events()
 	eq(v.sim.snapshot(), bare.snapshot(), "1200 frames with every effect on")
 	v.queue_free()
+
+
+## PORT-66: a scuff where the ball lands, fading, a dozen at most.
+func test_bounce_marks() -> void:
+	var v := _view()
+	var m := v.effects.marks
+	v.effects.on_event([K.EVENT_BOUNCE, 60, 120, 1])
+	eq(m.list.size(), 1, "a bounce leaves a mark")
+	for i in 20:
+		v.effects.on_event([K.EVENT_BOUNCE, 60 + i, 120, 1])
+	eq(m.list.size(), CourtEffects.MARK_MAX, "the oldest go")
+	for f in CourtEffects.MARK_FRAMES:
+		v.effects.update()
+	eq(m.list.size(), 0, "and they fade away")
+	v.queue_free()
+
+
+## PORT-66: camera flashes at the big moments, none with FLASHES off or in
+## the demo.
+func test_camera_flashes() -> void:
+	var kept := Settings.flashes
+	var cfg := SimTypes.MatchConfig.singles()
+	var v := match_view(cfg)
+	v.highlight = null
+	Settings.flashes = true
+	v.effects.on_event([K.EVENT_HIT, 100, 120, 0 | (K.SHOT_SPECIAL << 4)])
+	check(v.effects.flashes.left > 0, "PICKLE SMASH: the cameras flash")
+	var seen := 0
+	for f in CourtEffects.FLASH_BURST:
+		v.effects.update()
+		seen = maxi(seen, v.effects.flashes.lit.size())
+	check(seen > 0, "glints in the stands")
+	v.effects.flashes.left = 0
+	v.sim.rally_start = (v.sim.shot_serial - 15) & 0xff
+	v.effects.on_event([K.EVENT_HIT, 100, 120, 0])
+	check(v.effects.flashes.left > 0, "a 15-shot rally")
+	v.effects.flashes.left = 0
+	Settings.flashes = false
+	v.effects.flash(CourtEffects.FLASH_BIG)
+	eq(v.effects.flashes.left, 0, "FLASHES off: none")
+	Settings.flashes = kept
+	v.queue_free()
+	var demo := _view()
+	demo.effects.flash(CourtEffects.FLASH_BIG)
+	eq(demo.effects.flashes.left, 0, "none in the demo")
+	demo.queue_free()
+
+
+## PORT-66: a ball that clips the tape and goes over shakes the net; one
+## well over doesn't; one into the net does.
+func test_net_cord() -> void:
+	var v := _view()
+	var b := v.sim.ball
+	b.active = 1
+	b.rally_state = K.BALL_RALLY_LIVE
+	for clear in [1, 10]:
+		v.effects.shake = 0
+		b.x_fp = K.to_fp(K.COURT_NET_X - 2)
+		b.z_fp = K.to_fp(K.COURT_NET_HEIGHT + clear)
+		v.effects.update()
+		b.x_fp = K.to_fp(K.COURT_NET_X + 2)
+		v.effects.update()
+		if clear == 1:
+			check(v.effects.shake > 0, "a net cord shakes the net")
+			check(v.effects.net_offset() != Vector2.ZERO or v.effects.shake < CourtEffects.SHAKE_FRAMES,
+				"the net moves")
+		else:
+			eq(v.effects.shake, 0, "well over: still")
+	v.effects.on_event([K.EVENT_FAULT, 128, 120, K.FAULT_NET])
+	eq(v.effects.shake, CourtEffects.SHAKE_FRAMES, "into the net: it shakes")
+	for f in CourtEffects.SHAKE_FRAMES:
+		v.effects.update()
+	eq(v.effects.net_offset(), Vector2.ZERO, "and settles")
+	v.queue_free()

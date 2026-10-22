@@ -7,6 +7,7 @@
 ## (any page id) opens that title page; "court=S,K,R,L" sets the court
 ## colour presets; "time=N" DAY 0, DUSK 1, NIGHT 2;
 ## "meterfull" keeps P1's SPECIALS meter full (with mods=131072), "picklesmash" shoots a PICKLE SMASH;
+## "camflash" a burst of the crowd's camera flashes (PORT-66);
 ## "pad" shows the controller prompts; "save" a save with records (title); "pause" pauses the match at the end; "tune" opens the tuning panel; "debug" the F3 overlay (hit volumes); "location=N" OPEN PLAY's location; "potm" a bot match to its PLAY OF THE MATCH; "nearreach" a near-side reach mid-step;
 ## "closecall" shows a forced close-up; "initials" the initials card;
 ## "result" plays a bot match and ends it (the stats card); "mp4" four
@@ -430,6 +431,8 @@ func _tick() -> void:
 					and pl.shot_type == K.SHOT_SPECIAL and pl.contact_consumed and pl.state == K.STATE_ACTIVE \
 					and _target > _frames + 6:
 				_target = _frames + 4
+	if _frames == _target - 12 and _view is MatchView and "camflash" in OS.get_cmdline_user_args():
+		_view.effects.flash(CourtEffects.FLASH_BURST)     # PORT-66: the stands' camera flashes
 	if _frames == _target - 3 and _view is MatchView and "score10" in OS.get_cmdline_user_args():
 		_view.sim.team_score = [10, 10]
 	if _frames >= _target:
