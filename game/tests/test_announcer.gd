@@ -160,6 +160,21 @@ func test_a_match() -> void:
 	_restore(k)
 
 
+## Practice is quiet: no points there, so the rally talk would count the
+## machine's feeds (returned or not) as one long rally.
+func test_practice_is_quiet() -> void:
+	wipe_saves("user://test_announcer/")
+	var save := SaveGame.new()
+	save.dir = "user://test_announcer/"
+	save.load_game()
+	var v := match_view(save.practice_config(K.DIFFICULTY_MEDIUM))
+	check(v.sim.config.practice, "a practice match")
+	eq(v.commentary, null, "no announcer in practice")
+	for f in 600:
+		v._physics_process(1.0 / 60.0)
+	v.queue_free()
+
+
 func test_settings() -> void:
 	var k := _kept()
 	var sv := fresh_save("user://test_announcer/")

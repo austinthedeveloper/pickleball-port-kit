@@ -88,6 +88,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-60 | The park: paddles a player, winners staying said | `feature/cld-park-stacking` | Released (v0.21.1) |
 | PORT-61 | The swing-arm ball machine | `feature/cld-ball-machine` | Released (v0.22.0) |
 | PORT-62 | Player specials and powerups: a running design doc | `feature/cld-specials-doc` | In progress |
+| PORT-63 | Practice without the announcer | `feature/cld-practice-quiet` | Ready to test |
 
 ## Releases
 
@@ -294,6 +295,15 @@ the same request). Open: 36 and 40.
   '95 overhead smash as PICKLE SMASH; the first powerup list. Nothing
   built yet.
   - Status: **In progress** (waiting on the questions in the doc).
+
+### 63. `feature/cld-practice-quiet`: practice without the announcer (asked for 2026-10-21)
+
+- [x] `PORT-63` KNOWN_ISSUES #72: no announcer in practice. With no
+  points there, its rally lines counted the machine's feeds, missed or
+  not, as one long rally. Lessons and matches are unchanged.
+  - Verified: `test_announcer.test_practice_is_quiet`; 426/426 plus the
+    e2e, golden traces unchanged.
+  - Status: **Ready to test**.
 
 ## For you
 

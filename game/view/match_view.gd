@@ -22,7 +22,7 @@ const INPUT_LOCK_FRAMES := 12
 var glide := BallGlide.new()       ## a paced ball drawn gliding (ADR-073)
 var tuning: TuningPanel            ## F2 / TUNE (ADR-074); null in the demo
 var highlight: Highlight           ## PLAY OF THE MATCH (ADR-075); null when there's none
-var commentary: Commentary         ## the announcer's lines (ADR-076); null in the demo
+var commentary: Commentary         ## the announcer's lines (ADR-076); null in the demo and practice
 var _base_time := CourtStyle.DAY    ## the owner's time and court, before GLOW's
 var _base_court: Array = []
 var sim: Sim
@@ -288,7 +288,9 @@ func _build() -> void:
 	highlight = Highlight.new(self)
 	if not highlight.wanted():
 		highlight = null
-	commentary = null if demo else Commentary.new(self)
+	# none in the demo, nor in practice: no points, so its rally talk
+	# would count the machine's feeds as one endless rally
+	commentary = null if demo or sim.config.practice else Commentary.new(self)
 	if commentary:
 		commentary.begin()
 
