@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.22.1`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.23.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-61 of 63 roadmap tasks are in.
+62 of 64 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -380,5 +380,11 @@ Status: **In progress** (waiting on the questions in the doc).
 ## PORT-63: practice without the announcer (asked for 2026-10-21)
 
 KNOWN_ISSUES #72: no announcer in practice. With no points there, its rally lines counted the machine's feeds, missed or not, as one long rally. Lessons and matches are unchanged.
+
+Status: **Released (v0.22.1)**.
+
+## PORT-64: the title menu regrouped (asked for 2026-10-21)
+
+ADR-079: MAIN is STORY, PLAY, PRACTICE, PLAYER and OPTIONS (was twelve rows). PLAY has QUICK MATCH (SINGLES or DOUBLES, one row), TOURNAMENT, OPEN PLAY and MULTIPLAYER; QUICK MATCH opens MATCH SETUP (START, MODE, PLAYERS, VS, DIFFICULTY, CPU ERRORS, POINTS, COURT, MODIFIERS); PLAYER has the players, RECORDS, ACHIEVEMENTS and the HAT MUSEUM. BACK goes to the page you came from; after a match the title opens where it started (MATCH SETUP after a quick match). Mocked up first with the game's panels, then built as mocked.
 
 Status: **Ready to test**.

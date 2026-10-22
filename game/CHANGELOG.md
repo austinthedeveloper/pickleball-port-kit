@@ -4,7 +4,25 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
-## [0.22.1] - 2026-10-21
+## [0.23.0] - 2026-10-21
+
+A simpler title menu.
+
+### Changed
+- **The title menu** has five rows instead of twelve: STORY, PLAY,
+  PRACTICE, PLAYER and OPTIONS.
+- **PLAY** holds the modes: QUICK MATCH (pick SINGLES or DOUBLES with
+  Left/Right), TOURNAMENT, OPEN PLAY and MULTIPLAYER.
+- **MATCH SETUP** comes up on the way to a quick match, with everything
+  for the match in one place: the mode, players, opponent, difficulty,
+  CPU errors, points, court and modifiers. It remembers your choices, so
+  START gets you straight in, and after the match you're back on it for
+  a rematch.
+- **PLAYER** gathers your players, records, achievements and the hat
+  museum. Achievements are now two presses from the title.
+- BACK returns to the page you came from.
+
+ - 2026-10-21
 
 A quieter practice.
 
