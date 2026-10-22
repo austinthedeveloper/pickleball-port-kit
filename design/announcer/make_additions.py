@@ -83,29 +83,34 @@ G = [
     ]),
 ]
 
-out = sys.argv[1]
-rows = [(i, name, t, d, s) for name, when, lines in G for (i, t, d, s) in lines]
-assert len({r[0] for r in rows}) == len(rows), "duplicate id"
-with open(os.path.join(out, "additions.csv"), "w", newline="") as f:
-    w = csv.writer(f)
-    w.writerow(["id", "file", "text", "delivery", "max_seconds", "group"])
-    for (i, name, t, d, s) in rows:
-        w.writerow([i, i + ".wav", t, d, s, name])
-md = ["# The Announcer: additions to record\n",
-      "The second batch: **%d lines**, the same voice and settings as the first" % len(rows),
-      "(`SCRIPT.md`, whose recording spec holds here too). `additions.csv` has",
-      "one row per file. Put the recordings in `audio/announcer/raw/` beside the",
-      "first batch; the game already asks for these (all but the power-ups, which",
-      "aren't built yet) and uses each once it's there (until then it says what",
-      "it said before).\n",
-      "Re-recording everything: `SCRIPT.md` is the first batch. Leave out the",
-      "lines in `removed.txt` (the team intros, `team_*`).\n",
-      "Score calls need nothing new: the numbers were recorded from zero to",
-      "twenty-five, rising and falling, so any game to 11, 15 or 21 is",
-      "covered (a game past 25-all is called by the score on the board).\n"]
-for name, when, lines in G:
-    md += ["## %s\n" % name, "*%s*\n" % when, "| id | line | delivery | max s |", "|---|---|---|---|"]
-    md += ["| `%s` | %s | %s | %s |" % (i, t, d, s) for (i, t, d, s) in lines]
-    md.append("")
-open(os.path.join(out, "ADDITIONS.md"), "w").write("\n".join(md))
-print(len(rows), "lines")
+def write_outputs(out):
+    """Write the standalone additions list and recording notes."""
+    rows = [(i, name, t, d, s) for name, when, lines in G for (i, t, d, s) in lines]
+    assert len({r[0] for r in rows}) == len(rows), "duplicate id"
+    with open(os.path.join(out, "additions.csv"), "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["id", "file", "text", "delivery", "max_seconds", "group"])
+        for (i, name, t, d, s) in rows:
+            w.writerow([i, i + ".wav", t, d, s, name])
+    md = ["# The Announcer: additions to record\n",
+          "The second batch: **%d lines**, the same voice and settings as the first" % len(rows),
+          "(`SCRIPT.md`, whose recording spec holds here too). `additions.csv` has",
+          "one row per file. Put the recordings in `audio/announcer/raw/` beside the",
+          "first batch; the game already asks for these (all but the power-ups, which",
+          "aren't built yet) and uses each once it's there (until then it says what",
+          "it said before).\n",
+          "Re-recording everything: `SCRIPT.md` is the first batch. Leave out the",
+          "lines in `removed.txt` (the team intros, `team_*`).\n",
+          "Score calls need nothing new: the numbers were recorded from zero to",
+          "twenty-five, rising and falling, so any game to 11, 15 or 21 is",
+          "covered (a game past 25-all is called by the score on the board).\n"]
+    for name, when, lines in G:
+        md += ["## %s\n" % name, "*%s*\n" % when, "| id | line | delivery | max s |", "|---|---|---|---|"]
+        md += ["| `%s` | %s | %s | %s |" % (i, t, d, s) for (i, t, d, s) in lines]
+        md.append("")
+    open(os.path.join(out, "ADDITIONS.md"), "w").write("\n".join(md))
+    print(len(rows), "lines")
+
+
+if __name__ == "__main__":
+    write_outputs(sys.argv[1])

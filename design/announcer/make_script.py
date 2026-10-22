@@ -1,6 +1,9 @@
-"""The announcer's script: one source, two outputs (SCRIPT.md to read,
-lines.csv for the voiceover tool). Run: python3 design/announcer/make_script.py design/announcer"""
-import csv, sys, os
+"""The complete announcer script: core lines plus make_additions.py, minus
+removed.txt. Writes SCRIPT.md and lines.csv for a full recording batch.
+Run: python3 design/announcer/make_script.py design/announcer"""
+import csv, fnmatch, sys, os
+
+from make_additions import G as ADDITION_GROUPS
 
 # Delivery shorthands
 HYPE = "Big, booming 1994 TV sports energy."
@@ -42,7 +45,7 @@ group("Match start: venues", "As a match begins, once, for its venue.", [
     ("time_dusk", "The lights are coming on. What an evening for it.", WARM, 3),
 ])
 
-group("Match start: the teams", "As a CPU team's match begins (its intro card), once.", [
+group("Match start", "As a match begins, after the venue.", [
     ("team_henderson", "Here come the Hendersons, Dad and Kiddo! Dad jokes incoming!", WARM, 4),
     ("team_snowbirds", "Marge and Walt, the Snowbirds! They say they've played since 1962. Pickleball was invented in 1965. Hmm.", WRY, 6),
     ("team_gym_bros", "Here come the Gym Bros, Brad and Chad! Do they even dink?", WRY, 4),
@@ -270,6 +273,28 @@ group("Ladder, tournament and story", "Around the ladder, the bracket (and the c
 ])
 
 out = sys.argv[1]
+
+# The additions generator remains the source for the second batch, while this
+# generator produces the complete list needed for a full recording run.
+G.extend(ADDITION_GROUPS)
+
+removed_path = os.path.join(os.path.dirname(__file__), "removed.txt")
+removed_patterns = []
+with open(removed_path) as f:
+    for line in f:
+        pattern = line.split("#", 1)[0].strip()
+        if pattern:
+            removed_patterns.append(pattern)
+
+G = [
+    (name, when, [
+        line for line in lines
+        if not any(fnmatch.fnmatchcase(line[0], pattern) for pattern in removed_patterns)
+    ])
+    for name, when, lines in G
+]
+G = [(name, when, lines) for name, when, lines in G if lines]
+
 os.makedirs(out, exist_ok=True)
 rows = []
 for name, when, lines in G:
