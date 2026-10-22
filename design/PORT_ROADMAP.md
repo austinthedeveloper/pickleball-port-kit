@@ -186,6 +186,8 @@ status in the same commit. The finished tasks, in full, are in
   `v0.23.0`, on `feature/cld-release-0.23.0`).
 - **v0.24.0** (2026-10-21): PORT-65 SPECIALS, the meter and PICKLE SMASH
   (tag `v0.24.0`, on `feature/cld-release-0.24.0`).
+- **v0.25.0** (2026-10-21): PORT-55 the announcer re-recorded, with the
+  second batch (tag `v0.25.0`, on `feature/cld-release-0.25.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 

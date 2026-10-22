@@ -4,7 +4,20 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
-## [0.24.0] - 2026-10-21
+## [0.25.0] - 2026-10-21
+
+A new voice in the booth.
+
+### Changed
+- **The announcer** is re-recorded in one new voice, every line of it.
+- **New calls**: advantage and deuce under WIN BY 2, a line for every
+  achievement, an intro at THE GYM, and the SPECIALS calls (your meter
+  filling up, PICKLE SMASH, its knocked-back return, and a smash that wins
+  the point).
+- The 20, 25 and 30-shot rally calls and PICKLE SMASH have more room, so
+  the longer takes still play mid-rally.
+
+ - 2026-10-21
 
 The first special move.
 

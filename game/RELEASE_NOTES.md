@@ -1,6 +1,6 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.24.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.25.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
 63 of 65 roadmap tasks are in.
@@ -333,7 +333,7 @@ Status: **Ready to test**: say which achievements to add next.
 
 A second list to record, `design/announcer/ADDITIONS.md` and `additions.csv` (17 lines, `make_additions.py` makes both): under WIN BY 2 past game point, advantage (serving or receiving side) and deuce; an achievement's line as it unlocks. The game already asks for them and falls back to what it said before ("win by two", nothing) until they're in `audio/announcer/raw/`. Score calls need nothing new: the numbers go to twenty-five.
 
-Status: **In progress**: waiting for the recordings.
+Status: **Done** (the power-up lines wait for power-ups).
 
 ## PORT-56: the near-side reach (asked for 2026-10-21)
 
