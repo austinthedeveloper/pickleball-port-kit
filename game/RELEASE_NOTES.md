@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.22.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.22.1`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-60 of 62 roadmap tasks are in.
+61 of 63 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -376,3 +376,9 @@ Status: **Ready to test**.
 `design/SPECIALS_AND_POWERUPS.md`, a running document: a SPECIAL button with a meter (route A), powerups on the court (route B), or both (route C, the pick so far); specials by paddle, with the '95 overhead smash as PICKLE SMASH; the first powerup list. Nothing built yet.
 
 Status: **In progress** (waiting on the questions in the doc).
+
+## PORT-63: practice without the announcer (asked for 2026-10-21)
+
+KNOWN_ISSUES #72: no announcer in practice. With no points there, its rally lines counted the machine's feeds, missed or not, as one long rally. Lessons and matches are unchanged.
+
+Status: **Ready to test**.

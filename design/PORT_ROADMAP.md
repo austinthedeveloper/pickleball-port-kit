@@ -88,7 +88,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-60 | The park: paddles a player, winners staying said | `feature/cld-park-stacking` | Released (v0.21.1) |
 | PORT-61 | The swing-arm ball machine | `feature/cld-ball-machine` | Released (v0.22.0) |
 | PORT-62 | Player specials and powerups: a running design doc | `feature/cld-specials-doc` | In progress |
-| PORT-63 | Practice without the announcer | `feature/cld-practice-quiet` | Ready to test |
+| PORT-63 | Practice without the announcer | `feature/cld-practice-quiet` | Released (v0.22.1) |
 
 ## Releases
 
@@ -178,6 +178,8 @@ status in the same commit. The finished tasks, in full, are in
   staying said (tag `v0.21.1`, on `feature/cld-release-0.21.1`).
 - **v0.22.0** (2026-10-21): PORT-61 the swing-arm ball machine (tag
   `v0.22.0`, on `feature/cld-release-0.22.0`).
+- **v0.22.1** (2026-10-21): PORT-63 practice without the announcer (tag
+  `v0.22.1`, on `feature/cld-release-0.22.1`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 

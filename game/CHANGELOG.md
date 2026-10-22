@@ -4,7 +4,16 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
-## [0.22.0] - 2026-10-21
+## [0.22.1] - 2026-10-21
+
+A quieter practice.
+
+### Fixed
+- **No announcer in practice.** With no points to end a rally, the
+  announcer counted the ball machine's feeds as one long rally and kept
+  saying no one had missed, even after you had.
+
+ - 2026-10-21
 
 A new ball machine for practice.
 
