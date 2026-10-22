@@ -5,7 +5,7 @@
       "command": "uv",
       "args": [
         "--directory",
-        "${ASEPRITE_MCP_DIR}",
+        "${ASEPRITE_MCP_DIR:-/Users/txdevs/Documents/Development/aseprite-mcp}",
         "run",
         "-m",
         "aseprite_mcp"
