@@ -215,8 +215,9 @@ def shoe(p, ankle, toe_dir, far):
 
 
 def torso(neck, hip):
-    """Shirt as a shaped polygon along the spine: shoulders, chest, a slight
-    taper and a flat hem, shaded across its width (lit at the back)."""
+    """Shirt as a shaped polygon along the spine: broad shoulders and chest,
+    a V taper to the waist (not a bean), and a hem that flares a little over
+    the shorts, shaded across its width (lit at the back)."""
     p = Part()
     ax, ay = hip[0] - neck[0], hip[1] - neck[1]
     L = math.hypot(ax, ay)
@@ -225,9 +226,9 @@ def torso(neck, hip):
     if nx < 0:
         nx, ny = -nx, -ny
     # (t along neck->hip, side in 1x px; + = front)
-    shape = [(0.10, -1.8), (0.16, -3.9), (0.30, -4.3), (0.55, -3.7),
-             (0.80, -3.5), (1.04, -3.7), (1.04, 3.6), (0.80, 3.5),
-             (0.55, 3.8), (0.34, 4.5), (0.18, 3.3), (0.08, 1.6)]
+    shape = [(0.10, -2.0), (0.16, -4.2), (0.28, -4.5), (0.55, -3.4),
+             (0.78, -3.0), (1.04, -3.4), (1.04, 3.3), (0.78, 2.9),
+             (0.55, 3.5), (0.32, 4.6), (0.18, 3.5), (0.08, 1.6)]
     poly = [(neck[0] + ux * t * L + nx * sd * S, neck[1] + uy * t * L + ny * sd * S)
             for t, sd in shape]
     xs, ys = [q[0] for q in poly], [q[1] for q in poly]
@@ -291,10 +292,10 @@ def collar(neck):
 
 def shorts(hip, knee_n, knee_f):
     p = Part()
-    p.capsule(add(hip, (-1 * S, 0)), add(hip, (1 * S, 0)), 4.0 * S, 4.0 * S,
-              "shorts")
-    p.capsule(hip, lerp(hip, knee_f, 0.5), 3.2 * S, 2.8 * S, "shorts_far")
-    p.capsule(add(hip, (1 * S, 0)), lerp(hip, knee_n, 0.5), 3.2 * S, 2.8 * S,
+    p.capsule(add(hip, (-0.5 * S, 0.3 * S)), add(hip, (1 * S, 0.3 * S)),
+              3.5 * S, 3.5 * S, "shorts")
+    p.capsule(hip, lerp(hip, knee_f, 0.55), 3.0 * S, 2.7 * S, "shorts_far")
+    p.capsule(add(hip, (1 * S, 0)), lerp(hip, knee_n, 0.55), 3.1 * S, 2.7 * S,
               "shorts")
     p.despeckle()
     for (x, y), ch in list(p.px.items()):            # hem shadow
@@ -709,24 +710,30 @@ POSES = {
     "run3": shift(RUN, 0, 0, el_f=(30, 35), ha_f=(33, 38),
                   kn_n=(31, 46), an_n=(23, 48), toe_n=(1, 1.1),
                   kn_f=(29, 46), an_f=(27.5, 54.5)),
-    "windup": dict(IDLE, neck=(28, 24), hip=(27, 37),
-                   sh_n=(29, 29), el_n=(23, 33), ha_n=(18, 32),
-                   sh_f=(27, 29), el_f=(33, 31), ha_f=(38, 29),
-                   kn_n=(34, 46), an_n=(36, 54.5),
-                   kn_f=(21, 45), an_f=(17, 54.5),
-                   paddle=(-150, "mid")),
-    "swing": dict(neck=(34, 24), hip=(28, 37),
-                  sh_n=(34, 29), el_n=(40, 30), ha_n=(46, 31),
-                  sh_f=(31, 29), el_f=(25, 31), ha_f=(20, 29),
-                  kn_n=(40, 46), an_n=(42, 54.5), toe_n=(1, 0),
-                  kn_f=(21, 47), an_f=(14, 53.5), toe_f=(1, 0.35),
-                  paddle=(-12, "front"), pony="fly"),
-    "follow": dict(neck=(34, 24), hip=(28, 37),
-                   sh_n=(34, 29), el_n=(40, 27), ha_n=(45, 21),
-                   sh_f=(31, 29), el_f=(26, 33), ha_f=(22, 35),
-                   kn_n=(40, 46), an_n=(42, 54.5), toe_n=(1, 0),
-                   kn_f=(23, 47), an_f=(17, 52.5), toe_f=(1, 0.6),
-                   paddle=(-62, "front"), pony="fly"),
+    # Forehand (art/sprites/hd/v2): the body hits, not just the arm. Windup:
+    # shoulders coil (near shoulder behind the neck), weight on the bent back
+    # leg, the free hand points at the ball. Contact: hips and shoulders open,
+    # weight onto the front knee, back heel up. Follow: the paddle wraps up
+    # past the face, the back foot drags on its toe. Necks are unchanged, so
+    # the heads sit exactly where they did.
+    "windup": dict(IDLE, neck=(28, 24), hip=(25, 38),
+                   sh_n=(25.5, 30), el_n=(20, 34), ha_n=(15, 33),
+                   sh_f=(30, 29.5), el_f=(35, 31), ha_f=(40, 29.5),
+                   kn_n=(34, 46.5), an_n=(38, 54.5),
+                   kn_f=(19.5, 45.5), an_f=(16, 54.5),
+                   paddle=(-160, "mid")),
+    "swing": dict(neck=(34, 24), hip=(29, 37.5),
+                  sh_n=(35, 29.5), el_n=(40.5, 32.5), ha_n=(46, 33),
+                  sh_f=(31, 29), el_f=(26, 32), ha_f=(22.5, 30),
+                  kn_n=(40, 46.5), an_n=(42, 54.5), toe_n=(1, 0),
+                  kn_f=(24, 47), an_f=(18, 53), toe_f=(1, 0.9),
+                  paddle=(-10, "front"), pony="fly"),
+    "follow": dict(neck=(34, 24), hip=(30, 37),
+                   sh_n=(35.5, 29), el_n=(42.5, 27), ha_n=(45.5, 21),
+                   sh_f=(32, 29), el_f=(29, 33.5), ha_f=(27.5, 37),
+                   kn_n=(39, 46.5), an_n=(41, 54.5), toe_n=(1, 0),
+                   kn_f=(28.5, 47), an_f=(24, 53), toe_f=(1, 1.6),
+                   paddle=(-68, "front"), pony="fly"),
     "toss": dict(IDLE, neck=(30, 23), hip=(26, 37),
                  sh_n=(30, 28), el_n=(26, 34), ha_n=(22, 38),
                  sh_f=(28, 28), el_f=(32, 33), ha_f=(37, 33),
@@ -824,6 +831,8 @@ def scaled(pose):
     P["neck"] = add(P["neck"], (0, -2 * S))
     for k in ("sh_n", "sh_f"):
         P[k] = add(P[k], (0, -1.5 * S))
+    # hips higher: a shorter torso and longer legs (art/sprites/hd/v2)
+    P["hip"] = add(P["hip"], (0, -2 * S))
     return P
 
 

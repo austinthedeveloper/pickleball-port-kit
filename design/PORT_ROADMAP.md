@@ -92,6 +92,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-64 | The title menu regrouped: five places to go | `feature/cld-menu-regroup` | Released (v0.23.0) |
 | PORT-65 | SPECIALS: the meter and PICKLE SMASH | `feature/cld-specials` | Released (v0.24.0) |
 | PORT-66 | Effects: bounce marks, camera flashes, the net cord | `feature/cld-effects` | Released (v0.26.0) |
+| PORT-67 | The players' new body: a V torso, longer legs, a forehand with the body in it | `feature/cld-player-hd-body-v2` | Ready to test |
 
 ## Releases
 
@@ -380,6 +381,25 @@ the same request). Open: 36 and 40.
     cord and settling; the view against a bare sim); 440/440 plus the
     e2e, golden traces unchanged. Screenshots of the marks and a burst of
     flashes (`screenshot.gd ... camflash`).
+  - Status: **Ready to test**.
+
+### 67. `feature/cld-player-hd-body-v2`: the players' body and swing (asked for 2026-10-22)
+
+- [x] `PORT-67` A side-by-side test first (`art/sprites/hd/v2/`: v2
+  `.aseprite` copies of the 48 px players, old-vs-v2 GIFs and a still),
+  then the same changes in the game's players (`art/levels/tools/players.py`):
+  the shirt tapers from the shoulders to the waist (a V, not a bean), the
+  hips sit higher (a shorter torso, longer legs), the shorts are narrower
+  at the waist and a little longer. The forehand uses the body: the windup
+  coils the shoulders and loads the back leg, contact drives onto the
+  front knee with the back heel up, and the follow-through wraps the
+  paddle up (tilted forward, clear of the face) with the back foot
+  dragging on its toe. The head is left alone: no head code changed and
+  every pose keeps its neck, so heads, caps and hats are pixel-identical
+  (every cap and hat overlay sheet is byte-identical to before).
+  - Verified: all 21 poses compared old vs new, male and female, and the
+    head footprint diffed per frame (no changes); 440/440 plus the e2e,
+    golden traces unchanged (art only). Screenshots of doubles at the park.
   - Status: **Ready to test**.
 
 ## For you

@@ -4,6 +4,13 @@ A side-by-side test of a reworked body and swing for the HD players. The
 originals in `art/sprites/hd/` are untouched; nothing in the game uses
 these files.
 
+The game's players (`art/levels/tools/players.py`, the 2x rig) take the
+same changes: the V-tapered torso, hips 2 px higher, the narrower shorts
+and the new windup/swing/follow. The head is left alone there: every
+pose keeps its neck, so heads, caps and hats are pixel-identical to
+before; only the follow-through's paddle is tilted further forward to
+stay clear of the face at that size.
+
 | File | What |
 |---|---|
 | `player_hd_<male/female>_v2.aseprite` | Same 11 slots, tags and palette as the originals |
