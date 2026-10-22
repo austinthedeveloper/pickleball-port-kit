@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.25.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.26.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-63 of 65 roadmap tasks are in.
+64 of 66 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -392,5 +392,11 @@ Status: **Released (v0.23.0)**.
 ## PORT-65: SPECIALS, the meter and PICKLE SMASH (asked for 2026-10-21)
 
 ADR-080: SPECIALS on RULES (off by default, off in the ROM's game). Each player's meter fills with shots, points won and time in a rally; SPECIAL (O, the right trigger) spends a full one on PICKLE SMASH: twice a drive's pace, never stretched, always over the net, aimed deep away from the other side, and its return pops up soft (the knock-back). The CPUs use it too. Meters under the score panels, a PICKLE SMASH prompt, the PICKLE SMASH! pop.
+
+Status: **Released (v0.24.0)**.
+
+## PORT-66: three light effects (asked for 2026-10-22)
+
+`view/court_effects.gd`, display only and deterministic: a scuff where the ball bounces, fading over four seconds (a dozen at most); camera flashes among the crowd at the big moments (a 15, 20, 25 or 30-shot rally, PICKLE SMASH, match point, the match won), none with FLASHES off or in the demo; the net wobbles (a couple of pixels) when a ball clips the tape and carries over, with the net's sound, and when one goes into it. A few shapes a frame each, no new shaders or particles.
 
 Status: **Ready to test**.

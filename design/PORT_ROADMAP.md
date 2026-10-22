@@ -91,7 +91,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-63 | Practice without the announcer | `feature/cld-practice-quiet` | Released (v0.22.1) |
 | PORT-64 | The title menu regrouped: five places to go | `feature/cld-menu-regroup` | Released (v0.23.0) |
 | PORT-65 | SPECIALS: the meter and PICKLE SMASH | `feature/cld-specials` | Released (v0.24.0) |
-| PORT-66 | Effects: bounce marks, camera flashes, the net cord | `feature/cld-effects` | Ready to test |
+| PORT-66 | Effects: bounce marks, camera flashes, the net cord | `feature/cld-effects` | Released (v0.26.0) |
 
 ## Releases
 
@@ -189,6 +189,8 @@ status in the same commit. The finished tasks, in full, are in
   (tag `v0.24.0`, on `feature/cld-release-0.24.0`).
 - **v0.25.0** (2026-10-21): PORT-55 the announcer re-recorded, with the
   second batch (tag `v0.25.0`, on `feature/cld-release-0.25.0`).
+- **v0.26.0** (2026-10-22): PORT-66 bounce marks, camera flashes, the net
+  cord (tag `v0.26.0`, on `feature/cld-release-0.26.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 

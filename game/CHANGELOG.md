@@ -4,7 +4,20 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
-## [0.25.0] - 2026-10-21
+## [0.26.0] - 2026-10-22
+
+Little touches on the court.
+
+### Added
+- **Bounce marks**: the ball leaves a faint scuff where it lands, fading
+  after a few seconds.
+- **Camera flashes**: the crowd's cameras flash at the big moments, such
+  as a long rally, a PICKLE SMASH, match point and the winning point.
+  Turning FLASHES off in ACCESSIBILITY turns them off too.
+- **Net cords**: the net shakes when a ball clips the tape and rolls over,
+  and when one goes into it.
+
+ - 2026-10-21
 
 A new voice in the booth.
 
