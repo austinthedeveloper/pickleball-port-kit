@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.26.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.27.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-64 of 66 roadmap tasks are in.
+65 of 67 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -398,5 +398,11 @@ Status: **Released (v0.24.0)**.
 ## PORT-66: three light effects (asked for 2026-10-22)
 
 `view/court_effects.gd`, display only and deterministic: a scuff where the ball bounces, fading over four seconds (a dozen at most); camera flashes among the crowd at the big moments (a 15, 20, 25 or 30-shot rally, PICKLE SMASH, match point, the match won), none with FLASHES off or in the demo; the net wobbles (a couple of pixels) when a ball clips the tape and carries over, with the net's sound, and when one goes into it. A few shapes a frame each, no new shaders or particles.
+
+Status: **Ready to test**.
+
+## PORT-67: the players' body and swing (asked for 2026-10-22)
+
+A side-by-side test first (`art/sprites/hd/v2/`: v2 `.aseprite` copies of the 48 px players, old-vs-v2 GIFs and a still), then the same changes in the game's players (`art/levels/tools/players.py`): the shirt tapers from the shoulders to the waist (a V, not a bean), the hips sit higher (a shorter torso, longer legs), the shorts are narrower at the waist and a little longer. The forehand uses the body: the windup coils the shoulders and loads the back leg, contact drives onto the front knee with the back heel up, and the follow-through wraps the paddle up (tilted forward, clear of the face) with the back foot dragging on its toe. The head is left alone: no head code changed and every pose keeps its neck, so heads, caps and hats are pixel-identical (every cap and hat overlay sheet is byte-identical to before).
 
 Status: **Ready to test**.
