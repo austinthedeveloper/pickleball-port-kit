@@ -94,6 +94,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-66 | Effects: bounce marks, camera flashes, the net cord | `feature/cld-effects` | Released (v0.26.0) |
 | PORT-67 | The players' new body: a V torso, longer legs, a forehand with the body in it | `feature/cld-player-hd-body-v2` | Released (v0.27.0) |
 | PORT-68 | SPECIALS' meters under the players | `feature/cld-meters-under-players` | Ready to test |
+| PORT-69 | Saved replays: SAVE LAST RALLY, REPLAYS, and in the demo | `feature/cld-saved-replays` | Ready to test |
 
 ## Releases
 
@@ -420,6 +421,26 @@ the same request). Open: 36 and 40.
     full one with the prompt.
   - Status: **Ready to test**: play a match with SPECIALS on (RULES) and
     say if the bars read at a glance and sit well under the feet.
+
+### 69. `feature/cld-saved-replays`: saved replays (asked for 2026-10-22)
+
+- [x] `PORT-69` ADR-081: **SAVE LAST RALLY** on the pause menu keeps the
+  rally that ended last (PLAY OF THE MATCH's recording, cut after it) as
+  a file under `user://replays/`, six at most. **REPLAYS** on PLAYER
+  lists them, newest first; a press watches one full screen with a SAVED
+  REPLAY card (or, with ON PRESS set to DELETE, deletes it). **IN THE
+  DEMO** (on) lets the title's demo play them, every other time, between
+  live matches. A replay from another sim lists as OLD VERSION.
+  - Verified: `test_saved_replays` (exact playback from the file, the live
+    match untouched, FULL, OLD VERSION, the title's REPLAYS and demo),
+    `test_layout` (REPLAYS at its widest, the pause row, the card),
+    `test_menus`; 447/447 plus the e2e, golden traces unchanged. A replay
+    recorded in one run played back exactly in another. Screenshots of
+    the pause menu, REPLAYS, and a replay playing
+    (`screenshot.gd ... replays savelast` / `title_replays ... replays watch`).
+  - Status: **Ready to test**: save a good rally from the pause menu, then
+    watch it from PLAYER, REPLAYS, and let the title sit to see it in the
+    demo.
 
 ## For you
 

@@ -59,9 +59,23 @@ static func build(t: TitleScreen) -> void:
 		{"id": "records", "label": "RECORDS", "press": func(): t.open_page("records")},
 		{"id": "achievements", "label": "ACHIEVEMENTS", "value": func(): return Achievements.label(t.save),
 			"press": func(): t.open_page("achievements")},
+		{"id": "replays", "label": "REPLAYS", "value": func(): return "%d SAVED" % SavedReplays.list().size(),
+			"press": func(): t.open_page("replays")},
 		{"id": "hats", "label": "HAT MUSEUM", "value": func(): return "" if t._career().active_player() else "NO PLAYER",
 			"press": t.open_player_museum},
 	], help, Rect2(300, 172, 360, 0))
+	# PORT-69: the saved rallies; a press watches one (or, set to, deletes it)
+	var replay_rows := []
+	for i in SavedReplays.MAX:
+		replay_rows.append({"id": "replay%d" % i, "label": func(): return t.replay_label(i),
+			"value": func(): return t.replay_value(i), "press": func(): t.replay_press(i)})
+	replay_rows.append({"id": "on_press", "label": "ON PRESS",
+		"value": func(): return "DELETE" if t.replay_delete else "WATCH",
+		"change": func(_d): t.replay_delete = not t.replay_delete})
+	replay_rows.append({"id": "demo", "label": "IN THE DEMO",
+		"value": func(): return "ON" if Settings.replays_in_demo else "OFF",
+		"change": func(_d): Settings.replays_in_demo = not Settings.replays_in_demo})
+	t._add_page("replays", "REPLAYS", replay_rows, help, Rect2(260, 60, 440, 0))
 	var court_rows := [{"id": "venue", "label": "VENUE", "value": func(): return Settings.VENUE_NAMES[Settings.venue_i],
 		"change": func(d): Settings.venue_i = (Settings.venue_i + d + Settings.VENUES.size()) % Settings.VENUES.size(); t._start_demo()},
 		{"id": "time", "label": "TIME", "value": func(): return CourtStyle.time_names()[Settings.time_i],

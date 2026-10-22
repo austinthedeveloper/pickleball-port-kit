@@ -20,6 +20,7 @@ func _initialize() -> void:
 	# checkout, since every checkout shares user:// (KNOWN_ISSUES #42)
 	SaveGame.default_dir = "user://e2e_%s/" % ProjectSettings.globalize_path("res://").md5_text().left(8)
 	TestSuite.wipe_saves(SaveGame.default_dir)
+	TestSuite.wipe_replays(SaveGame.default_dir + "replays/")
 	var controls = load("res://game_ui/controls.gd").new()
 	controls.name = "Controls"
 	root.add_child(controls)

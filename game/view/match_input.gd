@@ -124,11 +124,15 @@ func serve_assist(it: SimTypes.Intent) -> void:
 		it.hit_held = 0
 
 
-## The pause menu (ADR-030): RESUME, RESTART (not in practice), MAIN MENU.
+## The pause menu (ADR-030): RESUME, RESTART (not in practice), SAVE LAST
+## RALLY (where there's PLAY OF THE MATCH), TUNE, MAIN MENU.
 func pause_rows() -> Array:
 	var rows := [{"id": "resume", "label": "RESUME", "press": func(): pause_choice = "resume"}]
 	if not v.sim.config.practice:
 		rows.append({"id": "restart", "label": "RESTART", "press": func(): pause_choice = "restart"})
+	if Highlight.wanted_for(v):
+		rows.append({"id": "save_rally", "label": "SAVE LAST RALLY", "value": v.save_rally_state,
+			"press": func(): pause_choice = "save_rally"})     # PORT-69
 	if v.tuning and v.tuning.available():
 		rows.append({"id": "tune", "label": "TUNE", "press": func(): pause_choice = "tune"})
 	rows.append({"id": "menu", "label": "PARK" if v.park and v.sim.config.practice else "MAIN MENU",
@@ -157,6 +161,10 @@ func pause_input(it: SimTypes.Intent) -> bool:
 			it.pause_pressed = 1         # the sim unpauses on its own Start
 		"tune":
 			v.tuning.open_panel()        # ADR-074: over the pause menu
+			return true
+		"save_rally":
+			v._sfx.play("confirm" if v.save_rally() else "back")
+			menu.refresh()
 			return true
 		"restart":
 			v._sfx.play("confirm")

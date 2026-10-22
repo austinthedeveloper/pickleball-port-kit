@@ -14,6 +14,16 @@ static func wipe_saves(dir: String) -> void:
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(dir + f))
 
 
+## Saved replays (PORT-69) in a folder of the tests' own, emptied.
+static func wipe_replays(dir := "user://test_replays/") -> void:
+	SavedReplays.dir = dir
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(dir))
+	for f in DirAccess.get_files_at(dir):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(dir + f))
+	SavedReplays.list()                  # re-read
+	SavedReplays._cached = false
+
+
 ## A save in its own folder, wiped and loaded fresh (each suite its own
 ## dir, so suites never see each other's).
 static func fresh_save(dir: String) -> SaveGame:

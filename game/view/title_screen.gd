@@ -37,7 +37,7 @@ static var return_to := ""
 const TREE := {"play": "main", "setup": "play", "multi": "play", "court": "setup",
 	"modifiers": "setup", "rules": "modifiers", "learn": "main", "options": "main",
 	"controls": "options", "access": "options", "player": "main", "records": "player",
-	"achievements": "player"}
+	"achievements": "player", "replays": "player"}
 
 var _demo: MatchView
 var _ui: CanvasLayer
@@ -307,7 +307,7 @@ func _show(id: String) -> void:
 	if hat_museum:
 		hat_museum.visible = id == "museum"
 	for n in _header:
-		n.visible = not id in ["select", "setup", "records", "achievements", "controls", "options", "modifiers", "rules", "lobby", "museum", "career_card", "career_edit",
+		n.visible = not id in ["select", "setup", "records", "achievements", "replays", "controls", "options", "modifiers", "rules", "lobby", "museum", "career_card", "career_edit",
 			"career_name"]
 	if lobby_screen:
 		lobby_screen.visible = id == "lobby"
@@ -627,7 +627,16 @@ func practice_config() -> SimTypes.MatchConfig:
 	return practice_page.config()
 
 
-func _start_demo() -> void:
+## The title's demo: a live CPU match, or (every other one, from the
+## cycle, with IN THE DEMO on) a saved replay, quietly (PORT-69).
+func _start_demo(cycle := false) -> void:
+	if cycle:
+		_demo_count += 1
+	var list := SavedReplays.list().filter(func(r): return r["playable"])
+	if cycle and Settings.replays_in_demo and _demo_count % 2 == 0 and not list.is_empty():
+		var data := SavedReplays.load_replay(list[(_demo_count / 2) % list.size()]["name"])
+		if not data.is_empty() and _start_replay(data, true):
+			return
 	if _demo:
 		_demo.queue_free()
 	_demo = MatchView.new()
@@ -638,6 +647,70 @@ func _start_demo() -> void:
 	_demo.time = Settings.time_i
 	_demo.setup(cfg, Settings.venue(), true)
 	_demo._hud.visible = false
+
+
+# --- REPLAYS (PORT-69, ADR-081) ---------------------------------------------------------
+
+var replay_delete := false       ## ON PRESS: DELETE
+var watching := false            ## a replay from REPLAYS fills the screen
+var _demo_count := 0
+
+
+func replay_label(i: int) -> String:
+	var list := SavedReplays.list()
+	return SavedReplays.row_label(list[i]) if i < list.size() else "EMPTY"
+
+
+func replay_value(i: int) -> String:
+	var list := SavedReplays.list()
+	return SavedReplays.row_value(list[i]) if i < list.size() else ""
+
+
+func replay_press(i: int) -> void:
+	var list := SavedReplays.list()
+	if i >= list.size():
+		_sfx.play("blip")
+		return
+	if replay_delete:
+		SavedReplays.remove(list[i]["name"])
+		_sfx.play("back")
+		pages["replays"].refresh()
+		return
+	var data := SavedReplays.load_replay(list[i]["name"]) if list[i]["playable"] else {}
+	if data.is_empty() or not _start_replay(data, false):
+		_sfx.play("blip")
+		return
+	_sfx.play("confirm")
+	watching = true
+	_ui.visible = false
+
+
+## A saved replay in the demo's place: on its own court, with the card and
+## the score (from REPLAYS), or with neither (quiet, behind the menu).
+func _start_replay(data: Dictionary, quiet: bool) -> bool:
+	if _demo:
+		_demo.queue_free()
+	_demo = MatchView.new()
+	add_child(_demo)
+	move_child(_demo, 0)
+	var cfg := OnlineSession.config_from_dict(data["cfg"])
+	_demo.court = Array(data.get("court", Settings.court)).duplicate()
+	_demo.time = int(data.get("time", Settings.time_i))
+	_demo.setup(cfg, str(data.get("venue", Settings.venue())), true)
+	_demo._hud.visible = false
+	var h := Highlight.from_saved(_demo, data)
+	h.quiet = quiet
+	_demo.highlight = h
+	return h.start(_replay_done.bind(quiet))
+
+
+func _replay_done(quiet: bool) -> void:
+	if not quiet:
+		watching = false
+		_ui.visible = true
+		_lock = SWITCH_LOCK              # the skip's press isn't a menu press
+		pages[page].refresh()
+	_start_demo()
 
 
 func _refresh() -> void:
@@ -752,7 +825,9 @@ func _process(_delta: float) -> void:
 		pages["options"].refresh()       # the download's percentage, and when it's done
 	if _demo.sim.phase == K.PHASE_MATCH_RESULT and _demo.sim.phase_timer >= K.ATTRACT_RESULT_FRAMES - 1:
 		_demo_doubles = not _demo_doubles
-		_start_demo()
+		_start_demo(true)
+	if watching:
+		return                           # REPLAYS' replay has the screen
 	if _lock > 0:
 		_lock -= 1
 		return

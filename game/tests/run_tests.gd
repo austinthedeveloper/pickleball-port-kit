@@ -15,6 +15,7 @@ func _initialize() -> void:
 	controls.name = "Controls"
 	root.add_child(controls)
 	controls._ready()
+	TestSuite.wipe_replays()          # never the player's own (PORT-69)
 	var filter := ""
 	var args := OS.get_cmdline_user_args()
 	if args.size() > 0:

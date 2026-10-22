@@ -303,7 +303,8 @@ func _pick(view: MatchView, row: String) -> bool:
 func test_pause_menu_rows() -> void:
 	var view := _paused_view(SimTypes.MatchConfig.singles())
 	var ids := view._hud.pause_menu.rows.map(func(r): return r["id"])
-	eq(ids, ["resume", "restart", "tune", "menu"], "TUNE: the tuning panel (ADR-074)")
+	eq(ids, ["resume", "restart", "save_rally", "tune", "menu"],
+		"SAVE LAST RALLY (PORT-69), TUNE: the tuning panel (ADR-074)")
 	check(view._hud._paused.visible, "it shows while paused")
 	view.free()
 	var practice := _paused_view(SimTypes.MatchConfig.practice_session(Practice.DEFAULTS, 0))

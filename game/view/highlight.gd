@@ -4,6 +4,11 @@
 ## tuning panel's retune) and plays the rally back by running a second sim
 ## through them, checked against the live one. Display only: the live sim
 ## is never stepped or written here.
+##
+## Saved replays (PORT-69, ADR-081) are the same recording cut after one
+## rally: the pause menu's SAVE LAST RALLY writes `export(last)` through
+## SavedReplays, and `from_saved` plays one back, from REPLAYS on the
+## title or quietly in its demo.
 class_name Highlight
 extends RefCounted
 
@@ -23,6 +28,10 @@ var _ops := {}                   ## frame -> [["new_match"] or ["retune", speed,
 var _serve_at := 0               ## the frame the current point's serve began
 var _serve_snap: Array = []
 var best := {}                   ## the longest rally of this match so far
+var last := {}                   ## the rally that ended last (SAVE LAST RALLY)
+var saved_last := false          ## that one is saved already
+var saved := false               ## a saved replay, not this match's (from_saved)
+var quiet := false               ## in the title's demo: no card, no skip, no score
 
 # playback
 var replay: Sim
@@ -46,8 +55,14 @@ func _init(v: MatchView) -> void:
 ## Whether this match gets one: not the demo, online, a lesson, practice or
 ## MULTI BALL (no single rally).
 func wanted() -> bool:
-	return not view.demo and view.net == null and view.lesson == null \
-		and not view.sim.config.practice and not view.sim.multi_on
+	return wanted_for(view)
+
+
+## The same, before the view has made its Highlight (the pause menu's
+## SAVE LAST RALLY row is built first).
+static func wanted_for(v: MatchView) -> bool:
+	return not v.demo and v.net == null and v.lesson == null \
+		and not v.sim.config.practice and not v.sim.multi_on
 
 
 func frames() -> int:
@@ -98,7 +113,8 @@ func op(o: Array) -> void:
 
 
 ## After the live step: a serve's start, a point's end (the longest rally
-## of the match is the one to show; a tie goes to the later).
+## of the match is the one to show; a tie goes to the later). Every rally
+## that was served is the last one, for SAVE LAST RALLY.
 func after_step(events: Array) -> void:
 	var s := view.sim
 	if s.phase == K.PHASE_SERVE_SETUP and _serve_at != frames() - 1 and _serve_snap.is_empty():
@@ -108,10 +124,52 @@ func after_step(events: Array) -> void:
 		if e[0] != K.EVENT_POINT:
 			continue
 		var shots: int = (s.shot_serial - s.rally_start) & 0xff
+		var rally := {"shots": shots, "from": _serve_at, "to": frames() - 1, "winner": e[3],
+			"fault": s.last_fault, "snap_from": _serve_snap, "snap_to": s.snapshot()}
+		if shots >= 1 and not _serve_snap.is_empty():
+			last = rally
+			saved_last = false
 		if shots >= MIN_SHOTS and shots >= int(best.get("shots", 0)):
-			best = {"shots": shots, "from": _serve_at, "to": frames() - 1, "winner": e[3],
-				"fault": s.last_fault, "snap_from": _serve_snap, "snap_to": s.snapshot()}
+			best = rally
 		_serve_snap = []
+
+
+# --- Saving (PORT-69) -------------------------------------------------------------------
+
+## A rally as a saved replay: the match's start and its inputs up to the
+## rally's result, the rally's place in them and its snapshots (playback
+## checks them), and what REPLAYS lists. Plain values only (SavedReplays
+## stores it with store_var, which keeps the ints ints).
+func export(rally: Dictionary) -> Dictionary:
+	var end := mini(frames(), int(rally["to"]) + AFTER_FRAMES)
+	var ops := {}
+	for f in _ops:
+		if int(f) < end:
+			ops[int(f)] = _ops[f].duplicate(true)
+	return {"format": SavedReplays.FORMAT, "tuning": K.TUNING_VERSION,
+		"version": str(ProjectSettings.get_setting("application/config/version", "")),
+		"saved": int(Time.get_unix_time_from_system()),
+		"venue": view.venue, "time": view._base_time, "court": view._base_court.duplicate(),
+		"teams": [view._hud._team_label(0), view._hud._team_label(1)],
+		"doubles": view.sim.config.mode == K.MODE_DOUBLES,
+		"cfg": _cfg.duplicate(true), "career": _career.to_dict() if _career else {},
+		"bot": _bot, "ops": ops, "inputs": _inputs.slice(0, end * 8),
+		"rally": rally.duplicate(true)}
+
+
+## A saved replay (`export`'s dictionary), ready to `start` on a view set
+## up with its config.
+static func from_saved(v: MatchView, data: Dictionary) -> Highlight:
+	var h := Highlight.new(v)
+	h.saved = true
+	h._cfg = data["cfg"]
+	var c: Dictionary = data.get("career", {})
+	h._career = null if c.is_empty() else Career.Player.from_dict(c)
+	h._bot = bool(data.get("bot", false))
+	h._inputs = data["inputs"]
+	h._ops = data["ops"]
+	h.best = data["rally"]
+	return h
 
 
 # --- Playback --------------------------------------------------------------------------
@@ -123,7 +181,7 @@ func playing() -> bool:
 ## The match is over: play the best rally, then `done`. False (and nothing
 ## shown) when there's none.
 func start(done: Callable) -> bool:
-	if best.is_empty() or not wanted():
+	if best.is_empty() or not (saved or wanted()):
 		return false
 	_done = done
 	var cfg := OnlineSession.config_from_dict(_cfg)
@@ -133,7 +191,8 @@ func start(done: Callable) -> bool:
 	_frame = 0
 	_state = "seek"
 	_shown = 0
-	_build_overlay()
+	if not quiet:
+		_build_overlay()
 	view._hud.visible = false            # not the result yet: the title card
 
 	return true
@@ -158,7 +217,7 @@ func update() -> void:
 	_shown += 1
 	if _bug:
 		_bug.queue_redraw()                # the REPLAY dot blinks
-	var skip := _shown > SKIP_LOCK and (Input.is_action_just_pressed("hit")
+	var skip := not quiet and _shown > SKIP_LOCK and (Input.is_action_just_pressed("hit")
 		or Input.is_action_just_pressed("start"))
 	if _state == "seek":
 		var n := 0
@@ -170,7 +229,7 @@ func update() -> void:
 				push_warning("PLAY OF THE MATCH: the replay differs; not shown")
 				_finish()
 				return
-			if _shown >= TITLE_FRAMES:
+			if _shown >= TITLE_FRAMES or quiet:
 				_swap_in()
 		if skip:
 			_finish()
@@ -185,7 +244,8 @@ func update() -> void:
 		else:
 			_finish()
 			return
-	_caption[2].visible = _frame > to          # the result line, once it's won
+	if not _caption.is_empty():
+		_caption[2].visible = _frame > to      # the result line, once it's won
 	view._update_visuals()
 	if skip:
 		_finish()
@@ -198,7 +258,7 @@ func _swap_in() -> void:
 	view.sim = replay
 	view.glide = BallGlide.new()
 	view.flair.visible = false           # the live match's reactions and emotes wait
-	view._hud.visible = true             # the rally's own score, from the replay
+	view._hud.visible = not quiet        # the rally's own score, from the replay
 
 
 func _finish() -> void:
@@ -208,7 +268,7 @@ func _finish() -> void:
 		view.flair.visible = true
 		_live = null
 	_state = ""
-	view._hud.visible = true
+	view._hud.visible = not view.demo    # the title's demo never shows one
 	if overlay:
 		overlay.queue_free()
 		overlay = null
@@ -271,7 +331,8 @@ func _build_overlay() -> void:
 	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	overlay.add_child(card)
 	UiKit.panel(Rect2(200, 392, 560, 104), card)
-	_caption = [UiKit.text("big_gold", "PLAY OF THE MATCH", Vector2(480, 404), 0.5, Color.WHITE, card),
+	_caption = [UiKit.text("big_gold", "SAVED REPLAY" if saved else "PLAY OF THE MATCH",
+			Vector2(480, 404), 0.5, Color.WHITE, card),
 		UiKit.text("small", "%d-SHOT RALLY" % int(best["shots"]), Vector2(480, 440), 0.5,
 			Color(0.85, 0.88, 0.95), card),
 		UiKit.text("small", ending(), Vector2(480, 466), 0.5, Color("fbe46a"), card)]

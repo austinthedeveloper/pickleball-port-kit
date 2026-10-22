@@ -167,6 +167,11 @@ func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE and sim:
 		sim.dispose()
+		# freed mid-replay (the title's demo moving on): the other sim too
+		if highlight:
+			for other in [highlight.replay, highlight._live]:
+				if other and other != sim:
+					other.dispose()
 	if what == NOTIFICATION_EXIT_TREE and commentary and Announcer.current \
 			and Announcer.current._priority < Announcer.TOP:
 		Announcer.current.hush()           # leaving mid-line (a match's end line plays on)
@@ -584,6 +589,27 @@ func _physics_process(_delta: float) -> void:
 		finished.emit(true)
 		return
 	_update_visuals()
+
+
+## SAVE LAST RALLY (PORT-69): the rally that ended last, to SavedReplays.
+## False when there's none, it's saved already, or REPLAYS is full.
+func save_rally() -> bool:
+	if highlight == null or highlight.last.is_empty() or highlight.saved_last \
+			or SavedReplays.full():
+		return false
+	highlight.saved_last = SavedReplays.save(highlight.export(highlight.last)) != ""
+	return highlight.saved_last
+
+
+## The pause row's value: NONE YET, SAVED, FULL, or the rally's shots.
+func save_rally_state() -> String:
+	if highlight == null or highlight.last.is_empty():
+		return "NONE YET"
+	if highlight.saved_last:
+		return "SAVED"
+	if SavedReplays.full():
+		return "FULL"
+	return "%d SHOTS" % int(highlight.last["shots"])
 
 
 ## PLAY OF THE MATCH is on screen (the replay's sim is the one drawn).

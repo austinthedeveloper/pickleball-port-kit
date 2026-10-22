@@ -25,6 +25,10 @@
 ## title_career_museum: the HAT MUSEUM, half the hats won); "unlock"
 ## shows the UNLOCKED! card at the end of a match.
 ## "story<ch>_<kind>_<page>" a story scene (PORT-44); "course..." PICKLEBALL 101 (PORT-45).
+## "replays" (PORT-69) keeps saved replays in user://shot_replays/, not the
+## player's: "savelast" there saves the last rally (and shows it SAVED on
+## the pause menu, with "pause"); title_replays lists them, "watch" plays
+## the newest from REPLAYS.
 extends SceneTree
 
 var _frames := 0
@@ -68,6 +72,8 @@ func _initialize() -> void:
 	var venue: String = a[1] if a.size() > 1 else "park"
 	_target = int(a[2]) if a.size() > 2 else 120
 	_out = a[3] if a.size() > 3 else "user://shot.png"
+	if "replays" in a.slice(4):
+		SavedReplays.dir = "user://shot_replays/"
 	for arg in a.slice(4):
 		if arg == "pad":
 			GameControls.last_device = GameControls.PAD
@@ -358,14 +364,20 @@ func _initialize() -> void:
 
 func _tick() -> void:
 	_frames += 1
+	# (not with "replays": a press put in the sim isn't in the recording)
 	if _view is MatchView and _view.sim.p1_bot and not (_view.highlight and _view.highlight.playing()) \
+			and not "replays" in OS.get_cmdline_user_args() \
 			and _view.sim.phase == K.PHASE_SERVE_SETUP \
 			and _view.sim.server_index == 0 and _frames % 32 == 0:
 		# the bot presses B to serve, like the test harness
 		_view.sim.intents[0].hit_pressed = 1
 		_view.sim.serve_requested = 1
+	if _frames == _target - 12 and _view is MatchView and "savelast" in OS.get_cmdline_user_args():
+		print("saved the last rally: ", _view.save_rally())
 	if _frames == _target - 10 and _view is MatchView and "pause" in OS.get_cmdline_user_args():
 		_view.sim.paused = 1
+	if _frames == 10 and _view is TitleScreen and "watch" in OS.get_cmdline_user_args():
+		_view.replay_press(0)
 	if _frames == 2 and _view is MatchView and "debug" in OS.get_cmdline_user_args():
 		_view._debug.visible = true        # F3: positions, hit volumes, landing marks
 	if _frames == _target - 20 and _view is MatchView and "tune" in OS.get_cmdline_user_args():

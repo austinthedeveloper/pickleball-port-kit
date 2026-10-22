@@ -88,6 +88,8 @@ static func shake_scale() -> float:
 ## HUD text, and the serve assist (holding B releases a strong serve).
 static var shake_i := SHAKE_DEFAULT   ## SHAKES
 static var flashes := true
+## Saved replays take turns with the title's live demo (PORT-69).
+static var replays_in_demo := true
 static var hud_large := false
 static var serve_assist := false
 ## Controller rumble on hits (PORT-15).
@@ -148,6 +150,7 @@ static func load_from(save: SaveGame) -> void:
 	shake_i = clampi(int(st.get("shake_level", SHAKE_DEFAULT if int(st.get("shake", 1)) else 0)),
 		0, SHAKES.size() - 1)
 	flashes = int(st.get("flash", 1)) != 0
+	replays_in_demo = int(st.get("replay_demo", 1)) != 0
 	hud_large = int(st.get("hud_large", 0)) != 0
 	serve_assist = int(st.get("serve_assist", 0)) != 0
 	vibration = int(st.get("vibration", 1)) != 0
@@ -170,7 +173,7 @@ static func store_to(save: SaveGame) -> void:
 		"fullscreen": 1 if fullscreen else 0, "integer_scale": 1 if integer_scale else 0,
 		"player": [p1_choice["palette"], p1_choice["variant"], p1_choice["paddle"]],
 		"court": court.duplicate(), "time": time_i,
-		"shake": 1 if shake_i else 0, "shake_level": shake_i, "flash": 1 if flashes else 0,
+		"shake": 1 if shake_i else 0, "shake_level": shake_i, "flash": 1 if flashes else 0, "replay_demo": 1 if replays_in_demo else 0,
 		"hud_large": 1 if hud_large else 0, "serve_assist": 1 if serve_assist else 0,
 		"vibration": 1 if vibration else 0, "pad_glyphs": pad_glyphs,
 		"bindings": Bindings.to_save()}, true)

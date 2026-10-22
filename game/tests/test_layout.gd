@@ -233,6 +233,11 @@ func test_hud() -> void:
 			v.sim.paused = 1
 			v._update_visuals()
 			check_layout(v, tag + " paused")
+			if v.highlight:                      # PORT-69: SAVE LAST RALLY at its widest
+				v.highlight.last = {"shots": 188}
+				v._hud.pause_menu.refresh()
+				check_layout(v, tag + " paused, a rally to save")
+				v.highlight.last = {}
 			v.sim.paused = 0
 			v.sim.phase = K.PHASE_POINT_RESULT
 			v.sim.point_winner = 0
@@ -896,6 +901,7 @@ func test_highlight() -> void:
 			for winner in [0, 1]:
 				v.highlight.best = {"shots": 188, "from": 0, "to": 0, "winner": winner, "fault": f,
 					"snap_from": [], "snap_to": []}
+				v.highlight.saved = winner == 1          # PORT-69's card: SAVED REPLAY
 				v.highlight.start(func(): pass)
 				v.highlight._caption[2].visible = true
 				check_layout(v, "PLAY OF THE MATCH, fault %d, team %d (device %d)" % [f, winner, dev])
@@ -909,6 +915,30 @@ func test_highlight() -> void:
 	GameControls.last_device = kept[0]
 	Settings.pad_glyphs = kept[1]
 	GameControls.device_serial += 1
+
+
+## PORT-69: REPLAYS full, at its widest (188 shots, December 28th, an OLD
+## one), each row selected, watching and deleting.
+func test_replays() -> void:
+	wipe_replays("user://test_layout_replays/")
+	var d := Time.get_unix_time_from_datetime_dict({"year": 2026, "month": 12, "day": 28,
+		"hour": 12, "minute": 0, "second": 0})
+	for i in SavedReplays.MAX:
+		SavedReplays.save({"format": SavedReplays.FORMAT,
+			"tuning": K.TUNING_VERSION + (1 if i == 0 else 0), "saved": d + i, "doubles": true,
+			"cfg": {}, "inputs": PackedInt32Array(), "ops": {}, "rally": {"shots": 188}})
+	var t := _title()
+	t._show("replays")
+	var p: MenuPage = t.pages["replays"]
+	for row in p.rows:
+		p.select(row["id"])
+		p.settle()
+		check_layout(t, "REPLAYS / %s" % row["id"])
+	t.replay_delete = true
+	p.refresh()
+	check_layout(t, "REPLAYS, DELETE")
+	t.free()
+	wipe_replays()
 
 
 ## PORT-54: ACHIEVEMENTS with each row selected, done (with its day) and not.
