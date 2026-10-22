@@ -90,7 +90,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-62 | Player specials and powerups: a running design doc | `feature/cld-specials-doc` | In progress |
 | PORT-63 | Practice without the announcer | `feature/cld-practice-quiet` | Released (v0.22.1) |
 | PORT-64 | The title menu regrouped: five places to go | `feature/cld-menu-regroup` | Released (v0.23.0) |
-| PORT-65 | SPECIALS: the meter and PICKLE SMASH | `feature/cld-specials` | Ready to test |
+| PORT-65 | SPECIALS: the meter and PICKLE SMASH | `feature/cld-specials` | Released (v0.24.0) |
 
 ## Releases
 
@@ -184,6 +184,8 @@ status in the same commit. The finished tasks, in full, are in
   `v0.22.1`, on `feature/cld-release-0.22.1`).
 - **v0.23.0** (2026-10-21): PORT-64 the title menu regrouped (tag
   `v0.23.0`, on `feature/cld-release-0.23.0`).
+- **v0.24.0** (2026-10-21): PORT-65 SPECIALS, the meter and PICKLE SMASH
+  (tag `v0.24.0`, on `feature/cld-release-0.24.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 

@@ -4,7 +4,23 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
-## [0.23.0] - 2026-10-21
+## [0.24.0] - 2026-10-21
+
+The first special move.
+
+### Added
+- **SPECIALS** (MODIFIERS > RULES, off by default): each player has a
+  meter that fills as you play. It goes up with every shot you hit, every
+  point your side wins, and the time a rally lasts. The meters sit under
+  the score panels and flash gold when full.
+- **PICKLE SMASH**: with a full meter, press **SPECIAL** (O on the
+  keyboard, the right trigger on a pad) for a smash from any height. It's
+  twice as fast as a drive, always clears the net, and aims itself deep
+  into the open lane. Whoever returns it gets their paddle knocked back,
+  and their return pops up. Without a full meter, SPECIAL is a normal hit.
+  The CPUs use it too.
+
+ - 2026-10-21
 
 A simpler title menu.
 

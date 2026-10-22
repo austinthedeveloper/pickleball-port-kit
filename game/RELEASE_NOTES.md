@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.23.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.24.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-62 of 64 roadmap tasks are in.
+63 of 65 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -386,5 +386,11 @@ Status: **Released (v0.22.1)**.
 ## PORT-64: the title menu regrouped (asked for 2026-10-21)
 
 ADR-079: MAIN is STORY, PLAY, PRACTICE, PLAYER and OPTIONS (was twelve rows). PLAY has QUICK MATCH (SINGLES or DOUBLES, one row), TOURNAMENT, OPEN PLAY and MULTIPLAYER; QUICK MATCH opens MATCH SETUP (START, MODE, PLAYERS, VS, DIFFICULTY, CPU ERRORS, POINTS, COURT, MODIFIERS); PLAYER has the players, RECORDS, ACHIEVEMENTS and the HAT MUSEUM. BACK goes to the page you came from; after a match the title opens where it started (MATCH SETUP after a quick match). Mocked up first with the game's panels, then built as mocked.
+
+Status: **Released (v0.23.0)**.
+
+## PORT-65: SPECIALS, the meter and PICKLE SMASH (asked for 2026-10-21)
+
+ADR-080: SPECIALS on RULES (off by default, off in the ROM's game). Each player's meter fills with shots, points won and time in a rally; SPECIAL (O, the right trigger) spends a full one on PICKLE SMASH: twice a drive's pace, never stretched, always over the net, aimed deep away from the other side, and its return pops up soft (the knock-back). The CPUs use it too. Meters under the score panels, a PICKLE SMASH prompt, the PICKLE SMASH! pop.
 
 Status: **Ready to test**.
