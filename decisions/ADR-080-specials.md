@@ -36,12 +36,24 @@ never see it). Not in practice or MULTI BALL.
   ADR-056), so the shoulders stay SHORT and SPECIAL takes an input the
   SNES pad never had. It's on CONTROLS (the key, or a button as well as
   the trigger), and online carries the shot's third bit.
-- **On screen** (display only, `view/special_meters.gd`): a thin bar for
-  each player under their side's score panel, in the team's colour and
-  flashing gold when full, with an O / RT **PICKLE SMASH** prompt while a
-  human's is full. The smash plays the overhead's swing, a bigger sound
+- **On screen** (display only, `view/special_meters.gd`): a small bar
+  under each player's feet (PORT-68, below), in their colour and
+  flashing gold when full, with an O / RT **PICKLE SMASH** prompt under
+  the side's score panel while a human's is full. The smash plays the overhead's swing, a bigger sound
   and shake, a strong rumble, and a **PICKLE SMASH!** pop. The announcer
   always calls it.
+
+### Amended 2026-10-22 (PORT-68): the bars under the players
+
+The first bars sat under the score panels, as wide as the panel, so a
+long team name made longer bars, and you had to look away from the court
+to read yours (the user, after playing v0.27.0: put it under each
+player). Each bar is now 40 x 4 px, centred under the player's feet just
+below their marker, and goes where they go (all four in doubles; hidden
+on the result card). Its width never depends on a name. The PICKLE SMASH
+prompt stays under the score panel, where the bars were. `test_layout`
+puts the players at the corners of their runoff and at the net and checks
+no bar meets a text or leaves the screen.
 
 ## Measured (`tools/rally_stats.gd ... mods=131072`, 6 matches)
 

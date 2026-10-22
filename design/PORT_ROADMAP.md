@@ -93,6 +93,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-65 | SPECIALS: the meter and PICKLE SMASH | `feature/cld-specials` | Released (v0.24.0) |
 | PORT-66 | Effects: bounce marks, camera flashes, the net cord | `feature/cld-effects` | Released (v0.26.0) |
 | PORT-67 | The players' new body: a V torso, longer legs, a forehand with the body in it | `feature/cld-player-hd-body-v2` | Released (v0.27.0) |
+| PORT-68 | SPECIALS' meters under the players | `feature/cld-meters-under-players` | Ready to test |
 
 ## Releases
 
@@ -403,6 +404,22 @@ the same request). Open: 36 and 40.
     head footprint diffed per frame (no changes); 440/440 plus the e2e,
     golden traces unchanged (art only). Screenshots of doubles at the park.
   - Status: **Ready to test**.
+
+### 68. `feature/cld-meters-under-players`: the SPECIALS meters under the players (asked for 2026-10-22)
+
+- [x] `PORT-68` ADR-080, amended: each player's SPECIALS meter is a small
+  fixed-width bar under their feet (in their colour, gold when full),
+  following them, flipped or not, all four in doubles, instead of a bar
+  under the score panel that grew with the team name. The PICKLE SMASH
+  prompt stays under the score panel. Display only.
+  - Verified: `test_specials` (the bars follow the players: under the
+    feet, centred, a fixed width; still display only), `test_layout` (the
+    players at the runoff's corners and the net: no bar meets a text or
+    leaves the screen); 441/441 plus the e2e, golden traces unchanged.
+    Screenshots of singles and doubles with the meters part full, and a
+    full one with the prompt.
+  - Status: **Ready to test**: play a match with SPECIALS on (RULES) and
+    say if the bars read at a glance and sit well under the feet.
 
 ## For you
 

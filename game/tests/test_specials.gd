@@ -199,3 +199,23 @@ func test_the_meters_are_display_only() -> void:
 	var off := match_view(SimTypes.MatchConfig.singles())
 	eq(off._hud.specials, null, "no meters when SPECIALS is off")
 	off.queue_free()
+
+
+## ADR-080 (PORT-68): each player's bar sits under their feet, the same width
+## whatever the names, and goes where they go (doubles: all four).
+func test_the_meters_follow_the_players() -> void:
+	var cfg := SimTypes.MatchConfig.doubles()
+	cfg.modifiers = K.MOD_SPECIALS
+	var v := match_view(cfg)
+	v.highlight = null
+	var m: SpecialMeters = v._hud.specials
+	for f in 300:
+		v._physics_process(1.0 / 60.0)
+	for slot in K.MAX_PLAYERS:
+		var feet: Vector2 = v._players[slot]["root"].position + v._actors.position
+		var r := m.bar(slot)
+		check(m.shown(slot), "slot %d's bar is up" % slot)
+		eq(r.size.x, float(SpecialMeters.BAR_W), "a fixed width")
+		eq(r.get_center().x, feet.x, "centred on slot %d's feet" % slot)
+		check(r.position.y > feet.y, "under slot %d's feet" % slot)
+	v.queue_free()

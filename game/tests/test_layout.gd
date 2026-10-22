@@ -268,7 +268,38 @@ func test_hud() -> void:
 		sv._hud.refresh()
 		check(sv._hud.specials.prompts[0].visible, "the PICKLE SMASH prompt is up")
 		check_layout(sv, "hud specials %s" % ("doubles" if doubles else "singles"))
+		# ADR-080 (PORT-68): the bars ride under the feet; with the players at the
+		# corners of their runoff (the nearest the bottom texts) and at the
+		# net, no bar meets a text or leaves the screen
+		for spot in [[K.PLAYER_CLAMP_MIN_X, K.PLAYER_RIGHT_CLAMP_MAX_X, K.PLAYER_CLAMP_MAX_Y],
+				[K.PLAYER_CLAMP_MIN_X, K.PLAYER_RIGHT_CLAMP_MAX_X, K.PLAYER_CLAMP_MIN_Y],
+				[K.PLAYER_CLAMP_MAX_X, K.PLAYER_RIGHT_CLAMP_MIN_X, K.PLAYER_CLAMP_MAX_Y]]:
+			for slot in K.MAX_PLAYERS:
+				var pl: SimTypes.Player = sv.sim.players[slot]
+				pl.x_fp = K.to_fp(spot[0] if pl.team == 0 else spot[1])
+				pl.y_fp = K.to_fp(spot[2] - (slot % 2) * 30)
+			sv._update_visuals()
+			sv._hud.refresh()
+			_check_meters(sv, "hud specials %s at %s" % ["doubles" if doubles else "singles", spot])
 		sv.free()
+
+
+## SPECIALS' bars (ADR-080, PORT-68): each shown one on screen and clear of every text.
+func _check_meters(v: MatchView, where: String) -> void:
+	var m: SpecialMeters = v._hud.specials
+	var rects := texts(v).map(func(t): return text_rect(t))
+	var ts := texts(v)
+	for slot in K.MAX_PLAYERS:
+		if not m.shown(slot):
+			continue
+		var r := m.bar(slot).grow(1)
+		if not SCREEN.encloses(r):
+			_fail("%s: slot %d's meter leaves the screen at %s" % [where, slot, r], "meter|screen")
+		for i in ts.size():
+			if r.intersects(rects[i].grow(-SLACK)):
+				_fail("%s: slot %d's meter %s overlaps \"%s\" %s" % [where, slot, r.position,
+					ts[i].text, rects[i].position.round()], "meter|" + ts[i].text)
+	asserts += 1
 
 
 ## CAREER (ADR-047): the slots, the card, the editor with every value of
