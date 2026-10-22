@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.29.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.30.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-68 of 70 roadmap tasks are in.
+69 of 71 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -424,3 +424,9 @@ Status: **Ready to test**: save a good rally from the pause menu, then watch it 
 ADR-081, amended: while PLAY OF THE MATCH plays, SAVE (soft: X or L, beside SKIP) keeps the match's best rally in REPLAYS. The card says SAVED (and SAVE goes) or REPLAYS FULL; never twice, and not on a saved replay's own card.
 
 Status: **Ready to test**.
+
+## PORT-71: replays trimmed to the rally (asked for 2026-10-22)
+
+ADR-081, amended: a replay (saved, or PLAY OF THE MATCH) opens just before the serve is struck, not at the serve's setup; any pause in the rally runs unseen (the sim steps while paused, so the pause menu used to show in the replay); and it ends 50 frames after the point (was 80). The recording is unchanged, so the replay is still exact. Replays saved before this have no serve frame and still open at the setup, but skip their pauses.
+
+Status: **Ready to test**: save a rally you paused in, and one you waited to serve, and watch them from REPLAYS.

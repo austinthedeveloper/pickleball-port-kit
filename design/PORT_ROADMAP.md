@@ -96,7 +96,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-68 | SPECIALS' meters under the players | `feature/cld-meters-under-players` | Released (v0.28.0) |
 | PORT-69 | Saved replays: SAVE LAST RALLY, REPLAYS, and in the demo | `feature/cld-saved-replays` | Released (v0.28.0) |
 | PORT-70 | SAVE on PLAY OF THE MATCH | `feature/cld-potm-save` | Released (v0.29.0) |
-| PORT-71 | Replays trimmed to the rally: from the serve, no pauses | `feature/cld-replay-trim` | Ready to test |
+| PORT-71 | Replays trimmed to the rally: from the serve, no pauses | `feature/cld-replay-trim` | Released (v0.30.0) |
 
 ## Releases
 
@@ -202,6 +202,8 @@ status in the same commit. The finished tasks, in full, are in
   PORT-69 saved replays (tag `v0.28.0`, on `feature/cld-release-0.28.0`).
 - **v0.29.0** (2026-10-22): PORT-70 SAVE on PLAY OF THE MATCH (tag
   `v0.29.0`, on `feature/cld-release-0.29.0`).
+- **v0.30.0** (2026-10-22): PORT-71 replays trimmed to the rally (tag
+  `v0.30.0`, on `feature/cld-release-0.30.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 

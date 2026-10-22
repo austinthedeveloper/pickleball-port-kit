@@ -4,6 +4,17 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.30.0] - 2026-10-22
+
+Replays show just the rally.
+
+### Fixed
+- **Replays** start a moment before the serve instead of while the server
+  is still waiting, skip any time you spent on the pause menu during the
+  rally, and end soon after the ball is dead. This goes for saved replays
+  and PLAY OF THE MATCH. Replays saved before this version still start at
+  the serve's setup, but skip their pauses.
+
 ## [0.29.0] - 2026-10-22
 
 Keep the play of the match.
