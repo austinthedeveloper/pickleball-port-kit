@@ -1,8 +1,10 @@
 # Audio size comparison
 
 Smaller-file versions of nine of the game's sounds, to listen to beside
-the originals before choosing a build-time audio format. Nothing here
-changes what the game ships.
+the originals before choosing a build-time audio format. The choice made
+from it is ADR-083: the music and ambience ship as Ogg q4
+(`game/tools/encode_ogg.py`, run by `sync_assets.sh`); effects and the
+announcer stay WAV, imported as QOA. This folder doesn't feed the game.
 
 ```sh
 .venv/bin/pip install soundfile                                # once: libsndfile with Vorbis + LAME
@@ -17,7 +19,7 @@ build machine and isn't needed: `soundfile` wheels bundle libvorbis and
 LAME. `<name>_original.wav` is a byte-for-byte copy of the source, so git
 stores it once.
 
-## What the game ships today
+## What the game shipped before ADR-083
 
 | Source | Clips | Format | WAV on disk |
 |---|---:|---|---:|
@@ -197,7 +199,7 @@ From the estimate table (QOA is what ships now):
 Platform exports (60 to 93 MB) also hold the engine binary, so they
 shrink by the same ~15 MB, not in proportion.
 
-## Doing it at build time in Godot (notes, not changes)
+## Doing it at build time in Godot (the notes ADR-083 followed)
 
 Godot's WAV importer can't produce Vorbis: an `.ogg` has to exist as a
 file under `game/assets/`. The cleanest place is `sync_assets.sh`: keep

@@ -40,12 +40,14 @@ func test_every_effect_has_samples() -> void:
 func test_every_venue_has_its_ambience() -> void:
 	for venue in Settings.VENUES:
 		check(Sfx.AMBIENCE.has(venue), "%s has an ambience" % venue)
-		check(ResourceLoader.exists(Sfx.DIR + String(Sfx.AMBIENCE.get(venue, "")) + ".wav"),
+		check(ResourceLoader.exists(Sfx.DIR + String(Sfx.AMBIENCE.get(venue, "")) + Sfx.AMBIENCE_EXT),
 			"%s: its loop exists" % venue)
 		var s := Sfx.new()
 		runner.root.add_child(s)
 		s.setup(venue, false)
 		eq(s.ambience_name, venue, "%s plays its own loop by day" % venue)
+		var stream: AudioStreamOggVorbis = s._amb.stream
+		check(stream != null and stream.loop, "%s: the loop is Ogg, and loops" % venue)
 		s.free()
 
 

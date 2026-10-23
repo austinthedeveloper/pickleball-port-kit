@@ -100,6 +100,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-72 | Pads: L is SHORT, R is SPECIAL, the triggers mirror them | `feature/cld-pad-mapping` | Ready to test |
 | PORT-73 | Generic pads (SNES USB): MAP BUTTONS, saved per pad | `feature/cld-pad-mapping` | Ready to test |
 | PORT-74 | "A controller is recommended" at startup | `feature/cld-pad-mapping` | Ready to test |
+| PORT-75 | Smaller audio: the music and ambience as Ogg (the `.pck` 34 to 18.5 MB) | `feature/cld-audio-compare` | Ready to test |
 
 ## Releases
 
@@ -517,6 +518,25 @@ the same request). Open: 36 and 40.
     it and answer each step. STANDARD: SDL knows it already; try it in a
     match, and fix any button on CONTROLS. Try L and R in a rally.
 
+### 73. `feature/cld-audio-compare`: smaller audio (asked for 2026-10-22)
+
+- [x] `PORT-75` ADR-083: first a comparison: nine clips (three SFX, the
+  park ambience, two music tracks, three announcer lines) in Ogg q6/q4/q2,
+  IMA-ADPCM, 22 kHz mono and MP3 beside their originals, with sizes
+  against the QOA the game shipped (`audio/compare/`, `make_compare.py
+  --estimate`). Then the switch: the 12 music files and 7 ambience loops
+  ship as Ogg q4, encoded by `sync_assets.sh` (`tools/encode_ogg.py`,
+  reproducible bytes); effects and the announcer stay WAV/QOA. The `.pck`
+  goes from about 34 MB to 18.5 MB.
+  - Verified: `test_music.test_loops_loop_and_stingers_dont`,
+    `test_audio.test_every_venue_has_its_ambience` (each loop Ogg and
+    looping); 459/459 plus the e2e, golden traces unchanged; the exported
+    `.pck` boots clean. Every Ogg decodes to its WAV's exact length.
+    Not verified: by ear (KNOWN_ISSUES #74: two loops' seams to listen to).
+  - Status: **Ready to test**: play a match at the park and at SPACE
+    past the loop's end (about 40 s) and listen at the wrap; compare the
+    title music with `audio/compare/out/music_title_original.wav`.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
@@ -527,12 +547,10 @@ the chain: each has a default I've gone with.
   for SPECIAL (ADR-082). Should the bible's control line change to match
   (and the ROM, which has no SPECIAL, keep L or R)?
 
-- **Audio size (`feature/cld-audio-compare`, groundwork only):** nine
-  clips in smaller formats to listen to, in `audio/compare/out/`, with
-  sizes in `audio/compare/README.md`. Audio is about 30 MB of the 34 MB
-  `.pck` (already QOA). Ogg q4 for the music and ambience alone would take
-  the `.pck` to about 19 MB. Say which quality sounds right (q6, q4 or
-  q2), and whether to make the switch.
+- **PORT-75 smaller audio:** the music and ambience are Ogg q4 now. If
+  a track sounds worse than its WAV (`audio/compare/out/` has q6, q4 and
+  q2 of three of them), say so: `QUALITY` in `game/tools/encode_ogg.py`
+  changes them all (q6 adds about 4 MB to the `.pck`).
 
 - **PORT-65 SPECIALS:** PICKLE SMASH's strength is a first guess
   (ADR-080 has the numbers and the knobs). Say if it should win more or

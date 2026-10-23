@@ -27,9 +27,21 @@ func _save() -> SaveGame:
 func test_every_track_has_a_file() -> void:
 	for d in [Music.LOOPS, Music.STINGERS]:
 		for name in d:
-			check(ResourceLoader.exists(Music.DIR + d[name] + ".wav"), "%s: %s.wav" % [name, d[name]])
+			check(ResourceLoader.exists(Music.DIR + d[name] + Music.EXT), ("%s: %s" + Music.EXT) % [name, d[name]])
 	for venue in Settings.VENUES:
 		eq(Music.match_track(venue), "match_" + venue, "%s has its own match loop" % venue)
+
+
+## The soundtrack is Ogg (ADR-083): a loop plays round, a stinger once.
+func test_loops_loop_and_stingers_dont() -> void:
+	var m := _music()
+	m.play_loop("match_park")
+	var loop: AudioStreamOggVorbis = m._decks[m._active].stream
+	check(loop != null and loop.loop, "the loop is Ogg, and loops")
+	m.play_sting("won")
+	var sting: AudioStreamOggVorbis = m._sting.stream
+	check(sting != null and not sting.loop, "the stinger plays once")
+	m.free()
 
 
 func test_each_screen_names_its_track() -> void:

@@ -11,8 +11,9 @@ merges).
 game/tools/test.sh                                   # all Godot tests, headless (must pass)
 godot --path game                                    # play
 godot --headless --path game -s res://tests/golden.gd  # regenerate golden traces (play changes only)
-game/tools/sync_assets.sh                            # after rebuilding art/levels
+game/tools/sync_assets.sh                            # after rebuilding art/levels or audio (needs .venv: soundfile)
 .venv/bin/python art/levels/tools/build.py           # rebuild the 960x540 art (needs .venv: numpy, pillow)
+.venv/bin/python audio/compare/make_compare.py --estimate   # audio formats compared by size (audio/compare/README.md)
 godot --path game --resolution 960x540 -s res://tools/screenshot.gd -- <title|singles|doubles|demo|practice> <park|lakeside|sunset> <frames> <out.png>
 godot --headless --path game -s res://tools/point_log.gd -- doubles 2   # why each point ended
 godot --headless --path game -s res://tools/rally_stats.gd -- doubles 8 errors=50   # mean rally, as MATCH SETUP builds it
@@ -41,7 +42,7 @@ project lead's; the remaster is one of its artifacts and may not
 contradict it). `design/BIBLE_PLAN.md` lists what it asks of the port and
 the gaps (phase 5 in the roadmap). The SNES repo's decisions are cited as
 "SNES ADR-n": its numbers from 052 on are not this repo's. This repo keeps
-its own numbering (next: ADR-082; `decisions/README.md` indexes them).
+its own numbering (next: ADR-084; `decisions/README.md` indexes them).
 
 ## Rules of the code (game/)
 

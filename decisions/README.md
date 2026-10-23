@@ -73,3 +73,4 @@ first decisions, are rows in `design/07_DECISIONS_AND_RISKS.md`.
 | 080 | [SPECIALS: a Meter and PICKLE SMASH](ADR-080-specials.md) | Accepted 2026-10-21 |
 | 081 | [Saved Replays](ADR-081-saved-replays.md) | Accepted 2026-10-22 |
 | 082 | [Pads: L Short, R Special; Generic Pads Mapped; a Controller Recommended](ADR-082-pads.md) | Accepted 2026-10-22 |
+| 083 | [The Soundtrack and Ambience Ship as Ogg](ADR-083-ogg-soundtrack.md) | Accepted 2026-10-22 |

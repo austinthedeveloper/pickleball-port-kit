@@ -12,6 +12,7 @@ class_name Music
 extends Node
 
 const DIR := "res://assets/audio/"
+const EXT := ".ogg"                ## the soundtrack ships as Ogg Vorbis (ADR-083)
 ## Loops by name: the title, the park in open play, and a match at each venue.
 const LOOPS := {"title": "music_title", "park": "music_park",
 	"match_park": "music_match_park", "match_lakeside": "music_match_lakeside",
@@ -123,9 +124,8 @@ func play_loop(name: String) -> void:
 	if track == "":
 		return
 	_active = 1 - _active
-	var stream: AudioStreamWAV = load(DIR + LOOPS[track] + ".wav")
-	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	stream.loop_end = int(stream.get_length() * stream.mix_rate)
+	var stream: AudioStreamOggVorbis = load(DIR + LOOPS[track] + EXT)
+	stream.loop = true
 	_deck_track[_active] = track
 	_gain[_active] = 0.0
 	_fade_deck(_active, 1.0, 1.0 / CROSSFADE)
@@ -141,7 +141,7 @@ func play_sting(name: String) -> void:
 	track = ""
 	for i in 2:
 		_fade_deck(i, 0.0, 1.0 / STING_FADE)
-	_sting.stream = load(DIR + STINGERS[name] + ".wav")
+	_sting.stream = load(DIR + STINGERS[name] + EXT)
 	_sting_gain = 1.0
 	_sting_fading = false
 	_start(_sting)

@@ -24,6 +24,8 @@ const EFFECTS := {
 const JITTER := {"hit": 0.03, "hit_drive": 0.03, "hit_smash": 0.03, "hit_slice": 0.03, "hit_soft": 0.03, "bounce": 0.04}
 ## Per-effect level trims (dB) for the HD set's mix.
 const TRIM_DB := {"whistle": -3.0, "applause": 1.0, "net": -1.0, "hit_soft": 1.0}
+## The ambience loops ship as Ogg Vorbis; the effects as WAV (QOA) (ADR-083).
+const AMBIENCE_EXT := ".ogg"
 const AMBIENCE := {"park": "ambience_park", "lakeside": "ambience_lakeside",
 	"sunset": "ambience_sunset", "dinosaur": "ambience_dinosaur", "space": "ambience_space",
 	"undersea": "ambience_undersea", "gym": "ambience_gym"}
@@ -71,9 +73,8 @@ func setup(venue: String, quiet: bool, ambience := "") -> void:
 	if AMBIENCE.has(loop):
 		ambience_name = loop
 		_amb = AudioStreamPlayer.new()
-		var stream: AudioStreamWAV = load(DIR + AMBIENCE[loop] + ".wav")
-		stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-		stream.loop_end = stream.get_length() * stream.mix_rate
+		var stream: AudioStreamOggVorbis = load(DIR + AMBIENCE[loop] + AMBIENCE_EXT)
+		stream.loop = true
 		_amb.stream = stream
 		_amb.volume_db = -60.0
 		_amb.autoplay = true

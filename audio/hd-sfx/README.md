@@ -7,7 +7,7 @@ recorded or third-party audio. The SNES set stays in `../snes-sfx`.
 
 ```sh
 .venv/bin/python audio/hd-sfx/make_sfx.py --report   # writes out/, prints levels
-cp audio/hd-sfx/out/*.wav game/assets/audio/          # or game/tools/sync_assets.sh
+game/tools/sync_assets.sh                            # into the game (ambience as Ogg, ADR-083)
 ```
 
 | Sound | How it's made | Variants |

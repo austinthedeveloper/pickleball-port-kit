@@ -10,7 +10,7 @@ files. There is no recorded or third-party audio, as with the effects in
 ```sh
 .venv/bin/python audio/music/make_music.py --report   # writes out/, prints levels (about 90 s)
 .venv/bin/python audio/music/make_music.py title      # just the tracks whose name has "title"
-cp audio/music/out/*.wav game/assets/audio/           # or game/tools/sync_assets.sh
+game/tools/sync_assets.sh                            # into the game, as Ogg q4 (ADR-083)
 ```
 
 | Track | Where | Key, tempo, length | What's in it |
