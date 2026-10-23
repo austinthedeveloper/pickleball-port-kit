@@ -360,3 +360,43 @@ func test_bad_files() -> void:
 	check(not SavedReplays.playable(other), "another format doesn't play")
 	check(SavedReplays.playable(good))
 	wipe_replays()
+
+
+## A replay shows the match's light effects: its bounces leave marks, and
+## watched from REPLAYS the cameras flash (behind the title's menu, quiet,
+## they don't, as in the demo).
+func test_replays_show_the_effects() -> void:
+	var kept := Settings.flashes
+	Settings.flashes = true
+	wipe_replays()
+	var v := _view()
+	check(_to_a_rally(v))
+	var data := v.highlight.export(v.highlight.last)
+	v.free()
+	for quiet in [false, true]:
+		var d := MatchView.new()
+		runner.root.add_child(d)
+		d.setup(OnlineSession.config_from_dict(data["cfg"]), str(data["venue"]), true)
+		var h := Highlight.from_saved(d, data)
+		h.quiet = quiet
+		d.highlight = h
+		check(h.start(func(): pass))
+		var marked := false
+		var flashed := false
+		for f in 20000:
+			if not h.playing():
+				break
+			d._physics_process(1.0 / 60.0)
+			if d.replaying():
+				d.effects.marks.list.clear()
+				d._physics_process(1.0 / 60.0)
+				marked = marked or not d.effects.marks.list.is_empty()
+				d.effects.flashes.left = 0
+				d.effects.flash(CourtEffects.FLASH_BURST)
+				flashed = flashed or d.effects.flashes.left > 0
+		if not quiet:
+			check(marked, "the replay's bounces leave marks")
+		eq(flashed, not quiet, "flashes when watched (quiet: %s)" % quiet)
+		d.free()
+	wipe_replays()
+	Settings.flashes = kept

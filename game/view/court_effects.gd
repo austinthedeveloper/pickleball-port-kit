@@ -3,7 +3,8 @@
 ## - bounce marks: a scuff where the ball lands, fading over MARK_FRAMES;
 ## - camera flashes: glints among the crowd at the big moments (a 15, 20,
 ##   25 or 30-shot rally, PICKLE SMASH, match point, the match won); none
-##   with FLASHES off or in the demo;
+##   with FLASHES off or in the demo (a saved replay watched from REPLAYS
+##   flashes; one playing behind the title's menu doesn't);
 ## - the net shakes when a ball clips the tape and carries over (a net
 ##   cord), and when one goes into it.
 class_name CourtEffects
@@ -68,7 +69,8 @@ func on_event(e: Array) -> void:
 
 
 func flash(frames: int) -> void:
-	if flashes and Settings.flashes and not view.demo:
+	var watched := view.replaying() and not view.highlight.quiet
+	if flashes and Settings.flashes and (watched or not view.demo):
 		flashes.left = maxi(flashes.left, frames)
 
 

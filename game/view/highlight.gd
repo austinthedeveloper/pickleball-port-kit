@@ -355,10 +355,12 @@ func _finish() -> void:
 	_done.call()
 
 
-## An event of PLAY OF THE MATCH's replay: the sounds and the show, never
-## the stats, the score's animation, quips or records.
+## An event of PLAY OF THE MATCH's replay: the sounds and the show (the
+## bounce marks and camera flashes too), never the stats, the score's
+## animation, quips or records.
 func _replay_event(e: Array) -> void:
 	view.feel.on_event(e)
+	view.effects.on_event(e)
 	var sim := view.sim
 	view._sfx.event(e, (sim.shot_serial - sim.rally_start) & 0xff, false)
 	match int(e[0]):

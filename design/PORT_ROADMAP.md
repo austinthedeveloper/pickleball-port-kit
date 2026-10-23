@@ -347,7 +347,10 @@ the same request). Open: 36 and 40.
   CONTROLLER page at its longest name and every status, and the mouse
   picking a row anywhere on its bar; pad names cut to fit. The docs:
   PORT-55, 59 to 77 (but 62) moved to `PORT_HISTORY.md`.
-  - Verified: 476/476 plus the e2e, golden traces unchanged; the release
+  Then, at your call: replays show the match's light effects too (the
+  bounce marks, and the camera flashes when a saved one is watched from
+  REPLAYS; none behind the title's menu, as in the demo).
+  - Verified: 477/477 plus the e2e, golden traces unchanged; the release
     notes regenerate the same; the title's menu and prompts pixel for
     pixel the same.
   - Status: **Done**.
@@ -356,11 +359,6 @@ the same request). Open: 36 and 40.
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
-
-- **PORT-80 replays' marks:** PLAY OF THE MATCH's replay (and a saved
-  one) shows the sparks and dust but not the light effects (bounce marks,
-  the camera flash) the match shows. One line would add them; say if you
-  want it.
 
 - **PORT-78 the keyboard:** parked at your request. When you've thought
   it over: which presets (WASD + J K L, arrows + Z X C, both), which is
