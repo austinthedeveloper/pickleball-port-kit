@@ -101,3 +101,48 @@ func test_dinos_stay_behind_the_fence() -> void:
 			var feet := s.position.y                       # offset puts the feet here
 			check(feet <= 170.0, "%s's feet behind the fence (y %d)" % [d[1]["name"], feet])
 	view.queue_free()
+
+
+## A park at OPEN PLAY's location `k` (0 THE PARK, 1 DINO PARK, 2 THE GYM).
+func _park(k: int) -> ParkView:
+	var kept := Settings.park_i
+	Settings.park_i = k
+	var op := OpenPlay.new()
+	op.begin(4242, false)
+	var pv := ParkView.new().setup(op, null, false)
+	runner.root.add_child(pv)
+	Settings.park_i = kept
+	return pv
+
+
+func test_dino_park_has_them_and_no_other_park() -> void:
+	for k in Settings.PARKS.size():
+		var pv := _park(k)
+		eq(pv.dinos.size(), DinoWalkers.PARK_CAST.size() if k == 1 else 0, "location %d" % k)
+		pv.queue_free()
+
+
+func test_dino_park_leaves_open_play_alone_and_repeats() -> void:
+	var a := _park(1)
+	var b := _park(1)
+	var bare := OpenPlay.new()
+	bare.begin(4242, false)
+	var moved := false
+	var start: Vector2 = a.dinos[0][0].position
+	for f in 900:
+		a.step_frame(SimTypes.Intent.new())
+		b.step_frame(SimTypes.Intent.new())
+		bare.update(0, 0, false)
+		if a.op.snapshot() != bare.snapshot():
+			runner.fail("the park's OpenPlay diverged from a bare one at frame %d" % f)
+			break
+		for i in a.dinos.size():
+			var sa: Sprite2D = a.dinos[i][0]
+			var sb: Sprite2D = b.dinos[i][0]
+			if sa.position != sb.position or sa.region_rect != sb.region_rect or sa.flip_h != sb.flip_h:
+				runner.fail("%s differs between two parks at frame %d" % [a.dinos[i][1]["name"], f])
+				break
+		moved = moved or a.dinos[0][0].position != start
+	check(moved, "the Carnotaurus walks")
+	a.queue_free()
+	b.queue_free()

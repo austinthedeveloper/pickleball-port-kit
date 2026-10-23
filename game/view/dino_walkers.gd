@@ -5,7 +5,8 @@
 ## a pterodactyl crosses the sky behind the volcano. Each sits just in front
 ## of its backdrop layer (under the next one) and moves with its parallax.
 ## Display only; deterministic (the sim's frame count), so screenshots and
-## replays repeat.
+## replays repeat. OPEN PLAY's DINO PARK has its own cast (PARK_CAST), which
+## ParkView places in its world.
 class_name DinoWalkers
 extends Node2D
 
@@ -35,6 +36,24 @@ const CAST := [
 		"fly": [1080, -60, 1800]},          # from x, to x, every n frames
 ]
 
+## DINO PARK (ADR-078), in its world's px: the Carnotaurus strolls the
+## path's lower edge among the people, the baby patrols the grass below the
+## T. rex statue, and the pterodactyl flies over the courts.
+const PARK_CAST := [
+	{"name": "carnotaurus", "layer": "ground", "y": 744, "speed": 0.5,
+		"walk": ["carno_mount_walk.png", [9, 9, 9, 9]], "idle": ["carno_mount_idle.png", [84, 10]],
+		"cell": Vector2i(144, 96), "feet": Vector2i(70, 90), "right": true,
+		"route": [[300, 240], [1700, 300], [2120, 200], [820, 300]]},
+	{"name": "baby", "layer": "ground", "y": 560, "speed": 0.5, "scale": 2,
+		"walk": ["baby_dino_walk.png", [8, 8]], "idle": ["baby_dino_walk.png", [400]],
+		"cell": Vector2i(32, 32), "feet": Vector2i(16, 31), "right": true,
+		"route": [[1240, 150], [1100, 220]]},
+	{"name": "pterodactyl", "layer": "air", "y": 430, "speed": -1.5, "scale": 2,
+		"walk": ["pterodactyl_flap.png", [10, 10]],
+		"cell": Vector2i(32, 32), "feet": Vector2i(16, 16), "right": false,
+		"fly": [2340, -100, 1800]},
+]
+
 var sim: Sim
 var dinos: Array = []            ## [Sprite2D, cast entry, plan, parallax]
 
@@ -47,12 +66,9 @@ static func for_venue(venue: String, s: Sim, layers: Dictionary, tint: Color) ->
 	var w := DinoWalkers.new()
 	w.sim = s
 	for c: Dictionary in CAST:
-		var spr := Sprite2D.new()
-		spr.centered = false
-		spr.region_enabled = true
+		var spr := sprite(c)
 		spr.z_index = layers[c["layer"]][0]      # after the layer's own sprite
 		spr.modulate = tint
-		spr.scale = Vector2.ONE * c.get("scale", 1)
 		w.add_child(spr)
 		w.dinos.append([spr, c, plan(c), float(layers[c["layer"]][1])])
 	return w
@@ -81,23 +97,37 @@ static func plan(c: Dictionary) -> Array:
 
 ## Each dinosaur's place and pose this frame; `cam` is the camera's offset.
 func update(cam: Vector2) -> void:
-	var f := sim.frame_count
 	for d in dinos:
 		var spr: Sprite2D = d[0]
-		var c: Dictionary = d[1]
-		var pose := pose_at(c, d[2], f)
-		var strip: Array = c[pose[0]]
-		var tex: Texture2D = load(DIR + strip[0])
-		if spr.texture != tex:
-			spr.texture = tex
-		var cell: Vector2i = c["cell"]
-		spr.region_rect = Rect2(pose[1] * cell.x, 0, cell.x, cell.y)
-		var flip: bool = pose[3] != c["right"]
-		spr.flip_h = flip
-		var feet: Vector2i = c["feet"]
-		spr.offset = -Vector2((cell.x - 1 - feet.x) if flip else feet.x, feet.y)
-		spr.position = (pose[2] - cam * d[3]).round()
-		spr.visible = pose[2].x > -100.0 and pose[2].x < 1060.0
+		var at := dress(spr, d[1], d[2], sim.frame_count)
+		spr.position = (at - cam * d[3]).round()
+		spr.visible = at.x > -100.0 and at.x < 1060.0
+
+
+## A cast member's sprite (its strip and frame come from dress()).
+static func sprite(c: Dictionary) -> Sprite2D:
+	var spr := Sprite2D.new()
+	spr.centered = false
+	spr.region_enabled = true
+	spr.scale = Vector2.ONE * c.get("scale", 1)
+	return spr
+
+
+## Puts `spr` in its pose at frame `f` (its strip, frame and facing, the
+## feet at the origin) and returns where its feet go.
+static func dress(spr: Sprite2D, c: Dictionary, legs: Array, f: int) -> Vector2:
+	var pose := pose_at(c, legs, f)
+	var strip: Array = c[pose[0]]
+	var tex: Texture2D = load(DIR + strip[0])
+	if spr.texture != tex:
+		spr.texture = tex
+	var cell: Vector2i = c["cell"]
+	spr.region_rect = Rect2(pose[1] * cell.x, 0, cell.x, cell.y)
+	var flip: bool = pose[3] != c["right"]
+	spr.flip_h = flip
+	var feet: Vector2i = c["feet"]
+	spr.offset = -Vector2((cell.x - 1 - feet.x) if flip else feet.x, feet.y)
+	return pose[2]
 
 
 ## [strip "walk" or "idle", its frame, the feet, facing right] at frame `f`.

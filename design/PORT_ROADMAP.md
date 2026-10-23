@@ -101,7 +101,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-73 | Generic pads (SNES USB): MAP BUTTONS, saved per pad | `feature/cld-pad-mapping` | Released (v0.31.0) |
 | PORT-74 | "A controller is recommended" at startup | `feature/cld-pad-mapping` | Released (v0.31.0) |
 | PORT-75 | Smaller audio: the music and ambience as Ogg (the `.pck` 34 to 18.5 MB) | `feature/cld-audio-compare` | Released (v0.31.0) |
-| PORT-76 | DINOSAUR: the Carnotaurus (with Nathan) wanders the background, with the dinosaur game's Spinosaurus, baby and pterodactyl | `feature/cld-dino-park-dinosaurs` | Ready to test |
+| PORT-76 | DINOSAUR and DINO PARK: the Carnotaurus (with Nathan) wanders, with the dinosaur game's Spinosaurus, baby and pterodactyl | `feature/cld-dino-park-dinosaurs` | Ready to test |
 
 ## Releases
 
@@ -565,13 +565,18 @@ the same request). Open: 36 and 40.
   by `view/dino_walkers.gd`: display only, from the frame count, each on
   a backdrop layer's parallax and tint. The raptor, T. rex and
   Brachiosaurus were tried and left out (the venue paints all three).
+  OPEN PLAY's DINO PARK has them too: the Carnotaurus strolls the sand
+  path among the people (sorted by his feet), the baby patrols the grass
+  by the T. rex statue, the pterodactyl flies over the courts.
   - Verified: `test_dinos.gd` (only on DINOSAUR, the sim untouched, two
     views agree, the route crosses and turns and loops without a jump,
-    behind the fence), `test_view`, `test_layout`; 464/464 plus the
-    e2e, golden traces unchanged; screenshots at four frames and at
-    NIGHT.
+    behind the fence; DINO PARK has its cast and the other parks none,
+    OpenPlay untouched, two parks agree), `test_view`, `test_layout`;
+    466/466 plus the e2e, golden traces unchanged; screenshots at four
+    frames and at NIGHT, and of DINO PARK.
   - Status: **Ready to test**: play a match at DINOSAUR and watch the
-    fence line for a minute (his lap is about 80 s).
+    fence line for a minute (his lap is about 80 s); walk DINO PARK's
+    path.
 
 ## For you
 
@@ -581,7 +586,8 @@ the chain: each has a default I've gone with.
 - **PORT-76 the dinosaurs:** the Carnotaurus walks with Nathan up (the
   solo `walk`/`idle` tags are one line away in `export.sh` and `CAST`).
   Say if you'd rather see the raptor or the T. rex in place of the painted
-  ones, or the dinosaurs in OPEN PLAY's DINO PARK too.
+  ones. In DINO PARK he strolls the path among the people; say if he
+  should keep to the grass instead.
 
 - **PORT-72 the shoulders:** the bible says "hold L or R to hit short"
   (SNES ADR-056); at your request the remaster now has L for SHORT and R

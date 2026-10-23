@@ -43,9 +43,18 @@ never redrawn.
   palisade, like the painted ones'), the Spinosaurus and the baby on the
   trees, the pterodactyl on the sky. They take the backdrop's time-of-day
   tint and dim with it on a long rally (PORT-43).
+- **DINO PARK too** (OPEN PLAY's location, ADR-078; `PARK_CAST`, placed
+  by `ParkView` in its world): the Carnotaurus strolls the sand path's
+  lower edge, sorted by his feet among the people, so you walk past (and
+  behind) him; the baby patrols the grass below the T. rex statue (2x);
+  the pterodactyl (2x, nearer the camera) flies over the courts, over the
+  palms' canopies. The Spinosaurus stays at the venue: at 1x it would
+  stand shorter than a person here. Their clock is the park view's frames
+  since it opened.
 - **Display only, deterministic.** Places and frames are functions of the
   sim's frame count (a looping route of walks and stops), so screenshots,
-  replays and the demo repeat; the view never writes to the sim.
+  replays and the demo repeat; the view never writes to the sim (or to
+  OpenPlay).
 
 ## Consequences
 
@@ -53,6 +62,8 @@ never redrawn.
   two views agree frame for frame; the Carnotaurus's route crosses the
   venue, turns both ways, uses every frame and never jumps, the loop
   included; everything stays under the fence and behind it.
-- OPEN PLAY's DINO PARK (ADR-078, `art/park/`) doesn't have them yet.
+- `test_dinos.gd` also: DINO PARK has its cast and the other parks none;
+  the park's OpenPlay stays equal to a bare one; two parks agree frame
+  for frame.
 - A rebuild of the export needs the dinosaur repo beside the kit (or
   `DINO=`). The committed `out/` strips are what the game ships.

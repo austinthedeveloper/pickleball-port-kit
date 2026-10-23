@@ -18,8 +18,9 @@ breathing poses, where the 64x64 `-sheet.png` production cells are a
 squeezed single pose (the SNES game's OBJ budget; its
 `documents/concept-art-analysis.md`).
 
-The game's timing, routes and layers are `CAST` in
-`game/view/dino_walkers.gd`.
+The game's timing, routes and layers are `CAST` (the DINOSAUR venue) and
+`PARK_CAST` (OPEN PLAY's DINO PARK: the Carnotaurus, the baby and the
+pterodactyl) in `game/view/dino_walkers.gd`.
 
 ## Rebuilding
 

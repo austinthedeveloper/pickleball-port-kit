@@ -67,6 +67,8 @@ var _panel_prompts: PromptBar
 var _call: BitmapText
 var _sfx: Sfx
 var _looks := {}                     ## "team:member" -> PlayerLook
+var dinos: Array = []                ## DINO PARK's dinosaurs (ADR-084): [Sprite2D, cast entry, plan]
+var dino_frame := 0                  ## their clock: frames since the park opened
 var _prompt_key := ""
 
 
@@ -127,6 +129,15 @@ func _build() -> void:
 	_world.add_child(_actors)
 	for spr in layout["sprites"]:
 		_add_prop(spr)
+	if layout.get("theme", "") == "dino":
+		for c: Dictionary in DinoWalkers.PARK_CAST:
+			var spr := DinoWalkers.sprite(c)
+			if c["layer"] == "air":
+				spr.z_index = 3                # over the trees' canopies
+				_world.add_child(spr)
+			else:
+				_actors.add_child(spr)         # sorted by its feet with the people
+			dinos.append([spr, c, DinoWalkers.plan(c)])
 	_overlay = ParkOverlay.new()
 	_overlay.view = self
 	_overlay.z_index = 2
@@ -387,6 +398,7 @@ func step_frame(it: SimTypes.Intent = null, pad2_start := false) -> void:
 		pad2_start = false
 		GameControls.clear_latch()
 	anim = (anim + 1) & 0xff
+	dino_frame += 1
 	if result_timer:
 		result_timer -= 1
 	if pad2_start and op.called == OpenPlay.NONE:
@@ -450,6 +462,9 @@ func refresh() -> void:
 		_draw_court(c)
 		_draw_score(c)
 	_draw_bench()
+	for d in dinos:
+		var spr: Sprite2D = d[0]
+		spr.position = DinoWalkers.dress(spr, d[1], d[2], dino_frame).round()
 	_draw_message()
 	_overlay.queue_redraw()
 
