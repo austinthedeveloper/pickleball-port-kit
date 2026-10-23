@@ -104,6 +104,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-76 | DINOSAUR and DINO PARK: the Carnotaurus (with Nathan) wanders, with the dinosaur game's Spinosaurus, baby and pterodactyl | `feature/cld-dino-park-dinosaurs` | Released (v0.32.0) |
 | PORT-77 | The dinosaur game's levels as courts: RUINS, GLACIER, LAB, STATION | `feature/cld-dino-levels` | Released (v0.32.0) |
 | PORT-78 | Keyboard controls you can guess: a WASD + J K L preset and an arrows + Z X C one, keys drawn where they sit | `feature/cld-keyboard-layout` | Planned (parked: you're thinking it over) |
+| PORT-79 | Text centred in the menu bars and the prompts' keys | `feature/cld-text-centring` | Ready to test |
 
 ## Releases
 
@@ -645,6 +646,21 @@ the same request). Open: 36 and 40.
     harmless default, so no new layout version), `test_layout` cases for
     the card and the preset row.
   - Status: **Planned**, parked until you've decided the layout.
+
+### 79. `feature/cld-text-centring`: text centred in the bars and keys (asked for 2026-10-23)
+
+- [x] `PORT-79` Known issue 77: the menus' highlight bar, MAP BUTTONS'
+  bar and the prompts' keys had their text about 3 px low (the offsets
+  didn't allow for the small font's outline and shadow). The bars start
+  2 px above the letters (the change arrows and the mouse's row bands
+  follow), keys and pills are 24 px tall with a 2 px lip, and the key
+  letters and their labels share one height (`PromptBar.TEXT_Y`). Display
+  only, no ADR.
+  - Verified: 470/470 plus the e2e, golden traces unchanged; before and
+    after screenshots of the title and a practice match.
+  - Status: **Ready to test**: look at any menu and the prompts, and at
+    a pad's prompts (the round buttons' letters moved up 3 px; not
+    screenshotted).
 
 ## For you
 

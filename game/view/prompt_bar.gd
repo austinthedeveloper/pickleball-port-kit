@@ -4,7 +4,11 @@
 class_name PromptBar
 extends Node2D
 
-const H := 22.0
+const H := 22.0                  ## a round button or the d-pad
+const KEY_H := 24.0              ## a key or a pill: the letters' outline and shadow fit
+## The small font's ink is rows 2..18 of its 20 px cell (outline and drop
+## shadow included): at TEXT_Y that's -9..7, inside a key's top face.
+const TEXT_Y := -11.0
 const GAP := 18.0
 
 var items: Array = []            ## [[action, label], ...]
@@ -47,7 +51,8 @@ func rebuild() -> void:
 	var x := -total / 2.0
 	for i in items.size():
 		var w: Array = widths[i]
-		var r := Rect2(x, -H / 2.0, w[1], H)
+		var h := H if w[0]["kind"] in ["face", "menu", "view", "dpad"] else KEY_H
+		var r := Rect2(x, -h / 2.0, w[1], h)
 		_layout.append([w[0], r])
 		if w[0]["text"] != "":
 			# the glyph's letters or key name, over its shape (children draw last)
@@ -55,7 +60,7 @@ func rebuild() -> void:
 			gt.font = "small"
 			gt.text = w[0]["text"]
 			gt.align = 0.5
-			gt.position = Vector2(r.get_center().x, r.position.y + 3)
+			gt.position = Vector2(r.get_center().x, TEXT_Y)
 			add_child(gt)
 			_texts.append(gt)
 		x += w[1] + 6
@@ -63,7 +68,7 @@ func rebuild() -> void:
 		t.font = "small"
 		t.text = items[i][1]
 		t.tint = tint
-		t.position = Vector2(x, -8)
+		t.position = Vector2(x, TEXT_Y)
 		add_child(t)
 		_texts.append(t)
 		x += w[2] + GAP
@@ -106,7 +111,7 @@ func _draw() -> void:
 				draw_rect(r, Color(0.92, 0.93, 0.98))
 				draw_rect(r.grow(-2), Color(0.16, 0.18, 0.3) if pill else Color(0.24, 0.26, 0.38))
 				if not pill:
-					draw_rect(Rect2(r.position.x + 2, r.end.y - 5, r.size.x - 4, 3), Color(0.1, 0.11, 0.2))
+					draw_rect(Rect2(r.position.x + 2, r.end.y - 4, r.size.x - 4, 2), Color(0.1, 0.11, 0.2))
 
 
 ## An Xbox face-style button: dark ring, tinted face, coloured rim.

@@ -291,7 +291,7 @@ func _step_visuals() -> void:
 
 
 func _draw_bar() -> void:
-	var r := Rect2(area.position.x + 14, _bar_y - 5, area.size.x - 28, ROW_H - 4)
+	var r := Rect2(area.position.x + 14, _bar_y - 2, area.size.x - 28, ROW_H - 4)
 	_bar.draw_rect(r, BAR)
 	_bar.draw_rect(Rect2(r.position, Vector2(4, r.size.y)), BAR_EDGE)
 
@@ -301,7 +301,7 @@ func _draw_arrows() -> void:
 		return
 	var v: BitmapText = _values[cursor]
 	var w := BitmapText.measure("small", v.text)
-	var y := _bar_y + 8
+	var y := _bar_y + 10
 	var right := v.position.x + 10
 	var left := v.position.x - w - 10
 	_overlay.draw_colored_polygon(PackedVector2Array([Vector2(right, y - 5), Vector2(right + 6, y),
@@ -314,7 +314,7 @@ func _draw_arrows() -> void:
 func row_at(p: Vector2) -> int:
 	if p.x < area.position.x or p.x > area.end.x:
 		return -1
-	var i := int(floor((p.y - (_top - 5)) / ROW_H))
+	var i := int(floor((p.y - (_top - 4)) / ROW_H))
 	return i if i >= 0 and i < rows.size() else -1
 
 

@@ -58,6 +58,6 @@ func refresh() -> void:
 func _draw_bar() -> void:
 	if mapper == null or mapper.done():
 		return
-	var r := Rect2(AREA.position.x + 14, TOP + mapper.step * ROW_H - 5, AREA.size.x - 28, ROW_H - 2)
+	var r := Rect2(AREA.position.x + 14, TOP + mapper.step * ROW_H - 1, AREA.size.x - 28, ROW_H - 2)
 	_bar.draw_rect(r, MenuPage.BAR)
 	_bar.draw_rect(Rect2(r.position, Vector2(4, r.size.y)), MenuPage.BAR_EDGE)
