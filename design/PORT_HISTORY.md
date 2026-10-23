@@ -2,7 +2,8 @@
 
 The finished tasks of the port, in full, moved out of
 `design/PORT_ROADMAP.md` (PORT-00 to 22 in PORT-23; 23 to 39 and 41 in the
-2026-10-19 cleanup; 42 to 58, but 55, in the 2026-10-21 one) so the sheet stays short. Each block
+2026-10-19 cleanup; 42 to 58, but 55, in the 2026-10-21 one; 55, 59 to 77, but 62, in the
+2026-10-23 one) so the sheet stays short. Each block
 is as it was when its branch landed. `game/tools/release_notes.py` reads
 this file and the sheet together.
 
@@ -1359,3 +1360,342 @@ the 2026-10-21 cleanup.
   - Verified: `test_multiplayer`, `test_couch_cup`, `test_layout`. 423/423
     plus the e2e. Screenshots of the lobby and the tags.
   - Status: **Ready to test**.
+
+### 55. `feature/cld-announcer-additions`: the announcer's second batch (asked for 2026-10-21)
+
+- [ ] `PORT-55` A second list to record, `design/announcer/ADDITIONS.md`
+  and `additions.csv` (17 lines, `make_additions.py` makes both): under
+  WIN BY 2 past game point, advantage (serving or receiving side) and
+  deuce; an achievement's line as it unlocks. The game already asks for
+  them and falls back to what it said before ("win by two", nothing) until
+  they're in `audio/announcer/raw/`. Score calls need nothing new: the
+  numbers go to twenty-five.
+  - Verified: `test_announcer` (the extension, the fallback, a recorded
+    batch said). 418/418 plus the e2e.
+  - 2026-10-21, `feature/cld-announcer-specials`: now 54 lines. Added
+    SPECIALS' (the intro, a meter filling, PICKLE SMASH, its pop-up
+    return, a smash that wins or sets up the point; wired, with a smash's
+    line as the fallback), the other six achievements' own lines, and
+    twelve power-up lines for later (not wired: power-ups aren't built).
+    GLOBETROTTER's line no longer counts venues (there are seven now).
+    `test_announcer.test_the_specials_lines`.
+  - 2026-10-21, `feature/cld-voices-ash`: the user re-recorded the whole
+    script in one voice (298 clips: the first batch and the additions,
+    no team intros) and they replace the old ones. The new takes run
+    longer, so the big in-rally calls get more room (rally counts up to
+    4 s, PICKLE SMASH 3 s; a shot's call still 1.3 s). `test_announcer`
+    now asks for every second-batch line.
+  - Status: **Done** (the power-up lines wait for power-ups).
+
+
+### 59. `feature/cld-cleanup-5`: cleanup round 5 (asked for 2026-10-21)
+
+- [x] `PORT-59` The local branches merged into `origin/main` deleted (73;
+  the two still checked out in agent worktrees, both merged, stay until
+  those are cleaned up). The code: the three sliders (BALL SPEED, BALL
+  SIZE, CPU ERRORS) defined once (`Settings.SLIDERS`, `Settings.nudge`,
+  `view/setting_rows.gd`) for the title and the tuning panel; PLAY OF THE
+  MATCH's event handling in `highlight.gd`, out of `match_view.gd`; a
+  dead `Announcer.speak_ids`; `TestSuite.match_view` for the tests' match
+  setup. The docs: PORT-42 to 58 (but 55) moved to `PORT_HISTORY.md`, the
+  index naming each task's release; `decisions/README.md`, an index of
+  the ADRs; the bible plan's list of the remaster's own additions; the
+  README's file layout.
+  - Verified: 423/423 plus the e2e, golden traces unchanged; the release
+    notes regenerate the same (57 of 58 tasks); MODIFIERS and the tuning
+    panel unchanged on screen.
+  - Status: **Done**.
+
+### 60. `feature/cld-park-stacking`: the park's stack and winners staying (asked for 2026-10-21)
+
+- [x] `PORT-60` KNOWN_ISSUES #71: the rack draws a pair of paddles for
+  each waiting team (one a player, as real stacking reads), the panel
+  counts the teams ahead of you, and a win that keeps you on says so
+  (WINNERS STAY ON, then YOU STAY ON COURT n with STEP OFF at its rack).
+  The park's rules (SNES ADR-070 to 072) are unchanged.
+  - Verified: `test_open_play` (27, with `test_staying_on_is_said`).
+    424/424 plus the e2e, golden traces unchanged. Screenshots of the rack
+    and the panel.
+  - Status: **Released (v0.21.1)**.
+
+### 61. `feature/cld-ball-machine`: the swing-arm ball machine (asked for 2026-10-21)
+
+- [x] `PORT-61` KNOWN_ISSUES #34: practice's machine is row C of
+  `art/concept/ball-machine.png`, a cart with a hopper of balls and a
+  launcher arm on a pivot, built in Aseprite (`art/sprites/machine`:
+  `machine.py` draws the layers, `build_machine.lua` makes
+  `machine.aseprite` and the sheet). The arm has nine angles and swings
+  through them toward the sim's pose (up, centre, down) instead of
+  snapping; it recoils along itself on a feed. Display only: the sim's
+  poses and feeds are unchanged.
+  - Verified: `test_practice.test_machine_arm_swings`; 425/425 plus the
+    e2e, golden traces unchanged. Screenshots in practice at the park.
+  - Status: **Ready to test**.
+
+### 63. `feature/cld-practice-quiet`: practice without the announcer (asked for 2026-10-21)
+
+- [x] `PORT-63` KNOWN_ISSUES #72: no announcer in practice. With no
+  points there, its rally lines counted the machine's feeds, missed or
+  not, as one long rally. Lessons and matches are unchanged.
+  - Verified: `test_announcer.test_practice_is_quiet`; 426/426 plus the
+    e2e, golden traces unchanged.
+  - Status: **Released (v0.22.1)**.
+
+### 64. `feature/cld-menu-regroup`: the title menu regrouped (asked for 2026-10-21)
+
+- [x] `PORT-64` ADR-079: MAIN is STORY, PLAY, PRACTICE, PLAYER and
+  OPTIONS (was twelve rows). PLAY has QUICK MATCH (SINGLES or DOUBLES,
+  one row), TOURNAMENT, OPEN PLAY and MULTIPLAYER; QUICK MATCH opens
+  MATCH SETUP (START, MODE, PLAYERS, VS, DIFFICULTY, CPU ERRORS, POINTS,
+  COURT, MODIFIERS); PLAYER has the players, RECORDS, ACHIEVEMENTS and
+  the HAT MUSEUM. BACK goes to the page you came from; after a match the
+  title opens where it started (MATCH SETUP after a quick match).
+  Mocked up first with the game's panels, then built as mocked.
+  - Verified: `test_menus` (the whole tree, and coming back after a
+    match), the suites that walked MAIN now reach rows by id
+    (`TitleScreen.reveal`), `test_layout` on every page; 427/427 plus the
+    e2e (now through MATCH SETUP), golden traces unchanged. Screenshots
+    of MAIN, PLAY, MATCH SETUP and PLAYER.
+  - Status: **Released (v0.23.0)**.
+
+### 65. `feature/cld-specials`: SPECIALS, the meter and PICKLE SMASH (asked for 2026-10-21)
+
+- [x] `PORT-65` ADR-080: SPECIALS on RULES (off by default, off in the
+  ROM's game). Each player's meter fills with shots, points won and time
+  in a rally; SPECIAL (O, the right trigger) spends a full one on PICKLE
+  SMASH: twice a drive's pace, never stretched, always over the net,
+  aimed deep away from the other side, and its return pops up soft (the
+  knock-back). The CPUs use it too. Meters under the score panels, a
+  PICKLE SMASH prompt, the PICKLE SMASH! pop.
+  - Verified: `test_specials` (10: off by default, the fills, spending,
+    the flight, the knock-back, the CPUs, not in practice or MULTI BALL,
+    online's packing, the meters display only), `test_shots` and
+    `test_controls` (the trigger, SHORT still LB or RB), `test_layout`
+    (the meters and prompts); 436/436 plus the e2e, golden traces
+    unchanged. `rally_stats` with mods=131072: the smasher's side wins 56%
+    (doubles) and 79% (singles) of rallies with a smash. Screenshots of
+    the meters and a PICKLE SMASH.
+  - Status: **Released (v0.24.0)**.
+
+### 66. `feature/cld-effects`: three light effects (asked for 2026-10-22)
+
+- [x] `PORT-66` `view/court_effects.gd`, display only and deterministic:
+  a scuff where the ball bounces, fading over four seconds (a dozen at
+  most); camera flashes among the crowd at the big moments (a 15, 20, 25
+  or 30-shot rally, PICKLE SMASH, match point, the match won), none with
+  FLASHES off or in the demo; the net wobbles (a couple of pixels) when a
+  ball clips the tape and carries over, with the net's sound, and when one
+  goes into it. A few shapes a frame each, no new shaders or particles.
+  - Verified: `test_feel` (the marks, the flashes and FLASHES off, the net
+    cord and settling; the view against a bare sim); 440/440 plus the
+    e2e, golden traces unchanged. Screenshots of the marks and a burst of
+    flashes (`screenshot.gd ... camflash`).
+  - Status: **Ready to test**.
+
+### 67. `feature/cld-player-hd-body-v2`: the players' body and swing (asked for 2026-10-22)
+
+- [x] `PORT-67` A side-by-side test first (`art/sprites/hd/v2/`: v2
+  `.aseprite` copies of the 48 px players, old-vs-v2 GIFs and a still),
+  then the same changes in the game's players (`art/levels/tools/players.py`):
+  the shirt tapers from the shoulders to the waist (a V, not a bean), the
+  hips sit higher (a shorter torso, longer legs), the shorts are narrower
+  at the waist and a little longer. The forehand uses the body: the windup
+  coils the shoulders and loads the back leg, contact drives onto the
+  front knee with the back heel up, and the follow-through wraps the
+  paddle up (tilted forward, clear of the face) with the back foot
+  dragging on its toe. The head is left alone: no head code changed and
+  every pose keeps its neck, so heads, caps and hats are pixel-identical
+  (every cap and hat overlay sheet is byte-identical to before).
+  - Verified: all 21 poses compared old vs new, male and female, and the
+    head footprint diffed per frame (no changes); 440/440 plus the e2e,
+    golden traces unchanged (art only). Screenshots of doubles at the park.
+  - Status: **Ready to test**.
+
+### 68. `feature/cld-meters-under-players`: the SPECIALS meters under the players (asked for 2026-10-22)
+
+- [x] `PORT-68` ADR-080, amended: each player's SPECIALS meter is a small
+  fixed-width bar under their feet (in their colour, gold when full),
+  following them, flipped or not, all four in doubles, instead of a bar
+  under the score panel that grew with the team name. The PICKLE SMASH
+  prompt stays under the score panel. Display only.
+  - Verified: `test_specials` (the bars follow the players: under the
+    feet, centred, a fixed width; still display only), `test_layout` (the
+    players at the runoff's corners and the net: no bar meets a text or
+    leaves the screen); 441/441 plus the e2e, golden traces unchanged.
+    Screenshots of singles and doubles with the meters part full, and a
+    full one with the prompt.
+  - Status: **Ready to test**: play a match with SPECIALS on (RULES) and
+    say if the bars read at a glance and sit well under the feet.
+
+### 69. `feature/cld-saved-replays`: saved replays (asked for 2026-10-22)
+
+- [x] `PORT-69` ADR-081: **SAVE LAST RALLY** on the pause menu keeps the
+  rally that ended last (PLAY OF THE MATCH's recording, cut after it) as
+  a file under `user://replays/`, six at most. **REPLAYS** on PLAYER
+  lists them, newest first; a press watches one full screen with a SAVED
+  REPLAY card (or, with ON PRESS set to DELETE, deletes it). **IN THE
+  DEMO** (on) lets the title's demo play them, every other time, between
+  live matches. A replay from another sim lists as OLD VERSION.
+  - Verified: `test_saved_replays` (exact playback from the file, the live
+    match untouched, FULL, OLD VERSION, the title's REPLAYS and demo),
+    `test_layout` (REPLAYS at its widest, the pause row, the card),
+    `test_menus`; 447/447 plus the e2e, golden traces unchanged. A replay
+    recorded in one run played back exactly in another. Screenshots of
+    the pause menu, REPLAYS, and a replay playing
+    (`screenshot.gd ... replays savelast` / `title_replays ... replays watch`).
+  - Status: **Ready to test**: save a good rally from the pause menu, then
+    watch it from PLAYER, REPLAYS, and let the title sit to see it in the
+    demo.
+
+### 70. `feature/cld-potm-save`: SAVE on PLAY OF THE MATCH (asked for 2026-10-22)
+
+- [x] `PORT-70` ADR-081, amended: while PLAY OF THE MATCH plays, SAVE
+  (soft: X or L, beside SKIP) keeps the match's best rally in REPLAYS.
+  The card says SAVED (and SAVE goes) or REPLAYS FULL; never twice, and
+  not on a saved replay's own card.
+  - Verified: `test_saved_replays` (SAVE during PLAY OF THE MATCH, played
+    back exactly from the file; once; FULL; none on a saved replay),
+    `test_layout` (the card with SAVE, SAVED and REPLAYS FULL),
+    `test_highlight`; 448/448 plus the e2e, golden traces unchanged.
+    Screenshots of the card before and after SAVE
+    (`screenshot.gd ... potm potmsave replays`).
+  - Status: **Ready to test**.
+
+### 71. `feature/cld-replay-trim`: replays trimmed to the rally (asked for 2026-10-22)
+
+- [x] `PORT-71` ADR-081, amended: a replay (saved, or PLAY OF THE MATCH)
+  opens just before the serve is struck, not at the serve's setup; any
+  pause in the rally runs unseen (the sim steps while paused, so the
+  pause menu used to show in the replay); and it ends 50 frames after the
+  point (was 80). The recording is unchanged, so the replay is still
+  exact. Replays saved before this have no serve frame and still open at
+  the setup, but skip their pauses.
+  - Verified: `test_saved_replays` (P1 a human who waits four seconds to
+    serve and pauses ten seconds mid-rally: the replay opens 45 frames
+    before the serve, never draws a paused frame, and still ends on the
+    rally's exact snapshot), `test_highlight`; 449/449 plus the e2e,
+    golden traces unchanged. Screenshot of a replay's opening frame.
+  - Status: **Ready to test**: save a rally you paused in, and one you
+    waited to serve, and watch them from REPLAYS.
+
+### 72. `feature/cld-pad-mapping`: L for SHORT, R for SPECIAL (asked for 2026-10-22)
+
+- [x] `PORT-72` ADR-082: on a pad, L and the left trigger are SHORT, R
+  and the right trigger SPECIAL (PICKLE SMASH); SHORT was either shoulder
+  and SPECIAL the right trigger. The keyboard is unchanged. A save's old
+  bindings load with R on SPECIAL. Departs from the bible's "L or R"
+  (For you).
+  - Verified: `test_pad_maps` (the shoulders and triggers, an old save's
+    bindings), `test_shots`, `test_controls`, `test_controller`; golden
+    traces unchanged.
+  - Status: **Ready to test**: try L and R in a rally.
+
+### 73. `feature/cld-pad-mapping`: generic pads, mapped (asked for 2026-10-22)
+
+- [x] `PORT-73` ADR-082: OPTIONS, CONTROLS, **CONTROLLER**: the pad in
+  hand, **MAP BUTTONS** for a pad SDL doesn't know (it asks for each
+  action, naming the SNES button, from the pad's raw buttons, hat or
+  axes), **CLEAR MAPPING**, BUTTON ICONS (moved here, with a new SNES
+  family) and PAD NOTICE. The map becomes an SDL mapping string given to
+  Godot, saved per pad model (GUID) and given again whenever the pad
+  connects; a mapped pad draws as a SNES pad.
+  - Verified: `test_pad_maps` (a SNES USB pad's raw events mapped and
+    then driving P1's actions, 2P's reading and the menus, a hat D-pad,
+    undo, cancel, a resting trigger axis, the save), `test_layout` (MAP
+    BUTTONS at every step, CONTROLLER with every value). Screenshots of
+    MAP BUTTONS and CONTROLLER (`screenshot.gd -- title_padmap`,
+    `title_pad`, `title_controls`). Not verified: a real generic pad
+    (Godot's raw-joystick path can't be driven headless).
+  - Status: **Ready to test**: plug in a SNES USB pad, open OPTIONS,
+    CONTROLS, CONTROLLER, and see what MAP BUTTONS says. UNKNOWN: press
+    it and answer each step. STANDARD: SDL knows it already; try it in a
+    match, and fix any button on CONTROLS.
+
+### 74. `feature/cld-pad-mapping`: a controller recommended (asked for 2026-10-22)
+
+- [x] `PORT-74` ADR-082: with no pad connected, the title opens on A
+  CONTROLLER IS RECOMMENDED (OK, DON'T SHOW AGAIN), once a session; a pad
+  connecting closes it.
+  - Verified: `test_pad_maps` (the title's flow, the card), `test_layout`
+    (the card), and the e2e (it now dismisses the card); 459/459 with the
+    branches together. Screenshot of the card (`screenshot.gd --
+    title_notice`).
+  - Status: **Ready to test**: start the game with no pad plugged in.
+
+### 75. `feature/cld-audio-compare`: smaller audio (asked for 2026-10-22)
+
+- [x] `PORT-75` ADR-083: first a comparison: nine clips (three SFX, the
+  park ambience, two music tracks, three announcer lines) in Ogg q6/q4/q2,
+  IMA-ADPCM, 22 kHz mono and MP3 beside their originals, with sizes
+  against the QOA the game shipped (`audio/compare/`, `make_compare.py
+  --estimate`). Then the switch: the 12 music files and 7 ambience loops
+  ship as Ogg q4, encoded by `sync_assets.sh` (`tools/encode_ogg.py`,
+  reproducible bytes); effects and the announcer stay WAV/QOA. The `.pck`
+  goes from about 34 MB to 18.5 MB.
+  - Verified: `test_music.test_loops_loop_and_stingers_dont`,
+    `test_audio.test_every_venue_has_its_ambience` (each loop Ogg and
+    looping); 459/459 plus the e2e, golden traces unchanged; the exported
+    `.pck` boots clean. Every Ogg decodes to its WAV's exact length.
+    Not verified: by ear (KNOWN_ISSUES #74: two loops' seams to listen to).
+  - Status: **Ready to test**: play a match at the park and at SPACE
+    past the loop's end (about 40 s) and listen at the wrap; compare the
+    title music with `audio/compare/out/music_title_original.wav`.
+
+### 76. `feature/cld-dino-park-dinosaurs`: the dinosaur game's dinosaurs at DINOSAUR (asked for 2026-10-22)
+
+- [x] `PORT-76` ADR-084: the Carnotaurus of the SNES dinosaur game, with
+  Nathan up, walks the DINOSAUR venue's stands behind the fence (his own
+  `mount_walk` and `mount_idle` frames, 1x), stops to look about, turns
+  back, and once a lap walks off the right edge and returns. From the same
+  game: the Spinosaurus breathes in the jungle's gap, the baby dinosaur
+  patrols the jungle's edge (2x), and the pterodactyl crosses the sky
+  behind the volcano. The sprites are exported as drawn
+  (`art/sprites/dinos/export.sh`, the dinosaur repo only read) and drawn
+  by `view/dino_walkers.gd`: display only, from the frame count, each on
+  a backdrop layer's parallax and tint. The raptor, T. rex and
+  Brachiosaurus were tried and left out (the venue paints all three).
+  OPEN PLAY's DINO PARK has them too: the Carnotaurus strolls the sand
+  path among the people (sorted by his feet), the baby patrols the grass
+  by the T. rex statue, the pterodactyl flies over the courts. He roars
+  (his `mount_roar`) when a long rally (10+ shots) ends or a match is
+  won, and in DINO PARK when you come back a winner.
+  - Verified: `test_dinos.gd` (only on DINOSAUR, the sim untouched, two
+    views agree, the route crosses and turns and loops without a jump,
+    behind the fence; DINO PARK has its cast and the other parks none,
+    OpenPlay untouched, two parks agree; the roar holds the route and
+    resumes it, a long rally ends in one, a won game in DINO PARK too),
+    `test_view`, `test_layout`; 469/469 plus the e2e, golden traces
+    unchanged; screenshots at four frames, at NIGHT, mid-roar
+    (`screenshot.gd ... roar`), and of DINO PARK.
+  - Status: **Ready to test**: play a match at DINOSAUR and watch the
+    fence line for a minute (his lap is about 80 s) and for a roar after
+    a long rally; walk DINO PARK's path, and come back from a win there.
+
+### 77. `feature/cld-dino-levels`: the dinosaur game's levels as courts (asked for 2026-10-22)
+
+- [x] `PORT-77` ADR-085: four venues from the dinosaur game's level
+  concepts (`../dinosaur/assets/levels`), after the GYM on COURT > VENUE.
+  **RUINS** (`01-ruins.png`): a burning, drowned city under a purple and
+  orange sunset, a broken bridge, mossy pillars and rusted girders, the
+  crowd on a mossy wall; PURPLE court, CLAY kitchen, cracked CONCRETE.
+  **GLACIER** (`ice-wilderness.png`): snowy peaks at dusk, ice spires,
+  the aqueduct hung with icicles, snowy pines; BLUE and NAVY on SNOW.
+  **LAB** (`science-lab.png`, indoors): green tanks with a T. rex, a
+  raptor and a long-neck's skeletons, a hazard-striped catwalk, consoles,
+  a raptor loose on the deck behind a yellow rail; BLACK and GREEN, YELLOW
+  lines, steel plates. **STATION** (`space.png`, indoors): windows on a
+  nebula, a ringed planet, asteroids and a wreck, orange-lit rails and
+  consoles, an astronaut and a drone; SLATE and ORANGE on deck plates.
+  Dinosaurs only at the LAB (your call after the first cut): there Nathan
+  rides the Carnotaurus along the deck (ADR-084's sprites, with the roar).
+  Each has its own ambience and match track; the announcer's lines for
+  them are in the batch to record (until then: the format).
+  - Verified: `test_dinos` (the Carnotaurus on the LAB's deck, behind the
+    fence; none at the other three), `test_court` (each paints its
+    presets), `test_announcer`, and every suite that runs all venues;
+    470/470 plus the e2e, golden traces unchanged; the existing venues'
+    art and audio byte-identical; screenshots of all four in a match
+    (`art/levels/out/previews/{ruins,glacier,lab,station}.png`).
+  - Status: **Ready to test**: COURT > VENUE, play a game at each and
+    listen to the ambience and track; try TIME at RUINS and GLACIER (LAB
+    and STATION stay lit).
