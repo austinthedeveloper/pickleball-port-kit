@@ -4,6 +4,25 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.31.0] - 2026-10-22
+
+Bring your own pad, and a smaller download.
+
+### Added
+- **Map any controller**: OPTIONS, CONTROLS, CONTROLLER has MAP BUTTONS
+  for pads the game doesn't recognise, like SNES-style USB pads. It asks
+  for each button in turn and remembers that pad from then on. CLEAR
+  MAPPING undoes it, and a mapped pad shows SNES buttons in the prompts.
+- **A controller is recommended**: with no pad plugged in, the title says
+  so once a session (DON'T SHOW AGAIN turns it off).
+
+### Changed
+- **Shoulder buttons**: L (and the left trigger) hits short, R (and the
+  right trigger) is SPECIAL. Before, either shoulder hit short. The
+  keyboard is unchanged.
+- **A smaller download**: the music and ambience are compressed better,
+  so the game's update is about 18 MB instead of 34 MB.
+
 ## [0.30.0] - 2026-10-22
 
 Replays show just the rally.

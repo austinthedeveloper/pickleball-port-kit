@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.30.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.31.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-69 of 71 roadmap tasks are in.
+73 of 75 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -430,3 +430,27 @@ Status: **Ready to test**.
 ADR-081, amended: a replay (saved, or PLAY OF THE MATCH) opens just before the serve is struck, not at the serve's setup; any pause in the rally runs unseen (the sim steps while paused, so the pause menu used to show in the replay); and it ends 50 frames after the point (was 80). The recording is unchanged, so the replay is still exact. Replays saved before this have no serve frame and still open at the setup, but skip their pauses.
 
 Status: **Ready to test**: save a rally you paused in, and one you waited to serve, and watch them from REPLAYS.
+
+## PORT-72: L for SHORT, R for SPECIAL (asked for 2026-10-22)
+
+ADR-082: on a pad, L and the left trigger are SHORT, R and the right trigger SPECIAL (PICKLE SMASH); SHORT was either shoulder and SPECIAL the right trigger. The keyboard is unchanged. A save's old bindings load with R on SPECIAL. Departs from the bible's "L or R" (For you).
+
+Status: **Ready to test**: try L and R in a rally.
+
+## PORT-73: generic pads, mapped (asked for 2026-10-22)
+
+ADR-082: OPTIONS, CONTROLS, **CONTROLLER**: the pad in hand, **MAP BUTTONS** for a pad SDL doesn't know (it asks for each action, naming the SNES button, from the pad's raw buttons, hat or axes), **CLEAR MAPPING**, BUTTON ICONS (moved here, with a new SNES family) and PAD NOTICE. The map becomes an SDL mapping string given to Godot, saved per pad model (GUID) and given again whenever the pad connects; a mapped pad draws as a SNES pad.
+
+Status: **Ready to test**: plug in a SNES USB pad, open OPTIONS, CONTROLS, CONTROLLER, and see what MAP BUTTONS says. UNKNOWN: press it and answer each step. STANDARD: SDL knows it already; try it in a match, and fix any button on CONTROLS.
+
+## PORT-74: a controller recommended (asked for 2026-10-22)
+
+ADR-082: with no pad connected, the title opens on A CONTROLLER IS RECOMMENDED (OK, DON'T SHOW AGAIN), once a session; a pad connecting closes it.
+
+Status: **Ready to test**: start the game with no pad plugged in.
+
+## PORT-75: smaller audio (asked for 2026-10-22)
+
+ADR-083: first a comparison: nine clips (three SFX, the park ambience, two music tracks, three announcer lines) in Ogg q6/q4/q2, IMA-ADPCM, 22 kHz mono and MP3 beside their originals, with sizes against the QOA the game shipped (`audio/compare/`, `make_compare.py --estimate`). Then the switch: the 12 music files and 7 ambience loops ship as Ogg q4, encoded by `sync_assets.sh` (`tools/encode_ogg.py`, reproducible bytes); effects and the announcer stay WAV/QOA. The `.pck` goes from about 34 MB to 18.5 MB.
+
+Status: **Ready to test**: play a match at the park and at SPACE past the loop's end (about 40 s) and listen at the wrap; compare the title music with `audio/compare/out/music_title_original.wav`.

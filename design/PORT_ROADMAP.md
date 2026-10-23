@@ -97,10 +97,10 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-69 | Saved replays: SAVE LAST RALLY, REPLAYS, and in the demo | `feature/cld-saved-replays` | Released (v0.28.0) |
 | PORT-70 | SAVE on PLAY OF THE MATCH | `feature/cld-potm-save` | Released (v0.29.0) |
 | PORT-71 | Replays trimmed to the rally: from the serve, no pauses | `feature/cld-replay-trim` | Released (v0.30.0) |
-| PORT-72 | Pads: L is SHORT, R is SPECIAL, the triggers mirror them | `feature/cld-pad-mapping` | Ready to test |
-| PORT-73 | Generic pads (SNES USB): MAP BUTTONS, saved per pad | `feature/cld-pad-mapping` | Ready to test |
-| PORT-74 | "A controller is recommended" at startup | `feature/cld-pad-mapping` | Ready to test |
-| PORT-75 | Smaller audio: the music and ambience as Ogg (the `.pck` 34 to 18.5 MB) | `feature/cld-audio-compare` | Ready to test |
+| PORT-72 | Pads: L is SHORT, R is SPECIAL, the triggers mirror them | `feature/cld-pad-mapping` | Released (v0.31.0) |
+| PORT-73 | Generic pads (SNES USB): MAP BUTTONS, saved per pad | `feature/cld-pad-mapping` | Released (v0.31.0) |
+| PORT-74 | "A controller is recommended" at startup | `feature/cld-pad-mapping` | Released (v0.31.0) |
+| PORT-75 | Smaller audio: the music and ambience as Ogg (the `.pck` 34 to 18.5 MB) | `feature/cld-audio-compare` | Released (v0.31.0) |
 
 ## Releases
 
@@ -208,6 +208,9 @@ status in the same commit. The finished tasks, in full, are in
   `v0.29.0`, on `feature/cld-release-0.29.0`).
 - **v0.30.0** (2026-10-22): PORT-71 replays trimmed to the rally (tag
   `v0.30.0`, on `feature/cld-release-0.30.0`).
+- **v0.31.0** (2026-10-22): PORT-72 L for SHORT and R for SPECIAL, PORT-73
+  generic pads mapped, PORT-74 a controller recommended, PORT-75 smaller
+  audio (tag `v0.31.0`, on `feature/cld-release-0.31.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 
@@ -485,13 +488,20 @@ the same request). Open: 36 and 40.
   - Status: **Ready to test**: save a rally you paused in, and one you
     waited to serve, and watch them from REPLAYS.
 
-### 72. `feature/cld-pad-mapping`: pads (asked for 2026-10-22)
+### 72. `feature/cld-pad-mapping`: L for SHORT, R for SPECIAL (asked for 2026-10-22)
 
 - [x] `PORT-72` ADR-082: on a pad, L and the left trigger are SHORT, R
   and the right trigger SPECIAL (PICKLE SMASH); SHORT was either shoulder
   and SPECIAL the right trigger. The keyboard is unchanged. A save's old
   bindings load with R on SPECIAL. Departs from the bible's "L or R"
   (For you).
+  - Verified: `test_pad_maps` (the shoulders and triggers, an old save's
+    bindings), `test_shots`, `test_controls`, `test_controller`; golden
+    traces unchanged.
+  - Status: **Ready to test**: try L and R in a rally.
+
+### 73. `feature/cld-pad-mapping`: generic pads, mapped (asked for 2026-10-22)
+
 - [x] `PORT-73` ADR-082: OPTIONS, CONTROLS, **CONTROLLER**: the pad in
   hand, **MAP BUTTONS** for a pad SDL doesn't know (it asks for each
   action, naming the SNES button, from the pad's raw buttons, hat or
@@ -499,26 +509,30 @@ the same request). Open: 36 and 40.
   family) and PAD NOTICE. The map becomes an SDL mapping string given to
   Godot, saved per pad model (GUID) and given again whenever the pad
   connects; a mapped pad draws as a SNES pad.
-- [x] `PORT-74` ADR-082: with no pad connected, the title opens on A
-  CONTROLLER IS RECOMMENDED (OK, DON'T SHOW AGAIN), once a session; a pad
-  connecting closes it.
-  - Verified: `test_pad_maps` (the shoulders and triggers, an old save's
-    bindings, a SNES USB pad's raw events mapped and then driving P1's
-    actions, 2P's reading and the menus, a hat D-pad, undo, cancel, a
-    resting trigger axis, the save, the title's flow, the card),
-    `test_shots`, `test_controls`, `test_controller`, `test_layout`
-    (MAP BUTTONS at every step, the card, CONTROLLER with every value),
-    and the e2e (it now dismisses the card); golden traces unchanged.
-    Screenshots of the card, MAP BUTTONS and CONTROLLER (`screenshot.gd
-    -- title_notice`, `title_padmap`, `title_pad`, `title_controls`).
-    Not verified: a real generic pad (Godot's raw-joystick path can't be
-    driven headless).
+  - Verified: `test_pad_maps` (a SNES USB pad's raw events mapped and
+    then driving P1's actions, 2P's reading and the menus, a hat D-pad,
+    undo, cancel, a resting trigger axis, the save), `test_layout` (MAP
+    BUTTONS at every step, CONTROLLER with every value). Screenshots of
+    MAP BUTTONS and CONTROLLER (`screenshot.gd -- title_padmap`,
+    `title_pad`, `title_controls`). Not verified: a real generic pad
+    (Godot's raw-joystick path can't be driven headless).
   - Status: **Ready to test**: plug in a SNES USB pad, open OPTIONS,
     CONTROLS, CONTROLLER, and see what MAP BUTTONS says. UNKNOWN: press
     it and answer each step. STANDARD: SDL knows it already; try it in a
-    match, and fix any button on CONTROLS. Try L and R in a rally.
+    match, and fix any button on CONTROLS.
 
-### 73. `feature/cld-audio-compare`: smaller audio (asked for 2026-10-22)
+### 74. `feature/cld-pad-mapping`: a controller recommended (asked for 2026-10-22)
+
+- [x] `PORT-74` ADR-082: with no pad connected, the title opens on A
+  CONTROLLER IS RECOMMENDED (OK, DON'T SHOW AGAIN), once a session; a pad
+  connecting closes it.
+  - Verified: `test_pad_maps` (the title's flow, the card), `test_layout`
+    (the card), and the e2e (it now dismisses the card); 459/459 with the
+    branches together. Screenshot of the card (`screenshot.gd --
+    title_notice`).
+  - Status: **Ready to test**: start the game with no pad plugged in.
+
+### 75. `feature/cld-audio-compare`: smaller audio (asked for 2026-10-22)
 
 - [x] `PORT-75` ADR-083: first a comparison: nine clips (three SFX, the
   park ambience, two music tracks, three announcer lines) in Ogg q6/q4/q2,
