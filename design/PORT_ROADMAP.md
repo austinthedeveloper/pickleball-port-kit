@@ -486,6 +486,13 @@ the same request). Open: 36 and 40.
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
 
+- **Audio size (`feature/cld-audio-compare`, groundwork only):** nine
+  clips in smaller formats to listen to, in `audio/compare/out/`, with
+  sizes in `audio/compare/README.md`. Audio is about 30 MB of the 34 MB
+  `.pck` (already QOA). Ogg q4 for the music and ambience alone would take
+  the `.pck` to about 19 MB. Say which quality sounds right (q6, q4 or
+  q2), and whether to make the switch.
+
 - **PORT-65 SPECIALS:** PICKLE SMASH's strength is a first guess
   (ADR-080 has the numbers and the knobs). Say if it should win more or
   less often, or fill faster or slower.
