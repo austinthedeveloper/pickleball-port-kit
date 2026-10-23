@@ -141,6 +141,13 @@ func test_the_view_shows_a_smash() -> void:
 	eq(v.actors.frame_for(0), "overhead_contact", "on the contact frame")
 	var pops := v._fx.get_children().filter(func(n): return n is BitmapText and n.text == "SMASH!")
 	eq(pops.size(), 1, "SMASH! over it")
+	# KNOWN_ISSUES #78: a second smash before the first has faded takes its
+	# place, and PICKLE SMASH's does too
+	v.actors.smash_pop(Vector2(500, 200))
+	v.actors.smash_pop(Vector2(540, 210), true)
+	pops = v._fx.get_children().filter(func(n): return n is BitmapText and n.text.ends_with("SMASH!"))
+	eq(pops.size(), 1, "one SMASH! at a time")
+	eq(pops[0].text if pops else "", "PICKLE SMASH!", "the latest")
 	check(v.feel.shake_amp >= Feel.SHAKE_SMASH[0] * Settings.shake_scale() - 0.001 or Settings.shake_i == 0,
 		"the biggest shake")
 	p.state = kept

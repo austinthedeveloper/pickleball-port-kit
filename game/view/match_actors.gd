@@ -6,6 +6,7 @@ class_name MatchActors
 extends RefCounted
 
 var v: MatchView
+var smash: BitmapText             ## the SMASH! on screen, if one is
 
 
 func _init(view: MatchView) -> void:
@@ -172,14 +173,18 @@ func frame_for(i: int) -> String:
 
 
 ## SMASH! over an overhead's contact (ADR-053): rises and fades in half a
-## second. Display only; skipped in the demo's quiet and when effects are off.
+## second, one at a time (a new one takes the last's place: KNOWN_ISSUES
+## #78). Display only; skipped in the demo's quiet and when effects are off.
 func smash_pop(at: Vector2, special := false) -> void:
 	if not Feel.ON["shake"]:
 		return
+	if is_instance_valid(smash):
+		smash.free()                         # its tween goes with it
 	var t := UiKit.text("big_gold" if special else "small", "PICKLE SMASH!" if special else "SMASH!",
 		at + Vector2(0, -40 if special else -26), 0.5, Color.WHITE if special else Color("fbe46a"), v._fx)
 	t.z_index = 5
-	var tw := v.create_tween()
+	smash = t
+	var tw := t.create_tween()
 	tw.tween_property(t, "position:y", t.position.y - 18.0, 0.5).set_ease(Tween.EASE_OUT)
 	tw.parallel().tween_property(t, "modulate:a", 0.0, 0.5).set_delay(0.25)
 	tw.tween_callback(t.queue_free)

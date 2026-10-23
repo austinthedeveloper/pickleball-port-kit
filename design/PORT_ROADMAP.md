@@ -350,6 +350,7 @@ the same request). Open: 36 and 40.
   Then, at your call: replays show the match's light effects too (the
   bounce marks, and the camera flashes when a saved one is watched from
   REPLAYS; none behind the title's menu, as in the demo).
+  And known issue 78: SMASH! pop-ups one at a time (two could overlap).
   - Verified: 477/477 plus the e2e, golden traces unchanged; the release
     notes regenerate the same; the title's menu and prompts pixel for
     pixel the same.
