@@ -45,10 +45,7 @@ func test_version_is_consistent() -> void:
 
 
 func test_title_shows_the_build() -> void:
-	var t := TitleScreen.new()
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
+	var t := title_screen()
 	eq(t.build_label.text, BuildInfo.label())
 	t.free()
 

@@ -54,7 +54,7 @@ func build_pages() -> void:
 			"value": func(): return "%d OF %d" % [Career.hats_held(cp()), Museum.hats()],
 			"press": func(): t.open_museum()},
 		{"id": "edit", "label": "EDIT", "press": func(): input(CareerPage.PAD_B)},
-		{"id": "delete", "label": "DELETE PLAYER", "value": func(): return "B AGAIN" if delete_armed else "",
+		{"id": "delete", "label": "DELETE PLAYER", "value": func(): return "PRESS AGAIN" if delete_armed else "",
 			"press": delete},
 	], [["hit", "SELECT"], ["back", "BACK"]], Rect2(380, 46, 500, 0))
 	var edit_rows := [{"id": "name", "label": "NAME", "value": func(): return cp().shown_name(),
@@ -201,11 +201,7 @@ func sync(changed: bool, dir := 1) -> void:
 
 ## Back to PLAYER with the cursor on PLAYERS (Y from CAREER's slots).
 func back_to_player() -> void:
-	t._show("player")
-	t.pages["player"].select("career")
-	t.pages["player"].appear(-1)
-	t._lock = t.SWITCH_LOCK
-	GameControls.clear_latch()
+	t.back_to("player", "career")
 
 
 ## After a row was pressed (keys or the mouse): its sound, and the record line.

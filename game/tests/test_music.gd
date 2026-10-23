@@ -217,11 +217,7 @@ func test_music_setting() -> void:
 	m.free()
 	# the OPTIONS row
 	var s := _save()
-	var t := TitleScreen.new()
-	t.save = s
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
+	var t := title_screen(s)
 	eq(Music.volume, Music.DEFAULT_VOLUME, "a new save starts at the default")
 	t.open_page("options")
 	var o: MenuPage = t.pages["options"]

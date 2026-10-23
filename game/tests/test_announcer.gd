@@ -202,11 +202,7 @@ func test_settings() -> void:
 	sv.data["settings"]["announcer"] = 0
 	Settings.load_from(sv)
 	eq([Announcer.enabled, Announcer.volume], [false, Announcer.DEFAULT_VOLUME], "0.19.0's OFF")
-	var t := TitleScreen.new()
-	t.save = sv
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
+	var t := title_screen(sv)
 	var page: MenuPage = t.pages["options"]
 	page.select("announcer")
 	page.change(1)

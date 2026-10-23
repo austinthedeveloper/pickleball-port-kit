@@ -73,10 +73,7 @@ func test_the_title_says_so() -> void:
 	Updater.instance = u
 	u.state = Updater.AVAILABLE
 	u.latest = "0.9.0"
-	var t := TitleScreen.new()
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
+	var t := title_screen()
 	t._refresh_record()
 	eq(t._record.text, "0.9.0 IS OUT: GET IT IN OPTIONS, UPDATES")
 	t.open_page("options")

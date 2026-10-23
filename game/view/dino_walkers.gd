@@ -15,31 +15,34 @@ extends Node2D
 const DIR := "res://assets/dinos/"
 const ROAR_RALLY := 10           ## a point after this many shots, or a match won, makes him roar
 
-## Who's in it. `cell` is a frame's size in the strip, `feet` the anchor in a
-## cell (feet, or the body's middle for a flyer), `right` whether the art
-## faces right. `walk`/`idle` are strips and frames per pose (the sources'
-## timings at 60 Hz); a `route` is [x to walk to, frames to stand there],
-## looping, at `speed` px a frame along the `y` of the `layer`. One with a
-## `roar` strip can be made to roar.
-const CAST := [
+## What each dinosaur looks like. `cell` is a frame's size in the strip,
+## `feet` the anchor in a cell (feet, or the body's middle for a flyer),
+## `right` whether the art faces right. `walk`/`idle` are strips and frames
+## per pose (the sources' timings at 60 Hz). One with a `roar` strip can be
+## made to roar.
+const LOOKS := {
+	"carnotaurus": {"walk": ["carno_mount_walk.png", [9, 9, 9, 9]],
+		"idle": ["carno_mount_idle.png", [84, 10]], "roar": ["carno_mount_roar.png", [12, 11, 10, 30]],
+		"cell": Vector2i(144, 96), "feet": Vector2i(70, 90), "right": true},
+	"baby": {"walk": ["baby_dino_walk.png", [8, 8]], "idle": ["baby_dino_walk.png", [400]],
+		"cell": Vector2i(32, 32), "feet": Vector2i(16, 31), "right": true},
+	"spinosaurus": {"idle": ["spinosaurus_idle.png", [50, 50]],
+		"cell": Vector2i(96, 64), "feet": Vector2i(48, 63), "right": false},
+	"pterodactyl": {"walk": ["pterodactyl_flap.png", [10, 10]],
+		"cell": Vector2i(32, 32), "feet": Vector2i(16, 16), "right": false},
+}
+
+## Who's at DINOSAUR, and where: a `route` is [x to walk to, frames to
+## stand there], looping, at `speed` px a frame along the `y` of the
+## `layer`; a flyer's `fly` is [from x, to x, every n frames].
+static var CAST: Array = _with_looks([
 	{"name": "carnotaurus", "layer": "stands", "y": 162, "speed": 0.5,
-		"walk": ["carno_mount_walk.png", [9, 9, 9, 9]], "idle": ["carno_mount_idle.png", [84, 10]],
-		"roar": ["carno_mount_roar.png", [12, 11, 10, 30]],
-		"cell": Vector2i(144, 96), "feet": Vector2i(70, 90), "right": true,
 		"route": [[450, 300], [175, 260], [1090, 420]]},
 	{"name": "baby", "layer": "trees", "y": 152, "speed": 0.5, "scale": 2,
-		"walk": ["baby_dino_walk.png", [8, 8]], "idle": ["baby_dino_walk.png", [400]],
-		"cell": Vector2i(32, 32), "feet": Vector2i(16, 31), "right": true,
 		"route": [[300, 150], [210, 220]]},
-	{"name": "spinosaurus", "layer": "trees", "y": 152, "speed": 0.0,
-		"idle": ["spinosaurus_idle.png", [50, 50]],
-		"cell": Vector2i(96, 64), "feet": Vector2i(48, 63), "right": false,
-		"route": [[548, 600]]},
-	{"name": "pterodactyl", "layer": "sky", "y": 66, "speed": -1.0,
-		"walk": ["pterodactyl_flap.png", [10, 10]],
-		"cell": Vector2i(32, 32), "feet": Vector2i(16, 16), "right": false,
-		"fly": [1080, -60, 1800]},          # from x, to x, every n frames
-]
+	{"name": "spinosaurus", "layer": "trees", "y": 152, "speed": 0.0, "route": [[548, 600]]},
+	{"name": "pterodactyl", "layer": "sky", "y": 66, "speed": -1.0, "fly": [1080, -60, 1800]},
+])
 
 ## ADR-085: the dinosaur game's levels that keep its dinosaurs (the LAB;
 ## the user's call), and the y of the deck the Carnotaurus walks there
@@ -49,21 +52,20 @@ const RIDES := {"lab": 180}
 ## DINO PARK (ADR-078), in its world's px: the Carnotaurus strolls the
 ## path's lower edge among the people, the baby patrols the grass below the
 ## T. rex statue, and the pterodactyl flies over the courts.
-const PARK_CAST := [
+static var PARK_CAST: Array = _with_looks([
 	{"name": "carnotaurus", "layer": "ground", "y": 744, "speed": 0.5,
-		"walk": ["carno_mount_walk.png", [9, 9, 9, 9]], "idle": ["carno_mount_idle.png", [84, 10]],
-		"roar": ["carno_mount_roar.png", [12, 11, 10, 30]],
-		"cell": Vector2i(144, 96), "feet": Vector2i(70, 90), "right": true,
 		"route": [[300, 240], [1700, 300], [2120, 200], [820, 300]]},
 	{"name": "baby", "layer": "ground", "y": 560, "speed": 0.5, "scale": 2,
-		"walk": ["baby_dino_walk.png", [8, 8]], "idle": ["baby_dino_walk.png", [400]],
-		"cell": Vector2i(32, 32), "feet": Vector2i(16, 31), "right": true,
 		"route": [[1240, 150], [1100, 220]]},
 	{"name": "pterodactyl", "layer": "air", "y": 430, "speed": -1.5, "scale": 2,
-		"walk": ["pterodactyl_flap.png", [10, 10]],
-		"cell": Vector2i(32, 32), "feet": Vector2i(16, 16), "right": false,
 		"fly": [2340, -100, 1800]},
-]
+])
+
+
+## Each place's entries with their dinosaur's LOOKS.
+static func _with_looks(places: Array) -> Array:
+	return places.map(func(e: Dictionary): return (LOOKS[e["name"]] as Dictionary).merged(e))
+
 
 ## One of the cast: its sprite, its entry, its route's legs, and a roar
 ## (the frame it began, and the frames the route has waited for roars).

@@ -167,6 +167,24 @@ func export(rally: Dictionary) -> Dictionary:
 		"rally": rally.duplicate(true)}
 
 
+## SAVE LAST RALLY (PORT-69): the rally that ended last, once. False
+## when there's none, it's saved already, or REPLAYS is full.
+func save_last() -> bool:
+	if last.is_empty() or saved_last or SavedReplays.full():
+		return false
+	saved_last = SavedReplays.save(export(last)) != ""
+	return saved_last
+
+
+## SAVE LAST RALLY's value: NONE YET, SAVED, FULL, or the rally's shots.
+func last_state() -> String:
+	if last.is_empty():
+		return "NONE YET"
+	if saved_last:
+		return "SAVED"
+	return "FULL" if SavedReplays.full() else "%d SHOTS" % int(last["shots"])
+
+
 ## PLAY OF THE MATCH's SAVE (PORT-70): its rally to SavedReplays, once
 ## (it's the same rally as SAVE LAST RALLY's when the match ended on it).
 func save_best() -> bool:
@@ -345,15 +363,7 @@ func _replay_event(e: Array) -> void:
 	view._sfx.event(e, (sim.shot_serial - sim.rally_start) & 0xff, false)
 	match int(e[0]):
 		K.EVENT_HIT, K.EVENT_SERVE:
-			var slot: int = e[3] & 15
-			var lead := -14.0 if sim.players[slot].team else 14.0
-			var shot: int = e[3] >> 4 if e[0] == K.EVENT_HIT else K.SHOT_STANDARD
-			view.actors.spawn_fx("spark", CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp)
-				+ Vector2(lead, 0), 1 if shot in [K.SHOT_DRIVE, K.SHOT_OVERHEAD, K.SHOT_SPECIAL] else 0)
-			if shot == K.SHOT_OVERHEAD or shot == K.SHOT_SPECIAL:
-				view._players[slot]["choice"] = "overhead"
-				view.actors.smash_pop(CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp),
-					shot == K.SHOT_SPECIAL)
+			view.contact_fx(e)
 		K.EVENT_BOUNCE:
 			view.actors.spawn_fx("dust", CourtView.ground(K.to_fp(e[1]), K.to_fp(e[2])), 0)
 		K.EVENT_POINT:

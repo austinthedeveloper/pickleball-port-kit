@@ -57,7 +57,12 @@ static func _plain(n: String) -> String:
 static func display_name(device: int, width := 18) -> String:
 	if device < 0:
 		return "NONE"
-	var n := _plain(Input.get_joy_name(device))
+	return short_name(Input.get_joy_name(device), width)
+
+
+## A pad's reported name in the fonts' characters, cut to `width` with "..".
+static func short_name(raw: String, width: int) -> String:
+	var n := _plain(raw)
 	return n if n.length() <= width else n.substr(0, width - 2).strip_edges() + ".."
 
 

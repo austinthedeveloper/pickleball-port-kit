@@ -211,10 +211,7 @@ func test_title_select_flow() -> void:
 	var kept := [Settings.p1_choice.duplicate(), Settings.two_players, Settings.opponent_i]
 	Settings.two_players = false
 	Settings.opponent_i = -1
-	var t := TitleScreen.new()
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
+	var t := title_screen()
 	var started := []
 	t.start_match.connect(func(cfg, _v, _l, _p, _n): started.append(cfg))
 	Settings.quick_doubles = true

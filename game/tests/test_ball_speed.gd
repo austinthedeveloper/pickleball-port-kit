@@ -97,11 +97,7 @@ func test_the_setting() -> void:
 	eq(OnlineSession.config_from_dict(JSON.parse_string(JSON.stringify(d))).ball_speed, 93,
 		"online: the guest plays the host's")
 	# the MODIFIERS row: 1% a press, within its range
-	var t := TitleScreen.new()
-	t.save = sv
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
+	var t := title_screen(sv)
 	var page: MenuPage = t.pages["modifiers"]
 	page.select("ball_speed")
 	eq(page.value_of("ball_speed"), "93%")

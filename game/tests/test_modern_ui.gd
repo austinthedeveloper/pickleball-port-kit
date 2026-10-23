@@ -145,10 +145,7 @@ func test_pages_slide_in_and_swallow_input() -> void:
 		p._process(1.0 / 60.0)
 	eq(p._values[1].scale.x, 1.0, "and settles")
 	p.free()
-	var t := TitleScreen.new()
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
+	var t := title_screen()
 	t.open_page("options")
 	check(t._lock >= MenuPage.TRANSITION and t.pages["options"].animating(),
 		"the title waits out the slide (rule 9)")

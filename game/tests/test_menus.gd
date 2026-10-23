@@ -10,7 +10,7 @@ func _keep() -> void:
 	_kept = [Settings.venue_i, Settings.difficulty_i, Settings.points_i,
 		Settings.opponent_i, Settings.two_players, Settings.camera_i,
 		Settings.mod_bits, Settings.fullscreen, Settings.integer_scale,
-		TitleScreen.main_cursor, Sfx.setting]
+		TitleScreen.main_cursor, Sfx.setting, Settings.quick_doubles]
 
 
 func _restore() -> void:
@@ -26,6 +26,7 @@ func _restore() -> void:
 	Settings.integer_scale = k[8]
 	TitleScreen.main_cursor = k[9]
 	Sfx.setting = k[10]
+	Settings.quick_doubles = k[11]
 
 
 func _save() -> SaveGame:
@@ -34,12 +35,7 @@ func _save() -> SaveGame:
 
 
 func _title(save: SaveGame) -> TitleScreen:
-	var t := TitleScreen.new()
-	t.save = save
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()                  # the runner's root isn't ready during the suites
-	return t
+	return title_screen(save)
 
 
 func test_menu_page_rows_by_name() -> void:
@@ -238,7 +234,8 @@ func test_settings_survive_a_restart() -> void:
 	Settings.venue_i = 2
 	Settings.difficulty_i = K.DIFFICULTY_HARD
 	Settings.camera_i = 3
-	Settings.mod_bits = K.MOD_FAST_BALL | K.MOD_WIN_BY_2
+	Settings.mod_bits = K.MOD_FAST_BALL | K.MOD_WIN_BY_2 | K.MOD_SPECIALS
+	Settings.quick_doubles = true
 	Settings.fullscreen = true
 	Settings.integer_scale = false
 	Sfx.setting = AudioMap.SOUND_OFF
@@ -250,6 +247,7 @@ func test_settings_survive_a_restart() -> void:
 	Settings.difficulty_i = 0
 	Settings.camera_i = 0
 	Settings.mod_bits = 0
+	Settings.quick_doubles = false
 	Settings.fullscreen = false
 	Settings.integer_scale = true
 	Sfx.setting = 0
@@ -258,10 +256,20 @@ func test_settings_survive_a_restart() -> void:
 	s2.load_game()
 	var t2 := _title(s2)
 	eq([Settings.venue_i, Settings.difficulty_i, Settings.camera_i, Settings.mod_bits],
-		[2, K.DIFFICULTY_HARD, 3, K.MOD_FAST_BALL | K.MOD_WIN_BY_2], "match settings")
+		[2, K.DIFFICULTY_HARD, 3, K.MOD_FAST_BALL | K.MOD_WIN_BY_2 | K.MOD_SPECIALS], "match settings")
+	check(Settings.quick_doubles, "QUICK MATCH's DOUBLES")
 	check(Settings.fullscreen and not Settings.integer_scale, "window options")
 	eq(Sfx.setting, AudioMap.SOUND_OFF, "sound")
 	t2.free()
+	# a save from before QUICK MATCH's MODE: SINGLES
+	s2.data["settings"].erase("quick_doubles")
+	s2.save_game()
+	var s3 := SaveGame.new()
+	s3.dir = DIR
+	s3.load_game()
+	var t3 := _title(s3)
+	check(not Settings.quick_doubles, "no key: SINGLES")
+	t3.free()
 	_restore()
 
 

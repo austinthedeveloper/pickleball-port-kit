@@ -107,11 +107,7 @@ func test_title_museum() -> void:
 	var s := _save()
 	s.career.create(0, "MAX")
 	s.career.active_player().unlocked = 1 << Career.unlock_names.find("BEANIE")
-	var t := TitleScreen.new()
-	t.save = s
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
+	var t := title_screen(s)
 	t.career.open()
 	t.pages["career"].select("slot0")
 	t.pages["career"].press()

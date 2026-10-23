@@ -288,3 +288,24 @@ func test_no_points_or_serves() -> void:
 	check(not kinds.has(K.EVENT_SERVE) and not kinds.has(K.EVENT_POINT)
 		and not kinds.has(K.EVENT_FAULT), "no serves, points, or faults")
 	check(kinds.has(K.EVENT_HIT) and kinds.has(K.EVENT_BOUNCE), "feeds and bounces")
+
+
+## The practice screen (the machine's swing, the HUD, the quiet announcer)
+## is display only: a view and a bare sim, side by side, stay the same.
+func test_the_view_is_display_only() -> void:
+	var cfg := SimTypes.MatchConfig.practice_session(Practice.DEFAULTS, 0)
+	var v := match_view(cfg)
+	var bare := Sim.new(SimTypes.MatchConfig.practice_session(Practice.DEFAULTS, 0))
+	bare.p1_bot = true
+	for f in 1500:
+		v._physics_process(1.0 / 60.0)
+		bare.step()
+		bare.drain_events()
+	eq(v.sim.snapshot(), bare.snapshot(), "1500 frames of practice")
+	var p := v.sim.practice
+	var q := bare.practice
+	eq([p.state, p.timer, p.streak, p.best, p.feeds, p.rng, p.pose],
+		[q.state, q.timer, q.streak, q.best, q.feeds, q.rng, q.pose], "the machine too")
+	check(p.feeds > 0, "it fed (%d)" % p.feeds)
+	bare.dispose()
+	v.queue_free()

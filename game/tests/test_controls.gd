@@ -84,11 +84,7 @@ func test_bindings_saved() -> void:
 
 
 func _title() -> TitleScreen:
-	var t := TitleScreen.new()
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
-	return t
+	return title_screen()
 
 
 func _press(t: TitleScreen, code: int) -> void:

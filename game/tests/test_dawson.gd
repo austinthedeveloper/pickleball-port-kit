@@ -46,11 +46,7 @@ func test_alone_and_fast() -> void:
 func test_unlocked_by_a_clear() -> void:
 	var s := fresh_save("user://test_dawson/")
 	var kept := Settings.opponent_i
-	var t := TitleScreen.new()
-	t.save = s
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
+	var t := title_screen(s)
 	check(not t.dawson_unlocked())
 	var seen := []
 	Settings.opponent_i = -2

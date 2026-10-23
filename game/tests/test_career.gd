@@ -568,12 +568,7 @@ func test_display_only() -> void:
 
 
 func _title(s: SaveGame) -> TitleScreen:
-	var t := TitleScreen.new()
-	t.save = s
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
-	return t
+	return title_screen(s)
 
 
 ## The title's CAREER entry by row ids: a new player named on the keyboard,
@@ -648,7 +643,7 @@ func test_title_delete_and_cancel() -> void:
 	t.pages["career_card"].select("delete")
 	t.pages["career_card"].press()
 	eq(s.career.players[0].used, 1, "one press only arms")
-	eq(t.pages["career_card"].value_of("delete"), "B AGAIN")
+	eq(t.pages["career_card"].value_of("delete"), "PRESS AGAIN")
 	t.pages["career_card"].press()
 	eq(s.career.players[0].used, 0, "the second deletes")
 	eq(t.page, "career", "back to the slots")

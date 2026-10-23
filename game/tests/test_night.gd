@@ -150,11 +150,7 @@ func test_time_row_and_save() -> void:
 	var kept := Settings.time_i
 	var save := fresh_save("user://test_night/")
 	Settings.time_i = 0
-	var t := TitleScreen.new()
-	t.save = save
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
+	var t := title_screen(save)
 	t.open_page("court")
 	var p: MenuPage = t.pages["court"]
 	eq(p.rows[1]["id"], "time", "TIME follows VENUE (ADR-045)")

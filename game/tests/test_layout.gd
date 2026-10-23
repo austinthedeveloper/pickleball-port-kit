@@ -110,12 +110,7 @@ func _save() -> SaveGame:
 
 
 func _title() -> TitleScreen:
-	var t := TitleScreen.new()
-	t.save = _save()
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
-	return t
+	return title_screen(_save())
 
 
 ## Every title page, with every value of every row.
@@ -320,11 +315,7 @@ func test_career_screens() -> void:
 		p.wins = [Career.COUNTER_MAX, Career.COUNTER_MAX]
 		p.losses = [Career.COUNTER_MAX, Career.COUNTER_MAX]
 	s.career.select(0)
-	var t := TitleScreen.new()
-	t.save = s
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
+	var t := title_screen(s)
 	t.open_career()
 	t.pages["career"].settle()
 	check_layout(t, "career slots")
@@ -490,6 +481,22 @@ func test_park() -> void:
 	view.refresh()
 	check_layout(view, "park winners stay")
 	eq(view.message.left(13), "WINNERS STAY:")
+	# PORT-60: staying on at the rack (with STEP OFF), and the widest wait
+	park.called = OpenPlay.NONE
+	park.x_fp = K.to_fp(OpenPlay.rack_x(2))
+	park.y_fp = K.to_fp(OpenPlay.RACK_Y)
+	view.refresh()
+	check_layout(view, "park staying on, at the rack")
+	eq(view.message, "YOU STAY ON COURT 3")
+	park.stay_court = OpenPlay.NONE
+	park.your_court = 2
+	park.court[2].stack = [5, 6, OpenPlay.YOU, 0]
+	park.court[2].stack_count = 3
+	park.x_fp = K.to_fp(OpenPlay.START_X)
+	park.y_fp = K.to_fp(OpenPlay.START_Y)
+	view.refresh()
+	check_layout(view, "park teams ahead")
+	eq(view.message, "2 TEAMS AHEAD OF YOU ON COURT 3")
 	view.free()
 
 
@@ -527,11 +534,7 @@ func test_tournament() -> void:
 	var s2 := _save()
 	var t2 := Tournament.create(3, false, K.DIFFICULTY_MEDIUM, 11)
 	s2.store_tournament(t2)
-	var title := TitleScreen.new()
-	title.save = s2
-	runner.root.add_child(title)
-	if not title.is_node_ready():
-		title._ready()
+	var title := title_screen(s2)
 	title.pages["main"].refresh()
 	check_layout(title, "title main, QF on TOURNAMENT")
 	title.free()
@@ -973,32 +976,35 @@ func test_achievements() -> void:
 ## Port ADR-082: MAP BUTTONS at every step (each one being asked, then
 ## answered by the longest sources: an axis, a hat, a two-digit button),
 ## with the widest pad name; and the startup card about controllers.
+## A generic pad's answer to MAP BUTTONS' step `i` (device 7): an axis for
+## the first two, the d-pad's left and right, then a button each.
+static func _pad_answer(i: int) -> InputEvent:
+	var e: InputEvent
+	if i < 2:
+		e = InputEventJoypadMotion.new()
+		e.axis = 9
+		e.axis_value = -1.0 if i == 0 else 1.0
+	elif i < 4:
+		e = InputEventJoypadButton.new()
+		e.button_index = JOY_BUTTON_DPAD_LEFT if i == 2 else JOY_BUTTON_DPAD_RIGHT
+		e.pressed = true
+	else:
+		e = InputEventJoypadButton.new()
+		e.button_index = 30 + i
+		e.pressed = true
+	e.device = 7
+	return e
+
+
 func test_pad_map() -> void:
 	var t := _title()
 	var m := t.pad_mapper
 	m.begin(7, "03000000790000001100000000000000", "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW")
 	t._show("padmap")
-	var events := []
 	for i in PadMapper.STEPS.size():
-		var e: InputEvent
-		if i < 2:
-			e = InputEventJoypadMotion.new()
-			e.axis = 9
-			e.axis_value = -1.0 if i == 0 else 1.0
-		elif i < 4:
-			e = InputEventJoypadButton.new()
-			e.button_index = JOY_BUTTON_DPAD_LEFT if i == 2 else JOY_BUTTON_DPAD_RIGHT
-			e.pressed = true
-		else:
-			e = InputEventJoypadButton.new()
-			e.button_index = 30 + i
-			e.pressed = true
-		e.device = 7
-		events.append(e)
-	for i in events.size():
 		t.pad_map_screen.refresh()
 		check_layout(t, "MAP BUTTONS asking %s" % PadMapper.STEPS[i][0])
-		m.feed(events[i])
+		m.feed(_pad_answer(i))
 	t.pad_map_screen.refresh()
 	check_layout(t, "MAP BUTTONS all answered")
 	m.cancel()
@@ -1056,19 +1062,23 @@ func test_text_centred() -> void:
 			var bar := p.bar_rect()
 			_centred(Vector2(y + ink.x, y + ink.y), Vector2(bar.position.y, bar.end.y),
 				"%s / %s's bar" % [id, row["id"]])
+			# the mouse picks the row anywhere on its bar
+			var mid := bar.get_center().x
+			for at in [bar.position.y + 0.5, bar.end.y - 0.5]:
+				if p.row_at(Vector2(mid, at)) != p.cursor:
+					runner.fail("%s / %s: the mouse at y %.1f is on row %d" % [id, row["id"], at,
+						p.row_at(Vector2(mid, at))])
+			asserts += 1
 	var m := t.pad_mapper
 	m.begin(7, "03000000790000001100000000000000", "PAD")
 	t._show("padmap")
-	for i in 3:
+	for i in PadMapper.STEPS.size():
+		eq(m.step, i, "MAP BUTTONS asks step %d" % i)
 		var y: float = t.pad_map_screen._labels[m.step].position.y
 		var bar := t.pad_map_screen.bar_rect()
 		_centred(Vector2(y + ink.x, y + ink.y), Vector2(bar.position.y, bar.end.y),
 			"MAP BUTTONS step %d's bar" % m.step)
-		var e := InputEventJoypadButton.new()
-		e.button_index = 30 + i
-		e.pressed = true
-		e.device = 7
-		m.feed(e)
+		m.feed(_pad_answer(i))
 	m.cancel()
 	t.free()
 	var kept := [GameControls.last_device, Settings.pad_glyphs]
@@ -1093,3 +1103,23 @@ func test_text_centred() -> void:
 	GameControls.last_device = kept[0]
 	Settings.pad_glyphs = kept[1]
 	GameControls.device_serial += 1
+
+
+## CONTROLLER with a pad's longest name and each MAP BUTTONS status (the
+## tests have no pads, so the rows are given those values).
+func test_controller_page_widest() -> void:
+	var t := _title()
+	t._show("pad")
+	var p: MenuPage = t.pages["pad"]
+	p.settle()
+	var name := PadMaps.short_name("USB,2-axis 8-button gamepad with a long name", 18)
+	for st in [PadMaps.STANDARD, PadMaps.UNKNOWN, PadMaps.MAPPED, PadMaps.NO_PAD]:
+		for row in p.rows:
+			if row["id"] == "device":
+				row["value"] = func(): return name
+			elif row["id"] == "map":
+				row["value"] = func(): return st
+		p.refresh()
+		eq(p.value_of("map"), st)
+		check_layout(t, "CONTROLLER: %s, %s" % [name, st])
+	t.free()

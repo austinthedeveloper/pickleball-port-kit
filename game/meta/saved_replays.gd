@@ -37,7 +37,6 @@ static func list() -> Array:
 			"playable": playable(d)})
 	_cache.sort_custom(func(a, b): return a["saved"] > b["saved"] \
 		or (a["saved"] == b["saved"] and a["name"] > b["name"]))
-	_cached = true
 	return _cache
 
 

@@ -39,8 +39,7 @@ func setup(m: PadMapper) -> PadMapScreen:
 func refresh() -> void:
 	if mapper == null:
 		return
-	var n := PadMaps._plain(mapper.pad_name)
-	_name.text = n if n.length() <= 28 else n.substr(0, 26).strip_edges() + ".."
+	_name.text = PadMaps.short_name(mapper.pad_name, 28)
 	for i in PadMapper.STEPS.size():
 		var out: String = PadMaps.SDL_NAMES[PadMapper.STEPS[i][1]]
 		var asked := i == mapper.step

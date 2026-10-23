@@ -201,10 +201,7 @@ func test_view_reads_each_controller() -> void:
 
 func test_lobby_on_the_title() -> void:
 	_pads([30, 31])
-	var t := TitleScreen.new()
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
+	var t := title_screen()
 	var started := []
 	t.start_match.connect(func(cfg, _v, _l, pads, players): started.append([cfg, pads, players]))
 	t.reveal("multiplayer").press()

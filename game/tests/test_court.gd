@@ -137,11 +137,7 @@ func test_lines_and_ball_stay_readable() -> void:
 func test_court_page_and_save() -> void:
 	var kept: Array = Settings.court.duplicate()
 	var save := fresh_save("user://test_court/")
-	var t := TitleScreen.new()
-	t.save = save
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
+	var t := title_screen(save)
 	t.reveal("court").press()
 	eq(t.page, "court")
 	var p: MenuPage = t.pages["court"]
@@ -160,11 +156,7 @@ func test_court_page_and_save() -> void:
 	s2.dir = save.dir
 	s2.load_game()
 	s2.data["settings"]["court"][1] = 99                       # out of range: DEFAULT
-	var t2 := TitleScreen.new()
-	t2.save = s2
-	runner.root.add_child(t2)
-	if not t2.is_node_ready():
-		t2._ready()
+	var t2 := title_screen(s2)
 	eq(Settings.court, [1, 0, 0, CourtStyle.count("lines") - 1], "saved, and a bad index loads as DEFAULT")
 	t2.free()
 	Settings.court = kept

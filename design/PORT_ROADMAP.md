@@ -105,6 +105,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-77 | The dinosaur game's levels as courts: RUINS, GLACIER, LAB, STATION | `feature/cld-dino-levels` | Released (v0.32.0) |
 | PORT-78 | Keyboard controls you can guess: a WASD + J K L preset and an arrows + Z X C one, keys drawn where they sit | `feature/cld-keyboard-layout` | Planned (parked: you're thinking it over) |
 | PORT-79 | Text centred in the menu bars and the prompts' keys | `feature/cld-text-centring` | Ready to test |
+| PORT-80 | Cleanup round 6: one copy of the shot effects, the title's way back, the dinosaurs' looks; tests for the gaps | `feature/cld-cleanup-6` | Done |
 
 ## Releases
 
@@ -323,10 +324,43 @@ the same request). Open: 36 and 40.
     a pad's prompts (the round buttons' letters moved up 3 px; not
     screenshotted).
 
+### 80. `feature/cld-cleanup-6`: cleanup round 6 (asked for 2026-10-23)
+
+- [x] `PORT-80` The local branches merged into `origin/main` deleted (33;
+  `feature/cld-release-0.26.0` kept: it has commits its remote branch
+  lacks, though `main` has them; the two in agent worktrees stay). The
+  code: a hit's spark and smash pop in one place (`MatchView.contact_fx`,
+  the match's and PLAY OF THE MATCH's replay); SAVE LAST RALLY's rules in
+  `Highlight` next to PLAY OF THE MATCH's SAVE; one `TitleScreen.back_to`
+  for the seven ways back to a page; the dinosaurs' looks once
+  (`DinoWalkers.LOOKS`, merged into DINOSAUR's and DINO PARK's casts,
+  checked equal to the old tables); `PadMaps.short_name` for CONTROLLER
+  and MAP BUTTONS; QUICK MATCH and MODE share their row; "PRESS AGAIN" for
+  "B AGAIN" (prompts, not button names); stale comments (the announcer's
+  recorded lines, the SNES icons). The tests: `TestSuite.title_screen` for
+  25 copies of the title's setup. New: a rally saved once by SAVE LAST
+  RALLY and PLAY OF THE MATCH, whichever first, and a new match forgetting
+  the best; replay files that aren't replays, another format, two in one
+  second; practice's view against a bare sim; QUICK MATCH's DOUBLES and
+  SPECIALS surviving a restart (and an old save without the key);
+  `test_layout` for the park's YOU STAY ON COURT and 2 TEAMS AHEAD, the
+  CONTROLLER page at its longest name and every status, and the mouse
+  picking a row anywhere on its bar; pad names cut to fit. The docs:
+  PORT-55, 59 to 77 (but 62) moved to `PORT_HISTORY.md`.
+  - Verified: 476/476 plus the e2e, golden traces unchanged; the release
+    notes regenerate the same; the title's menu and prompts pixel for
+    pixel the same.
+  - Status: **Done**.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
+
+- **PORT-80 replays' marks:** PLAY OF THE MATCH's replay (and a saved
+  one) shows the sparks and dust but not the light effects (bounce marks,
+  the camera flash) the match shows. One line would add them; say if you
+  want it.
 
 - **PORT-78 the keyboard:** parked at your request. When you've thought
   it over: which presets (WASD + J K L, arrows + Z X C, both), which is

@@ -39,11 +39,7 @@ func test_the_views() -> void:
 func test_the_row() -> void:
 	var kept := Settings.park_i
 	var sv := fresh_save("user://test_park_locations/")
-	var t := TitleScreen.new()
-	t.save = sv
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
+	var t := title_screen(sv)
 	Settings.park_i = 0
 	var p: MenuPage = t.reveal("openplay")
 	eq(p.value_of("openplay"), "THE PARK")

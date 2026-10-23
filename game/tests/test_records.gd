@@ -215,11 +215,7 @@ func test_records_page() -> void:
 	s.data["records"]["best_streak"] = 4
 	s.data["initials"]["best_streak"] = "ZED"
 	s.data["records"]["vs"][3] = [2, 5]
-	var t := TitleScreen.new()
-	t.save = s
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
+	var t := title_screen(s)
 	t.open_page("records")
 	var p: MenuPage = t.pages["records"]
 	eq(p.value_of("streak"), "ZED 4", "the holder before the count")
@@ -231,7 +227,7 @@ func test_records_page() -> void:
 	p.select("erase")
 	p.press()
 	eq(s.data["records"]["best_streak"], 4, "one press only arms the erase")
-	eq(p.value_of("erase"), "B AGAIN")
+	eq(p.value_of("erase"), "PRESS AGAIN")
 	p.press()
 	eq(s.data["records"]["best_streak"], 0, "the second erases")
 	eq(s.data["initials"]["best_streak"], "")

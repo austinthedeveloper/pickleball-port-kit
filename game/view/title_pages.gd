@@ -22,9 +22,12 @@ static func build(t: TitleScreen) -> void:
 		{"id": "player", "label": "PLAYER", "value": t._career_label, "press": func(): t.open_page("player")},
 		{"id": "options", "label": "OPTIONS", "press": func(): t.open_page("options")},
 	], [], Rect2(300, 214, 360, 0))
+	# QUICK MATCH and MATCH SETUP's MODE are one setting
+	var doubles_label := func(): return "DOUBLES" if Settings.quick_doubles else "SINGLES"
+	var flip_doubles := func(_d): Settings.quick_doubles = not Settings.quick_doubles
 	t._add_page("play", "PLAY", [
-		{"id": "quick", "label": "QUICK MATCH", "value": func(): return "DOUBLES" if Settings.quick_doubles else "SINGLES",
-			"change": func(_d): Settings.quick_doubles = not Settings.quick_doubles,
+		{"id": "quick", "label": "QUICK MATCH", "value": doubles_label,
+			"change": flip_doubles,
 			"press": func(): t.open_page("setup")},
 		{"id": "tournament", "label": "TOURNAMENT", "value": t._cup_label, "press": t._open_tournament},
 		{"id": "openplay", "label": "OPEN PLAY", "value": func(): return Settings.park_name(),
@@ -36,8 +39,8 @@ static func build(t: TitleScreen) -> void:
 	], help, Rect2(300, 172, 360, 0))
 	t._add_page("setup", "MATCH SETUP", [
 		{"id": "start", "label": "START", "press": func(): t.open_select(Settings.quick_doubles)},
-		{"id": "mode", "label": "MODE", "value": func(): return "DOUBLES" if Settings.quick_doubles else "SINGLES",
-			"change": func(_d): Settings.quick_doubles = not Settings.quick_doubles},
+		{"id": "mode", "label": "MODE", "value": doubles_label,
+			"change": flip_doubles},
 		{"id": "players", "label": "PLAYERS", "value": func(): return "2P VS" if Settings.two_players else "1P",
 			"change": func(_d):
 				Settings.two_players = not Settings.two_players
@@ -235,7 +238,7 @@ static func build(t: TitleScreen) -> void:
 			"press": func(): t.open_page("achievements")},      # ADR-077
 		{"id": "vs", "label": "VS", "value": t._vs_label,
 			"change": func(d): t.vs_i = (t.vs_i + d + Opponents.count()) % Opponents.count()},
-		{"id": "erase", "label": "ERASE RECORDS", "value": func(): return "B AGAIN" if t._erase_armed else "",
+		{"id": "erase", "label": "ERASE RECORDS", "value": func(): return "PRESS AGAIN" if t._erase_armed else "",
 			"press": t._erase},
 	], [["back", "BACK"]], Rect2(230, 46, 500, 0))   # wide: LADDER shows both modes
 	# ADR-077: every achievement, DONE or not; how to earn the one selected

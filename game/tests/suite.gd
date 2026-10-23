@@ -20,8 +20,7 @@ static func wipe_replays(dir := "user://test_replays/") -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(dir))
 	for f in DirAccess.get_files_at(dir):
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(dir + f))
-	SavedReplays.list()                  # re-read
-	SavedReplays._cached = false
+	SavedReplays._cached = false         # re-read on the next list()
 
 
 ## A save in its own folder, wiped and loaded fresh (each suite its own
@@ -43,6 +42,18 @@ func match_view(cfg: SimTypes.MatchConfig, venue := "park", demo := false) -> Ma
 	v.card_frames = -1
 	v.sim.p1_bot = true
 	return v
+
+
+## A title screen on the runner's root, ready (the root isn't during the
+## suites), on `save` if given.
+func title_screen(save: SaveGame = null) -> TitleScreen:
+	var t := TitleScreen.new()
+	if save:
+		t.save = save
+	runner.root.add_child(t)
+	if not t.is_node_ready():
+		t._ready()
+	return t
 
 
 func check(cond: bool, msg: String = "check failed") -> bool:

@@ -363,13 +363,19 @@ func back() -> void:
 		return
 	var from := page
 	var to: Array = _parents.get(from, [TREE.get(from, "main"), from])
-	var parent: String = to[0]
-	_show(parent)
-	pages[parent].select(to[1])
-	pages[parent].appear(-1)
+	back_to(to[0], to[1], true)
+
+
+## Back on `to` (its `row` selected, if given), sliding in from the left,
+## with the closing press swallowed (rule 9) and the back sound if `sound`.
+func back_to(to: String, row := "", sound := false) -> void:
+	_show(to)
+	if row != "":
+		pages[to].select(row)
+	pages[to].appear(-1)
 	_lock = SWITCH_LOCK
 	GameControls.clear_latch()
-	if _sfx:
+	if sound and _sfx:
 		_sfx.play("back")
 
 
@@ -441,19 +447,10 @@ func museum_input(pressed: int) -> void:
 	if result != Museum.STAY:
 		if result == Museum.CLOSE_SAVE and save:
 			save.save_game()
-		if _museum_from == "player":
-			_show("player")
-			pages["player"].select("hats")
-			pages["player"].appear(-1)
-		else:
-			_show("career_card")
-			pages["career_card"].select("hats")
-			pages["career_card"].appear(-1)
+		back_to(_museum_from, "hats", true)
+		if _museum_from == "career_card":
 			career.sync(false)
 		_museum_from = "career_card"
-		_lock = SWITCH_LOCK
-		GameControls.clear_latch()
-		_sfx.play("back")
 	elif museum.player().hat != was[1]:
 		_sfx.play("confirm")
 	elif museum.cursor != was[0]:
@@ -485,11 +482,7 @@ func select_input(pressed: int) -> void:
 	var was := [select.row, select.current]
 	var result := select.input(pressed)
 	if result == PlayerSelect.BACK:
-		_show("setup")
-		pages["setup"].appear(-1)
-		_lock = SWITCH_LOCK
-		GameControls.clear_latch()
-		_sfx.play("back")
+		back_to("setup", "", true)
 	elif result == PlayerSelect.DONE:
 		if _career().active_player() == null:
 			Settings.p1_choice = select.choice[0].duplicate()
@@ -545,12 +538,7 @@ func _update_lobby() -> void:
 
 
 func _leave_lobby() -> void:
-	_show("multi")
-	pages["multi"].select("local")
-	pages["multi"].appear(-1)
-	_lock = SWITCH_LOCK
-	GameControls.clear_latch()
-	_sfx.play("back")
+	back_to("multi", "local", true)
 
 
 ## Everyone's ready: the lobby's match at the chosen court, with the match
@@ -806,11 +794,7 @@ func open_pad_map() -> void:
 
 ## Leaves MAP BUTTONS for CONTROLLER (its row), the closing press swallowed.
 func _close_pad_map() -> void:
-	_show("pad")
-	pages["pad"].select("map")
-	pages["pad"].appear(-1)
-	_lock = SWITCH_LOCK
-	GameControls.clear_latch()
+	back_to("pad", "map")
 
 
 ## One input event while MAP BUTTONS is open: the pad's answers; Esc

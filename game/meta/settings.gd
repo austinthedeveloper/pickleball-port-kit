@@ -98,8 +98,8 @@ static var hud_large := false
 static var serve_assist := false
 ## Controller rumble on hits (PORT-15).
 static var vibration := true
-## BUTTON ICONS (PORT-28): 0 AUTO (from the pad's name), then XBOX,
-## PLAYSTATION, NINTENDO (Prompts.FAMILIES).
+## BUTTON ICONS (PORT-28): 0 AUTO (from the pad's name), then the rest
+## of Prompts.FAMILIES (XBOX, PLAYSTATION, NINTENDO, SNES).
 static var pad_glyphs := 0
 ## The "a controller is recommended" card at startup with no pad
 ## connected (port ADR-082); DON'T SHOW AGAIN turns it off.

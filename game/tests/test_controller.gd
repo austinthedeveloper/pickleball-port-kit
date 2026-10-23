@@ -199,11 +199,7 @@ func test_button_icons_row() -> void:
 	var dir := "user://test_glyphs/"
 	var s := fresh_save(dir)
 	var kept := Settings.pad_glyphs
-	var t := TitleScreen.new()
-	t.save = s
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
+	var t := title_screen(s)
 	check(t.pages["controls"].select("pad"), "CONTROLLER is on CONTROLS")
 	var c: MenuPage = t.pages["pad"]
 	check(c.select("icons"), "BUTTON ICONS is on CONTROLLER")

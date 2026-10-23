@@ -101,7 +101,7 @@ func begin() -> void:
 	elif _first(["venue_" + view.venue]) != "":
 		_intro.append("venue_" + view.venue)  # (the dinosaur game's four are still to record: ADR-085)
 	for m in MOD_LINES:
-		if cfg.modifiers & int(m[0]) and _first([m[1]]) != "":    # (SPECIALS' is still to record)
+		if cfg.modifiers & int(m[0]) and _first([m[1]]) != "":
 			_intro.append(m[1])
 			break
 	if _intro.size() == 1:
@@ -151,8 +151,8 @@ func _meters() -> void:
 func _on_hit(e: Array) -> void:
 	var s := view.sim
 	var shots: int = (s.shot_serial - s.rally_start) & 0xff
-	# SPECIALS: PICKLE SMASH (until its lines are recorded, a smash's), and
-	# the knock-back's pop-up
+	# SPECIALS: PICKLE SMASH (a smash's line if PICKLE SMASH's are
+	# missing), and the knock-back's pop-up
 	var team := 1 if (int(e[3]) & 15) >= 2 else 0
 	var was_smash := _last_smash
 	_last_smash = int(e[3]) >> 4 == K.SHOT_SPECIAL
@@ -219,7 +219,7 @@ func _on_point(winner: int) -> void:
 		line = "smash_finish"              # ... or set up the point
 	elif _extended():
 		# WIN BY 2, past game point: advantage or deuce (the second batch,
-		# PORT-55; "win by two" until those are recorded)
+		# PORT-55; "win by two" if they're missing)
 		if diff == 0:
 			_deuces += 1
 			line = _first(["deuce_long" if _deuces >= 3 else "deuce", "win_by_2"])

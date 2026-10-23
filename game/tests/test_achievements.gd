@@ -112,11 +112,7 @@ func test_scholar() -> void:
 func test_the_page() -> void:
 	var sv := fresh_save("user://test_achievements/")
 	Achievements.unlock(sv, "pickled")
-	var t := TitleScreen.new()
-	t.save = sv
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
+	var t := title_screen(sv)
 	eq(t.pages["records"].value_of("achievements"), "1/%d" % Achievements.count())
 	t.open_page("achievements")
 	var p: MenuPage = t.pages["achievements"]

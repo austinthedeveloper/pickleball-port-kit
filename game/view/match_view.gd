@@ -603,22 +603,12 @@ func _physics_process(_delta: float) -> void:
 ## SAVE LAST RALLY (PORT-69): the rally that ended last, to SavedReplays.
 ## False when there's none, it's saved already, or REPLAYS is full.
 func save_rally() -> bool:
-	if highlight == null or highlight.last.is_empty() or highlight.saved_last \
-			or SavedReplays.full():
-		return false
-	highlight.saved_last = SavedReplays.save(highlight.export(highlight.last)) != ""
-	return highlight.saved_last
+	return highlight != null and highlight.save_last()
 
 
 ## The pause row's value: NONE YET, SAVED, FULL, or the rally's shots.
 func save_rally_state() -> String:
-	if highlight == null or highlight.last.is_empty():
-		return "NONE YET"
-	if highlight.saved_last:
-		return "SAVED"
-	if SavedReplays.full():
-		return "FULL"
-	return "%d SHOTS" % int(highlight.last["shots"])
+	return "NONE YET" if highlight == null else highlight.last_state()
 
 
 ## PLAY OF THE MATCH is on screen (the replay's sim is the one drawn).
@@ -651,16 +641,8 @@ func _on_event(e: Array) -> void:
 	_sfx.event(e, rally, match_won)
 	match kind:
 		K.EVENT_HIT, K.EVENT_SERVE:
-			var slot: int = e[3] & 15
-			_rumble_hit(slot, e[3] >> 4 if kind == K.EVENT_HIT else K.SHOT_STANDARD)
-			var lead := -14.0 if sim.players[slot].team else 14.0
-			var shot: int = e[3] >> 4 if kind == K.EVENT_HIT else K.SHOT_STANDARD
-			actors.spawn_fx("spark", CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp)
-				+ Vector2(lead, 0), 1 if shot in [K.SHOT_DRIVE, K.SHOT_OVERHEAD, K.SHOT_SPECIAL] else 0)
-			if shot == K.SHOT_OVERHEAD or shot == K.SHOT_SPECIAL:
-				_players[slot]["choice"] = "overhead"   # whatever the windup guessed
-				actors.smash_pop(CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp),
-					shot == K.SHOT_SPECIAL)
+			_rumble_hit(e[3] & 15, e[3] >> 4 if kind == K.EVENT_HIT else K.SHOT_STANDARD)
+			contact_fx(e)
 		K.EVENT_BOUNCE:
 			actors.spawn_fx("dust", at, 0)
 		K.EVENT_CROWD:
@@ -684,6 +666,19 @@ func _on_event(e: Array) -> void:
 			# the server is still the rally's (the next serve isn't set up).
 			if end.career_counts():
 				save.career.record_point(rally, e[3] == 0, sim.server_index == 0)
+
+## A hit or serve's spark at the paddle, and a smash's pop (the match and
+## PLAY OF THE MATCH's replay alike).
+func contact_fx(e: Array) -> void:
+	var slot: int = e[3] & 15
+	var lead := -14.0 if sim.players[slot].team else 14.0
+	var shot: int = e[3] >> 4 if e[0] == K.EVENT_HIT else K.SHOT_STANDARD
+	var ball := CourtView.air(sim.ball.x_fp, sim.ball.y_fp, sim.ball.z_fp)
+	actors.spawn_fx("spark", ball + Vector2(lead, 0),
+		1 if shot in [K.SHOT_DRIVE, K.SHOT_OVERHEAD, K.SHOT_SPECIAL] else 0)
+	if shot == K.SHOT_OVERHEAD or shot == K.SHOT_SPECIAL:
+		_players[slot]["choice"] = "overhead"   # whatever the windup guessed
+		actors.smash_pop(ball, shot == K.SHOT_SPECIAL)
 
 
 ## GHOST BALL (SNES ADR-053, render_ball): high in a live rally the ball

@@ -19,12 +19,7 @@ func _to_a_rally(v: MatchView) -> bool:
 
 
 func _title() -> TitleScreen:
-	var t := TitleScreen.new()
-	t.save = fresh_save("user://test_saved_replays/")
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
-	return t
+	return title_screen(fresh_save("user://test_saved_replays/"))
 
 
 ## A saved replay played on a view of its own, as the title does; the
@@ -301,4 +296,67 @@ func test_trimmed_to_the_rally() -> void:
 		"nor its ten seconds (%d frames drawn)" % drawn)
 	eq(at_end, rally["snap_to"], "still the rally, exactly")
 	d.free()
+	wipe_replays()
+
+
+## SAVE LAST RALLY and PLAY OF THE MATCH's SAVE on the same rally write it
+## once, whichever comes first; a new match forgets the best.
+func test_one_rally_saved_once() -> void:
+	wipe_replays()
+	var v := _view()
+	check(_to_a_rally(v))
+	var h := v.highlight
+	h.best = h.last.duplicate(true)          # the match's longest so far
+	eq(h.best_state(), "SAVE")
+	check(v.save_rally(), "SAVE LAST RALLY")
+	eq(h.best_state(), "SAVED", "PLAY OF THE MATCH's is the same rally")
+	check(not h.save_best(), "not again")
+	eq(SavedReplays.list().size(), 1, "one file")
+	v.free()
+	wipe_replays()
+	var w := _view()
+	check(_to_a_rally(w))
+	var g := w.highlight
+	g.best = g.last.duplicate(true)
+	check(g.save_best(), "PLAY OF THE MATCH's SAVE")
+	eq(w.save_rally_state(), "SAVED", "SAVE LAST RALLY's is the same rally")
+	check(not w.save_rally(), "not again")
+	eq(SavedReplays.list().size(), 1, "one file")
+	g.op(["new_match"])
+	eq(g.best, {}, "a new match forgets the best")
+	check(not g.saved_best, "...and that it was saved")
+	eq(g.best_state(), "", "nothing to SAVE")
+	w.free()
+	wipe_replays()
+
+
+## Files that aren't replays are skipped; another format doesn't play; two
+## saved in the same second get their own names.
+func test_bad_files() -> void:
+	wipe_replays()
+	var good := {"format": SavedReplays.FORMAT, "tuning": K.TUNING_VERSION, "saved": 77,
+		"cfg": {}, "inputs": PackedInt32Array(), "ops": {}, "rally": {"shots": 3}}
+	var plain := FileAccess.open(SavedReplays.dir + "plain" + SavedReplays.EXT, FileAccess.WRITE)
+	plain.store_string("not a replay")
+	plain.close()
+	var bad := {"array": [1, 2], "missing": good.duplicate(), "inputs": good.duplicate(true)}
+	bad["missing"].erase("rally")
+	bad["inputs"]["inputs"] = [1, 2, 3]
+	for n in bad:
+		var f := FileAccess.open_compressed(SavedReplays.dir + n + SavedReplays.EXT, FileAccess.WRITE,
+			FileAccess.COMPRESSION_GZIP)
+		f.store_var(bad[n])
+		f.close()
+		eq(SavedReplays.load_replay(n + SavedReplays.EXT), {}, "%s isn't a replay" % n)
+	eq(SavedReplays.load_replay("plain" + SavedReplays.EXT), {}, "a plain file isn't")
+	eq(SavedReplays.load_replay("nowhere" + SavedReplays.EXT), {}, "nor a missing one")
+	SavedReplays._cached = false
+	eq(SavedReplays.list(), [], "REPLAYS skips them")
+	eq(SavedReplays.save(good), "77" + SavedReplays.EXT)
+	eq(SavedReplays.save(good), "77-2" + SavedReplays.EXT, "the same second: its own name")
+	eq(SavedReplays.list().size(), 2)
+	var other := good.duplicate()
+	other["format"] = SavedReplays.FORMAT + 1
+	check(not SavedReplays.playable(other), "another format doesn't play")
+	check(SavedReplays.playable(good))
 	wipe_replays()

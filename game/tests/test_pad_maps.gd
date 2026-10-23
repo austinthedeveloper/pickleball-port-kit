@@ -207,11 +207,7 @@ func test_maps_saved() -> void:
 
 
 func _title() -> TitleScreen:
-	var t := TitleScreen.new()
-	runner.root.add_child(t)
-	if not t.is_node_ready():
-		t._ready()
-	return t
+	return title_screen()
 
 
 ## MAP BUTTONS on the title: the pad's events answer, Esc cancels, the
@@ -307,3 +303,14 @@ func test_generic_prompts() -> void:
 	eq(PadMapper.source_name("-a1"), "AXIS 1 -")
 	eq(PadMapper.source_name("h0.4"), "HAT DOWN")
 	eq(PadMapper.source_name("b12"), "BUTTON 12")
+
+
+## A pad's name in the fonts' characters, cut to fit; no pad's row values.
+func test_names_and_status() -> void:
+	eq(PadMaps.short_name("8BitDo SN30 Pro", 18), "8BITDO SN30 PRO")
+	eq(PadMaps.short_name("Pad™ (USB) #2", 18), "PAD   USB   2", "the fonts' characters only")
+	eq(PadMaps.short_name("™™", 18), "PAD", "nothing left: PAD")
+	eq(PadMaps.short_name("USB,2-axis 8-button gamepad", 18), "USB 2-AXIS 8-BUT..", "cut to 18")
+	eq(PadMaps.short_name("USB,2-axis 8-button gamepad", 18).length(), 18)
+	eq(PadMaps.display_name(-1), "NONE")
+	eq(PadMaps.status(-1), PadMaps.NO_PAD)
