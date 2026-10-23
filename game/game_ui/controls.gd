@@ -18,7 +18,7 @@ const ACTIONS := {
 	"drive": [KEY_K],
 	"soft": [KEY_L],
 	"slice": [KEY_I],                  # SNES X (SNES ADR-056)
-	"short": [KEY_SHIFT, KEY_U],       # SNES L or R held: any shot goes short
+	"short": [KEY_SHIFT, KEY_U],       # held: any shot goes short (SNES ADR-056)
 	"special": [KEY_O],                # SPECIALS' PICKLE SMASH (port ADR-080)
 	"start": [KEY_ENTER, KEY_ESCAPE],
 }
@@ -27,8 +27,8 @@ const PAD_BUTTONS := {
 	"drive": JOY_BUTTON_B,
 	"soft": JOY_BUTTON_X,
 	"slice": JOY_BUTTON_Y,
-	"short": JOY_BUTTON_LEFT_SHOULDER,   # RB too (added in _ready)
-	"special": -1,                       # no button: the right trigger (port ADR-080)
+	"short": JOY_BUTTON_LEFT_SHOULDER,   # and the left trigger (port ADR-082)
+	"special": JOY_BUTTON_RIGHT_SHOULDER,  # and the right trigger (port ADR-080, 082)
 	"start": JOY_BUTTON_START,
 	"move_up": JOY_BUTTON_DPAD_UP,
 	"move_down": JOY_BUTTON_DPAD_DOWN,
@@ -146,6 +146,8 @@ static func _on_joy_connection(device: int, connected: bool) -> void:
 	news_serial += 1
 	if not connected:
 		lost_serial += 1
+	else:
+		PadMaps.on_connect(device)         # a generic pad's map (port ADR-082)
 	refresh_pads()
 
 
@@ -163,12 +165,10 @@ func _ready() -> void:
 			var b := InputEventJoypadButton.new()
 			b.button_index = PAD_BUTTONS[action]
 			InputMap.action_add_event(action, b)
-	# SHORT is either shoulder, as on the SNES (L or R); SPECIAL, which the
-	# SNES pad never had, is the right trigger (port ADR-080)
-	var rb := InputEventJoypadButton.new()
-	rb.button_index = JOY_BUTTON_RIGHT_SHOULDER
-	InputMap.action_add_event("short", rb)
-	InputMap.action_add_event("special", special_trigger())
+	# port ADR-082: L is SHORT and R is SPECIAL, each trigger the same as
+	# the shoulder above it
+	InputMap.action_add_event("short", trigger(JOY_AXIS_TRIGGER_LEFT))
+	InputMap.action_add_event("special", trigger(JOY_AXIS_TRIGGER_RIGHT))
 	for pair in [["move_left", JOY_AXIS_LEFT_X, -1.0], ["move_right", JOY_AXIS_LEFT_X, 1.0],
 			["move_up", JOY_AXIS_LEFT_Y, -1.0], ["move_down", JOY_AXIS_LEFT_Y, 1.0]]:
 		var m := InputEventJoypadMotion.new()
@@ -257,7 +257,7 @@ static func pad_bits() -> Array:
 
 ## P1's intent from the input map. The four swings (SNES ADR-056): HIT
 ## (standard), DRIVE, SOFT (a lob, or a dink aimed away), SLICE. SHORT
-## held (L or R on a pad) aims away from your own net, so any of them goes
+## held (L or the left trigger on a pad, port ADR-082) aims away from your own net, so any of them goes
 ## short, while the D-pad still moves and aims at a sideline; `team` says
 ## which way away is (0 left: -1; 1 right: +1).
 static func read_intent(team := 0) -> SimTypes.Intent:
@@ -295,7 +295,9 @@ static func read_intent(team := 0) -> SimTypes.Intent:
 
 ## Reading pads directly (2P, and multiplayer's four pads; PORT-16). For
 ## now every pad is taken to be an Xbox pad on its default layout: A hit,
-## B drive, X soft, Menu pause, D-pad or left stick to move. Remaps apply
+## B drive, X soft, Y slice, LB / LT short, RB / RT special, Menu pause,
+## D-pad or left stick to move (a generic pad mapped on CONTROLLER sends
+## these too, port ADR-082). Remaps apply
 ## to P1's input map only (design/KNOWN_ISSUES.md #39).
 ##
 ## Tests and the e2e can stand in fake pads: `fake_pads` maps a device id
@@ -324,18 +326,21 @@ static func joy_axis(device: int, axis: int) -> float:
 			return 0.0
 		if axis == JOY_AXIS_TRIGGER_RIGHT:
 			return float(fake_pads[device].get("rt", 0.0))
+		if axis == JOY_AXIS_TRIGGER_LEFT:
+			return float(fake_pads[device].get("lt", 0.0))
 		return float(fake_pads[device].get("x" if axis == JOY_AXIS_LEFT_X else "y", 0.0))
 	return Input.get_joy_axis(device, axis)
 
 
 static var _pad_prev := {}
-const TRIGGER_RIGHT := -2           ## the right trigger, as a key of a pad's held buttons
+const TRIGGER_RIGHT := -2           ## SPECIAL (R or its trigger), as a key of a pad's held buttons
 
 
-## SPECIAL's pad input: the right trigger pulled (port ADR-080).
-static func special_trigger() -> InputEventJoypadMotion:
+## A trigger pulled, as an input-map event: the left one is SHORT, the
+## right one SPECIAL, mirroring the shoulders (port ADR-082).
+static func trigger(axis: int) -> InputEventJoypadMotion:
 	var m := InputEventJoypadMotion.new()
-	m.axis = JOY_AXIS_TRIGGER_RIGHT
+	m.axis = axis
 	m.axis_value = 1.0
 	return m
 
@@ -354,13 +359,15 @@ static func read_pad_intent(device: int, team := 0) -> SimTypes.Intent:
 		it.move_y = -1
 	elif joy_button(device, JOY_BUTTON_DPAD_DOWN) or ay > 0.4:
 		it.move_y = 1
-	var short := joy_button(device, JOY_BUTTON_LEFT_SHOULDER) or joy_button(device, JOY_BUTTON_RIGHT_SHOULDER)
+	var short := joy_button(device, JOY_BUTTON_LEFT_SHOULDER) or joy_axis(device, JOY_AXIS_TRIGGER_LEFT) > 0.5
 	it.aim_x = (1 if team else -1) if short else it.move_x
 	it.aim_y = it.move_y
 	var held := {}
 	for b in [JOY_BUTTON_A, JOY_BUTTON_B, JOY_BUTTON_X, JOY_BUTTON_Y, JOY_BUTTON_START]:
 		held[b] = joy_button(device, b)
-	held[TRIGGER_RIGHT] = joy_axis(device, JOY_AXIS_TRIGGER_RIGHT) > 0.5
+	# SPECIAL: R or the right trigger (port ADR-082)
+	held[TRIGGER_RIGHT] = joy_button(device, JOY_BUTTON_RIGHT_SHOULDER) \
+		or joy_axis(device, JOY_AXIS_TRIGGER_RIGHT) > 0.5
 	var prev: Dictionary = _pad_prev.get(device, {})
 	var pressed := {}
 	for b in held:

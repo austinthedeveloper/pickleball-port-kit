@@ -2,7 +2,8 @@
 ## action, applied to the input map and kept in the save's
 ## settings.bindings. A rebind that takes another action's key or button
 ## swaps it over, so no action is ever left unbound. The pad sticks stay
-## on the moves; 2P's pad keeps the default layout.
+## on the moves and the triggers on SHORT (left) and SPECIAL (right),
+## port ADR-082; 2P's pad keeps the default layout.
 class_name Bindings
 extends RefCounted
 
@@ -11,6 +12,9 @@ const ACTIONS := ["hit", "drive", "soft", "slice", "short", "special", "start", 
 const NAMES := {"hit": "HIT", "drive": "DRIVE", "soft": "SOFT", "slice": "SLICE", "short": "SHORT",
 	"special": "SPECIAL", "start": "START",
 	"move_up": "UP", "move_down": "DOWN", "move_left": "LEFT", "move_right": "RIGHT"}
+
+## The triggers mirror the shoulders' defaults (port ADR-082).
+const TRIGGERS := {"short": JOY_AXIS_TRIGGER_LEFT, "special": JOY_AXIS_TRIGGER_RIGHT}
 
 ## action -> {"keys": [physical keycodes], "pad": JOY_BUTTON_*}
 static var current := defaults()
@@ -40,15 +44,11 @@ static func apply() -> void:
 			b.button_index = current[a]["pad"]
 			b.device = GameControls.p1_device()
 			InputMap.action_add_event(a, b)
-		if a == "short" and current[a]["pad"] == JOY_BUTTON_LEFT_SHOULDER:
-			var rb := InputEventJoypadButton.new()   # either shoulder, as on the SNES
-			rb.button_index = JOY_BUTTON_RIGHT_SHOULDER
-			rb.device = GameControls.p1_device()
-			InputMap.action_add_event(a, rb)
-		if a == "special":
-			var rt := GameControls.special_trigger()   # always the trigger, and any button given
-			rt.device = GameControls.p1_device()
-			InputMap.action_add_event(a, rt)
+		if a in TRIGGERS:
+			# the trigger stays, whatever button the action is given
+			var trig := GameControls.trigger(TRIGGERS[a])
+			trig.device = GameControls.p1_device()
+			InputMap.action_add_event(a, trig)
 	GameControls.binding_serial += 1
 
 
@@ -85,7 +85,7 @@ static func _taken(code: int, except: String) -> bool:
 static func rebind_pad(action: String, button: int) -> void:
 	var old: int = current[action]["pad"]
 	for a in ACTIONS:
-		# a swap, unless there's nothing to give back (SPECIAL: the trigger)
+		# a swap, unless there's nothing to give back
 		if a != action and current[a]["pad"] == button and old >= 0:
 			current[a]["pad"] = old
 	current[action]["pad"] = button
@@ -123,6 +123,7 @@ static func from_save(d: Variant) -> void:
 			var keys: Variant = b.get("keys")
 			if typeof(keys) == TYPE_ARRAY and not keys.is_empty():
 				current[a]["keys"] = keys.map(func(k): return int(k))
-			if b.has("pad"):
+			# no button (-1) was SPECIAL's before port ADR-082 gave it R
+			if b.has("pad") and int(b["pad"]) >= 0:
 				current[a]["pad"] = int(b["pad"])
 	apply()

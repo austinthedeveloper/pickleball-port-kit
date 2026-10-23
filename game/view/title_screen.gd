@@ -37,7 +37,7 @@ static var return_to := ""
 const TREE := {"play": "main", "setup": "play", "multi": "play", "court": "setup",
 	"modifiers": "setup", "rules": "modifiers", "learn": "main", "options": "main",
 	"controls": "options", "access": "options", "player": "main", "records": "player",
-	"achievements": "player", "replays": "player"}
+	"achievements": "player", "replays": "player", "pad": "controls", "notice": "main"}
 
 var _demo: MatchView
 var _ui: CanvasLayer
@@ -80,6 +80,14 @@ func _store_settings() -> void:
 	Settings.store_to(save)
 
 
+## The settings, and the save written now (a choice that must outlast a
+## quit from the title: DON'T SHOW AGAIN, a pad's map).
+func _save_settings() -> void:
+	Settings.store_to(save)
+	if save:
+		save.save_game()
+
+
 ## The title's music (PORT-22), on every page.
 func music_track() -> String:
 	return "title"
@@ -87,6 +95,9 @@ func music_track() -> String:
 
 var achieve_how: BitmapText          ## under ACHIEVEMENTS (ADR-077)
 static var _greeted := false       ## the announcer has said the name this session
+## The "a controller is recommended" card has had its chance this session
+## (port ADR-082; the tests' runner sets it, so the title opens on MAIN).
+static var notice_done := false
 
 func _ready() -> void:
 	_load_settings()
@@ -157,6 +168,9 @@ func _ready() -> void:
 	hat_museum.visible = false
 	hat_museum.pressed.connect(museum_input)
 	_ui.add_child(hat_museum)
+	pad_map_screen = PadMapScreen.new().setup(pad_mapper)
+	pad_map_screen.visible = false
+	_ui.add_child(pad_map_screen)
 	_sfx = Sfx.new()
 	add_child(_sfx)
 	_sfx.setup("", false)
@@ -165,18 +179,23 @@ func _ready() -> void:
 	if return_to != "" and pages.has(return_to):
 		reveal_page(return_to)
 	return_to = ""
+	if not notice_done:
+		notice_done = true               # port ADR-082: once a session, at startup
+		if Settings.pad_notice and GameControls.connected_pads().is_empty():
+			open_page("notice")
+			_lock = 10                   # the title's own opening wait, as without it
 	Settings.apply_window(get_window())    # last: a mode change can run a frame
 
 
 func _add_page(id: String, title: String, rows: Array, help: Array,
 		at := Rect2(300, 172, 360, 0)) -> void:
-	if id != "main":
+	if not id in ["main", "notice"]:          # the notice's OK is its way back
 		rows.append({"id": "back", "label": "BACK", "press": back})
 	# top pad, the rows, then a footer that keeps the prompt bar clear of them
 	# (MAIN has none: the key legend under it says HIT, and its rows need the room)
 	var h := 18 + rows.size() * MenuPage.ROW_H + (52 if not help.is_empty() else 12) \
 		+ (46 if title != "" else 0)
-	at.size.y = h if id in ["main", "play", "player"] else maxi(h, 300)     # the short ones fit their rows
+	at.size.y = h if id in ["main", "play", "player", "pad", "notice"] else maxi(h, 300)     # the short ones fit their rows
 	var p := MenuPage.new().setup(id, title, rows, at, help)
 	# the mouse: hover selects, click presses, wheel changes, right click backs
 	p.pressed.connect(func(row): _after_press(row))
@@ -306,9 +325,11 @@ func _show(id: String) -> void:
 		select_screen.visible = id == "select"
 	if hat_museum:
 		hat_museum.visible = id == "museum"
+	if pad_map_screen:
+		pad_map_screen.visible = id == "padmap"
 	for n in _header:
 		n.visible = not id in ["select", "setup", "records", "achievements", "replays", "controls", "options", "modifiers", "rules", "lobby", "museum", "career_card", "career_edit",
-			"career_name"]
+			"career_name", "pad", "padmap"]
 	if lobby_screen:
 		lobby_screen.visible = id == "lobby"
 	_erase_armed = false
@@ -383,7 +404,7 @@ func _row_to(from: String, to: String) -> String:
 ## cursor on it. Tests use this to reach a row by id.
 func reveal(row: String) -> MenuPage:
 	for id in ["main", "play", "setup", "player", "learn", "options", "multi", "modifiers", "rules", "court",
-			"controls", "access", "records"]:
+			"controls", "pad", "access", "records"]:
 		if pages.has(id) and pages[id].index_of(row) >= 0:
 			var p := reveal_page(id)
 			p.select(row)
@@ -763,6 +784,61 @@ func config(doubles: bool) -> SimTypes.MatchConfig:
 
 ## CONTROLS: the action waiting for its new key or button ("" = none).
 var listening := ""
+## MAP BUTTONS (port ADR-082): the steps being asked of a generic pad.
+var pad_mapper := PadMapper.new()
+var pad_map_screen: PadMapScreen
+
+
+## MAP BUTTONS: asks the pad in hand for its buttons, if it's one SDL
+## doesn't know (or one mapped before); a standard pad needs none.
+func open_pad_map() -> void:
+	var dev := PadMaps.target_pad()
+	if not PadMaps.status(dev) in [PadMaps.UNKNOWN, PadMaps.MAPPED]:
+		if _sfx:
+			_sfx.play("back")
+		return
+	pad_mapper.begin(dev)
+	_show("padmap")
+	pad_map_screen.refresh()
+	_lock = SWITCH_LOCK
+	GameControls.clear_latch()
+
+
+## Leaves MAP BUTTONS for CONTROLLER (its row), the closing press swallowed.
+func _close_pad_map() -> void:
+	_show("pad")
+	pages["pad"].select("map")
+	pages["pad"].appear(-1)
+	_lock = SWITCH_LOCK
+	GameControls.clear_latch()
+
+
+## One input event while MAP BUTTONS is open: the pad's answers; Esc
+## cancels and Backspace steps back. All of it is swallowed (rule 9).
+func pad_map_input(event: InputEvent) -> void:
+	if event.is_echo():
+		return
+	if event is InputEventKey and event.is_pressed():
+		var code: int = event.physical_keycode if event.physical_keycode else event.keycode
+		if code == KEY_ESCAPE:
+			pad_mapper.cancel()
+			_close_pad_map()
+			if _sfx:
+				_sfx.play("back")
+		elif code == KEY_BACKSPACE:
+			pad_mapper.undo()
+			pad_map_screen.refresh()
+			if _sfx:
+				_sfx.play("blip")
+	elif event is InputEventJoypadButton or event is InputEventJoypadMotion:
+		var r := pad_mapper.feed(event)
+		if r == PadMapper.DONE:
+			_save_settings()
+			_close_pad_map()
+		else:
+			pad_map_screen.refresh()
+		if r != PadMapper.IGNORED and _sfx:
+			_sfx.play("confirm" if r == PadMapper.DONE else "blip")
 
 
 func listen(action: String) -> void:
@@ -773,6 +849,11 @@ func listen(action: String) -> void:
 ## While listening, the next key or pad button press rebinds the action
 ## (Esc cancels) and is swallowed (rule 9).
 func _input(event: InputEvent) -> void:
+	if page == "padmap":
+		pad_map_input(event)
+		if is_inside_tree():
+			get_viewport().set_input_as_handled()
+		return
 	if listening == "" or not event.is_pressed() or event.is_echo():
 		return
 	var done := false
@@ -831,7 +912,10 @@ func _process(_delta: float) -> void:
 	if _lock > 0:
 		_lock -= 1
 		return
-	if listening != "":
+	if listening != "" or page == "padmap":
+		return
+	if page == "notice" and not GameControls.connected_pads().is_empty():
+		back()                           # a pad came: the card has made its point
 		return
 	if page == "practice":
 		_update_practice(GameControls.pad_bits()[0])

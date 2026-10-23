@@ -50,6 +50,7 @@ static func defaults() -> Dictionary:
 			"shake_level": Settings.SHAKE_DEFAULT,  # SCREEN SHAKE strength (SHAKES)
 			"vibration": 1,  # PORT-15: controller rumble
 			"pad_glyphs": 0,  # PORT-28: BUTTON ICONS, AUTO
+			"pad_maps": {}, "pad_notice": 1,  # port ADR-082: generic pads' maps, the pad card
 			"net_address": "",  # PORT-31: the last address joined
 			"music": Music.DEFAULT_VOLUME},  # PORT-22: MUSIC, 0 (OFF) .. 10
 		"records": {"singles_wins": 0, "singles_losses": 0, "doubles_wins": 0,

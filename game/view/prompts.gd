@@ -4,9 +4,12 @@
 ## LS RS, Menu and View, the default and any unknown pad), PlayStation
 ## (cross, circle, square, triangle; L1 R1 L3 R3, OPTIONS and CREATE) or
 ## Nintendo (B A Y X by position, since Godot maps every pad by position:
-## the south button is JOY_BUTTON_A; L R, + and -). The family comes from
-## the pad's name, or BUTTON ICONS on CONTROLS. Bindings come from the live
-## input map, so a remap shows at once.
+## the south button is JOY_BUTTON_A; L R, + and -). A generic pad (one SDL
+## doesn't know, mapped on CONTROLLER, port ADR-082) is drawn as a SNES
+## pad: B A Y X by position in the Super Famicom's colours, L R, START and
+## SELECT. The family comes from the pad's name, or BUTTON ICONS on
+## CONTROLLER. Bindings come from the live input map, so a remap shows at
+## once.
 class_name Prompts
 extends RefCounted
 
@@ -21,9 +24,10 @@ const NAMED := {JOY_BUTTON_LEFT_SHOULDER: "LB", JOY_BUTTON_RIGHT_SHOULDER: "RB",
 const XBOX := "xbox"
 const PLAYSTATION := "playstation"
 const NINTENDO := "nintendo"
+const SNES := "snes"
 ## BUTTON ICONS (Settings.pad_glyphs): AUTO, then each family.
-const FAMILIES := ["", XBOX, PLAYSTATION, NINTENDO]
-const FAMILY_NAMES := ["AUTO", "XBOX", "PLAYSTATION", "NINTENDO"]
+const FAMILIES := ["", XBOX, PLAYSTATION, NINTENDO, SNES]
+const FAMILY_NAMES := ["AUTO", "XBOX", "PLAYSTATION", "NINTENDO", "SNES"]
 ## PlayStation faces by position: the shape and its colour.
 const PS_FACE := {JOY_BUTTON_A: ["cross", Color("7fa8ff")], JOY_BUTTON_B: ["circle", Color("ff6a6a")],
 	JOY_BUTTON_X: ["square", Color("f08ad0")], JOY_BUTTON_Y: ["triangle", Color("5fd6a8")]}
@@ -34,6 +38,12 @@ const NIN_FACE := {JOY_BUTTON_A: "B", JOY_BUTTON_B: "A", JOY_BUTTON_X: "Y", JOY_
 const NIN_NAMED := {JOY_BUTTON_LEFT_SHOULDER: "L", JOY_BUTTON_RIGHT_SHOULDER: "R",
 	JOY_BUTTON_LEFT_STICK: "LS", JOY_BUTTON_RIGHT_STICK: "RS"}
 const NIN_GREY := Color(0.78, 0.8, 0.86)
+## SNES faces by position (south B, east A, west Y, north X) in the Super
+## Famicom's colours; the shoulders are L and R, the triggers mirror them.
+const SNES_FACE := {JOY_BUTTON_A: ["B", Color("f0c030")], JOY_BUTTON_B: ["A", Color("e04a3a")],
+	JOY_BUTTON_X: ["Y", Color("5fc24a")], JOY_BUTTON_Y: ["X", Color("3a7be0")]}
+const SNES_NAMED := {JOY_BUTTON_LEFT_SHOULDER: "L", JOY_BUTTON_RIGHT_SHOULDER: "R",
+	JOY_BUTTON_START: "START", JOY_BUTTON_BACK: "SELECT"}
 
 
 ## A pad's family from the name its driver reports (SDL's names: "PS5
@@ -44,6 +54,9 @@ static func family_of(pad_name: String) -> String:
 	for k in ["playstation", "dualsense", "dualshock", "ps3", "ps4", "ps5", "sony"]:
 		if k in n:
 			return PLAYSTATION
+	for k in ["snes", "super famicom", "super nintendo"]:
+		if k in n:
+			return SNES
 	for k in ["nintendo", "switch", "joy-con", "joycon", "pro controller", "wii u", "gamecube"]:
 		if k in n:
 			return NINTENDO
@@ -56,6 +69,8 @@ static func family() -> String:
 	if forced != "":
 		return forced
 	if GameControls.last_pad >= 0:
+		if PadMaps.generic(GameControls.last_pad):
+			return SNES                      # port ADR-082: no Xbox letters on it
 		return family_of(Input.get_joy_name(GameControls.last_pad))
 	return XBOX
 
@@ -94,12 +109,15 @@ static func first_button(action: String) -> int:
 ## Pad-only prompts (the lobby is controllers only): always the button.
 const PAD_ONLY := {"pad_a": JOY_BUTTON_A, "pad_b": JOY_BUTTON_B, "pad_x": JOY_BUTTON_X,
 	"pad_menu": JOY_BUTTON_START, "lb": JOY_BUTTON_LEFT_SHOULDER, "rb": JOY_BUTTON_RIGHT_SHOULDER}
+## Keyboard-only prompts (mapping a pad, port ADR-082: the pad's own
+## buttons mean nothing yet): always the key.
+const KEY_ONLY := {"esc": KEY_ESCAPE, "bksp": KEY_BACKSPACE}
 
 static func glyph(action: String, device := -1) -> Dictionary:
 	if PAD_ONLY.has(action):
 		return button_glyph(PAD_ONLY[action])
-	if action == "rt":
-		return trigger_glyph()
+	if KEY_ONLY.has(action):
+		return {"kind": "key", "text": key_name(KEY_ONLY[action])}
 	if device < 0:
 		device = GameControls.last_device
 	if device == GameControls.KEYBOARD:
@@ -113,16 +131,18 @@ static func glyph(action: String, device := -1) -> Dictionary:
 		return {"kind": "dpad", "text": "", "dir": -1}
 	if action == "back":
 		action = "drive"                 # B backs out on a pad
-	if action == "special" and first_button(action) < 0:
-		return trigger_glyph()
+	if action in Bindings.TRIGGERS and first_button(action) < 0:
+		return trigger_glyph("", Bindings.TRIGGERS[action] == JOY_AXIS_TRIGGER_LEFT)
 	return button_glyph(first_button(action))
 
 
-## The right trigger (SPECIAL, port ADR-080), as each family names it.
-static func trigger_glyph(fam := "") -> Dictionary:
+## A trigger (SHORT's left, SPECIAL's right, port ADR-082), as each family
+## names it; a SNES pad has none, so its shoulders' letters.
+static func trigger_glyph(fam := "", left := false) -> Dictionary:
 	if fam == "":
 		fam = family()
-	return {"kind": "pill", "text": {PLAYSTATION: "R2", NINTENDO: "ZR"}.get(fam, "RT")}
+	var names := {PLAYSTATION: ["R2", "L2"], NINTENDO: ["ZR", "ZL"], SNES: ["R", "L"]}
+	return {"kind": "pill", "text": names.get(fam, ["RT", "LT"])[1 if left else 0]}
 
 
 static func button_glyph(b: int, fam := "") -> Dictionary:
@@ -137,6 +157,11 @@ static func button_glyph(b: int, fam := "") -> Dictionary:
 			return {"kind": "pill", "text": "OPTIONS"}
 		if b == JOY_BUTTON_BACK:
 			return {"kind": "pill", "text": "CREATE"}
+	elif fam == SNES:
+		if SNES_FACE.has(b):
+			return {"kind": "face", "text": SNES_FACE[b][0], "color": SNES_FACE[b][1]}
+		if SNES_NAMED.has(b):
+			return {"kind": "pill", "text": SNES_NAMED[b]}
 	elif fam == NINTENDO:
 		if NIN_FACE.has(b):
 			return {"kind": "face", "text": NIN_FACE[b], "color": NIN_GREY}
