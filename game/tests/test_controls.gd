@@ -12,6 +12,13 @@ func _keys(action: String) -> Array:
 	return out
 
 
+func _trigger(action: String) -> int:
+	for e in InputMap.action_get_events(action):
+		if e is InputEventJoypadMotion and e.axis in [JOY_AXIS_TRIGGER_LEFT, JOY_AXIS_TRIGGER_RIGHT]:
+			return e.axis
+	return -1
+
+
 func _pad(action: String) -> int:
 	for e in InputMap.action_get_events(action):
 		if e is InputEventJoypadButton:
@@ -46,10 +53,10 @@ func test_conflicts_swap() -> void:
 	Bindings.rebind_pad("hit", JOY_BUTTON_B)  # drive's button
 	eq([_pad("hit"), _pad("drive")], [JOY_BUTTON_B, JOY_BUTTON_A], "the buttons swap")
 	for a in Bindings.ACTIONS:
-		# SPECIAL's pad input is the right trigger (port ADR-080), no button
-		check(not _keys(a).is_empty() and (_pad(a) >= 0 or a == "special"), "%s is still bound" % a)
-	Bindings.rebind_pad("special", JOY_BUTTON_X)    # soft's button: soft keeps it (nothing to swap)
-	eq([_pad("special"), _pad("soft")], [JOY_BUTTON_X, JOY_BUTTON_X], "nobody is left without a button")
+		check(not _keys(a).is_empty() and _pad(a) >= 0, "%s is still bound" % a)
+	Bindings.rebind_pad("special", JOY_BUTTON_X)    # soft's button: soft takes RB
+	eq([_pad("special"), _pad("soft")], [JOY_BUTTON_X, JOY_BUTTON_RIGHT_SHOULDER], "the buttons swap")
+	check(_trigger("special") == JOY_AXIS_TRIGGER_RIGHT, "SPECIAL keeps its trigger (port ADR-082)")
 	check(not Bindings.is_default())
 	Bindings.reset()
 	check(Bindings.is_default(), "reset")

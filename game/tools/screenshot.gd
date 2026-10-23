@@ -25,6 +25,8 @@
 ## title_career_museum: the HAT MUSEUM, half the hats won); "unlock"
 ## shows the UNLOCKED! card at the end of a match.
 ## "story<ch>_<kind>_<page>" a story scene (PORT-44); "course..." PICKLEBALL 101 (PORT-45).
+## title_notice: the startup card about controllers; title_padmap: MAP
+## BUTTONS halfway through a generic pad; title_pad: CONTROLLER (port ADR-082).
 ## "replays" (PORT-69) keeps saved replays in user://shot_replays/, not the
 ## player's: "savelast" there saves the last rally (and shows it SAVED on
 ## the pause menu, with "pause"); title_replays lists them, "watch" plays
@@ -82,7 +84,7 @@ func _initialize() -> void:
 			Updater.instance = u
 			u.state = int(arg.substr(7))
 			u.latest = "0.9.0"
-		if arg.begins_with("icons="):           # PORT-28: 1 XBOX, 2 PLAYSTATION, 3 NINTENDO
+		if arg.begins_with("icons="):           # PORT-28: 1 XBOX, 2 PLAYSTATION, 3 NINTENDO, 4 SNES
 			Settings.pad_glyphs = int(arg.substr(6))
 		if arg.begins_with("location="):        # ADR-078: OPEN PLAY's location (0 park, 1 dino, 2 gym)
 			Settings.park_i = int(arg.substr(9))
@@ -92,6 +94,7 @@ func _initialize() -> void:
 			Settings.court = Array(arg.substr(6).split(",")).map(func(x): return int(x))
 	var controls = load("res://game_ui/controls.gd").new()
 	root.add_child(controls)
+	TitleScreen.notice_done = mode != "title_notice"    # port ADR-082: the startup card
 	if mode.begins_with("park"):
 		var op := OpenPlay.new()
 		op.begin(4242, false)
@@ -267,6 +270,27 @@ func _initialize() -> void:
 					_view.select_input(PlayerSelect.PAD_LEFT)     # WOOD
 					_view.select.choice[0]["variant"] = K.VARIANT_FEMALE
 					_view.select_screen.refresh()
+				elif mode == "title_padmap":
+					# port ADR-082: a generic pad halfway through MAP BUTTONS (D-pad
+					# on axes, faces as buttons)
+					var t: TitleScreen = _view
+					t.reveal_page("pad")
+					t.pad_mapper.begin(7, "03000000790000001100000000000000", "USB Gamepad")
+					for ev in [[1, -1.0], [1, 0.0], [1, 1.0], [1, 0.0], [0, -1.0], [0, 0.0], [0, 1.0],
+							[0, 0.0], [2], [1]]:
+						var e: InputEvent
+						if ev.size() == 2:
+							e = InputEventJoypadMotion.new()
+							e.axis = ev[0]
+							e.axis_value = ev[1]
+						else:
+							e = InputEventJoypadButton.new()
+							e.button_index = ev[0]
+							e.pressed = true
+						e.device = 7
+						t.pad_mapper.feed(e)
+					t._show("padmap")
+					t.pad_map_screen.refresh()
 				elif mode.begins_with("title_career"):
 					var t: TitleScreen = _view
 					t.open_career()

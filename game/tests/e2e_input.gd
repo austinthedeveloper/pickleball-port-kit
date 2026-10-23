@@ -76,6 +76,11 @@ func _tick() -> void:
 	_release()
 	match _step:
 		0:
+			# port ADR-082: no pad here, so the card about one comes first
+			if _frame == 14:
+				_expect(_screen() is TitleScreen and _title().page == "notice",
+					"with no pad, the title opens on the controller card")
+				_press("hit")              # OK
 			# the menu tree: MAIN -> OPTIONS, SOUND one right, Y back
 			if _frame == 30:
 				_expect(_screen() is TitleScreen, "boots to the title")

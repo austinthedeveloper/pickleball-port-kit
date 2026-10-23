@@ -968,3 +968,46 @@ func test_achievements() -> void:
 			t._refresh_achievement()
 			check_layout(t, "ACHIEVEMENTS: %s (%s)" % [a[0], "done" if done else "not yet"])
 	t.free()
+
+
+## Port ADR-082: MAP BUTTONS at every step (each one being asked, then
+## answered by the longest sources: an axis, a hat, a two-digit button),
+## with the widest pad name; and the startup card about controllers.
+func test_pad_map() -> void:
+	var t := _title()
+	var m := t.pad_mapper
+	m.begin(7, "03000000790000001100000000000000", "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW")
+	t._show("padmap")
+	var events := []
+	for i in PadMapper.STEPS.size():
+		var e: InputEvent
+		if i < 2:
+			e = InputEventJoypadMotion.new()
+			e.axis = 9
+			e.axis_value = -1.0 if i == 0 else 1.0
+		elif i < 4:
+			e = InputEventJoypadButton.new()
+			e.button_index = JOY_BUTTON_DPAD_LEFT if i == 2 else JOY_BUTTON_DPAD_RIGHT
+			e.pressed = true
+		else:
+			e = InputEventJoypadButton.new()
+			e.button_index = 30 + i
+			e.pressed = true
+		e.device = 7
+		events.append(e)
+	for i in events.size():
+		t.pad_map_screen.refresh()
+		check_layout(t, "MAP BUTTONS asking %s" % PadMapper.STEPS[i][0])
+		m.feed(events[i])
+	t.pad_map_screen.refresh()
+	check_layout(t, "MAP BUTTONS all answered")
+	m.cancel()
+	PadMaps.maps = {}
+	TitleScreen.notice_done = false
+	var n := _title()
+	n.pages["notice"].settle()
+	eq(n.page, "notice")
+	check_layout(n, "the controller card")
+	n.free()
+	TitleScreen.notice_done = true
+	t.free()

@@ -22,7 +22,7 @@ func setup(v: MatchView, left: Rect2, right: Rect2) -> SpecialMeters:
 	view = v
 	panels = [left, right]
 	for team in 2:
-		var pb := PromptBar.new().setup([["rt" if v.multiplayer() else "special", "PICKLE SMASH"]],
+		var pb := PromptBar.new().setup([["rb" if v.multiplayer() else "special", "PICKLE SMASH"]],
 			Vector2(panels[team].get_center().x, panels[team].end.y + 14))
 		pb.visible = false
 		add_child(pb)

@@ -194,7 +194,7 @@ func test_pad_families() -> void:
 	Settings.pad_glyphs = kept
 
 
-## BUTTON ICONS on CONTROLS, by row id, saved.
+## BUTTON ICONS on CONTROLS' CONTROLLER page (port ADR-082), by row id, saved.
 func test_button_icons_row() -> void:
 	var dir := "user://test_glyphs/"
 	var s := fresh_save(dir)
@@ -204,8 +204,9 @@ func test_button_icons_row() -> void:
 	runner.root.add_child(t)
 	if not t.is_node_ready():
 		t._ready()
-	var c: MenuPage = t.pages["controls"]
-	check(c.select("icons"), "BUTTON ICONS is on CONTROLS")
+	check(t.pages["controls"].select("pad"), "CONTROLLER is on CONTROLS")
+	var c: MenuPage = t.pages["pad"]
+	check(c.select("icons"), "BUTTON ICONS is on CONTROLLER")
 	eq(c.value_of("icons"), "AUTO")
 	c.change(1)
 	c.change(1)

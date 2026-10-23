@@ -44,6 +44,7 @@ var _anim_dir := 1
 var _overlay: Node2D             ## the arrows, over the values
 var _bar: Node2D                 ## the highlight bar, under the labels
 var _title: BitmapText
+var _panel: NinePatchRect
 
 
 func setup(id: String, title: String, page_rows: Array, rect := Rect2(300, 172, 360, 300),
@@ -53,7 +54,7 @@ func setup(id: String, title: String, page_rows: Array, rect := Rect2(300, 172, 
 	area = rect
 	size = Vector2(960, 540)
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	var panel := UiKit.panel(area, self)
+	_panel = UiKit.panel(area, self)
 	_bar = Node2D.new()
 	_bar.draw.connect(_draw_bar)
 	add_child(_bar)
@@ -105,6 +106,25 @@ func setup(id: String, title: String, page_rows: Array, rect := Rect2(300, 172, 
 func _label(i: int) -> String:
 	var l: Variant = rows[i]["label"]
 	return l.call() if l is Callable else String(l)
+
+
+## Lines of text between the title and the rows (a notice's message): the
+## rows, the panel and the prompts move down to make room.
+const BODY_H := 22
+
+func set_body(lines: Array, tint := Color.WHITE) -> void:
+	var dy := lines.size() * BODY_H + 10
+	for i in lines.size():
+		UiKit.text("small", String(lines[i]), Vector2(area.get_center().x, _top + i * BODY_H), 0.5,
+			tint, self)
+	_top += dy
+	area.size.y += dy
+	_panel.size.y += dy
+	for i in rows.size():
+		_labels[i].position.y = _row_y(i)
+	if prompts:
+		prompts.position.y += dy
+	settle()
 
 
 ## A page built with a title can change it (a player's name).

@@ -180,16 +180,44 @@ static func build(t: TitleScreen) -> void:
 		control_rows.append({"id": action, "label": Bindings.NAMES[action],
 			"value": func(): return "PRESS A KEY OR BUTTON" if t.listening == action else Bindings.describe(action),
 			"press": func(): t.listen(action)})
-	control_rows.append({"id": "icons", "label": "BUTTON ICONS",
-		"value": func(): return Prompts.FAMILY_NAMES[Settings.pad_glyphs],
-		"change": func(d):
-			Settings.pad_glyphs = (Settings.pad_glyphs + d + Prompts.FAMILIES.size()) % Prompts.FAMILIES.size()
-			GameControls.device_serial += 1})        # every prompt bar redraws
+	# port ADR-082: the pad's own page (BUTTON ICONS moved there)
+	control_rows.append({"id": "pad", "label": "CONTROLLER",
+		"value": func(): return PadMaps.status(PadMaps.target_pad()),
+		"press": func(): t.open_page("pad")})
 	control_rows.append({"id": "reset", "label": "RESET DEFAULTS", "press": func():
 		Bindings.reset()
 		t._store_settings()})
 	t._add_page("controls", "CONTROLS", control_rows, [["hit", "REBIND"], ["back", "BACK"]],
 		Rect2(250, 8, 460, 0))           # high: SLICE, SHORT and SPECIAL made it 14 rows
+	# CONTROLLER (port ADR-082): the pad in hand, mapping a generic one, its
+	# icons, and the startup card about pads
+	t._add_page("pad", "CONTROLLER", [
+		{"id": "device", "label": "PAD", "value": func(): return PadMaps.display_name(PadMaps.target_pad())},
+		{"id": "map", "label": "MAP BUTTONS", "value": func(): return PadMaps.status(PadMaps.target_pad()),
+			"press": t.open_pad_map},
+		{"id": "clear", "label": "CLEAR MAPPING", "press": func():
+			var dev := PadMaps.target_pad()
+			if PadMaps.mapped(dev):
+				PadMaps.clear(Input.get_joy_guid(dev))
+				t._save_settings()},
+		{"id": "icons", "label": "BUTTON ICONS",
+			"value": func(): return Prompts.FAMILY_NAMES[Settings.pad_glyphs],
+			"change": func(d):
+				Settings.pad_glyphs = (Settings.pad_glyphs + d + Prompts.FAMILIES.size()) % Prompts.FAMILIES.size()
+				GameControls.device_serial += 1},        # every prompt bar redraws
+		{"id": "notice", "label": "PAD NOTICE", "value": func(): return onoff.call(Settings.pad_notice),
+			"change": func(_d): Settings.pad_notice = not Settings.pad_notice},
+	], help, Rect2(250, 150, 460, 0))
+	# the card at startup with no pad connected (port ADR-082)
+	t._add_page("notice", "CONTROLLER", [
+		{"id": "ok", "label": "OK", "press": t.back},
+		{"id": "never", "label": "DON'T SHOW AGAIN", "press": func():
+			Settings.pad_notice = false
+			t._save_settings()
+			t.back()},
+	], [["hit", "SELECT"]], Rect2(220, 150, 520, 0))
+	t.pages["notice"].set_body(["A CONTROLLER IS RECOMMENDED:", "THE GAME PLAYS BEST ON A GAMEPAD.",
+		"THE KEYS ARE ON OPTIONS, CONTROLS."], MenuPage.DIM)
 	t.career.build_pages()
 	t._add_page("records", "RECORDS", [
 		{"id": "singles", "label": "SINGLES", "value": func(): return t._wl("singles")},
