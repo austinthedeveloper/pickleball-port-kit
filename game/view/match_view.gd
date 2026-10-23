@@ -667,6 +667,8 @@ func _on_event(e: Array) -> void:
 			crowd.cheer(90 if e[3] >= 13 else 50)
 		K.EVENT_POINT:
 			crowd.cheer(90)
+			if dinos and (match_won or rally >= DinoWalkers.ROAR_RALLY):
+				dinos.roar()
 			if watcher and e[3] == 1:
 				watcher.cheer(70)            # their teammate won it
 			_hud.on_point(e[3])

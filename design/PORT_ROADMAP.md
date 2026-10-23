@@ -567,16 +567,20 @@ the same request). Open: 36 and 40.
   Brachiosaurus were tried and left out (the venue paints all three).
   OPEN PLAY's DINO PARK has them too: the Carnotaurus strolls the sand
   path among the people (sorted by his feet), the baby patrols the grass
-  by the T. rex statue, the pterodactyl flies over the courts.
+  by the T. rex statue, the pterodactyl flies over the courts. He roars
+  (his `mount_roar`) when a long rally (10+ shots) ends or a match is
+  won, and in DINO PARK when you come back a winner.
   - Verified: `test_dinos.gd` (only on DINOSAUR, the sim untouched, two
     views agree, the route crosses and turns and loops without a jump,
     behind the fence; DINO PARK has its cast and the other parks none,
-    OpenPlay untouched, two parks agree), `test_view`, `test_layout`;
-    466/466 plus the e2e, golden traces unchanged; screenshots at four
-    frames and at NIGHT, and of DINO PARK.
+    OpenPlay untouched, two parks agree; the roar holds the route and
+    resumes it, a long rally ends in one, a won game in DINO PARK too),
+    `test_view`, `test_layout`; 469/469 plus the e2e, golden traces
+    unchanged; screenshots at four frames, at NIGHT, mid-roar
+    (`screenshot.gd ... roar`), and of DINO PARK.
   - Status: **Ready to test**: play a match at DINOSAUR and watch the
-    fence line for a minute (his lap is about 80 s); walk DINO PARK's
-    path.
+    fence line for a minute (his lap is about 80 s) and for a roar after
+    a long rally; walk DINO PARK's path, and come back from a win there.
 
 ## For you
 

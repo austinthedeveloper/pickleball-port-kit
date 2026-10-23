@@ -43,6 +43,12 @@ never redrawn.
   palisade, like the painted ones'), the Spinosaurus and the baby on the
   trees, the pterodactyl on the sky. They take the backdrop's time-of-day
   tint and dim with it on a long rally (PORT-43).
+- **He roars** (`mount_roar`, 63 frames at its timings) when a point
+  ends a rally of 10 shots or more (`DinoWalkers.ROAR_RALLY`) or wins the
+  match, and in DINO PARK when you come back from a game you won. His
+  route waits for the roar and carries on from where he stood. A roar is
+  a sim event read, never written: the same match roars at the same
+  frames.
 - **DINO PARK too** (OPEN PLAY's location, ADR-078; `PARK_CAST`, placed
   by `ParkView` in its world): the Carnotaurus strolls the sand path's
   lower edge, sorted by his feet among the people, so you walk past (and
@@ -62,6 +68,10 @@ never redrawn.
   two views agree frame for frame; the Carnotaurus's route crosses the
   venue, turns both ways, uses every frame and never jumps, the loop
   included; everything stays under the fence and behind it.
+- `test_dinos.gd` also: the roar stands him still, plays every frame,
+  and lets the route carry on (twice over); the demo's long rallies end in
+  one; DINO PARK roars after a win and not after a loss. `screenshot.gd`'s
+  `roar` shoots mid-roar.
 - `test_dinos.gd` also: DINO PARK has its cast and the other parks none;
   the park's OpenPlay stays equal to a bare one; two parks agree frame
   for frame.

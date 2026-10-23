@@ -9,6 +9,7 @@ no pixel is changed here, and nothing in the dinosaur repo is written.
 |---|---|---|---|
 | `carno_mount_walk.png` | `carnotaurus/aseprite/carnotaurus_mounted.aseprite`, tag `mount_walk` | 4 × 144x96, faces right, feet on row 90 | The Carnotaurus with Nathan up, walking the stands behind the fence (1x) |
 | `carno_mount_idle.png` | the same file, tag `mount_idle` | 2 × 144x96 (the second is the blink) | ...and stopping to look about |
+| `carno_mount_roar.png` | the same file, tag `mount_roar` | 4 × 144x96 | ...and roaring when a long rally ends or a match is won (DINO PARK: when you come back a winner) |
 | `spinosaurus_idle.png` | `enemies/spinosaurus-idle-preview.png` | 2 × 96x64, faces left | Breathing at the jungle's edge (1x) |
 | `baby_dino_walk.png` | `enemies/baby-dino-patrol-sheet.png` | 2 × 32x32, faces right | Patrolling the jungle's edge (2x) |
 | `pterodactyl_flap.png` | `enemies/pterodactyl-swoop-sheet.png` | 2 × 32x32, faces left | Crossing the sky behind the volcano (1x) |

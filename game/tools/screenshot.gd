@@ -13,6 +13,7 @@
 ## "result" plays a bot match and ends it (the stats card); "mp4" four
 ## humans on fake pads (doubles); title_lobby a lobby with three players.
 ## `smash`: the first overhead after half the frames, just after contact.
+## `roar` (DINOSAUR): the Carnotaurus's first roar, mid-roar.
 ## "park" the open play park (ADR-034), you stacked at court 2's rack;
 ## "park_house" in the clubhouse at the records board; "park_call" your
 ## game called. "partner=N" puts ladder team N's captain on slot 1.
@@ -469,6 +470,9 @@ func _tick() -> void:
 					and pl.shot_type == K.SHOT_SPECIAL and pl.contact_consumed and pl.state == K.STATE_ACTIVE \
 					and _target > _frames + 6:
 				_target = _frames + 4
+	if _view is MatchView and "roar" in OS.get_cmdline_user_args() and _view.dinos \
+			and _view.dinos.dinos[0].roar_at == _view.sim.frame_count and _target > _frames + 30:
+		_target = _frames + 25           # ADR-084: the Carnotaurus's first roar, mouth open
 	if _frames == _target - 12 and _view is MatchView and "camflash" in OS.get_cmdline_user_args():
 		_view.effects.flash(CourtEffects.FLASH_BURST)     # PORT-66: the stands' camera flashes
 	if _frames == _target - 3 and _view is MatchView and "score10" in OS.get_cmdline_user_args():

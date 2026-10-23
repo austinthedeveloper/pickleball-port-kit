@@ -16,7 +16,7 @@ mkdir -p "$OUT"
 rm -f "$OUT"/*.png
 
 # The Carnotaurus with Nathan: 144x96 cells, facing right, feet on row 90.
-for tag in mount_walk mount_idle; do
+for tag in mount_walk mount_idle mount_roar; do
   "$ASE" -b --tag "$tag" "$SRC/carnotaurus/aseprite/carnotaurus_mounted.aseprite" \
     --sheet "$OUT/carno_$tag.png" --sheet-type horizontal >/dev/null
 done

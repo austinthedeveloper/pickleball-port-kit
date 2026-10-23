@@ -13,9 +13,9 @@ func _view() -> MatchView:
 ## Every dinosaur's look this frame: name, place, cell, facing, strip.
 func _looks(view: MatchView) -> Array:
 	var out := []
-	for d in view.dinos.dinos:
-		var s: Sprite2D = d[0]
-		out.append([d[1]["name"], s.position, s.region_rect, s.flip_h, s.texture.resource_path, s.visible])
+	for d: DinoWalkers.Dino in view.dinos.dinos:
+		var s := d.spr
+		out.append([d.c["name"], s.position, s.region_rect, s.flip_h, s.texture.resource_path, s.visible])
 	return out
 
 
@@ -95,11 +95,10 @@ func test_dinos_stay_behind_the_fence() -> void:
 		view._physics_process(1.0 / 60.0)
 		if f % 40:
 			continue
-		for d in view.dinos.dinos:
-			var s: Sprite2D = d[0]
-			check(s.z_index < fence_z, "%s under the fence" % d[1]["name"])
-			var feet := s.position.y                       # offset puts the feet here
-			check(feet <= 170.0, "%s's feet behind the fence (y %d)" % [d[1]["name"], feet])
+		for d: DinoWalkers.Dino in view.dinos.dinos:
+			check(d.spr.z_index < fence_z, "%s under the fence" % d.c["name"])
+			var feet := d.spr.position.y                   # offset puts the feet here
+			check(feet <= 170.0, "%s's feet behind the fence (y %d)" % [d.c["name"], feet])
 	view.queue_free()
 
 
@@ -128,7 +127,7 @@ func test_dino_park_leaves_open_play_alone_and_repeats() -> void:
 	var bare := OpenPlay.new()
 	bare.begin(4242, false)
 	var moved := false
-	var start: Vector2 = a.dinos[0][0].position
+	var start: Vector2 = a.dinos[0].spr.position
 	for f in 900:
 		a.step_frame(SimTypes.Intent.new())
 		b.step_frame(SimTypes.Intent.new())
@@ -137,12 +136,58 @@ func test_dino_park_leaves_open_play_alone_and_repeats() -> void:
 			runner.fail("the park's OpenPlay diverged from a bare one at frame %d" % f)
 			break
 		for i in a.dinos.size():
-			var sa: Sprite2D = a.dinos[i][0]
-			var sb: Sprite2D = b.dinos[i][0]
+			var sa: Sprite2D = a.dinos[i].spr
+			var sb: Sprite2D = b.dinos[i].spr
 			if sa.position != sb.position or sa.region_rect != sb.region_rect or sa.flip_h != sb.flip_h:
-				runner.fail("%s differs between two parks at frame %d" % [a.dinos[i][1]["name"], f])
+				runner.fail("%s differs between two parks at frame %d" % [a.dinos[i].c["name"], f])
 				break
-		moved = moved or a.dinos[0][0].position != start
+		moved = moved or a.dinos[0].spr.position != start
 	check(moved, "the Carnotaurus walks")
 	a.queue_free()
 	b.queue_free()
+
+
+func test_carnotaurus_roars_and_carries_on() -> void:
+	var d := DinoWalkers.Dino.new(DinoWalkers.CAST[0])
+	var n := DinoWalkers.total(d.c["roar"][1])
+	var before := d.dress(500)
+	d.roar(500)
+	d.roar(510)                                          # one at a time
+	var strips := {}
+	for f in range(500, 500 + n):
+		eq(d.dress(f), before, "stands still to roar (frame %d)" % f)
+		check(d.spr.texture.resource_path.ends_with("carno_mount_roar.png"), "the roar's strip")
+		strips[d.spr.region_rect.position.x] = true
+	eq(strips.size(), 4, "every frame of the roar")
+	eq(d.dress(500 + n), DinoWalkers.pose_at(d.c, d.legs, 500)[2], "then carries on from there")
+	d.roar(2000)
+	d.dress(2000)
+	eq(d.dress(2000 + n), DinoWalkers.pose_at(d.c, d.legs, 2000 - n)[2], "a second roar waits too")
+	d.spr.free()
+
+
+func test_a_long_rally_makes_him_roar() -> void:
+	var view := _view()
+	var roared := false
+	for f in 6000:
+		view._physics_process(1.0 / 60.0)
+		if view.dinos.dinos[0].roaring(view.sim.frame_count):
+			roared = true
+			break
+	check(roared, "the demo's long rallies end in a roar")
+	view.queue_free()
+
+
+func test_dino_park_roars_when_you_come_back_a_winner() -> void:
+	var kept := Settings.park_i
+	Settings.park_i = 1
+	for won in [1, 0]:
+		var op := OpenPlay.new()
+		op.begin(4242, false)
+		op.last_won = won
+		var pv := ParkView.new().setup(op, null, true)
+		runner.root.add_child(pv)
+		var d: DinoWalkers.Dino = pv.dinos[0]
+		eq(d.roaring(ParkView.ROAR_AT), won == 1, "won %d" % won)
+		pv.queue_free()
+	Settings.park_i = kept

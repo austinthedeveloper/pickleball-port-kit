@@ -27,6 +27,7 @@ const SLOTS := MatchView.SLOTS
 ## Display only (render_park.c).
 const RESULT_FRAMES := 240           ## "YOU WON" after a match
 const TWO_P_FRAMES := 120            ## "2P JOINED" / "2P LEFT"
+const ROAR_AT := 20                  ## DINO PARK: back from a win, the Carnotaurus roars (ADR-084)
 const TOP_Y := OpenPlay.COURT_TOP + 24
 const BOTTOM_Y := OpenPlay.COURT_TOP + OpenPlay.COURT_H - 10
 ## A new park ignores input this long (rule 9: the press that opened it).
@@ -67,7 +68,7 @@ var _panel_prompts: PromptBar
 var _call: BitmapText
 var _sfx: Sfx
 var _looks := {}                     ## "team:member" -> PlayerLook
-var dinos: Array = []                ## DINO PARK's dinosaurs (ADR-084): [Sprite2D, cast entry, plan]
+var dinos: Array = []                ## DINO PARK's dinosaurs (ADR-084): [DinoWalkers.Dino]
 var dino_frame := 0                  ## their clock: frames since the park opened
 var _prompt_key := ""
 
@@ -131,13 +132,15 @@ func _build() -> void:
 		_add_prop(spr)
 	if layout.get("theme", "") == "dino":
 		for c: Dictionary in DinoWalkers.PARK_CAST:
-			var spr := DinoWalkers.sprite(c)
+			var d := DinoWalkers.Dino.new(c)
 			if c["layer"] == "air":
-				spr.z_index = 3                # over the trees' canopies
-				_world.add_child(spr)
+				d.spr.z_index = 3              # over the trees' canopies
+				_world.add_child(d.spr)
 			else:
-				_actors.add_child(spr)         # sorted by its feet with the people
-			dinos.append([spr, c, DinoWalkers.plan(c)])
+				_actors.add_child(d.spr)       # sorted by its feet with the people
+			if result_timer and op.last_won == 1:
+				d.roar(ROAR_AT)                # back from a win: the Carnotaurus roars
+			dinos.append(d)
 	_overlay = ParkOverlay.new()
 	_overlay.view = self
 	_overlay.z_index = 2
@@ -462,9 +465,8 @@ func refresh() -> void:
 		_draw_court(c)
 		_draw_score(c)
 	_draw_bench()
-	for d in dinos:
-		var spr: Sprite2D = d[0]
-		spr.position = DinoWalkers.dress(spr, d[1], d[2], dino_frame).round()
+	for d: DinoWalkers.Dino in dinos:
+		d.spr.position = d.dress(dino_frame).round()
 	_draw_message()
 	_overlay.queue_redraw()
 
