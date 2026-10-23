@@ -55,9 +55,14 @@ func refresh() -> void:
 	_bar.queue_redraw()
 
 
+## The bar behind the step being asked.
+func bar_rect() -> Rect2:
+	return UiKit.bar_behind(AREA.position.x + 14, AREA.size.x - 28, TOP + mapper.step * ROW_H, ROW_H - 2)
+
+
 func _draw_bar() -> void:
 	if mapper == null or mapper.done():
 		return
-	var r := Rect2(AREA.position.x + 14, TOP + mapper.step * ROW_H - 1, AREA.size.x - 28, ROW_H - 2)
+	var r := bar_rect()
 	_bar.draw_rect(r, MenuPage.BAR)
 	_bar.draw_rect(Rect2(r.position, Vector2(4, r.size.y)), MenuPage.BAR_EDGE)

@@ -4,6 +4,9 @@ class_name UiKit
 extends RefCounted
 
 const UI := "res://assets/levels/ui/"
+## The small font's ink, outline and drop shadow included: rows 2 to 18 of
+## its 20 px cell (y 2 up to 19), so its middle is 10.5 px below the text.
+const SMALL_INK := Vector2(2, 19)
 
 
 ## A framed panel (panel_<style>.png, 12 px frame) over `rect`, added to
@@ -21,6 +24,13 @@ static func panel(rect: Rect2, parent: Node = null, style := "title") -> NinePat
 	if parent:
 		parent.add_child(n)
 	return n
+
+
+## A highlight bar `h` tall behind a row of small text at `text_y`, from
+## `x` across `w`, centred on the letters' ink (the bar's top on a whole px).
+static func bar_behind(x: float, w: float, text_y: float, h: float) -> Rect2:
+	var mid := (SMALL_INK.x + SMALL_INK.y) / 2.0
+	return Rect2(x, text_y + floorf(mid - h / 2.0), w, h)
 
 
 ## Bitmap text: a font (small, big, big_gold), aligned 0 left .. 1 right

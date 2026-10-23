@@ -1011,3 +1011,85 @@ func test_pad_map() -> void:
 	n.free()
 	TitleScreen.notice_done = true
 	t.free()
+
+
+## The small font's ink rows (outline and shadow), read off its texture:
+## [top, bottom) over every glyph.
+static func _small_ink() -> Vector2:
+	var f := BitmapText.load_font("small")
+	var img: Image = (f["texture"] as Texture2D).get_image()
+	var top := 99
+	var bottom := 0
+	for ch in String(f["chars"]):
+		var g: Dictionary = f["glyphs"][ch]
+		for y in int(g["h"]):
+			for x in int(g["w"]):
+				if img.get_pixel(int(g["x"]) + x, int(g["y"]) + y).a > 0.0:
+					top = mini(top, y)
+					bottom = maxi(bottom, y + 1)
+	return Vector2(top, bottom)
+
+
+## `ink` (top, bottom) sits inside `box` (top, bottom), as far from one
+## edge as the other give or take a px (PORT-79: text sat 3 px low).
+func _centred(ink: Vector2, box: Vector2, where: String) -> void:
+	var above := ink.x - box.x
+	var below := box.y - ink.y
+	if above < 0 or below < 0 or absf(above - below) > 1.0:
+		runner.fail("%s: text ink %s in %s (%.1f px above, %.1f below)" % [where, ink, box, above, below])
+	asserts += 1
+
+
+## PORT-79: the selected row's letters centred in the menus' bar and MAP
+## BUTTONS', and every key's letters in its top face, their labels level.
+func test_text_centred() -> void:
+	var ink := _small_ink()
+	eq(UiKit.SMALL_INK, ink, "UiKit.SMALL_INK matches the font")
+	var t := _title()
+	for id in t.pages:
+		t._show(id)
+		var p: MenuPage = t.pages[id]
+		for row in p.rows:
+			p.select(row["id"])
+			p.settle()
+			var y: float = p._labels[p.cursor].position.y
+			var bar := p.bar_rect()
+			_centred(Vector2(y + ink.x, y + ink.y), Vector2(bar.position.y, bar.end.y),
+				"%s / %s's bar" % [id, row["id"]])
+	var m := t.pad_mapper
+	m.begin(7, "03000000790000001100000000000000", "PAD")
+	t._show("padmap")
+	for i in 3:
+		var y: float = t.pad_map_screen._labels[m.step].position.y
+		var bar := t.pad_map_screen.bar_rect()
+		_centred(Vector2(y + ink.x, y + ink.y), Vector2(bar.position.y, bar.end.y),
+			"MAP BUTTONS step %d's bar" % m.step)
+		var e := InputEventJoypadButton.new()
+		e.button_index = 30 + i
+		e.pressed = true
+		e.device = 7
+		m.feed(e)
+	m.cancel()
+	t.free()
+	var kept := [GameControls.last_device, Settings.pad_glyphs]
+	var items := [["hit", "HIT"], ["drive", "DRIVE"], ["soft", "SOFT"], ["slice", "SLICE"],
+		["short", "SHORT"], ["special", "SPECIAL"], ["start", "PAUSE"], ["esc", "BACK"], ["bksp", "STEP BACK"]]
+	var kinds := {}
+	for fam in Prompts.FAMILIES.size():
+		GameControls.last_device = GameControls.KEYBOARD if fam == 0 else GameControls.PAD
+		Settings.pad_glyphs = fam
+		GameControls.device_serial += 1
+		var b := PromptBar.new().setup(items, Vector2(480, 500))
+		for k in b.key_faces():
+			var face: Rect2 = k[0]
+			var letters: BitmapText = k[1]
+			var label: BitmapText = k[2]
+			kinds[fam] = true
+			_centred(Vector2(letters.position.y + ink.x, letters.position.y + ink.y),
+				Vector2(face.position.y, face.end.y), "family %d: \"%s\"'s key" % [fam, letters.text])
+			eq(label.position.y, letters.position.y, "\"%s\" level with its key" % label.text)
+		b.free()
+	eq(kinds.size(), Prompts.FAMILIES.size(), "every family has a key or pill to check")
+	GameControls.last_device = kept[0]
+	Settings.pad_glyphs = kept[1]
+	GameControls.device_serial += 1

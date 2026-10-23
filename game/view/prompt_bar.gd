@@ -9,12 +9,14 @@ const KEY_H := 24.0              ## a key or a pill: the letters' outline and sh
 ## The small font's ink is rows 2..18 of its 20 px cell (outline and drop
 ## shadow included): at TEXT_Y that's -9..7, inside a key's top face.
 const TEXT_Y := -11.0
+const ROUND := ["face", "menu", "view", "dpad"]   ## glyphs H wide and tall; the rest are keys and pills
+const LIP := 2.0                 ## a key's dark front edge, under its top face
 const GAP := 18.0
 
 var items: Array = []            ## [[action, label], ...]
 var tint := Color(0.85, 0.88, 0.95)
 var _texts: Array = []
-var _layout: Array = []          ## per item: [glyph, glyph rect]
+var _layout: Array = []          ## per item: [glyph, glyph rect, its letters or null, label]
 var _serial := -1
 var _binding_serial := -1
 
@@ -51,9 +53,10 @@ func rebuild() -> void:
 	var x := -total / 2.0
 	for i in items.size():
 		var w: Array = widths[i]
-		var h := H if w[0]["kind"] in ["face", "menu", "view", "dpad"] else KEY_H
+		var h := H if w[0]["kind"] in ROUND else KEY_H
 		var r := Rect2(x, -h / 2.0, w[1], h)
-		_layout.append([w[0], r])
+		var entry := [w[0], r, null, null]
+		_layout.append(entry)
 		if w[0]["text"] != "":
 			# the glyph's letters or key name, over its shape (children draw last)
 			var gt := BitmapText.new()
@@ -63,6 +66,7 @@ func rebuild() -> void:
 			gt.position = Vector2(r.get_center().x, TEXT_Y)
 			add_child(gt)
 			_texts.append(gt)
+			entry[2] = gt
 		x += w[1] + 6
 		var t := BitmapText.new()
 		t.font = "small"
@@ -71,12 +75,28 @@ func rebuild() -> void:
 		t.position = Vector2(x, TEXT_Y)
 		add_child(t)
 		_texts.append(t)
+		entry[3] = t
 		x += w[2] + GAP
 	queue_redraw()
 
 
+## Each key or pill's top face (inside its frame, above a key's lip) with
+## the letters on it and the label beside it, in the bar's coordinates:
+## [[Rect2, BitmapText, BitmapText], ...]. Round buttons and the d-pad are
+## left out (no face to sit in).
+func key_faces() -> Array:
+	var out := []
+	for l in _layout:
+		var g: Dictionary = l[0]
+		if g["kind"] in ["key", "pill"]:
+			var r: Rect2 = l[1]
+			var lip := LIP if g["kind"] == "key" else 0.0
+			out.append([r.grow_individual(-2, -2, -2, -2 - lip), l[2], l[3]])
+	return out
+
+
 func _glyph_width(g: Dictionary) -> float:
-	if g["kind"] in ["face", "menu", "view", "dpad"]:
+	if g["kind"] in ROUND:
 		return H
 	return BitmapText.measure("small", g["text"]) + 12.0
 
@@ -111,7 +131,7 @@ func _draw() -> void:
 				draw_rect(r, Color(0.92, 0.93, 0.98))
 				draw_rect(r.grow(-2), Color(0.16, 0.18, 0.3) if pill else Color(0.24, 0.26, 0.38))
 				if not pill:
-					draw_rect(Rect2(r.position.x + 2, r.end.y - 4, r.size.x - 4, 2), Color(0.1, 0.11, 0.2))
+					draw_rect(Rect2(r.position.x + 2, r.end.y - 2 - LIP, r.size.x - 4, LIP), Color(0.1, 0.11, 0.2))
 
 
 ## An Xbox face-style button: dark ring, tinted face, coloured rim.
