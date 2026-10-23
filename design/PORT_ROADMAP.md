@@ -103,6 +103,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-75 | Smaller audio: the music and ambience as Ogg (the `.pck` 34 to 18.5 MB) | `feature/cld-audio-compare` | Released (v0.31.0) |
 | PORT-76 | DINOSAUR and DINO PARK: the Carnotaurus (with Nathan) wanders, with the dinosaur game's Spinosaurus, baby and pterodactyl | `feature/cld-dino-park-dinosaurs` | Released (v0.32.0) |
 | PORT-77 | The dinosaur game's levels as courts: RUINS, GLACIER, LAB, STATION | `feature/cld-dino-levels` | Released (v0.32.0) |
+| PORT-78 | Keyboard controls you can guess: a WASD + J K L preset and an arrows + Z X C one, keys drawn where they sit | `feature/cld-keyboard-layout` | Planned (parked: you're thinking it over) |
 
 ## Releases
 
@@ -615,10 +616,44 @@ the same request). Open: 36 and 40.
     listen to the ambience and track; try TIME at RUINS and GLACIER (LAB
     and STATION stay lit).
 
+### 78. `feature/cld-keyboard-layout`: keyboard controls you can guess (asked for 2026-10-23, parked)
+
+- [ ] `PORT-78` The keyboard layout (`game_ui/controls.gd`) grew one SNES
+  button at a time: hit Space/J, drive K, soft L, slice I, short
+  Shift/U, special O, so nothing about where the keys sit says which shot
+  is which, and the prompts show the first key only (SHIFT, not the U I O
+  over J K L grid). There's no single standard, but two conventions:
+  emulators (RetroArch, Snes9x: arrows, Z = B, X = A, A = Y, S = X,
+  Q/W = L/R, Enter = Start) and PC action games (WASD, the common actions
+  on J K L, the rare ones on U I O). The proposal: two presets on
+  CONTROLS, on top of REBIND (`game_ui/bindings.gd`):
+
+  | | WASD (default) | Arrows |
+  |---|---|---|
+  | Hit | J | Z |
+  | Drive | K | X |
+  | Soft | L | C |
+  | Slice | I | S |
+  | Special | O | D |
+  | Short (held) | Shift or Space | Shift |
+
+  The three shots in one row in one order, the rarer ones on the row
+  above. And the lesson cards draw the keys where they sit (a little
+  keyboard) instead of a line of names.
+  - Needs: an ADR (new defaults), `test_controls` and the prompts, a
+    save with remapped keys still loading (a preset is a saved key with a
+    harmless default, so no new layout version), `test_layout` cases for
+    the card and the preset row.
+  - Status: **Planned**, parked until you've decided the layout.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
+
+- **PORT-78 the keyboard:** parked at your request. When you've thought
+  it over: which presets (WASD + J K L, arrows + Z X C, both), which is
+  the default, and does Space stay as a key for hit or become SHORT?
 
 - **PORT-77 the levels:** the names are RUINS, GLACIER, LAB and STATION
   (8 cells fit COURT's page). The crowd is the same crowd everywhere, so
