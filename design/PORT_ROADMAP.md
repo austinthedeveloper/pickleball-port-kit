@@ -101,6 +101,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-73 | Generic pads (SNES USB): MAP BUTTONS, saved per pad | `feature/cld-pad-mapping` | Released (v0.31.0) |
 | PORT-74 | "A controller is recommended" at startup | `feature/cld-pad-mapping` | Released (v0.31.0) |
 | PORT-75 | Smaller audio: the music and ambience as Ogg (the `.pck` 34 to 18.5 MB) | `feature/cld-audio-compare` | Released (v0.31.0) |
+| PORT-76 | DINOSAUR: the Carnotaurus (with Nathan) wanders the background, with the dinosaur game's Spinosaurus, baby and pterodactyl | `feature/cld-dino-park-dinosaurs` | Ready to test |
 
 ## Releases
 
@@ -551,10 +552,36 @@ the same request). Open: 36 and 40.
     past the loop's end (about 40 s) and listen at the wrap; compare the
     title music with `audio/compare/out/music_title_original.wav`.
 
+### 76. `feature/cld-dino-park-dinosaurs`: the dinosaur game's dinosaurs at DINOSAUR (asked for 2026-10-22)
+
+- [x] `PORT-76` ADR-084: the Carnotaurus of the SNES dinosaur game, with
+  Nathan up, walks the DINOSAUR venue's stands behind the fence (his own
+  `mount_walk` and `mount_idle` frames, 1x), stops to look about, turns
+  back, and once a lap walks off the right edge and returns. From the same
+  game: the Spinosaurus breathes in the jungle's gap, the baby dinosaur
+  patrols the jungle's edge (2x), and the pterodactyl crosses the sky
+  behind the volcano. The sprites are exported as drawn
+  (`art/sprites/dinos/export.sh`, the dinosaur repo only read) and drawn
+  by `view/dino_walkers.gd`: display only, from the frame count, each on
+  a backdrop layer's parallax and tint. The raptor, T. rex and
+  Brachiosaurus were tried and left out (the venue paints all three).
+  - Verified: `test_dinos.gd` (only on DINOSAUR, the sim untouched, two
+    views agree, the route crosses and turns and loops without a jump,
+    behind the fence), `test_view`, `test_layout`; 464/464 plus the
+    e2e, golden traces unchanged; screenshots at four frames and at
+    NIGHT.
+  - Status: **Ready to test**: play a match at DINOSAUR and watch the
+    fence line for a minute (his lap is about 80 s).
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
+
+- **PORT-76 the dinosaurs:** the Carnotaurus walks with Nathan up (the
+  solo `walk`/`idle` tags are one line away in `export.sh` and `CAST`).
+  Say if you'd rather see the raptor or the T. rex in place of the painted
+  ones, or the dinosaurs in OPEN PLAY's DINO PARK too.
 
 - **PORT-72 the shoulders:** the bible says "hold L or R to hit short"
   (SNES ADR-056); at your request the remaster now has L for SHORT and R

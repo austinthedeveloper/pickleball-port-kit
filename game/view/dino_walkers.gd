@@ -1,0 +1,137 @@
+## DINOSAUR's background dinosaurs (ADR-084), drawn with the SNES dinosaur
+## game's own sprites (art/sprites/dinos): the Carnotaurus, with Nathan up,
+## walks the stands behind the fence, stops to look about and turns back; a
+## baby dinosaur patrols the jungle's edge, where a Spinosaurus breathes;
+## a pterodactyl crosses the sky behind the volcano. Each sits just in front
+## of its backdrop layer (under the next one) and moves with its parallax.
+## Display only; deterministic (the sim's frame count), so screenshots and
+## replays repeat.
+class_name DinoWalkers
+extends Node2D
+
+const DIR := "res://assets/dinos/"
+
+## Who's in it. `cell` is a frame's size in the strip, `feet` the anchor in a
+## cell (feet, or the body's middle for a flyer), `right` whether the art
+## faces right. `walk`/`idle` are strips and frames per pose (the sources'
+## timings at 60 Hz); a `route` is [x to walk to, frames to stand there],
+## looping, at `speed` px a frame along the `y` of the `layer`.
+const CAST := [
+	{"name": "carnotaurus", "layer": "stands", "y": 162, "speed": 0.5,
+		"walk": ["carno_mount_walk.png", [9, 9, 9, 9]], "idle": ["carno_mount_idle.png", [84, 10]],
+		"cell": Vector2i(144, 96), "feet": Vector2i(70, 90), "right": true,
+		"route": [[450, 300], [175, 260], [1090, 420]]},
+	{"name": "baby", "layer": "trees", "y": 152, "speed": 0.5, "scale": 2,
+		"walk": ["baby_dino_walk.png", [8, 8]], "idle": ["baby_dino_walk.png", [400]],
+		"cell": Vector2i(32, 32), "feet": Vector2i(16, 31), "right": true,
+		"route": [[300, 150], [210, 220]]},
+	{"name": "spinosaurus", "layer": "trees", "y": 152, "speed": 0.0,
+		"idle": ["spinosaurus_idle.png", [50, 50]],
+		"cell": Vector2i(96, 64), "feet": Vector2i(48, 63), "right": false,
+		"route": [[548, 600]]},
+	{"name": "pterodactyl", "layer": "sky", "y": 66, "speed": -1.0,
+		"walk": ["pterodactyl_flap.png", [10, 10]],
+		"cell": Vector2i(32, 32), "feet": Vector2i(16, 16), "right": false,
+		"fly": [1080, -60, 1800]},          # from x, to x, every n frames
+]
+
+var sim: Sim
+var dinos: Array = []            ## [Sprite2D, cast entry, plan, parallax]
+
+
+## The cast on the DINOSAUR venue, null elsewhere. `layers` maps a backdrop
+## layer's name to [its z, its parallax].
+static func for_venue(venue: String, s: Sim, layers: Dictionary, tint: Color) -> DinoWalkers:
+	if venue != "dinosaur":
+		return null
+	var w := DinoWalkers.new()
+	w.sim = s
+	for c: Dictionary in CAST:
+		var spr := Sprite2D.new()
+		spr.centered = false
+		spr.region_enabled = true
+		spr.z_index = layers[c["layer"]][0]      # after the layer's own sprite
+		spr.modulate = tint
+		spr.scale = Vector2.ONE * c.get("scale", 1)
+		w.add_child(spr)
+		w.dinos.append([spr, c, plan(c), float(layers[c["layer"]][1])])
+	return w
+
+
+## A route as legs [first frame, frames, from x, to x] (a stop has from ==
+## to), starting from where the route ends so it loops.
+static func plan(c: Dictionary) -> Array:
+	var legs := []
+	var route: Array = c["route"] if c.has("route") else []
+	if route.is_empty():
+		return legs
+	var x: float = route[-1][0]
+	var t := 0
+	for stop: Array in route:
+		var to := float(stop[0])
+		if to != x:
+			var n := int(ceil(absf(to - x) / c["speed"]))
+			legs.append([t, n, x, to])
+			t += n
+		legs.append([t, int(stop[1]), to, to])
+		t += int(stop[1])
+		x = to
+	return legs
+
+
+## Each dinosaur's place and pose this frame; `cam` is the camera's offset.
+func update(cam: Vector2) -> void:
+	var f := sim.frame_count
+	for d in dinos:
+		var spr: Sprite2D = d[0]
+		var c: Dictionary = d[1]
+		var pose := pose_at(c, d[2], f)
+		var strip: Array = c[pose[0]]
+		var tex: Texture2D = load(DIR + strip[0])
+		if spr.texture != tex:
+			spr.texture = tex
+		var cell: Vector2i = c["cell"]
+		spr.region_rect = Rect2(pose[1] * cell.x, 0, cell.x, cell.y)
+		var flip: bool = pose[3] != c["right"]
+		spr.flip_h = flip
+		var feet: Vector2i = c["feet"]
+		spr.offset = -Vector2((cell.x - 1 - feet.x) if flip else feet.x, feet.y)
+		spr.position = (pose[2] - cam * d[3]).round()
+		spr.visible = pose[2].x > -100.0 and pose[2].x < 1060.0
+
+
+## [strip "walk" or "idle", its frame, the feet, facing right] at frame `f`.
+static func pose_at(c: Dictionary, legs: Array, f: int) -> Array:
+	if c.has("fly"):
+		var fly: Array = c["fly"]
+		var t := f % int(fly[2])
+		var x: float = fly[0] + t * float(c["speed"])
+		var y: float = c["y"] + sin(t / 50.0) * 8.0
+		return ["walk", cycle(c["walk"][1], t), Vector2(x, y), c["speed"] > 0.0]
+	var last: Array = legs[-1]
+	var t := f % (int(last[0]) + int(last[1]))
+	var right := true
+	for leg: Array in legs:
+		if leg[2] != leg[3]:
+			right = leg[3] > leg[2]
+		if t < leg[0] + leg[1]:
+			var k: int = t - leg[0]
+			var y: float = c["y"]
+			if leg[2] == leg[3]:
+				return ["idle", cycle(c["idle"][1], k), Vector2(leg[2], y), right if c["speed"] > 0.0 else c["right"]]
+			var x: float = lerpf(leg[2], leg[3], float(k) / leg[1])
+			return ["walk", cycle(c["walk"][1], k), Vector2(x, y), right]
+	return ["idle", 0, Vector2(last[2], c["y"]), right]
+
+
+## The frame of a strip with these durations, `t` frames in.
+static func cycle(ticks: Array, t: int) -> int:
+	var total := 0
+	for n: int in ticks:
+		total += n
+	t %= total
+	for i in ticks.size():
+		t -= int(ticks[i])
+		if t < 0:
+			return i
+	return 0

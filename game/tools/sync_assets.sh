@@ -19,6 +19,9 @@ $SYNC "$KIT/art/park/out/" "$DST/park/"
 # the practice ball machine (art/sprites/machine, built in Aseprite)
 mkdir -p "$DST/machine"
 $SYNC "$KIT/art/sprites/machine/out/" "$DST/machine/"
+# DINOSAUR's background dinosaurs (art/sprites/dinos/export.sh, ADR-084)
+mkdir -p "$DST/dinos"
+$SYNC "$KIT/art/sprites/dinos/out/" "$DST/dinos/"
 # the HD set (audio/hd-sfx/make_sfx.py) and the soundtrack
 # (audio/music/make_music.py); the SNES originals stay in audio/snes-sfx.
 # Effects ship as WAV (imported as QOA); the music and the ambience loops

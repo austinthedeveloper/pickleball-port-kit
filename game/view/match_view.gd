@@ -96,6 +96,7 @@ var _net_layer: Sprite2D
 const GLOW_TIME := 2
 const GLOW_LINES := 4
 var critter: Critter             ## SNES ADR-064: the venue's gull, satellite or fish
+var dinos: DinoWalkers           ## ADR-084: DINOSAUR's Carnotaurus and friends
 var wind_view: WindView          ## WIND's streaks (port ADR-065)
 var heat: RallyHeat              ## PORT-43: a long rally's fire
 var focus: RallyHeat.FocusDim    ## ... and its focus
@@ -184,6 +185,7 @@ func _tex(rel: String) -> Texture2D:
 func _build() -> void:
 	var vm: Dictionary = manifest["venues"][venue]
 	var z := 0
+	var layer_z := {}                ## a backdrop layer's name: [z, parallax]
 	for layer in vm["layers"]:
 		if layer["name"] == "net":
 			# PORT-43: a long rally dims everything behind the net but the
@@ -197,6 +199,7 @@ func _build() -> void:
 		s.position = Vector2(layer["origin"][0], layer["origin"][1])
 		s.z_index = z
 		add_child(s)
+		layer_z[layer["name"]] = [z, float(layer["parallax"])]
 		_layers.append([s, s.position, float(layer["parallax"])])
 		if layer["name"] == "net":
 			_net_layer = s
@@ -251,6 +254,12 @@ func _build() -> void:
 	critter = Critter.for_venue(venue, sim)
 	if critter:
 		add_child(critter)
+	dinos = DinoWalkers.for_venue(venue, sim, layer_z, CourtStyle.time_scales(time)[0])
+	if dinos:
+		add_child(dinos)
+		if focus:
+			for spr: CanvasItem in dinos.get_children():
+				focus.dim_too(spr)
 	if sim.config.modifiers & K.MOD_WIND:
 		wind_view = WindView.new().setup(sim)
 		add_child(wind_view)
@@ -318,7 +327,7 @@ func rebuild(cfg: SimTypes.MatchConfig) -> void:
 	_layers = []
 	_players = []
 	_multi_balls = []
-	for f in ["crowd", "watcher", "critter", "wind_view", "focus", "heat", "close_call",
+	for f in ["crowd", "watcher", "critter", "dinos", "wind_view", "focus", "heat", "close_call",
 			"lesson_view", "_ground", "_net_text", "effects", "_net_layer"]:
 		set(f, null)
 	glide = BallGlide.new()
@@ -761,6 +770,8 @@ func _update_camera() -> void:
 		crowd.position = stands
 	if watcher:
 		watcher.position = stands
+	if dinos:
+		dinos.update(cam)
 	var court_shift := (-cam).round()
 	_actors.position = court_shift
 	_shadows.position = court_shift
