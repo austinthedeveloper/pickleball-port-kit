@@ -9,7 +9,9 @@
 ## pad: B A Y X by position in the Super Famicom's colours, L R, START and
 ## SELECT. The family comes from the pad's name, or BUTTON ICONS on
 ## CONTROLLER. Bindings come from the live input map, so a remap shows at
-## once.
+## once. On a touch screen (PORT-81) the prompts are the on-screen pad's
+## buttons (TouchPad), a SNES pad's: fixed, since a remap is the keys' and
+## pads'.
 class_name Prompts
 extends RefCounted
 
@@ -120,6 +122,8 @@ static func glyph(action: String, device := -1) -> Dictionary:
 		return {"kind": "key", "text": key_name(KEY_ONLY[action])}
 	if device < 0:
 		device = GameControls.last_device
+	if device == GameControls.TOUCH:
+		return touch_glyph(action)
 	if device == GameControls.KEYBOARD:
 		if action == "dpad":
 			return {"kind": "key", "text": "ARROWS"}
@@ -134,6 +138,21 @@ static func glyph(action: String, device := -1) -> Dictionary:
 	if action in Bindings.TRIGGERS and first_button(action) < 0:
 		return trigger_glyph("", Bindings.TRIGGERS[action] == JOY_AXIS_TRIGGER_LEFT)
 	return button_glyph(first_button(action))
+
+
+## The on-screen pad's buttons (TouchPad), drawn as a SNES pad's: B hit,
+## A drive (and back, as on a pad), Y soft, X slice, L short, R special.
+const TOUCH := {"hit": JOY_BUTTON_A, "drive": JOY_BUTTON_B, "soft": JOY_BUTTON_X,
+	"slice": JOY_BUTTON_Y, "short": JOY_BUTTON_LEFT_SHOULDER, "special": JOY_BUTTON_RIGHT_SHOULDER,
+	"start": JOY_BUTTON_START, "move_up": JOY_BUTTON_DPAD_UP, "move_down": JOY_BUTTON_DPAD_DOWN,
+	"move_left": JOY_BUTTON_DPAD_LEFT, "move_right": JOY_BUTTON_DPAD_RIGHT}
+
+static func touch_glyph(action: String) -> Dictionary:
+	if action == "dpad":
+		return {"kind": "dpad", "text": "", "dir": -1}
+	if action == "back":
+		action = "drive"
+	return button_glyph(TOUCH.get(action, -1), SNES)
 
 
 ## A trigger (SHORT's left, SPECIAL's right, port ADR-082), as each family

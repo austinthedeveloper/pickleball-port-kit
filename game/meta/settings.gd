@@ -104,6 +104,9 @@ static var pad_glyphs := 0
 ## The "a controller is recommended" card at startup with no pad
 ## connected (port ADR-082); DON'T SHOW AGAIN turns it off.
 static var pad_notice := true
+## TOUCH PAD (PORT-81, port ADR-086): the on-screen pad, TouchPad.AUTO
+## (a touch screen with no pad), ON or OFF.
+static var touch_pad := 0
 
 
 ## Reads the save's settings, each made valid.
@@ -163,6 +166,7 @@ static func load_from(save: SaveGame) -> void:
 	vibration = int(st.get("vibration", 1)) != 0
 	pad_glyphs = clampi(int(st.get("pad_glyphs", 0)), 0, Prompts.FAMILIES.size() - 1)
 	pad_notice = int(st.get("pad_notice", 1)) != 0
+	touch_pad = clampi(int(st.get("touch_pad", 0)), 0, TouchPad.MODES.size() - 1)
 	Bindings.from_save(st.get("bindings", {}))
 	PadMaps.from_save(st.get("pad_maps", {}))
 	GameControls.refresh_pads()
@@ -186,7 +190,7 @@ static func store_to(save: SaveGame) -> void:
 		"hud_large": 1 if hud_large else 0, "serve_assist": 1 if serve_assist else 0,
 		"vibration": 1 if vibration else 0, "pad_glyphs": pad_glyphs,
 		"bindings": Bindings.to_save(), "pad_maps": PadMaps.to_save(),
-		"pad_notice": 1 if pad_notice else 0}, true)
+		"pad_notice": 1 if pad_notice else 0, "touch_pad": touch_pad}, true)
 
 
 ## Applies the window options (a no-op headless, where there's no window).
