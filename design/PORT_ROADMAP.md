@@ -588,23 +588,22 @@ the same request). Open: 36 and 40.
 - [x] `PORT-77` ADR-085: four venues from the dinosaur game's level
   concepts (`../dinosaur/assets/levels`), after the GYM on COURT > VENUE.
   **RUINS** (`01-ruins.png`): a burning, drowned city under a purple and
-  orange sunset, a broken bridge, mossy pillars and rusted girders,
-  raptors and a stegosaurus on the wall; PURPLE court, CLAY kitchen,
-  cracked CONCRETE. **GLACIER** (`ice-wilderness.png`): snowy peaks at
-  dusk, ice spires, the aqueduct hung with icicles, snowy pines, pale
-  raptors and a triceratops in the drifts; BLUE and NAVY on SNOW.
+  orange sunset, a broken bridge, mossy pillars and rusted girders, the
+  crowd on a mossy wall; PURPLE court, CLAY kitchen, cracked CONCRETE.
+  **GLACIER** (`ice-wilderness.png`): snowy peaks at dusk, ice spires,
+  the aqueduct hung with icicles, snowy pines; BLUE and NAVY on SNOW.
   **LAB** (`science-lab.png`, indoors): green tanks with a T. rex, a
   raptor and a long-neck's skeletons, a hazard-striped catwalk, consoles,
   a raptor loose on the deck behind a yellow rail; BLACK and GREEN, YELLOW
   lines, steel plates. **STATION** (`space.png`, indoors): windows on a
   nebula, a ringed planet, asteroids and a wreck, orange-lit rails and
-  consoles, a raptor, an astronaut and a drone; SLATE and ORANGE on deck
-  plates. Nathan rides the Carnotaurus along each deck (ADR-084's sprites,
-  with the roar), and the pterodactyl crosses RUINS' and GLACIER's skies.
+  consoles, an astronaut and a drone; SLATE and ORANGE on deck plates.
+  Dinosaurs only at the LAB (your call after the first cut): there Nathan
+  rides the Carnotaurus along the deck (ADR-084's sprites, with the roar).
   Each has its own ambience and match track; the announcer's lines for
   them are in the batch to record (until then: the format).
-  - Verified: `test_dinos` (the Carnotaurus on each deck, behind the
-    fence; the pterodactyl outdoors only), `test_court` (each paints its
+  - Verified: `test_dinos` (the Carnotaurus on the LAB's deck, behind the
+    fence; none at the other three), `test_court` (each paints its
     presets), `test_announcer`, and every suite that runs all venues;
     470/470 plus the e2e, golden traces unchanged; the existing venues'
     art and audio byte-identical; screenshots of all four in a match
@@ -621,8 +620,7 @@ the chain: each has a default I've gone with.
 - **PORT-77 the levels:** the names are RUINS, GLACIER, LAB and STATION
   (8 cells fit COURT's page). The crowd is the same crowd everywhere, so
   GLACIER's spectators are in shorts; say if they should be bundled up.
-  Should any of the four be a story chapter, an opponent's home, or an
-  OPEN PLAY location?
+  They live on COURT > VENUE only for now (your call).
 
 - **PORT-76 the dinosaurs:** the Carnotaurus walks with Nathan up (the
   solo `walk`/`idle` tags are one line away in `export.sh` and `CAST`).

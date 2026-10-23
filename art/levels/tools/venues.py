@@ -792,8 +792,7 @@ RUST = ramp("3a1a14", "6a3020", "9a4a2a", "c87040")
 def ruins() -> Venue:
     """The dinosaur game's level 1: a drowned city burning under a purple
     and orange sunset, a broken bridge over the river, mossy pillars and
-    rusted girders, purple raptors on the wall."""
-    import critters as K
+    rusted girders, the crowd on a mossy wall."""
     v = Venue("ruins")
     v.stands_behind_fence = True
     S = Layer()
@@ -836,16 +835,12 @@ def ruins() -> Venue:
         P.fill(wall & P.rect_mask(-48, y, 1008, y + 1), RUIN_STONE[0])
     P.fill(P.rect_mask(-48, 165, 1008, 168), MOSS[1])
     P.fill(P.rect_mask(-48, 165, 1008, 166), MOSS[2])
-    K.raptor(P, 130, 168, ramp("3a1e5a", "6a3a8a", "9a62b4", "c49ad8"), d=1, s=1.5)
-    K.raptor(P, 220, 168, ramp("5a1e44", "8a3a6a", "c0609a", "e89ac0"), d=1, s=1.3)
-    K.stegosaurus(P, 840, 168, ramp("2a2a4a", "4a4a72", "6a6a96", "9090b8"),
-                  ramp("6a2a1a", "a8502a", "e08a4a"), d=-1, s=1.8)
     barrel(P, 286, 168, 14, 20, ramp("6a1414", "a82a24", "d84a3a"), hexrgb("e8e0d0"),
            mark=(hexrgb("f4f0e6"), hexrgb("c8281e")))
     crate(P, 640, 168, 20, ramp("4a2a16", "7a4a26", "a06a3a"))
     crate(P, 662, 168, 14, ramp("4a2a16", "7a4a26", "a06a3a"))
     v.add("stands", P, 1.0)
-    stand_seats(v, (340, 400, 470, 560, 720, 780), 180)
+    stand_seats(v, (140, 210, 340, 400, 470, 560, 720, 780, 850), 180)
     v.watcher = {"x": 780, "y": 180, "pose": "stand"}
     B = Layer()
     posts = [-30] + [M(x, 0)[0] for x in (110, 330, 560, 790, 1020, 1240)] + [990]
@@ -873,8 +868,7 @@ PINE = ramp("10223a", "1c3a4e", "2c5662")
 def glacier() -> Venue:
     """The dinosaur game's ice wilderness: a pink dusk over snowy peaks, a
     frozen castle's spires, a stone aqueduct hung with icicles, snowy
-    pines, and pale raptors in the drifts."""
-    import critters as K
+    pines, the crowd in the drifts."""
     v = Venue("glacier")
     v.stands_behind_fence = True
     S = Layer()
@@ -884,7 +878,6 @@ def glacier() -> Venue:
     for (cx, cy, w, h, sd) in ((150, 30, 150, 7, 241), (420, 14, 120, 6, 242), (700, 40, 160, 7, 243),
                                (900, 20, 110, 6, 244), (300, 66, 100, 5, 245)):
         cloud(S, cx, cy, w, h, ramp("4a3a7a", "8a4a7a", "c86a7a", "f09a8a"), seed=sd)
-    K.pterodactyl(S, 820, 52, ramp("3a1e3a", "7a3a4a", "b06a5a", "d89a7a"), d=-1, s=1.6, up=True)
     v.add("sky", S, 0.2)
     F = Layer()
     peaks(F, -48, 1008, 132, 30, 84, ramp("2a3060", "3e4880", "5a68a8"), SNOW, seed=250)
@@ -911,15 +904,11 @@ def glacier() -> Venue:
     v.add("trees", T, 0.6)
     P = Layer()
     snow_bank(P, -48, 1008, 168, 192, SNOW, seed=280)
-    K.raptor(P, 120, 180, ramp("4a5272", "7a84a6", "aab4d0", "dce4f4"), d=1, s=1.5)
-    K.raptor(P, 210, 180, ramp("2a2e4a", "4a5070", "6e76a0", "9aa2c8"), d=1, s=1.3)
-    K.triceratops(P, 850, 180, ramp("3a3a52", "5a5a78", "80809e", "a8a8c4"),
-                  ramp("2a3a6a", "4a6aa8", "7aa0d8"), d=-1, s=1.8)
     crate(P, 640, 180, 20, ramp("3a2a20", "5a4030", "7a5a40"))
     P.fill(P.ellipse_mask(650, 160, 12, 4) & P.rect_mask(638, 154, 662, 161), SNOW[2])
     icicles(P, 640, 660, 160, 5, ramp("6a9ad8", "9ac8f4", "e0f4ff"), seed=281)
     v.add("stands", P, 1.0)
-    stand_seats(v, (330, 400, 470, 560, 720, 780), 184)
+    stand_seats(v, (130, 200, 330, 400, 470, 560, 720, 780, 850), 184)
     v.watcher = {"x": 780, "y": 184, "pose": "stand"}
     B = Layer()
     posts = [-30] + [M(x, 0)[0] for x in (110, 330, 560, 790, 1020, 1240)] + [990]
@@ -1066,7 +1055,7 @@ def drone(L: Layer, x, y, s=1.0):
 def station() -> Venue:
     """The dinosaur game's space station, indoors: big windows on a nebula,
     a ringed planet, asteroids and a wrecked station; orange-lit girders,
-    consoles, an orange railing, raptors and a drone on the deck."""
+    consoles, an orange railing, an astronaut and a drone on the deck."""
     import critters as K
     v = Venue("station")
     v.stands_behind_fence = True
@@ -1135,13 +1124,11 @@ def station() -> Venue:
     for x in range(-48, 1008, 32):
         P.fill(deck & P.rect_mask(x, 166, x + 1, 192), HULL[1])
     P.fill(P.rect_mask(-48, 166, 1008, 168), LIGHT[1])
-    K.raptor(P, 140, 172, ramp("3a1e5a", "6a3a8a", "9a62b4", "c49ad8"), d=1, s=1.5)
     K.astronaut(P, 230, 172, ramp("8a92a4", "c4ccd8", "eef2f8", "ffffff"), ramp("1a2a5a", "4a7ad8"),
                 d=1, s=1.3, wave=True)
     drone(P, 860, 128, s=1.2)
-    K.raptor(P, 850, 172, ramp("2a2a3a", "4a4a5e", "7a7a8e", "a8a8bc"), d=-1, s=1.4)
     v.add("stands", P, 1.0)
-    stand_seats(v, (330, 400, 470, 560, 640, 720), 180)
+    stand_seats(v, (150, 330, 400, 470, 560, 640, 720, 800), 180)
     v.watcher = {"x": 720, "y": 180, "pose": "stand"}
     B = Layer()
     posts = [-30] + [M(x, 0)[0] for x in (110, 330, 560, 790, 1020, 1240)] + [990]

@@ -1,6 +1,6 @@
 ## DINOSAUR's background dinosaurs (ADR-084): display only, deterministic,
-## wandering, and always behind the fence; the Carnotaurus at the dinosaur
-## game's four levels too (ADR-085).
+## wandering, and always behind the fence; the Carnotaurus at the LAB too
+## (ADR-085).
 extends TestSuite
 
 
@@ -31,9 +31,12 @@ func test_dinos_only_on_the_dinosaur_venues() -> void:
 	sim.dispose()
 
 
-## ADR-085: at the dinosaur game's levels, the Carnotaurus with Nathan on
-## the deck, the pterodactyl outdoors; DINOSAUR keeps its whole cast.
-func test_the_levels_have_the_carnotaurus() -> void:
+## ADR-085: of the dinosaur game's levels only the LAB keeps dinosaurs:
+## the Carnotaurus with Nathan on its deck. DINOSAUR keeps its whole cast.
+func test_the_lab_has_the_carnotaurus() -> void:
+	eq(DinoWalkers.RIDES.keys(), ["lab"], "only the LAB")
+	for venue in ["ruins", "glacier", "station"]:
+		check(DinoWalkers.cast_for(venue).is_empty(), "%s: no dinosaurs" % venue)
 	eq(DinoWalkers.cast_for("dinosaur"), DinoWalkers.CAST, "DINOSAUR's cast unchanged")
 	eq(DinoWalkers.CAST[0]["y"], 162, "...and its Carnotaurus's deck")
 	for venue: String in DinoWalkers.RIDES:
@@ -41,7 +44,7 @@ func test_the_levels_have_the_carnotaurus() -> void:
 		var cast := DinoWalkers.cast_for(venue)
 		eq(cast[0]["name"], "carnotaurus", venue)
 		eq(cast[0]["y"], DinoWalkers.RIDES[venue], "%s: on its deck" % venue)
-		eq(cast.size(), 2 if venue in DinoWalkers.SKIES else 1, "%s: the pterodactyl outdoors" % venue)
+		eq(cast.size(), 1, "%s: just him" % venue)
 
 
 func test_dinos_leave_the_sim_alone() -> void:

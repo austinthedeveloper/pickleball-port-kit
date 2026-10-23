@@ -29,10 +29,10 @@ COURT > VENUE like the others:
 
 | Venue | From | Court (DEFAULT) | Who's watching |
 |---|---|---|---|
-| **RUINS** | `01-ruins.png` | PURPLE, CLAY kitchen, CONCRETE (cracked), WHITE | two raptors and a stegosaurus on a mossy wall, a burning skyline over a river and a broken bridge |
-| **GLACIER** | `ice-wilderness.png` | BLUE, NAVY kitchen, SNOW, WHITE | two pale raptors and a triceratops in the drifts, snowy peaks, ice spires, the aqueduct, a pterodactyl |
+| **RUINS** | `01-ruins.png` | PURPLE, CLAY kitchen, CONCRETE (cracked), WHITE | the crowd on a mossy wall, a burning skyline over a river and a broken bridge |
+| **GLACIER** | `ice-wilderness.png` | BLUE, NAVY kitchen, SNOW, WHITE | the crowd in the drifts, snowy peaks, ice spires, the aqueduct |
 | **LAB** (indoors) | `science-lab.png` | BLACK, GREEN kitchen, ASPHALT (steel plates), YELLOW | a raptor loose on the grated deck behind a yellow safety rail; a T. rex, a raptor and a long-neck in the tanks |
-| **STATION** (indoors) | `space.png` | SLATE, ORANGE kitchen, ASPHALT (deck plates), WHITE | a raptor, an astronaut and a drone behind an orange rail; the windows' planet, asteroids and wreck |
+| **STATION** (indoors) | `space.png` | SLATE, ORANGE kitchen, ASPHALT (deck plates), WHITE | an astronaut and a drone with the crowd behind an orange rail; the windows' planet, asteroids and wreck |
 
 - **Drawn in the kit's way**, not traced: `art/levels/tools/venues.py`
   gains `ruins()`, `glacier()`, `lab()` and `station()`, and
@@ -46,11 +46,15 @@ COURT > VENUE like the others:
 - **LAB and STATION are indoors** (`Settings.INDOOR`): always lit,
   whatever COURT's TIME says. RUINS and GLACIER take TIME like the
   outdoor venues.
-- **The Carnotaurus comes too** (ADR-084's sprites, as drawn): Nathan
-  rides him along each venue's deck behind the fence, among the crowd
-  (`DinoWalkers.RIDES`: the deck's y), with the same route, idle and roar
-  as at DINOSAUR. The pterodactyl crosses RUINS' and GLACIER's skies
-  (`SKIES`). DINOSAUR's own cast is unchanged.
+- **Dinosaurs only at the LAB** (the user, after a first cut put them at
+  all four: "I didn't realize we were going to place dinosaurs in the
+  locations. Get rid of them for all except LAB"). RUINS, GLACIER and
+  STATION are the levels' places without their creatures: spectators
+  stand where the raptors, the stegosaurus and the triceratops were. At
+  the LAB, the tanks' skeletons, two loose raptors, and the Carnotaurus
+  (ADR-084's sprites, as drawn): Nathan rides him along the deck behind
+  the fence, among the crowd (`DinoWalkers.RIDES`: the deck's y), with
+  DINOSAUR's route, idle and roar. DINOSAUR's own cast is unchanged.
 - **Their own sound:** an ambience each (`audio/hd-sfx/make_sfx.py`:
   wind, fires, a river and far raptors; a howling wind and groaning ice;
   mains hum, bubbling tanks and beeps; an engine drone, vents and doors)
@@ -68,13 +72,12 @@ COURT > VENUE like the others:
 - No story chapter, opponent home or OPEN PLAY location plays at them;
   they're picked on COURT > VENUE (and QUICK MATCH, the demo and replays
   follow it).
-- No venue critter (SNES ADR-064) at them: the Carnotaurus and the
-  pterodactyl are their life.
+- No venue critter (SNES ADR-064) at them.
 
 ## Tests
 
-`test_dinos` (the levels have the Carnotaurus on their deck, the
-pterodactyl outdoors, behind the fence at each); `test_court` (the four
+`test_dinos` (the LAB has the Carnotaurus on its deck, behind the
+fence; the other three none); `test_court` (the four
 paint their venues.json presets); `test_announcer` (their lines are to
 record); and the suites that run every venue (`test_view`,
 `test_layout`, `test_night`, `test_music`, `test_audio`, `test_replay`,
