@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.31.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.32.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-73 of 75 roadmap tasks are in.
+75 of 77 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -454,3 +454,15 @@ Status: **Ready to test**: start the game with no pad plugged in.
 ADR-083: first a comparison: nine clips (three SFX, the park ambience, two music tracks, three announcer lines) in Ogg q6/q4/q2, IMA-ADPCM, 22 kHz mono and MP3 beside their originals, with sizes against the QOA the game shipped (`audio/compare/`, `make_compare.py --estimate`). Then the switch: the 12 music files and 7 ambience loops ship as Ogg q4, encoded by `sync_assets.sh` (`tools/encode_ogg.py`, reproducible bytes); effects and the announcer stay WAV/QOA. The `.pck` goes from about 34 MB to 18.5 MB.
 
 Status: **Ready to test**: play a match at the park and at SPACE past the loop's end (about 40 s) and listen at the wrap; compare the title music with `audio/compare/out/music_title_original.wav`.
+
+## PORT-76: the dinosaur game's dinosaurs at DINOSAUR (asked for 2026-10-22)
+
+ADR-084: the Carnotaurus of the SNES dinosaur game, with Nathan up, walks the DINOSAUR venue's stands behind the fence (his own `mount_walk` and `mount_idle` frames, 1x), stops to look about, turns back, and once a lap walks off the right edge and returns. From the same game: the Spinosaurus breathes in the jungle's gap, the baby dinosaur patrols the jungle's edge (2x), and the pterodactyl crosses the sky behind the volcano. The sprites are exported as drawn (`art/sprites/dinos/export.sh`, the dinosaur repo only read) and drawn by `view/dino_walkers.gd`: display only, from the frame count, each on a backdrop layer's parallax and tint. The raptor, T. rex and Brachiosaurus were tried and left out (the venue paints all three). OPEN PLAY's DINO PARK has them too: the Carnotaurus strolls the sand path among the people (sorted by his feet), the baby patrols the grass by the T. rex statue, the pterodactyl flies over the courts. He roars (his `mount_roar`) when a long rally (10+ shots) ends or a match is won, and in DINO PARK when you come back a winner.
+
+Status: **Ready to test**: play a match at DINOSAUR and watch the fence line for a minute (his lap is about 80 s) and for a roar after a long rally; walk DINO PARK's path, and come back from a win there.
+
+## PORT-77: the dinosaur game's levels as courts (asked for 2026-10-22)
+
+ADR-085: four venues from the dinosaur game's level concepts (`../dinosaur/assets/levels`), after the GYM on COURT > VENUE. **RUINS** (`01-ruins.png`): a burning, drowned city under a purple and orange sunset, a broken bridge, mossy pillars and rusted girders, the crowd on a mossy wall; PURPLE court, CLAY kitchen, cracked CONCRETE. **GLACIER** (`ice-wilderness.png`): snowy peaks at dusk, ice spires, the aqueduct hung with icicles, snowy pines; BLUE and NAVY on SNOW. **LAB** (`science-lab.png`, indoors): green tanks with a T. rex, a raptor and a long-neck's skeletons, a hazard-striped catwalk, consoles, a raptor loose on the deck behind a yellow rail; BLACK and GREEN, YELLOW lines, steel plates. **STATION** (`space.png`, indoors): windows on a nebula, a ringed planet, asteroids and a wreck, orange-lit rails and consoles, an astronaut and a drone; SLATE and ORANGE on deck plates. Dinosaurs only at the LAB (your call after the first cut): there Nathan rides the Carnotaurus along the deck (ADR-084's sprites, with the roar). Each has its own ambience and match track; the announcer's lines for them are in the batch to record (until then: the format).
+
+Status: **Ready to test**: COURT > VENUE, play a game at each and listen to the ambience and track; try TIME at RUINS and GLACIER (LAB and STATION stay lit).

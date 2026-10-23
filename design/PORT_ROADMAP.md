@@ -101,8 +101,8 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-73 | Generic pads (SNES USB): MAP BUTTONS, saved per pad | `feature/cld-pad-mapping` | Released (v0.31.0) |
 | PORT-74 | "A controller is recommended" at startup | `feature/cld-pad-mapping` | Released (v0.31.0) |
 | PORT-75 | Smaller audio: the music and ambience as Ogg (the `.pck` 34 to 18.5 MB) | `feature/cld-audio-compare` | Released (v0.31.0) |
-| PORT-76 | DINOSAUR and DINO PARK: the Carnotaurus (with Nathan) wanders, with the dinosaur game's Spinosaurus, baby and pterodactyl | `feature/cld-dino-park-dinosaurs` | Ready to test |
-| PORT-77 | The dinosaur game's levels as courts: RUINS, GLACIER, LAB, STATION | `feature/cld-dino-levels` | Ready to test |
+| PORT-76 | DINOSAUR and DINO PARK: the Carnotaurus (with Nathan) wanders, with the dinosaur game's Spinosaurus, baby and pterodactyl | `feature/cld-dino-park-dinosaurs` | Released (v0.32.0) |
+| PORT-77 | The dinosaur game's levels as courts: RUINS, GLACIER, LAB, STATION | `feature/cld-dino-levels` | Released (v0.32.0) |
 
 ## Releases
 
@@ -213,6 +213,9 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.31.0** (2026-10-22): PORT-72 L for SHORT and R for SPECIAL, PORT-73
   generic pads mapped, PORT-74 a controller recommended, PORT-75 smaller
   audio (tag `v0.31.0`, on `feature/cld-release-0.31.0`).
+- **v0.32.0** (2026-10-22): PORT-76 the Carnotaurus and friends at
+  DINOSAUR and DINO PARK, PORT-77 RUINS, GLACIER, LAB and STATION (tag
+  `v0.32.0`, on `feature/cld-release-0.32.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 

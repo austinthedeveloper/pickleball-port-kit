@@ -4,6 +4,28 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.32.0] - 2026-10-22
+
+Dinosaurs, and four new courts.
+
+### Added
+- **Four new venues** on COURT, VENUE, from the levels of the SNES
+  dinosaur game: **RUINS** (a burning city at sunset over a river),
+  **GLACIER** (snowy peaks, ice spires and an icicled stone bridge),
+  **LAB** (green tanks of dinosaur skeletons, a hazard-striped catwalk,
+  and a few dinosaurs on the loose) and **STATION** (windows on a nebula
+  and a ringed planet). Each has its own court colours, sounds and match
+  music. LAB and STATION are indoors, so they stay lit at any TIME. The
+  announcer doesn't introduce them yet.
+- **The Carnotaurus**, with Nathan riding, wanders behind the fence at
+  DINOSAUR and the LAB, and strolls DINO PARK's path in OPEN PLAY. He
+  roars after a long rally or a match won. At DINOSAUR the Spinosaurus,
+  a baby dinosaur and a pterodactyl join him.
+
+### Changed
+- **GLOBETROTTER** now asks for a win at all eleven venues. Already
+  earned? You keep it.
+
 ## [0.31.0] - 2026-10-22
 
 Bring your own pad, and a smaller download.
