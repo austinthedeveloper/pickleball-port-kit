@@ -99,7 +99,7 @@ func begin() -> void:
 	if view.story_mode:
 		_intro.append("story_stakes_1")
 	elif _first(["venue_" + view.venue]) != "":
-		_intro.append("venue_" + view.venue)  # (the GYM's is still to record: PORT-55)
+		_intro.append("venue_" + view.venue)  # (the dinosaur game's four are still to record: ADR-085)
 	for m in MOD_LINES:
 		if cfg.modifiers & int(m[0]) and _first([m[1]]) != "":    # (SPECIALS' is still to record)
 			_intro.append(m[1])

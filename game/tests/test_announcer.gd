@@ -24,6 +24,11 @@ func _restore(k: Array) -> void:
 	Announcer.enabled = k[3]
 
 
+## Venues whose introduction isn't recorded yet (ADR-085: in
+## design/announcer/ADDITIONS.md); their matches open with the format.
+const TO_RECORD := ["ruins", "glacier", "lab", "station"]
+
+
 ## Every clip is there, and every line the commentary can ask for.
 func test_the_clips() -> void:
 	var a := _voice()
@@ -50,7 +55,8 @@ func test_the_clips() -> void:
 	for n in Commentary.RALLY_CALLS:
 		wanted.append("rally_%d" % n)
 	for v in Settings.VENUES:
-		wanted.append("venue_" + v)
+		if not v in TO_RECORD:
+			wanted.append("venue_" + v)
 	for n in 26:
 		wanted.append_array(["num_%02d_up" % n, "num_%02d_down" % n])
 	for f in wanted:

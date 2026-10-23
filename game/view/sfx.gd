@@ -28,7 +28,8 @@ const TRIM_DB := {"whistle": -3.0, "applause": 1.0, "net": -1.0, "hit_soft": 1.0
 const AMBIENCE_EXT := ".ogg"
 const AMBIENCE := {"park": "ambience_park", "lakeside": "ambience_lakeside",
 	"sunset": "ambience_sunset", "dinosaur": "ambience_dinosaur", "space": "ambience_space",
-	"undersea": "ambience_undersea", "gym": "ambience_gym"}
+	"undersea": "ambience_undersea", "gym": "ambience_gym", "ruins": "ambience_ruins",
+	"glacier": "ambience_glacier", "lab": "ambience_lab", "station": "ambience_station"}
 const VOICES := 3                  ## overlapping copies per effect
 const AMBIENCE_DB := -12.0
 const FADE_IN := 0.6

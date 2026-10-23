@@ -102,6 +102,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-74 | "A controller is recommended" at startup | `feature/cld-pad-mapping` | Released (v0.31.0) |
 | PORT-75 | Smaller audio: the music and ambience as Ogg (the `.pck` 34 to 18.5 MB) | `feature/cld-audio-compare` | Released (v0.31.0) |
 | PORT-76 | DINOSAUR and DINO PARK: the Carnotaurus (with Nathan) wanders, with the dinosaur game's Spinosaurus, baby and pterodactyl | `feature/cld-dino-park-dinosaurs` | Ready to test |
+| PORT-77 | The dinosaur game's levels as courts: RUINS, GLACIER, LAB, STATION | `feature/cld-dino-levels` | Ready to test |
 
 ## Releases
 
@@ -582,10 +583,46 @@ the same request). Open: 36 and 40.
     fence line for a minute (his lap is about 80 s) and for a roar after
     a long rally; walk DINO PARK's path, and come back from a win there.
 
+### 77. `feature/cld-dino-levels`: the dinosaur game's levels as courts (asked for 2026-10-22)
+
+- [x] `PORT-77` ADR-085: four venues from the dinosaur game's level
+  concepts (`../dinosaur/assets/levels`), after the GYM on COURT > VENUE.
+  **RUINS** (`01-ruins.png`): a burning, drowned city under a purple and
+  orange sunset, a broken bridge, mossy pillars and rusted girders,
+  raptors and a stegosaurus on the wall; PURPLE court, CLAY kitchen,
+  cracked CONCRETE. **GLACIER** (`ice-wilderness.png`): snowy peaks at
+  dusk, ice spires, the aqueduct hung with icicles, snowy pines, pale
+  raptors and a triceratops in the drifts; BLUE and NAVY on SNOW.
+  **LAB** (`science-lab.png`, indoors): green tanks with a T. rex, a
+  raptor and a long-neck's skeletons, a hazard-striped catwalk, consoles,
+  a raptor loose on the deck behind a yellow rail; BLACK and GREEN, YELLOW
+  lines, steel plates. **STATION** (`space.png`, indoors): windows on a
+  nebula, a ringed planet, asteroids and a wreck, orange-lit rails and
+  consoles, a raptor, an astronaut and a drone; SLATE and ORANGE on deck
+  plates. Nathan rides the Carnotaurus along each deck (ADR-084's sprites,
+  with the roar), and the pterodactyl crosses RUINS' and GLACIER's skies.
+  Each has its own ambience and match track; the announcer's lines for
+  them are in the batch to record (until then: the format).
+  - Verified: `test_dinos` (the Carnotaurus on each deck, behind the
+    fence; the pterodactyl outdoors only), `test_court` (each paints its
+    presets), `test_announcer`, and every suite that runs all venues;
+    470/470 plus the e2e, golden traces unchanged; the existing venues'
+    art and audio byte-identical; screenshots of all four in a match
+    (`art/levels/out/previews/{ruins,glacier,lab,station}.png`).
+  - Status: **Ready to test**: COURT > VENUE, play a game at each and
+    listen to the ambience and track; try TIME at RUINS and GLACIER (LAB
+    and STATION stay lit).
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
+
+- **PORT-77 the levels:** the names are RUINS, GLACIER, LAB and STATION
+  (8 cells fit COURT's page). The crowd is the same crowd everywhere, so
+  GLACIER's spectators are in shorts; say if they should be bundled up.
+  Should any of the four be a story chapter, an opponent's home, or an
+  OPEN PLAY location?
 
 - **PORT-76 the dinosaurs:** the Carnotaurus walks with Nathan up (the
   solo `walk`/`idle` tags are one line away in `export.sh` and `CAST`).

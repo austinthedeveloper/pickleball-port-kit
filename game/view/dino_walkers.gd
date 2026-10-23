@@ -7,7 +7,9 @@
 ## Display only; deterministic (the sim's frame count), so screenshots and
 ## replays repeat. The Carnotaurus roars (roar()) when a long rally ends or
 ## a match is won: his route waits for it. OPEN PLAY's DINO PARK has its own
-## cast (PARK_CAST), which ParkView places in its world.
+## cast (PARK_CAST), which ParkView places in its world. The dinosaur game's
+## four levels as venues (ADR-085) have him too, on their decks (RIDES),
+## and the outdoor two the pterodactyl.
 class_name DinoWalkers
 extends Node2D
 
@@ -39,6 +41,11 @@ const CAST := [
 		"cell": Vector2i(32, 32), "feet": Vector2i(16, 16), "right": false,
 		"fly": [1080, -60, 1800]},          # from x, to x, every n frames
 ]
+
+## ADR-085: the venues from the dinosaur game's levels, and the y of the
+## deck the Carnotaurus walks there (behind the fence, among the crowd).
+const RIDES := {"ruins": 180, "glacier": 184, "lab": 180, "station": 180}
+const SKIES := ["ruins", "glacier"]       ## ...and where the pterodactyl flies too
 
 ## DINO PARK (ADR-078), in its world's px: the Carnotaurus strolls the
 ## path's lower edge among the people, the baby patrols the grass below the
@@ -102,14 +109,28 @@ var sim: Sim
 var dinos: Array = []            ## [Dino]
 
 
-## The cast on the DINOSAUR venue, null elsewhere. `layers` maps a backdrop
-## layer's name to [its z, its parallax].
+## Who walks at a venue: DINOSAUR's whole cast; at the dinosaur game's
+## levels (ADR-085) the Carnotaurus on their deck, and the pterodactyl
+## outdoors; nobody elsewhere.
+static func cast_for(venue: String) -> Array:
+	if venue == "dinosaur":
+		return CAST
+	if not RIDES.has(venue):
+		return []
+	var rider: Dictionary = CAST[0].duplicate()
+	rider["y"] = RIDES[venue]
+	return [rider, CAST[3]] if venue in SKIES else [rider]
+
+
+## The cast at a venue (cast_for), null where there's none. `layers` maps a
+## backdrop layer's name to [its z, its parallax].
 static func for_venue(venue: String, s: Sim, layers: Dictionary, tint: Color) -> DinoWalkers:
-	if venue != "dinosaur":
+	var cast := cast_for(venue)
+	if cast.is_empty():
 		return null
 	var w := DinoWalkers.new()
 	w.sim = s
-	for c: Dictionary in CAST:
+	for c: Dictionary in cast:
 		var d := Dino.new(c, float(layers[c["layer"]][1]))
 		d.spr.z_index = layers[c["layer"]][0]    # after the layer's own sprite
 		d.spr.modulate = tint

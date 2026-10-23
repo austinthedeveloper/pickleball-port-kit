@@ -1142,11 +1142,163 @@ def stinger_cleared():
     return fade_out(s.render(rt60=2.0, echo_beats=0.5, target_rms=-16.0), 0.7)
 
 
+# ADR-085: the dinosaur game's levels as venues
+
+def match_ruins():
+    """Under play in the burning city: C minor, 100 BPM. Low strings of pad
+    and a driving bass under taiko-ish toms, brass stabs on the turn; a
+    brass melody, heroic and a little sad, in the second half."""
+    s = Song(100, 16, seed=808)
+    prog = progression("Cm7 Abmaj7 Ebmaj7 Bb Cm7 Abmaj7 Fm7 G7sus4 "
+                       "Abmaj7 Bb Gm7 Cm7 Abmaj7 Bb Cm7:2 G7:2 Cm7")
+    s.bus("pads", reverb=0.45)
+    s.pads("pads", prog, center=58, gain=0.12, cutoff=800, attack=0.8)
+    s.bus("bass", reverb=0.05)
+    s.bass("bass", prog, bars_of(("R.RR.R.RR.RR.R.5", 7), ("R.RR.R.R5.5.O.a.", 1),
+                                 ("R.RR.R.RR.RR.R.5", 7), ("R.R.5.5.O.O.a.a.", 1)),
+           gain=0.55, bright=0.7)
+    s.bus("brass", reverb=0.4)
+    s.comp("brass", prog, bars_of(("X...............", 4), ("X.......X..x....", 4),
+                                  ("................", 7), ("X.x.x.x.........", 1)),
+           v_brass, center=60, gain=0.1)
+    mel = melody("C5:1 Eb5:1/2 F5:1/2 G5:1 Bb5:1 "
+                 "Ab5:1/2 G5:1/2 F5:1 Eb5:2 "
+                 "F5:1 G5:1/2 Ab5:1/2 Bb5:1 C6:1 "
+                 "G5:3 r:1 "
+                 "Ab5:1 G5:1/2 F5:1/2 Eb5:1 F5:1 "
+                 "G5:1 Bb5:1/2 C6:1/2 Bb5:2 "
+                 "Ab5:1 G5:1/2 F5:1/2 G5:1 B4:1 "
+                 "C5:3 r:1")
+    bars_long(mel, 8)
+    s.bus("lead", reverb=0.4, echo=0.15)
+    s.notes("lead", v_brass, mel, 8, gain=0.13, pan=0.1)
+    groove = {"kick": "X.......x.x.....", "tomlo": "X.....x.....x...", "tom": "....x.......x.x.",
+              "shaker": "x.x.x.x.x.x.x.x."}
+    end = dict(groove, tom="....x...x.x.x.x.")
+    s.bus("drums", reverb=0.25)
+    s.drums("drums", [groove] * 7 + [end] + [groove] * 7 + [end],
+            {"kick": 0.6, "tom": 0.3, "tomlo": 0.4, "shaker": 0.08})
+    s.sidechain("pads", 0.25)
+    return s.render(rt60=2.2, echo_beats=0.75, echo_fb=0.3, target_rms=-20.0)
+
+
+def match_glacier():
+    """Under play on the ice: B minor, 84 BPM. A bell arpeggio through a
+    long echo like falling snow, cold wide pads, a held bass, a brushed kit;
+    a flute melody over the second half."""
+    s = Song(84, 16, seed=909, swing=0.03)
+    prog = progression("Bm9 Gmaj7 Dmaj7 A6 Bm9 Gmaj7 Em9 F#7sus4 "
+                       "Gmaj7 A6 F#m7 Bm9 Gmaj7 A6 Em9:2 F#7sus4:2 Bm9")
+    s.bus("bells", reverb=0.5, echo=0.4)
+    s.arp("bells", prog, bars_of(("0.1.2.3.2.1.2.3.", 16)), v_bell, center=79, gain=0.06,
+          pan=-0.2, vel=0.5, ratio=3.5, decay=0.9)
+    s.bus("pads", reverb=0.65)
+    s.pads("pads", prog, center=62, gain=0.13, cutoff=1200, attack=1.4, release=1.2)
+    s.bus("bass", reverb=0.08)
+    s.bass("bass", prog, bars_of(("R-------R---5---", 16)), gain=0.45, bright=0.4)
+    mel = melody("F#5:2 E5:1 D5:1 "
+                 "B4:2 D5:1 E5:1 "
+                 "F#5:3/2 A5:1/2 G5:1 F#5:1 "
+                 "E5:4 "
+                 "D5:2 E5:1 F#5:1 "
+                 "A5:2 G5:1 F#5:1 "
+                 "E5:3/2 D5:1/2 C#5:1 A4:1 "
+                 "B4:4")
+    bars_long(mel, 8)
+    s.bus("flute", reverb=0.55, echo=0.25)
+    s.notes("flute", v_flute, mel, 8, transpose=12, gain=0.14, pan=0.15)
+    groove = {"kick": "x.......x.......", "snare": "....o.......o...", "hat": "o.o.o.o.o.o.o.o."}
+    s.bus("drums", reverb=0.3)
+    s.drums("drums", [groove] * 16, {"kick": 0.45, "snare": 0.14, "hat": 0.06})
+    s.sidechain("pads", 0.2)
+    return s.render(rt60=3.0, echo_beats=0.75, echo_fb=0.42, target_rms=-20.0)
+
+
+def match_lab():
+    """Under play in the lab: A minor, 120 BPM. A ticking pulse-wave
+    sequence, an octave-hopping bass, tight claps and hats, a pad that
+    hums; a lead line, a little mad-scientist, in the second half."""
+    s = Song(120, 16, seed=1010)
+    prog = progression("Am7 Am7 Fmaj7 E7sus4 Am7 Am7 Dm7 E7 "
+                       "Fmaj7 G6 Em7 Am7 Fmaj7 Dm7 E7sus4:2 E7:2 Am7")
+    s.bus("seq", reverb=0.25, echo=0.3)
+    s.arp("seq", prog, bars_of(("0120012001200123", 16)), v_lead, center=69, gain=0.05,
+          pan=-0.25, vel=0.55, pw=0.25, bright=2200, detune=0, vib=0)
+    s.bus("pads", reverb=0.4)
+    s.pads("pads", prog, center=60, gain=0.08, cutoff=700)
+    s.bus("bass", reverb=0.04)
+    s.bass("bass", prog, bars_of(("RORORORORORORO5O", 7), ("RORORORO5O5OaOaO", 1),
+                                 ("RORORORORORORO5O", 7), ("R.R.5.5.O.O.a.a.", 1)),
+           gain=0.5, bright=1.0)
+    mel = melody("A5:1/2 C6:1/2 E6:1 D6:1/2 C6:1/2 B5:1 "
+                 "C6:1/2 A5:1/2 E5:1 r:2 "
+                 "F5:1/2 A5:1/2 C6:1 B5:1/2 A5:1/2 G#5:1 "
+                 "E5:3 r:1 "
+                 "A5:1/2 C6:1/2 E6:1 F6:1/2 E6:1/2 D6:1 "
+                 "C6:1/2 B5:1/2 A5:1 G5:1 E5:1 "
+                 "F5:1 D5:1/2 F5:1/2 G#5:1 B5:1 "
+                 "A5:3 r:1")
+    bars_long(mel, 8)
+    s.bus("lead", reverb=0.3, echo=0.2)
+    s.notes("lead", v_lead, mel, 8, gain=0.09, pan=0.2, pw=0.5, bright=3200, vib=10)
+    groove = {"kick": "X...x...X...x...", "clap": "....x.......x...", "hat": "xoxoxoxoxoxoxoxo"}
+    fill = dict(groove, clap="....x.......x.xx")
+    s.bus("drums", reverb=0.15)
+    s.drums("drums", [groove] * 7 + [fill] + [groove] * 7 + [fill],
+            {"kick": 0.6, "clap": 0.22, "hat": 0.08})
+    s.sidechain("pads", 0.35)
+    return s.render(rt60=1.6, echo_beats=0.75, echo_fb=0.3, target_rms=-20.0)
+
+
+def match_station():
+    """Under play on the station: E dorian, 110 BPM. Driving synth
+    eighths, an electric piano answering, a pumping bass, brass on the
+    turnarounds; a bright lead over the second half."""
+    s = Song(110, 16, seed=1111)
+    prog = progression("Em9 A9 Em9 A9 Cmaj7 D6 Em9 Bm7 "
+                       "Cmaj7 D6 Bm7 Em9 Cmaj7 D6 Am7:2 B7sus4:2 Em9")
+    s.bus("arp", reverb=0.35, echo=0.3)
+    for pan, det in ((-0.3, -4), (0.3, 4)):
+        s.arp("arp", prog, bars_of(("0101210101210123", 16)), v_lead, center=71, gain=0.045,
+              pan=pan, vel=0.55, pw=0.5, bright=2400, detune=det, vib=0)
+    s.bus("keys", reverb=0.25)
+    s.comp("keys", prog, bars_of(("..x...x...x...x.", 16)), v_epiano, center=62, gain=0.14, vel=0.6)
+    s.bus("bass", reverb=0.05)
+    s.bass("bass", prog, bars_of(("R.R.R.R.R.R.R.5.", 7), ("R.R.R.R.5.5.O.a.", 1),
+                                 ("R.R.R.R.R.R.R.5.", 7), ("R.R.5.5.O.O.a.a.", 1)),
+           gain=0.55, bright=0.9)
+    s.bus("brass", reverb=0.35)
+    s.comp("brass", prog, bars_of(("................", 7), ("X.x.x...........", 1),
+                                  ("................", 7), ("X.x.x.x.........", 1)),
+           v_brass, center=64, gain=0.1)
+    mel = melody("B5:1 E6:1/2 F#6:1/2 G6:1 F#6:1 "
+                 "E6:1/2 D6:1/2 B5:1 A5:2 "
+                 "G5:1 A5:1/2 B5:1/2 D6:1 E6:1 "
+                 "B5:3 r:1 "
+                 "B5:1 E6:1/2 F#6:1/2 A6:1 G6:1 "
+                 "F#6:1/2 E6:1/2 D6:1 E6:2 "
+                 "C6:1 D6:1/2 E6:1/2 D6:1 B5:1 "
+                 "E6:3 r:1")
+    bars_long(mel, 8)
+    s.bus("lead", reverb=0.35, echo=0.25)
+    s.notes("lead", v_lead, mel, 8, gain=0.08, pan=0.1, pw=0.25, bright=3600, vib=14)
+    groove = {"kick": "x...x...x...x...", "snare": "....x.......x...", "hat": "..x...x...x...x.",
+              "clap": "....o.......o..."}
+    fill = dict(groove, snare="....x.......x.xx")
+    s.bus("drums", reverb=0.2)
+    s.drums("drums", [groove] * 7 + [fill] + [groove] * 7 + [fill],
+            {"kick": 0.6, "snare": 0.3, "hat": 0.1, "clap": 0.14})
+    s.sidechain("keys", 0.2)
+    return s.render(rt60=2.0, echo_beats=0.75, echo_fb=0.35, target_rms=-20.0)
+
+
 STINGERS = ("music_won", "music_lost", "music_cleared")
 TRACKS = {"music_title": title, "music_match_park": match_park, "music_match_lakeside": match_lakeside,
           "music_match_sunset": match_sunset, "music_match_dinosaur": match_dinosaur,
           "music_match_space": match_space, "music_match_undersea": match_undersea,
-          "music_match_gym": match_gym, "music_park": park, "music_won": stinger_won,
+          "music_match_gym": match_gym, "music_match_ruins": match_ruins,
+          "music_match_glacier": match_glacier, "music_match_lab": match_lab,
+          "music_match_station": match_station, "music_park": park, "music_won": stinger_won,
           "music_lost": stinger_lost, "music_cleared": stinger_cleared}
 
 

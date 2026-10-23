@@ -282,7 +282,8 @@ def build_venue(name, crowd_rows):
     stand = [i for i, (p, _) in enumerate(crowd_rows) if p == "stand"]
     k = {"sit": 0, "stand": 0}
     offset = {"park": 0, "lakeside": 5, "sunset": 8, "dinosaur": 2,
-              "space": 6, "undersea": 10, "gym": 3}[name]
+              "space": 6, "undersea": 10, "gym": 3,
+              "ruins": 4, "glacier": 7, "lab": 1, "station": 9}[name]
     for s in v.seats:
         pool = sit if s["pose"] == "sit" else stand
         person = pool[(k[s["pose"]] + offset) % len(pool)]

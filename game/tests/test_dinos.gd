@@ -1,12 +1,13 @@
 ## DINOSAUR's background dinosaurs (ADR-084): display only, deterministic,
-## wandering, and always behind the fence.
+## wandering, and always behind the fence; the Carnotaurus at the dinosaur
+## game's four levels too (ADR-085).
 extends TestSuite
 
 
-func _view() -> MatchView:
+func _view(venue := "dinosaur") -> MatchView:
 	var view := MatchView.new()
 	runner.root.add_child(view)
-	view.setup(SimTypes.MatchConfig.doubles(), "dinosaur", true)
+	view.setup(SimTypes.MatchConfig.doubles(), venue, true)
 	return view
 
 
@@ -19,15 +20,28 @@ func _looks(view: MatchView) -> Array:
 	return out
 
 
-func test_dinos_only_on_the_dinosaur_venue() -> void:
+func test_dinos_only_on_the_dinosaur_venues() -> void:
 	var sim := Sim.new(SimTypes.MatchConfig.doubles())
 	for venue in Settings.VENUES:
 		var w := DinoWalkers.for_venue(venue, sim, {"sky": [0, 0.2], "trees": [2, 0.6], "stands": [4, 1.0]},
 			Color.WHITE)
-		check((w != null) == (venue == "dinosaur"), venue)
+		check((w != null) == (venue == "dinosaur" or DinoWalkers.RIDES.has(venue)), venue)
 		if w:
 			w.free()
 	sim.dispose()
+
+
+## ADR-085: at the dinosaur game's levels, the Carnotaurus with Nathan on
+## the deck, the pterodactyl outdoors; DINOSAUR keeps its whole cast.
+func test_the_levels_have_the_carnotaurus() -> void:
+	eq(DinoWalkers.cast_for("dinosaur"), DinoWalkers.CAST, "DINOSAUR's cast unchanged")
+	eq(DinoWalkers.CAST[0]["y"], 162, "...and its Carnotaurus's deck")
+	for venue: String in DinoWalkers.RIDES:
+		check(venue in Settings.VENUES, "%s is a venue" % venue)
+		var cast := DinoWalkers.cast_for(venue)
+		eq(cast[0]["name"], "carnotaurus", venue)
+		eq(cast[0]["y"], DinoWalkers.RIDES[venue], "%s: on its deck" % venue)
+		eq(cast.size(), 2 if venue in DinoWalkers.SKIES else 1, "%s: the pterodactyl outdoors" % venue)
 
 
 func test_dinos_leave_the_sim_alone() -> void:
@@ -85,21 +99,23 @@ func test_carnotaurus_wanders() -> void:
 
 
 func test_dinos_stay_behind_the_fence() -> void:
-	var view := _view()
-	var fence_z := -1
-	for n in view.get_children():
-		if n is Sprite2D and n.texture and n.texture.resource_path.ends_with("/fence.png"):
-			fence_z = n.z_index
-	check(fence_z > 0, "found the fence")
-	for f in 2400:
-		view._physics_process(1.0 / 60.0)
-		if f % 40:
-			continue
-		for d: DinoWalkers.Dino in view.dinos.dinos:
-			check(d.spr.z_index < fence_z, "%s under the fence" % d.c["name"])
-			var feet := d.spr.position.y                   # offset puts the feet here
-			check(feet <= 170.0, "%s's feet behind the fence (y %d)" % [d.c["name"], feet])
-	view.queue_free()
+	for venue: String in ["dinosaur"] + DinoWalkers.RIDES.keys():
+		var view := _view(venue)
+		var fence_z := -1
+		for n in view.get_children():
+			if n is Sprite2D and n.texture and n.texture.resource_path.ends_with("/fence.png"):
+				fence_z = n.z_index
+		check(fence_z > 0, "%s: found the fence" % venue)
+		var deepest: float = 170.0 if venue == "dinosaur" else DinoWalkers.RIDES[venue] + 8.0
+		for f in 2400:
+			view._physics_process(1.0 / 60.0)
+			if f % 40:
+				continue
+			for d: DinoWalkers.Dino in view.dinos.dinos:
+				check(d.spr.z_index < fence_z, "%s: %s under the fence" % [venue, d.c["name"]])
+				var feet := d.spr.position.y                   # offset puts the feet here
+				check(feet <= deepest, "%s: %s's feet behind the fence (y %d)" % [venue, d.c["name"], feet])
+		view.queue_free()
 
 
 ## A park at OPEN PLAY's location `k` (0 THE PARK, 1 DINO PARK, 2 THE GYM).

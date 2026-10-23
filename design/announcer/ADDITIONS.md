@@ -1,6 +1,6 @@
 # The Announcer: additions to record
 
-The second batch: **54 lines**, the same voice and settings as the first
+The second batch: **62 lines**, the same voice and settings as the first
 (`SCRIPT.md`, whose recording spec holds here too). `additions.csv` has
 one row per file. Put the recordings in `audio/announcer/raw/` beside the
 first batch; the game already asks for these (all but the power-ups, which
@@ -37,6 +37,21 @@ covered (a game past 25-all is called by the score on the board).
 |---|---|---|---|
 | `venue_gym_1` | Welcome to the gym! The lights are bright and the floor is squeaky. | Warm, friendly, a smile in the voice. | 4.0 |
 | `venue_gym_2` | We're indoors today, folks. No wind, no excuses! | Dry, playful, a little deadpan; let the pun land. | 3.0 |
+
+## The dinosaur game's levels
+
+*As a match at RUINS, GLACIER, LAB or STATION (the venues from the dinosaur game, ADR-085) begins. Not recorded yet: until then the match opens with the format.*
+
+| id | line | delivery | max s |
+|---|---|---|---|
+| `venue_ruins_1` | Welcome to the ruins! Mind the rubble, and the raptors. | Warm, friendly, a smile in the voice. | 3.5 |
+| `venue_ruins_2` | The city's on fire, folks, and so are these players! | Big, booming 1994 TV sports energy. | 3.0 |
+| `venue_glacier_1` | Welcome to the glacier! Bundle up, it's a cold one today. | Warm, friendly, a smile in the voice. | 3.5 |
+| `venue_glacier_2` | Careful out there. The only thing colder is that serve! | Dry, playful, a little deadpan; let the pun land. | 3.0 |
+| `venue_lab_1` | Welcome to the lab! And please, nobody tap on the tanks. | Dry, playful, a little deadpan; let the pun land. | 3.0 |
+| `venue_lab_2` | Today's experiment: pickleball! Let's see what happens. | Warm, friendly, a smile in the voice. | 3.0 |
+| `venue_station_1` | Welcome aboard the station! Gravity's on. Mostly. | Dry, playful, a little deadpan; let the pun land. | 3.0 |
+| `venue_station_2` | Live from orbit, it's pickleball! | Big, booming 1994 TV sports energy. | 2.2 |
 
 ## Achievements
 

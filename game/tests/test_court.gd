@@ -64,7 +64,7 @@ func test_fun_venues_paint_their_presets() -> void:
 	var checked := 0
 	for v in venues["venues"]:
 		var venue := String(v["name"]).to_lower()
-		if not venue in ["dinosaur", "space", "undersea", "gym"]:
+		if not venue in ["dinosaur", "space", "undersea", "gym", "ruins", "glacier", "lab", "station"]:
 			continue
 		check(venue in Settings.VENUES, "%s is a venue" % venue)
 		for part in CourtStyle.PARTS:
@@ -77,7 +77,7 @@ func test_fun_venues_paint_their_presets() -> void:
 			check(off <= 0.06 or (part == "lines" and got.get_luminance() > 0.85 * want.get_luminance()),
 				"%s %s paints %s (%s vs %s)" % [venue, part, v["ground"][part], got, want])
 			checked += 1
-	eq(checked, 16, "four venues (the fun ones and the GYM), four parts")
+	eq(checked, 32, "eight venues (the fun ones, the GYM, the dinosaur game's four), four parts")
 
 
 func test_a_preset_touches_only_its_part() -> void:

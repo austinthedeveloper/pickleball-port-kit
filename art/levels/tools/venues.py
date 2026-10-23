@@ -1,6 +1,7 @@
 """The venues as parallax layers: three from the level mocks (park,
-lakeside, sunset), ADR-046's fun venues (dinosaur, space, undersea), and
-the port's indoor GYM (ADR-078, THE GYM's games).
+lakeside, sunset), ADR-046's fun venues (dinosaur, space, undersea), the
+port's indoor GYM (ADR-078, THE GYM's games), and the dinosaur game's four
+levels (ADR-085: ruins, glacier, and the indoor lab and station).
 
 Each builder returns a Venue: named layers (back to front), each with a
 parallax factor, plus spots (spectator seats, the watcher, prop anchors).
@@ -15,14 +16,16 @@ from dataclasses import dataclass, field
 import numpy as np
 
 import court as C
-from pix import Layer, bush, chain_link, fbm, hexrgb, ramp, stamp_text, tree
-from scenery import (OUTLINE, M, ball_icon, bin_can, bleachers, brain_coral, bubbles, hills, sailboat,
-                     cloud, coral_fan, coral_tubes, dome, fence, fern_band, flowers,
-                     hedge_band, house, kelp, lamp_post, moon_ridge, nebula,
-                     notice_board, palisade, palm, park_bench, pavers, planet,
-                     rocket, rope_fence, shipwreck, sign, skyline, sky_gradient,
-                     smoke, stars, sun, towel_and_bag, tree_icon, tree_line,
-                     volcano, water, water_sky)
+from pix import Layer, bush, chain_link, fbm, grow as grow_, hexrgb, ramp, solid, stamp_text, tree
+from scenery import (OUTLINE, M, arch_bridge, asteroid, ball_icon, barrel, bin_can, bleachers,
+                     brain_coral, bubbles, hills, sailboat, cloud, console, coral_fan,
+                     coral_tubes, crate, dome, fence, fern_band, fire, flowers, girder,
+                     hazard, hedge_band, house, icicles, kelp, lamp_post, moon_ridge,
+                     nebula, notice_board, palisade, palm, park_bench, pavers, peaks,
+                     pine, pipe_run, planet, rocket, rope_fence, ruined_towers,
+                     safety_rail, shipwreck, sign, skyline, sky_gradient, smoke,
+                     snow_bank, stars, stone_pillar, sun, tank, towel_and_bag,
+                     tree_icon, tree_line, volcano, water, water_sky)
 
 
 @dataclass
@@ -748,5 +751,419 @@ def gym() -> Venue:
     return v
 
 
+# -- The dinosaur game's levels (ADR-085): its ruined city, its ice wilderness,
+# its science lab and its space station, each as a court ------------------------
+
+def surround_marks(v: Venue, G: Layer, seed, kind="cracks", k=0.8):
+    """Darken lines into the surround (cracks, plates, deck seams): darker
+    paint, so a recoloured surround keeps them (the shader scales by
+    brightness), like the GYM's boards."""
+    floor = (v.roles == C.ROLE["surround"]) | (v.roles == C.ROLE["surround_shade"])
+    rng = random.Random(seed)
+    m = np.zeros(floor.shape, bool)
+    if kind == "cracks":
+        for _ in range(26):
+            x, y = rng.uniform(-40, 1000), rng.uniform(196, 590)
+            pts = [(x, y)]
+            for _ in range(rng.randint(3, 7)):
+                x += rng.uniform(-14, 14)
+                y += rng.uniform(-2, 8)
+                pts.append((x, y))
+            m |= G.line_mask(pts, 1)
+    else:                                   # plates: rows of seams, wider toward us
+        y, i = 188.0, 0
+        while y < 620:
+            m |= G.rect_mask(-48, y, 1008, y + 1)
+            x = (i % 2) * 40 - 48
+            while x < 1010:
+                m |= G.rect_mask(x, y, x + 1, y + 10 + i * 1.6)
+                x += 80
+            y += 10 + i * 1.6
+            i += 1
+    m &= floor
+    G.a[m, :3] = (G.a[m, :3] * k).astype(np.uint8)
+
+
+MOSS = ramp("263a1c", "3e5a22", "6a7e2e")
+RUIN_STONE = ramp("3a3448", "5e5462", "8a7c7e", "aa9c94")
+RUST = ramp("3a1a14", "6a3020", "9a4a2a", "c87040")
+
+
+def ruins() -> Venue:
+    """The dinosaur game's level 1: a drowned city burning under a purple
+    and orange sunset, a broken bridge over the river, mossy pillars and
+    rusted girders, purple raptors on the wall."""
+    import critters as K
+    v = Venue("ruins")
+    v.stands_behind_fence = True
+    S = Layer()
+    sky_gradient(S, [(0, "1e1440"), (0.28, "3e2266"), (0.52, "8a2e6a"), (0.72, "d8504a"),
+                     (0.88, "f08a3a"), (1, "fcc060")], y0=-24, y1=136)
+    sun(S, 520, 122, 26, ramp("f8b850", "fbd070", "fde69a", "fff6d0"))
+    for (cx, cy, w, h, sd) in ((120, 26, 140, 9, 201), (330, 8, 110, 7, 202), (610, 30, 150, 9, 203),
+                               (860, 14, 130, 8, 204), (470, 60, 120, 6, 205), (780, 70, 110, 6, 206),
+                               (60, 84, 90, 5, 207)):
+        cloud(S, cx, cy, w, h, ramp("5a2a6a", "9a3a6a", "d0545a", "f08a4a"), seed=sd)
+    v.add("sky", S, 0.2)
+    F = Layer()
+    hills(F, -48, 1008, 128, 8, 26, ramp("4a2a6a", "5a3478", "6e3e84"), seed=210)
+    tops = ruined_towers(F, -48, 1008, 130, 28, 74, ramp("4a3470", "1c1636", "251d44", "6a4a8a"),
+                         hexrgb("f8c060"), seed=211, low=(450, 590))
+    water(F, -48, 1008, 128, 160, ramp("2a1e4a", "4a2c64", "7a3a6a", "c0584e"), hexrgb("fcd080"),
+          seed=212, reflect=(520, 18, hexrgb("f8b850")))
+    arch_bridge(F, -48, 1008, 134, 9, ramp("1a1430", "2a2048", "3e3060"), span=44, gap=(560, 640))
+    for i, k in enumerate((3, 14, 29)):
+        if k < len(tops):
+            x, y = tops[k]
+            smoke(F, x, y - 4, 70, ramp("221a30", "2e2440", "3c3050", "4a3c5c"), seed=213 + i)
+            fire(F, x, y + 2, 12, 10, ramp("c0301a", "f07020", "fcd050"), seed=216 + i)
+    v.add("far", F, 0.4)
+    T = Layer()
+    rub = moon_ridge(T, -60, 1040, 182, 6, 22, ramp("2a2436", "3a3246", "4a4256", "5e5468"),
+                     seed=220, step=(16, 40))
+    for (x, w, h, sd) in ((10, 26, 84, 221), (70, 20, 56, 222), (180, 22, 40, 223),
+                          (780, 22, 46, 224), (880, 24, 70, 225), (950, 28, 96, 226)):
+        stone_pillar(T, x, 176, w, h, RUIN_STONE, moss=MOSS, seed=sd)
+    girder(T, (30, 102), (150, 150), 6, RUST)
+    girder(T, (820, 160), (930, 112), 6, RUST)
+    girder(T, (250, 176), (330, 150), 5, RUST)
+    v.add("trees", T, 0.6)
+    P = Layer()
+    wall = P.rect_mask(-48, 166, 1008, 192)
+    n = fbm(P.h, P.w, 6, 230, 2)
+    P.fill_where(wall, np.array(RUIN_STONE[:3], np.uint8)[np.clip((n * 3).astype(int), 0, 2)])
+    for y in (172, 180):
+        P.fill(wall & P.rect_mask(-48, y, 1008, y + 1), RUIN_STONE[0])
+    P.fill(P.rect_mask(-48, 165, 1008, 168), MOSS[1])
+    P.fill(P.rect_mask(-48, 165, 1008, 166), MOSS[2])
+    K.raptor(P, 130, 168, ramp("3a1e5a", "6a3a8a", "9a62b4", "c49ad8"), d=1, s=1.5)
+    K.raptor(P, 220, 168, ramp("5a1e44", "8a3a6a", "c0609a", "e89ac0"), d=1, s=1.3)
+    K.stegosaurus(P, 840, 168, ramp("2a2a4a", "4a4a72", "6a6a96", "9090b8"),
+                  ramp("6a2a1a", "a8502a", "e08a4a"), d=-1, s=1.8)
+    barrel(P, 286, 168, 14, 20, ramp("6a1414", "a82a24", "d84a3a"), hexrgb("e8e0d0"),
+           mark=(hexrgb("f4f0e6"), hexrgb("c8281e")))
+    crate(P, 640, 168, 20, ramp("4a2a16", "7a4a26", "a06a3a"))
+    crate(P, 662, 168, 14, ramp("4a2a16", "7a4a26", "a06a3a"))
+    v.add("stands", P, 1.0)
+    stand_seats(v, (340, 400, 470, 560, 720, 780), 180)
+    v.watcher = {"x": 780, "y": 180, "pose": "stand"}
+    B = Layer()
+    posts = [-30] + [M(x, 0)[0] for x in (110, 330, 560, 790, 1020, 1240)] + [990]
+    fence(B, -48, 1008, 120, 188, posts, hexrgb("3a2a2a"), RUST, spacing=6)
+    # the wire's torn: a hole, peeled back
+    hole = B.poly_mask([(596, 132), (630, 128), (648, 150), (622, 164), (598, 156)])
+    B.a[hole & (B.a[..., :3].sum(axis=2) < 200)] = 0
+    B.fill(B.rect_mask(-48, 186, 1008, 190), RUIN_STONE[1])
+    B.fill(B.rect_mask(-48, 186, 1008, 187), RUIN_STONE[3])
+    v.add("fence", B, 1.0)
+    G = ground_band(v, 188, preset_court("60408c", "b05434", "a0a098", "ffffff"),   # PURPLE, CLAY, CONCRETE
+                    seed=231, speckle=(0.004, hexrgb("807e78")))
+    surround_marks(v, G, 232)
+    front_fence(v, hexrgb("807e78"), ramp("14200e", "223418", "34481e", "4e5e26", "6a7a30", "8a9440"),
+                seed=233, posts_mock=(105, 440, 900, 1250), wire=hexrgb("3a2a2a"), post=RUST)
+    verge(v, ramp("5e5462", "7a7076", "8a7c7e", "9a8e8c"), RUIN_STONE[0], seed=234)
+    return v
+
+
+SNOW = ramp("8a9ac8", "b8c8e8", "dce6f6", "f4f8ff")
+ICE_STONE = ramp("262a48", "3a4064", "565e86", "7a84a8")
+PINE = ramp("10223a", "1c3a4e", "2c5662")
+
+
+def glacier() -> Venue:
+    """The dinosaur game's ice wilderness: a pink dusk over snowy peaks, a
+    frozen castle's spires, a stone aqueduct hung with icicles, snowy
+    pines, and pale raptors in the drifts."""
+    import critters as K
+    v = Venue("glacier")
+    v.stands_behind_fence = True
+    S = Layer()
+    sky_gradient(S, [(0, "141a44"), (0.3, "2a2e6a"), (0.55, "5a4a8a"), (0.75, "b0607a"),
+                     (0.9, "e88a70"), (1, "f8b080")], y0=-24, y1=128)
+    sun(S, 610, 110, 18, ramp("f8a070", "fbc090", "fde0b8", "fff4e0"))
+    for (cx, cy, w, h, sd) in ((150, 30, 150, 7, 241), (420, 14, 120, 6, 242), (700, 40, 160, 7, 243),
+                               (900, 20, 110, 6, 244), (300, 66, 100, 5, 245)):
+        cloud(S, cx, cy, w, h, ramp("4a3a7a", "8a4a7a", "c86a7a", "f09a8a"), seed=sd)
+    K.pterodactyl(S, 820, 52, ramp("3a1e3a", "7a3a4a", "b06a5a", "d89a7a"), d=-1, s=1.6, up=True)
+    v.add("sky", S, 0.2)
+    F = Layer()
+    peaks(F, -48, 1008, 132, 30, 84, ramp("2a3060", "3e4880", "5a68a8"), SNOW, seed=250)
+    ruined_towers(F, 690, 910, 134, 34, 70, ramp("3a4278", "1e2650", "28305e", "6a7ab0"),
+                  hexrgb("a8e0ff"), seed=251, lit=0.03, spires=0.9)
+    ruined_towers(F, 40, 150, 134, 20, 44, ramp("3a4278", "1e2650", "28305e", "6a7ab0"),
+                  hexrgb("a8e0ff"), seed=252, lit=0.02, spires=0.9)
+    hills(F, -48, 1008, 150, 10, 20, ramp("7a8ab8", "9aaad4", "c0cceb"), seed=253)
+    arch_bridge(F, 230, 690, 92, 16, ICE_STONE, span=34)
+    icicles(F, 232, 688, 108, 9, ramp("6a9ad8", "9ac8f4", "e0f4ff"), seed=254)
+    F.fill(F.rect_mask(230, 90, 690, 93), SNOW[3])
+    for x in range(247, 690, 34):                       # the piers, down to the snow
+        F.fill(F.rect_mask(x - 4, 108, x + 4, 150), ICE_STONE[1])
+        F.fill(F.rect_mask(x - 4, 108, x - 2, 150), ICE_STONE[3])
+    v.add("far", F, 0.4)
+    T = Layer()
+    rng = random.Random(260)
+    for x in range(-60, 1040, 17):
+        h = rng.uniform(40, 82) if (x < 260 or x > 700) else rng.uniform(26, 50)
+        pine(T, x + rng.randint(-5, 5), 172, h, PINE, snow=SNOW, seed=261 + x)
+    for (x, w, h, sd) in ((-10, 40, 90, 270), (970, 44, 100, 271)):
+        stone_pillar(T, x, 176, w, h, ICE_STONE, snow=SNOW, seed=sd, broken=False)
+    snow_bank(T, -48, 1008, 164, 190, SNOW, seed=272)
+    v.add("trees", T, 0.6)
+    P = Layer()
+    snow_bank(P, -48, 1008, 168, 192, SNOW, seed=280)
+    K.raptor(P, 120, 180, ramp("4a5272", "7a84a6", "aab4d0", "dce4f4"), d=1, s=1.5)
+    K.raptor(P, 210, 180, ramp("2a2e4a", "4a5070", "6e76a0", "9aa2c8"), d=1, s=1.3)
+    K.triceratops(P, 850, 180, ramp("3a3a52", "5a5a78", "80809e", "a8a8c4"),
+                  ramp("2a3a6a", "4a6aa8", "7aa0d8"), d=-1, s=1.8)
+    crate(P, 640, 180, 20, ramp("3a2a20", "5a4030", "7a5a40"))
+    P.fill(P.ellipse_mask(650, 160, 12, 4) & P.rect_mask(638, 154, 662, 161), SNOW[2])
+    icicles(P, 640, 660, 160, 5, ramp("6a9ad8", "9ac8f4", "e0f4ff"), seed=281)
+    v.add("stands", P, 1.0)
+    stand_seats(v, (330, 400, 470, 560, 720, 780), 184)
+    v.watcher = {"x": 780, "y": 184, "pose": "stand"}
+    B = Layer()
+    posts = [-30] + [M(x, 0)[0] for x in (110, 330, 560, 790, 1020, 1240)] + [990]
+    fence(B, -48, 1008, 120, 188, posts, hexrgb("4a5a8a"), ICE_STONE[1:], spacing=6)
+    B.fill(B.rect_mask(-48, 116, 1008, 120), SNOW[2])
+    B.fill(B.rect_mask(-48, 116, 1008, 117), SNOW[3])
+    icicles(B, -48, 1008, 120, 10, ramp("6a9ad8", "9ac8f4", "e0f4ff"), seed=290)
+    for x in posts:
+        B.fill(B.ellipse_mask(x + 0.5, 113, 5, 3), SNOW[3])
+    B.fill(B.rect_mask(-48, 186, 1008, 190), SNOW[1])
+    B.fill(B.rect_mask(-48, 186, 1008, 187), SNOW[3])
+    v.add("fence", B, 1.0)
+    G = ground_band(v, 188, preset_court("265ca8", "223470", "ecf0f6", "ffffff"),   # BLUE, NAVY, SNOW
+                    seed=291, speckle=(0.004, hexrgb("c8d0e0")))
+    front_fence(v, hexrgb("c8d0e0"), ramp("3a4a7a", "6a7aa8", "9aa8d0", "c8d4ee", "e8eef8", "ffffff"),
+                seed=292, posts_mock=(105, 440, 900, 1250), wire=hexrgb("4a5a8a"), post=ICE_STONE[1:])
+    verge(v, SNOW, SNOW[0], seed=293)
+    return v
+
+
+STEEL = ramp("1a2228", "2e3a42", "4a5862", "6e7e88")
+LAB_WALL = ramp("0c1a1e", "12262a", "1a3236")
+TANK_GLASS = ramp("0e3a1e", "1e6a2e", "3a9a3a", "6ac850", "b8f4a0")
+SAFETY = ramp("8a5a0a", "d09a1a", "f4c838")
+
+
+def corner_props(Fr: Layer, items):
+    """The near corners' clutter, drawn over the players: [(kind, x, ...)]."""
+    for it in items:
+        kind, x = it[0], it[1]
+        if kind == "barrel":
+            barrel(Fr, x, 538, 30, 44, it[2], it[3], mark=it[4] if len(it) > 4 else None)
+        elif kind == "crate":
+            crate(Fr, x, 538, it[2], it[3])
+        elif kind == "console":
+            console(Fr, x, 538, 70, 60, STEEL, it[2], it[3], seed=x)
+
+
+def lab() -> Venue:
+    """The dinosaur game's science lab, indoors: pipes and hanging lamps,
+    green tanks with dinosaur skeletons, a hazard-striped catwalk,
+    consoles, a raptor loose among the crowd, a steel floor."""
+    import critters as K
+    v = Venue("lab")
+    v.stands_behind_fence = True
+    S = Layer()
+    sky_gradient(S, [(0, "060c10"), (0.6, "0c1a20"), (1, "12262c")], y0=-24, y1=120)
+    pipe_run(S, [(-60, 6), (1020, 6)], 8, STEEL)
+    pipe_run(S, [(-60, 20), (300, 20), (300, 34), (1020, 34)], 6, ramp("1a2a22", "2e4a3a", "4a6e52"))
+    for x in (90, 330, 600, 860):                       # hanging lamps and their light
+        S.fill(S.rect_mask(x - 1, 6, x + 1, 40), STEEL[0])
+        S.fill(S.poly_mask([(x - 16, 40), (x + 16, 40), (x + 10, 34), (x - 10, 34)]), STEEL[2])
+        S.fill(S.rect_mask(x - 14, 40, x + 14, 42), hexrgb("f4f0c0"))
+        cone = S.poly_mask([(x - 14, 42), (x + 14, 42), (x + 44, 160), (x - 44, 160)])
+        yy, xx = np.mgrid[0:S.h, 0:S.w]
+        S.fill(cone & ((xx + yy) % 2 == 0), hexrgb("1e3a3a"))
+    v.add("sky", S, 0.2)
+    F = Layer()
+    wall = F.rect_mask(-48, 40, 1008, 160)
+    F.fill(wall, LAB_WALL[1])
+    for x in range(-48, 1008, 48):                      # wall panels
+        F.fill(F.rect_mask(x, 40, x + 1, 160), LAB_WALL[0])
+        F.fill(F.rect_mask(x + 1, 40, x + 2, 160), LAB_WALL[2])
+    F.fill(F.rect_mask(-48, 96, 1008, 97), LAB_WALL[0])
+    trex = lambda L: K.trex(L, 330, 136, ramp("000000", "000000", "000000"), d=1, s=1.9)
+    tank(F, 330, 150, 92, 124, TANK_GLASS, STEEL, specimen=trex, seed=300)
+    rap = lambda cx: (lambda L: K.raptor(L, cx, 128, ramp("000000", "000000", "000000"), d=-1, s=1.5))
+    tank(F, 640, 150, 64, 100, TANK_GLASS, STEEL, specimen=rap(642), seed=301)
+    tank(F, 880, 150, 76, 116, TANK_GLASS, STEEL, specimen=lambda L: K.brachiosaurus(
+        L, 868, 132, ramp("000000", "000000", "000000"), d=1, s=0.8), seed=302)
+    tank(F, 90, 150, 56, 90, TANK_GLASS, STEEL, seed=303)
+    # the catwalk between the tanks
+    F.fill(F.rect_mask(400, 88, 600, 94), STEEL[1])
+    hazard(F, 400, 94, 600, 98)
+    safety_rail(F, 400, 600, 72, 88, (404, 470, 530, 596), SAFETY, mid=True)
+    v.add("far", F, 0.4)
+    T = Layer()
+    T.fill(T.rect_mask(-48, 120, 1008, 190), STEEL[0])
+    pipe_run(T, [(-60, 128), (1020, 128)], 6, STEEL)
+    for x in (40, 230, 470, 700, 930):
+        pipe_run(T, [(x, 128), (x, 180)], 5, ramp("1a2a22", "2e4a3a", "4a6e52"))
+    for i, x in enumerate((70, 260, 520, 740)):
+        console(T, x, 176, 60, 46, STEEL, ramp("0e2a1a", "5af08a"), [hexrgb("f04a3a"), hexrgb("5af08a"),
+                hexrgb("f4c838")], seed=310 + i)
+    T.fill(T.ellipse_mask(160, 140, 5, 5), hexrgb("f04a3a"))      # the warning light
+    T.fill(T.ellipse_mask(159, 139, 2, 2), hexrgb("ffb0a0"))
+    door = T.rect_mask(860, 132, 910, 180)
+    T.fill(door, STEEL[1])
+    hazard(T, 860, 172, 910, 180)
+    T.fill(T.rect_mask(872, 140, 898, 156), hexrgb("2a1414"))
+    T.fill(T.rect_mask(882, 144, 888, 150), hexrgb("f04a3a"))
+    T.outline(OUTLINE, door)
+    v.add("trees", T, 0.6)
+    P = Layer()
+    deck = P.rect_mask(-48, 166, 1008, 192)
+    P.fill(deck, STEEL[1])
+    yy, xx = np.mgrid[0:P.h, 0:P.w]
+    P.fill(deck & (xx % 4 == 0) & (yy % 4 == 0), STEEL[0])        # the grating
+    hazard(P, -48, 164, 1008, 168)
+    K.raptor(P, 160, 172, ramp("3a1e5a", "6a3a8a", "9a62b4", "c49ad8"), d=1, s=1.5)
+    K.raptor(P, 820, 172, ramp("1e3a1a", "3a6a2a", "62a040", "9ad070"), d=-1, s=1.2)
+    barrel(P, 240, 172, 14, 20, ramp("6a1414", "a82a24", "d84a3a"), hexrgb("e8e0d0"),
+           mark=(hexrgb("f4f0e6"), hexrgb("c8281e")))
+    barrel(P, 258, 172, 14, 20, ramp("1a3a1a", "2e6a2e", "4a9a3a"), hexrgb("2a2a2a"),
+           mark=(hexrgb("e8e0d0"), hexrgb("2e6a2e")))
+    crate(P, 870, 172, 18, ramp("4a2a16", "7a4a26", "a06a3a"))
+    v.add("stands", P, 1.0)
+    stand_seats(v, (330, 400, 470, 560, 640, 720), 180)
+    v.watcher = {"x": 720, "y": 180, "pose": "stand"}
+    B = Layer()
+    posts = [-30] + [M(x, 0)[0] for x in (110, 330, 560, 790, 1020, 1240)] + [990]
+    safety_rail(B, -48, 1008, 140, 186, posts, SAFETY)
+    hazard(B, -48, 184, 1008, 190)
+    v.add("fence", B, 1.0)
+    G = ground_band(v, 188, preset_court("1c1c24", "2e7a48", "46484e", "fade46"),   # BLACK, GREEN, ASPHALT, YELLOW
+                    seed=320, speckle=(0.003, hexrgb("3a3c42")))
+    surround_marks(v, G, 321, kind="plates", k=0.75)
+    Fr = Layer()
+    corner_props(Fr, [("barrel", 30, ramp("6a1414", "a82a24", "d84a3a"), hexrgb("e8e0d0"),
+                       (hexrgb("f4f0e6"), hexrgb("c8281e"))),
+                      ("barrel", 66, ramp("1a3a1a", "2e6a2e", "4a9a3a"), hexrgb("2a2a2a")),
+                      ("crate", 86, 40, ramp("4a2a16", "7a4a26", "a06a3a")),
+                      ("console", 860, ramp("0e2a1a", "5af08a"), [hexrgb("f04a3a"), hexrgb("5af08a")]),
+                      ("barrel", 940, ramp("6a1414", "a82a24", "d84a3a"), hexrgb("e8e0d0"))])
+    v.add("front", Fr, 1.3)
+    verge(v, ramp("1e2a30", "222e34"), STEEL[2], seed=322, cell=24)
+    hazard(v.layers[-1][1], -48, 500, 1008, 506)
+    return v
+
+
+HULL = ramp("141822", "222a38", "343e50", "4e5a6e")
+LIGHT = ramp("8a3a10", "f07a20", "ffc070")
+
+
+def drone(L: Layer, x, y, s=1.0):
+    """A hovering robot drone: a round shell, a red eye, a thruster flame."""
+    body = L.ellipse_mask(x, y, 9 * s, 8 * s) | L.rect_mask(x - 12 * s, y - 2 * s, x + 12 * s, y + 2 * s)
+    solid(L, body, ramp("3a4252", "6a7488", "9aa4b8", "c8d0dc"), OUTLINE)
+    L.fill(L.ellipse_mask(x + 3 * s, y - 1 * s, 3 * s, 3 * s), hexrgb("f04a3a"))
+    L.px(x + 2 * s, y - 2 * s, hexrgb("ffd0c0"))
+    L.fill(L.poly_mask([(x - 3 * s, y + 8 * s), (x, y + 16 * s), (x + 3 * s, y + 8 * s)]), LIGHT[1])
+
+
+def station() -> Venue:
+    """The dinosaur game's space station, indoors: big windows on a nebula,
+    a ringed planet, asteroids and a wrecked station; orange-lit girders,
+    consoles, an orange railing, raptors and a drone on the deck."""
+    import critters as K
+    v = Venue("station")
+    v.stands_behind_fence = True
+    S = Layer()
+    sky_gradient(S, [(0, "06061a"), (0.5, "140e36"), (1, "2a1a52")], y0=-24, y1=150)
+    nebula(S, 50, 70, ramp("1e1a4a", "3a2470", "6a3a8a", "a04a8a"), seed=330, slope=0.12)
+    stars(S, -24, 170, 0.006, [hexrgb("6a6a9a"), hexrgb("b0b0d8"), hexrgb("ffffff")], seed=331,
+          twinkles=((120, 24), (470, 10), (700, 70), (900, 30)))
+    planet(S, 250, 96, 46, ramp("142a5a", "1e4a8a", "3a70b8", "7aa8e0"), seed=332,
+           ring=(80, 12, ramp("4a3a6a", "8a7aa8", "c8b8e0")))
+    planet(S, 690, 30, 10, ramp("6a6a7a", "a0a0b0", "d0d0dc"))
+    # the wreck: a broken ring and its towers
+    wr = ramp("1a1a2a", "2a2a40", "3e3e58", "5a5a78")
+    S.fill(S.ellipse_mask(780, 90, 70, 14) & ~S.ellipse_mask(780, 90, 62, 9) &
+           ~S.rect_mask(800, 70, 830, 110), wr[1])
+    for (x, h) in ((760, 50), (775, 70), (792, 40), (808, 60)):
+        S.fill(S.rect_mask(x, 90 - h, x + 8, 100), wr[2])
+        S.fill(S.rect_mask(x, 90 - h, x + 2, 100), wr[3])
+    for i, (x, y, r) in enumerate(((120, 30, 7), (420, 60, 11), (560, 24, 6), (900, 110, 13),
+                                   (640, 110, 8), (40, 120, 9), (980, 40, 6))):
+        asteroid(S, x, y, r, ramp("1e1a2a", "3a3448", "5a5268", "7a7088"), seed=340 + i)
+    v.add("sky", S, 0.2)
+    F = Layer()
+    hull = F.rect_mask(-48, -24, 1008, 160)
+    win = np.zeros_like(hull)
+    for (x0, x1) in ((40, 440), (520, 920)):
+        win |= F.poly_mask([(x0 + 14, 14), (x1 - 14, 14), (x1, 28), (x1, 104), (x1 - 14, 118),
+                            (x0 + 14, 118), (x0, 104), (x0, 28)])
+    struts = np.zeros_like(hull)
+    for x in (140, 240, 340, 620, 720, 820):
+        struts |= F.rect_mask(x - 3, 14, x + 3, 118)
+    win &= ~struts
+    F.fill(hull & ~win, HULL[1])
+    for x in range(-48, 1008, 56):                      # hull plates
+        F.fill(hull & ~win & F.rect_mask(x, -24, x + 1, 160), HULL[0])
+        F.fill(hull & ~win & F.rect_mask(x + 1, -24, x + 2, 160), HULL[2])
+    for y in (-2, 132, 150):
+        F.fill(hull & ~win & F.rect_mask(-48, y, 1008, y + 1), HULL[0])
+    F.fill(grow_(win) & ~win, HULL[3])
+    F.fill(grow_(grow_(win)) & ~grow_(win), HULL[0])
+    for (x0, x1) in ((40, 440), (520, 920)):
+        F.fill(F.rect_mask(x0 + 20, 6, x1 - 20, 9), LIGHT[1])     # light strips
+        F.fill(F.rect_mask(x0 + 20, 6, x1 - 20, 7), LIGHT[2])
+        F.fill(F.rect_mask(x0 + 20, 124, x1 - 20, 127), LIGHT[1])
+    for x in (-20, 480, 980):
+        F.fill(F.rect_mask(x - 2, 20, x + 3, 110), LIGHT[1])
+        F.fill(F.rect_mask(x - 2, 20, x - 1, 110), LIGHT[2])
+    v.add("far", F, 0.4)
+    T = Layer()
+    T.fill(T.rect_mask(-48, 132, 1008, 190), HULL[0])
+    for x in range(-48, 1008, 64):
+        T.fill(T.rect_mask(x, 132, x + 1, 190), HULL[1])
+    pipe_run(T, [(-60, 138), (1020, 138)], 6, HULL[1:])
+    for i, x in enumerate((60, 250, 600, 800)):
+        console(T, x, 176, 64, 40, HULL[1:], ramp("0e2030", "4ad8f0"),
+                [hexrgb("f07a20"), hexrgb("4ad8f0"), hexrgb("f04a3a")], seed=360 + i)
+    for x in (180, 470, 730, 930):
+        T.fill(T.rect_mask(x - 2, 146, x + 3, 176), LIGHT[1])
+        T.fill(T.rect_mask(x - 2, 146, x - 1, 176), LIGHT[2])
+    crate(T, 400, 176, 22, ramp("4a2a16", "7a4a26", "a06a3a"))
+    crate(T, 424, 176, 16, ramp("2a3040", "4a5268", "6a7690"))
+    v.add("trees", T, 0.6)
+    P = Layer()
+    deck = P.rect_mask(-48, 166, 1008, 192)
+    P.fill(deck, HULL[2])
+    for x in range(-48, 1008, 32):
+        P.fill(deck & P.rect_mask(x, 166, x + 1, 192), HULL[1])
+    P.fill(P.rect_mask(-48, 166, 1008, 168), LIGHT[1])
+    K.raptor(P, 140, 172, ramp("3a1e5a", "6a3a8a", "9a62b4", "c49ad8"), d=1, s=1.5)
+    K.astronaut(P, 230, 172, ramp("8a92a4", "c4ccd8", "eef2f8", "ffffff"), ramp("1a2a5a", "4a7ad8"),
+                d=1, s=1.3, wave=True)
+    drone(P, 860, 128, s=1.2)
+    K.raptor(P, 850, 172, ramp("2a2a3a", "4a4a5e", "7a7a8e", "a8a8bc"), d=-1, s=1.4)
+    v.add("stands", P, 1.0)
+    stand_seats(v, (330, 400, 470, 560, 640, 720), 180)
+    v.watcher = {"x": 720, "y": 180, "pose": "stand"}
+    B = Layer()
+    posts = [-30] + [M(x, 0)[0] for x in (110, 330, 560, 790, 1020, 1240)] + [990]
+    safety_rail(B, -48, 1008, 140, 186, posts, LIGHT)
+    for x in posts:
+        B.fill(B.rect_mask(x - 2, 134, x + 3, 140), hexrgb("4ad8f0"))
+    B.fill(B.rect_mask(-48, 184, 1008, 190), HULL[1])
+    B.fill(B.rect_mask(-48, 184, 1008, 185), LIGHT[1])
+    v.add("fence", B, 1.0)
+    G = ground_band(v, 188, preset_court("4e5662", "c45c1c", "46484e", "ffffff"),   # SLATE, ORANGE, ASPHALT
+                    seed=370, speckle=(0.003, hexrgb("3a3c42")))
+    surround_marks(v, G, 371, kind="plates", k=0.75)
+    Fr = Layer()
+    corner_props(Fr, [("crate", 10, 44, ramp("4a2a16", "7a4a26", "a06a3a")),
+                      ("crate", 56, 30, ramp("2a3040", "4a5268", "6a7690")),
+                      ("console", 870, ramp("0e2030", "4ad8f0"), [hexrgb("f07a20"), hexrgb("4ad8f0")])])
+    v.add("front", Fr, 1.3)
+    verge(v, ramp("1a2030", "1e2434"), LIGHT[1], seed=372, cell=24)
+    return v
+
+
 VENUES = {"park": park, "lakeside": lakeside, "sunset": sunset,
-          "dinosaur": dinosaur, "space": space, "undersea": undersea, "gym": gym}
+          "dinosaur": dinosaur, "space": space, "undersea": undersea, "gym": gym,
+          "ruins": ruins, "glacier": glacier,
+          "lab": lab, "station": station}

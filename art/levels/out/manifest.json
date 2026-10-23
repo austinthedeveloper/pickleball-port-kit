@@ -2553,6 +2553,1146 @@
     "y": 151,
     "pose": "sit"
    }
+  },
+  "ruins": {
+   "layers": [
+    {
+     "name": "sky",
+     "file": "venues/ruins/sky.png",
+     "parallax": 0.2,
+     "z": 0,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "far",
+     "file": "venues/ruins/far.png",
+     "parallax": 0.4,
+     "z": 1,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "trees",
+     "file": "venues/ruins/trees.png",
+     "parallax": 0.6,
+     "z": 2,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "ground",
+     "file": "venues/ruins/ground.png",
+     "parallax": 1.0,
+     "z": 3,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "stands",
+     "file": "venues/ruins/stands.png",
+     "parallax": 1.0,
+     "z": 4,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "fence",
+     "file": "venues/ruins/fence.png",
+     "parallax": 1.0,
+     "z": 5,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "net",
+     "file": "venues/ruins/net.png",
+     "parallax": 1.0,
+     "z": 6,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "front",
+     "file": "venues/ruins/front.png",
+     "parallax": 1.3,
+     "z": 7,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    }
+   ],
+   "draw_order_doc": "Draw layers by z. Game sprites (shadows, players, ball, near net post; y-sorted) go after 'net' and before 'front'. Crowd sprites go after 'stands'. Offset each layer by -camera * parallax.",
+   "court_mask": "venues/ruins/court_mask.png",
+   "court_colors": {
+    "surround": [
+     [
+      134,
+      134,
+      128
+     ],
+     [
+      150,
+      150,
+      143
+     ],
+     [
+      160,
+      160,
+      152
+     ],
+     [
+      170,
+      170,
+      161
+     ],
+     [
+      186,
+      186,
+      176
+     ]
+    ],
+    "surface": [
+     [
+      88,
+      59,
+      129
+     ],
+     [
+      94,
+      63,
+      137
+     ],
+     [
+      98,
+      65,
+      143
+     ],
+     [
+      104,
+      69,
+      151
+     ]
+    ],
+    "kitchen": [
+     [
+      162,
+      77,
+      48
+     ],
+     [
+      172,
+      82,
+      51
+     ],
+     [
+      180,
+      86,
+      53
+     ],
+     [
+      190,
+      91,
+      56
+     ]
+    ],
+    "kitchen_shade": [
+     [
+      130,
+      62,
+      38
+     ],
+     [
+      137,
+      66,
+      41
+     ],
+     [
+      144,
+      69,
+      43
+     ]
+    ],
+    "lines": [
+     [
+      245,
+      245,
+      245
+     ],
+     [
+      255,
+      255,
+      255
+     ],
+     [
+      255,
+      255,
+      255
+     ]
+    ],
+    "lines_shade": [
+     [
+      184,
+      184,
+      184
+     ],
+     [
+      194,
+      194,
+      194
+     ],
+     [
+      204,
+      204,
+      204
+     ]
+    ]
+   },
+   "seats": [
+    {
+     "x": 340,
+     "y": 180,
+     "pose": "stand",
+     "person": 12
+    },
+    {
+     "x": 400,
+     "y": 180,
+     "pose": "stand",
+     "person": 13
+    },
+    {
+     "x": 470,
+     "y": 180,
+     "pose": "stand",
+     "person": 14
+    },
+    {
+     "x": 560,
+     "y": 180,
+     "pose": "stand",
+     "person": 15
+    },
+    {
+     "x": 720,
+     "y": 180,
+     "pose": "stand",
+     "person": 12
+    },
+    {
+     "x": 780,
+     "y": 180,
+     "pose": "stand",
+     "person": 13
+    }
+   ],
+   "watcher": {
+    "x": 780,
+    "y": 180,
+    "pose": "stand"
+   }
+  },
+  "glacier": {
+   "layers": [
+    {
+     "name": "sky",
+     "file": "venues/glacier/sky.png",
+     "parallax": 0.2,
+     "z": 0,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "far",
+     "file": "venues/glacier/far.png",
+     "parallax": 0.4,
+     "z": 1,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "trees",
+     "file": "venues/glacier/trees.png",
+     "parallax": 0.6,
+     "z": 2,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "ground",
+     "file": "venues/glacier/ground.png",
+     "parallax": 1.0,
+     "z": 3,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "stands",
+     "file": "venues/glacier/stands.png",
+     "parallax": 1.0,
+     "z": 4,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "fence",
+     "file": "venues/glacier/fence.png",
+     "parallax": 1.0,
+     "z": 5,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "net",
+     "file": "venues/glacier/net.png",
+     "parallax": 1.0,
+     "z": 6,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "front",
+     "file": "venues/glacier/front.png",
+     "parallax": 1.3,
+     "z": 7,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    }
+   ],
+   "draw_order_doc": "Draw layers by z. Game sprites (shadows, players, ball, near net post; y-sorted) go after 'net' and before 'front'. Crowd sprites go after 'stands'. Offset each layer by -camera * parallax.",
+   "court_mask": "venues/glacier/court_mask.png",
+   "court_colors": {
+    "surround": [
+     [
+      198,
+      202,
+      207
+     ],
+     [
+      222,
+      226,
+      231
+     ],
+     [
+      236,
+      240,
+      246
+     ],
+     [
+      250,
+      254,
+      255
+     ],
+     [
+      255,
+      255,
+      255
+     ]
+    ],
+    "surface": [
+     [
+      35,
+      85,
+      155
+     ],
+     [
+      37,
+      90,
+      165
+     ],
+     [
+      39,
+      94,
+      171
+     ],
+     [
+      41,
+      99,
+      181
+     ]
+    ],
+    "kitchen": [
+     [
+      31,
+      48,
+      103
+     ],
+     [
+      33,
+      51,
+      110
+     ],
+     [
+      35,
+      53,
+      114
+     ],
+     [
+      37,
+      56,
+      121
+     ]
+    ],
+    "kitchen_shade": [
+     [
+      25,
+      38,
+      83
+     ],
+     [
+      27,
+      41,
+      87
+     ],
+     [
+      28,
+      43,
+      92
+     ]
+    ],
+    "lines": [
+     [
+      245,
+      245,
+      245
+     ],
+     [
+      255,
+      255,
+      255
+     ],
+     [
+      255,
+      255,
+      255
+     ]
+    ],
+    "lines_shade": [
+     [
+      184,
+      184,
+      184
+     ],
+     [
+      194,
+      194,
+      194
+     ],
+     [
+      204,
+      204,
+      204
+     ]
+    ]
+   },
+   "seats": [
+    {
+     "x": 330,
+     "y": 184,
+     "pose": "stand",
+     "person": 15
+    },
+    {
+     "x": 400,
+     "y": 184,
+     "pose": "stand",
+     "person": 12
+    },
+    {
+     "x": 470,
+     "y": 184,
+     "pose": "stand",
+     "person": 13
+    },
+    {
+     "x": 560,
+     "y": 184,
+     "pose": "stand",
+     "person": 14
+    },
+    {
+     "x": 720,
+     "y": 184,
+     "pose": "stand",
+     "person": 15
+    },
+    {
+     "x": 780,
+     "y": 184,
+     "pose": "stand",
+     "person": 12
+    }
+   ],
+   "watcher": {
+    "x": 780,
+    "y": 184,
+    "pose": "stand"
+   }
+  },
+  "lab": {
+   "layers": [
+    {
+     "name": "sky",
+     "file": "venues/lab/sky.png",
+     "parallax": 0.2,
+     "z": 0,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "far",
+     "file": "venues/lab/far.png",
+     "parallax": 0.4,
+     "z": 1,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "trees",
+     "file": "venues/lab/trees.png",
+     "parallax": 0.6,
+     "z": 2,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "ground",
+     "file": "venues/lab/ground.png",
+     "parallax": 1.0,
+     "z": 3,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "stands",
+     "file": "venues/lab/stands.png",
+     "parallax": 1.0,
+     "z": 4,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "fence",
+     "file": "venues/lab/fence.png",
+     "parallax": 1.0,
+     "z": 5,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "net",
+     "file": "venues/lab/net.png",
+     "parallax": 1.0,
+     "z": 6,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "front",
+     "file": "venues/lab/front.png",
+     "parallax": 1.3,
+     "z": 7,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    }
+   ],
+   "draw_order_doc": "Draw layers by z. Game sprites (shadows, players, ball, near net post; y-sorted) go after 'net' and before 'front'. Crowd sprites go after 'stands'. Offset each layer by -camera * parallax.",
+   "court_mask": "venues/lab/court_mask.png",
+   "court_colors": {
+    "surround": [
+     [
+      59,
+      60,
+      66
+     ],
+     [
+      66,
+      68,
+      73
+     ],
+     [
+      70,
+      72,
+      78
+     ],
+     [
+      74,
+      76,
+      83
+     ],
+     [
+      81,
+      84,
+      90
+     ]
+    ],
+    "surface": [
+     [
+      26,
+      26,
+      33
+     ],
+     [
+      27,
+      27,
+      35
+     ],
+     [
+      29,
+      29,
+      37
+     ],
+     [
+      30,
+      30,
+      39
+     ]
+    ],
+    "kitchen": [
+     [
+      42,
+      112,
+      66
+     ],
+     [
+      45,
+      120,
+      71
+     ],
+     [
+      47,
+      124,
+      73
+     ],
+     [
+      50,
+      132,
+      78
+     ]
+    ],
+    "kitchen_shade": [
+     [
+      34,
+      90,
+      53
+     ],
+     [
+      36,
+      95,
+      56
+     ],
+     [
+      38,
+      100,
+      59
+     ]
+    ],
+    "lines": [
+     [
+      240,
+      213,
+      67
+     ],
+     [
+      250,
+      222,
+      70
+     ],
+     [
+      255,
+      231,
+      73
+     ]
+    ],
+    "lines_shade": [
+     [
+      180,
+      160,
+      50
+     ],
+     [
+      190,
+      169,
+      53
+     ],
+     [
+      200,
+      178,
+      56
+     ]
+    ]
+   },
+   "seats": [
+    {
+     "x": 330,
+     "y": 180,
+     "pose": "stand",
+     "person": 13
+    },
+    {
+     "x": 400,
+     "y": 180,
+     "pose": "stand",
+     "person": 14
+    },
+    {
+     "x": 470,
+     "y": 180,
+     "pose": "stand",
+     "person": 15
+    },
+    {
+     "x": 560,
+     "y": 180,
+     "pose": "stand",
+     "person": 12
+    },
+    {
+     "x": 640,
+     "y": 180,
+     "pose": "stand",
+     "person": 13
+    },
+    {
+     "x": 720,
+     "y": 180,
+     "pose": "stand",
+     "person": 14
+    }
+   ],
+   "watcher": {
+    "x": 720,
+    "y": 180,
+    "pose": "stand"
+   }
+  },
+  "station": {
+   "layers": [
+    {
+     "name": "sky",
+     "file": "venues/station/sky.png",
+     "parallax": 0.2,
+     "z": 0,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "far",
+     "file": "venues/station/far.png",
+     "parallax": 0.4,
+     "z": 1,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "trees",
+     "file": "venues/station/trees.png",
+     "parallax": 0.6,
+     "z": 2,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "ground",
+     "file": "venues/station/ground.png",
+     "parallax": 1.0,
+     "z": 3,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "stands",
+     "file": "venues/station/stands.png",
+     "parallax": 1.0,
+     "z": 4,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "fence",
+     "file": "venues/station/fence.png",
+     "parallax": 1.0,
+     "z": 5,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "net",
+     "file": "venues/station/net.png",
+     "parallax": 1.0,
+     "z": 6,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "front",
+     "file": "venues/station/front.png",
+     "parallax": 1.3,
+     "z": 7,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    }
+   ],
+   "draw_order_doc": "Draw layers by z. Game sprites (shadows, players, ball, near net post; y-sorted) go after 'net' and before 'front'. Crowd sprites go after 'stands'. Offset each layer by -camera * parallax.",
+   "court_mask": "venues/station/court_mask.png",
+   "court_colors": {
+    "surround": [
+     [
+      59,
+      60,
+      66
+     ],
+     [
+      66,
+      68,
+      73
+     ],
+     [
+      70,
+      72,
+      78
+     ],
+     [
+      74,
+      76,
+      83
+     ],
+     [
+      81,
+      84,
+      90
+     ]
+    ],
+    "surface": [
+     [
+      72,
+      79,
+      90
+     ],
+     [
+      76,
+      84,
+      96
+     ],
+     [
+      80,
+      88,
+      100
+     ],
+     [
+      84,
+      93,
+      106
+     ]
+    ],
+    "kitchen": [
+     [
+      180,
+      85,
+      26
+     ],
+     [
+      192,
+      90,
+      27
+     ],
+     [
+      200,
+      94,
+      29
+     ],
+     [
+      212,
+      99,
+      30
+     ]
+    ],
+    "kitchen_shade": [
+     [
+      145,
+      68,
+      21
+     ],
+     [
+      153,
+      72,
+      22
+     ],
+     [
+      161,
+      75,
+      23
+     ]
+    ],
+    "lines": [
+     [
+      245,
+      245,
+      245
+     ],
+     [
+      255,
+      255,
+      255
+     ],
+     [
+      255,
+      255,
+      255
+     ]
+    ],
+    "lines_shade": [
+     [
+      184,
+      184,
+      184
+     ],
+     [
+      194,
+      194,
+      194
+     ],
+     [
+      204,
+      204,
+      204
+     ]
+    ]
+   },
+   "seats": [
+    {
+     "x": 330,
+     "y": 180,
+     "pose": "stand",
+     "person": 13
+    },
+    {
+     "x": 400,
+     "y": 180,
+     "pose": "stand",
+     "person": 14
+    },
+    {
+     "x": 470,
+     "y": 180,
+     "pose": "stand",
+     "person": 15
+    },
+    {
+     "x": 560,
+     "y": 180,
+     "pose": "stand",
+     "person": 12
+    },
+    {
+     "x": 640,
+     "y": 180,
+     "pose": "stand",
+     "person": 13
+    },
+    {
+     "x": 720,
+     "y": 180,
+     "pose": "stand",
+     "person": 14
+    }
+   ],
+   "watcher": {
+    "x": 720,
+    "y": 180,
+    "pose": "stand"
+   }
   }
  }
 }

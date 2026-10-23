@@ -13,7 +13,9 @@ describes every file, position, anchor, animation and layer order.
 - **Venues:** `park` (level-01, Riverdale Park, day), `lakeside`
   (level-02), `sunset` (level-03, doubles), and ADR-046's `dinosaur`,
   `space` and `undersea` (no level mocks: drawn from the SNES mocks'
-  themes, `art/concept/court_top_*.png`).
+  themes, `art/concept/court_top_*.png`), ADR-078's indoor `gym`, and
+  ADR-085's `ruins`, `glacier`, `lab` and `station` (drawn from the
+  dinosaur game's level concepts, `../dinosaur/assets/levels`).
 
 `out/previews/<venue>_vs_mock.png` shows each level rebuilt from these
 assets (HUD, players, crowd, ball) beside its mock.
@@ -86,7 +88,7 @@ python3 -m venv .venv && .venv/bin/pip install -r art/levels/tools/requirements.
 | `tools/build.py` | Everything, plus the previews |
 | `tools/pix.py` | The drawing kit: aliased shapes, ramps, foliage, chain-link, outlines |
 | `tools/scenery.py` | The props |
-| `tools/venues.py` | The six venues, positioned from the mocks via `M()` |
+| `tools/venues.py` | The venues, positioned from the mocks via `M()` |
 | `tools/critters.py` | The fun venues' onlookers: dinosaurs, aliens, astronauts, sea creatures |
 | `tools/court.py` | Geometry, court mask and net |
 | `tools/players.py` | The players |

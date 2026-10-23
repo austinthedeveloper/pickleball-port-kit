@@ -8,7 +8,7 @@ import random
 import numpy as np
 
 from pix import (Layer, bush, chain_link, dither_ramp, edge_dist, fbm,
-                 foliage, grow, hexrgb, ramp, stamp_text, text_width, tree)
+                 foliage, grow, hexrgb, ramp, solid, stamp_text, text_width, tree)
 
 OUTLINE = hexrgb("0b1626")
 
@@ -811,3 +811,372 @@ def rope_fence(layer: Layer, x0, x1, top, base, posts, rope, wood, spacing=8,
         cap = layer.ellipse_mask(px_ + 0.5, top - 6, 4.5, 2)
         layer.fill(cap, wood[3])
         layer.outline(outline, p | cap)
+
+
+# -- The dinosaur game's levels (ADR-085): ruins, glacier, lab, station ---------
+
+def ruined_towers(layer: Layer, x0, x1, base, h_min, h_max, rmp, window, seed=0,
+                  lit=0.06, spires=0.35, low=None):
+    """A drowned city's towers against the sunset: dark slabs with broken,
+    jagged tops, clusters of thin spires, a few lit windows. low=(a, b):
+    the towers there are stumps (a gap for the sun). Returns the tops
+    [(x, y)] (for fires and smoke)."""
+    rng = random.Random(seed)
+    tops = []
+    for row, fac in enumerate((0.7, 1.0)):
+        x = x0
+        while x < x1:
+            w = rng.randint(10, 26)
+            h = rng.uniform(h_min, h_max) * fac
+            if rng.random() < 0.15:
+                h *= 1.4
+            if low and low[0] < x + w / 2 < low[1]:
+                h *= 0.3
+            top = base - h
+            pts = [(x, base + 2), (x, top + rng.uniform(0, 6))]
+            k = x
+            while k < x + w - 3:                     # the broken crown
+                k += rng.randint(2, 5)
+                pts.append((min(k, x + w), top + rng.uniform(-3, 10)))
+            pts += [(x + w, top + rng.uniform(0, 8)), (x + w, base + 2)]
+            m = layer.poly_mask(pts)
+            if rng.random() < spires:                # gothic spires
+                for _ in range(rng.randint(1, 3)):
+                    sx = x + rng.uniform(2, w - 3)
+                    sh = rng.uniform(10, 26) * fac
+                    m |= layer.poly_mask([(sx - 2, top + 4), (sx, top - sh), (sx + 2, top + 4)])
+            col = rmp[row] if row == 0 else rmp[1 + rng.randint(0, 1)]
+            layer.fill(m, col)
+            if row:
+                layer.fill(m & layer.rect_mask(x, top - 30, x + 2, base + 2), rmp[-1])
+                for wy in range(int(top) + 8, int(base), 4):
+                    for wx in range(x + 3, x + w - 2, 3):
+                        if rng.random() < lit:
+                            layer.px(wx, wy, window)
+                tops.append((x + w / 2, top))
+            x += w + rng.randint(-3, 4)
+    return tops
+
+
+def fire(layer: Layer, x, y, w, h, rmp, seed=0):
+    """A burning tower top: flame tongues, dark red to yellow."""
+    rng = random.Random(seed)
+    m = np.zeros((layer.h, layer.w), bool)
+    for k in range(int(3 + w / 3)):
+        fx = x + rng.uniform(-w / 2, w / 2)
+        fh = h * rng.uniform(0.4, 1.0)
+        m |= layer.poly_mask([(fx - 3, y + 2), (fx + rng.uniform(-2, 2), y - fh), (fx + 3, y + 2)])
+    layer.fill(m, rmp[0])
+    layer.fill(m & shift_(m, 0, 3) & shift_(m, 1, 0) & shift_(m, -1, 0), rmp[1])
+    layer.fill(m & shift_(m, 0, 6) & shift_(m, 2, 0) & shift_(m, -2, 0), rmp[2])
+    return m
+
+
+def arch_bridge(layer: Layer, x0, x1, deck, h, rmp, span=40, gap=None, outline=None):
+    """A stone bridge seen side on: a deck on piers with round arches
+    between; gap=(a, b) is a broken span (the deck stops in ragged ends)."""
+    m = layer.rect_mask(x0, deck, x1, deck + h)
+    x = x0 + span * 0.2
+    while x < x1:
+        m &= ~(layer.ellipse_mask(x + span / 2, deck + h, span * 0.38, h * 0.7))
+        x += span
+    if gap:
+        a, b = gap
+        cut = layer.poly_mask([(a, deck - 2), (a + 4, deck + 3), (a - 2, deck + 6), (a + 3, deck + h + 2),
+                               (b - 3, deck + h + 2), (b + 2, deck + 6), (b - 4, deck + 3), (b, deck - 2)])
+        m &= ~cut
+    layer.fill(m, rmp[1])
+    layer.fill(m & ~shift_(m, 0, 1), rmp[-1])
+    layer.fill(m & layer.rect_mask(x0, deck + 3, x1, deck + 4), rmp[0])
+    layer.fill(m & ~shift_(m, 0, -1), rmp[0])
+    if outline is not None:
+        layer.outline(outline, m)
+    return m
+
+
+def stone_pillar(layer: Layer, x, base, w, h, rmp, moss=None, seed=0, broken=True,
+                 snow=None, outline=OUTLINE):
+    """A block pillar: courses of stone, a broken (or capped) top, moss and
+    hanging vines (or a snow cap)."""
+    rng = random.Random(seed)
+    top = base - h
+    if broken:
+        pts = [(x - w / 2, base), (x - w / 2, top + rng.uniform(0, 6))]
+        k = x - w / 2
+        while k < x + w / 2 - 3:
+            k += rng.randint(3, 6)
+            pts.append((min(k, x + w / 2), top + rng.uniform(-2, 8)))
+        pts += [(x + w / 2, base)]
+        m = layer.poly_mask(pts)
+    else:
+        m = layer.rect_mask(x - w / 2, top, x + w / 2, base)
+        m |= layer.rect_mask(x - w / 2 - 3, top - 5, x + w / 2 + 3, top + 1)
+    solid(layer, m, rmp)
+    for cy in range(int(top) + 8, int(base), 9):                       # the courses
+        layer.fill(m & layer.rect_mask(x - w / 2, cy, x + w / 2, cy + 1), rmp[0])
+        off = (cy // 9) % 2 * (w / 3)
+        for cx in (x - w / 2 + w / 3 + off, x - w / 2 + 2 * w / 3 + off):
+            layer.fill(m & layer.rect_mask(cx, cy - 8, cx + 1, cy), rmp[0])
+    if moss is not None:
+        cap = m & ~shift_(m, 0, 4)
+        layer.fill(cap, moss[1])
+        layer.fill(cap & ~shift_(m, 0, 1), moss[2])
+        for _ in range(int(w / 5)):
+            vx = rng.uniform(x - w / 2 + 1, x + w / 2 - 1)
+            vy = top + rng.uniform(0, 8)
+            vine = layer.line_mask([(vx, vy), (vx + rng.uniform(-2, 2), vy + rng.uniform(8, h * 0.6))], 1)
+            layer.fill(vine & m, moss[0])
+    if snow is not None:
+        cap = layer.poly_mask([(x - w / 2 - 3, top + 3), (x - w / 2 + 2, top - 5), (x + w / 2 - 2, top - 6),
+                               (x + w / 2 + 3, top + 3)])
+        layer.fill(cap, snow[1])
+        layer.fill(cap & ~shift_(cap, 0, 2), snow[2])
+        icicles(layer, x - w / 2 - 2, x + w / 2 + 2, top + 3, 8, snow, seed=seed)
+        m |= cap
+    if outline is not None:
+        layer.outline(outline, m)
+    return m
+
+
+def girder(layer: Layer, a, b, w, rmp, outline=OUTLINE):
+    """A rusted steel beam from a to b with rivets."""
+    m = layer.line_mask([a, b], w)
+    layer.fill(m, rmp[1])
+    layer.fill(m & ~shift_(m, 0, 2), rmp[2])
+    layer.fill(m & ~shift_(m, 0, -2), rmp[0])
+    n = max(1, int(math.hypot(b[0] - a[0], b[1] - a[1]) / 9))
+    for k in range(1, n):
+        t = k / n
+        layer.px(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, rmp[-1])
+    layer.outline(outline, m)
+    return m
+
+
+def barrel(layer: Layer, cx, base, w, h, rmp, band, mark=None, outline=OUTLINE):
+    m = layer.rect_mask(cx - w / 2, base - h, cx + w / 2, base)
+    m &= ~(layer.rect_mask(cx - w / 2, base - h, cx - w / 2 + 1, base - h + 1) |
+           layer.rect_mask(cx + w / 2 - 1, base - h, cx + w / 2, base - h + 1))
+    solid(layer, m, rmp, rim=2)
+    for y in (base - h + 4, base - 5):
+        layer.fill(m & layer.rect_mask(cx - w / 2, y, cx + w / 2, y + 2), band)
+    if mark is not None:
+        layer.fill(layer.ellipse_mask(cx, base - h / 2, w * 0.22, w * 0.22), mark[0])
+        layer.fill(layer.ellipse_mask(cx, base - h / 2, w * 0.1, w * 0.1), mark[1])
+    layer.outline(outline, m)
+    return m
+
+
+def crate(layer: Layer, x0, base, size, rmp, outline=OUTLINE, cross=True):
+    m = layer.rect_mask(x0, base - size, x0 + size, base)
+    solid(layer, m, rmp, rim=1)
+    inner = layer.rect_mask(x0 + 3, base - size + 3, x0 + size - 3, base - 3)
+    layer.fill(m & ~inner, rmp[2])
+    if cross:
+        layer.fill(layer.line_mask([(x0 + 3, base - 4), (x0 + size - 4, base - size + 3)], 2) & inner, rmp[2])
+    layer.outline(outline, m)
+    return m
+
+
+def peaks(layer: Layer, x0, x1, base, h_min, h_max, rock, snow, seed=0, step=(40, 90)):
+    """Jagged mountains with snow on their upper slopes and lit left faces."""
+    rng = random.Random(seed)
+    x = x0 - rng.randint(0, 30)
+    m_all = np.zeros((layer.h, layer.w), bool)
+    while x < x1:
+        w = rng.randint(*step)
+        h = rng.uniform(h_min, h_max)
+        px = x + w * rng.uniform(0.4, 0.6)
+        top = base - h
+        pts = [(x - w * 0.3, base), (px - w * 0.12, top + h * 0.25), (px - 3, top + 5), (px, top),
+               (px + 4, top + 7), (px + w * 0.15, top + h * 0.3), (x + w * 1.3, base)]
+        m = layer.poly_mask(pts)
+        lit = m & layer.poly_mask([(x - w * 0.3, base), (px, top), (px + 2, base)])
+        layer.fill(m, rock[1])
+        layer.fill(lit, rock[2])
+        cap = m & layer.rect_mask(x - w, top, x + w * 2, top + h * rng.uniform(0.3, 0.45))
+        n = fbm(layer.h, layer.w, 4, seed + int(x), 2)
+        cap &= n > 0.25
+        layer.fill(cap & lit, snow[-1])
+        layer.fill(cap & ~lit, snow[1])
+        m_all |= m
+        x += int(w * rng.uniform(0.55, 0.9))
+    return m_all
+
+
+def pine(layer: Layer, x, base, h, leaf, snow=None, trunk=None, seed=0, outline=OUTLINE):
+    """A spruce: stacked drooping tiers, snow along each tier's top."""
+    rng = random.Random(seed)
+    w = h * 0.42
+    m = np.zeros((layer.h, layer.w), bool)
+    tiers = max(3, int(h / 12))
+    tops = []
+    for k in range(tiers):
+        t0 = k / tiers
+        ty = base - h + h * t0 * 0.92
+        tw = w * (0.25 + 0.75 * (k + 1) / tiers)
+        by = ty + h / tiers * 1.7
+        tier = layer.poly_mask([(x, ty), (x + tw / 2, by), (x + tw * 0.2, by - 2), (x, by + 1),
+                                (x - tw * 0.2, by - 2), (x - tw / 2, by)])
+        m |= tier
+        tops.append(tier)
+    if trunk is not None:
+        tr = layer.rect_mask(x - 2, base - h * 0.12, x + 2, base)
+        layer.fill(tr, trunk)
+    layer.fill(m, leaf[1])
+    layer.fill(m & layer.poly_mask([(x, base - h), (x - w, base), (x, base)]), leaf[2])
+    layer.fill(m & ~shift_(m, 1, 0), leaf[0])
+    if snow is not None:
+        for tier in tops:
+            edge = tier & ~shift_(tier, 0, 2)
+            layer.fill(edge, snow[-1])
+            layer.fill(tier & ~shift_(tier, 0, 1) & ~shift_(tier, 1, 0), snow[1])
+    if outline is not None:
+        layer.outline(outline, m)
+    return m
+
+
+def icicles(layer: Layer, x0, x1, y, max_len, rmp, seed=0):
+    """A fringe of icicles hanging from y."""
+    rng = random.Random(seed)
+    x = x0 + rng.uniform(0, 3)
+    while x < x1:
+        n = rng.uniform(2, max_len)
+        m = layer.poly_mask([(x - 1.5, y), (x, y + n), (x + 1.5, y)])
+        layer.fill(m, rmp[1])
+        layer.px(x - 1, y, rmp[-1])
+        x += rng.uniform(3, 6)
+
+
+def snow_bank(layer: Layer, x0, x1, top, base, snow, seed=0):
+    """A rolling band of snow (from top to base)."""
+    rng = random.Random(seed)
+    m = layer.rect_mask(x0, top + 6, x1, base)
+    x = x0 - 10
+    while x < x1 + 10:
+        r = rng.uniform(10, 24)
+        m |= layer.ellipse_mask(x, top + 6, r, rng.uniform(4, 8)) & layer.rect_mask(x0, top - 10, x1, base)
+        x += r * 1.3
+    n = fbm(layer.h, layer.w, 6, seed, 2)
+    ys = np.arange(layer.h)[:, None] - layer.oy
+    v = np.clip(0.95 - (ys - top) / max(1, base - top) * 0.6 + (n - 0.5) * 0.3, 0, 0.999)
+    layer.fill_where(m, np.array(snow, np.uint8)[np.clip((v * len(snow)).astype(int), 0, len(snow) - 1)])
+    layer.fill(m & ~shift_(m, 0, 1), snow[-1])
+    return m
+
+
+def hazard(layer: Layer, x0, y0, x1, y1, a=hexrgb("f0b828"), b=hexrgb("1a1a20"), w=6):
+    """Yellow and black diagonal stripes."""
+    H, W = layer.h, layer.w
+    yy, xx = np.mgrid[0:H, 0:W]
+    m = layer.rect_mask(x0, y0, x1, y1)
+    s = ((xx - yy) // w) % 2 == 0
+    layer.fill(m & s, a)
+    layer.fill(m & ~s, b)
+    return m
+
+
+def safety_rail(layer: Layer, x0, x1, top, base, posts, rmp, mid=True, outline=OUTLINE):
+    """A tubular railing: a top rail, a mid rail, posts."""
+    m = layer.rect_mask(x0, top, x1, top + 4)
+    if mid:
+        m |= layer.rect_mask(x0, (top + base) // 2, x1, (top + base) // 2 + 3)
+    for px in posts:
+        m |= layer.rect_mask(px - 2, top, px + 2, base)
+    layer.fill(m, rmp[1])
+    layer.fill(m & ~shift_(m, 0, 1), rmp[2])
+    layer.fill(m & ~shift_(m, 0, -1), rmp[0])
+    layer.outline(outline, m)
+    return m
+
+
+def pipe_run(layer: Layer, pts, w, rmp, joints=24, outline=OUTLINE):
+    """A pipe along a polyline (straight runs), banded and with flanges."""
+    m = np.zeros((layer.h, layer.w), bool)
+    for a, b in zip(pts, pts[1:]):
+        m |= layer.line_mask([a, b], w)
+        n = int(math.hypot(b[0] - a[0], b[1] - a[1]) / joints)
+        for k in range(1, n + 1):
+            t = k / (n + 1)
+            fx, fy = a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t
+            horiz = abs(b[0] - a[0]) > abs(b[1] - a[1])
+            fl = layer.rect_mask(fx - 1, fy - w / 2 - 1, fx + 2, fy + w / 2 + 1) if horiz else \
+                layer.rect_mask(fx - w / 2 - 1, fy - 1, fx + w / 2 + 1, fy + 2)
+            m |= fl
+    solid(layer, m, rmp, rim=max(1, w // 4))
+    if outline is not None:
+        layer.outline(outline, m)
+    return m
+
+
+def console(layer: Layer, x0, base, w, h, body, screen, glow, seed=0, outline=OUTLINE):
+    """A lab desk: a slanted control panel with blinking keys and a monitor."""
+    rng = random.Random(seed)
+    desk = layer.poly_mask([(x0, base), (x0, base - h * 0.55), (x0 + 4, base - h * 0.7),
+                            (x0 + w - 4, base - h * 0.7), (x0 + w, base - h * 0.55), (x0 + w, base)])
+    mon = layer.rect_mask(x0 + w * 0.2, base - h, x0 + w * 0.8, base - h * 0.72)
+    solid(layer, desk | mon, body, rim=1)
+    scr = layer.rect_mask(x0 + w * 0.2 + 2, base - h + 2, x0 + w * 0.8 - 2, base - h * 0.72 - 2)
+    layer.fill(scr, screen[0])
+    for yy in range(int(base - h + 4), int(base - h * 0.72 - 3), 3):
+        x = x0 + w * 0.2 + 4
+        while x < x0 + w * 0.8 - 5:
+            ln = rng.randint(2, 8)
+            layer.fill(layer.rect_mask(x, yy, min(x + ln, x0 + w * 0.8 - 4), yy + 1), screen[1])
+            x += ln + rng.randint(2, 5)
+    for k in range(int(w / 6)):
+        kx = x0 + 4 + k * 6
+        layer.fill(layer.rect_mask(kx, base - h * 0.62, kx + 3, base - h * 0.62 + 2),
+                   glow[rng.randrange(len(glow))])
+    layer.outline(outline, desk | mon)
+    return desk | mon
+
+
+def tank(layer: Layer, cx, base, w, h, glass, frame, specimen=None, seed=0, outline=OUTLINE):
+    """A glowing specimen tank: a metal base and cap, green liquid with
+    bubbles, a skeleton floating inside (specimen(L) paints a silhouette on
+    a scratch layer; it's recoloured)."""
+    rng = random.Random(seed)
+    top, bot = base - h, base - 12
+    body = layer.rect_mask(cx - w / 2, top + 10, cx + w / 2, bot)
+    xs = np.arange(layer.w) - layer.ox - cx
+    v = np.clip(1 - np.abs(xs) / (w / 2) * 0.9, 0, 0.999)
+    img = np.zeros((layer.h, layer.w, 3), np.uint8)
+    img[:] = np.array(glass, np.uint8)[np.clip((v * len(glass)).astype(int), 0, len(glass) - 1)][None, :, :]
+    layer.fill_where(body, img)
+    if specimen is not None:
+        tmp = Layer(layer.w, layer.h, layer.ox, layer.oy)
+        specimen(tmp)
+        sk = tmp.alpha() & body
+        layer.fill(sk, glass[0])
+        ribs = sk & ((np.arange(layer.h)[:, None] % 4) == 0)
+        layer.fill(ribs, glass[1])
+    for _ in range(int(h / 8)):
+        bx, by = cx + rng.uniform(-w / 2 + 3, w / 2 - 3), rng.uniform(top + 14, bot - 4)
+        layer.px(bx, by, glass[-1])
+        layer.px(bx + 1, by - 1, glass[-1])
+    layer.fill(body & layer.rect_mask(cx - w / 2 + 3, top + 12, cx - w / 2 + 5, bot - 2), glass[-1])
+    cap = layer.rect_mask(cx - w / 2 - 3, top, cx + w / 2 + 3, top + 10)
+    foot = layer.rect_mask(cx - w / 2 - 4, bot, cx + w / 2 + 4, base)
+    solid(layer, cap | foot, frame, rim=1)
+    layer.fill(layer.rect_mask(cx - w / 2 - 3, top + 7, cx + w / 2 + 3, top + 8), frame[0])
+    layer.outline(outline, body | cap | foot)
+    return body | cap | foot
+
+
+def asteroid(layer: Layer, cx, cy, r, rmp, seed=0, outline=None):
+    """A lumpy rock lit from the upper left, with a crater or two."""
+    rng = random.Random(seed)
+    pts = []
+    for k in range(9):
+        a = k / 9 * math.tau
+        rr = r * rng.uniform(0.75, 1.1)
+        pts.append((cx + math.cos(a) * rr, cy + math.sin(a) * rr * 0.85))
+    m = layer.poly_mask(pts)
+    solid(layer, m, rmp, rim=max(1, int(r / 5)))
+    for _ in range(int(r / 5)):
+        c = layer.ellipse_mask(cx + rng.uniform(-r / 2, r / 2), cy + rng.uniform(-r / 3, r / 3),
+                               r * 0.18, r * 0.12) & m
+        layer.fill(c, rmp[0])
+    if outline is not None:
+        layer.outline(outline, m)
+    return m

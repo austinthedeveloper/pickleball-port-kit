@@ -589,10 +589,134 @@ def amb_gym(rng):
     return reverb(out, rng, wet=0.35, seconds=1.2, decay=0.45, brightness=5000, stereo=True)
 
 
+# ADR-085: the dinosaur game's levels as venues
+
+def crackle(rng, seconds, rate=40):
+    """A fire: sparse pops and snaps over a low roar."""
+    out = band(pink(rng, seconds, 2), 80, 600) * 0.25
+    n = int(seconds * rate)
+    for _ in range(n):
+        d = rng.uniform(0.003, 0.012)
+        pop = band(noise(rng, d), 1500, 7000) * np.exp(-t_axis(d) / (d * 0.3))
+        place(out, pop, rng.uniform(0, seconds - 0.02), rng.uniform(-0.6, 0.6), rng.uniform(0.1, 0.5))
+    return out
+
+
+def screech(rng, f0=1400):
+    """A raptor's call, far off: a falling, rasping cry."""
+    d = rng.uniform(0.5, 0.8)
+    c = chirp(rng, f0, f0 * 0.45, d, warble=0.06, warble_rate=70, harm=0.6)
+    return band(c, 300, 5000)
+
+
+def amb_ruins(rng):
+    """RUINS: wind through the broken towers, the fires crackling, the
+    river below, a raptor calling now and then, a far-off collapse."""
+    s = LOOP + FADE
+    out = wind(rng, s, 120, 1400, 0.6) * 0.16
+    out += crackle(rng, s) * 0.08
+    out += band(pink(rng, s, 2), 200, 900) * 0.04            # the river
+    out += murmur(rng, s, 0.12)
+    tt = 4.0
+    while tt < s - 2:
+        place(out, screech(rng), tt, rng.uniform(-0.9, 0.9), rng.uniform(0.04, 0.07))
+        tt += rng.uniform(7, 13)
+    tt = 15.0
+    while tt < s - 4:                                        # rubble, far away
+        d = 2.5
+        rumble = band(noise(rng, d), 40, 300) * np.exp(-t_axis(d) / 0.8)
+        place(out, rumble, tt, rng.uniform(-0.6, 0.6), 0.25)
+        tt += rng.uniform(16, 22)
+    return reverb(out, rng, wet=0.2, seconds=1.5, decay=0.5, brightness=4000, stereo=True)
+
+
+def amb_glacier(rng):
+    """GLACIER: a howling wind off the peaks, the ice creaking, the snow
+    hissing past, a pterodactyl crying high up."""
+    s = LOOP + FADE
+    t = t_axis(s)
+    out = wind(rng, s, 200, 1100, 0.85, rate=0.08) * 0.22
+    howl = band(pink(rng, s, 2), 500, 700) * (0.5 + 0.5 * np.sin(2 * np.pi * 0.06 * t))[:, None]
+    out += howl * 0.12
+    out += band(noise(rng, s, 2), 4000, 9000) * 0.005        # blown snow
+    out += murmur(rng, s, 0.1)
+    tt = 3.0
+    while tt < s - 3:                                        # the ice groans
+        d = rng.uniform(0.8, 1.6)
+        f0 = rng.uniform(70, 140)
+        groan = chirp(rng, f0, f0 * rng.uniform(1.3, 1.8), d, warble=0.1, warble_rate=18, harm=0.8)
+        place(out, band(groan, 50, 900), tt, rng.uniform(-0.8, 0.8), 0.06)
+        tt += rng.uniform(5, 9)
+    tt = 11.0
+    while tt < s - 2:
+        place(out, screech(rng, 2200), tt, rng.uniform(-0.9, 0.9), 0.035)
+        tt += rng.uniform(13, 19)
+    return reverb(out, rng, wet=0.3, seconds=2.2, decay=0.8, brightness=5000, stereo=True)
+
+
+def beep(rng):
+    f = rng.choice([880.0, 1046.5, 1318.5, 1760.0])
+    d = rng.uniform(0.05, 0.1)
+    return np.sin(2 * np.pi * f * t_axis(d)) * np.exp(-t_axis(d) / 0.08)
+
+
+def amb_lab(rng):
+    """LAB, indoors: the mains hum and the pumps, the tanks bubbling, the
+    consoles beeping, a valve venting steam, the crowd in a hard room."""
+    s = LOOP + FADE
+    t = t_axis(s)
+    hum = sum(a * np.sin(2 * np.pi * f * t) for f, a in ((60, 1.0), (120, 0.5), (180, 0.25), (240, 0.12)))
+    out = pan_stereo(hum, 0.0) * 0.05
+    out += band(pink(rng, s, 2), 60, 300) * 0.08 * (0.8 + 0.2 * np.sin(2 * np.pi * 0.5 * t))[:, None]
+    out += murmur(rng, s, 0.15)
+    tt = 0.0
+    while tt < s - 0.1:
+        place(out, bubble(rng), tt, rng.uniform(-0.5, 0.5), rng.uniform(0.02, 0.06))
+        tt += rng.uniform(0.04, 0.3)
+    tt = 0.7
+    while tt < s - 1:
+        for k in range(int(rng.integers(1, 4))):
+            place(out, beep(rng), tt + k * 0.12, rng.uniform(-0.8, 0.8), 0.04)
+        tt += rng.uniform(1.5, 4.5)
+    tt = 9.0
+    while tt < s - 3:
+        d = 1.6
+        hiss = band(noise(rng, d), 2000, 9000) * np.sin(np.pi * t_axis(d) / d) ** 0.5
+        place(out, hiss, tt, rng.uniform(-0.7, 0.7), 0.05)
+        tt += rng.uniform(10, 15)
+    return reverb(out, rng, wet=0.35, seconds=1.0, decay=0.35, brightness=6000, stereo=True)
+
+
+def amb_station(rng):
+    """STATION, indoors: the engines' low drone, the air through the vents,
+    the consoles' chirps, a door sighing open now and then."""
+    s = LOOP + FADE
+    t = t_axis(s)
+    pad = np.zeros((len(t), 2))
+    for f, pan in [(41.2, -0.3), (41.5, 0.3), (61.8, 0.0), (82.4, -0.2), (123.6, 0.2)]:
+        pad += pan_stereo(np.sin(2 * np.pi * f * t) * (0.7 + 0.3 * np.sin(2 * np.pi * 0.04 * t + f)), pan)
+    out = pad * 0.06
+    out += band(pink(rng, s, 2), 250, 2200) * 0.05            # the vents
+    out += murmur(rng, s, 0.12)
+    tt = 0.5
+    while tt < s - 1:
+        place(out, beep(rng) * 0.7, tt, rng.uniform(-0.9, 0.9), 0.035)
+        tt += rng.uniform(1.0, 3.5)
+    tt = 7.0
+    while tt < s - 3:
+        d = 0.9
+        door = band(noise(rng, d), 600, 5000) * np.exp(-t_axis(d) / 0.3)
+        door += modes(d, [(110, 0.3, 0.4)])
+        place(out, door, tt, rng.uniform(-0.8, 0.8), 0.08)
+        tt += rng.uniform(9, 14)
+    return reverb(out, rng, wet=0.3, seconds=1.4, decay=0.5, brightness=5000, stereo=True)
+
+
 AMBIENCE = {"ambience_park": amb_park, "ambience_lakeside": amb_lakeside,
             "ambience_sunset": amb_sunset, "ambience_dinosaur": amb_jungle,
             "ambience_space": amb_space, "ambience_undersea": amb_undersea,
-            "ambience_gym": amb_gym}
+            "ambience_gym": amb_gym, "ambience_ruins": amb_ruins, "ambience_glacier": amb_glacier,
+            "ambience_lab": amb_lab, "ambience_station": amb_station}
 
 
 def rms_db(x):

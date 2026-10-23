@@ -26,6 +26,18 @@ G = [
         ("venue_gym_1", "Welcome to the gym! The lights are bright and the floor is squeaky.", WARM, 4.0),
         ("venue_gym_2", "We're indoors today, folks. No wind, no excuses!", WRY, 3.0),
     ]),
+    ("The dinosaur game's levels", "As a match at RUINS, GLACIER, LAB or STATION (the "
+     "venues from the dinosaur game, ADR-085) begins. Not recorded yet: until then the "
+     "match opens with the format.", [
+        ("venue_ruins_1", "Welcome to the ruins! Mind the rubble, and the raptors.", WARM, 3.5),
+        ("venue_ruins_2", "The city's on fire, folks, and so are these players!", HYPE, 3.0),
+        ("venue_glacier_1", "Welcome to the glacier! Bundle up, it's a cold one today.", WARM, 3.5),
+        ("venue_glacier_2", "Careful out there. The only thing colder is that serve!", WRY, 3.0),
+        ("venue_lab_1", "Welcome to the lab! And please, nobody tap on the tanks.", WRY, 3.0),
+        ("venue_lab_2", "Today's experiment: pickleball! Let's see what happens.", WARM, 3.0),
+        ("venue_station_1", "Welcome aboard the station! Gravity's on. Mostly.", WRY, 3.0),
+        ("venue_station_2", "Live from orbit, it's pickleball!", HYPE, 2.2),
+    ]),
     ("Achievements", "As an achievement unlocks (after the match's result): its own line "
      "if it has one, else a general one.", [
         ("achievement_1", "Achievement unlocked!", HYPE, 1.5),

@@ -36,6 +36,27 @@
       "name": "GYM", "scene": "", "ambience": "gym",
       "watcher": [194, 64, "sit"],
       "ground": {"surface": "CLAY", "kitchen": "GREEN", "surround": "MAPLE", "lines": "WHITE"}
+    },
+    {
+      "comment": "The dinosaur game's levels (ADR-085), the port's own: its ruined city, its ice wilderness, its science lab and its space station (the last two indoors).",
+      "name": "RUINS", "scene": "", "ambience": "ruins",
+      "watcher": [194, 64, "stand"],
+      "ground": {"surface": "PURPLE", "kitchen": "CLAY", "surround": "CONCRETE", "lines": "WHITE"}
+    },
+    {
+      "name": "GLACIER", "scene": "", "ambience": "glacier",
+      "watcher": [194, 64, "stand"],
+      "ground": {"surface": "BLUE", "kitchen": "NAVY", "surround": "SNOW", "lines": "WHITE"}
+    },
+    {
+      "name": "LAB", "scene": "", "ambience": "lab",
+      "watcher": [194, 64, "stand"],
+      "ground": {"surface": "BLACK", "kitchen": "GREEN", "surround": "ASPHALT", "lines": "YELLOW"}
+    },
+    {
+      "name": "STATION", "scene": "", "ambience": "station",
+      "watcher": [194, 64, "stand"],
+      "ground": {"surface": "SLATE", "kitchen": "ORANGE", "surround": "ASPHALT", "lines": "WHITE"}
     }
   ]
 }
