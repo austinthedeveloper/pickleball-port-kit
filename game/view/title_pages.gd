@@ -215,6 +215,10 @@ static func build(t: TitleScreen) -> void:
 				GameControls.device_serial += 1},        # every prompt bar redraws
 		{"id": "notice", "label": "PAD NOTICE", "value": func(): return onoff.call(Settings.pad_notice),
 			"change": func(_d): Settings.pad_notice = not Settings.pad_notice},
+		# PORT-81: the on-screen pad (AUTO: on a touch screen with no pad)
+		{"id": "touch", "label": "TOUCH PAD", "value": func(): return TouchPad.MODES[Settings.touch_pad],
+			"change": func(d):
+				Settings.touch_pad = (Settings.touch_pad + d + TouchPad.MODES.size()) % TouchPad.MODES.size()},
 	], help, Rect2(250, 150, 460, 0))
 	# the card at startup with no pad connected (port ADR-082)
 	t._add_page("notice", "CONTROLLER", [

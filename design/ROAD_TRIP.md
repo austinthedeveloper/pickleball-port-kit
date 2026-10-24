@@ -735,12 +735,12 @@ Everything above is built (ADR-087 has the details), except:
   the standard value. FEET is a human's top speed, 20 to 31 (24 at 8).
 - **The GARAGE's cosmetics** are the van's paint and the dash ornament
   (the freshener follows the ornament); the cassettes and the map's pen
-  colour wait (KNOWN_ISSUES #80).
+  colour wait (KNOWN_ISSUES #83).
 - **Scenes** play in full every trip (they're a page or two; START skips).
 - **The locals** have looks of their own (a shirt colour for the pair,
   each their own skin, hair, hat and body) drawn from the seed.
 - **A trip's length**: about 12 stops and 8 matches; a bot's matches take
   0.5 to 2.5 minutes (`tools/trip_balance.gd`), so a trip is well under
-  30 minutes. The balance is a first guess (KNOWN_ISSUES #79).
+  30 minutes. The balance is a first guess (KNOWN_ISSUES #82).
 - **Screenshots**: `godot --path game --resolution 960x540 -s res://tools/trip_shot.gd -- <home|garage|results|map|pick|shop|card|team|detour|motel|start|match> 60 out.png`.
 

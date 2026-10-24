@@ -8,7 +8,7 @@
 ## colour presets; "time=N" DAY 0, DUSK 1, NIGHT 2;
 ## "meterfull" keeps P1's SPECIALS meter full (with mods=131072), "picklesmash" shoots a PICKLE SMASH;
 ## "camflash" a burst of the crowd's camera flashes (PORT-66);
-## "pad" shows the controller prompts; "save" a save with records (title); "pause" pauses the match at the end; "tune" opens the tuning panel; "debug" the F3 overlay (hit volumes); "location=N" OPEN PLAY's location; "potm" a bot match to its PLAY OF THE MATCH ("potmsave" presses its SAVE); "nearreach" a near-side reach mid-step;
+## "pad" shows the controller prompts; "touch" the touch pad and its prompts (PORT-81); "save" a save with records (title); "pause" pauses the match at the end; "tune" opens the tuning panel; "debug" the F3 overlay (hit volumes); "location=N" OPEN PLAY's location; "potm" a bot match to its PLAY OF THE MATCH ("potmsave" presses its SAVE); "nearreach" a near-side reach mid-step;
 ## "closecall" shows a forced close-up; "initials" the initials card;
 ## "result" plays a bot match and ends it (the stats card); "mp4" four
 ## humans on fake pads (doubles); title_lobby a lobby with three players.
@@ -80,6 +80,9 @@ func _initialize() -> void:
 	for arg in a.slice(4):
 		if arg == "pad":
 			GameControls.last_device = GameControls.PAD
+		if arg == "touch":
+			Settings.touch_pad = TouchPad.ON
+			GameControls.last_device = GameControls.TOUCH
 		if arg.begins_with("update="):          # PORT-32: a stand-in updater in this state
 			var u := Updater.new()
 			Updater.instance = u

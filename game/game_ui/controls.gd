@@ -176,6 +176,13 @@ func _ready() -> void:
 		m.axis_value = pair[2]
 		InputMap.action_add_event(pair[0], m)
 	assign_pads(Input.get_connected_joypads(), false)
+	# PORT-81: a touch screen with no pad starts on touch (its on-screen pad)
+	if DisplayServer.is_touchscreen_available() and connected_pads().is_empty():
+		last_device = TOUCH
+	if not has_node("TouchPad"):
+		var touch := TouchPad.new()
+		touch.name = "TouchPad"
+		add_child(touch)
 
 
 ## Presses latched from input events until the next sim step reads them,
@@ -186,10 +193,12 @@ static var _latch := {}
 
 
 ## The device the player touched last (prompts follow it): KEYBOARD
-## (keys and the mouse) or PAD, and that pad's id; `device_serial` counts
+## (keys and the mouse), PAD, and that pad's id, or TOUCH (a finger, and
+## the mouse Godot makes of it; PORT-81); `device_serial` counts
 ## changes so a prompt can redraw.
 const KEYBOARD := 0
 const PAD := 1
+const TOUCH := 2
 static var last_device := KEYBOARD
 static var last_pad := 0
 static var device_serial := 0
@@ -199,7 +208,10 @@ static var binding_serial := 0
 
 static func note_device(event: InputEvent) -> void:
 	var dev := -1
-	if event is InputEventKey or event is InputEventMouseButton:
+	if event is InputEventScreenTouch or event is InputEventScreenDrag \
+			or (event is InputEventMouseButton and event.device == InputEvent.DEVICE_ID_EMULATION):
+		dev = TOUCH
+	elif event is InputEventKey or event is InputEventMouseButton:
 		dev = KEYBOARD
 	elif event is InputEventJoypadButton:
 		dev = PAD

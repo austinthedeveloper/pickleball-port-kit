@@ -76,4 +76,5 @@ first decisions, are rows in `design/07_DECISIONS_AND_RISKS.md`.
 | 083 | [The Soundtrack and Ambience Ship as Ogg](ADR-083-ogg-soundtrack.md) | Accepted 2026-10-22 |
 | 084 | [DINOSAUR's Dinosaurs From the Dinosaur Game](ADR-084-dinosaur-venue-dinos.md) | Accepted 2026-10-22 |
 | 085 | [The Dinosaur Game's Levels as Courts](ADR-085-dinosaur-game-levels.md) | Accepted 2026-10-22 |
+| 086 | [An On-Screen Pad for Touch Screens](ADR-086-touch-pad.md) | Accepted 2026-10-23 |
 | 087 | [ROAD TRIP: a Roguelike Mode on a Map](ADR-087-road-trip.md) | Accepted 2026-10-24 |

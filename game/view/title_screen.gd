@@ -182,7 +182,8 @@ func _ready() -> void:
 	return_to = ""
 	if not notice_done:
 		notice_done = true               # port ADR-082: once a session, at startup
-		if Settings.pad_notice and GameControls.connected_pads().is_empty():
+		# not on a touch screen's pad (PORT-81): that's the controller
+		if Settings.pad_notice and GameControls.connected_pads().is_empty() and not TouchPad.wanted():
 			open_page("notice")
 			_lock = 10                   # the title's own opening wait, as without it
 	Settings.apply_window(get_window())    # last: a mode change can run a frame

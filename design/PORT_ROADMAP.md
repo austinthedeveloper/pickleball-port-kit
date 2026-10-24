@@ -106,6 +106,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-78 | Keyboard controls you can guess: a WASD + J K L preset and an arrows + Z X C one, keys drawn where they sit | `feature/cld-keyboard-layout` | Planned (parked: you're thinking it over) |
 | PORT-79 | Text centred in the menu bars and the prompts' keys | `feature/cld-text-centring` | Ready to test |
 | PORT-80 | Cleanup round 6: one copy of the shot effects, the title's way back, the dinosaurs' looks; tests for the gaps | `feature/cld-cleanup-6` | Done |
+| PORT-81 | Touch controls for the web build: an on-screen SNES pad on phones and tablets | `feature/cld-touch-controls` | Ready to test |
 | PORT-82 | ROAD TRIP: a roguelike mode beside STORY, a road map of branching stops, a match at each, gear to pick, a garage between trips (port ADR-087) | `feature/cld-trip-run` | Ready to test |
 
 ## Releases
@@ -357,6 +358,31 @@ the same request). Open: 36 and 40.
     pixel the same.
   - Status: **Done**.
 
+### 81. `feature/cld-touch-controls`: touch controls on the web (asked for 2026-10-23)
+
+- [x] `PORT-81` The web build had no touch input (a tap on a menu row
+  worked, through Godot's mouse emulation; a match couldn't be played).
+  Godot has touch events and `TouchScreenButton`, but no D-pad node, so
+  one `TouchPad` node (`view/touch_pad.gd`, port ADR-086) tracks the
+  fingers and presses the input map's actions through `Input`: a SNES
+  pad with the D-pad bottom left, B A Y X bottom right (hit, drive, soft,
+  slice), START, L (SHORT) and R (SPECIAL) up top. The prompts follow it
+  (B HIT, A DRIVE...). TOUCH PAD on CONTROLLER: AUTO (a touch screen, no
+  pad), ON, OFF. Taps off the pad still drive the menus; a tap on a
+  button doesn't click the row under it; a part with a menu's panel under
+  it steps aside. No controller card on a phone.
+  - Verified: 487/487 plus the e2e. `test_touch` (synthetic touches:
+    every action, the D-pad's eight ways, two thumbs, a slide, a tap
+    shorter than a tick), a
+    `test_layout` case, the e2e with real touches through the event
+    queue; screenshots of the title, COURT, a match, pause, the result
+    and practice with the pad up. Golden traces unchanged.
+  - Status: **Ready to test** on a phone: export the web build
+    (`game/tools/export.sh`), serve it and open it on a phone in
+    landscape. Try a match (move and hit with two thumbs, hold L while
+    hitting), the menus by tap, and whether the buttons sit right under
+    your thumbs. Known issue 79 lists what couldn't be checked here.
+
 ### 82. `feature/cld-trip-run`: ROAD TRIP, a roguelike mode (asked for 2026-10-23)
 
 - [x] `PORT-82` ROAD TRIP (port ADR-087; the plan with your answers and the
@@ -384,8 +410,8 @@ the same request). Open: 36 and 40.
   - Status: **Ready to test**: play a trip or three. Say how it feels:
     too easy or hard (the bot wins leg 1 from the start and needs about
     12 in every stat for the final), the length, the prices, the gear.
-    Not built: the cassettes and the map's pen colour (KNOWN_ISSUES #79,
-    #80).
+    Not built: the cassettes and the map's pen colour (KNOWN_ISSUES #82,
+    #83).
 
 ## For you
 
@@ -395,7 +421,12 @@ the chain: each has a default I've gone with.
 - **PORT-82 ROAD TRIP:** built and playable (MAIN > ROAD TRIP). Play a
   few trips and say what to change: the difficulty, the length, prices
   and cash, the gear (which items are dull or too strong), the GARAGE's
-  pace. The numbers are a first guess (KNOWN_ISSUES #79).
+  pace. The numbers are a first guess (KNOWN_ISSUES #82).
+
+- **PORT-81 touch:** the pad is a SNES pad (B A Y X, L R up top). Say if
+  you'd rather have big labelled buttons (HIT, DRIVE...) or fewer of them
+  on phones; and whether TOUCH PAD should default to ON in the web build
+  rather than AUTO.
 
 - **PORT-78 the keyboard:** parked at your request. When you've thought
   it over: which presets (WASD + J K L, arrows + Z X C, both), which is

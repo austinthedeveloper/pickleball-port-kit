@@ -7,6 +7,8 @@ const UI := "res://assets/levels/ui/"
 ## The small font's ink, outline and drop shadow included: rows 2 to 18 of
 ## its 20 px cell (y 2 up to 19), so its middle is 10.5 px below the text.
 const SMALL_INK := Vector2(2, 19)
+## Every panel's group (the touch pad steps aside from them, PORT-81).
+const PANELS := "ui_panels"
 
 
 ## A framed panel (panel_<style>.png, 12 px frame) over `rect`, added to
@@ -21,6 +23,7 @@ static func panel(rect: Rect2, parent: Node = null, style := "title") -> NinePat
 	n.position = rect.position
 	n.size = rect.size
 	n.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	n.add_to_group(PANELS)
 	if parent:
 		parent.add_child(n)
 	return n

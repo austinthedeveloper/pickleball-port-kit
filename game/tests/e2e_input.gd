@@ -48,6 +48,25 @@ func _release() -> void:
 		_held = ""
 
 
+## A finger (index 0, so Godot makes a mouse of it too) down or up.
+func _touch(at: Vector2, pressed: bool) -> void:
+	var e := InputEventScreenTouch.new()
+	e.position = at
+	e.pressed = pressed
+	Input.parse_input_event(e)
+
+
+## A screen point on a page's row.
+func _row_point(page: MenuPage, id: String) -> Vector2:
+	var want := page.rows.map(func(r): return r["id"]).find(id)
+	var inv := page.get_global_transform().affine_inverse()
+	for y in range(0, 540, 2):
+		var p := Vector2(480, y)
+		if page.row_at(inv * p) == want:
+			return p + Vector2(0, 6)
+	return Vector2(-1, -1)
+
+
 func _expect(cond: bool, msg: String) -> void:
 	print(("  ok   " if cond else "  FAIL ") + msg)
 	if not cond:
@@ -214,6 +233,28 @@ func _tick() -> void:
 				s.load_game()
 				_expect(int(s.data["settings"]["sound"]) == AudioMap.SOUND_NO_CROWD,
 					"the SOUND setting was saved (survives a restart)")
+				_next(8)
+		8:
+			# PORT-81: the touch pad, real touches through the event queue: Y
+			# on the pad backs out of MATCH SETUP, a tap on QUICK MATCH (the
+			# first finger's mouse) opens it again
+			if _t == 1:
+				Settings.touch_pad = TouchPad.ON
+			if _t == 3:
+				_expect(root.get_node("Controls/TouchPad").visible, "TOUCH PAD ON shows the pad")
+				_touch(TouchPad.face_centre("soft"), true)
+			if _t == 5:
+				_touch(TouchPad.face_centre("soft"), false)
+			if _t == 14:
+				_expect(_title().page == "play", "Y on the touch pad goes back")
+				_expect(GameControls.last_device == GameControls.TOUCH, "the prompts follow the finger")
+				var at := _row_point(_title().pages["play"], "quick")
+				_touch(at, true)
+			if _t == 16:
+				_touch(_row_point(_title().pages["play"], "quick"), false)
+			if _t == 30:
+				_expect(_title().page == "setup", "a tap on QUICK MATCH opens it")
+				Settings.touch_pad = TouchPad.AUTO
 				_next(9)
 		9:
 			print("\n%s" % ("e2e passed" if _fails == 0 else "e2e FAILED (%d)" % _fails))

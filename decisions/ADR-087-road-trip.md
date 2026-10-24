@@ -98,7 +98,7 @@ erring at five rates) wins every leg 1 match from the starting 1s, about
 half of leg 2's, and the final only from about 12 in every stat; 20 wins
 everything. A match takes 0.5 to 2.5 minutes, so a trip's eight or so
 matches and its stops fit well inside 30 minutes. Play will move these
-(KNOWN_ISSUES #79).
+(KNOWN_ISSUES #82).
 
 ## Why
 

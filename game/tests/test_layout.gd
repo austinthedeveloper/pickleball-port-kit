@@ -582,6 +582,59 @@ func test_pad_families() -> void:
 	GameControls.device_serial += 1
 
 
+## PORT-81: the touch pad over every title page, a match (the serve and
+## paused) and the bracket, with its prompts: its letters clear of the
+## screens' text.
+func test_touch_pad() -> void:
+	var kept := [GameControls.last_device, Settings.touch_pad]
+	GameControls.last_device = GameControls.TOUCH
+	Settings.touch_pad = TouchPad.ON
+	GameControls.device_serial += 1
+	var with_pad := func(n: Node) -> TouchPad:
+		var pad := TouchPad.new()
+		pad._ready()
+		pad.visible = true
+		n.add_child(pad)
+		return pad
+	# the pad steps aside from the screen's panels, as it does each frame
+	var settle := func(n: Node, pad: TouchPad) -> void:
+		var boxes := []
+		var stack := [n]
+		while not stack.is_empty():
+			var c: Node = stack.pop_back()
+			if c is NinePatchRect and _shown(c):
+				boxes.append(Rect2(c.get_global_transform().origin, c.size))
+			stack.append_array(c.get_children())
+		pad.avoid(boxes)
+	var t := _title()
+	var tp: TouchPad = with_pad.call(t)
+	for id in t.pages:
+		t._show(id)
+		t.pages[id].settle()
+		settle.call(t, tp)
+		check_layout(t, "touch: title %s" % id)
+	t.free()
+	var v := _view(SimTypes.MatchConfig.singles())
+	var vp: TouchPad = with_pad.call(v)
+	settle.call(v, vp)
+	check_layout(v, "touch: the serve")
+	v.sim.paused = 1
+	v._hud.refresh()
+	settle.call(v, vp)
+	check_layout(v, "touch: paused")
+	v.free()
+	var b := BracketScreen.new().setup(_save(), false)
+	runner.root.add_child(b)
+	if not b.is_node_ready():
+		b._ready()
+	settle.call(b, with_pad.call(b))
+	check_layout(b, "touch: bracket")
+	b.free()
+	GameControls.last_device = kept[0]
+	Settings.touch_pad = kept[1]
+	GameControls.device_serial += 1
+
+
 ## PORT-29: the lobby in both cup modes with four players, and the couch
 ## bracket (doubles teams' names) fresh, in play and over.
 func test_couch_cup() -> void:
