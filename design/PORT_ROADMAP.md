@@ -366,7 +366,7 @@ the same request). Open: 36 and 40.
   of stops (PICKUP GAME, GRUDGE MATCH, YARD SALE, PRO SHOP, MOTEL,
   DETOUR), a big match ending each of the first two legs and the final
   ending the third, about 12 stops and 30 minutes at most. You start
-  weak (a plain paddle and cap, every stat at 1 of 9); gear picked one of
+  weak (a plain paddle and cap, every stat at 1 of 20); gear picked one of
   three at least every two stops (the game's paddles and hats, items,
   one-sided rules) makes a trip strong. Three hearts, and the trip can
   end. MILES fill the GARAGE's fixed ladder of lasting rewards (stats,
