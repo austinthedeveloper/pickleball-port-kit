@@ -106,7 +106,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-78 | Keyboard controls you can guess: a WASD + J K L preset and an arrows + Z X C one, keys drawn where they sit | `feature/cld-keyboard-layout` | Planned (parked: you're thinking it over) |
 | PORT-79 | Text centred in the menu bars and the prompts' keys | `feature/cld-text-centring` | Ready to test |
 | PORT-80 | Cleanup round 6: one copy of the shot effects, the title's way back, the dinosaurs' looks; tests for the gaps | `feature/cld-cleanup-6` | Done |
-| PORT-82 | STORY as a road trip on a map: a new remaster-only story, branching roads, a match at each stop, gear to pick (a plan: `design/STORY_ROGUELIKE.md`) | `feature/cld-story-roguelike` | Planned (waiting on your answers) |
+| PORT-82 | ROAD TRIP: a roguelike mode beside STORY, a road map of branching stops, a match at each, gear to pick, a garage between trips (a plan: `design/ROAD_TRIP.md`) | `feature/cld-story-roguelike` | Planned (waiting on your answers) |
 
 ## Releases
 
@@ -357,34 +357,35 @@ the same request). Open: 36 and 40.
     pixel the same.
   - Status: **Done**.
 
-### 82. `feature/cld-story-roguelike`: STORY as a road trip on a map (asked for 2026-10-23)
+### 82. `feature/cld-story-roguelike`: ROAD TRIP, a roguelike mode (asked for 2026-10-23)
 
-- [ ] `PORT-82` A plan, nothing built: `design/STORY_ROGUELIKE.md`. A new
-  story, the remaster's own (not bound by the bible, at your word): ROAD
-  TRIP, you and Pepper driving to the SUMMER OPEN on the coast, where the
-  Champs defend their title. The map is a road map on the van's
-  dashboard: three legs (out of town, the long drive, the coast) of five
-  columns of stops in three or four lanes, each leg ending in a big match
-  against one of its ladder teams, then the final. Stops: PICKUP GAME,
-  GRUDGE MATCH, YARD SALE, PRO SHOP, MOTEL, DETOUR. Gear, pick one of
-  three, at least every two stops on any road; 23 items in three kinds
-  (the trip only; knobs the game has; one-sided rules behind a
-  `MatchConfig.perks` field, off in conformance, with an ADR). Three
-  hearts, RELAXED for no penalty; HEAT and new gear between trips. Seeded
-  like the tournament, the generated map kept in a new save key (v6
-  stays). SAVE THE PARK stays beside it. Seven build stages.
-  - Status: **Planned**: eight questions at the end of the doc (For you).
+- [ ] `PORT-82` A plan, nothing built: `design/ROAD_TRIP.md`, with your
+  first answers in. A mode of its own beside STORY (which stays): you and
+  a partner drive to the SUMMER OPEN, where the Champs defend their
+  title. A road map on the van's dashboard: three legs of three columns
+  of stops (PICKUP GAME, GRUDGE MATCH, YARD SALE, PRO SHOP, MOTEL,
+  DETOUR), a big match ending each of the first two legs and the final
+  ending the third, about 12 stops and 30 minutes at most. You start
+  weak (a plain paddle and cap, every stat at 1 of 9); gear picked one of
+  three at least every two stops (the game's paddles and hats, items,
+  one-sided rules) makes a trip strong. Three hearts, and the trip can
+  end. MILES buy lasting upgrades in the GARAGE; beaten captains become
+  partners; HEAT. Everything stays inside the mode. The trip's stats and
+  rules are a sim change behind `MatchConfig.trip`, off in conformance,
+  with an ADR. A new save key (v6 stays). [IMAGE] notes through the doc
+  brief an image agent. Seven build stages.
+  - Status: **Planned**: three smaller questions at the end of the doc
+    (For you).
 
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
 
-- **PORT-82 story as a road trip:** eight questions at the end of
-  `design/STORY_ROGUELIKE.md`. The big ones: is ROAD TRIP the story you
-  want (or Grimsby back, or something else); three hearts with a RELAXED
-  choice, or no hearts; and does it sit beside SAVE THE PARK or replace
-  it?
+- **PORT-82 ROAD TRIP:** three smaller questions at the end of
+  `design/ROAD_TRIP.md`: how big a stat point should feel, the GARAGE as
+  a shop or a fixed reward ladder, and whether it sells cosmetics. The
+  [IMAGE] notes in the doc are ready for an image agent.
 
 - **PORT-78 the keyboard:** parked at your request. When you've thought
   it over: which presets (WASD + J K L, arrows + Z X C, both), which is
