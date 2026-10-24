@@ -1292,13 +1292,237 @@ def match_station():
     return s.render(rt60=2.0, echo_beats=0.75, echo_fb=0.35, target_rms=-20.0)
 
 
+# ADR-088: the painted venues
+
+def match_western():
+    """Under play on Main Street: E minor, 100 BPM. A boom-chick bass, a
+    plucked strum on the off-beats, a galloping shaker; a lonesome whistle
+    over the second half."""
+    s = Song(100, 16, seed=1212, swing=0.05)
+    prog = progression("Em Em Am Em C B7 Em B7 Em Am D G C Am B7:2 B7sus4:2 Em")
+    s.bus("pads", reverb=0.5)
+    s.pads("pads", prog, center=55, gain=0.07, cutoff=700, attack=0.9)
+    s.bus("bass", reverb=0.08)
+    s.bass("bass", prog, bars_of(("R.......5.......", 7), ("R.......5...a...", 1),
+                                 ("R.......5.......", 7), ("R...5...O...a...", 1)),
+           gain=0.5, bright=0.6)
+    s.bus("strum", reverb=0.3)
+    s.comp("strum", prog, bars_of(("....x.......x...", 16)), v_marimba, center=62, gain=0.12)
+    mel = melody("E5:1 B5:1 E6:2 D6:1/2 B5:1/2 A5:1 B5:2 "
+                 "G5:1 A5:1 B5:1 G5:1 F#5:3 r:1 "
+                 "E5:1 B5:1 E6:2 F#6:1/2 E6:1/2 D6:1 B5:2 "
+                 "A5:1 G5:1/2 F#5:1/2 D#5:1 F#5:1 E5:3 r:1")
+    bars_long(mel, 8)
+    s.bus("whistle", reverb=0.55, echo=0.3)
+    s.notes("whistle", v_whistle, mel, 8, gain=0.13, pan=0.1)
+    groove = {"kick": "x.......x.......", "rim": "....x.......x...", "shaker": "x.xxx.xxx.xxx.xx"}
+    s.bus("drums", reverb=0.25)
+    s.drums("drums", [groove] * 16, {"kick": 0.5, "rim": 0.18, "shaker": 0.07})
+    return s.render(rt60=2.4, echo_beats=0.75, echo_fb=0.35, target_rms=-20.0)
+
+
+def match_rooftop():
+    """Under play over the city: D minor, 96 BPM. A city-funk groove, an
+    electric piano's stabs, a busy bass, brass on the turns; a mellow lead
+    over the second half."""
+    s = Song(96, 16, seed=1313, swing=0.04)
+    prog = progression("Dm9 G9 Dm9 G9 Bbmaj7 A7 Dm9 A7sus4 "
+                       "Bbmaj7 C9 Am7 Dm9 Gm9 C9 Bbmaj7:2 A7:2 Dm9")
+    s.bus("keys", reverb=0.25)
+    s.comp("keys", prog, bars_of(("..x..x....x..x..", 16)), v_epiano, center=62, gain=0.14, vel=0.6)
+    s.bus("bass", reverb=0.04)
+    s.bass("bass", prog, bars_of(("R..R..O.R.5..R.a", 16)), gain=0.55, bright=1.0)
+    s.bus("brass", reverb=0.35)
+    s.comp("brass", prog, bars_of(("................", 7), ("X..x..x.........", 1),
+                                  ("................", 7), ("X..x..x..x......", 1)),
+           v_brass, center=64, gain=0.1)
+    mel = melody("D5:1/2 F5:1/2 A5:1 G5:1/2 F5:1/2 E5:1 "
+                 "F5:1/2 D5:1/2 A4:1 r:2 "
+                 "Bb4:1/2 D5:1/2 F5:1 E5:1/2 D5:1/2 C#5:1 "
+                 "A4:3 r:1 "
+                 "D5:1/2 F5:1/2 A5:1 C6:1/2 Bb5:1/2 A5:1 "
+                 "G5:1/2 F5:1/2 E5:1 D5:1 C5:1 "
+                 "Bb4:1 G4:1/2 Bb4:1/2 C#5:1 E5:1 "
+                 "D5:3 r:1")
+    bars_long(mel, 8)
+    s.bus("lead", reverb=0.35, echo=0.2)
+    s.notes("lead", v_mellow, mel, 8, gain=0.15, pan=0.15)
+    groove = {"kick": "X..x..x...x..x..", "snare": "....x.......x...", "hat": "x.x.x.x.x.x.x.x."}
+    fill = dict(groove, snare="....x.......x.xx")
+    s.bus("drums", reverb=0.15)
+    s.drums("drums", [groove] * 7 + [fill] + [groove] * 7 + [fill],
+            {"kick": 0.6, "snare": 0.3, "hat": 0.09})
+    s.sidechain("keys", 0.2)
+    return s.render(rt60=1.6, echo_beats=0.75, echo_fb=0.3, target_rms=-20.0)
+
+
+def match_pirate():
+    """Under play on the high seas: D minor, 116 BPM. A hornpipe: an
+    oom-pah bass, a squeezebox on the off-beats, a deck-stomping drum;
+    a flute tune over the second half."""
+    s = Song(116, 16, seed=1414)
+    prog = progression("Dm Dm C C Bb A Dm A Dm Dm C F Bb C Dm:2 A:2 Dm")
+    s.bus("bass", reverb=0.08)
+    s.bass("bass", prog, bars_of(("R...5...R...5...", 7), ("R...5...R.5.a...", 1),
+                                 ("R...5...R...5...", 7), ("R...5...O...a...", 1)),
+           gain=0.5, bright=0.7)
+    s.bus("box", reverb=0.3)
+    s.comp("box", prog, bars_of(("..x...x...x...x.", 16)), v_lead, center=62, gain=0.06,
+           pw=0.5, bright=1800, vib=8)
+    mel = melody("D5:1/2 E5:1/2 F5:1/2 G5:1/2 A5:1 D6:1 "
+                 "C6:1/2 A5:1/2 F5:1/2 E5:1/2 D5:2 "
+                 "E5:1/2 F5:1/2 G5:1/2 C6:1/2 G5:1 E5:1 "
+                 "F5:1/2 G5:1/2 A5:1/2 C6:1/2 A5:2 "
+                 "Bb5:1/2 A5:1/2 G5:1/2 F5:1/2 D5:1 F5:1 "
+                 "E5:1/2 F5:1/2 G5:1/2 E5:1/2 C5:2 "
+                 "D5:1/2 E5:1/2 F5:1/2 D5:1/2 C#5:1 E5:1 "
+                 "D5:3 r:1")
+    bars_long(mel, 8)
+    s.bus("flute", reverb=0.4, echo=0.1)
+    s.notes("flute", v_flute, mel, 8, transpose=12, gain=0.12, pan=-0.1)
+    groove = {"tomlo": "X.......X.......", "clap": "....x.......x...", "shaker": "x.x.x.x.x.x.x.x."}
+    end = dict(groove, tom="........x.x.x.x.")
+    s.bus("drums", reverb=0.25)
+    s.drums("drums", [groove] * 7 + [end] + [groove] * 7 + [end],
+            {"tomlo": 0.5, "tom": 0.3, "clap": 0.2, "shaker": 0.07})
+    return s.render(rt60=1.8, echo_beats=0.5, echo_fb=0.25, target_rms=-20.0)
+
+
+def match_motel():
+    """Under play at the motel: A minor, 84 BPM. A lazy desert lounge: a
+    twangy lead through a long echo, a held electric piano, brushed
+    drums, a walking bass."""
+    s = Song(84, 16, seed=1515, swing=0.05)
+    prog = progression("Am7 D9 Am7 D9 Fmaj7 E7 Am7 E7sus4 "
+                       "Fmaj7 G6 Em7 Am7 Dm7 G6 Fmaj7:2 E7:2 Am7")
+    s.bus("keys", reverb=0.45)
+    s.comp("keys", prog, bars_of(("x.......x.......", 16)), v_epiano, center=60, gain=0.12, vel=0.5)
+    s.bus("bass", reverb=0.06)
+    s.bass("bass", prog, bars_of(("R.......5...O...", 7), ("R...5...3...a...", 1),
+                                 ("R.......5...O...", 7), ("R...5...O...a...", 1)),
+           gain=0.5, bright=0.5)
+    mel = melody("A5:1 C6:1/2 E6:1/2 C6:1 A5:1 "
+                 "B5:1 D6:1/2 E6:1/2 D6:2 "
+                 "G5:1 B5:1/2 D6:1/2 B5:1 G5:1 "
+                 "E5:3 r:1 "
+                 "F5:1 A5:1/2 C6:1/2 A5:1 F5:1 "
+                 "G5:1 B5:1/2 D6:1/2 E6:2 "
+                 "C6:1 A5:1 G#5:1 B5:1 "
+                 "A5:3 r:1")
+    bars_long(mel, 8)
+    s.bus("twang", reverb=0.5, echo=0.4)
+    s.notes("twang", v_lead, mel, 8, transpose=-12, gain=0.1, pan=0.15, pw=0.5, bright=2600, vib=18)
+    groove = {"kick": "x.......x.......", "rim": "....x.......x...", "shaker": "x.x.x.x.x.x.x.x."}
+    s.bus("drums", reverb=0.3)
+    s.drums("drums", [groove] * 16, {"kick": 0.45, "rim": 0.16, "shaker": 0.06})
+    return s.render(rt60=2.4, echo_beats=0.75, echo_fb=0.42, target_rms=-20.0)
+
+
+def match_fair():
+    """Under play on the midway: F major, 126 BPM. A calliope tune, an
+    oom-pah bass, a marimba's pah, a bright brass band kit."""
+    s = Song(126, 16, seed=1616)
+    prog = progression("F F C7 C7 F Bb C7 F Bb F C7 F Bb C7 F:2 C7:2 F")
+    s.bus("bass", reverb=0.08)
+    s.bass("bass", prog, bars_of(("R...5...R...5...", 7), ("R...5...R.5.a...", 1),
+                                 ("R...5...R...5...", 7), ("R...5...O...a...", 1)),
+           gain=0.5, bright=0.8)
+    s.bus("pah", reverb=0.25)
+    s.comp("pah", prog, bars_of(("..x...x...x...x.", 16)), v_marimba, center=65, gain=0.12)
+    s.bus("bells", reverb=0.4, echo=0.2)
+    s.arp("bells", prog, bars_of(("0.1.2.1.0.1.2.1.", 16)), v_bell, center=79, gain=0.04,
+          pan=-0.25, vel=0.5, ratio=3.5, decay=0.6)
+    mel = melody("D6:1 F6:1 D6:1 Bb5:1 "
+                 "C6:1 A5:1 F5:1 A5:1 "
+                 "G5:1 Bb5:1 E6:1 C6:1 "
+                 "A5:2 F5:2 "
+                 "D6:1/2 C6:1/2 Bb5:1 F5:1 D6:1 "
+                 "C6:1/2 Bb5:1/2 G5:1 E5:1 G5:1 "
+                 "A5:1 C6:1 Bb5:1 G5:1 "
+                 "F5:3 r:1")
+    bars_long(mel, 8)
+    s.bus("calliope", reverb=0.35, echo=0.1)
+    s.notes("calliope", v_lead, mel, 8, gain=0.08, pan=0.1, pw=0.5, bright=3000, vib=20)
+    groove = {"kick": "X...x...X...x...", "snare": "....o.......o...", "hat": "..x...x...x...x."}
+    fill = dict(groove, snare="....o.......x.xx")
+    s.bus("drums", reverb=0.2)
+    s.drums("drums", [groove] * 7 + [fill] + [groove] * 7 + [fill],
+            {"kick": 0.5, "snare": 0.25, "hat": 0.08})
+    return s.render(rt60=1.6, echo_beats=0.5, echo_fb=0.25, target_rms=-20.0)
+
+
+def match_drivein():
+    """Under play at the drive-in: C major, 80 BPM. A doo-wop ballad:
+    repeated piano chords, an ooh of a pad, a walking bass; a mellow sax
+    of a lead over the second half."""
+    s = Song(80, 16, seed=1717, swing=0.08)
+    prog = progression("C Am F G C Am F G F G Em Am F G C:2 G7:2 C")
+    s.bus("keys", reverb=0.35)
+    s.comp("keys", prog, bars_of(("x.x.x.x.x.x.x.x.", 16)), v_epiano, center=62, gain=0.1, vel=0.5)
+    s.bus("pads", reverb=0.55)
+    s.pads("pads", prog, center=60, gain=0.08, cutoff=900, attack=0.6)
+    s.bus("bass", reverb=0.06)
+    s.bass("bass", prog, bars_of(("R...3...5...O...", 16)), gain=0.5, bright=0.6)
+    mel = melody("A5:1 C6:1 A5:1 F5:1 "
+                 "G5:2 B5:1 D6:1 "
+                 "E6:1 D6:1/2 B5:1/2 G5:2 "
+                 "A5:3 r:1 "
+                 "C6:1 A5:1/2 C6:1/2 F6:2 "
+                 "D6:1 B5:1/2 D6:1/2 G6:2 "
+                 "E6:1 C6:1 B5:1 D6:1 "
+                 "C6:3 r:1")
+    bars_long(mel, 8)
+    s.bus("sax", reverb=0.45, echo=0.15)
+    s.notes("sax", v_mellow, mel, 8, transpose=-12, gain=0.15, pan=0.1)
+    groove = {"kick": "x.......x.......", "snare": "....x.......x...", "hat": "x.x.x.x.x.x.x.x."}
+    s.bus("drums", reverb=0.3)
+    s.drums("drums", [groove] * 16, {"kick": 0.45, "snare": 0.22, "hat": 0.06})
+    return s.render(rt60=2.2, echo_beats=0.75, echo_fb=0.3, target_rms=-20.0)
+
+
+def match_mall():
+    """Under play at the mall: Eb major, 98 BPM. Smooth 1994 shopping
+    music: an electric piano, a bell arpeggio under the skylight, a
+    rounded bass, a light four-on-the-floor; mallets over the second half."""
+    s = Song(98, 16, seed=1818)
+    prog = progression("Ebmaj7 Cm7 Abmaj7 Bb6 Ebmaj7 Cm7 Fm7 Bb7sus4 "
+                       "Abmaj7 Bb6 Gm7 Cm7 Abmaj7 Fm7 Bb7sus4:2 Bb7:2 Ebmaj7")
+    s.bus("keys", reverb=0.35)
+    s.comp("keys", prog, bars_of(("x..x..x...x..x..", 16)), v_epiano, center=62, gain=0.13, vel=0.55)
+    s.bus("bells", reverb=0.5, echo=0.35)
+    s.arp("bells", prog, bars_of(("0.1.2.3.2.1.2.3.", 16)), v_bell, center=79, gain=0.045,
+          pan=-0.2, vel=0.5, ratio=3.5, decay=0.8)
+    s.bus("bass", reverb=0.05)
+    s.bass("bass", prog, bars_of(("R..R....5..R....", 16)), gain=0.5, bright=0.6)
+    mel = melody("C6:1 Eb6:1 G6:1 Eb6:1 "
+                 "D6:2 F6:1 G6:1 "
+                 "F6:1 D6:1 Bb5:1 G5:1 "
+                 "Bb5:3 r:1 "
+                 "C6:1/2 Eb6:1/2 G6:1 F6:1/2 Eb6:1/2 C6:1 "
+                 "Ab5:1 C6:1 Eb6:2 "
+                 "Eb6:1 D6:1 F6:1 Ab6:1 "
+                 "G6:3 r:1")
+    bars_long(mel, 8)
+    s.bus("mallets", reverb=0.4, echo=0.2)
+    s.notes("mallets", v_marimba, mel, 8, transpose=-12, gain=0.15, pan=0.15)
+    groove = {"kick": "x...x...x...x...", "clap": "....o.......o...", "hat": "..x...x...x...x."}
+    s.bus("drums", reverb=0.2)
+    s.drums("drums", [groove] * 16, {"kick": 0.45, "clap": 0.16, "hat": 0.07})
+    s.sidechain("keys", 0.15)
+    return s.render(rt60=2.0, echo_beats=0.75, echo_fb=0.35, target_rms=-20.0)
+
+
 STINGERS = ("music_won", "music_lost", "music_cleared")
 TRACKS = {"music_title": title, "music_match_park": match_park, "music_match_lakeside": match_lakeside,
           "music_match_sunset": match_sunset, "music_match_dinosaur": match_dinosaur,
           "music_match_space": match_space, "music_match_undersea": match_undersea,
           "music_match_gym": match_gym, "music_match_ruins": match_ruins,
           "music_match_glacier": match_glacier, "music_match_lab": match_lab,
-          "music_match_station": match_station, "music_park": park, "music_won": stinger_won,
+          "music_match_station": match_station, "music_match_western": match_western,
+          "music_match_rooftop": match_rooftop, "music_match_pirate": match_pirate,
+          "music_match_motel": match_motel, "music_match_fair": match_fair,
+          "music_match_drivein": match_drivein, "music_match_mall": match_mall,
+          "music_park": park, "music_won": stinger_won,
           "music_lost": stinger_lost, "music_cleared": stinger_cleared}
 
 

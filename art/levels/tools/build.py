@@ -271,7 +271,13 @@ def build_venue(name, crowd_rows):
     v.layers.sort(key=lambda t: order.index(t[0]))
     layers = []
     for z, (lname, L, par) in enumerate(v.layers):
-        rel = save(L.a, f"venues/{name}/{lname}.png")
+        if hasattr(v, "crowd_meta") and lname == "far":
+            # ADR-088: a painted backdrop, opaque and photographic: lossy WebP
+            rel = f"venues/{name}/far.webp"
+            (OUT / rel).parent.mkdir(parents=True, exist_ok=True)
+            Image.fromarray(L.a[..., :3]).save(OUT / rel, quality=90, method=6)
+        else:
+            rel = save(L.a, f"venues/{name}/{lname}.png")
         layers.append({"name": lname, "file": rel, "parallax": par, "z": z,
                        "origin": [-OVER_X, -OVER_Y],
                        "size": [L.w, L.h]})
@@ -283,13 +289,21 @@ def build_venue(name, crowd_rows):
     k = {"sit": 0, "stand": 0}
     offset = {"park": 0, "lakeside": 5, "sunset": 8, "dinosaur": 2,
               "space": 6, "undersea": 10, "gym": 3,
-              "ruins": 4, "glacier": 7, "lab": 1, "station": 9}[name]
+              "ruins": 4, "glacier": 7, "lab": 1, "station": 9}.get(name, 0)
     for s in v.seats:
+        if "person" in s:                  # ADR-088: a row of the venue's own sheet
+            seats.append(s)
+            continue
         pool = sit if s["pose"] == "sit" else stand
         person = pool[(k[s["pose"]] + offset) % len(pool)]
         k[s["pose"]] += 1
         seats.append(dict(s, person=person))
+    extra = {}
+    if hasattr(v, "crowd_meta"):
+        save(v.crowd_sheet, v.crowd_meta["file"])
+        extra["crowd"] = v.crowd_meta
     return v, {
+        **extra,
         "layers": layers,
         "draw_order_doc": "Draw layers by z. Game sprites (shadows, players, "
                           "ball, near net post; y-sorted) go after 'net' and "
@@ -392,14 +406,18 @@ def nine_slice(img, w, h, m):
     return out
 
 
-def crowd_sprites(seats, cheer=False):
-    sheet = np.array(Image.open(OUT / "sprites/crowd.png"))
+def crowd_sprites(seats, cheer=False, own=None):
+    """own: a painted venue's crowd entry (ADR-088), else the shared sheet."""
+    sheet = np.array(Image.open(OUT / (own["file"] if own else "sprites/crowd.png")))
+    fw, fh = own["frame_size"] if own else (crowd.FW, crowd.FH)
     out = []
     for s in seats:
         r = s["person"]
-        f = sheet[r * crowd.FH:(r + 1) * crowd.FH,
-                  (crowd.FW if cheer else 0):(crowd.FW * (2 if cheer else 1))]
-        ax, ay = crowd.SEAT if s["pose"] == "sit" else crowd.FEET
+        f = sheet[r * fh:(r + 1) * fh, (fw if cheer else 0):(fw * (2 if cheer else 1))]
+        if own:
+            ax, ay = own["stand_anchor"]
+        else:
+            ax, ay = crowd.SEAT if s["pose"] == "sit" else crowd.FEET
         out.append(sprite_layer(f, s["x"] - ax, s["y"] - ay))
     return out
 
@@ -462,7 +480,7 @@ def scene(name, v, vmeta, meta_ui, fx):
         hud.over(sprite_layer(icon, 0, 0)[0], tb[0] + tb[2] - 25, tb[1] + 16)
     # sort players by feet y (shadows first)
     shadows = extras_net[0::2] if False else []
-    extra = [("stands", L, xy) for (L, xy) in crowd_sprites(vmeta["seats"])]
+    extra = [("stands", L, xy) for (L, xy) in crowd_sprites(vmeta["seats"], own=vmeta.get("crowd"))]
     post = np.array(Image.open(OUT / fx["net_post"]["file"]))
     ax, ay = fx["net_post"]["anchor"]
     px, py = fx["net_post"]["position"]

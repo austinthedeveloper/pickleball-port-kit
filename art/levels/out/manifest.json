@@ -3741,6 +3741,2143 @@
     "y": 180,
     "pose": "stand"
    }
+  },
+  "western": {
+   "crowd": {
+    "file": "venues/western/crowd.png",
+    "frame_size": [
+     38,
+     54
+    ],
+    "frames": [
+     "idle",
+     "cheer"
+    ],
+    "sit_anchor": [
+     19,
+     52
+    ],
+    "stand_anchor": [
+     19,
+     52
+    ],
+    "doc": "The venue's own locals (ADR-088): row = person, column 0 idle, 1 cheer, anchored at the feet."
+   },
+   "layers": [
+    {
+     "name": "far",
+     "file": "venues/western/far.webp",
+     "parallax": 1.0,
+     "z": 0,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "ground",
+     "file": "venues/western/ground.png",
+     "parallax": 1.0,
+     "z": 1,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "stands",
+     "file": "venues/western/stands.png",
+     "parallax": 1.0,
+     "z": 2,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "fence",
+     "file": "venues/western/fence.png",
+     "parallax": 1.0,
+     "z": 3,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "net",
+     "file": "venues/western/net.png",
+     "parallax": 1.0,
+     "z": 4,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "front",
+     "file": "venues/western/front.png",
+     "parallax": 1.0,
+     "z": 5,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    }
+   ],
+   "draw_order_doc": "Draw layers by z. Game sprites (shadows, players, ball, near net post; y-sorted) go after 'net' and before 'front'. Crowd sprites go after 'stands'. Offset each layer by -camera * parallax.",
+   "court_mask": "venues/western/court_mask.png",
+   "court_colors": {
+    "surround": [
+     [
+      157,
+      100,
+      49
+     ],
+     [
+      176,
+      112,
+      55
+     ],
+     [
+      187,
+      119,
+      58
+     ],
+     [
+      198,
+      126,
+      61
+     ],
+     [
+      217,
+      138,
+      67
+     ]
+    ],
+    "surface": [
+     [
+      138,
+      40,
+      48
+     ],
+     [
+      147,
+      43,
+      51
+     ],
+     [
+      153,
+      45,
+      53
+     ],
+     [
+      162,
+      48,
+      56
+     ]
+    ],
+    "kitchen": [
+     [
+      162,
+      77,
+      48
+     ],
+     [
+      172,
+      82,
+      51
+     ],
+     [
+      180,
+      86,
+      53
+     ],
+     [
+      190,
+      91,
+      56
+     ]
+    ],
+    "kitchen_shade": [
+     [
+      130,
+      62,
+      38
+     ],
+     [
+      137,
+      66,
+      41
+     ],
+     [
+      144,
+      69,
+      43
+     ]
+    ],
+    "lines": [
+     [
+      245,
+      245,
+      245
+     ],
+     [
+      255,
+      255,
+      255
+     ],
+     [
+      255,
+      255,
+      255
+     ]
+    ],
+    "lines_shade": [
+     [
+      184,
+      184,
+      184
+     ],
+     [
+      194,
+      194,
+      194
+     ],
+     [
+      204,
+      204,
+      204
+     ]
+    ]
+   },
+   "seats": [
+    {
+     "x": 77,
+     "y": 198,
+     "pose": "stand",
+     "person": 1
+    },
+    {
+     "x": 152,
+     "y": 198,
+     "pose": "stand",
+     "person": 4
+    },
+    {
+     "x": 226,
+     "y": 198,
+     "pose": "stand",
+     "person": 7
+    },
+    {
+     "x": 301,
+     "y": 198,
+     "pose": "stand",
+     "person": 2
+    },
+    {
+     "x": 375,
+     "y": 198,
+     "pose": "stand",
+     "person": 5
+    },
+    {
+     "x": 450,
+     "y": 198,
+     "pose": "stand",
+     "person": 0
+    },
+    {
+     "x": 525,
+     "y": 198,
+     "pose": "stand",
+     "person": 3
+    },
+    {
+     "x": 599,
+     "y": 198,
+     "pose": "stand",
+     "person": 6
+    },
+    {
+     "x": 674,
+     "y": 198,
+     "pose": "stand",
+     "person": 1
+    },
+    {
+     "x": 748,
+     "y": 198,
+     "pose": "stand",
+     "person": 4
+    },
+    {
+     "x": 823,
+     "y": 198,
+     "pose": "stand",
+     "person": 7
+    }
+   ],
+   "watcher": {
+    "x": 674,
+    "y": 198,
+    "pose": "stand"
+   }
+  },
+  "rooftop": {
+   "crowd": {
+    "file": "venues/rooftop/crowd.png",
+    "frame_size": [
+     36,
+     55
+    ],
+    "frames": [
+     "idle",
+     "cheer"
+    ],
+    "sit_anchor": [
+     18,
+     53
+    ],
+    "stand_anchor": [
+     18,
+     53
+    ],
+    "doc": "The venue's own locals (ADR-088): row = person, column 0 idle, 1 cheer, anchored at the feet."
+   },
+   "layers": [
+    {
+     "name": "far",
+     "file": "venues/rooftop/far.webp",
+     "parallax": 1.0,
+     "z": 0,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "ground",
+     "file": "venues/rooftop/ground.png",
+     "parallax": 1.0,
+     "z": 1,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "fence",
+     "file": "venues/rooftop/fence.png",
+     "parallax": 1.0,
+     "z": 2,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "stands",
+     "file": "venues/rooftop/stands.png",
+     "parallax": 1.0,
+     "z": 3,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "net",
+     "file": "venues/rooftop/net.png",
+     "parallax": 1.0,
+     "z": 4,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "front",
+     "file": "venues/rooftop/front.png",
+     "parallax": 1.0,
+     "z": 5,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    }
+   ],
+   "draw_order_doc": "Draw layers by z. Game sprites (shadows, players, ball, near net post; y-sorted) go after 'net' and before 'front'. Crowd sprites go after 'stands'. Offset each layer by -camera * parallax.",
+   "court_mask": "venues/rooftop/court_mask.png",
+   "court_colors": {
+    "surround": [
+     [
+      62,
+      49,
+      55
+     ],
+     [
+      70,
+      55,
+      61
+     ],
+     [
+      74,
+      58,
+      65
+     ],
+     [
+      78,
+      61,
+      69
+     ],
+     [
+      86,
+      67,
+      75
+     ]
+    ],
+    "surface": [
+     [
+      35,
+      85,
+      155
+     ],
+     [
+      37,
+      90,
+      165
+     ],
+     [
+      39,
+      94,
+      171
+     ],
+     [
+      41,
+      99,
+      181
+     ]
+    ],
+    "kitchen": [
+     [
+      31,
+      48,
+      103
+     ],
+     [
+      33,
+      51,
+      110
+     ],
+     [
+      35,
+      53,
+      114
+     ],
+     [
+      37,
+      56,
+      121
+     ]
+    ],
+    "kitchen_shade": [
+     [
+      25,
+      38,
+      83
+     ],
+     [
+      27,
+      41,
+      87
+     ],
+     [
+      28,
+      43,
+      92
+     ]
+    ],
+    "lines": [
+     [
+      245,
+      245,
+      245
+     ],
+     [
+      255,
+      255,
+      255
+     ],
+     [
+      255,
+      255,
+      255
+     ]
+    ],
+    "lines_shade": [
+     [
+      184,
+      184,
+      184
+     ],
+     [
+      194,
+      194,
+      194
+     ],
+     [
+      204,
+      204,
+      204
+     ]
+    ]
+   },
+   "seats": [
+    {
+     "x": 150,
+     "y": 208,
+     "pose": "stand",
+     "person": 1
+    },
+    {
+     "x": 228,
+     "y": 208,
+     "pose": "stand",
+     "person": 4
+    },
+    {
+     "x": 308,
+     "y": 208,
+     "pose": "stand",
+     "person": 7
+    },
+    {
+     "x": 386,
+     "y": 208,
+     "pose": "stand",
+     "person": 2
+    },
+    {
+     "x": 466,
+     "y": 208,
+     "pose": "stand",
+     "person": 5
+    },
+    {
+     "x": 544,
+     "y": 208,
+     "pose": "stand",
+     "person": 0
+    },
+    {
+     "x": 624,
+     "y": 208,
+     "pose": "stand",
+     "person": 3
+    },
+    {
+     "x": 702,
+     "y": 208,
+     "pose": "stand",
+     "person": 6
+    },
+    {
+     "x": 782,
+     "y": 208,
+     "pose": "stand",
+     "person": 1
+    },
+    {
+     "x": 860,
+     "y": 208,
+     "pose": "stand",
+     "person": 4
+    }
+   ],
+   "watcher": {
+    "x": 702,
+    "y": 208,
+    "pose": "stand"
+   }
+  },
+  "pirate": {
+   "crowd": {
+    "file": "venues/pirate/crowd.png",
+    "frame_size": [
+     42,
+     60
+    ],
+    "frames": [
+     "idle",
+     "cheer"
+    ],
+    "sit_anchor": [
+     21,
+     58
+    ],
+    "stand_anchor": [
+     21,
+     58
+    ],
+    "doc": "The venue's own locals (ADR-088): row = person, column 0 idle, 1 cheer, anchored at the feet."
+   },
+   "layers": [
+    {
+     "name": "far",
+     "file": "venues/pirate/far.webp",
+     "parallax": 1.0,
+     "z": 0,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "ground",
+     "file": "venues/pirate/ground.png",
+     "parallax": 1.0,
+     "z": 1,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "fence",
+     "file": "venues/pirate/fence.png",
+     "parallax": 1.0,
+     "z": 2,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "stands",
+     "file": "venues/pirate/stands.png",
+     "parallax": 1.0,
+     "z": 3,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "net",
+     "file": "venues/pirate/net.png",
+     "parallax": 1.0,
+     "z": 4,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "front",
+     "file": "venues/pirate/front.png",
+     "parallax": 1.0,
+     "z": 5,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    }
+   ],
+   "draw_order_doc": "Draw layers by z. Game sprites (shadows, players, ball, near net post; y-sorted) go after 'net' and before 'front'. Crowd sprites go after 'stands'. Offset each layer by -camera * parallax.",
+   "court_mask": "venues/pirate/court_mask.png",
+   "court_colors": {
+    "surround": [
+     [
+      139,
+      86,
+      43
+     ],
+     [
+      156,
+      96,
+      48
+     ],
+     [
+      166,
+      102,
+      51
+     ],
+     [
+      176,
+      108,
+      54
+     ],
+     [
+      193,
+      118,
+      59
+     ]
+    ],
+    "surface": [
+     [
+      18,
+      120,
+      129
+     ],
+     [
+      20,
+      127,
+      137
+     ],
+     [
+      20,
+      133,
+      143
+     ],
+     [
+      22,
+      140,
+      151
+     ]
+    ],
+    "kitchen": [
+     [
+      31,
+      48,
+      103
+     ],
+     [
+      33,
+      51,
+      110
+     ],
+     [
+      35,
+      53,
+      114
+     ],
+     [
+      37,
+      56,
+      121
+     ]
+    ],
+    "kitchen_shade": [
+     [
+      25,
+      38,
+      83
+     ],
+     [
+      27,
+      41,
+      87
+     ],
+     [
+      28,
+      43,
+      92
+     ]
+    ],
+    "lines": [
+     [
+      245,
+      245,
+      245
+     ],
+     [
+      255,
+      255,
+      255
+     ],
+     [
+      255,
+      255,
+      255
+     ]
+    ],
+    "lines_shade": [
+     [
+      184,
+      184,
+      184
+     ],
+     [
+      194,
+      194,
+      194
+     ],
+     [
+      204,
+      204,
+      204
+     ]
+    ]
+   },
+   "seats": [
+    {
+     "x": 74,
+     "y": 195,
+     "pose": "stand",
+     "person": 1
+    },
+    {
+     "x": 142,
+     "y": 195,
+     "pose": "stand",
+     "person": 4
+    },
+    {
+     "x": 210,
+     "y": 195,
+     "pose": "stand",
+     "person": 7
+    },
+    {
+     "x": 279,
+     "y": 195,
+     "pose": "stand",
+     "person": 2
+    },
+    {
+     "x": 347,
+     "y": 195,
+     "pose": "stand",
+     "person": 5
+    },
+    {
+     "x": 415,
+     "y": 195,
+     "pose": "stand",
+     "person": 0
+    },
+    {
+     "x": 483,
+     "y": 195,
+     "pose": "stand",
+     "person": 3
+    },
+    {
+     "x": 551,
+     "y": 195,
+     "pose": "stand",
+     "person": 6
+    },
+    {
+     "x": 620,
+     "y": 195,
+     "pose": "stand",
+     "person": 1
+    },
+    {
+     "x": 688,
+     "y": 195,
+     "pose": "stand",
+     "person": 4
+    },
+    {
+     "x": 756,
+     "y": 195,
+     "pose": "stand",
+     "person": 7
+    },
+    {
+     "x": 452,
+     "y": 149,
+     "pose": "stand",
+     "person": 8
+    }
+   ],
+   "watcher": {
+    "x": 620,
+    "y": 195,
+    "pose": "stand"
+   }
+  },
+  "motel": {
+   "crowd": {
+    "file": "venues/motel/crowd.png",
+    "frame_size": [
+     36,
+     55
+    ],
+    "frames": [
+     "idle",
+     "cheer"
+    ],
+    "sit_anchor": [
+     18,
+     53
+    ],
+    "stand_anchor": [
+     18,
+     53
+    ],
+    "doc": "The venue's own locals (ADR-088): row = person, column 0 idle, 1 cheer, anchored at the feet."
+   },
+   "layers": [
+    {
+     "name": "far",
+     "file": "venues/motel/far.webp",
+     "parallax": 1.0,
+     "z": 0,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "ground",
+     "file": "venues/motel/ground.png",
+     "parallax": 1.0,
+     "z": 1,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "stands",
+     "file": "venues/motel/stands.png",
+     "parallax": 1.0,
+     "z": 2,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "fence",
+     "file": "venues/motel/fence.png",
+     "parallax": 1.0,
+     "z": 3,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "net",
+     "file": "venues/motel/net.png",
+     "parallax": 1.0,
+     "z": 4,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "front",
+     "file": "venues/motel/front.png",
+     "parallax": 1.0,
+     "z": 5,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    }
+   ],
+   "draw_order_doc": "Draw layers by z. Game sprites (shadows, players, ball, near net post; y-sorted) go after 'net' and before 'front'. Crowd sprites go after 'stands'. Offset each layer by -camera * parallax.",
+   "court_mask": "venues/motel/court_mask.png",
+   "court_colors": {
+    "surround": [
+     [
+      92,
+      81,
+      83
+     ],
+     [
+      102,
+      91,
+      93
+     ],
+     [
+      109,
+      97,
+      99
+     ],
+     [
+      116,
+      103,
+      105
+     ],
+     [
+      126,
+      113,
+      115
+     ]
+    ],
+    "surface": [
+     [
+      35,
+      85,
+      155
+     ],
+     [
+      37,
+      90,
+      165
+     ],
+     [
+      39,
+      94,
+      171
+     ],
+     [
+      41,
+      99,
+      181
+     ]
+    ],
+    "kitchen": [
+     [
+      31,
+      48,
+      103
+     ],
+     [
+      33,
+      51,
+      110
+     ],
+     [
+      35,
+      53,
+      114
+     ],
+     [
+      37,
+      56,
+      121
+     ]
+    ],
+    "kitchen_shade": [
+     [
+      25,
+      38,
+      83
+     ],
+     [
+      27,
+      41,
+      87
+     ],
+     [
+      28,
+      43,
+      92
+     ]
+    ],
+    "lines": [
+     [
+      245,
+      245,
+      245
+     ],
+     [
+      255,
+      255,
+      255
+     ],
+     [
+      255,
+      255,
+      255
+     ]
+    ],
+    "lines_shade": [
+     [
+      184,
+      184,
+      184
+     ],
+     [
+      194,
+      194,
+      194
+     ],
+     [
+      204,
+      204,
+      204
+     ]
+    ]
+   },
+   "seats": [
+    {
+     "x": 226,
+     "y": 203,
+     "pose": "stand",
+     "person": 1
+    },
+    {
+     "x": 299,
+     "y": 203,
+     "pose": "stand",
+     "person": 4
+    },
+    {
+     "x": 371,
+     "y": 203,
+     "pose": "stand",
+     "person": 7
+    },
+    {
+     "x": 444,
+     "y": 203,
+     "pose": "stand",
+     "person": 2
+    },
+    {
+     "x": 516,
+     "y": 203,
+     "pose": "stand",
+     "person": 5
+    },
+    {
+     "x": 589,
+     "y": 203,
+     "pose": "stand",
+     "person": 0
+    },
+    {
+     "x": 661,
+     "y": 203,
+     "pose": "stand",
+     "person": 3
+    },
+    {
+     "x": 734,
+     "y": 203,
+     "pose": "stand",
+     "person": 6
+    }
+   ],
+   "watcher": {
+    "x": 589,
+    "y": 203,
+    "pose": "stand"
+   }
+  },
+  "fair": {
+   "crowd": {
+    "file": "venues/fair/crowd.png",
+    "frame_size": [
+     40,
+     55
+    ],
+    "frames": [
+     "idle",
+     "cheer"
+    ],
+    "sit_anchor": [
+     20,
+     53
+    ],
+    "stand_anchor": [
+     20,
+     53
+    ],
+    "doc": "The venue's own locals (ADR-088): row = person, column 0 idle, 1 cheer, anchored at the feet."
+   },
+   "layers": [
+    {
+     "name": "far",
+     "file": "venues/fair/far.webp",
+     "parallax": 1.0,
+     "z": 0,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "ground",
+     "file": "venues/fair/ground.png",
+     "parallax": 1.0,
+     "z": 1,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "stands",
+     "file": "venues/fair/stands.png",
+     "parallax": 1.0,
+     "z": 2,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "fence",
+     "file": "venues/fair/fence.png",
+     "parallax": 1.0,
+     "z": 3,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "net",
+     "file": "venues/fair/net.png",
+     "parallax": 1.0,
+     "z": 4,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "front",
+     "file": "venues/fair/front.png",
+     "parallax": 1.0,
+     "z": 5,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    }
+   ],
+   "draw_order_doc": "Draw layers by z. Game sprites (shadows, players, ball, near net post; y-sorted) go after 'net' and before 'front'. Crowd sprites go after 'stands'. Offset each layer by -camera * parallax.",
+   "court_mask": "venues/fair/court_mask.png",
+   "court_colors": {
+    "surround": [
+     [
+      87,
+      87,
+      29
+     ],
+     [
+      98,
+      97,
+      32
+     ],
+     [
+      104,
+      103,
+      34
+     ],
+     [
+      110,
+      109,
+      36
+     ],
+     [
+      121,
+      119,
+      39
+     ]
+    ],
+    "surface": [
+     [
+      42,
+      112,
+      66
+     ],
+     [
+      45,
+      120,
+      71
+     ],
+     [
+      47,
+      124,
+      73
+     ],
+     [
+      50,
+      132,
+      78
+     ]
+    ],
+    "kitchen": [
+     [
+      180,
+      85,
+      26
+     ],
+     [
+      192,
+      90,
+      27
+     ],
+     [
+      200,
+      94,
+      29
+     ],
+     [
+      212,
+      99,
+      30
+     ]
+    ],
+    "kitchen_shade": [
+     [
+      145,
+      68,
+      21
+     ],
+     [
+      153,
+      72,
+      22
+     ],
+     [
+      161,
+      75,
+      23
+     ]
+    ],
+    "lines": [
+     [
+      245,
+      245,
+      245
+     ],
+     [
+      255,
+      255,
+      255
+     ],
+     [
+      255,
+      255,
+      255
+     ]
+    ],
+    "lines_shade": [
+     [
+      184,
+      184,
+      184
+     ],
+     [
+      194,
+      194,
+      194
+     ],
+     [
+      204,
+      204,
+      204
+     ]
+    ]
+   },
+   "seats": [
+    {
+     "x": 80,
+     "y": 190,
+     "pose": "stand",
+     "person": 1
+    },
+    {
+     "x": 160,
+     "y": 190,
+     "pose": "stand",
+     "person": 4
+    },
+    {
+     "x": 240,
+     "y": 190,
+     "pose": "stand",
+     "person": 7
+    },
+    {
+     "x": 320,
+     "y": 190,
+     "pose": "stand",
+     "person": 2
+    },
+    {
+     "x": 400,
+     "y": 190,
+     "pose": "stand",
+     "person": 5
+    },
+    {
+     "x": 480,
+     "y": 190,
+     "pose": "stand",
+     "person": 0
+    },
+    {
+     "x": 560,
+     "y": 190,
+     "pose": "stand",
+     "person": 3
+    },
+    {
+     "x": 640,
+     "y": 190,
+     "pose": "stand",
+     "person": 6
+    },
+    {
+     "x": 720,
+     "y": 190,
+     "pose": "stand",
+     "person": 1
+    },
+    {
+     "x": 800,
+     "y": 190,
+     "pose": "stand",
+     "person": 4
+    },
+    {
+     "x": 880,
+     "y": 190,
+     "pose": "stand",
+     "person": 7
+    }
+   ],
+   "watcher": {
+    "x": 720,
+    "y": 190,
+    "pose": "stand"
+   }
+  },
+  "drivein": {
+   "crowd": {
+    "file": "venues/drivein/crowd.png",
+    "frame_size": [
+     38,
+     53
+    ],
+    "frames": [
+     "idle",
+     "cheer"
+    ],
+    "sit_anchor": [
+     19,
+     51
+    ],
+    "stand_anchor": [
+     19,
+     51
+    ],
+    "doc": "The venue's own locals (ADR-088): row = person, column 0 idle, 1 cheer, anchored at the feet."
+   },
+   "layers": [
+    {
+     "name": "far",
+     "file": "venues/drivein/far.webp",
+     "parallax": 1.0,
+     "z": 0,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "ground",
+     "file": "venues/drivein/ground.png",
+     "parallax": 1.0,
+     "z": 1,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "fence",
+     "file": "venues/drivein/fence.png",
+     "parallax": 1.0,
+     "z": 2,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "stands",
+     "file": "venues/drivein/stands.png",
+     "parallax": 1.0,
+     "z": 3,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "net",
+     "file": "venues/drivein/net.png",
+     "parallax": 1.0,
+     "z": 4,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "front",
+     "file": "venues/drivein/front.png",
+     "parallax": 1.0,
+     "z": 5,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    }
+   ],
+   "draw_order_doc": "Draw layers by z. Game sprites (shadows, players, ball, near net post; y-sorted) go after 'net' and before 'front'. Crowd sprites go after 'stands'. Offset each layer by -camera * parallax.",
+   "court_mask": "venues/drivein/court_mask.png",
+   "court_colors": {
+    "surround": [
+     [
+      56,
+      43,
+      50
+     ],
+     [
+      63,
+      48,
+      55
+     ],
+     [
+      67,
+      51,
+      59
+     ],
+     [
+      71,
+      54,
+      63
+     ],
+     [
+      78,
+      59,
+      68
+     ]
+    ],
+    "surface": [
+     [
+      88,
+      59,
+      129
+     ],
+     [
+      94,
+      63,
+      137
+     ],
+     [
+      98,
+      65,
+      143
+     ],
+     [
+      104,
+      69,
+      151
+     ]
+    ],
+    "kitchen": [
+     [
+      184,
+      59,
+      120
+     ],
+     [
+      196,
+      63,
+      127
+     ],
+     [
+      204,
+      65,
+      133
+     ],
+     [
+      216,
+      69,
+      140
+     ]
+    ],
+    "kitchen_shade": [
+     [
+      148,
+      47,
+      96
+     ],
+     [
+      156,
+      50,
+      101
+     ],
+     [
+      164,
+      52,
+      107
+     ]
+    ],
+    "lines": [
+     [
+      115,
+      230,
+      245
+     ],
+     [
+      120,
+      240,
+      255
+     ],
+     [
+      125,
+      250,
+      255
+     ]
+    ],
+    "lines_shade": [
+     [
+      86,
+      173,
+      184
+     ],
+     [
+      91,
+      182,
+      194
+     ],
+     [
+      96,
+      192,
+      204
+     ]
+    ]
+   },
+   "seats": [
+    {
+     "x": 77,
+     "y": 206,
+     "pose": "stand",
+     "person": 1
+    },
+    {
+     "x": 150,
+     "y": 206,
+     "pose": "stand",
+     "person": 4
+    },
+    {
+     "x": 223,
+     "y": 206,
+     "pose": "stand",
+     "person": 7
+    },
+    {
+     "x": 297,
+     "y": 206,
+     "pose": "stand",
+     "person": 2
+    },
+    {
+     "x": 370,
+     "y": 206,
+     "pose": "stand",
+     "person": 5
+    },
+    {
+     "x": 443,
+     "y": 206,
+     "pose": "stand",
+     "person": 0
+    },
+    {
+     "x": 517,
+     "y": 206,
+     "pose": "stand",
+     "person": 3
+    },
+    {
+     "x": 590,
+     "y": 206,
+     "pose": "stand",
+     "person": 6
+    },
+    {
+     "x": 663,
+     "y": 206,
+     "pose": "stand",
+     "person": 1
+    },
+    {
+     "x": 737,
+     "y": 206,
+     "pose": "stand",
+     "person": 4
+    },
+    {
+     "x": 810,
+     "y": 206,
+     "pose": "stand",
+     "person": 7
+    },
+    {
+     "x": 883,
+     "y": 206,
+     "pose": "stand",
+     "person": 2
+    }
+   ],
+   "watcher": {
+    "x": 737,
+    "y": 206,
+    "pose": "stand"
+   }
+  },
+  "mall": {
+   "crowd": {
+    "file": "venues/mall/crowd.png",
+    "frame_size": [
+     40,
+     56
+    ],
+    "frames": [
+     "idle",
+     "cheer"
+    ],
+    "sit_anchor": [
+     20,
+     54
+    ],
+    "stand_anchor": [
+     20,
+     54
+    ],
+    "doc": "The venue's own locals (ADR-088): row = person, column 0 idle, 1 cheer, anchored at the feet."
+   },
+   "layers": [
+    {
+     "name": "far",
+     "file": "venues/mall/far.webp",
+     "parallax": 1.0,
+     "z": 0,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "ground",
+     "file": "venues/mall/ground.png",
+     "parallax": 1.0,
+     "z": 1,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "stands",
+     "file": "venues/mall/stands.png",
+     "parallax": 1.0,
+     "z": 2,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "fence",
+     "file": "venues/mall/fence.png",
+     "parallax": 1.0,
+     "z": 3,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "net",
+     "file": "venues/mall/net.png",
+     "parallax": 1.0,
+     "z": 4,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    },
+    {
+     "name": "front",
+     "file": "venues/mall/front.png",
+     "parallax": 1.0,
+     "z": 5,
+     "origin": [
+      -48,
+      -24
+     ],
+     "size": [
+      1056,
+      588
+     ]
+    }
+   ],
+   "draw_order_doc": "Draw layers by z. Game sprites (shadows, players, ball, near net post; y-sorted) go after 'net' and before 'front'. Crowd sprites go after 'stands'. Offset each layer by -camera * parallax.",
+   "court_mask": "venues/mall/court_mask.png",
+   "court_colors": {
+    "surround": [
+     [
+      135,
+      137,
+      118
+     ],
+     [
+      151,
+      153,
+      132
+     ],
+     [
+      161,
+      163,
+      140
+     ],
+     [
+      171,
+      173,
+      148
+     ],
+     [
+      187,
+      189,
+      162
+     ]
+    ],
+    "surface": [
+     [
+      18,
+      120,
+      129
+     ],
+     [
+      20,
+      127,
+      137
+     ],
+     [
+      20,
+      133,
+      143
+     ],
+     [
+      22,
+      140,
+      151
+     ]
+    ],
+    "kitchen": [
+     [
+      184,
+      59,
+      120
+     ],
+     [
+      196,
+      63,
+      127
+     ],
+     [
+      204,
+      65,
+      133
+     ],
+     [
+      216,
+      69,
+      140
+     ]
+    ],
+    "kitchen_shade": [
+     [
+      148,
+      47,
+      96
+     ],
+     [
+      156,
+      50,
+      101
+     ],
+     [
+      164,
+      52,
+      107
+     ]
+    ],
+    "lines": [
+     [
+      245,
+      245,
+      245
+     ],
+     [
+      255,
+      255,
+      255
+     ],
+     [
+      255,
+      255,
+      255
+     ]
+    ],
+    "lines_shade": [
+     [
+      184,
+      184,
+      184
+     ],
+     [
+      194,
+      194,
+      194
+     ],
+     [
+      204,
+      204,
+      204
+     ]
+    ]
+   },
+   "seats": [
+    {
+     "x": 80,
+     "y": 200,
+     "pose": "stand",
+     "person": 1
+    },
+    {
+     "x": 160,
+     "y": 200,
+     "pose": "stand",
+     "person": 4
+    },
+    {
+     "x": 240,
+     "y": 200,
+     "pose": "stand",
+     "person": 7
+    },
+    {
+     "x": 320,
+     "y": 200,
+     "pose": "stand",
+     "person": 2
+    },
+    {
+     "x": 400,
+     "y": 200,
+     "pose": "stand",
+     "person": 5
+    },
+    {
+     "x": 480,
+     "y": 200,
+     "pose": "stand",
+     "person": 0
+    },
+    {
+     "x": 560,
+     "y": 200,
+     "pose": "stand",
+     "person": 3
+    },
+    {
+     "x": 640,
+     "y": 200,
+     "pose": "stand",
+     "person": 6
+    },
+    {
+     "x": 720,
+     "y": 200,
+     "pose": "stand",
+     "person": 1
+    },
+    {
+     "x": 800,
+     "y": 200,
+     "pose": "stand",
+     "person": 4
+    },
+    {
+     "x": 880,
+     "y": 200,
+     "pose": "stand",
+     "person": 7
+    }
+   ],
+   "watcher": {
+    "x": 720,
+    "y": 200,
+    "pose": "stand"
+   }
   }
  }
 }

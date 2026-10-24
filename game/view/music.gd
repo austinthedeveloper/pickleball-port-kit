@@ -20,7 +20,10 @@ const LOOPS := {"title": "music_title", "park": "music_park",
 	"match_space": "music_match_space", "match_undersea": "music_match_undersea",
 	"match_gym": "music_match_gym", "match_ruins": "music_match_ruins",
 	"match_glacier": "music_match_glacier", "match_lab": "music_match_lab",
-	"match_station": "music_match_station"}
+	"match_station": "music_match_station", "match_western": "music_match_western",
+	"match_rooftop": "music_match_rooftop", "match_pirate": "music_match_pirate",
+	"match_motel": "music_match_motel", "match_fair": "music_match_fair",
+	"match_drivein": "music_match_drivein", "match_mall": "music_match_mall"}
 const STINGERS := {"won": "music_won", "lost": "music_lost", "cleared": "music_cleared"}
 const VOLUMES := 10                ## MUSIC steps above OFF
 const BASE_DB := -9.0              ## the soundtrack sits this far under the effects

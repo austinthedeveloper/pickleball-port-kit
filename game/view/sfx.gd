@@ -29,7 +29,10 @@ const AMBIENCE_EXT := ".ogg"
 const AMBIENCE := {"park": "ambience_park", "lakeside": "ambience_lakeside",
 	"sunset": "ambience_sunset", "dinosaur": "ambience_dinosaur", "space": "ambience_space",
 	"undersea": "ambience_undersea", "gym": "ambience_gym", "ruins": "ambience_ruins",
-	"glacier": "ambience_glacier", "lab": "ambience_lab", "station": "ambience_station"}
+	"glacier": "ambience_glacier", "lab": "ambience_lab", "station": "ambience_station",
+	"western": "ambience_western", "rooftop": "ambience_rooftop", "pirate": "ambience_pirate",
+	"motel": "ambience_motel", "fair": "ambience_fair", "drivein": "ambience_drivein",
+	"mall": "ambience_mall"}
 const VOICES := 3                  ## overlapping copies per effect
 const AMBIENCE_DB := -12.0
 const FADE_IN := 0.6

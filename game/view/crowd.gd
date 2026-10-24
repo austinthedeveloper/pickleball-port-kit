@@ -1,6 +1,7 @@
 ## The venue's crowd (art manifest seats): people on the stands who cheer
 ## on long rallies and points, in turns so the stands ripple. Dimmed with
-## the backdrop at night. Display only.
+## the backdrop at night. Display only. A painted venue (ADR-088) has its
+## own locals: its manifest entry's "crowd" sheet, in place of the shared one.
 class_name Crowd
 extends Node2D
 
@@ -11,7 +12,7 @@ var _fh := 0
 
 
 func setup(manifest: Dictionary, venue: String, tint: Color) -> Crowd:
-	var meta: Dictionary = manifest["sprites"]["crowd"]
+	var meta: Dictionary = manifest["venues"][venue].get("crowd", manifest["sprites"]["crowd"])
 	var tex: Texture2D = load(MatchView.LEVELS + meta["file"])
 	_fw = meta["frame_size"][0]
 	_fh = meta["frame_size"][1]

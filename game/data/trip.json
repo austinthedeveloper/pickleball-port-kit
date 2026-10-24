@@ -1,9 +1,9 @@
 {
   "comment": "ROAD TRIP (PORT-82, design/ROAD_TRIP.md, port ADR-087): the remaster's roguelike mode. legs: three stretches of road, each with its venues, the ladder teams that turn up as grudge matches, and the teams one of which ends it (the last leg ends in the final). gear: id, name, kind (bag, paddle, hat, partner, perk), rarity (common, uncommon, rare), icon (trip_gear_icons.png's cell, -1 the plain paddle's own icon), the two lines its card shows, and what it does. hazards: one modifier for the next match. detours: a page and two or three choices. ladder: the GARAGE's steps, in order. Text is the small font's: capitals, digits, spaces and !?.,:-'/%+, a line at most 30 characters on a card or 46 on a page.",
   "legs": [
-    {"name": "OUT OF TOWN", "venues": ["park", "lakeside"], "grudge": [0, 1, 2], "big": [1, 2]},
-    {"name": "THE LONG DRIVE", "venues": ["dinosaur", "undersea", "space", "ruins", "glacier"], "grudge": [2, 3, 4, 5], "big": [3, 4, 5]},
-    {"name": "THE COAST", "venues": ["sunset", "lab", "station"], "grudge": [5, 6], "big": [7]}
+    {"name": "OUT OF TOWN", "venues": ["park", "lakeside", "fair", "motel"], "grudge": [0, 1, 2], "big": [1, 2]},
+    {"name": "THE LONG DRIVE", "venues": ["dinosaur", "undersea", "space", "ruins", "glacier", "western", "drivein"], "grudge": [2, 3, 4, 5], "big": [3, 4, 5]},
+    {"name": "THE COAST", "venues": ["sunset", "lab", "station", "pirate", "rooftop", "mall"], "grudge": [5, 6], "big": [7]}
   ],
   "locals": ["MAIL CARRIERS", "LUNCH BREAK", "NIGHT SHIFT", "CAMP STAFF", "THE BAKERS",
     "LIFEGUARDS", "DINER CREW", "THE ROOFERS", "SCOUT LEADERS", "THE MECHANICS", "BINGO NIGHT",

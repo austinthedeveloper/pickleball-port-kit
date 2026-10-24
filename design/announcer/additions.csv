@@ -17,6 +17,20 @@ venue_lab_1,venue_lab_1.wav,"Welcome to the lab! And please, nobody tap on the t
 venue_lab_2,venue_lab_2.wav,Today's experiment: pickleball! Let's see what happens.,"Warm, friendly, a smile in the voice.",3.0,The dinosaur game's levels
 venue_station_1,venue_station_1.wav,Welcome aboard the station! Gravity's on. Mostly.,"Dry, playful, a little deadpan; let the pun land.",3.0,The dinosaur game's levels
 venue_station_2,venue_station_2.wav,"Live from orbit, it's pickleball!","Big, booming 1994 TV sports energy.",2.2,The dinosaur game's levels
+venue_western_1,venue_western_1.wav,"Welcome to town, partner! This court ain't big enough for four.","Dry, playful, a little deadpan; let the pun land.",3.5,The painted venues
+venue_western_2,venue_western_2.wav,High noon on Main Street. Somebody's getting dinked!,"Big, booming 1994 TV sports energy.",3.0,The painted venues
+venue_rooftop_1,venue_rooftop_1.wav,"Welcome to the rooftop! Watch that lob, it's a long way down.","Dry, playful, a little deadpan; let the pun land.",3.5,The painted venues
+venue_rooftop_2,venue_rooftop_2.wav,Pickleball above the city lights!,"Big, booming 1994 TV sports energy.",2.2,The painted venues
+venue_pirate_1,venue_pirate_1.wav,"Ahoy! Welcome aboard, and mind the cannons.","Warm, friendly, a smile in the voice.",3.0,The painted venues
+venue_pirate_2,venue_pirate_2.wav,"All hands on deck, it's pickleball on the high seas!","Big, booming 1994 TV sports energy.",3.0,The painted venues
+venue_motel_1,venue_motel_1.wav,"Welcome to the motel! The pool's closed, but the court's open.","Dry, playful, a little deadpan; let the pun land.",3.5,The painted venues
+venue_motel_2,venue_motel_2.wav,Vacancy! And these players are checking in.,"Warm, friendly, a smile in the voice.",2.8,The painted venues
+venue_fair_1,venue_fair_1.wav,Welcome to the county fair! Step right up!,"Warm, friendly, a smile in the voice.",3.0,The painted venues
+venue_fair_2,venue_fair_2.wav,"Forget the ring toss, folks. This is the real game!","Big, booming 1994 TV sports energy.",3.0,The painted venues
+venue_drivein_1,venue_drivein_1.wav,Welcome to the drive-in! Tonight's feature: pickleball!,"Warm, friendly, a smile in the voice.",3.0,The painted venues
+venue_drivein_2,venue_drivein_2.wav,"Two thumbs up already, and nobody's served yet!","Dry, playful, a little deadpan; let the pun land.",3.0,The painted venues
+venue_mall_1,venue_mall_1.wav,"Welcome to the mall! Shop till you drop, then play till you drop.","Warm, friendly, a smile in the voice.",3.5,The painted venues
+venue_mall_2,venue_mall_2.wav,"Attention, shoppers: pickleball, at center court!","Big, booming 1994 TV sports energy.",2.8,The painted venues
 achievement_1,achievement_1.wav,Achievement unlocked!,"Big, booming 1994 TV sports energy.",1.5,Achievements
 achievement_2,achievement_2.wav,That's one for the trophy case!,"Big, booming 1994 TV sports energy.",2.0,Achievements
 achievement_pickled,achievement_pickled.wav,Pickled! They didn't score a single point!,"Big, booming 1994 TV sports energy.",3.0,Achievements

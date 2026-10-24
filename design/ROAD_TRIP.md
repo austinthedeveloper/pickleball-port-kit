@@ -89,9 +89,9 @@ faces.
 
   | Leg | Where | Venues today | Its ladder teams | Big match (one, by seed) |
   |---|---|---|---|---|
-  | 1. Out of town | Home and the lake | PARK, LAKESIDE | Hendersons, Snowbirds, Gym Bros | Snowbirds or Gym Bros |
-  | 2. The long drive | Theme parks and odd places | DINOSAUR, UNDERSEA, SPACE, RUINS, GLACIER | Gym Bros, Pirates, Goth Club, Surf Crew | Pirates, Goth Club or Surf Crew |
-  | 3. The coast | The beach and the city | SUNSET, LAB, STATION | Surf Crew, Twins | The Twins, then the final |
+  | 1. Out of town | Home and the lake | PARK, LAKESIDE, FAIR, MOTEL (ADR-088) | Hendersons, Snowbirds, Gym Bros | Snowbirds or Gym Bros |
+  | 2. The long drive | Theme parks and odd places | DINOSAUR, UNDERSEA, SPACE, RUINS, GLACIER, WESTERN, DRIVE-IN | Gym Bros, Pirates, Goth Club, Surf Crew | Pirates, Goth Club or Surf Crew |
+  | 3. The coast | The beach and the city | SUNSET, LAB, STATION, PIRATES, ROOFTOP, MALL | Surf Crew, Twins | The Twins, then the final |
 
   The **final** is the SUMMER OPEN against the Champs at SUNSET, at night.
   A leg's other ladder teams turn up as GRUDGE MATCHes, so a trip meets

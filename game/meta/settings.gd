@@ -6,14 +6,17 @@ class_name Settings
 extends RefCounted
 
 ## data/venues.json's, in its order (ADR-024, the fun three ADR-046, the
-## GYM ADR-078, the dinosaur game's four ADR-085): new ones go last, so a
-## saved choice keeps its place.
+## GYM ADR-078, the dinosaur game's four ADR-085, the painted seven
+## ADR-088): new ones go last, so a saved choice keeps its place.
 const VENUES := ["park", "lakeside", "sunset", "dinosaur", "space", "undersea", "gym",
-	"ruins", "glacier", "lab", "station"]
+	"ruins", "glacier", "lab", "station",
+	"western", "rooftop", "pirate", "motel", "fair", "drivein", "mall"]
 const VENUE_NAMES := ["PARK", "LAKESIDE", "SUNSET", "DINOSAUR", "SPACE", "UNDERSEA", "GYM",
-	"RUINS", "GLACIER", "LAB", "STATION"]
+	"RUINS", "GLACIER", "LAB", "STATION",
+	"WESTERN", "ROOFTOP", "PIRATES", "MOTEL", "FAIR", "DRIVE-IN", "MALL"]
 ## Indoors (ADR-078): the lights are always on, whatever COURT's TIME says.
-const INDOOR := ["gym", "lab", "station"]
+## The DRIVE-IN is painted at night already (ADR-088), so it's kept as painted too.
+const INDOOR := ["gym", "lab", "station", "mall", "drivein"]
 const DIFFICULTIES := ["KID", "EASY", "MEDIUM", "HARD"]
 const POINTS := [3, 5, 7, 9, 11, 15, 21]
 const CAMERAS := [0, 50, 75, 100]

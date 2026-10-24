@@ -1,6 +1,6 @@
 # The Announcer: additions to record
 
-The second batch: **62 lines**, the same voice and settings as the first
+The second batch: **76 lines**, the same voice and settings as the first
 (`SCRIPT.md`, whose recording spec holds here too). `additions.csv` has
 one row per file. Put the recordings in `audio/announcer/raw/` beside the
 first batch; the game already asks for these (all but the power-ups, which
@@ -52,6 +52,27 @@ covered (a game past 25-all is called by the score on the board).
 | `venue_lab_2` | Today's experiment: pickleball! Let's see what happens. | Warm, friendly, a smile in the voice. | 3.0 |
 | `venue_station_1` | Welcome aboard the station! Gravity's on. Mostly. | Dry, playful, a little deadpan; let the pun land. | 3.0 |
 | `venue_station_2` | Live from orbit, it's pickleball! | Big, booming 1994 TV sports energy. | 2.2 |
+
+## The painted venues
+
+*As a match at WESTERN, ROOFTOP, PIRATES, MOTEL, FAIR, DRIVE-IN or MALL (ADR-088) begins. Not recorded yet: until then the match opens with the format.*
+
+| id | line | delivery | max s |
+|---|---|---|---|
+| `venue_western_1` | Welcome to town, partner! This court ain't big enough for four. | Dry, playful, a little deadpan; let the pun land. | 3.5 |
+| `venue_western_2` | High noon on Main Street. Somebody's getting dinked! | Big, booming 1994 TV sports energy. | 3.0 |
+| `venue_rooftop_1` | Welcome to the rooftop! Watch that lob, it's a long way down. | Dry, playful, a little deadpan; let the pun land. | 3.5 |
+| `venue_rooftop_2` | Pickleball above the city lights! | Big, booming 1994 TV sports energy. | 2.2 |
+| `venue_pirate_1` | Ahoy! Welcome aboard, and mind the cannons. | Warm, friendly, a smile in the voice. | 3.0 |
+| `venue_pirate_2` | All hands on deck, it's pickleball on the high seas! | Big, booming 1994 TV sports energy. | 3.0 |
+| `venue_motel_1` | Welcome to the motel! The pool's closed, but the court's open. | Dry, playful, a little deadpan; let the pun land. | 3.5 |
+| `venue_motel_2` | Vacancy! And these players are checking in. | Warm, friendly, a smile in the voice. | 2.8 |
+| `venue_fair_1` | Welcome to the county fair! Step right up! | Warm, friendly, a smile in the voice. | 3.0 |
+| `venue_fair_2` | Forget the ring toss, folks. This is the real game! | Big, booming 1994 TV sports energy. | 3.0 |
+| `venue_drivein_1` | Welcome to the drive-in! Tonight's feature: pickleball! | Warm, friendly, a smile in the voice. | 3.0 |
+| `venue_drivein_2` | Two thumbs up already, and nobody's served yet! | Dry, playful, a little deadpan; let the pun land. | 3.0 |
+| `venue_mall_1` | Welcome to the mall! Shop till you drop, then play till you drop. | Warm, friendly, a smile in the voice. | 3.5 |
+| `venue_mall_2` | Attention, shoppers: pickleball, at center court! | Big, booming 1994 TV sports energy. | 2.8 |
 
 ## Achievements
 

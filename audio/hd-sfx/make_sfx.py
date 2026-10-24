@@ -712,11 +712,210 @@ def amb_station(rng):
     return reverb(out, rng, wet=0.3, seconds=1.4, decay=0.5, brightness=5000, stereo=True)
 
 
+# ADR-088: the painted venues
+
+def crickets(rng, out, s, n=5, gain=0.04):
+    """A field of crickets, as at SUNSET."""
+    for c in range(n):
+        pan = rng.uniform(-0.9, 0.9)
+        carrier = rng.uniform(4200, 5200)
+        period = rng.uniform(0.45, 0.9)
+        g = rng.uniform(0.5, 1.0) * gain
+        pulses = int(rng.integers(3, 5))
+        tt = rng.uniform(0, period)
+        while tt < s:
+            place(out, cricket(rng, period, carrier, pulses), tt, pan, g)
+            tt += period * rng.uniform(0.95, 1.05)
+
+
+def creak(rng, f0=200):
+    """Old wood under load: a slow, rasping glide."""
+    d = rng.uniform(0.4, 0.9)
+    c = chirp(rng, f0, f0 * rng.uniform(0.7, 0.85), d, warble=0.15, warble_rate=24, harm=0.9)
+    return band(c, 120, 2500)
+
+
+def amb_western(rng):
+    """WESTERN: a dry wind down the street, a sign creaking on its hooks,
+    spurs jingling on the boardwalk, a horse far off."""
+    s = LOOP + FADE
+    out = wind(rng, s, 150, 2200, 0.7) * 0.2 + murmur(rng, s, 0.14)
+    tt = 2.0
+    while tt < s - 2:
+        place(out, creak(rng, rng.uniform(260, 340)), tt, rng.uniform(-0.6, 0.6), 0.05)
+        tt += rng.uniform(5, 9)
+    tt = 1.0
+    while tt < s - 1:                                      # spurs, a step or three
+        for k in range(int(rng.integers(1, 4))):
+            ring = modes(0.25, [(4200, 0.05, 0.3), (5300, 0.04, 0.2), (6100, 0.03, 0.15)],
+                         phase_rng=rng)
+            place(out, ring, tt + k * 0.45, rng.uniform(-0.8, 0.8), 0.04)
+        tt += rng.uniform(3, 7)
+    tt = 12.0
+    while tt < s - 3:                                      # a whinny, down the street
+        whinny = np.concatenate([chirp(rng, 900, 1500, 0.35, 0.08, 30, 0.5),
+                                 chirp(rng, 1400, 600, 0.7, 0.1, 22, 0.5)])
+        place(out, band(whinny, 400, 4000), tt, rng.uniform(-0.9, 0.9), 0.03)
+        tt += rng.uniform(16, 24)
+    return out
+
+
+def amb_rooftop(rng):
+    """ROOFTOP: the city below (traffic, a horn, a siren far off), the
+    wind across the roof, the pigeons on the parapet."""
+    s = LOOP + FADE
+    t = t_axis(s)
+    out = band(pink(rng, s, 2), 40, 450) * 0.12 + wind(rng, s, 200, 2000, 0.5) * 0.12
+    out += murmur(rng, s, 0.14)
+    d = 7.0
+    st = t_axis(d)
+    siren = np.sin(np.cumsum(2 * np.pi * (850 + 150 * np.sin(2 * np.pi * 0.5 * st)) / SR))
+    place(out, band(siren * np.sin(np.pi * st / d) ** 2, 500, 2500), 14.0, 0.6, 0.015)
+    tt = 3.0
+    while tt < s - 1:                                      # a horn, two notes
+        d = rng.uniform(0.15, 0.3)
+        f = rng.choice([392.0, 440.0, 494.0])
+        horn = np.sign(np.sin(2 * np.pi * f * t_axis(d))) + np.sign(np.sin(2 * np.pi * f * 1.26 * t_axis(d)))
+        place(out, band(horn, 300, 2500) * 0.5, tt, rng.uniform(-0.9, 0.9), 0.01)
+        tt += rng.uniform(5, 11)
+    tt = 0.5
+    while tt < s - 2:                                      # coo-ROO-coo
+        coo = np.concatenate([chirp(rng, 330, 420, 0.18, 0.05, 12, 0.5),
+                              chirp(rng, 430, 300, 0.35, 0.05, 12, 0.5)])
+        place(out, band(coo, 150, 1400), tt, rng.uniform(-0.8, 0.8), 0.05)
+        tt += rng.uniform(2.5, 6)
+    return out
+
+
+def amb_pirate(rng):
+    """PIRATE: the sea against the hull, the timbers creaking, the wind
+    in the rigging, gulls, the ship's bell once."""
+    s = LOOP + FADE
+    out = wind(rng, s, 250, 2500, 0.6, rate=0.1) * 0.12 + murmur(rng, s, 0.14)
+    tt = 0.0
+    while tt < s:                                          # swells along the hull
+        d = rng.uniform(1.8, 3.2)
+        sw = band(noise(rng, d), 120, 700) * np.sin(np.pi * t_axis(d) / d) ** 2
+        place(out, sw, tt, rng.uniform(-0.6, 0.6), rng.uniform(0.06, 0.1))
+        tt += rng.uniform(1.2, 2.4)
+    tt = 1.5
+    while tt < s - 1:
+        place(out, creak(rng, rng.uniform(140, 220)), tt, rng.uniform(-0.8, 0.8), 0.06)
+        tt += rng.uniform(2.5, 5.5)
+    tt = 6.0
+    while tt < s - 2:
+        pan = rng.uniform(-0.9, 0.9)
+        for k in range(int(rng.integers(1, 3))):
+            place(out, gull(rng), tt + k * rng.uniform(0.45, 0.7), pan, rng.uniform(0.03, 0.06))
+        tt += rng.uniform(7.0, 12.0)
+    bell = modes(2.5, [(784, 1.2, 1.0), (1960, 0.6, 0.4), (2610, 0.4, 0.2)])
+    place(out, bell, 20.0, -0.4, 0.04)
+    place(out, bell, 20.9, -0.4, 0.035)
+    return out
+
+
+def amb_motel(rng):
+    """MOTEL: a desert evening, crickets, the neon sign buzzing, trucks
+    passing on the highway, the ice machine dropping a load."""
+    s = LOOP + FADE
+    t = t_axis(s)
+    out = wind(rng, s, 90, 1000, 0.3) * 0.1 + murmur(rng, s, 0.1)
+    crickets(rng, out, s, 5, 0.035)
+    buzz = sum(a * np.sin(2 * np.pi * f * t) for f, a in ((120, 1.0), (240, 0.6), (360, 0.4), (480, 0.25)))
+    flick = 0.85 + 0.15 * (band(rng.standard_normal(len(t)), 0, 6) / 0.02).clip(-1, 1)
+    out += pan_stereo(buzz * flick, 0.7) * 0.012
+    tt = 4.0
+    while tt < s - 6:                                      # a truck goes by
+        d = 6.0
+        pas = band(pink(rng, d, 2), 50, 500) * (np.sin(np.pi * t_axis(d) / d) ** 3)[:, None]
+        i = int(tt * SR)
+        m = min(len(pas), len(out) - i)
+        out[i:i + m] += pas[:m] * 0.12
+        tt += rng.uniform(10, 16)
+    clunk = band(noise(rng, 0.4), 80, 1500) * np.exp(-t_axis(0.4) / 0.08)
+    clunk += modes(0.4, [(140, 0.1, 0.5)])
+    for k in range(5):
+        place(out, band(noise(rng, 0.05), 2000, 7000) * 0.5, 27.0 + 0.12 + k * 0.07, 0.8, 0.03)
+    place(out, clunk, 27.0, 0.8, 0.06)
+    return out
+
+
+def amb_fair(rng):
+    """FAIR: a busy midway, a carousel organ across the grounds, the game
+    stalls' bells, a whoop from the rides, a goat."""
+    s = LOOP + FADE
+    out = murmur(rng, s, 0.26) + wind(rng, s, 100, 1500, 0.3) * 0.08
+    scale = [523.3, 587.3, 659.3, 698.5, 784.0, 880.0]
+    tune = []
+    for k in range(int(s / 0.3)):                          # an organ waltz, far off
+        f = scale[int(rng.integers(len(scale)))] if k % 3 else scale[0]
+        d = 0.3
+        tt_ = t_axis(d)
+        n = sum(a * np.sin(2 * np.pi * f * h * tt_) for h, a in ((1, 1.0), (2, 0.4), (3, 0.2)))
+        tune.append(n * np.sin(np.pi * tt_ / d) ** 0.5 * (1.0 if k % 3 == 0 else 0.6))
+    tune = band(np.concatenate(tune), 300, 3000)
+    tune = fit(tune, len(out))
+    out += pan_stereo(tune, -0.5) * 0.012
+    tt = 1.0
+    while tt < s - 1:
+        place(out, modes(0.8, [(1568, 0.3, 1.0), (3920, 0.15, 0.3)]), tt, rng.uniform(-0.9, 0.9), 0.025)
+        tt += rng.uniform(2.5, 6)
+    tt = 8.0
+    while tt < s - 2:
+        place(out, band(chirp(rng, 500, 950, 0.7, 0.04, 8, 0.4), 300, 3000), tt,
+              rng.uniform(-0.9, 0.9), 0.03)
+        tt += rng.uniform(9, 14)
+    bleat = band(chirp(rng, 420, 360, 0.6, 0.12, 9, 0.7), 250, 3500)
+    place(out, bleat, 23.0, 0.5, 0.04)
+    return reverb(out, rng, wet=0.12, seconds=0.8, decay=0.3, brightness=6000, stereo=True)
+
+
+def amb_drivein(rng):
+    """DRIVE-IN: a warm night, crickets, the film's soundtrack tinny from
+    the speaker posts, a car door now and then."""
+    s = LOOP + FADE
+    t = t_axis(s)
+    out = murmur(rng, s, 0.12) + wind(rng, s, 80, 900, 0.2) * 0.06
+    crickets(rng, out, s, 6, 0.035)
+    film = band(pink(rng, s, 2), 400, 2800) * (0.6 + 0.4 * np.sin(2 * np.pi * 0.23 * t))[:, None]
+    strings = sum(np.sin(2 * np.pi * f * t) for f in (220.0, 277.2, 329.6))
+    out += film * 0.04 + pan_stereo(band(strings, 300, 2500), 0.0) * 0.006
+    tt = 5.0
+    while tt < s - 2:
+        d = 0.3
+        slam = band(noise(rng, d), 60, 1200) * np.exp(-t_axis(d) / 0.05)
+        place(out, slam, tt, rng.uniform(-0.9, 0.9), 0.08)
+        tt += rng.uniform(8, 14)
+    return out
+
+
+def amb_mall(rng):
+    """MALL, indoors: shoppers under the skylight, the fountain, the
+    escalator's motor, the chime before an announcement (none follows)."""
+    s = LOOP + FADE
+    t = t_axis(s)
+    out = murmur(rng, s, 0.28)
+    out += band(noise(rng, s, 2), 700, 6000) * 0.02 * (0.9 + 0.1 * np.sin(2 * np.pi * 0.3 * t))[:, None]
+    motor = sum(a * np.sin(2 * np.pi * f * t) for f, a in ((50, 1.0), (100, 0.4), (150, 0.2)))
+    out += pan_stereo(motor, 0.6) * 0.02
+    tt = 0.4
+    while tt < s - 1:                                      # heels on the tile
+        place(out, band(noise(rng, 0.03), 1500, 6000) * np.exp(-t_axis(0.03) / 0.008), tt,
+              rng.uniform(-0.9, 0.9), rng.uniform(0.03, 0.06))
+        tt += rng.uniform(0.25, 0.7)
+    chime = np.concatenate([modes(0.6, [(880.0, 0.5, 1.0)]), modes(1.2, [(698.5, 0.8, 1.0)])])
+    place(out, chime, 18.0, 0.0, 0.03)
+    return reverb(out, rng, wet=0.35, seconds=1.4, decay=0.5, brightness=5500, stereo=True)
+
+
 AMBIENCE = {"ambience_park": amb_park, "ambience_lakeside": amb_lakeside,
             "ambience_sunset": amb_sunset, "ambience_dinosaur": amb_jungle,
             "ambience_space": amb_space, "ambience_undersea": amb_undersea,
             "ambience_gym": amb_gym, "ambience_ruins": amb_ruins, "ambience_glacier": amb_glacier,
-            "ambience_lab": amb_lab, "ambience_station": amb_station}
+            "ambience_lab": amb_lab, "ambience_station": amb_station,
+            "ambience_western": amb_western, "ambience_rooftop": amb_rooftop,
+            "ambience_pirate": amb_pirate, "ambience_motel": amb_motel, "ambience_fair": amb_fair,
+            "ambience_drivein": amb_drivein, "ambience_mall": amb_mall}
 
 
 def rms_db(x):

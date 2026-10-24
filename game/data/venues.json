@@ -57,6 +57,42 @@
       "name": "STATION", "scene": "", "ambience": "station",
       "watcher": [194, 64, "stand"],
       "ground": {"surface": "SLATE", "kitchen": "ORANGE", "surround": "ASPHALT", "lines": "WHITE"}
+    },
+    {
+      "comment": "The painted seven (ADR-088), the port's own: cut from generated paintings (art/venues-r1). The surround is the painting's floor (DEFAULT).",
+      "name": "WESTERN", "scene": "", "ambience": "western",
+      "watcher": [194, 64, "stand"],
+      "ground": {"surface": "RED", "kitchen": "CLAY", "surround": "DEFAULT", "lines": "WHITE"}
+    },
+    {
+      "name": "ROOFTOP", "scene": "", "ambience": "rooftop",
+      "watcher": [194, 64, "stand"],
+      "ground": {"surface": "BLUE", "kitchen": "NAVY", "surround": "DEFAULT", "lines": "WHITE"}
+    },
+    {
+      "name": "PIRATE", "scene": "", "ambience": "pirate",
+      "watcher": [194, 64, "stand"],
+      "ground": {"surface": "AQUA", "kitchen": "NAVY", "surround": "DEFAULT", "lines": "WHITE"}
+    },
+    {
+      "name": "MOTEL", "scene": "", "ambience": "motel",
+      "watcher": [194, 64, "stand"],
+      "ground": {"surface": "BLUE", "kitchen": "NAVY", "surround": "DEFAULT", "lines": "WHITE"}
+    },
+    {
+      "name": "FAIR", "scene": "", "ambience": "fair",
+      "watcher": [194, 64, "stand"],
+      "ground": {"surface": "GREEN", "kitchen": "ORANGE", "surround": "DEFAULT", "lines": "WHITE"}
+    },
+    {
+      "name": "DRIVEIN", "scene": "", "ambience": "drivein",
+      "watcher": [194, 64, "stand"],
+      "ground": {"surface": "PURPLE", "kitchen": "PINK", "surround": "DEFAULT", "lines": "CYAN"}
+    },
+    {
+      "name": "MALL", "scene": "", "ambience": "mall",
+      "watcher": [194, 64, "stand"],
+      "ground": {"surface": "AQUA", "kitchen": "PINK", "surround": "DEFAULT", "lines": "WHITE"}
     }
   ]
 }

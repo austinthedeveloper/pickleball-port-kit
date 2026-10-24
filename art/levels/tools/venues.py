@@ -1154,3 +1154,9 @@ VENUES = {"park": park, "lakeside": lakeside, "sunset": sunset,
           "dinosaur": dinosaur, "space": space, "undersea": undersea, "gym": gym,
           "ruins": ruins, "glacier": glacier,
           "lab": lab, "station": station}
+
+
+# ADR-088: the painted venues, cut from generated paintings (painted.py)
+import painted  # noqa: E402
+
+VENUES.update(painted.VENUES)

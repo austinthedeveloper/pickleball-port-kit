@@ -15,7 +15,12 @@ describes every file, position, anchor, animation and layer order.
   `space` and `undersea` (no level mocks: drawn from the SNES mocks'
   themes, `art/concept/court_top_*.png`), ADR-078's indoor `gym`, and
   ADR-085's `ruins`, `glacier`, `lab` and `station` (drawn from the
-  dinosaur game's level concepts, `../dinosaur/assets/levels`).
+  dinosaur game's level concepts, `../dinosaur/assets/levels`), and
+  ADR-088's painted `western`, `rooftop`, `pirate`, `motel`, `fair`,
+  `drivein` and `mall`: not drawn, but cut from generated paintings
+  (`art/venues-r1`) by `tools/painted.py`, with a crowd sheet of their
+  own (`venues/<venue>/crowd.png`, the manifest's `crowd`) and the
+  backdrop as `far.webp`.
 
 `out/previews/<venue>_vs_mock.png` shows each level rebuilt from these
 assets (HUD, players, crowd, ball) beside its mock.
@@ -89,6 +94,7 @@ python3 -m venv .venv && .venv/bin/pip install -r art/levels/tools/requirements.
 | `tools/pix.py` | The drawing kit: aliased shapes, ramps, foliage, chain-link, outlines |
 | `tools/scenery.py` | The props |
 | `tools/venues.py` | The venues, positioned from the mocks via `M()` |
+| `tools/painted.py` | ADR-088's painted venues, cut from `art/venues-r1` |
 | `tools/critters.py` | The fun venues' onlookers: dinosaurs, aliens, astronauts, sea creatures |
 | `tools/court.py` | Geometry, court mask and net |
 | `tools/players.py` | The players |

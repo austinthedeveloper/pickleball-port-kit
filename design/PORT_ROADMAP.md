@@ -108,6 +108,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-80 | Cleanup round 6: one copy of the shot effects, the title's way back, the dinosaurs' looks; tests for the gaps | `feature/cld-cleanup-6` | Done |
 | PORT-81 | Touch controls for the web build: an on-screen SNES pad on phones and tablets | `feature/cld-touch-controls` | Ready to test |
 | PORT-82 | ROAD TRIP: a roguelike mode beside STORY, a road map of branching stops, a match at each, gear to pick, a garage between trips (port ADR-087) | `feature/cld-trip-run` | Ready to test |
+| PORT-83 | The painted venues: WESTERN, ROOFTOP, PIRATES, MOTEL, FAIR, DRIVE-IN, MALL, from generated paintings (port ADR-088) | `feature/cld-venue-art-r1` | Ready to test |
 
 ## Releases
 
@@ -416,10 +417,34 @@ the same request). Open: 36 and 40.
     Not built: the cassettes and the map's pen colour (KNOWN_ISSUES #82,
     #83).
 
+### 83. `feature/cld-venue-art-r1`: the painted venues (asked for 2026-10-24)
+
+- [x] `PORT-83` Seven venues from generated paintings (port ADR-088), after
+  STATION on COURT > VENUE: WESTERN, ROOFTOP, PIRATES, MOTEL (the drained
+  pool from ROAD TRIP's motel), FAIR, DRIVE-IN, MALL. The loop was ROAD
+  TRIP's: I wrote the prompts and reviewed each round, you generated
+  (`art/venues-r1`: prompts, references, concepts, plates, cutouts,
+  locals, both reviews; MOTEL's re-layout in `art/venues-r2-fixes`).
+  `art/levels/tools/painted.py` cuts the layers and paints the court on
+  each floor; every venue has its own locals (`Crowd` takes a venue's
+  sheet), its court presets, its own ambience and match track. MALL and the DRIVE-IN
+  ignore TIME (indoors; already night). ROAD TRIP's legs visit them.
+  - Verified: the full suite plus the e2e, golden traces unchanged; the
+    existing venues' art and sounds byte-identical; `test_court` (their
+    presets, their locals), `test_night`, `test_layout` (the COURT page's
+    new names). Screenshots of each in a match.
+  - Status: **Ready to test**: play a match at each. Say if a scene, its
+    crowd or its sound should change. Not done: the announcer's lines
+    (KNOWN_ISSUES #85); no parallax (#86).
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
+
+- **PORT-83 the painted venues:** play a match at each. The names are
+  WESTERN, ROOFTOP, PIRATES, MOTEL, FAIR, DRIVE-IN and MALL. Each has a
+  new match track and ambience: say if one misses the mark.
 
 - **PORT-82 ROAD TRIP:** built and playable (MAIN > ROAD TRIP). Play a
   few trips and say what to change: the difficulty, the length, prices

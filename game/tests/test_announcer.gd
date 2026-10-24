@@ -24,9 +24,10 @@ func _restore(k: Array) -> void:
 	Announcer.enabled = k[3]
 
 
-## Venues whose introduction isn't recorded yet (ADR-085: in
+## Venues whose introduction isn't recorded yet (ADR-085, ADR-088: in
 ## design/announcer/ADDITIONS.md); their matches open with the format.
-const TO_RECORD := ["ruins", "glacier", "lab", "station"]
+const TO_RECORD := ["ruins", "glacier", "lab", "station",
+	"western", "rooftop", "pirate", "motel", "fair", "drivein", "mall"]
 
 
 ## Every clip is there, and every line the commentary can ask for.

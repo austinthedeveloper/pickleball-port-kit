@@ -38,6 +38,23 @@ G = [
         ("venue_station_1", "Welcome aboard the station! Gravity's on. Mostly.", WRY, 3.0),
         ("venue_station_2", "Live from orbit, it's pickleball!", HYPE, 2.2),
     ]),
+    ("The painted venues", "As a match at WESTERN, ROOFTOP, PIRATES, MOTEL, FAIR, DRIVE-IN "
+     "or MALL (ADR-088) begins. Not recorded yet: until then the match opens with the format.", [
+        ("venue_western_1", "Welcome to town, partner! This court ain't big enough for four.", WRY, 3.5),
+        ("venue_western_2", "High noon on Main Street. Somebody's getting dinked!", HYPE, 3.0),
+        ("venue_rooftop_1", "Welcome to the rooftop! Watch that lob, it's a long way down.", WRY, 3.5),
+        ("venue_rooftop_2", "Pickleball above the city lights!", HYPE, 2.2),
+        ("venue_pirate_1", "Ahoy! Welcome aboard, and mind the cannons.", WARM, 3.0),
+        ("venue_pirate_2", "All hands on deck, it's pickleball on the high seas!", HYPE, 3.0),
+        ("venue_motel_1", "Welcome to the motel! The pool's closed, but the court's open.", WRY, 3.5),
+        ("venue_motel_2", "Vacancy! And these players are checking in.", WARM, 2.8),
+        ("venue_fair_1", "Welcome to the county fair! Step right up!", WARM, 3.0),
+        ("venue_fair_2", "Forget the ring toss, folks. This is the real game!", HYPE, 3.0),
+        ("venue_drivein_1", "Welcome to the drive-in! Tonight's feature: pickleball!", WARM, 3.0),
+        ("venue_drivein_2", "Two thumbs up already, and nobody's served yet!", WRY, 3.0),
+        ("venue_mall_1", "Welcome to the mall! Shop till you drop, then play till you drop.", WARM, 3.5),
+        ("venue_mall_2", "Attention, shoppers: pickleball, at center court!", HYPE, 2.8),
+    ]),
     ("Achievements", "As an achievement unlocks (after the match's result): its own line "
      "if it has one, else a general one.", [
         ("achievement_1", "Achievement unlocked!", HYPE, 1.5),

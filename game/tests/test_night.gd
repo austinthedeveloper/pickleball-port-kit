@@ -137,7 +137,8 @@ func test_every_venue_at_night() -> void:
 			var sc := CourtStyle.time_scales(t)
 			var dim := view._layers.filter(func(l): return l[0] != view._ground \
 				and not String(l[0].texture.resource_path).ends_with("net.png"))
-			check(dim.size() >= 6 and dim.all(func(l): return l[0].modulate == sc[0]),
+			# (a painted venue, ADR-088, has four: far, stands, fence, front)
+			check(dim.size() >= 4 and dim.all(func(l): return l[0].modulate == sc[0]),
 				"%s t%d: the backdrop takes the dark scale" % [venue, t])
 			check(view._ground.material is ShaderMaterial, "%s t%d: the court under the lights" % [venue, t])
 			check(view.crowd.people.all(func(c): return c[0].modulate == sc[0]), "%s t%d: the crowd dims" % [venue, t])

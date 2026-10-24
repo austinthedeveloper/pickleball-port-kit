@@ -57,17 +57,21 @@ func test_default_is_the_paint_pixel_for_pixel() -> void:
 ## ADR-046: the fun venues paint their venues.json ground presets, so
 ## DEFAULT there is the preset the SNES named (GREEN / ORANGE / GRASS /
 ## WHITE at DINOSAUR, and so on). (PARK, LAKESIDE and SUNSET keep the
-## level mocks' own paint.)
+## level mocks' own paint; ADR-088's painted seven keep their painting's
+## floor, DEFAULT, and paint their court's three presets.)
 func test_fun_venues_paint_their_presets() -> void:
 	var m := _manifest()
 	var venues: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/venues.json"))
 	var checked := 0
 	for v in venues["venues"]:
 		var venue := String(v["name"]).to_lower()
-		if not venue in ["dinosaur", "space", "undersea", "gym", "ruins", "glacier", "lab", "station"]:
+		if not venue in ["dinosaur", "space", "undersea", "gym", "ruins", "glacier", "lab", "station",
+				"western", "rooftop", "pirate", "motel", "fair", "drivein", "mall"]:
 			continue
 		check(venue in Settings.VENUES, "%s is a venue" % venue)
 		for part in CourtStyle.PARTS:
+			if v["ground"][part] == "DEFAULT":
+				continue
 			var want: Variant = CourtStyle.preset(part, CourtStyle.names(part).find(v["ground"][part]))
 			check(want != null, "%s %s names a preset" % [venue, part])
 			if want == null:
@@ -77,7 +81,7 @@ func test_fun_venues_paint_their_presets() -> void:
 			check(off <= 0.06 or (part == "lines" and got.get_luminance() > 0.85 * want.get_luminance()),
 				"%s %s paints %s (%s vs %s)" % [venue, part, v["ground"][part], got, want])
 			checked += 1
-	eq(checked, 32, "eight venues (the fun ones, the GYM, the dinosaur game's four), four parts")
+	eq(checked, 53, "the fun ones, the GYM and the dinosaur game's four (four parts); the painted seven (three)")
 
 
 func test_a_preset_touches_only_its_part() -> void:
@@ -160,3 +164,31 @@ func test_court_page_and_save() -> void:
 	eq(Settings.court, [1, 0, 0, CourtStyle.count("lines") - 1], "saved, and a bad index loads as DEFAULT")
 	t2.free()
 	Settings.court = kept
+
+
+## ADR-088: the painted seven bring their own locals. Each crowd sprite
+## comes from the venue's sheet, every seat's row is on it, and a cheer
+## shows the second column.
+func test_painted_venues_have_their_locals() -> void:
+	var m := _manifest()
+	var painted := []
+	for venue in Settings.VENUES:
+		if m["venues"][venue].has("crowd"):
+			painted.append(venue)
+	eq(painted, ["western", "rooftop", "pirate", "motel", "fair", "drivein", "mall"], "the painted seven")
+	for venue in painted:
+		var view := MatchView.new()
+		runner.root.add_child(view)
+		view.setup(SimTypes.MatchConfig.doubles(), venue, true)
+		var meta: Dictionary = m["venues"][venue]["crowd"]
+		var fw: int = meta["frame_size"][0]
+		var fh: int = meta["frame_size"][1]
+		check(view.crowd.people.size() >= 8, "%s: a crowd" % venue)
+		for p in view.crowd.people:
+			var s: Sprite2D = p[0]
+			eq(s.texture.resource_path, MatchView.LEVELS + String(meta["file"]), "%s: its own sheet" % venue)
+			check((p[1] + 1) * fh <= s.texture.get_height(), "%s: row %d is on the sheet" % [venue, p[1]])
+		view.crowd.cheer(16)
+		view.crowd.update()
+		check(view.crowd.people.any(func(p): return p[0].region_rect.position.x == fw), "%s: they cheer" % venue)
+		view.free()

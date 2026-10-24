@@ -78,3 +78,4 @@ first decisions, are rows in `design/07_DECISIONS_AND_RISKS.md`.
 | 085 | [The Dinosaur Game's Levels as Courts](ADR-085-dinosaur-game-levels.md) | Accepted 2026-10-22 |
 | 086 | [An On-Screen Pad for Touch Screens](ADR-086-touch-pad.md) | Accepted 2026-10-23 |
 | 087 | [ROAD TRIP: a Roguelike Mode on a Map](ADR-087-road-trip.md) | Accepted 2026-10-24 |
+| 088 | [The Painted Venues](ADR-088-painted-venues.md) | Accepted 2026-10-24 |

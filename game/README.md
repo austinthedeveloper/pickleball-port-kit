@@ -115,7 +115,8 @@ shots, the smash, the serve, the two-bounce rule, the kitchen), each a
 real match or ball-machine drill with one goal; and the **BALL MACHINE**
 (ADR-028), which feeds a drill (SHOT, TARGET, RATE, RETURN TO) and counts
 your return streak. **COURT**: VENUE (PARK, LAKESIDE, SUNSET, DINOSAUR,
-SPACE, UNDERSEA), TIME (DAY, DUSK, NIGHT), SURFACE, KITCHEN, SURROUND,
+SPACE, UNDERSEA, GYM, RUINS, GLACIER, LAB, STATION, and ADR-088's painted
+WESTERN, ROOFTOP, PIRATES, MOTEL, FAIR, DRIVE-IN, MALL), TIME (DAY, DUSK, NIGHT), SURFACE, KITCHEN, SURROUND,
 LINES, previewed on the demo. **MODIFIERS**: BIG BALL, FAST BALL, GHOST
 BALL, POPCORN, ICE, GLOW, INVERSE, MOON, BOUNCY, WIND, and **RULES**: WIN
 BY 2, LAVA, SIDE-OUT, MOMENTUM, DINK OR DIE, SUDDEN DEATH, MULTI BALL, and **SPECIALS** (ADR-080: a meter, and PICKLE SMASH on SPECIAL)
