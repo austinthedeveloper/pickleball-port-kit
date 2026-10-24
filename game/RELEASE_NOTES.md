@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.32.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.33.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-75 of 77 roadmap tasks are in.
+79 of 82 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -466,3 +466,33 @@ Status: **Ready to test**: play a match at DINOSAUR and watch the fence line for
 ADR-085: four venues from the dinosaur game's level concepts (`../dinosaur/assets/levels`), after the GYM on COURT > VENUE. **RUINS** (`01-ruins.png`): a burning, drowned city under a purple and orange sunset, a broken bridge, mossy pillars and rusted girders, the crowd on a mossy wall; PURPLE court, CLAY kitchen, cracked CONCRETE. **GLACIER** (`ice-wilderness.png`): snowy peaks at dusk, ice spires, the aqueduct hung with icicles, snowy pines; BLUE and NAVY on SNOW. **LAB** (`science-lab.png`, indoors): green tanks with a T. rex, a raptor and a long-neck's skeletons, a hazard-striped catwalk, consoles, a raptor loose on the deck behind a yellow rail; BLACK and GREEN, YELLOW lines, steel plates. **STATION** (`space.png`, indoors): windows on a nebula, a ringed planet, asteroids and a wreck, orange-lit rails and consoles, an astronaut and a drone; SLATE and ORANGE on deck plates. Dinosaurs only at the LAB (your call after the first cut): there Nathan rides the Carnotaurus along the deck (ADR-084's sprites, with the roar). Each has its own ambience and match track; the announcer's lines for them are in the batch to record (until then: the format).
 
 Status: **Ready to test**: COURT > VENUE, play a game at each and listen to the ambience and track; try TIME at RUINS and GLACIER (LAB and STATION stay lit).
+
+## PORT-78: keyboard controls you can guess (asked for 2026-10-23, parked) (not in this build)
+
+The keyboard layout (`game_ui/controls.gd`) grew one SNES button at a time: hit Space/J, drive K, soft L, slice I, short Shift/U, special O, so nothing about where the keys sit says which shot is which, and the prompts show the first key only (SHIFT, not the U I O over J K L grid). There's no single standard, but two conventions: emulators (RetroArch, Snes9x: arrows, Z = B, X = A, A = Y, S = X, Q/W = L/R, Enter = Start) and PC action games (WASD, the common actions on J K L, the rare ones on U I O). The proposal: two presets on CONTROLS, on top of REBIND (`game_ui/bindings.gd`): | | WASD (default) | Arrows | |---|---|---| | Hit | J | Z | | Drive | K | X | | Soft | L | C | | Slice | I | S | | Special | O | D | | Short (held) | Shift or Space | Shift | The three shots in one row in one order, the rarer ones on the row above. And the lesson cards draw the keys where they sit (a little keyboard) instead of a line of names.
+
+Status: **Planned**, parked until you've decided the layout.
+
+## PORT-79: text centred in the bars and keys (asked for 2026-10-23)
+
+Known issue 77: the menus' highlight bar, MAP BUTTONS' bar and the prompts' keys had their text about 3 px low (the offsets didn't allow for the small font's outline and shadow). The bars start 2 px above the letters (the change arrows and the mouse's row bands follow), keys and pills are 24 px tall with a 2 px lip, and the key letters and their labels share one height (`PromptBar.TEXT_Y`). Display only, no ADR.
+
+Status: **Ready to test**: look at any menu and the prompts, and at a pad's prompts (the round buttons' letters moved up 3 px; not screenshotted).
+
+## PORT-80: cleanup round 6 (asked for 2026-10-23)
+
+The local branches merged into `origin/main` deleted (33; `feature/cld-release-0.26.0` kept: it has commits its remote branch lacks, though `main` has them; the two in agent worktrees stay). The code: a hit's spark and smash pop in one place (`MatchView.contact_fx`, the match's and PLAY OF THE MATCH's replay); SAVE LAST RALLY's rules in `Highlight` next to PLAY OF THE MATCH's SAVE; one `TitleScreen.back_to` for the seven ways back to a page; the dinosaurs' looks once (`DinoWalkers.LOOKS`, merged into DINOSAUR's and DINO PARK's casts, checked equal to the old tables); `PadMaps.short_name` for CONTROLLER and MAP BUTTONS; QUICK MATCH and MODE share their row; "PRESS AGAIN" for "B AGAIN" (prompts, not button names); stale comments (the announcer's recorded lines, the SNES icons). The tests: `TestSuite.title_screen` for 25 copies of the title's setup. New: a rally saved once by SAVE LAST RALLY and PLAY OF THE MATCH, whichever first, and a new match forgetting the best; replay files that aren't replays, another format, two in one second; practice's view against a bare sim; QUICK MATCH's DOUBLES and SPECIALS surviving a restart (and an old save without the key); `test_layout` for the park's YOU STAY ON COURT and 2 TEAMS AHEAD, the CONTROLLER page at its longest name and every status, and the mouse picking a row anywhere on its bar; pad names cut to fit. The docs: PORT-55, 59 to 77 (but 62) moved to `PORT_HISTORY.md`. Then, at your call: replays show the match's light effects too (the bounce marks, and the camera flashes when a saved one is watched from REPLAYS; none behind the title's menu, as in the demo). And known issue 78: SMASH! pop-ups one at a time (two could overlap).
+
+Status: **Done**.
+
+## PORT-81: touch controls on the web (asked for 2026-10-23)
+
+The web build had no touch input (a tap on a menu row worked, through Godot's mouse emulation; a match couldn't be played). Godot has touch events and `TouchScreenButton`, but no D-pad node, so one `TouchPad` node (`view/touch_pad.gd`, port ADR-086) tracks the fingers and presses the input map's actions through `Input`: a SNES pad with the D-pad bottom left, B A Y X bottom right (hit, drive, soft, slice), START, L (SHORT) and R (SPECIAL) up top. The prompts follow it (B HIT, A DRIVE...). TOUCH PAD on CONTROLLER: AUTO (a touch screen, no pad), ON, OFF. Taps off the pad still drive the menus; a tap on a button doesn't click the row under it; a part with a menu's panel under it steps aside. No controller card on a phone.
+
+Status: **Ready to test** on a phone: export the web build (`game/tools/export.sh`), serve it and open it on a phone in landscape. Try a match (move and hit with two thumbs, hold L while hitting), the menus by tap, and whether the buttons sit right under your thumbs. Known issue 79 lists what couldn't be checked here.
+
+## PORT-82: ROAD TRIP, a roguelike mode (asked for 2026-10-23)
+
+ROAD TRIP (port ADR-087; the plan with your answers and the art: `design/ROAD_TRIP.md`; the art in `art/roadtrip-v3` and `art/roadtrip-r4-fixes`, imported to `game/assets/trip`). A mode on MAIN beside STORY: you and a partner drive to the SUMMER OPEN on a road map of three legs (three columns of stops in three lanes, then a big match; the last leg's is the final against the Champs). Stops: PICKUP GAME, GRUDGE MATCH, YARD SALE, PRO SHOP, MOTEL, DETOUR. You start weak (a plain paddle and cap, four stats at 1 of 20); gear picked one of three (the game's paddles and hats, stacking items, partner training, one-sided rules) makes a trip strong. Three hearts; the trip can end. The miles fill the GARAGE's fixed ladder of lasting rewards (starting stats, a heart, gear, van paints and ornaments); beaten captains become partners; a trip won opens the next HEAT. Nothing counts outside the trip. Seeded: the map, picks, shop and detours are the same wherever played. The sim: `MatchConfig.trip` (a slot's stats, a CPU's style, the left side's perks), off everywhere else.
+
+Status: **Ready to test**: play a trip or three. Say how it feels: too easy or hard (the bot wins leg 1 from the start and needs about 12 in every stat for the final), the length, the prices, the gear. Not built: the cassettes and the map's pen colour (KNOWN_ISSUES #82, #83).

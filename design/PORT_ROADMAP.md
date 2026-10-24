@@ -221,6 +221,9 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.32.0** (2026-10-22): PORT-76 the Carnotaurus and friends at
   DINOSAUR and DINO PARK, PORT-77 RUINS, GLACIER, LAB and STATION (tag
   `v0.32.0`, on `feature/cld-release-0.32.0`).
+- **v0.33.0** (2026-10-24): PORT-79 text centred, PORT-80 cleanup round 6,
+  PORT-81 touch controls, PORT-82 ROAD TRIP (tag `v0.33.0`, on
+  `feature/cld-release-0.33.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 

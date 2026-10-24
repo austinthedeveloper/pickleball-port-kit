@@ -4,6 +4,35 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.33.0] - 2026-10-24
+
+ROAD TRIP, and touch controls for the web.
+
+### Added
+- **ROAD TRIP**, a new mode on the title, beside STORY. You and Pepper
+  load the van and drive to the SUMMER OPEN on the coast, where the Champs
+  defend their title. Every trip is a different road map: pick your way
+  through pickup games, grudge matches, yard sales, the pro shop, motels
+  and detours, with a big match at the end of each leg and the final at
+  the beach. You start with a plain paddle and not much else; the gear
+  you pick up on the way (paddles, hats, grip tape, sneakers, partner
+  drills, and tricks like SECOND SERVE and LUCKY LINE) makes you stronger.
+  You have three hearts, so a trip can end. The miles you drive fill the
+  GARAGE with lasting rewards (better starting stats, new gear, van paint
+  jobs and dashboard ornaments), captains you beat can partner you, and
+  winning opens a harder HEAT. Nothing in a trip counts toward your
+  records or career.
+- **Touch controls** in the web build: an on-screen SNES pad on phones
+  and tablets (TOUCH PAD on CONTROLLER: AUTO, ON or OFF). Taps still work
+  the menus.
+
+### Changed
+- Replays show the bounce marks and the crowd's camera flashes.
+- Text sits centred in the menus' highlight bar and the prompts' keys.
+
+### Fixed
+- Two SMASH! pop-ups no longer overlap.
+
 ## [0.32.0] - 2026-10-22
 
 Dinosaurs, and four new courts.
