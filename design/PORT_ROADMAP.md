@@ -106,7 +106,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-78 | Keyboard controls you can guess: a WASD + J K L preset and an arrows + Z X C one, keys drawn where they sit | `feature/cld-keyboard-layout` | Planned (parked: you're thinking it over) |
 | PORT-79 | Text centred in the menu bars and the prompts' keys | `feature/cld-text-centring` | Ready to test |
 | PORT-80 | Cleanup round 6: one copy of the shot effects, the title's way back, the dinosaurs' looks; tests for the gaps | `feature/cld-cleanup-6` | Done |
-| PORT-82 | STORY as a summer on a map: branching legs between the chapters, a match at each stop, gear to pick (a plan: `design/STORY_ROGUELIKE.md`) | `feature/cld-story-roguelike` | Planned (waiting on your answers) |
+| PORT-82 | STORY as a road trip on a map: a new remaster-only story, branching roads, a match at each stop, gear to pick (a plan: `design/STORY_ROGUELIKE.md`) | `feature/cld-story-roguelike` | Planned (waiting on your answers) |
 
 ## Releases
 
@@ -357,21 +357,22 @@ the same request). Open: 36 and 40.
     pixel the same.
   - Status: **Done**.
 
-### 82. `feature/cld-story-roguelike`: STORY as a summer on a map (asked for 2026-10-23)
+### 82. `feature/cld-story-roguelike`: STORY as a road trip on a map (asked for 2026-10-23)
 
-- [ ] `PORT-82` A plan, nothing built: `design/STORY_ROGUELIKE.md`. A
-  story run is one summer on a paper map pinned to the clubhouse
-  corkboard. The eight chapters stay, as gates every path passes (the
-  canon's seven signatures, then the Champs); between two chapters is a
-  leg of one or two stops in two or three lanes: PICKUP GAME, GRUDGE
-  MATCH, PRO SHOP, PEPPER'S PORCH, NOTICE BOARD. A chapter, a grudge
-  match and some events offer gear, pick one of three (about every one to
-  two stops); 23 items in three kinds (the summer only; knobs the game
-  has; one-sided rules behind a `MatchConfig.perks` field, off in
-  conformance, with an ADR). Three hearts, RELAXED for today's no-penalty
-  story; HEAT and new gear between summers. Seeded like the tournament,
-  the generated map kept in a v7 save (the old chapter's meaning goes).
-  Seven build stages, from the run's logic (no screens) to the art.
+- [ ] `PORT-82` A plan, nothing built: `design/STORY_ROGUELIKE.md`. A new
+  story, the remaster's own (not bound by the bible, at your word): ROAD
+  TRIP, you and Pepper driving to the SUMMER OPEN on the coast, where the
+  Champs defend their title. The map is a road map on the van's
+  dashboard: three legs (out of town, the long drive, the coast) of five
+  columns of stops in three or four lanes, each leg ending in a big match
+  against one of its ladder teams, then the final. Stops: PICKUP GAME,
+  GRUDGE MATCH, YARD SALE, PRO SHOP, MOTEL, DETOUR. Gear, pick one of
+  three, at least every two stops on any road; 23 items in three kinds
+  (the trip only; knobs the game has; one-sided rules behind a
+  `MatchConfig.perks` field, off in conformance, with an ADR). Three
+  hearts, RELAXED for no penalty; HEAT and new gear between trips. Seeded
+  like the tournament, the generated map kept in a new save key (v6
+  stays). SAVE THE PARK stays beside it. Seven build stages.
   - Status: **Planned**: eight questions at the end of the doc (For you).
 
 ## For you
@@ -379,12 +380,11 @@ the same request). Open: 36 and 40.
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
 
-- **PORT-82 story as a summer:** eight questions at the end of
-  `design/STORY_ROGUELIKE.md`. The big ones: chapters as gates every
-  path passes (canon: all seven sign) or a bigger map where you meet only
-  some teams (changes the bible's story); three hearts with a RELAXED
-  choice, or no hearts; and does it replace today's STORY (the scenes
-  reused, a SCRAPBOOK to rewatch them) or sit beside it?
+- **PORT-82 story as a road trip:** eight questions at the end of
+  `design/STORY_ROGUELIKE.md`. The big ones: is ROAD TRIP the story you
+  want (or Grimsby back, or something else); three hearts with a RELAXED
+  choice, or no hearts; and does it sit beside SAVE THE PARK or replace
+  it?
 
 - **PORT-78 the keyboard:** parked at your request. When you've thought
   it over: which presets (WASD + J K L, arrows + Z X C, both), which is
