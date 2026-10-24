@@ -144,6 +144,20 @@ func test_title_pages() -> void:
 	Sfx.setting = kept[7]
 
 
+## The lite (Web) build's title (port ADR-089): MAIN without ROAD TRIP,
+## OPTIONS without the announcer's rows.
+func test_lite_title() -> void:
+	var kept := Settings.lite
+	Settings.lite = true
+	var t := _title()
+	for id in ["main", "options", "court"]:
+		t._show(id)
+		t.pages[id].settle()
+		check_layout(t, "lite title %s" % id)
+	t.free()
+	Settings.lite = kept
+
+
 func test_player_select() -> void:
 	var t := _title()
 	t.open_select(true)

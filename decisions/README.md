@@ -79,3 +79,4 @@ first decisions, are rows in `design/07_DECISIONS_AND_RISKS.md`.
 | 086 | [An On-Screen Pad for Touch Screens](ADR-086-touch-pad.md) | Accepted 2026-10-23 |
 | 087 | [ROAD TRIP: a Roguelike Mode on a Map](ADR-087-road-trip.md) | Accepted 2026-10-24 |
 | 088 | [The Painted Venues](ADR-088-painted-venues.md) | Accepted 2026-10-24 |
+| 089 | [The Lite Web Build](ADR-089-lite-web-build.md) | Accepted 2026-10-24 |

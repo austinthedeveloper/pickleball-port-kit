@@ -1,9 +1,11 @@
 """Encodes the music and ambience WAVs to Ogg Vorbis for the game (ADR-083).
 
-    .venv/bin/python game/tools/encode_ogg.py DST SRC.wav...
+    .venv/bin/python game/tools/encode_ogg.py [--web] DST SRC.wav...
 
 Writes DST/<name>.ogg for each SRC. q4 (audio/compare/README.md has the
-comparison). The output is byte-for-byte reproducible: libsndfile picks a
+comparison). --web is the Web build's smaller set (port ADR-089): q1, and
+the ambience mono (crowd and weather beds lose little); export.sh encodes
+it into the Web export's copy of the project, and always rewrites. The output is byte-for-byte reproducible: libsndfile picks a
 random stream serial, so it is set to one derived from the name and every
 page's CRC redone. A file whose WAV hasn't changed isn't rewritten.
 
@@ -17,6 +19,7 @@ import zlib
 import soundfile as sf
 
 QUALITY = 4                       # oggenc's -q scale, 0..10
+WEB_QUALITY = 1
 
 
 def _crc_table():
@@ -54,31 +57,40 @@ def fix_serial(data, serial):
     return bytes(out)
 
 
-def encode(src, dst):
+def encode(src, dst, web=False):
     data, sr = sf.read(src, dtype="float64")
-    sf.write(dst, data, sr, format="OGG", subtype="VORBIS",
-             compression_level=1 - QUALITY / 10)
     name = os.path.splitext(os.path.basename(dst))[0]
+    if web and name.startswith("ambience_") and data.ndim == 2:
+        data = data.mean(axis=1)
+    quality = WEB_QUALITY if web else QUALITY
+    sf.write(dst, data, sr, format="OGG", subtype="VORBIS",
+             compression_level=1 - quality / 10)
     with open(dst, "rb") as fh:
         raw = fh.read()
     with open(dst, "wb") as fh:
         fh.write(fix_serial(raw, zlib.crc32(name.encode())))
-    st = os.stat(src)
-    os.utime(dst, (st.st_atime, st.st_mtime))   # "unchanged" = same mtime
+    if not web:   # the web copy keeps a new mtime, so Godot reimports it
+        st = os.stat(src)
+        os.utime(dst, (st.st_atime, st.st_mtime))   # "unchanged" = same mtime
 
 
 def main():
-    dst_dir, srcs = sys.argv[1], sys.argv[2:]
+    args = sys.argv[1:]
+    web = "--web" in args
+    if web:
+        args.remove("--web")
+    dst_dir, srcs = args[0], args[1:]
     os.makedirs(dst_dir, exist_ok=True)
     n = 0
     for src in srcs:
         name = os.path.splitext(os.path.basename(src))[0]
         dst = os.path.join(dst_dir, name + ".ogg")
-        if os.path.exists(dst) and int(os.stat(dst).st_mtime) == int(os.stat(src).st_mtime):
+        if not web and os.path.exists(dst) and int(os.stat(dst).st_mtime) == int(os.stat(src).st_mtime):
             continue
-        encode(src, dst)
+        encode(src, dst, web)
         n += 1
-    print("encoded %d of %d to Ogg q%d" % (n, len(srcs), QUALITY))
+    print("encoded %d of %d to Ogg q%d%s" % (n, len(srcs), WEB_QUALITY if web else QUALITY,
+                                         " (web)" if web else ""))
 
 
 if __name__ == "__main__":

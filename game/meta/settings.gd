@@ -17,6 +17,12 @@ const VENUE_NAMES := ["PARK", "LAKESIDE", "SUNSET", "DINOSAUR", "SPACE", "UNDERS
 ## Indoors (ADR-078): the lights are always on, whatever COURT's TIME says.
 ## The DRIVE-IN is painted at night already (ADR-088), so it's kept as painted too.
 const INDOOR := ["gym", "lab", "station", "mall", "drivein"]
+## The Web build is "lite" (port ADR-089): its preset's feature tag, whose
+## exclude_filter leaves out the announcer, ROAD TRIP and these venues (the
+## last seven, so the rest keep their places and a saved choice its index).
+## Tests set `lite` to play the Web build's game.
+const PAINTED := ["western", "rooftop", "pirate", "motel", "fair", "drivein", "mall"]
+static var lite := OS.has_feature("lite")
 const DIFFICULTIES := ["KID", "EASY", "MEDIUM", "HARD"]
 const POINTS := [3, 5, 7, 9, 11, 15, 21]
 const CAMERAS := [0, 50, 75, 100]
@@ -117,7 +123,7 @@ static func load_from(save: SaveGame) -> void:
 	if save == null:
 		return
 	var st: Dictionary = save.data["settings"]
-	venue_i = clampi(int(st["venue"]), 0, VENUES.size() - 1)
+	venue_i = clampi(int(st["venue"]), 0, venue_count() - 1)
 	difficulty_i = clampi(int(st["difficulty"]), 0, DIFFICULTIES.size() - 1)
 	points_i = clampi(int(st["points"]), 0, POINTS.size() - 1)
 	two_players = int(st["players"]) == 2
@@ -211,9 +217,19 @@ static func venue() -> String:
 	return VENUES[venue_i]
 
 
+## How many of VENUES this build has: all, or the lite build's first ones.
+static func venue_count() -> int:
+	return VENUES.size() - (PAINTED.size() if lite else 0)
+
+
+## The venues this build has.
+static func venues() -> Array:
+	return VENUES.slice(0, venue_count())
+
+
 static func home_venue(team: int) -> String:
 	var home: String = String(Opponents.team(team).get("venue", "PARK")).to_lower()
-	return home if home in VENUES else VENUES[0]
+	return home if home in venues() else VENUES[0]
 
 
 ## The match the settings describe; `rung` is the ladder's current team.

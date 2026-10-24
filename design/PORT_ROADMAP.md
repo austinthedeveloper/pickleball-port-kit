@@ -109,6 +109,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-81 | Touch controls for the web build: an on-screen SNES pad on phones and tablets | `feature/cld-touch-controls` | Ready to test |
 | PORT-82 | ROAD TRIP: a roguelike mode beside STORY, a road map of branching stops, a match at each, gear to pick, a garage between trips (port ADR-087) | `feature/cld-trip-run` | Ready to test |
 | PORT-83 | The painted venues: WESTERN, ROOFTOP, PIRATES, MOTEL, FAIR, DRIVE-IN, MALL, from generated paintings (port ADR-088) | `feature/cld-venue-art-r1` | Ready to test |
+| PORT-84 | The lite Web build: smaller music and ambience, no announcer, ROAD TRIP or painted venues; the Web zip 51 MB to 21 MB (port ADR-089) | `feature/cld-web-lite` | Ready to test |
 
 ## Releases
 
@@ -437,10 +438,32 @@ the same request). Open: 36 and 40.
     crowd or its sound should change. Not done: the announcer's lines
     (KNOWN_ISSUES #85); no parallax (#86).
 
+### 84. `feature/cld-web-lite`: the lite Web build (asked for 2026-10-24)
+
+- [x] `PORT-84` The Web build thinned, the desktop builds untouched (port
+  ADR-089). Its preset carries the `lite` feature and leaves out the
+  announcer, ROAD TRIP's art and the seven painted venues; the game,
+  with `Settings.lite` on, hides ROAD TRIP and the announcer's rows and
+  goes round the first eleven venues. `export.sh` exports it from a copy
+  with its music and ambience re-encoded smaller (q1, the ambience mono).
+  The Web pack is 12 MB (was 41), the zip 21 MB (was 51).
+  - Verified: the full suite plus the e2e (`test_lite`, a lite case in
+    `test_layout`); a full export, the Web pack booted headless with
+    `lite` on and the left-out files absent; the Web build served
+    locally and played in a browser (title, setup, a match), no console
+    errors.
+  - Status: **Ready to test**: open the Web build and listen to the
+    music and the crowd. If q1 sounds rough, the setting is
+    `WEB_QUALITY` in `game/tools/encode_ogg.py`.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
+
+- **PORT-84 the lite Web build:** listen to the Web build's music and
+  crowd (q1, the crowd in mono). Say if it's too rough, or if you want
+  any of the left-out parts back on the web.
 
 - **PORT-83 the painted venues:** play a match at each. The names are
   WESTERN, ROOFTOP, PIRATES, MOTEL, FAIR, DRIVE-IN and MALL. Each has a

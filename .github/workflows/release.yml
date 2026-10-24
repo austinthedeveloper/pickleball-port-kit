@@ -52,6 +52,11 @@ jobs:
         with:
           templates: "true"
 
+      - name: Python for the Web build's audio (export.sh, port ADR-089)
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install --quiet soundfile numpy
+
       - name: Export every preset
         run: |
           game/tools/export.sh
