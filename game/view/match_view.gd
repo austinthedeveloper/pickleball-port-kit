@@ -57,6 +57,11 @@ func my_team() -> int:
 var park := false
 ## STORY (ADR-069): a chapter's match; B on the result goes on (main.gd).
 var story_mode := false
+## ROAD TRIP (port ADR-087): a stop's match; B on the result goes on, and
+## nothing is recorded (a trip counts only inside the trip). `trip_name`:
+## the other side's name on the HUD (a trip's locals).
+var trip := false
+var trip_name := ""
 var story := Story.new()
 ## The intro card (ADR-026): the match waits under it, no sim, no AI.
 var card_frames := -1
@@ -575,7 +580,7 @@ func _physics_process(_delta: float) -> void:
 		_prev_phase = sim.phase
 	flair.tick()
 	if sim.rematch_requested:
-		if park or tournament or story_mode:
+		if park or tournament or story_mode or trip:
 			finished.emit(false)             # ADR-034: back to the park; PORT-25: the bracket
 			return
 		if ladder and sim.match_winner == 0:
@@ -659,7 +664,7 @@ func _on_event(e: Array) -> void:
 			if line != "":
 				_hud.show_quip(line, _hud.team_tint(loser))
 				flair.quip(loser)
-			if save and not demo:
+			if save and not demo and not trip:
 				if not multiplayer():
 					save.record_rally(rally)
 			# ADR-047: the active career player's point (against the CPU);

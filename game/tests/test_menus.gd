@@ -71,8 +71,8 @@ func test_every_page_opens_by_name_and_backs_out() -> void:
 	_keep()
 	var t := _title(_save())
 	eq(t.page, "main")
-	eq(t.pages["main"].rows.map(func(r): return r["id"]), ["story", "play", "practice", "player", "options"],
-		"MAIN: five places to go (ADR-079)")
+	eq(t.pages["main"].rows.map(func(r): return r["id"]), ["story", "trip", "play", "practice", "player", "options"],
+		"MAIN: six places to go (ADR-079, ROAD TRIP: port ADR-087)")
 	for id in ["play", "player", "options"]:
 		t.pages["main"].select(id)
 		t.pages["main"].press()

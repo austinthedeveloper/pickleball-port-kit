@@ -86,6 +86,8 @@ func setup(v: MatchView) -> void:
 	# fits its first four letters; this one fits all eight).
 	if cfg.career_p1 and cfg.career and not view.demo and not cfg.practice:
 		left_name = cfg.career.shown_name()
+	if view.trip and view.trip_name != "":
+		right_name = view.trip_name          # ROAD TRIP's locals (port ADR-087)
 	var left_tint: Color = MatchView.TEAM_TINTS[cfg.palette[0]]
 	var right_tint: Color = MatchView.TEAM_TINTS[cfg.palette[2]]
 	if cfg.opponent >= 0 and not cfg.human[2] and not view.demo:
@@ -311,7 +313,7 @@ func refresh() -> void:
 			if view.cleared or (view.tournament and view.cup_finish.begins_with("CHAMPION")):
 				_banner.text = "CHAMPION!" if not view.cup_finish.begins_with("CHAMPIONS") else "CHAMPIONS!"
 			var ready := s.phase_timer >= K.POINT_RESULT_MIN_FRAMES
-			var next := "PARK" if view.park else "CONTINUE" if view.story_mode else ("NEXT OPPONENT" if (view.ladder and you) else (
+			var next := "PARK" if view.park else "CONTINUE" if (view.story_mode or view.trip) else ("NEXT OPPONENT" if (view.ladder and you) else (
 				"BRACKET" if view.tournament else "REMATCH"))
 			_banner_sub.text = ""
 			_result_prompts.visible = ready

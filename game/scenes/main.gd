@@ -126,6 +126,7 @@ func show_title() -> void:
 	t.open_lesson.connect(show_lesson)
 	t.open_online.connect(show_online)
 	t.open_story.connect(func(): show_story(StoryMode.current(save), "intro"))
+	t.open_trip.connect(func(): show_trip_home())
 	t.open_course.connect(show_course)
 	_swap(t)
 	park = null
@@ -241,6 +242,148 @@ func _on_tournament_match(cfg: SimTypes.MatchConfig, venue: String, pads: Array 
 	m.court = Settings.court.duplicate()
 	m.time = Settings.time_i
 	m.setup(cfg, venue, false)
+
+
+# --- ROAD TRIP (port ADR-087) ------------------------------------------------------
+
+## ROAD TRIP's home; `ended`: the results of a trip that just ended.
+func show_trip_home(ended: Dictionary = {}) -> void:
+	save.save_game()
+	var h := TripHome.new().setup(save, ended)
+	h.leave.connect(show_title)
+	h.start.connect(func(t: RoadTrip): show_trip_scene(t, RoadTrip.data()["scenes"]["start"],
+		{"art": "garage"}, func(_c): show_trip_map(t)))
+	h.resume.connect(show_trip_map)
+	_swap(h)
+
+
+func show_trip_map(t: RoadTrip) -> void:
+	t.store(save)
+	save.save_game()
+	var m := TripMap.new().setup(save, t)
+	m.leave.connect(func(): show_trip_home())
+	m.go.connect(func(target: Array): _on_trip_go(t, target))
+	_swap(m)
+
+
+## You in a trip's scenes: the career player (or MATCH SETUP's 1P) in the
+## trip's hat and paddle.
+func _trip_me(t: RoadTrip) -> PlayerLook:
+	var d := t.driver(save.career.active_player(), Settings.p1_choice)
+	return PlayerLook.for_career(d, d.shirt, d.variant, d.paddle, MatchView.levels_manifest())
+
+
+func _trip_me_name() -> String:
+	var me := save.career.active_player()
+	return me.shown_name() if me else "YOU"
+
+
+func show_trip_scene(t: RoadTrip, pages: Array, opts: Dictionary, then: Callable) -> void:
+	var s := TripScene.new().setup(t, pages, _trip_me(t), _trip_me_name(), opts)
+	s.done.connect(then)
+	_swap(s)
+
+
+## A stop driven to (or a lost big match, again): what happens there.
+func _on_trip_go(t: RoadTrip, target: Array) -> void:
+	if not (t.is_gate() and int(target[0]) == RoadTrip.GATE):
+		t.go(int(target[0]), int(target[1]))
+	var n := t.here()
+	t.store(save)
+	save.save_game()
+	var scenes: Dictionary = RoadTrip.data()["scenes"]
+	match String(n["type"]):
+		"pickup":
+			_trip_match(t, n)
+		"grudge", "big", "final":
+			var team := int(n["team"])
+			var pages: Array = scenes["teams"][team] if team >= 0 and team < scenes["teams"].size() else []
+			var card_lines := ["VS " + RoadTrip.opponent_name(n)]
+			var info := t.info(n)
+			card_lines.append(String(info[1]))
+			if String(info[2]).begins_with("TODAY:"):
+				card_lines.append(String(info[2]).split("   ")[0])
+			var over := "LEG %d: %s" % [t.leg() + 1, String(RoadTrip.leg_info(t.leg())["name"])]
+			show_trip_scene(t, pages, {"venue": String(n["venue"]), "time": int(n["time"]), "team": team,
+				"card": {"over": over, "title": RoadTrip.stop_name(n), "lines": card_lines}},
+				func(_c): _trip_match(t, n))
+		"yard":
+			show_trip_scene(t, scenes["yard_sale"], {"art": "yard_sale"}, func(_c):
+				t.offer_pick("yard", 0)
+				t.finish_stop()
+				show_trip_map(t))
+		"shop":
+			var shop := TripShop.new().setup(save, t)
+			shop.leave.connect(func():
+				t.finish_stop()
+				show_trip_map(t))
+			_swap(shop)
+		"motel":
+			var heal_ok := t.hearts < t.max_hearts
+			show_trip_scene(t, scenes["motel"], {"art": "motel", "choices": [
+				{"label": "SLEEP IT OFF: A HEART BACK", "enabled": heal_ok, "value": "" if heal_ok else "FULL"},
+				{"label": "PARTNER PRACTISES: +1 EACH STAT", "enabled": true}]}, func(c: int):
+					t.rest(c == 0)
+					t.finish_stop()
+					show_trip_map(t))
+		"detour":
+			var d := RoadTrip.detour(String(n["detour"]))
+			var choices := t.detour_choices(d)
+			show_trip_scene(t, [{"who": "narrator", "lines": d["lines"]}],
+				{"art": String(d.get("art", "roadside")), "choices": choices}, func(c: int):
+					t.choose(d, maxi(0, c))
+					t.finish_stop()
+					show_trip_map(t))
+		_:
+			t.finish_stop()
+			show_trip_map(t)
+
+
+## A stop's match. B on the result goes on (its result recorded in the
+## trip); MENU leaves for ROAD TRIP's home, and leaving before the match
+## is over counts as a loss.
+func _trip_match(t: RoadTrip, n: Dictionary) -> void:
+	var cfg := t.config_for(n, Settings.p1_choice, true, save.career.active_player())
+	t.store(save)
+	save.save_game()
+	var m := MatchView.new()
+	m.save = save
+	m.trip = true
+	if int(n.get("team", -1)) < 0:
+		m.trip_name = RoadTrip.opponent_name(n)
+	m.finished.connect(func(to_title: bool):
+		var over := m.sim.phase == K.PHASE_MATCH_RESULT
+		_after_trip_match(t, over and m.sim.match_winner == 0, to_title))
+	_swap(m)
+	m.camera.percent = Settings.CAMERAS[Settings.camera_i]
+	m.court = Settings.court.duplicate()
+	m.time = int(n.get("time", CourtStyle.DAY))
+	m.setup(cfg, String(n["venue"]), false)
+
+
+func _after_trip_match(t: RoadTrip, won: bool, leave: bool) -> void:
+	t.record_match(won)
+	var scenes: Dictionary = RoadTrip.data()["scenes"]
+	if t.state == "won":
+		show_trip_scene(t, scenes["won"], {"art": "summer_open"}, func(_c): _end_trip(t))
+	elif t.state == "over":
+		show_trip_scene(t, scenes["over"], {"art": "roadside"}, func(_c): _end_trip(t))
+	elif leave:
+		t.store(save)
+		show_trip_home()
+	else:
+		show_trip_map(t)
+
+
+## The trip's end: its miles to the GARAGE, then the results at home.
+func _end_trip(t: RoadTrip) -> void:
+	var heat_before := int(RoadTrip.meta(save)["heat"])
+	var steps := t.finish(save)
+	save.save_game()
+	var heat_now := int(RoadTrip.meta(save)["heat"])
+	show_trip_home({"won": t.state == "won", "leg": t.leg() + 1, "wins": t.wins, "losses": t.losses,
+		"stops": t.stops, "miles": t.miles, "steps": steps,
+		"heat_open": heat_now if heat_now > heat_before else -1})
 
 
 # --- STORY: SAVE THE PARK (ADR-069) ------------------------------------------------

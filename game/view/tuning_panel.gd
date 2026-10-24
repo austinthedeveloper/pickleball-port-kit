@@ -139,7 +139,7 @@ func _retune() -> void:
 ## sliders); they're kept for the next match too (a story chapter's twist
 ## isn't). In practice and lessons, only for the next match.
 func apply() -> void:
-	if not view.story_mode:
+	if not view.story_mode and not view.trip:
 		Settings.mod_bits = mods & Settings.MOD_SAVED
 	if not can_apply():
 		close()

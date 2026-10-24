@@ -5,9 +5,9 @@
     {"name": "THE LONG DRIVE", "venues": ["dinosaur", "undersea", "space", "ruins", "glacier"], "grudge": [2, 3, 4, 5], "big": [3, 4, 5]},
     {"name": "THE COAST", "venues": ["sunset", "lab", "station"], "grudge": [5, 6], "big": [7]}
   ],
-  "locals": ["THE MAIL CARRIERS", "LUNCH BREAK", "THE NIGHT SHIFT", "CAMP COUNSELORS", "THE BAKERS",
-    "THE LIFEGUARDS", "DINER REGULARS", "THE ROOFERS", "SCOUT LEADERS", "THE MECHANICS", "BINGO NIGHT",
-    "THE TOUR GUIDES", "CROSSING GUARDS", "THE PAPERBOYS", "THE PLUMBERS", "TOWN COUNCIL"],
+  "locals": ["MAIL CARRIERS", "LUNCH BREAK", "NIGHT SHIFT", "CAMP STAFF", "THE BAKERS",
+    "LIFEGUARDS", "DINER CREW", "THE ROOFERS", "SCOUT LEADERS", "THE MECHANICS", "BINGO NIGHT",
+    "TOUR GUIDES", "SCHOOL GUARDS", "THE PAPERBOYS", "THE PLUMBERS", "TOWN COUNCIL"],
   "grudge_mods": ["MOD_LAVA", "MOD_ICE", "MOD_GHOST_BALL", "MOD_POPCORN", "MOD_BIG_BALL", "MOD_BOUNCY"],
   "gear": [
     {"id": "spare_paddle", "name": "SPARE PADDLE", "kind": "bag", "rarity": "common", "icon": 0, "lines": ["ONE MORE HEART.", "STACKS."], "hearts": 1, "stacks": true},

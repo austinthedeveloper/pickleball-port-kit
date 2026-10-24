@@ -56,7 +56,7 @@ func update_unlock() -> void:
 ## active career player against the CPU, outside the demo, practice and
 ## multiplayer (as the records).
 func career_counts() -> bool:
-	return v.save != null and not v.demo and not v.multiplayer() and not v.sim.config.human[2] \
+	return v.save != null and not v.demo and not v.trip and not v.multiplayer() and not v.sim.config.human[2] \
 		and not v.sim.config.practice
 
 
@@ -64,8 +64,8 @@ func career_counts() -> bool:
 ## ladder (ADR-023): a win moves to the next rung; beating the last clears.
 ## A record beaten (the rally, in 2P too) asks for initials (ADR-040).
 func on_match_over() -> void:
-	if v.demo or v.save == null or v.net:
-		return                             # online matches aren't recorded either
+	if v.demo or v.save == null or v.net or v.trip:
+		return                             # online matches aren't recorded either, nor a trip's
 	var won := v.sim.match_winner == 0
 	if v.multiplayer():
 		if v.tournament:

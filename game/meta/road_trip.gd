@@ -56,6 +56,7 @@ var hazards: Array = []          ## hazard ids waiting for the next match
 var used: Array = []             ## once-only items spent (rain check, umbrella)
 var pending: Dictionary = {}     ## an offer not yet taken: {"kind": "pick", "items": [...]}
 var beaten: Array = []           ## ladder teams beaten on this trip
+var route: Array = []            ## the stops driven to, [leg, col, lane] each
 var stops := 0                   ## stops reached
 var wins := 0
 var losses := 0
@@ -357,6 +358,7 @@ func reachable() -> Array:
 ## Drives to a stop (one of reachable()); its node.
 func go(c: int, ln: int) -> Dictionary:
 	at = [leg(), c, ln]
+	route.append(at.duplicate())
 	stops += 1
 	miles += 10 * (leg() + 1)
 	return here()
@@ -371,6 +373,77 @@ func finish_stop() -> void:
 
 func is_match(n: Dictionary) -> bool:
 	return MATCHES.has(String(n.get("type", "")))
+
+
+## Where the map lets you go: the stops reachable, or (a big match lost)
+## the big match again.
+func targets() -> Array:
+	var r := reachable()
+	if r.is_empty() and state == "on" and is_gate() and not here()["done"]:
+		return [[GATE, 0]]
+	return r
+
+
+func node_for(target: Array) -> Dictionary:
+	return node_at(leg(), int(target[0]), int(target[1]))
+
+
+## A stop's lines for the map's panel and its card: what it is, where,
+## and what's at stake.
+func info(n: Dictionary) -> Array:
+	var type := String(n.get("type", ""))
+	var out := []
+	var head := stop_name(n)
+	if MATCHES.has(type):
+		head += "  VS " + opponent_name(n)
+	out.append(head)
+	if MATCHES.has(type):
+		var where := String(Settings.VENUE_NAMES[maxi(0, Settings.VENUES.find(String(n["venue"])))])
+		if int(n.get("time", 0)) != CourtStyle.DAY:
+			where += " " + String(CourtStyle.time_names()[int(n["time"])])
+		out.append("%s, FIRST TO %d" % [where, points_for(n)])
+		var bits := modifiers_for(n)
+		var names := []
+		for row in Settings.MOD_ROWS:
+			if bits & int(row[2]):
+				names.append(String(row[1]))
+		var prize := "PRIZE: CASH"
+		if type in ["grudge", "big"]:
+			prize = "PRIZE: A GEAR PICK, CASH"
+		elif type == "final":
+			prize = "THE SUMMER OPEN TITLE"
+		out.append(("TODAY: " + ", ".join(names) + "   " if not names.is_empty() else "") + prize)
+	else:
+		match type:
+			"yard":
+				out.append("A FREE PICK FROM THE BOXES.")
+			"shop":
+				out.append("GEAR, A SODA FOR A HEART, A FIX FOR A HAZARD.")
+			"motel":
+				out.append("A HEART BACK, OR YOUR PARTNER PRACTISES.")
+			"detour":
+				if has_item("road_atlas"):
+					out.append(String(detour(String(n["detour"]))["lines"][0]))
+				else:
+					out.append("WHO KNOWS WHAT'S DOWN THIS ROAD?")
+	return out
+
+
+## Your look in a trip's match: the active career player (or MATCH SETUP's
+## 1P), wearing the trip's hat. A copy; the career isn't touched.
+func driver(career: Career.Player, p1: Dictionary) -> Career.Player:
+	var d: Career.Player
+	if career != null:
+		d = career.copy()
+	else:
+		d = Career.Player.new()
+		d.used = 1
+		d.name = "YOU     "
+		d.shirt = int(p1.get("palette", 0))
+		d.variant = int(p1.get("variant", K.VARIANT_MALE))
+	d.hat = maxi(0, Career.hat_names.find(String(gear(hat).get("hat", "CAP"))))
+	d.paddle = int(gear(paddle).get("look", Paddles.WOOD))
+	return d
 
 
 # --- Stats ----------------------------------------------------------------------------
@@ -500,7 +573,8 @@ func partner_style() -> SimTypes.AiStyle:
 ## The match at stop `n`: doubles, you and your partner, your trip stats,
 ## the stop's opponents, venue and twist. `p1`: your look (a Player Select
 ## choice). Records nothing (MatchView.trip).
-func config_for(n: Dictionary, p1: Dictionary, spend := false) -> SimTypes.MatchConfig:
+func config_for(n: Dictionary, p1: Dictionary, spend := false,
+		career: Career.Player = null) -> SimTypes.MatchConfig:
 	var team := int(n.get("team", -1))
 	var cfg := Settings.config_for(true, team, difficulty_for(n), points_for(n), p1)
 	cfg.ball_speed = 100
@@ -508,6 +582,7 @@ func config_for(n: Dictionary, p1: Dictionary, spend := false) -> SimTypes.Match
 	cfg.set_partner(partner if partner >= 0 else Opponents.PEPPER)
 	cfg.modifiers = modifiers_for(n, spend)
 	cfg.paddle[0] = int(gear(paddle).get("look", Paddles.WOOD))
+	cfg.set_career(driver(career, p1))
 	cfg.trip = 1
 	cfg.trip_stats = [stats(), partner_stats.duplicate(), [], []]
 	cfg.styles = [null, partner_style(), null, null]
@@ -705,10 +780,27 @@ func rest(heal: bool) -> void:
 			partner_stats[i] = mini(STAT_MAX, int(partner_stats[i]) + 1)
 
 
+## A detour's choices as a scene shows them: each with whether you can
+## afford it, and DRIVE ON after them when you can afford none.
+func detour_choices(d: Dictionary) -> Array:
+	var out := []
+	var any := false
+	for ch in d["choices"]:
+		var need := int(ch.get("needs_cash", 0))
+		out.append({"label": String(ch["label"]), "enabled": cash >= need,
+			"value": "" if cash >= need else "NEED %d" % need})
+		any = any or cash >= need
+	if not any:
+		out.append({"label": "DRIVE ON", "enabled": true})
+	return out
+
+
 ## A detour's choice: its effects (cash, a heart, a hazard, a gear pick,
 ## a double-or-nothing bet decided by the seed). False if you can't
 ## afford it.
 func choose(d: Dictionary, choice: int) -> bool:
+	if choice < 0 or choice >= d["choices"].size():
+		return true                  # DRIVE ON: nothing happens
 	var ch: Dictionary = d["choices"][choice]
 	if cash < int(ch.get("needs_cash", 0)):
 		return false
@@ -731,7 +823,7 @@ func choose(d: Dictionary, choice: int) -> bool:
 
 const KEYS := ["seed", "gen", "heat", "partner", "map", "at", "hearts", "max_hearts", "cash",
 	"base", "partner_stats", "paddle", "hat", "bag", "hazards", "used", "pending", "beaten",
-	"stops", "wins", "losses", "miles", "state"]
+	"route", "stops", "wins", "losses", "miles", "state"]
 
 
 func to_dict() -> Dictionary:
@@ -764,6 +856,18 @@ static func meta(save: SaveGame) -> Dictionary:
 		if not m.has(k):
 			m[k] = def[k]
 	return m
+
+
+## The title's ROAD TRIP value: the leg of a trip in progress, or the
+## trips won.
+static func title_label(save: SaveGame) -> String:
+	if save == null:
+		return ""
+	var t := current(save)
+	if t != null:
+		return "LEG %d/%d" % [t.leg() + 1, LEGS]
+	var won := int(meta(save)["won"])
+	return "WON %d" % won if won > 0 else ""
 
 
 ## The trip in progress in the save, or null.
@@ -896,7 +1000,7 @@ static func step_label(i: int) -> String:
 	if step.has("start_item"):
 		parts.append("START WITH LAST TRIP'S ITEM")
 	if step.has("pool"):
-		parts.append("NEW GEAR: %d ITEMS" % step["pool"].size())
+		parts.append("%d NEW ITEMS ON THE ROAD" % step["pool"].size())
 	if step.has("van"):
 		parts.append("VAN PAINT: " + String(data()["vans"][int(step["van"])]))
 	if step.has("ornament"):

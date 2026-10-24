@@ -80,7 +80,7 @@ func test_the_data() -> void:
 		if l.length() > PAGE_LINE or not _glyphs_ok(l, chars):
 			bad.append("step: " + l)
 	for name in d["locals"]:
-		if String(name).length() > 18 or not _glyphs_ok(String(name), chars):
+		if String(name).length() > 13 or not _glyphs_ok(String(name), chars):   # the HUD fits 13
 			bad.append("locals: " + String(name))
 	eq(bad, [], "every text the trip shows fits and can be drawn")
 
@@ -303,6 +303,13 @@ func test_the_shop_and_detours() -> void:
 	t.hazards = ["storm"]
 	check(t.buy_fix())
 	eq(t.hazards, [])
+	var bet := RoadTrip.detour("bet")
+	t.cash = 0
+	var offered := t.detour_choices(bet)
+	eq(offered[-1]["label"], "DRIVE ON", "a detour you can't afford: DRIVE ON")
+	check(t.choose(bet, offered.size() - 1))
+	t.cash = 50
+	eq(t.detour_choices(bet).size(), bet["choices"].size(), "no DRIVE ON when you can pay")
 	var noise := RoadTrip.detour("noise")
 	t.cash = 5
 	check(not t.choose(noise, 0), "can't pay to fix the van")

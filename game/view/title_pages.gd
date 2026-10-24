@@ -16,6 +16,11 @@ static func build(t: TitleScreen) -> void:
 				t._store_settings()
 				TitleScreen.main_cursor = t.pages["main"].cursor
 				t.open_story.emit()},
+		{"id": "trip", "label": "ROAD TRIP", "value": func(): return RoadTrip.title_label(t.save),
+			"press": func():
+				t._store_settings()
+				TitleScreen.main_cursor = t.pages["main"].cursor
+				t.open_trip.emit()},
 		{"id": "play", "label": "PLAY", "press": func(): t.open_page("play")},
 		{"id": "practice", "label": "PRACTICE", "value": t._learn_label,
 			"press": func(): t.open_page("learn")},
