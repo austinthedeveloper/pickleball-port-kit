@@ -61,7 +61,10 @@ golden and conformance traces are unchanged:
   (1-0), LONG ARMS (BIG BALL's reach), SECOND WIND (+4 top speed while
   the other side has match point), KITCHEN PASS (the first KITCHEN! of a
   match is forgiven), SECOND SERVE (the first faulted serve of a match is
-  served again). A forgiven one emits `EVENT_PERK`.
+  served again), LUCKY LINE (the first ball of a match out by 6 inches or
+  less, the close-call replay's measure, is in), HOT HAND (SPECIALS on,
+  and three points in a row fill the left side's meters). Each emits
+  `EVENT_PERK` when it takes effect, and the HUD says so.
 
 ### The screens (display only)
 

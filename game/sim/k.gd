@@ -285,6 +285,9 @@ const PERK_LONG_ARMS := 2       ## the left side's reach as with BIG BALL
 const PERK_SECOND_WIND := 4     ## at match point against the left, it runs faster
 const PERK_KITCHEN_PASS := 8    ## the left side's first KITCHEN! a match is forgiven
 const PERK_SECOND_SERVE := 16   ## the left side's first faulted serve a match is taken again
+const PERK_LUCKY_LINE := 32     ## the left side's first ball out by a hair (6 inches) a match is in
+const PERK_HOT_HAND := 64       ## three points in a row fill the left side's SPECIAL meters
+const HOT_HAND_POINTS := 3
 const SECOND_WIND_FP := 4       ## the extra top speed
 ## MULTI BALL (port ADR-067): balls trickle in from the net, no serving.
 const MOD_MULTI_BALL := 65536

@@ -507,7 +507,8 @@ func perk_bits() -> int:
 	var bits := 0
 	for pair in [["head_start", K.PERK_HEAD_START], ["long_arms", K.PERK_LONG_ARMS],
 			["second_wind", K.PERK_SECOND_WIND], ["kitchen_pass", K.PERK_KITCHEN_PASS],
-			["second_serve", K.PERK_SECOND_SERVE]]:
+			["second_serve", K.PERK_SECOND_SERVE], ["lucky_line", K.PERK_LUCKY_LINE],
+			["hot_hand", K.PERK_HOT_HAND]]:
 		if has_perk(String(pair[0])):
 			bits |= int(pair[1])
 	return bits
@@ -573,7 +574,7 @@ func modifiers_for(n: Dictionary, spend := false) -> int:
 			used.append("umbrella")
 	for h in hazards:
 		bits |= mod_bits(String(hazard(String(h)).get("mod", "")))
-	if has_item("pickle_jar"):
+	if has_item("pickle_jar") or has_perk("hot_hand"):
 		bits |= K.MOD_SPECIALS
 	return bits
 

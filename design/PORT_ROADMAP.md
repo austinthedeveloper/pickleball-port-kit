@@ -384,8 +384,8 @@ the same request). Open: 36 and 40.
   - Status: **Ready to test**: play a trip or three. Say how it feels:
     too easy or hard (the bot wins leg 1 from the start and needs about
     12 in every stat for the final), the length, the prices, the gear.
-    Not built: LUCKY LINE, HOT HAND, the cassettes and pen colour
-    (KNOWN_ISSUES #79-81).
+    Not built: the cassettes and the map's pen colour (KNOWN_ISSUES #79,
+    #80).
 
 ## For you
 

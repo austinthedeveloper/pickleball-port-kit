@@ -448,3 +448,51 @@ func test_the_locals_looks() -> void:
 	plain.plain_paddle(manifest)
 	var order := String(manifest["sprites"]["players"]["roles"]["order"])
 	eq(plain.palette[order.find("f")], PlayerLook.PLAIN_PADDLE["f"], "the PLAIN PADDLE's plywood")
+
+
+func test_lucky_line_and_hot_hand() -> void:
+	var cfg := Settings.config_for(true, 0, K.DIFFICULTY_MEDIUM, 5, Settings.p1_choice)
+	cfg.trip = 1
+	cfg.perks = K.PERK_LUCKY_LINE
+	var s := Sim.new(cfg)
+	# a ball of yours lands just past their baseline
+	s.set_phase(K.PHASE_LIVE)
+	s.ball.last_hitter = 0
+	s.ball.bounce_count = 1
+	s.ball.x_fp = K.to_fp(K.COURT_BASELINE_RIGHT) + 8
+	s.ball.y_fp = K.to_fp(K.COURT_CENTERLINE_Y)
+	s.rules_process_ball_events(K.BALL_EVENT_BOUNCE | K.BALL_EVENT_OUT)
+	eq(s.phase, K.PHASE_LIVE, "LUCKY LINE: out by a hair is in")
+	check(s.lucky_line_used)
+	check(s.drain_events().any(func(e): return e[0] == K.EVENT_PERK and e[3] == K.PERK_LUCKY_LINE))
+	s.rules_process_ball_events(K.BALL_EVENT_BOUNCE | K.BALL_EVENT_OUT)
+	eq(s.phase, K.PHASE_POINT_RESULT, "once a match")
+	eq(s.point_winner, 1)
+	s.dispose()
+	# far out is out, lucky or not
+	var s2 := Sim.new(cfg)
+	s2.set_phase(K.PHASE_LIVE)
+	s2.ball.last_hitter = 0
+	s2.ball.bounce_count = 1
+	s2.ball.x_fp = K.to_fp(K.COURT_BASELINE_RIGHT + 40)
+	s2.ball.y_fp = K.to_fp(K.COURT_CENTERLINE_Y)
+	s2.rules_process_ball_events(K.BALL_EVENT_BOUNCE | K.BALL_EVENT_OUT)
+	eq(s2.phase, K.PHASE_POINT_RESULT, "a ball well out is out")
+	s2.dispose()
+	# HOT HAND: three in a row fill your side's meters
+	var t := RoadTrip.create(4, 0, RoadTrip.PEPPER)
+	t.take("hot_hand")
+	var hc := t.config_for({"type": "pickup", "team": -1, "local": 0, "mod": ""}, Settings.p1_choice)
+	check(hc.modifiers & K.MOD_SPECIALS, "HOT HAND turns SPECIALS on")
+	check(hc.perks & K.PERK_HOT_HAND)
+	var s3 := Sim.new(hc)
+	for k in 2:
+		s3.set_phase(K.PHASE_LIVE)
+		s3.resolve_point(1, K.FAULT_OUT)
+	check(s3.meter[0] < K.SPECIAL_METER_MAX, "two in a row: not yet")
+	s3.set_phase(K.PHASE_LIVE)
+	s3.resolve_point(1, K.FAULT_OUT)
+	eq(s3.meter[0], K.SPECIAL_METER_MAX, "three: the meter is full")
+	eq(s3.meter[1], K.SPECIAL_METER_MAX, "your partner's too")
+	check(s3.meter[2] < K.SPECIAL_METER_MAX, "theirs isn't")
+	s3.dispose()

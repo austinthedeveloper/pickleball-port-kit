@@ -87,6 +87,8 @@ var grow_fp := 0
 ## perks, and SECOND WIND's extra speed per slot while it's on.
 var kitchen_pass_used := false
 var second_serve_used := false
+var lucky_line_used := false
+var hot_streak := 0              ## points the left side has won in a row (HOT HAND)
 var wind_add := [0, 0, 0, 0]
 var ball_pace: Array = []
 var ball_tick := 0
@@ -823,6 +825,15 @@ func resolve_point(losing_team: int, fault: int) -> void:
 	for i in K.MAX_PLAYERS:
 		if players[i].active and players[i].team == winner:
 			fill_meter(i, K.SPECIAL_FILL_POINT)
+	# HOT HAND (port ADR-087): three in a row fill the left side's meters
+	if config.perks & K.PERK_HOT_HAND:
+		hot_streak = hot_streak + 1 if winner == 0 else 0
+		if hot_streak >= K.HOT_HAND_POINTS and specials_on():
+			hot_streak = 0
+			for i in K.MAX_PLAYERS:
+				if players[i].active and players[i].team == 0:
+					meter[i] = K.SPECIAL_METER_MAX
+			emit(K.EVENT_PERK, K.from_fp(ball.x_fp), K.from_fp(ball.y_fp), K.PERK_HOT_HAND)
 	if fault != K.FAULT_SECOND_BOUNCE and fault != K.FAULT_NONE:
 		emit(K.EVENT_FAULT, K.from_fp(ball.x_fp), K.from_fp(ball.y_fp), fault)
 	emit(K.EVENT_POINT, K.from_fp(ball.x_fp), K.from_fp(ball.y_fp), winner)
@@ -886,6 +897,13 @@ func rules_process_ball_events(ev: int) -> void:
 	if ball.bounce_count >= 2:
 		resolve_point(1 - hitter, K.FAULT_SECOND_BOUNCE)
 		return
+	# LUCKY LINE (port ADR-087): the left side's first ball out by a hair is in
+	if ev & K.BALL_EVENT_OUT and hitter == 0 and side != hitter and config.perks & K.PERK_LUCKY_LINE \
+			and not lucky_line_used \
+			and not Replay.check(ball.x_fp, ball.y_fp, Replay.MIN_SHOTS, K.FAULT_OUT).is_empty():
+		lucky_line_used = true
+		emit(K.EVENT_PERK, K.from_fp(ball.x_fp), K.from_fp(ball.y_fp), K.PERK_LUCKY_LINE)
+		ev &= ~K.BALL_EVENT_OUT
 	if (ev & K.BALL_EVENT_OUT) or side == hitter:
 		resolve_point(hitter, K.FAULT_OUT)
 		return
@@ -952,6 +970,8 @@ func _game_initialize() -> void:
 	team_score = [1 if config.perks & K.PERK_HEAD_START else 0, 0]
 	kitchen_pass_used = false
 	second_serve_used = false
+	lucky_line_used = false
+	hot_streak = 0
 	wind_add = [0, 0, 0, 0]
 	required_bounce = K.REQUIRED_BOUNCE_NONE
 	serving_team = 0

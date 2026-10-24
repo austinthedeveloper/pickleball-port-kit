@@ -726,9 +726,10 @@ on your go; the [IMAGE] notes can go to an image agent at any time
 
 Everything above is built (ADR-087 has the details), except:
 
-- **LUCKY LINE and HOT HAND** aren't built, so they aren't in the gear
-  (KNOWN_ISSUES #81). The other perks are: HEAD START, LONG ARMS, SECOND
-  WIND, KITCHEN PASS, SECOND SERVE.
+- **HOT HAND** turns SPECIALS on and three points in a row fill your
+  side's meters (the PICKLE SMASH is then a press away), rather than the
+  next shot smashing on its own. **LUCKY LINE** saves a ball out by 6
+  inches or less (the close-call replay's measure).
 - **Stats** are on the 20-point scale as planned; a point is 2/64 of a
   tunable (not the paddles' 3/64), so 1 is about 0.8 and 20 about 1.4 of
   the standard value. FEET is a human's top speed, 20 to 31 (24 at 8).

@@ -656,8 +656,8 @@ func _on_event(e: Array) -> void:
 			crowd.cheer(90 if e[3] >= 13 else 50)
 		K.EVENT_PERK:
 			# ROAD TRIP (port ADR-087): a one-sided rule saved the point
-			_hud.show_quip("KITCHEN PASS!" if e[3] == K.PERK_KITCHEN_PASS else "SECOND SERVE!",
-				Color("fbe46a"))
+			_hud.show_quip({K.PERK_KITCHEN_PASS: "KITCHEN PASS!", K.PERK_SECOND_SERVE: "SECOND SERVE!",
+				K.PERK_LUCKY_LINE: "LUCKY! IT'S IN!", K.PERK_HOT_HAND: "HOT HAND!"}.get(e[3], ""), Color("fbe46a"))
 		K.EVENT_POINT:
 			crowd.cheer(90)
 			if dinos and (match_won or rally >= DinoWalkers.ROAR_RALLY):
