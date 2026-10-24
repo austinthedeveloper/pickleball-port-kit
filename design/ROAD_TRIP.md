@@ -29,6 +29,11 @@ And the second round:
 10. The GARAGE is a fixed ladder of rewards the miles fill in order.
 11. Cosmetics are in (on the ladder).
 
+**Built (2026-10-24, `feature/cld-trip-run`; port ADR-087):** the plan's
+stages 1 to 5 and 7, and the art imported (stage 6): ROAD TRIP is on
+MAIN and playable from start to finish. What's not built, or built
+differently, is listed under "Built so far" at the end.
+
 The **[IMAGE ...]** notes describe art for an image agent to draft. The
 brief that applies to all of them is in "The art" near the end.
 
@@ -716,3 +721,25 @@ Stages 1 to 4 make a playable trip; 5 to 7 can come in any order after.
 None open: both rounds are answered (top of the doc). Stage 1 can start
 on your go; the [IMAGE] notes can go to an image agent at any time
 (stage 6 puts the drafts in the game).
+
+## Built so far
+
+Everything above is built (ADR-087 has the details), except:
+
+- **LUCKY LINE and HOT HAND** aren't built, so they aren't in the gear
+  (KNOWN_ISSUES #81). The other perks are: HEAD START, LONG ARMS, SECOND
+  WIND, KITCHEN PASS, SECOND SERVE.
+- **Stats** are on the 20-point scale as planned; a point is 2/64 of a
+  tunable (not the paddles' 3/64), so 1 is about 0.8 and 20 about 1.4 of
+  the standard value. FEET is a human's top speed, 20 to 31 (24 at 8).
+- **The GARAGE's cosmetics** are the van's paint and the dash ornament
+  (the freshener follows the ornament); the cassettes and the map's pen
+  colour wait (KNOWN_ISSUES #80).
+- **Scenes** play in full every trip (they're a page or two; START skips).
+- **The locals** have looks of their own (a shirt colour for the pair,
+  each their own skin, hair, hat and body) drawn from the seed.
+- **A trip's length**: about 12 stops and 8 matches; a bot's matches take
+  0.5 to 2.5 minutes (`tools/trip_balance.gd`), so a trip is well under
+  30 minutes. The balance is a first guess (KNOWN_ISSUES #79).
+- **Screenshots**: `godot --path game --resolution 960x540 -s res://tools/trip_shot.gd -- <home|garage|results|map|pick|shop|card|team|detour|motel|start|match> 60 out.png`.
+

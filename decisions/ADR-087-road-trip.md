@@ -63,6 +63,40 @@ golden and conformance traces are unchanged:
   match is forgiven), SECOND SERVE (the first faulted serve of a match is
   served again). A forgiven one emits `EVENT_PERK`.
 
+### The screens (display only)
+
+- **ROAD TRIP's home** in the garage: CONTINUE, NEW TRIP (pressed twice
+  over a trip in progress), PARTNER, HEAT, GARAGE (the ladder as shipping
+  tags, the steps reached stamped; VAN and ORNAMENT), BACK; the records;
+  a trip's results when it ends.
+- **The map**: the dashboard (the ornament on the dash, the freshener on
+  the mirror), the paper road map scrolling sideways, a pin a stop (grey
+  once passed, the big match's crest in the team's colours), the roads
+  printed and the road driven in red pen, the van (its paint) driving to
+  the stop chosen; hearts, cash, the leg, paddle, hat and bag along the
+  top; the stop's lines underneath. Stops by id (`stop_<leg>_<col>_<lane>`).
+- **PICK ONE**: index cards in the rarity's colour, the icon in the window,
+  the name; the chosen card's lines and stat change under them; SKIP
+  for 5 cash. **PRO SHOP**: a MenuPage beside the item's card.
+- **Scenes** (`TripScene`, STORY's scene style): the start, a card and
+  the team's lines before a big or grudge match, the yard sale, the motel
+  and detours ending on choices (a MenuPage; DRIVE ON when you can afford
+  none), the win and the end.
+- **The match** is a MatchView with `trip`: nothing recorded, CONTINUE on
+  the result, the locals named on the HUD in looks of their own
+  (`RoadTrip.local_members`), you with the PLAIN PADDLE's plywood, a
+  KITCHEN PASS! or SECOND SERVE! line when a perk saves a point. Leaving a
+  match before it ends is a loss.
+
+### The numbers (a first guess)
+
+A bot in your place (`tools/trip_balance.gd`, ten matches each, the bot
+erring at five rates) wins every leg 1 match from the starting 1s, about
+half of leg 2's, and the final only from about 12 in every stat; 20 wins
+everything. A match takes 0.5 to 2.5 minutes, so a trip's eight or so
+matches and its stops fit well inside 30 minutes. Play will move these
+(KNOWN_ISSUES #79).
+
 ## Why
 
 - The user's ask, then answers: a mode beside STORY, hearts so a trip can

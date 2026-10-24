@@ -62,6 +62,8 @@ var story_mode := false
 ## the other side's name on the HUD (a trip's locals).
 var trip := false
 var trip_name := ""
+var trip_members: Array = []     ## the locals' looks (RoadTrip.local_members)
+var trip_plain := false          ## you hold the PLAIN PADDLE
 var story := Story.new()
 ## The intro card (ADR-026): the match waits under it, no sim, no AI.
 var card_frames := -1
@@ -652,6 +654,10 @@ func _on_event(e: Array) -> void:
 			actors.spawn_fx("dust", at, 0)
 		K.EVENT_CROWD:
 			crowd.cheer(90 if e[3] >= 13 else 50)
+		K.EVENT_PERK:
+			# ROAD TRIP (port ADR-087): a one-sided rule saved the point
+			_hud.show_quip("KITCHEN PASS!" if e[3] == K.PERK_KITCHEN_PASS else "SECOND SERVE!",
+				Color("fbe46a"))
 		K.EVENT_POINT:
 			crowd.cheer(90)
 			if dinos and (match_won or rally >= DinoWalkers.ROAR_RALLY):

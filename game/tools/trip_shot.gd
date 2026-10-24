@@ -38,7 +38,7 @@ func _initialize() -> void:
 	m["looks"] = {"van": 2, "ornament": 1}
 	var t := RoadTrip.create(seed_value, 0, RoadTrip.PEPPER, m)
 	t._meta_for_draw = m
-	if screen != "map_start" and screen != "start":
+	if screen != "map_start" and screen != "start" and not "plain" in a:
 		_advance(t, 4)
 		for id in ["red_paddle", "visor", "grip_tape", "grip_tape", "spare_paddle", "pickle_jar", "dink_drill"]:
 			t.take(id)
@@ -103,6 +103,8 @@ func _initialize() -> void:
 			var mv := MatchView.new()
 			mv.trip = true
 			mv.trip_name = RoadTrip.opponent_name(n2)
+			mv.trip_members = t.local_members(n2)
+			mv.trip_plain = "plain" in a
 			root.add_child(mv)
 			mv.time = int(n2["time"])
 			mv.setup(t.config_for(n2, Settings.p1_choice, false, null), String(n2["venue"]), false)

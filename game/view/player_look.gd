@@ -166,6 +166,20 @@ static func _rgb8(v: Array) -> Color:
 	return Color8(int(v[0]), int(v[1]), int(v[2]))
 
 
+## ROAD TRIP's PLAIN PADDLE (port ADR-087): unpainted plywood and a black
+## taped handle, on the rig's paddle roles (art/roadtrip-v3's palette).
+const PLAIN_PADDLE := {"p": Color8(188, 163, 112), "P": Color8(188, 163, 112), "f": Color8(232, 211, 164),
+	"e": Color8(24, 20, 36), "E": Color8(232, 211, 164), "G": Color8(24, 20, 36)}
+
+
+func plain_paddle(manifest: Dictionary) -> void:
+	var order := String(manifest["sprites"]["players"]["roles"]["order"])
+	for k in PLAIN_PADDLE:
+		var i := order.find(k)
+		if i >= 0:
+			palette[i] = PLAIN_PADDLE[k]
+
+
 ## GLOW (SNES ADR-054): neon outlines, a purple, pink and cyan paddle, and
 ## outfits (shirt, cap, the shoe accent) more saturated and a little
 ## brighter, keeping their ramps' order.

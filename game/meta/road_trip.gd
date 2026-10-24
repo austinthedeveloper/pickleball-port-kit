@@ -388,6 +388,36 @@ func node_for(target: Array) -> Dictionary:
 	return node_at(leg(), int(target[0]), int(target[1]))
 
 
+## Shirts the locals wear (5-bit base colours; each a dark, mid and light
+## ramp), and their hats ("hair": bareheaded).
+const LOCAL_SHIRTS := [[24, 6, 6], [6, 14, 26], [6, 20, 10], [26, 20, 4], [18, 8, 22], [4, 20, 20],
+	[26, 12, 4], [20, 20, 22]]
+const LOCAL_HATS := ["cap", "visor", "headband", "bandana", "beanie", "backcap", "bucket", "hair"]
+
+
+## The two locals' looks at a stop (opponents.json's member shape), the
+## same every time: a shirt colour for the pair, each their own skin,
+## hair, hat and body. Display only.
+func local_members(n: Dictionary) -> Array:
+	var k := int(n.get("local", 0)) * 131 + leg() * 7
+	var base: Array = LOCAL_SHIRTS[roll(seed, k, 51, LOCAL_SHIRTS.size())]
+	var shirt := [[int(base[0]) * 3 / 5, int(base[1]) * 3 / 5, int(base[2]) * 3 / 5], base,
+		[mini(31, int(base[0]) + 5), mini(31, int(base[1]) + 5), mini(31, int(base[2]) + 5)]]
+	var skins: Array = ["light", "tan", "deep", "pale"]
+	var out := []
+	for i in 2:
+		var hair: Array = Career.hair_rgb5[roll(seed, k + i, 53, mini(5, Career.hair_rgb5.size()))]
+		out.append({"name": String(data()["locals"][int(n.get("local", 0))]),
+			"variant": "female" if roll(seed, k + i, 55, 2) == 0 else "male",
+			"paddle": ["wood", "blue", "red", "gold"][roll(seed, k + i, 57, 4)],
+			"hat": String(LOCAL_HATS[roll(seed, k + i, 59, LOCAL_HATS.size())]),
+			"skin": String(skins[roll(seed, k + i, 61, skins.size())]),
+			"hair": hair.duplicate(), "shirt": shirt.duplicate(true),
+			"shorts": [[3, 3, 5], [7, 7, 9]] if i == 0 else [[20, 20, 22], [26, 26, 28]],
+			"shoe": [26, 26, 26]})
+	return out
+
+
 ## A stop's lines for the map's panel and its card: what it is, where,
 ## and what's at stake.
 func info(n: Dictionary) -> Array:

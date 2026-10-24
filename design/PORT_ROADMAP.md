@@ -106,7 +106,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-78 | Keyboard controls you can guess: a WASD + J K L preset and an arrows + Z X C one, keys drawn where they sit | `feature/cld-keyboard-layout` | Planned (parked: you're thinking it over) |
 | PORT-79 | Text centred in the menu bars and the prompts' keys | `feature/cld-text-centring` | Ready to test |
 | PORT-80 | Cleanup round 6: one copy of the shot effects, the title's way back, the dinosaurs' looks; tests for the gaps | `feature/cld-cleanup-6` | Done |
-| PORT-82 | ROAD TRIP: a roguelike mode beside STORY, a road map of branching stops, a match at each, gear to pick, a garage between trips (a plan: `design/ROAD_TRIP.md`) | `feature/cld-story-roguelike` | Planned (answered; stage 1 on your go) |
+| PORT-82 | ROAD TRIP: a roguelike mode beside STORY, a road map of branching stops, a match at each, gear to pick, a garage between trips (port ADR-087) | `feature/cld-trip-run` | Ready to test |
 
 ## Releases
 
@@ -357,38 +357,45 @@ the same request). Open: 36 and 40.
     pixel the same.
   - Status: **Done**.
 
-### 82. `feature/cld-story-roguelike`: ROAD TRIP, a roguelike mode (asked for 2026-10-23)
+### 82. `feature/cld-trip-run`: ROAD TRIP, a roguelike mode (asked for 2026-10-23)
 
-- [ ] `PORT-82` A plan, nothing built: `design/ROAD_TRIP.md`, with your
-  first answers in. A mode of its own beside STORY (which stays): you and
-  a partner drive to the SUMMER OPEN, where the Champs defend their
-  title. A road map on the van's dashboard: three legs of three columns
-  of stops (PICKUP GAME, GRUDGE MATCH, YARD SALE, PRO SHOP, MOTEL,
-  DETOUR), a big match ending each of the first two legs and the final
-  ending the third, about 12 stops and 30 minutes at most. You start
-  weak (a plain paddle and cap, every stat at 1 of 20); gear picked one of
-  three at least every two stops (the game's paddles and hats, items,
-  one-sided rules) makes a trip strong. Three hearts, and the trip can
-  end. MILES fill the GARAGE's fixed ladder of lasting rewards (stats,
-  gear, a heart, and cosmetics for the van); beaten captains become
-  partners; HEAT. Everything stays inside the mode. The trip's stats and
-  rules are a sim change behind `MatchConfig.trip`, off in conformance,
-  with an ADR. A new save key (v6 stays). [IMAGE] notes through the doc
-  brief an image agent. Seven build stages.
-  - Art: all 19 images accepted 2026-10-24, the third draft set with
-    round 4's five fixes (`art/roadtrip-v3/`, `art/roadtrip-r4-fixes/`;
-    the doc's "The accepted art" lists them). Stage 6 imports them.
-  - Status: **Planned**: every question answered; stage 1
-    (`feature/cld-trip-run`) starts on your go.
+- [x] `PORT-82` ROAD TRIP (port ADR-087; the plan with your answers and the
+  art: `design/ROAD_TRIP.md`; the art in `art/roadtrip-v3` and
+  `art/roadtrip-r4-fixes`, imported to `game/assets/trip`). A mode on MAIN
+  beside STORY: you and a partner drive to the SUMMER OPEN on a road map
+  of three legs (three columns of stops in three lanes, then a big match;
+  the last leg's is the final against the Champs). Stops: PICKUP GAME,
+  GRUDGE MATCH, YARD SALE, PRO SHOP, MOTEL, DETOUR. You start weak (a
+  plain paddle and cap, four stats at 1 of 20); gear picked one of three
+  (the game's paddles and hats, stacking items, partner training,
+  one-sided rules) makes a trip strong. Three hearts; the trip can end.
+  The miles fill the GARAGE's fixed ladder of lasting rewards (starting
+  stats, a heart, gear, van paints and ornaments); beaten captains become
+  partners; a trip won opens the next HEAT. Nothing counts outside the
+  trip. Seeded: the map, picks, shop and detours are the same wherever
+  played. The sim: `MatchConfig.trip` (a slot's stats, a CPU's style, the
+  left side's perks), off everywhere else.
+  - Verified: 500+ tests plus the e2e, golden and conformance traces
+    unchanged; `test_road_trip` (the data, 300 seeds' maps, trips won and
+    lost, the save, the sim's stats and perks), `test_trip_screens` (the
+    real main scene from the title to a trip's end, three seeds),
+    `test_layout` on every trip screen and text. Screenshots of every
+    screen (`tools/trip_shot.gd`).
+  - Status: **Ready to test**: play a trip or three. Say how it feels:
+    too easy or hard (the bot wins leg 1 from the start and needs about
+    12 in every stat for the final), the length, the prices, the gear.
+    Not built: LUCKY LINE, HOT HAND, the cassettes and pen colour
+    (KNOWN_ISSUES #79-81).
 
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
 
-- **PORT-82 ROAD TRIP:** all answered. The [IMAGE] notes in
-  `design/ROAD_TRIP.md` are ready for an image agent; say when to start
-  stage 1.
+- **PORT-82 ROAD TRIP:** built and playable (MAIN > ROAD TRIP). Play a
+  few trips and say what to change: the difficulty, the length, prices
+  and cash, the gear (which items are dull or too strong), the GARAGE's
+  pace. The numbers are a first guess (KNOWN_ISSUES #79).
 
 - **PORT-78 the keyboard:** parked at your request. When you've thought
   it over: which presets (WASD + J K L, arrows + Z X C, both), which is

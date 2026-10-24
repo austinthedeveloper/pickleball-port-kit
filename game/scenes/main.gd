@@ -270,7 +270,10 @@ func show_trip_map(t: RoadTrip) -> void:
 ## trip's hat and paddle.
 func _trip_me(t: RoadTrip) -> PlayerLook:
 	var d := t.driver(save.career.active_player(), Settings.p1_choice)
-	return PlayerLook.for_career(d, d.shirt, d.variant, d.paddle, MatchView.levels_manifest())
+	var look := PlayerLook.for_career(d, d.shirt, d.variant, d.paddle, MatchView.levels_manifest())
+	if t.paddle == "plain_paddle":
+		look.plain_paddle(MatchView.levels_manifest())
+	return look
 
 
 func _trip_me_name() -> String:
@@ -351,6 +354,8 @@ func _trip_match(t: RoadTrip, n: Dictionary) -> void:
 	m.trip = true
 	if int(n.get("team", -1)) < 0:
 		m.trip_name = RoadTrip.opponent_name(n)
+		m.trip_members = t.local_members(n)
+	m.trip_plain = t.paddle == "plain_paddle"
 	m.finished.connect(func(to_title: bool):
 		var over := m.sim.phase == K.PHASE_MATCH_RESULT
 		_after_trip_match(t, over and m.sim.match_winner == 0, to_title))

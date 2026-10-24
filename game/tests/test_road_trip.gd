@@ -430,3 +430,21 @@ func test_the_one_sided_rules() -> void:
 	var ended := run_until(s3, func(): return s3.phase == K.PHASE_MATCH_RESULT, 40000)
 	check(ended >= 0, "a trip match with every rule ends")
 	s3.dispose()
+
+
+func test_the_locals_looks() -> void:
+	var t := RoadTrip.create(31, 0, RoadTrip.PEPPER)
+	var manifest := MatchView.levels_manifest()
+	var hats: Dictionary = manifest["sprites"]["players"]["roles"]["files"]["male"]
+	var n := {"type": "pickup", "local": 4}
+	eq(t.local_members(n), t.local_members(n), "the same locals look the same each time")
+	for local in RoadTrip.data()["locals"].size():
+		for m in t.local_members({"type": "pickup", "local": local}):
+			check(m["hat"] == "hair" or hats.has(String(m["hat"])), "a hat the rig draws: %s" % m["hat"])
+			check(Opponents.skin(String(m["skin"])).size() == 3)
+			var look := PlayerLook.from_member(m, manifest)
+			eq(look.palette.size(), PlayerLook.ROLE_COUNT)
+	var plain := PlayerLook.for_team(0, 0, Paddles.WOOD, manifest)
+	plain.plain_paddle(manifest)
+	var order := String(manifest["sprites"]["players"]["roles"]["order"])
+	eq(plain.palette[order.find("f")], PlayerLook.PLAIN_PADDLE["f"], "the PLAIN PADDLE's plywood")
