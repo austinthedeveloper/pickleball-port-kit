@@ -649,34 +649,43 @@ rules are about fitting the game's screens, not the hardware:
 - **Drafts first:** nothing is final until you've approved it, and the
   map gets a mock-up in the game (stage 6) before the art is polished.
 
-### Where each image stands (after the third set)
+### The accepted art (2026-10-24)
 
-The third set (`art/roadtrip-v3/`, 2026-10-24) is the one to build on.
-**Round 4 is a fix pass on it, not a new set:** redo only the rows marked
-**Fix**, starting from the v3 files; leave every **Accepted** image as it
-is (accepted for now: you still approve them in the game, stage 6).
+All 19 images are **accepted**: the third set (`art/roadtrip-v3/`) with
+round 4's five fixes (`art/roadtrip-r4-fixes/`) in place of their v3
+files. Stage 6 imports them into the game (backdrops as lossy WebP) and
+you see them there; anything that looks wrong in play is fixed then.
 
-| Image | Status | What round 4 does |
-|---|---|---|
-| trip_map_dashboard | **Fix** | Remove the hula figure from the backdrop: the dash ornament is a cosmetic the game draws on top (`trip_dash_ornaments`), so its spot on the left of the dash top is plain vinyl. Everything else stays. |
-| trip_map_paper | **Fix** | Clean the cut-out: the torn edge has a fringe of yellow and red pixels left from the source's background (the edge should be paper, then fully transparent). Move the folds to exactly every 300 px (x 300, 600, 900, 1200, 1500). Keep the look. |
-| trip_gear_icons | **Fix** | Re-crop: many cells hold slivers of the neighbouring icon, cut off by straight lines (the wrist weights, the clipboards, the paddle row, the cap and visor). Each 64 x 64 cell must hold one whole item and nothing else, on transparency, in the note's order. The icons themselves stay. |
-| trip_van | **Fix** | Frames 2 to 4: the wheels smear where they turn. Draw each frame's hub as a clean quarter turn of frame 1's (the same tyre, the same pixels rotated), nothing else changing. |
-| trip_van_paints | **Fix** | The recolour misses parts still in the start's blue: the front and rear bumpers and lower trim on CHERRY and MIDNIGHT, the trim on SUNSET. Every pixel of the lower body colour changes in every paint; the windows, tyres, lights and roof bag never do. |
-| trip_scene_roadside | Accepted | |
-| trip_scene_motel | Accepted | |
-| trip_scene_yard_sale | Accepted | |
-| trip_scene_pro_shop | Accepted | |
-| trip_scene_summer_open | Accepted | |
-| trip_garage | Accepted | |
-| trip_pins | Accepted | |
-| trip_title_card | Accepted | |
-| trip_card | Accepted | |
-| trip_ladder_step | Accepted | |
-| trip_hazard_icons | Accepted | |
-| trip_hud_icons | Accepted | |
-| trip_dash_ornaments | Accepted | |
-| trip_paddle_plain | Accepted | The palette file and the icon. |
+| Image | From |
+|---|---|
+| trip_map_dashboard | `art/roadtrip-r4-fixes/` |
+| trip_map_paper | `art/roadtrip-r4-fixes/` |
+| trip_pins | `art/roadtrip-v3/` |
+| trip_van | `art/roadtrip-r4-fixes/` |
+| trip_van_paints | `art/roadtrip-r4-fixes/` |
+| trip_scene_roadside | `art/roadtrip-v3/` |
+| trip_scene_motel | `art/roadtrip-v3/` |
+| trip_scene_yard_sale | `art/roadtrip-v3/` |
+| trip_scene_pro_shop | `art/roadtrip-v3/` |
+| trip_scene_summer_open | `art/roadtrip-v3/` |
+| trip_paddle_plain | `art/roadtrip-v3/` |
+| trip_card | `art/roadtrip-v3/` |
+| trip_gear_icons | `art/roadtrip-r4-fixes/` |
+| trip_hazard_icons | `art/roadtrip-v3/` |
+| trip_garage | `art/roadtrip-v3/` |
+| trip_dash_ornaments | `art/roadtrip-v3/` |
+| trip_ladder_step | `art/roadtrip-v3/` |
+| trip_title_card | `art/roadtrip-v3/` |
+| trip_hud_icons | `art/roadtrip-v3/` |
+
+Two small things to touch up when they're imported, not worth another
+round: MIDNIGHT's paint keeps a few light blue pixels at the front bottom
+corner, and the SWEATBAND item and the HEADBAND hat share a drawing (one
+could take another colour).
+
+The drafts before these (`art/roadtrip-drafts/`, the first set, and
+`art/roadtrip-v2/`) are history: the first set set the style, the second
+the sizes and cut-outs.
 
 ## Build stages
 
@@ -691,7 +700,7 @@ golden traces unchanged.
 | 3 | `feature/cld-trip-map` | The map screen with placeholder pins, ROAD TRIP's page, a stop's match and back, hearts and losing, the big matches and final. Playable end to end with the starting gear | |
 | 4 | `feature/cld-trip-gear` | Paddles and hats, kinds A and B, PICK ONE, YARD SALE, the PRO SHOP, MOTEL, cash, partners unlocked | |
 | 5 | `feature/cld-trip-story` | The scenes and detours, the hazards, the writing; kind C's one-sided rules | Amends stage 2's |
-| 6 | `feature/cld-trip-art` | The map mock-up, then the generated art from the notes above, polished; screenshots | |
+| 6 | `feature/cld-trip-art` | The map mock-up, then the accepted art (above) imported, the two touch-ups; screenshots | |
 | 7 | `feature/cld-trip-garage` | MILES, the GARAGE's ladder and the looks, HEAT, the pool's unlocks, the records page; a headless tool that plays trips with a CPU in your place (like `rally_stats.gd`) to time them (30 minutes at most) and set the stat step, hearts, prices and the ladder's miles | |
 
 Stages 1 to 4 make a playable trip; 5 to 7 can come in any order after.

@@ -375,6 +375,9 @@ the same request). Open: 36 and 40.
   rules are a sim change behind `MatchConfig.trip`, off in conformance,
   with an ADR. A new save key (v6 stays). [IMAGE] notes through the doc
   brief an image agent. Seven build stages.
+  - Art: all 19 images accepted 2026-10-24, the third draft set with
+    round 4's five fixes (`art/roadtrip-v3/`, `art/roadtrip-r4-fixes/`;
+    the doc's "The accepted art" lists them). Stage 6 imports them.
   - Status: **Planned**: every question answered; stage 1
     (`feature/cld-trip-run`) starts on your go.
 
