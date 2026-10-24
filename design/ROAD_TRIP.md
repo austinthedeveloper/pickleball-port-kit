@@ -23,6 +23,12 @@ the ones that change play get an ADR.
    outside the mode unlocks anything in it.
 8. The names are fine.
 
+And the second round:
+
+9. A stat has room to grow: 20 points before it's full.
+10. The GARAGE is a fixed ladder of rewards the miles fill in order.
+11. Cosmetics are in (on the ladder).
+
 The **[IMAGE ...]** notes describe art for an image agent to draft. The
 brief that applies to all of them is in "The art" near the end.
 
@@ -48,8 +54,9 @@ brief that applies to all of them is in "The art" near the end.
   than two stops without a pick.
 - **Hearts:** you start with three. A lost match costs one; with no hearts
   left the trip's over.
-- **Between trips:** the miles you drove buy lasting upgrades in the
-  GARAGE (stats, a heart, starting gear, new gear in the pool), and every
+- **Between trips:** the miles you drove fill the GARAGE's ladder of
+  lasting rewards, one step after another (stats, a heart, starting gear,
+  new gear in the pool, paint and ornaments for the van), and every
   captain you beat can be your partner on the next trip. The trips get
   harder (HEAT).
 - **A closed world:** ROAD TRIP has its own stats, gear, unlocks and
@@ -223,7 +230,7 @@ plays the scenes in full; later trips show a page each, and START skips.
 
 ### The trip's stats
 
-Four stats, 0 to 9, kept by the trip and passed to the match:
+Four stats, 1 to 20, kept by the trip and passed to the match:
 
 | Stat | What it moves | Start |
 |---|---|---|
@@ -232,13 +239,18 @@ Four stats, 0 to 9, kept by the trip and passed to the match:
 | SPEED | Swing recovery and swing limit (as the paddle's SPEED) | 1 |
 | FEET | How fast you run | 1 |
 
-The first three use the paddles' rule (each point away from 3 moves a
-tunable by 3/64 of its standard value, `Paddles`); a step that size may
-be too small for 1 against 9 to feel different, so the trip may use a
-bigger one (stage 7 tunes it). FEET is new. The ROM's paddles (the
-9-point budget, the hats' one-point trades) don't apply in the trip; it
-needs a config field that gives a slot its stats directly, which is a sim
-change, behind the switch below.
+- **The scale:** the game's standard player (the blue paddle, 3/3/3)
+  sits at about **8** on it, so a new driver at 1 is clearly weaker than
+  anyone outside the trip, a well-geared trip gets past 8 by leg 3, and
+  20 is far beyond the ROM's strongest paddle. Each point moves a tunable
+  by a fixed step (as the paddles do, `Paddles`: 3/64 a point there),
+  sized so 1 to 20 spans about half to one and a half times the standard
+  value. The tuning tool (stage 7) sets the step so a few points are
+  felt, and so a geared driver at the final is about where the Champs are.
+- **FEET** is new: the run speed, on the same scale.
+- The ROM's paddles (the 9-point budget, the hats' one-point trades)
+  don't apply in the trip. It needs a config field that gives a slot its
+  stats directly, which is a sim change, behind the switch below.
 
 ### Gear slots
 
@@ -251,15 +263,15 @@ art:
 |---|---|---|
 | PLAIN PADDLE (start) | Nothing | A blank paddle |
 | PLAIN CAP (start) | Nothing | The cap |
-| WOOD PADDLE | +3 CONTROL | Wood |
-| BLUE PADDLE | +1 POWER, +1 CONTROL, +1 SPEED | Blue |
-| RED PADDLE | +3 POWER | Red |
-| GOLD PADDLE | +3 SPEED | Gold |
-| VISOR | +2 CONTROL | Visor |
-| HEADBAND | +2 SPEED | Headband |
-| TRICORN | +2 POWER | Tricorn |
-| BANDANA | +1 POWER, +1 FEET | Bandana |
-| BEANIE | +2 FEET | Beanie |
+| WOOD PADDLE | +5 CONTROL | Wood |
+| BLUE PADDLE | +2 POWER, +2 CONTROL, +2 SPEED | Blue |
+| RED PADDLE | +5 POWER | Red |
+| GOLD PADDLE | +5 SPEED | Gold |
+| VISOR | +3 CONTROL | Visor |
+| HEADBAND | +3 SPEED | Headband |
+| TRICORN | +3 POWER | Tricorn |
+| BANDANA | +2 POWER, +2 FEET | Bandana |
+| BEANIE | +3 FEET | Beanie |
 
 The other hats (VIKING, CHEF, CROWN, WHIRLY, BUCKET...) are rarer finds,
 each with its own small trade, or kept as GARAGE looks.
@@ -338,10 +350,10 @@ paddles and hats above are this kind, and so are:
 
 | Item | Effect |
 |---|---|
-| GRIP TAPE | +1 CONTROL (stacks) |
-| WRIST WEIGHTS | +1 POWER (stacks) |
-| NEW SNEAKERS | +1 FEET (stacks) |
-| SWEATBAND | +1 SPEED (stacks) |
+| GRIP TAPE | +2 CONTROL (stacks) |
+| WRIST WEIGHTS | +2 POWER (stacks) |
+| NEW SNEAKERS | +2 FEET (stacks) |
+| SWEATBAND | +2 SPEED (stacks) |
 | LONG ARMS | Your reach as with BIG BALL, without the big ball |
 | SECOND SERVE | A serve into the net or out is taken again, once a game |
 | KITCHEN PASS | Your side's first KITCHEN! of a match is a let |
@@ -399,21 +411,45 @@ A page like a story scene with two or three choices, written in
 - **The end:** win the SUMMER OPEN: the trophy, the closing scene the
   first time (a card after that), and the next HEAT opens.
 - **MILES:** every stop reached adds miles (more for later legs, a bonus
-  for a win). They're kept between trips, won or lost, and spent in the
-  GARAGE.
-- **The GARAGE** (between trips, and from ROAD TRIP's page): lasting
-  upgrades, each a little dearer than the last:
-  - **Stats:** +1 to a starting stat (up to 4).
-  - **A fourth heart** (once).
-  - **Starting cash.**
-  - **A starting item:** begin with one common item you've found before.
-  - **New gear in the pool:** about 12 items are in the pool at first;
-    the rest are bought here or come with milestones (reach leg 2, win a
-    trip, win one without losing a heart).
-  - **Looks:** the van's paint, the dashboard's ornament (cosmetic).
+  for a win). They're kept between trips, won or lost, and they fill the
+  GARAGE's ladder.
+- **The GARAGE** (after every trip, and from ROAD TRIP's page): a fixed
+  ladder of lasting rewards, the same for everyone, that the miles fill
+  in order. Nothing to choose: after a trip the miles count up and each
+  step reached is handed over with a little fanfare; the page shows the
+  steps you have and the next three ahead. Each step costs a little more
+  than the last, so the first trips pay out often and later ones slowly.
   So the first trips are short and hard, and each one leaves you a little
-  stronger, as you asked. (An alternative: no shop, and the miles fill a
-  bar whose steps give fixed rewards in order. Question 2.)
+  stronger. A first draft of the ladder (`data/trip.json`; stage 7 sets
+  the miles):
+
+  | Step | Reward |
+  |---|---|
+  | 1 | +1 FEET to start |
+  | 2 | New gear in the pool: GRIP TAPE, SWEATBAND |
+  | 3 | Van paint: CHERRY |
+  | 4 | +1 POWER to start |
+  | 5 | Start with 20 cash |
+  | 6 | +1 CONTROL to start |
+  | 7 | Dash ornament: the pickle bobblehead |
+  | 8 | New gear: SECOND SERVE, ROAD ATLAS |
+  | 9 | +1 SPEED to start |
+  | 10 | Start with a BLUE PADDLE |
+  | 11 | Van paint: WOOD PANEL |
+  | 12 | A fourth heart |
+  | 13 | New gear: HOT HAND, LUCKY LINE |
+  | 14 | +1 to every starting stat |
+  | 15 | Dash ornament: the fuzzy dice |
+  | 16 | Start with a common item from your last trip |
+  | ... | More steps of the same kinds, up to +4 a stat at the top |
+
+  About 12 items are in the pool at first; the rest come from the ladder
+  and from milestones (reach leg 2, win a trip, win one without losing a
+  heart).
+- **Cosmetics** on the ladder and from milestones: the van's paint, the
+  ornament on the dash, the air freshener, the cassette in the deck (the
+  map screen's music), and the map's pen colour. Picked on the GARAGE
+  page once you have them; looks only.
 - **HEAT 0 to 5:** one more level opens per trip won, each adding one
   thing (the opponents err less, a hazard to start with, fewer MOTELs,
   big matches to one more point...). Picked on NEW TRIP.
@@ -426,6 +462,26 @@ A page like a story scene with two or three choices, written in
 > with summer days crossed off (no readable text), a strip light
 > overhead, a pickleball rolling on the concrete floor. The right half
 > stays fairly plain behind where the GARAGE's menu panel sits.
+
+> **[IMAGE trip_van_paints]** The van sheet (`trip_van`) again in 5 paint
+> jobs, same drawing, only the body colours change: CREAM AND SKY (the
+> start), CHERRY (red with a white stripe), WOOD PANEL (cream with wood
+> side panels), SUNSET (orange fading to purple, a palm silhouette on the
+> side), and MIDNIGHT (dark blue with pinstripes). Keep each as a palette
+> swap of the same pixels if possible.
+
+> **[IMAGE trip_dash_ornaments]** Ornaments for the dashboard, each about
+> 48 x 64 and drawn to sit on the dash at the same spot: the hula figure
+> (the start), a pickle bobblehead with a paddle, fuzzy dice hanging from
+> a string (top of the windscreen instead), a plastic dinosaur, a snow
+> globe, a tiny trophy. Plus 4 air fresheners (pine tree, cherry, lemon,
+> a pickle), 20 x 40, and 4 cassettes, 40 x 26, each a different
+> coloured shell with a blank label.
+
+> **[IMAGE trip_ladder_step]** 120 x 72, a reward step for the GARAGE's
+> ladder: a manila shipping tag on a string, with a 48 x 48 space for the
+> reward's icon; a "reached" version with a red rubber-stamp ring and a
+> "next" version slightly greyed.
 
 ## Where it sits
 
@@ -450,11 +506,11 @@ the key).
 
 ```
 "trip": {
-  "miles": 820,            # unspent
+  "miles": 820,            # all miles driven; the ladder's steps reached follow from it
   "won": 2, "trips": 9,    # records
   "best_heat": 1, "fastest": 1730,   # seconds
   "heat": 1,               # the highest HEAT open
-  "garage": {"stats": [1, 0, 2, 0], "heart": 1, "cash": 1, "start_item": "grip_tape", "van": 2},
+  "looks": {"van": 2, "ornament": 1, "freshener": 0, "tape": 0, "pen": 0},  # cosmetics chosen
   "pool": [...],           # gear ids unlocked
   "partners": [0, 3],      # captains unlocked (ladder team indices; Pepper is always there)
   "milestones": 0,         # bits
@@ -493,7 +549,10 @@ labels come from `UiKit`, and prompts are `PromptBar`s.
   id (`stop_2_1_1`), so tests select by id and the mouse picks a pin.
   LEFT and RIGHT scroll to look ahead.
 - **PICK ONE** (`view/trip_pick.gd`): three cards and SKIP.
-- **PRO SHOP** and **GARAGE**: `MenuPage`s of items and prices.
+- **PRO SHOP**: a `MenuPage` of items and prices.
+- **GARAGE**: the ladder as a row of tags (reached, next, ahead), the
+  miles counting up after a trip, and a `MenuPage` for the looks you
+  have.
 - **DETOUR**, **YARD SALE** and **MOTEL**: `StoryScene` pages with choice
   rows.
 - **TRIP'S OVER** and **CHAMPIONS!**: the trip in numbers on a panel,
@@ -501,7 +560,7 @@ labels come from `UiKit`, and prompts are `PromptBar`s.
 - **Text never collides** (`test_layout`): new cases for the map at
   every stop in a generated trip (and the longest stop name, the
   fullest bag, 0 and 9 hearts, 999 cash), every card, every detour page
-  and choice, the shop and garage at their longest lists, and ROAD TRIP's
+  and choice, the shop at its longest list, the garage's ladder at every step, and ROAD TRIP's
   page with every value of every row, with keyboard and pad prompts.
 
 > **[IMAGE trip_hud_icons]** 24 x 24 icons for the map's top strip: a red
@@ -545,20 +604,12 @@ golden traces unchanged.
 | 4 | `feature/cld-trip-gear` | Paddles and hats, kinds A and B, PICK ONE, YARD SALE, the PRO SHOP, MOTEL, cash, partners unlocked | |
 | 5 | `feature/cld-trip-story` | The scenes and detours, the hazards, the writing; kind C's one-sided rules | Amends stage 2's |
 | 6 | `feature/cld-trip-art` | The map mock-up, then the generated art from the notes above, polished; screenshots | |
-| 7 | `feature/cld-trip-garage` | MILES, the GARAGE, HEAT, the pool's unlocks, the records page; a headless tool that plays trips with a CPU in your place (like `rally_stats.gd`) to time them (30 minutes at most) and set the stat step, hearts and prices | |
+| 7 | `feature/cld-trip-garage` | MILES, the GARAGE's ladder and the looks, HEAT, the pool's unlocks, the records page; a headless tool that plays trips with a CPU in your place (like `rally_stats.gd`) to time them (30 minutes at most) and set the stat step, hearts, prices and the ladder's miles | |
 
 Stages 1 to 4 make a playable trip; 5 to 7 can come in any order after.
 
 ## Questions for you
 
-The first round is answered (top of the doc). New ones:
-
-1. **The stat step:** a paddle point is 3/64 (about 5%) of a tunable, so
-   1 against 9 in every stat is a big gap but 1 against 2 is hard to
-   feel. I'd let the tuning tool (stage 7) set it. Or would you rather
-   name a feel ("a fully geared player is about twice as strong as a new
-   one")?
-2. **The GARAGE:** choose your own lasting upgrades with MILES (the plan),
-   or a fixed ladder of rewards that the miles fill in order?
-3. **Cosmetics in the GARAGE** (the van's paint, the dash ornament): worth
-   having, or keep the garage to stats and gear?
+None open: both rounds are answered (top of the doc). Stage 1 can start
+on your go; the [IMAGE] notes can go to an image agent at any time
+(stage 6 puts the drafts in the game).

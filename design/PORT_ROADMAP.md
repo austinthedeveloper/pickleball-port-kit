@@ -106,7 +106,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-78 | Keyboard controls you can guess: a WASD + J K L preset and an arrows + Z X C one, keys drawn where they sit | `feature/cld-keyboard-layout` | Planned (parked: you're thinking it over) |
 | PORT-79 | Text centred in the menu bars and the prompts' keys | `feature/cld-text-centring` | Ready to test |
 | PORT-80 | Cleanup round 6: one copy of the shot effects, the title's way back, the dinosaurs' looks; tests for the gaps | `feature/cld-cleanup-6` | Done |
-| PORT-82 | ROAD TRIP: a roguelike mode beside STORY, a road map of branching stops, a match at each, gear to pick, a garage between trips (a plan: `design/ROAD_TRIP.md`) | `feature/cld-story-roguelike` | Planned (waiting on your answers) |
+| PORT-82 | ROAD TRIP: a roguelike mode beside STORY, a road map of branching stops, a match at each, gear to pick, a garage between trips (a plan: `design/ROAD_TRIP.md`) | `feature/cld-story-roguelike` | Planned (answered; stage 1 on your go) |
 
 ## Releases
 
@@ -369,23 +369,23 @@ the same request). Open: 36 and 40.
   weak (a plain paddle and cap, every stat at 1 of 9); gear picked one of
   three at least every two stops (the game's paddles and hats, items,
   one-sided rules) makes a trip strong. Three hearts, and the trip can
-  end. MILES buy lasting upgrades in the GARAGE; beaten captains become
+  end. MILES fill the GARAGE's fixed ladder of lasting rewards (stats,
+  gear, a heart, and cosmetics for the van); beaten captains become
   partners; HEAT. Everything stays inside the mode. The trip's stats and
   rules are a sim change behind `MatchConfig.trip`, off in conformance,
   with an ADR. A new save key (v6 stays). [IMAGE] notes through the doc
   brief an image agent. Seven build stages.
-  - Status: **Planned**: three smaller questions at the end of the doc
-    (For you).
+  - Status: **Planned**: every question answered; stage 1
+    (`feature/cld-trip-run`) starts on your go.
 
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
 
-- **PORT-82 ROAD TRIP:** three smaller questions at the end of
-  `design/ROAD_TRIP.md`: how big a stat point should feel, the GARAGE as
-  a shop or a fixed reward ladder, and whether it sells cosmetics. The
-  [IMAGE] notes in the doc are ready for an image agent.
+- **PORT-82 ROAD TRIP:** all answered. The [IMAGE] notes in
+  `design/ROAD_TRIP.md` are ready for an image agent; say when to start
+  stage 1.
 
 - **PORT-78 the keyboard:** parked at your request. When you've thought
   it over: which presets (WASD + J K L, arrows + Z X C, both), which is
