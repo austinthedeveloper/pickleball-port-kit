@@ -117,23 +117,32 @@ faces.
 - **The generated map is saved**, not regenerated from the seed, so a
   release that changes the generator can't change a trip in progress.
 
-> **[IMAGE trip_map_dashboard]** 960 x 540, the map screen's backdrop.
-> The view from the driver's seat looking down: the bottom third is the
-> van's dashboard (sun-faded teal vinyl, a cassette deck, a hula figure
-> on the dash, a pine-tree air freshener hanging at the top right, a
-> paper coffee cup in a holder), and the top two thirds is the windscreen
-> with a soft-focus summer road and hills, slightly blurred and darker so
-> the map reads over it. A fold-out road map lies open across the dash,
-> taking the middle 900 x 330. The map itself is a separate image (next).
+> **[IMAGE trip_map_dashboard]** 960 x 540, the map screen's backdrop,
+> seen from the driver's seat, level (no tilt or perspective on the dash
+> top, so the flat map drawn on it in code sits right). The bottom 120 px
+> are the van's dashboard front: sun-faded teal vinyl, a cassette deck in
+> the middle, two round gauges with plain dials (no numbers or marks), a
+> paper coffee cup in a holder at the right. Above it, the dash top: a
+> flat, empty strip of teal vinyl from x 30 to x 930 and y 190 to y 420,
+> **with no map, paper or objects on it** (the game draws the map there).
+> The only things on the dash top are at the far left (an empty round
+> spot for the ornament, 48 x 64, drawn in code) and nothing at the right.
+> The top 190 px are the windscreen: a soft-focus coastal road and hills,
+> darker and less saturated so the map reads over it, the rear-view
+> mirror's edge at the top right with an empty hook under it (the air
+> freshener is drawn in code). No steering wheel in the map's area.
 
-> **[IMAGE trip_map_paper]** 1800 x 330, wider than the screen (the map
-> scrolls sideways). A folded paper road map: off-white paper with two
-> vertical fold creases every 300 px, faint pale-green land, a blue lake
-> on the left third, tan desert and mountains in the middle third, a blue
-> coastline and beach on the right third. Thin grey printed roads, tiny
-> printed tree and mountain symbols, a compass rose in one corner, a
-> coffee ring stain. No words or numbers (the game prints its own text).
-> The pins and drawn roads go on top in code.
+> **[IMAGE trip_map_paper]** Exactly 1800 x 330, flat and seen from
+> straight above, wider than the screen (the map scrolls sideways). A
+> folded paper road map: off-white paper with vertical fold creases
+> exactly every 300 px, faint pale-green land with a blue lake in the
+> first 600 px, tan desert and mountains from 600 to 1200, green hills, a
+> blue coastline and beach from 1200 to 1800. Thin grey printed roads,
+> small printed tree, cactus and mountain symbols, a compass rose in the
+> bottom right corner, a coffee ring stain bottom left. Keep the middle
+> band (y 60 to 270) light and sparse: the pins and drawn roads go on top
+> in code. No words, numbers or letters. (The first draft is the right
+> idea: keep its look, at this exact size.)
 
 ### Stop types
 
@@ -154,20 +163,28 @@ GRUDGE MATCH, one PRO SHOP and one YARD SALE per column; no MOTEL in leg
 twice in a row; every leg has a road with three matches and one with
 one.
 
-> **[IMAGE trip_pins]** A sheet of 9 map pins, each 32 x 40: a round
-> pushpin head on a short needle, the head carrying a 24 x 24 icon. Icons:
-> a team crest (a plain shield, recoloured in code per team), a gold
-> trophy, a paddle, a red paddle, a cardboard box with a lamp poking out,
-> a striped shop awning, a motel's neon sign (an arrow), a yellow diamond
-> road sign with a "?" shape (drawn, not lettered), and a small "you are
-> here" van-front icon. Each pin also has a 50%-grey "already passed"
-> version.
+> **[IMAGE trip_pins]** A transparent PNG sheet, 9 columns x 2 rows of
+> exactly 32 x 40 cells, nothing between them. Each pin: a round cream
+> pushpin head 28 px across at the top of its cell, a 4 px grey needle
+> below, no shadow, glow or ground shadow. On the head, a simple icon in
+> at most 4 colours plus the outline, readable at this size: a shield
+> (**plain mid-grey, light and dark grey only**, so the game can tint it
+> to each team's colours), a gold trophy, a blue paddle, a red paddle, a
+> cardboard box with a lamp poking out, a red and white striped awning, a
+> pink arrow sign, a yellow diamond with a "?" shape (the one symbol
+> allowed), and the front of **our van** (`trip_van`'s boxy cream-over-blue
+> minivan, not a VW bus). Row 2: the same 9, desaturated to grey and a
+> little darker, for stops already passed.
 
-> **[IMAGE trip_van]** The van, 64 x 40, side view facing right, as a
-> sprite sheet: 4 driving frames (wheels turning, a small bounce) and 1
-> parked frame. A boxy late-80s minivan, two-tone (cream over sky blue), a
-> paddle bag strapped to the roof rack, two side windows where the game
-> draws the player and partner heads (leave those windows dark and plain).
+> **[IMAGE trip_van]** A transparent PNG sheet of 5 cells, each exactly 64
+> x 40, side view facing right, the **one drawing of the van** every other
+> image follows: a boxy late-80s minivan, cream over sky blue, a dark
+> blue paddle bag strapped to the roof rack, **exactly two** side windows,
+> plain dark blue with no reflections (the game draws the player and
+> partner heads in them), black tyres with grey hubs. Frames 1 to 4
+> driving: the wheels' hubs turn a quarter each frame and the body bobs 1
+> px on frames 2 and 4; everything else pixel for pixel the same. Frame 5
+> parked. Hard edges, no halo or coloured fringe around the outline.
 
 ### A stop's match
 
@@ -223,8 +240,10 @@ plays the scenes in full; later trips show a page each, and START skips.
 
 > **[IMAGE trip_scene_summer_open]** 960 x 540: the final's arrival: a
 > beach court at night under string lights and two tall light towers,
-> pennant flags, small bleachers packed with a crowd (silhouettes), a
-> trophy table at the net post, the ocean behind with a moon on it.
+> pennant flags, small bleachers packed with a crowd (dark silhouettes
+> only, no faces), a trophy table at the net post, the ocean behind with
+> a moon on it. The crowd sits in the middle band; **the bottom 200 px are
+> plain sand and court**, calm, for the speakers and the dialog panel.
 
 ## You, your partner, and their stats
 
@@ -276,11 +295,11 @@ art:
 The other hats (VIKING, CHEF, CROWN, WHIRLY, BUCKET...) are rarer finds,
 each with its own small trade, or kept as GARAGE looks.
 
-> **[IMAGE trip_paddle_plain]** A new paddle look for the player rig: the
-> PLAIN PADDLE, an unpainted pale plywood paddle with a black taped
-> handle, at the size and angle of the existing paddles in
-> `art/sprites/hd` (it replaces the paddle's colours only, so the drawing
-> is the existing paddle with a plain palette).
+> **[IMAGE trip_paddle_plain]** Not a new drawing: the existing paddle in
+> the player rig (`art/sprites/hd`), recoloured as a PLAIN PADDLE:
+> unpainted pale plywood face (two tones), a black taped handle. Deliver
+> it as the palette (the colours replacing the paddle's), plus one 64 x 64
+> icon of it, front-on, for the gear card.
 
 ### Your partner
 
@@ -305,11 +324,13 @@ the Champs' captain, comes only from winning a trip.
   bag (FLAT TIRE: the next match is on ICE, you're late and rushed).
   They're lifted after a match or at the PRO SHOP.
 
-> **[IMAGE trip_card]** 200 x 260, the frame for a pick card, nine-slice
-> friendly (16 px corners): a cream index card with a thin coloured top
-> band (one version each for common grey, uncommon blue, rare gold), a
-> pushpin at the top centre, a slight paper texture. A 64 x 64 window near
-> the top for the item's icon, and the lower half blank for text.
+> **[IMAGE trip_card]** A transparent PNG sheet of 3 cards, each exactly
+> 200 x 260, for nine-slice (the corners are 16 x 16 and the edges between
+> them repeat cleanly). A cream index card, flat colour with a light
+> paper speckle, a 1 px dark outline, a 12 px coloured band along the top
+> (grey for common, blue for uncommon, gold for rare), a red pushpin at
+> the top centre. An empty 64 x 64 window (a 2 px darker frame, a plain
+> fill) centred 24 px below the band. The lower half blank. No shadow.
 
 ### The kinds
 
@@ -370,24 +391,29 @@ That's 9 paddles and hats, 23 items and 5 hazards to start. More can come
 from the specials and powerups plan (`SPECIALS_AND_POWERUPS.md`, route
 B's BIG PADDLE, MAGNET...).
 
-> **[IMAGE trip_gear_icons]** A sheet of 64 x 64 item icons, one per item,
-> drawn as objects, not symbols, on a transparent background, lit from the
-> top left with a dark outline: a spare paddle, a pink piggy bank, a
-> coupon booklet, a copper penny, a folded road atlas, a torn ticket stub
-> (RAIN CHECK), a striped umbrella, a pair of high-top sneakers, a coiled
-> roll of grip tape, wrist weights, a terrycloth sweatband, a reach-grabber
-> tool (LONG ARMS), a second ball in a hand (SECOND SERVE), a laminated
-> pass on a lanyard (KITCHEN PASS), a four-leaf clover on a chalk line
-> (LUCKY LINE), a starting flag (HEAD START), a gust of wind with sweat
-> drops (SECOND WIND), a flaming paddle (HOT HAND), a pickle jar (PICKLE
-> JAR), a clipboard with Xs and Os (SCOUTING REPORT and DINK DRILL as two
-> variants), a lob arc over a net (LOB LESSON), a paddle bag (PARTNER'S
-> SHOES as shoes in a bag). The paddles and hats get icons too: each
-> existing paddle colour and hat, drawn front-on.
+> **[IMAGE trip_gear_icons]** A transparent PNG sheet on an exact grid of
+> 64 x 64 cells, one item per cell in the order below, each object drawn
+> whole inside its cell with a 2 px margin; no background, gradient,
+> glow or cast shadow. Objects, not symbols, lit from the top left, a dark
+> 1 px outline, at most 12 colours each. **No letters, digits, % or other
+> symbols on any object** (the rain check is a plain torn ticket stub, the
+> coupon book has blank coupons). Items: a spare paddle, a pink piggy
+> bank, a coupon booklet, a copper penny, a folded road atlas, a torn
+> ticket stub, a striped umbrella, a pair of high-top sneakers, a roll of
+> grip tape, wrist weights, a terrycloth sweatband, a reach-grabber tool, a
+> hand holding a second ball, a blank laminated pass on a lanyard, a
+> four-leaf clover on a chalk line, a chequered starting flag, a gust of
+> wind with sweat drops, a flaming paddle, a pickle jar, a clipboard with
+> Xs and Os, a clipboard with a dink's short arc, a lob's high arc over a
+> net, a pair of shoes in a paddle bag. Then the 4 paddles (wood, blue,
+> red, gold) and, for the hats, **the game's own hats** drawn front-on as
+> the player sprites wear them (`data/career.json`'s hats: VISOR,
+> HEADBAND, TRICORN, BANDANA, BEANIE, and the rest), not new caps.
 
-> **[IMAGE trip_hazard_icons]** Five 64 x 64 icons in the same style with
-> a red warning border: a flat tyre, a dark light bulb, a storm cloud with
-> wind lines, a stopwatch, a pothole with a cracked edge.
+> **[IMAGE trip_hazard_icons]** A transparent PNG sheet of 5 cells, 64 x
+> 64, the gear icons' style with a 3 px red border: **a flat tyre on its
+> own** (no car), a dark light bulb, a storm cloud with wind lines, a
+> stopwatch with a blank face, a pothole with a cracked edge.
 
 ### Detours
 
@@ -463,25 +489,29 @@ A page like a story scene with two or three choices, written in
 > overhead, a pickleball rolling on the concrete floor. The right half
 > stays fairly plain behind where the GARAGE's menu panel sits.
 
-> **[IMAGE trip_van_paints]** The van sheet (`trip_van`) again in 5 paint
-> jobs, same drawing, only the body colours change: CREAM AND SKY (the
-> start), CHERRY (red with a white stripe), WOOD PANEL (cream with wood
-> side panels), SUNSET (orange fading to purple, a palm silhouette on the
-> side), and MIDNIGHT (dark blue with pinstripes). Keep each as a palette
-> swap of the same pixels if possible.
+> **[IMAGE trip_van_paints]** **Recolours of `trip_van`, not new
+> drawings:** the same pixels, side view, frame 5 (parked), with only the
+> body's colours changed. Deliver each as the van sheet's palette with
+> the body colours replaced: CREAM AND SKY (the start), CHERRY (red with a
+> white stripe), WOOD PANEL (cream with wood-brown lower panels), SUNSET
+> (orange over purple), MIDNIGHT (dark blue with a light blue stripe).
 
-> **[IMAGE trip_dash_ornaments]** Ornaments for the dashboard, each about
-> 48 x 64 and drawn to sit on the dash at the same spot: the hula figure
-> (the start), a pickle bobblehead with a paddle, fuzzy dice hanging from
-> a string (top of the windscreen instead), a plastic dinosaur, a snow
-> globe, a tiny trophy. Plus 4 air fresheners (pine tree, cherry, lemon,
-> a pickle), 20 x 40, and 4 cassettes, 40 x 26, each a different
-> coloured shell with a blank label.
+> **[IMAGE trip_dash_ornaments]** A transparent PNG sheet. Dash ornaments,
+> each in a 48 x 64 cell, standing on the same base line so any of them
+> sits on the dash's ornament spot: the hula figure (the start), a pickle
+> bobblehead with a paddle, a plastic dinosaur, a snow globe, a tiny
+> trophy; and fuzzy dice in a 48 x 64 cell hanging from a string at the
+> top (they hang from the mirror instead). Air fresheners, 20 x 40, on a
+> string: **a cherry, a lemon, a pickle and a pineapple (no tree
+> shapes)**. Cassettes, 40 x 26, a coloured shell each (red, blue,
+> purple, yellow) with a blank label.
 
-> **[IMAGE trip_ladder_step]** 120 x 72, a reward step for the GARAGE's
-> ladder: a manila shipping tag on a string, with a 48 x 48 space for the
-> reward's icon; a "reached" version with a red rubber-stamp ring and a
-> "next" version slightly greyed.
+> **[IMAGE trip_ladder_step]** A transparent PNG sheet of 3 tags, each
+> exactly 120 x 72: a manila shipping tag on a short string, with **an
+> empty 48 x 48 window** (a plain lighter fill and a 1 px frame, nothing
+> drawn in it: the game draws each reward's icon there). One plain, one
+> "reached" with a red rubber-stamp ring around the window (the ring only,
+> no words), one "next" a little greyed.
 
 ## Where it sits
 
@@ -492,10 +522,12 @@ progress (LEG 2, 3 HEARTS) or the trips won. STORY (SAVE THE PARK) is
 unchanged. The scenes reuse `StoryScene`; the trip's data is
 `data/trip.json`; the code is `meta/trip.gd` and `view/trip_*.gd`.
 
-> **[IMAGE trip_title_card]** 640 x 200, the mode's logo: the words ROAD
-> TRIP in a chunky 80s road-sign style (the one place text is drawn into
-> art), the van driving out of the letters' right side with a dust trail,
-> a small pickleball paddle on the roof. A transparent background.
+> **[IMAGE trip_title_card]** A transparent PNG, 640 x 200, the mode's
+> logo: **ROAD TRIP as two words** in a chunky 80s road-sign style (the
+> one place letters are drawn into art), in flat colour bands (at most
+> three per letter, no smooth gradients), a dark outline, the van
+> (`trip_van`'s drawing, larger) driving out of the letters' right side
+> with a dust trail, a pickleball paddle on its roof.
 
 ## The save
 
@@ -563,29 +595,50 @@ labels come from `UiKit`, and prompts are `PromptBar`s.
   and choice, the shop at its longest list, the garage's ladder at every step, and ROAD TRIP's
   page with every value of every row, with keyboard and pad prompts.
 
-> **[IMAGE trip_hud_icons]** 24 x 24 icons for the map's top strip: a red
-> heart, a green dollar-bill bundle (no digits or symbols on it), a small
-> odometer (MILES), a HEAT flame in three strengths (yellow, orange,
-> red).
+> **[IMAGE trip_hud_icons]** A transparent PNG sheet of 24 x 24 cells, at
+> most 6 colours each: a red heart, a red heart's empty outline (a lost
+> heart), a green bundle of bills (plain, no symbols), an odometer
+> **with blank wheels and no lettering** (the game prints the miles), and
+> a flame in three strengths (yellow, orange, red).
 
 ### The art
 
-The brief for every [IMAGE] note above, for whoever drafts them:
+The brief for every [IMAGE] note above, for whoever drafts them. The first
+round of drafts (`art/roadtrip-drafts/`, 2026-10-23) got the mood right;
+the rules below are what it missed.
 
-- **The style:** the game's HD pixel art, as in the venues
-  (`game/assets/levels/venues/`), the park's props
-  (`game/assets/park/`: the bench is 82 x 32, the ball machine 64 x 76)
-  and the dinosaurs (`game/assets/dinos/`). Hard pixel edges, no
-  anti-aliasing or blur except where a note asks for soft focus, a dark
-  one-pixel outline on objects, light from the top left, a limited palette
-  sampled from the venues' art (sunny, saturated, early-90s).
+- **True pixel art, not pixel-styled painting.** Draw at the final size
+  given in the note (or at exactly half and scale by 2x, nearest
+  neighbour). Hard pixel edges: no anti-aliasing, blur, gradients, glows,
+  soft shadows or noise. The game's venue art uses about 200 colours for
+  a whole 960 x 540 screen; a backdrop here should stay under about 64,
+  a sprite or icon under 16, sampled from the venue art
+  (`game/assets/levels/venues/`) so the trip looks like the same game.
+- **Sizes are exact.** A sheet is a grid of cells of exactly the size the
+  note gives, in the order it lists, with nothing between cells.
+- **Transparent backgrounds** for every sheet, sprite and icon: no
+  backdrop, vignette, glow or ground shadow, and no coloured fringe around
+  a cut-out edge.
+- **The style:** as in the venues, the park's props (`game/assets/park/`:
+  the bench is 82 x 32, the ball machine 64 x 76) and the dinosaurs
+  (`game/assets/dinos/`): a dark 1 px outline on objects, light from the
+  top left, flatter and sparser than the drafts.
+- **Backdrops in layers** where the note says so: sky, far, mid and near
+  as separate transparent PNGs that stack into the scene (the venues are
+  built that way so the camera can lean).
+- **One van.** `trip_van` is the van's drawing; every other image with
+  the van in it (the pins, the paints, the scenes, the garage, the title)
+  copies that side view and those colours.
 - **No people.** The players, partners and locals are drawn by the game
   from the existing rig, and those long-chinned faces stay as they are.
-  The art holds places for them; it never draws them.
-- **No text, logos or brands** in any image except the title card. The
-  game prints all words in its bitmap fonts.
-- **Sizes** are the final on-screen size at 960x540; draw at that size
-  (or at half and scale by an exact 2x).
+  The art holds places for them; it never draws them. A crowd is dark
+  silhouettes only.
+- **No text, letters, digits or symbols** in any image except the title
+  card's ROAD TRIP and the DETOUR pin's "?": no labels on gauges,
+  odometers, tickets, coupons, signs or posters. The game prints every
+  word in its bitmap fonts.
+- **No brands or trademarked shapes:** no logos, and no look-alikes of
+  well-known products (a tree-shaped air freshener, a famous van's face).
 - **Drafts first:** the generated art is a draft for you to look at.
   Nothing is final until you've approved it, and the map gets a mock-up
   in the game (stage 6) before the art is polished.
