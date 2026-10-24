@@ -107,8 +107,9 @@ and generate at a wide 16:9 size (1920x1080 or the nearest size).
 
 ## Extra locations (optional)
 
-Three more that fit the game's 1994 feel and ROAD TRIP's legs. Generate
-any you like the sound of.
+Three more that fit the game's 1994 feel and ROAD TRIP's legs, then
+the motel pool from ROAD TRIP's motel scene. Generate any you like the
+sound of.
 
 ## 4. COUNTY FAIR — `fair_concept.png`
 
@@ -176,6 +177,40 @@ any you like the sound of.
 > a mall walker in a tracksuit, a security guard, a kid with a balloon.
 > Front strip: a planter of palms at the left and a fountain's rim and a
 > bench at the right, kept low and clear of the court.
+
+## 7. MOTEL POOL — `motel_concept.png`
+
+From ROAD TRIP's motel scene. Attach **two** references:
+`ref_scene.png` first, then `../roadtrip-v3/trip_scene_motel.png`.
+
+> Use case: scene redesign from the references. Reference 1 sets the
+> layout: keep its exact camera, court position, court size and
+> perspective, net, and the four players' size and placement. Reference 2
+> sets the place, the palette and the mood: match it closely. Warm, rich,
+> detailed pixel-art game style: crisp dark outlines, saturated colours.
+> HD remaster, no palette limit. Keep the top-centre sky simple (the
+> score panels go there). Spectators stand in one band behind a barrier
+> along the back of the court, small like reference 1's crowd, with faces
+> simple. No text, letters, numbers, logos or brands anywhere.
+>
+> The setting: reference 2's roadside desert motel at sunset, seen
+> straight on. The court is painted on the floor of the drained swimming
+> pool: faded BLUE court with a NAVY kitchen and white lines, on cracked,
+> sun-bleached pale-blue pool plaster with weeds in the cracks and a few
+> dry leaves. The pool's back wall, with its row of dark blue tiles and
+> two chrome ladders, rises behind the court; the far pool deck runs
+> along the top of that wall. Behind the deck, the one-storey motel's
+> row of teal doors and curtained windows with warm porch lamps, the
+> cream-and-blue minivan parked at the left, an ice machine, potted
+> cactus, and the tall neon arrow sign glowing pink and teal at the right
+> with no lettering. Beyond, palms, telephone poles, purple mountains and
+> reference 2's orange and violet sunset. The barrier is the pool's
+> coping edge with a low chrome rail. The spectators are motel guests on
+> the far deck: a man in a robe with a coffee mug, a lady in a sun hat
+> on a folding lounger, a trucker in a cap, a kid in water wings
+> disappointed there's no water. Front strip: the near pool coping and a
+> strip of chain-link fence, a striped lounger and a side table at the
+> left, spiky agave at the right, kept low and clear of the court.
 
 ---
 
