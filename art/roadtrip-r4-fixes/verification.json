@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "checks": [
+    "All five PNG dimensions match the brief.",
+    "Dashboard pixels outside the ornament repair bounds are identical to v3.",
+    "Van frames 1 and 5 are unchanged; frames 2–4 hubs are exact 90/180/270-degree pixel rotations.",
+    "Paint alpha and the starting van are unchanged; protected roof, glass, tyres and lights match the starting van.",
+    "Gear cells have clear 2 px margins; NONE cell 32 is fully transparent.",
+    "Paper fold registration is 300, 600, 900, 1200 and 1500."
+  ]
+}

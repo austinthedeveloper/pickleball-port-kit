@@ -687,6 +687,12 @@ The drafts before these (`art/roadtrip-drafts/`, the first set, and
 `art/roadtrip-v2/`) are history: the first set set the style, the second
 the sizes and cut-outs.
 
+Both folders are in the repo with their exports, palettes, layouts,
+WebP backdrops, review pages and the scripts that made them. Left out (in
+the main checkout only, not committed): the asset zips (copies of the
+PNGs), v3's `sources/` (the raw generations, 32 MB) and round 4's
+`support/` (intermediate files), and the two earlier draft sets.
+
 ## Build stages
 
 Each stage is a branch, chained, with its own row on the roadmap when it

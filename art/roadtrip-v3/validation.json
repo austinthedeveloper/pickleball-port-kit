@@ -1,0 +1,135 @@
+[
+  {
+    "name": "trip_map_dashboard",
+    "width": 960,
+    "height": 540,
+    "has_alpha": false,
+    "source": "First-round-style revision"
+  },
+  {
+    "name": "trip_map_paper",
+    "width": 1800,
+    "height": 330,
+    "has_alpha": true,
+    "source": "First-round-style revision"
+  },
+  {
+    "name": "trip_pins",
+    "width": 288,
+    "height": 80,
+    "has_alpha": true,
+    "source": "Targeted first-round edit"
+  },
+  {
+    "name": "trip_van",
+    "width": 320,
+    "height": 40,
+    "has_alpha": true,
+    "source": "First-round van corrected; animation derived"
+  },
+  {
+    "name": "trip_scene_roadside",
+    "width": 960,
+    "height": 540,
+    "has_alpha": false,
+    "source": "Targeted first-round edit"
+  },
+  {
+    "name": "trip_scene_motel",
+    "width": 960,
+    "height": 540,
+    "has_alpha": false,
+    "source": "First round retained; resized only"
+  },
+  {
+    "name": "trip_scene_yard_sale",
+    "width": 960,
+    "height": 540,
+    "has_alpha": false,
+    "source": "First round retained; resized only"
+  },
+  {
+    "name": "trip_scene_pro_shop",
+    "width": 960,
+    "height": 540,
+    "has_alpha": false,
+    "source": "First round retained; resized only"
+  },
+  {
+    "name": "trip_scene_summer_open",
+    "width": 960,
+    "height": 540,
+    "has_alpha": false,
+    "source": "Targeted first-round edit"
+  },
+  {
+    "name": "trip_paddle_plain",
+    "width": 64,
+    "height": 64,
+    "has_alpha": true,
+    "source": "First-round-style revision"
+  },
+  {
+    "name": "trip_card",
+    "width": 600,
+    "height": 260,
+    "has_alpha": true,
+    "source": "First-round-style revision"
+  },
+  {
+    "name": "trip_gear_icons",
+    "width": 512,
+    "height": 320,
+    "has_alpha": true,
+    "source": "First-round-style revision"
+  },
+  {
+    "name": "trip_hazard_icons",
+    "width": 320,
+    "height": 64,
+    "has_alpha": true,
+    "source": "First-round-style revision"
+  },
+  {
+    "name": "trip_garage",
+    "width": 960,
+    "height": 540,
+    "has_alpha": false,
+    "source": "Targeted first-round edit"
+  },
+  {
+    "name": "trip_van_paints",
+    "width": 320,
+    "height": 40,
+    "has_alpha": true,
+    "source": "Recolours of canonical parked van"
+  },
+  {
+    "name": "trip_dash_ornaments",
+    "width": 288,
+    "height": 130,
+    "has_alpha": true,
+    "source": "First-round-style revision"
+  },
+  {
+    "name": "trip_ladder_step",
+    "width": 360,
+    "height": 72,
+    "has_alpha": true,
+    "source": "First-round-style revision"
+  },
+  {
+    "name": "trip_title_card",
+    "width": 640,
+    "height": 200,
+    "has_alpha": true,
+    "source": "Targeted first-round edit"
+  },
+  {
+    "name": "trip_hud_icons",
+    "width": 168,
+    "height": 24,
+    "has_alpha": true,
+    "source": "First-round-style revision"
+  }
+]

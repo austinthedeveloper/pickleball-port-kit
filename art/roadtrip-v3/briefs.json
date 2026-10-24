@@ -1,0 +1,78 @@
+[
+  {
+    "name": "trip_map_dashboard",
+    "brief": "960 x 540, the map screen's backdrop, seen from the driver's seat, level (no tilt or perspective on the dash top, so the flat map drawn on it in code sits right). The bottom 120 px are the van's dashboard front: sun-faded teal vinyl, a cassette deck in the middle, two round gauges with plain dials (no numbers or marks), a paper coffee cup in a holder at the right. Above it, the dash top: a flat, empty strip of teal vinyl from x 30 to x 930 and y 190 to y 420, **with no map, paper or objects on it** (the game draws the map there). The only things on the dash top are at the far left (an empty round spot for the ornament, 48 x 64, drawn in code) and nothing at the right. The top 190 px are the windscreen: a soft-focus coastal road and hills, darker and less saturated so the map reads over it, the rear-view mirror's edge at the top right with an empty hook under it (the air freshener is drawn in code). No steering wheel in the map's area."
+  },
+  {
+    "name": "trip_map_paper",
+    "brief": "Exactly 1800 x 330, flat and seen from straight above, wider than the screen (the map scrolls sideways). A folded paper road map: off-white paper with vertical fold creases exactly every 300 px, faint pale-green land with a blue lake in the first 600 px, tan desert and mountains from 600 to 1200, green hills, a blue coastline and beach from 1200 to 1800. Thin grey printed roads, small printed tree, cactus and mountain symbols, a compass rose in the bottom right corner, a coffee ring stain bottom left. Keep the middle band (y 60 to 270) light and sparse: the pins and drawn roads go on top in code. No words, numbers or letters. (The first draft is the right idea: keep its look, at this exact size.)"
+  },
+  {
+    "name": "trip_pins",
+    "brief": "A transparent PNG sheet, 9 columns x 2 rows of exactly 32 x 40 cells, nothing between them. Each pin: a round cream pushpin head 28 px across at the top of its cell, a 4 px grey needle below, no shadow, glow or ground shadow. On the head, a simple icon in kept simple enough to read at this size: a shield (**plain mid-grey, light and dark grey only**, so the game can tint it to each team's colours), a gold trophy, a blue paddle, a red paddle, a cardboard box with a lamp poking out, a red and white striped awning, a pink arrow sign, a yellow diamond with a \"?\" shape (the one symbol allowed), and the front of **our van** (`trip_van`'s boxy cream-over-blue minivan, not a VW bus). Row 2: the same 9, desaturated to grey and a little darker, for stops already passed."
+  },
+  {
+    "name": "trip_van",
+    "brief": "A transparent PNG sheet of 5 cells, each exactly 64 x 40, side view facing right, the **one drawing of the van** every other image follows (the first set's side-view van is the look to keep): a boxy late-80s minivan, cream over sky blue, a dark blue paddle bag strapped to the roof rack, black tyres with grey hubs. Its windows, front to back: the sloped windscreen's edge, **the driver's door window** (glass with a highlight, like a real van's), then two passenger windows behind it, plain dark blue with no reflections (the game draws the player and partner heads in those two). Frames 1 to 4 driving: the wheels' hubs turn a quarter each frame and the body bobs 1 px on frames 2 and 4; everything else the same. Frame 5 parked."
+  },
+  {
+    "name": "trip_scene_roadside",
+    "brief": "960 x 540, a scene backdrop in the venues' layered style (sky, far, mid, near as separate layers if possible): a two-lane desert highway at golden hour, the van parked on the gravel shoulder with its hood up, a lone mailbox, telephone poles and distant mesas. The lower 200 px carry on the scene (the gravel shoulder, scrub, the road's edge) in lower contrast, not a flat fill: the speakers and the dialog panel stand over them."
+  },
+  {
+    "name": "trip_scene_motel",
+    "brief": "960 x 540, the same layered style: a one-storey roadside motel at dusk, a row of doors, an ice machine, a drained swimming pool with a pickleball net strung across it, a tall neon arrow sign (its tubes lit pink and teal, no letters)."
+  },
+  {
+    "name": "trip_scene_yard_sale",
+    "brief": "960 x 540: a suburban front lawn on a sunny afternoon, folding tables of junk (lamps, board games, old paddles in a bucket, a box of tennis balls), a hand-drawn sign shape with no text, a station wagon in the driveway."
+  },
+  {
+    "name": "trip_scene_pro_shop",
+    "brief": "960 x 540: inside a small sporting goods shop, a wall of paddles on pegs, a rack of caps and visors, a glass counter with an old cash register, a soda cooler, a sun-bleached poster of a smash (no text, no logos)."
+  },
+  {
+    "name": "trip_scene_summer_open",
+    "brief": "960 x 540: the final's arrival: a beach court at night under string lights and two tall light towers, pennant flags, small bleachers packed with a crowd (dark silhouettes only, no faces), a trophy table at the net post, the ocean behind with a moon on it. The crowd sits in the middle band; **the bottom 200 px are sand and court in lower contrast** (not a flat fill), for the speakers and the dialog panel."
+  },
+  {
+    "name": "trip_paddle_plain",
+    "brief": "Not a new drawing: the existing paddle in the player rig (`art/sprites/hd`), recoloured as a PLAIN PADDLE: unpainted pale plywood face (two tones), a black taped handle. Deliver it as the palette (the colours replacing the paddle's), plus one 64 x 64 icon of it, front-on, for the gear card."
+  },
+  {
+    "name": "trip_card",
+    "brief": "A transparent PNG sheet of 3 cards, each exactly 200 x 260, for nine-slice (the corners are 16 x 16 and the edges between them repeat cleanly). A cream index card, flat colour with a light paper speckle, a 1 px dark outline, a 12 px coloured band along the top (grey for common, blue for uncommon, gold for rare), a red pushpin at the top centre. An empty 64 x 64 window (a 2 px darker frame, a plain fill) centred 24 px below the band. The lower half blank. No shadow."
+  },
+  {
+    "name": "trip_gear_icons",
+    "brief": "A transparent PNG sheet on an exact grid of 64 x 64 cells, one item per cell in the order below, each object drawn whole inside its cell with a 2 px margin; no background, gradient, glow or cast shadow. Objects, not symbols, lit from the top left, a dark outline. **No letters, digits, % or other symbols on any object** (the rain check is a plain torn ticket stub, the coupon book has blank coupons). Items: a spare paddle, a pink piggy bank, a coupon booklet, a copper penny, a folded road atlas, a torn ticket stub, a striped umbrella, a pair of high-top sneakers, a roll of grip tape, wrist weights, a terrycloth sweatband, a reach-grabber tool, a hand holding a second ball, a blank laminated pass on a lanyard, a four-leaf clover on a chalk line, a chequered starting flag, a gust of wind with sweat drops, a flaming paddle, a pickle jar, a clipboard with Xs and Os, a clipboard with a dink's short arc, a lob's high arc over a net, a pair of shoes in a paddle bag. Then the 4 paddles (wood, blue, red, gold) and, for the hats, **the game's own hats** drawn front-on as the player sprites wear them (`data/career.json`'s hats: VISOR, HEADBAND, TRICORN, BANDANA, BEANIE, and the rest), not new caps."
+  },
+  {
+    "name": "trip_hazard_icons",
+    "brief": "A transparent PNG sheet of 5 cells, 64 x 64, the gear icons' style with a 3 px red border: **a flat tyre on its own** (no car), a dark light bulb, a storm cloud with wind lines, a stopwatch with a blank face, a pothole with a cracked edge."
+  },
+  {
+    "name": "trip_garage",
+    "brief": "960 x 540: a cluttered home garage, the van parked nose-in on the left half with its side door open, a workbench and pegboard on the right (paddles, caps and tools on hooks), a calendar with summer days crossed off (no readable text), a strip light overhead, a pickleball rolling on the concrete floor. The right half stays fairly plain behind where the GARAGE's menu panel sits."
+  },
+  {
+    "name": "trip_van_paints",
+    "brief": "**Recolours of `trip_van`, not new drawings:** the same pixels, side view, frame 5 (parked), with only the body's colours changed. Deliver each as the van sheet's palette with the body colours replaced: CREAM AND SKY (the start), CHERRY (red with a white stripe), WOOD PANEL (cream with wood-brown lower panels), SUNSET (orange over purple), MIDNIGHT (dark blue with a light blue stripe)."
+  },
+  {
+    "name": "trip_dash_ornaments",
+    "brief": "A transparent PNG sheet. Dash ornaments, each in a 48 x 64 cell, standing on the same base line so any of them sits on the dash's ornament spot: the hula figure (the start), a pickle bobblehead with a paddle, a plastic dinosaur, a snow globe, a tiny trophy; and fuzzy dice in a 48 x 64 cell hanging from a string at the top (they hang from the mirror instead). Air fresheners, 20 x 40, on a string: **a cherry, a lemon, a pickle and a pineapple (no tree shapes)**. Cassettes, 40 x 26, a coloured shell each (red, blue, purple, yellow) with a blank label."
+  },
+  {
+    "name": "trip_ladder_step",
+    "brief": "A transparent PNG sheet of 3 tags, each exactly 120 x 72: a manila shipping tag on a short string, with **an empty 48 x 48 window** (a plain lighter fill and a 1 px frame, nothing drawn in it: the game draws each reward's icon there). One plain, one \"reached\" with a red rubber-stamp ring around the window (the ring only, no words), one \"next\" a little greyed."
+  },
+  {
+    "name": "trip_title_card",
+    "brief": "A transparent PNG, 640 x 200, the mode's logo: **ROAD TRIP as two words** in a chunky 80s road-sign style (the one place letters are drawn into art), a dark outline, the van (`trip_van`'s drawing, larger) driving out of the letters' right side with a dust trail, a pickleball paddle on its roof."
+  },
+  {
+    "name": "trip_hud_icons",
+    "brief": "A transparent PNG sheet of 24 x 24 cells: a red heart, a red heart's empty outline (a lost heart), a green bundle of bills (plain, no symbols), an odometer **with blank wheels and no lettering** (the game prints the miles), and a flame in three strengths (yellow, orange, red)."
+  }
+]

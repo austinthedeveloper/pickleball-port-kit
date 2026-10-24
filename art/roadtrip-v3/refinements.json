@@ -1,0 +1,10 @@
+{
+  "trip_ladder_step": {
+    "source": "/Users/txdevs/.codex/generated_images/01a16bef-8c83-76b3-83c9-5abe3da03726/exec-fd8555f9-18ac-4fc2-8f5b-bb521c8c0bf6.png",
+    "prompt": "Use case: precise-object-edit. Keep these warm manila tags' texture and plain empty icon windows, but CORRECT THE SHAPE: each tag is a WIDE HORIZONTAL shipping label, width120 height72, NOT a tall luggage tag. Deliver THREE TAGS STACKED VERTICALLY in THREE ROWS, ONE COLUMN, to make the horizontal shape unmistakable. Each full tag has short loop string AT ITS LEFT END and 48x48 EMPTY plain cream square window on the RIGHT HALF. Plain, reached red stamp ring around blank window, nextgreyed. No icons in windows, no text, no background or shadows. Keep rich warm first-round styling. Each tag fills width and stays low/horizontal."
+  },
+  "trip_title_card": {
+    "source": "/Users/txdevs/.codex/generated_images/01a16bef-8c83-76b3-83c9-5abe3da03726/exec-2cdcf7b0-8cf5-44b7-a5bb-19b8fd8fb248.png",
+    "prompt": "Use case: precise-object-edit. Keep this exact beautiful logo, colors, shading, dust and canonical side-view van. Change ONLY the word spacing: move TRIP and the van right so ROAD and TRIP have a CLEAR EMPTY GAP as wide as half the letter O, visible at final640x200. The logo spells ROAD TRIP as TWO DISTINCT WORDS. Keep all eight letters with no changes to spelling. Transparent background; preserve the rich warm original colors. Do not concatenate the words."
+  }
+}

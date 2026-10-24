@@ -1,0 +1,745 @@
+[
+  {
+    "name": "trip_map_dashboard",
+    "width": 960,
+    "height": 540
+  },
+  {
+    "name": "trip_map_paper",
+    "width": 1800,
+    "height": 330
+  },
+  {
+    "name": "trip_pins",
+    "width": 288,
+    "height": 80,
+    "cells": [
+      {
+        "index": 0,
+        "x": 0,
+        "y": 0,
+        "width": 32,
+        "height": 40
+      },
+      {
+        "index": 1,
+        "x": 32,
+        "y": 0,
+        "width": 32,
+        "height": 40
+      },
+      {
+        "index": 2,
+        "x": 64,
+        "y": 0,
+        "width": 32,
+        "height": 40
+      },
+      {
+        "index": 3,
+        "x": 96,
+        "y": 0,
+        "width": 32,
+        "height": 40
+      },
+      {
+        "index": 4,
+        "x": 128,
+        "y": 0,
+        "width": 32,
+        "height": 40
+      },
+      {
+        "index": 5,
+        "x": 160,
+        "y": 0,
+        "width": 32,
+        "height": 40
+      },
+      {
+        "index": 6,
+        "x": 192,
+        "y": 0,
+        "width": 32,
+        "height": 40
+      },
+      {
+        "index": 7,
+        "x": 224,
+        "y": 0,
+        "width": 32,
+        "height": 40
+      },
+      {
+        "index": 8,
+        "x": 256,
+        "y": 0,
+        "width": 32,
+        "height": 40
+      },
+      {
+        "index": 9,
+        "x": 0,
+        "y": 40,
+        "width": 32,
+        "height": 40
+      },
+      {
+        "index": 10,
+        "x": 32,
+        "y": 40,
+        "width": 32,
+        "height": 40
+      },
+      {
+        "index": 11,
+        "x": 64,
+        "y": 40,
+        "width": 32,
+        "height": 40
+      },
+      {
+        "index": 12,
+        "x": 96,
+        "y": 40,
+        "width": 32,
+        "height": 40
+      },
+      {
+        "index": 13,
+        "x": 128,
+        "y": 40,
+        "width": 32,
+        "height": 40
+      },
+      {
+        "index": 14,
+        "x": 160,
+        "y": 40,
+        "width": 32,
+        "height": 40
+      },
+      {
+        "index": 15,
+        "x": 192,
+        "y": 40,
+        "width": 32,
+        "height": 40
+      },
+      {
+        "index": 16,
+        "x": 224,
+        "y": 40,
+        "width": 32,
+        "height": 40
+      },
+      {
+        "index": 17,
+        "x": 256,
+        "y": 40,
+        "width": 32,
+        "height": 40
+      }
+    ]
+  },
+  {
+    "name": "trip_scene_roadside",
+    "width": 960,
+    "height": 540
+  },
+  {
+    "name": "trip_scene_motel",
+    "width": 960,
+    "height": 540
+  },
+  {
+    "name": "trip_scene_yard_sale",
+    "width": 960,
+    "height": 540
+  },
+  {
+    "name": "trip_scene_pro_shop",
+    "width": 960,
+    "height": 540
+  },
+  {
+    "name": "trip_scene_summer_open",
+    "width": 960,
+    "height": 540
+  },
+  {
+    "name": "trip_paddle_plain",
+    "width": 64,
+    "height": 64
+  },
+  {
+    "name": "trip_card",
+    "width": 600,
+    "height": 260,
+    "cells": [
+      {
+        "index": 0,
+        "x": 0,
+        "y": 0,
+        "width": 200,
+        "height": 260
+      },
+      {
+        "index": 1,
+        "x": 200,
+        "y": 0,
+        "width": 200,
+        "height": 260
+      },
+      {
+        "index": 2,
+        "x": 400,
+        "y": 0,
+        "width": 200,
+        "height": 260
+      }
+    ]
+  },
+  {
+    "name": "trip_gear_icons",
+    "width": 512,
+    "height": 320,
+    "cells": [
+      {
+        "index": 0,
+        "x": 0,
+        "y": 0,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 1,
+        "x": 64,
+        "y": 0,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 2,
+        "x": 128,
+        "y": 0,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 3,
+        "x": 192,
+        "y": 0,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 4,
+        "x": 256,
+        "y": 0,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 5,
+        "x": 320,
+        "y": 0,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 6,
+        "x": 384,
+        "y": 0,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 7,
+        "x": 448,
+        "y": 0,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 8,
+        "x": 0,
+        "y": 64,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 9,
+        "x": 64,
+        "y": 64,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 10,
+        "x": 128,
+        "y": 64,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 11,
+        "x": 192,
+        "y": 64,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 12,
+        "x": 256,
+        "y": 64,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 13,
+        "x": 320,
+        "y": 64,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 14,
+        "x": 384,
+        "y": 64,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 15,
+        "x": 448,
+        "y": 64,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 16,
+        "x": 0,
+        "y": 128,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 17,
+        "x": 64,
+        "y": 128,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 18,
+        "x": 128,
+        "y": 128,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 19,
+        "x": 192,
+        "y": 128,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 20,
+        "x": 256,
+        "y": 128,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 21,
+        "x": 320,
+        "y": 128,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 22,
+        "x": 384,
+        "y": 128,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 23,
+        "x": 448,
+        "y": 128,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 24,
+        "x": 0,
+        "y": 192,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 25,
+        "x": 64,
+        "y": 192,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 26,
+        "x": 128,
+        "y": 192,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 27,
+        "x": 192,
+        "y": 192,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 28,
+        "x": 256,
+        "y": 192,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 29,
+        "x": 320,
+        "y": 192,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 30,
+        "x": 384,
+        "y": 192,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 31,
+        "x": 448,
+        "y": 192,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 32,
+        "x": 0,
+        "y": 256,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 33,
+        "x": 64,
+        "y": 256,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 34,
+        "x": 128,
+        "y": 256,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 35,
+        "x": 192,
+        "y": 256,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 36,
+        "x": 256,
+        "y": 256,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 37,
+        "x": 320,
+        "y": 256,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 38,
+        "x": 384,
+        "y": 256,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 39,
+        "x": 448,
+        "y": 256,
+        "width": 64,
+        "height": 64
+      }
+    ]
+  },
+  {
+    "name": "trip_hazard_icons",
+    "width": 320,
+    "height": 64,
+    "cells": [
+      {
+        "index": 0,
+        "x": 0,
+        "y": 0,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 1,
+        "x": 64,
+        "y": 0,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 2,
+        "x": 128,
+        "y": 0,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 3,
+        "x": 192,
+        "y": 0,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "index": 4,
+        "x": 256,
+        "y": 0,
+        "width": 64,
+        "height": 64
+      }
+    ]
+  },
+  {
+    "name": "trip_garage",
+    "width": 960,
+    "height": 540
+  },
+  {
+    "name": "trip_ladder_step",
+    "width": 360,
+    "height": 72,
+    "cells": [
+      {
+        "index": 0,
+        "x": 0,
+        "y": 0,
+        "width": 120,
+        "height": 72
+      },
+      {
+        "index": 1,
+        "x": 120,
+        "y": 0,
+        "width": 120,
+        "height": 72
+      },
+      {
+        "index": 2,
+        "x": 240,
+        "y": 0,
+        "width": 120,
+        "height": 72
+      }
+    ]
+  },
+  {
+    "name": "trip_title_card",
+    "width": 640,
+    "height": 200
+  },
+  {
+    "name": "trip_hud_icons",
+    "width": 168,
+    "height": 24,
+    "cells": [
+      {
+        "index": 0,
+        "x": 0,
+        "y": 0,
+        "width": 24,
+        "height": 24
+      },
+      {
+        "index": 1,
+        "x": 24,
+        "y": 0,
+        "width": 24,
+        "height": 24
+      },
+      {
+        "index": 2,
+        "x": 48,
+        "y": 0,
+        "width": 24,
+        "height": 24
+      },
+      {
+        "index": 3,
+        "x": 72,
+        "y": 0,
+        "width": 24,
+        "height": 24
+      },
+      {
+        "index": 4,
+        "x": 96,
+        "y": 0,
+        "width": 24,
+        "height": 24
+      },
+      {
+        "index": 5,
+        "x": 120,
+        "y": 0,
+        "width": 24,
+        "height": 24
+      },
+      {
+        "index": 6,
+        "x": 144,
+        "y": 0,
+        "width": 24,
+        "height": 24
+      }
+    ]
+  },
+  {
+    "name": "trip_dash_ornaments",
+    "width": 288,
+    "height": 130,
+    "cells": [
+      {
+        "row": 0,
+        "index": 0,
+        "x": 0,
+        "y": 0,
+        "width": 48,
+        "height": 64
+      },
+      {
+        "row": 0,
+        "index": 1,
+        "x": 48,
+        "y": 0,
+        "width": 48,
+        "height": 64
+      },
+      {
+        "row": 0,
+        "index": 2,
+        "x": 96,
+        "y": 0,
+        "width": 48,
+        "height": 64
+      },
+      {
+        "row": 0,
+        "index": 3,
+        "x": 144,
+        "y": 0,
+        "width": 48,
+        "height": 64
+      },
+      {
+        "row": 0,
+        "index": 4,
+        "x": 192,
+        "y": 0,
+        "width": 48,
+        "height": 64
+      },
+      {
+        "row": 0,
+        "index": 5,
+        "x": 240,
+        "y": 0,
+        "width": 48,
+        "height": 64
+      },
+      {
+        "row": 1,
+        "index": 0,
+        "x": 0,
+        "y": 64,
+        "width": 20,
+        "height": 40
+      },
+      {
+        "row": 1,
+        "index": 1,
+        "x": 20,
+        "y": 64,
+        "width": 20,
+        "height": 40
+      },
+      {
+        "row": 1,
+        "index": 2,
+        "x": 40,
+        "y": 64,
+        "width": 20,
+        "height": 40
+      },
+      {
+        "row": 1,
+        "index": 3,
+        "x": 60,
+        "y": 64,
+        "width": 20,
+        "height": 40
+      },
+      {
+        "row": 2,
+        "index": 0,
+        "x": 0,
+        "y": 104,
+        "width": 40,
+        "height": 26
+      },
+      {
+        "row": 2,
+        "index": 1,
+        "x": 40,
+        "y": 104,
+        "width": 40,
+        "height": 26
+      },
+      {
+        "row": 2,
+        "index": 2,
+        "x": 80,
+        "y": 104,
+        "width": 40,
+        "height": 26
+      },
+      {
+        "row": 2,
+        "index": 3,
+        "x": 120,
+        "y": 104,
+        "width": 40,
+        "height": 26
+      }
+    ]
+  }
+]

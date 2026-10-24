@@ -1,0 +1,13 @@
+{
+  "description": "Add as paddles.plain in art/sprites/hd/src/palettes.json; retains the existing rig geometry. p/P are plywood shade, f and E are plywood light; e is the dark rim; G is the black taped handle.",
+  "paddles": {
+    "plain": {
+      "p": [188, 163, 112],
+      "P": [188, 163, 112],
+      "f": [232, 211, 164],
+      "e": [24, 20, 36],
+      "E": [232, 211, 164],
+      "G": [24, 20, 36]
+    }
+  }
+}
