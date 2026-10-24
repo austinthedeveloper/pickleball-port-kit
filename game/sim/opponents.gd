@@ -91,6 +91,8 @@ static func skin(name: String) -> Array:
 ## default CPU.
 static func slot_style(cfg: SimTypes.MatchConfig, slot: int) -> SimTypes.AiStyle:
 	_load()
+	if cfg.trip and cfg.styles[slot] != null:
+		return cfg.styles[slot]          # ROAD TRIP (port ADR-087): the trip's own
 	if slot == 1 and cfg.partner >= 0 and cfg.partner < _teams.size():
 		return _teams[cfg.partner]["players"][0]["style_obj"]
 	if cfg.opponent >= 0 and cfg.opponent < _teams.size() and slot >= 2:

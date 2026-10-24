@@ -229,6 +229,8 @@ const EVENT_POINT := 5
 ## audio_crowd (audio_events.h) as an event, so the sim stays silent:
 ## practice's every-fifth-return cheer (ADR-028/029); detail = level.
 const EVENT_CROWD := 6
+## ROAD TRIP (port ADR-087): a one-sided rule took effect; detail = its K.PERK_* bit.
+const EVENT_PERK := 7
 
 # --- Match (match.h) ----------------------------------------------------------------------
 const MODE_SINGLES := 0
@@ -276,6 +278,14 @@ const BALL_SPEED_MAX := 130
 const BOUNCY_VERTICAL_256 := 175
 const WIND_PERIOD := 8          ## the wind pushes vy by 1 (12.4) every 8 frames aloft
 const WIND_DIRS := [1, -1, 0, -1, 1, 1, -1, 0]   ## a serve's wind, by frame
+## ROAD TRIP's one-sided rules (port ADR-087): bits of MatchConfig.perks,
+## for the left side only, off everywhere but a trip.
+const PERK_HEAD_START := 1      ## every match starts 1-0 to the left
+const PERK_LONG_ARMS := 2       ## the left side's reach as with BIG BALL
+const PERK_SECOND_WIND := 4     ## at match point against the left, it runs faster
+const PERK_KITCHEN_PASS := 8    ## the left side's first KITCHEN! a match is forgiven
+const PERK_SECOND_SERVE := 16   ## the left side's first faulted serve a match is taken again
+const SECOND_WIND_FP := 4       ## the extra top speed
 ## MULTI BALL (port ADR-067): balls trickle in from the net, no serving.
 const MOD_MULTI_BALL := 65536
 const MULTI_MAX := 3            ## balls in play at most

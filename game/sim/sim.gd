@@ -83,6 +83,11 @@ var popcorn_level := 0
 var ice := false
 ## BIG BALL grows reach and sweet spot (collision.c g_hit_box).
 var grow_fp := 0
+## ROAD TRIP's one-sided rules this match (port ADR-087): spent once-a-match
+## perks, and SECOND WIND's extra speed per slot while it's on.
+var kitchen_pass_used := false
+var second_serve_used := false
+var wind_add := [0, 0, 0, 0]
 var ball_pace: Array = []
 var ball_tick := 0
 var rally_start := 0
@@ -383,7 +388,9 @@ func resolve_player_hits() -> int:
 		# A team hits once (KNOWN_ISSUES #19).
 		if ball.last_hitter < K.MAX_PLAYERS and (ball.last_hitter >= 2) == (i >= 2):
 			continue
-		if not in_reach(p, ball, grow_fp):
+		var grow := grow_fp + (K.to_fp(K.MOD_BIG_REACH) if p.team == 0
+			and config.perks & K.PERK_LONG_ARMS else 0)
+		if not in_reach(p, ball, grow):
 			continue
 		p.contact_consumed = 1
 		ball.last_hitter = i
@@ -401,7 +408,7 @@ func resolve_player_hits() -> int:
 				and ball.z_fp >= K.to_fp(K.HIT_OVERHEAD_Z):
 			p.shot_type = K.SHOT_OVERHEAD
 		apply_targeted_shot(ball, p, special_aim(i) if p.shot_type == K.SHOT_SPECIAL
-			else (pop_up_aim(i) if returned else intents[i]), grow_fp)
+			else (pop_up_aim(i) if returned else intents[i]), grow)
 		return i + 1
 	return 0
 
@@ -812,6 +819,7 @@ func resolve_point(losing_team: int, fault: int) -> void:
 	point_scored = not (config.modifiers & K.MOD_SIDE_OUT) or winner == serving_team
 	if point_scored:
 		team_score[winner] += 1
+	_second_wind()
 	for i in K.MAX_PLAYERS:
 		if players[i].active and players[i].team == winner:
 			fill_meter(i, K.SPECIAL_FILL_POINT)
@@ -843,12 +851,24 @@ func rules_process_player_hit(slot: int) -> void:
 	# ADR-055, port-only: a legal volley still can't be made from inside
 	# your own kitchen.
 	if contact_volley and court_in_kitchen(players[slot].x_fp, players[slot].y_fp, team):
+		# KITCHEN PASS (port ADR-087): the left side's first one is forgiven
+		if team == 0 and config.perks & K.PERK_KITCHEN_PASS and not kitchen_pass_used:
+			kitchen_pass_used = true
+			emit(K.EVENT_PERK, K.from_fp(ball.x_fp), K.from_fp(ball.y_fp), K.PERK_KITCHEN_PASS)
+			return
 		resolve_point(team, K.FAULT_KITCHEN)
 
 func rules_process_ball_events(ev: int) -> void:
 	if ev & K.BALL_EVENT_BOUNCE:
 		momentum_slot = -1           # MOMENTUM: the ball bounced, balance back
 	if phase == K.PHASE_SERVE_FAULT:
+		# SECOND SERVE (port ADR-087): the left side's first fault is served again
+		if _last_hitter_team() == 0 and config.perks & K.PERK_SECOND_SERVE \
+				and not second_serve_used and not multi_on:
+			second_serve_used = true
+			emit(K.EVENT_PERK, K.from_fp(ball.x_fp), K.from_fp(ball.y_fp), K.PERK_SECOND_SERVE)
+			_begin_serve(serving_team)
+			return
 		resolve_point(_last_hitter_team(), last_fault)
 		return
 	if phase != K.PHASE_LIVE:
@@ -905,12 +925,34 @@ func match_point(team: int) -> bool:
 		return false
 	return score_wins(team_score[team] + 1, team_score[team ^ 1])
 
+## SECOND WIND (port ADR-087): while the right side has match point, the
+## left side's top speed is up SECOND_WIND_FP (to the most there is).
+func _second_wind() -> void:
+	if not (config.perks & K.PERK_SECOND_WIND):
+		return
+	var on := match_point(1) and not team_won(1)
+	for i in K.MAX_PLAYERS:
+		var p: Player = players[i]
+		if p.team != 0:
+			continue
+		if on and wind_add[i] == 0:
+			wind_add[i] = mini(K.SECOND_WIND_FP, 31 - p.max_speed_fp)
+			p.max_speed_fp += wind_add[i]
+		elif not on and wind_add[i] > 0:
+			p.max_speed_fp -= wind_add[i]
+			wind_add[i] = 0
+
+
 func _game_initialize() -> void:
 	paused = 0
 	last_fault = K.FAULT_NONE
 	point_winner = K.NO_TEAM
 	match_winner = K.NO_TEAM
-	team_score = [0, 0]
+	# HEAD START (port ADR-087): the left side starts a point up
+	team_score = [1 if config.perks & K.PERK_HEAD_START else 0, 0]
+	kitchen_pass_used = false
+	second_serve_used = false
+	wind_add = [0, 0, 0, 0]
 	required_bounce = K.REQUIRED_BOUNCE_NONE
 	serving_team = 0
 	momentum_slot = -1
@@ -977,6 +1019,12 @@ func _activate_players() -> void:
 		# stats (the paddle tables hold every pairing).
 		if i == 0 and config.career_p1 and config.career:
 			p.paddle = Paddles.profile(config.paddle[0], config.career.hat)
+		# ROAD TRIP (port ADR-087): the slot's own stats, not its paddle's
+		var ts: Array = config.trip_stats[i] if config.trip else []
+		if ts.size() == 4:
+			p.paddle = Paddles.trip_profile(int(ts[0]), int(ts[1]), int(ts[2]))
+			if not p.cpu_controlled:
+				p.max_speed_fp = Paddles.trip_feet(int(ts[3]))
 		if p.cpu_controlled:
 			var style: SimTypes.AiStyle = Opponents.slot_style(config, i).copy()
 			# The top speed is the style's before the difficulty (game.c):

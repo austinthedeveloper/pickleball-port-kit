@@ -218,6 +218,15 @@ class MatchConfig:
 	## the match's start (a copy; the sim reads only its hat).
 	var career_p1 := 0
 	var career: Career.Player = null
+	## ROAD TRIP (port ADR-087): `trip` on, a slot's stats come from
+	## `trip_stats` ([power, control, speed, feet], 1 to 20; [] for the
+	## slot's paddle), a CPU slot's play from `styles` (null: as ever), and
+	## `perks` (K.PERK_*) are the left side's one-sided rules. All off, the
+	## sim is the game's as before (the golden and conformance traces).
+	var trip := 0
+	var trip_stats: Array = [[], [], [], []]
+	var styles: Array = [null, null, null, null]
+	var perks := 0
 
 	static func singles() -> MatchConfig:
 		return MatchConfig.new()
