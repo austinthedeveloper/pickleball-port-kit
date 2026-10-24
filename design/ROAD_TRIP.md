@@ -649,32 +649,34 @@ rules are about fitting the game's screens, not the hardware:
 - **Drafts first:** nothing is final until you've approved it, and the
   map gets a mock-up in the game (stage 6) before the art is polished.
 
-### The first set: what each image needs
+### Where each image stands (after the third set)
 
-Which draft to start from, and what to change. "Keep" means it goes in
-after the resize and cut-out.
+The third set (`art/roadtrip-v3/`, 2026-10-24) is the one to build on.
+**Round 4 is a fix pass on it, not a new set:** redo only the rows marked
+**Fix**, starting from the v3 files; leave every **Accepted** image as it
+is (accepted for now: you still approve them in the game, stage 6).
 
-| Image | From | Fixes |
+| Image | Status | What round 4 does |
 |---|---|---|
-| trip_map_dashboard | first | Take the map off the dash (leave the vinyl showing, with its texture) and make the dash top level enough for the flat map drawn on it. Remove the tree air freshener (the mirror's hook stays empty). Blank the gauges' numbers. Keep the wheel, hula figure, deck and cup. |
-| trip_map_paper | first | Redraw at exactly 1800 x 330 with folds every 300 px; keep the middle band lighter where pins go; no junction circles (the game draws the stops). |
-| trip_pins | first | Redraw at 32 x 40 on a transparent sheet: no glow or ground shadows; the shield plain grey for tinting; the van pin from `trip_van`, not a VW bus. |
-| trip_van | first | The keeper's look, as the note says: add the driver's door window, two plain passenger windows, frames that line up, no halo. |
-| trip_van_paints | first, redone | Recolour `trip_van`; the first set's three-quarter views are colour ideas only. |
-| trip_scene_roadside | first or second | Either; the second's lower third needs the shoulder and scrub carried down instead of the brown block. |
-| trip_scene_motel | first or second | Keep. |
-| trip_scene_yard_sale | first or second | Keep. |
-| trip_scene_pro_shop | first or second | Keep. |
-| trip_scene_summer_open | first or second | The first's bottom is crowd; the second's is plain sand. Quieter, but not flat. |
-| trip_garage | first | Keep; its van to follow `trip_van`. |
-| trip_title_card | first | ROAD TRIP as two words; its van to follow `trip_van`. Transparent background. |
-| trip_card | first | Exact 200 x 260 with clean 16 px corners; transparent. |
-| trip_ladder_step | first | Empty the tag windows (no vans); exact 120 x 72; transparent. |
-| trip_gear_icons | first | Cut out on transparent 64 x 64 cells; no lettering (the rain check, the coupons); the hats as the game's own hats (the second set got these right); a plain penny. |
-| trip_hazard_icons | first | The flat tyre on its own, no car; transparent. |
-| trip_hud_icons | first | The odometer without lettering or digits; add an empty heart; transparent 24 x 24. |
-| trip_dash_ornaments | first | The air fresheners without the tree (cherry, lemon, pickle, pineapple); cut out. |
-| trip_paddle_plain | neither | A recolour of the rig's paddle (the second set's palette file is the right idea), plus a 64 x 64 icon. |
+| trip_map_dashboard | **Fix** | Remove the hula figure from the backdrop: the dash ornament is a cosmetic the game draws on top (`trip_dash_ornaments`), so its spot on the left of the dash top is plain vinyl. Everything else stays. |
+| trip_map_paper | **Fix** | Clean the cut-out: the torn edge has a fringe of yellow and red pixels left from the source's background (the edge should be paper, then fully transparent). Move the folds to exactly every 300 px (x 300, 600, 900, 1200, 1500). Keep the look. |
+| trip_gear_icons | **Fix** | Re-crop: many cells hold slivers of the neighbouring icon, cut off by straight lines (the wrist weights, the clipboards, the paddle row, the cap and visor). Each 64 x 64 cell must hold one whole item and nothing else, on transparency, in the note's order. The icons themselves stay. |
+| trip_van | **Fix** | Frames 2 to 4: the wheels smear where they turn. Draw each frame's hub as a clean quarter turn of frame 1's (the same tyre, the same pixels rotated), nothing else changing. |
+| trip_van_paints | **Fix** | The recolour misses parts still in the start's blue: the front and rear bumpers and lower trim on CHERRY and MIDNIGHT, the trim on SUNSET. Every pixel of the lower body colour changes in every paint; the windows, tyres, lights and roof bag never do. |
+| trip_scene_roadside | Accepted | |
+| trip_scene_motel | Accepted | |
+| trip_scene_yard_sale | Accepted | |
+| trip_scene_pro_shop | Accepted | |
+| trip_scene_summer_open | Accepted | |
+| trip_garage | Accepted | |
+| trip_pins | Accepted | |
+| trip_title_card | Accepted | |
+| trip_card | Accepted | |
+| trip_ladder_step | Accepted | |
+| trip_hazard_icons | Accepted | |
+| trip_hud_icons | Accepted | |
+| trip_dash_ornaments | Accepted | |
+| trip_paddle_plain | Accepted | The palette file and the icon. |
 
 ## Build stages
 
