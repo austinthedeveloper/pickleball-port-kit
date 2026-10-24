@@ -4,6 +4,25 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.34.0] - 2026-10-24
+
+Seven new courts, painted.
+
+### Added
+- **Seven new venues** on COURT > VENUE: **WESTERN** (Main Street at
+  golden hour, townsfolk on the boardwalk), **ROOFTOP** (a city roof at
+  dusk), **PIRATES** (a galleon's deck at sea, a parrot on the rail),
+  **MOTEL** (the drained pool at a desert motel), **FAIR** (a county
+  fair's midway, a goat at the fence), **DRIVE-IN** (a drive-in movie at
+  night) and **MALL** (a 1994 mall's centre court). Each has its own
+  crowd of locals, court colours, sounds and match music. MALL and the
+  DRIVE-IN keep their own lighting whatever TIME says.
+- ROAD TRIP's road now passes through them.
+
+### Changed
+- GLOBETROTTER counts the new venues. If you've already earned it, you
+  keep it.
+
 ## [0.33.0] - 2026-10-24
 
 ROAD TRIP, and touch controls for the web.

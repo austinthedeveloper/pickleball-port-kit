@@ -225,6 +225,9 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.33.0** (2026-10-24): PORT-79 text centred, PORT-80 cleanup round 6,
   PORT-81 touch controls, PORT-82 ROAD TRIP (tag `v0.33.0`, on
   `feature/cld-release-0.33.0`).
+- **v0.34.0** (2026-10-24): PORT-83 the painted venues: WESTERN, ROOFTOP,
+  PIRATES, MOTEL, FAIR, DRIVE-IN, MALL (tag `v0.34.0`, on
+  `feature/cld-release-0.34.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 

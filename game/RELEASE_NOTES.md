@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.33.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.34.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-79 of 82 roadmap tasks are in.
+80 of 83 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -496,3 +496,9 @@ Status: **Ready to test** on a phone: export the web build (`game/tools/export.s
 ROAD TRIP (port ADR-087; the plan with your answers and the art: `design/ROAD_TRIP.md`; the art in `art/roadtrip-v3` and `art/roadtrip-r4-fixes`, imported to `game/assets/trip`). A mode on MAIN beside STORY: you and a partner drive to the SUMMER OPEN on a road map of three legs (three columns of stops in three lanes, then a big match; the last leg's is the final against the Champs). Stops: PICKUP GAME, GRUDGE MATCH, YARD SALE, PRO SHOP, MOTEL, DETOUR. You start weak (a plain paddle and cap, four stats at 1 of 20); gear picked one of three (the game's paddles and hats, stacking items, partner training, one-sided rules) makes a trip strong. Three hearts; the trip can end. The miles fill the GARAGE's fixed ladder of lasting rewards (starting stats, a heart, gear, van paints and ornaments); beaten captains become partners; a trip won opens the next HEAT. Nothing counts outside the trip. Seeded: the map, picks, shop and detours are the same wherever played. The sim: `MatchConfig.trip` (a slot's stats, a CPU's style, the left side's perks), off everywhere else.
 
 Status: **Ready to test**: play a trip or three. Say how it feels: too easy or hard (the bot wins leg 1 from the start and needs about 12 in every stat for the final), the length, the prices, the gear. Not built: the cassettes and the map's pen colour (KNOWN_ISSUES #82, #83).
+
+## PORT-83: the painted venues (asked for 2026-10-24)
+
+Seven venues from generated paintings (port ADR-088), after STATION on COURT > VENUE: WESTERN, ROOFTOP, PIRATES, MOTEL (the drained pool from ROAD TRIP's motel), FAIR, DRIVE-IN, MALL. The loop was ROAD TRIP's: I wrote the prompts and reviewed each round, you generated (`art/venues-r1`: prompts, references, concepts, plates, cutouts, locals, both reviews; MOTEL's re-layout in `art/venues-r2-fixes`). `art/levels/tools/painted.py` cuts the layers and paints the court on each floor; every venue has its own locals (`Crowd` takes a venue's sheet), its court presets, its own ambience and match track. MALL and the DRIVE-IN ignore TIME (indoors; already night). ROAD TRIP's legs visit them.
+
+Status: **Ready to test**: play a match at each. Say if a scene, its crowd or its sound should change. Not done: the announcer's lines (KNOWN_ISSUES #85); no parallax (#86).
