@@ -35,3 +35,50 @@ up with it pixel for pixel:
 
 The overscan the camera needs (48 px a side) I extend myself. The prompts
 are in `PROMPTS_R2.md`.
+
+# Round 2: review
+
+All 21 images came back (`GENERATION_R2_NOTES.md` has the generator's
+own notes). I checked each plate against its concept and the court
+outline, each cutout on magenta and over its plate, and the locals
+side by side.
+
+**All 21 are accepted**, with one deterministic fix and a few touch-ups
+done at import. No more generation is needed.
+
+| Venue | Plate | Cutouts | Locals |
+|---|---|---|---|
+| WESTERN | Clean, the street and the buildings intact | Clean | Great: the sheriff, the prospector, the lady in the bonnet |
+| ROOFTOP | Clean | Clean; the chain-link is real see-through mesh | Great; the pizza box is a nice touch |
+| PIRATE SHIP | Clean, the best of the set | Clean | Great, and the parrot's two frames |
+| MOTEL POOL | The re-layout didn't take: fixed (below) | Fixed with the plate | Great: the robe, water wings, the grandma's bathing cap |
+| COUNTY FAIR | Clean; the far crowd under the tents is gone too, which is fine | Clean | Great, and the goat |
+| DRIVE-IN | Clean, the parking lines follow the court's perspective | Clean | Great |
+| MALL | Clean | Clean | Great |
+
+## The motel fix
+
+`../venues-r2-fixes/motel_relayout.py` moves the band above the pool
+floor up 40 px (at 960x540) without scaling it, so the pool's coping and
+tile row end exactly where the court starts (y 222). It stretches the
+floor down to the near strip, and applies the same mapping to the
+cutouts so they stay registered. The pool reads as shallow now, with
+the ladders' rails over the coping, and the motel, the sunset and the
+sign are untouched. `../venues-r2-fixes/` holds the fixed pair, which
+replaces this folder's at import.
+
+## Done at import (no new images)
+
+- **WESTERN's rail** ends about 6 px below the court's far edge: the
+  band above it moves up a few pixels, like the motel's.
+- **The camera's overscan** (24 px above, 48 px each side): the sky's
+  top rows and the floor's edges are extended, and the barrier and the
+  near strip continue past the sides.
+- **Letters on the locals:** the H on the drive-in letterman jacket and
+  the mark on the motel trucker's cap get painted out.
+- **The locals' sizes:** each person is cut from the sheet, put on one
+  baseline and reduced to the 32x64 cells. The kids, the goat and the
+  parrot stay smaller, as drawn.
+- **The near strips:** the mall's palm planter and the drive-in's bonnet
+  come close to the court's near corners. I check them with the players
+  at their widest and trim them if they cover a foot.
