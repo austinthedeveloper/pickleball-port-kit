@@ -4,6 +4,19 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.35.0] - 2026-10-24
+
+A lighter web build.
+
+### Changed
+- **The web build downloads less than half as much**: 21 MB, down from
+  51 MB. Its music and crowd sounds are encoded smaller, and it leaves
+  out ROAD TRIP, the announcer and the seven painted venues (WESTERN,
+  ROOFTOP, PIRATES, MOTEL, FAIR, DRIVE-IN, MALL). The Mac, Windows and
+  Linux builds have everything, as before. On the web, GLOBETROTTER
+  counts the venues the web build has, and a saved painted venue goes
+  back to one it has.
+
 ## [0.34.0] - 2026-10-24
 
 Seven new courts, painted.
