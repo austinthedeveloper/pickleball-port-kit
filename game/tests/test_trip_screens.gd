@@ -153,13 +153,16 @@ func _every_kind_of_stop(seed_value: int) -> void:
 			"pickup":
 				check(s is MatchView and s.trip, "a pickup game is a match")
 				_win(main, s)
-			"grudge", "big", "final":
+			"grudge", "big", "final", "rival":
 				check(s is TripScene and s.pages[0].get("card", false), "%s: its card first" % type)
 				s.done.emit(-1)
 				var m: MatchView = _settle(main)
 				check(m.trip and m.sim.config.trip == 1, "a trip match")
 				eq(m.sim.config.opponent, int(n["team"]))
 				_win(main, m)
+			"diner":
+				check(s is TripScene and s.choices.size() == 4, "the diner's menu")
+				_choose_any(s)
 			"yard":
 				check(s is TripScene)
 				s.done.emit(-1)
@@ -177,9 +180,12 @@ func _every_kind_of_stop(seed_value: int) -> void:
 				check(s is TripScene and s.choices.size() >= 2, "a detour's choices")
 				_choose_any(s)
 		var next: Node = _settle(main)
-		if next is TripScene and map.trip.state == "won":
-			next.done.emit(-1)                 # the closing scene
+		for k in 4:                            # the story's scenes after a match, the closing one
+			if not next is TripScene:
+				break
+			next.done.emit(-1)
 			next = _settle(main)
+
 		if next is TripHome:
 			break
 		check(next is TripMap, "back to the map after a %s" % type)
@@ -263,5 +269,101 @@ func test_a_trip_lost() -> void:
 	home2.garage_page.change(1)
 	eq(home2.garage_page.value_of("van"), "CREAM AND SKY", "no paint jobs yet")
 	home2._close_garage()
+	TripHome.seed_override = 0
+	_done(main, kept)
+
+
+## A second trip (port ADR-092): it opens on the van's story, THE VAN opens
+## over the map and swaps a paddle from the locker, the ROAD HOGS turn up
+## on the long drive (their scene, their names, their match), and the
+## SCRAPBOOK plays a chapter again and comes back.
+func test_the_story_across_trips() -> void:
+	var kept := SaveGame.default_dir
+	TripHome.seed_override = 77
+	var main := _main()
+	var m := RoadTrip.meta(main.save)
+	m["trips"] = 1
+	m["won"] = 1
+	var map := _to_map(main)
+	check(m["beats"].has("van_1"), "the second trip opened on the van's story")
+	var trip: RoadTrip = map.trip
+	trip.take("red_paddle")
+	trip.take("gold_paddle")
+	map.open_van()
+	_ready(map.van)
+	check(map.van is TripVan, "THE VAN over the map")
+	map.van.page.select("paddle")
+	map.van.page.change(1)
+	eq(trip.paddle, "plain_paddle", "the next paddle in the locker")
+	map.van.close()
+	eq(map.van, null)
+	eq(RoadTrip.current(main.save).paddle, "plain_paddle", "the swap is saved")
+	# drive to the ROAD HOGS: win everything on the way
+	var met := false
+	for step in 30:
+		if map.pick:
+			_ready(map.pick)
+			map.pick.take()
+		trip = map.trip
+		if trip.state != "on" or trip.leg() > RoadTrip.RIVAL_LEG:
+			break
+		var target: Array = map._targets[0]
+		var rl: int = trip.map[RoadTrip.RIVAL_LEG]["cols"][1].map(func(x): return x["type"]).find("rival")
+		for tg in map._targets:
+			if trip.leg() == RoadTrip.RIVAL_LEG and int(tg[1]) == rl:
+				target = tg                  # the road to the ROAD HOGS (every stop has one to its own lane)
+		var n := trip.node_for(target)
+		map.select(map.target_id(target))
+		map.press()
+		for f in TripMap.DRIVE_FRAMES + 2:
+			map._process(1.0 / 60.0)
+		var s: Node = _settle(main)
+		if String(n["type"]) == "rival":
+			check(s is TripScene and not s.members.is_empty(), "the ROAD HOGS' scene")
+			eq(s.who_name("captain"), "BUCK")
+			eq(s.pages[1], RoadTrip.beat("hogs_1")["pages"][0], "their first meeting")
+			s.done.emit(-1)
+			var mv: MatchView = _settle(main)
+			eq(mv.trip_name, "ROAD HOGS")
+			met = true
+			_win(main, mv)
+		elif s is MatchView:
+			_win(main, s)
+		elif s is TripScene:
+			if s.choices.is_empty():
+				s.done.emit(-1)
+				s = _settle(main)
+				if s is MatchView:
+					_win(main, s)
+			else:
+				_choose_any(s)
+		elif s is TripShop:
+			s.page.select("leave")
+			s.page.press()
+		var nxt: Node = _settle(main)
+		for k in 4:
+			if not nxt is TripScene:
+				break
+			nxt.done.emit(-1)
+			nxt = _settle(main)
+		if not nxt is TripMap:
+			break
+		map = nxt
+	check(met, "the ROAD HOGS on the long drive")
+	check(map.trip.rival_won, "and beaten")
+	# the SCRAPBOOK
+	map._leave()
+	var home: TripHome = _settle(main)
+	home.page.select("scrapbook")
+	home.page.press()
+	eq(home.view, "scrapbook")
+	home.scrap_page.select("van")
+	home.scrap_page.press()
+	var sc: Node = _settle(main)
+	check(sc is TripScene, "a chapter watched again")
+	eq(sc.pages, RoadTrip.beat("van_1")["pages"])
+	sc.done.emit(-1)
+	home = _settle(main)
+	eq(home.view, "scrapbook", "back in the SCRAPBOOK")
 	TripHome.seed_override = 0
 	_done(main, kept)

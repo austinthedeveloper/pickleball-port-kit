@@ -1,7 +1,9 @@
 ## The PRO SHOP (port ADR-087): four items (the same each visit), a soda
-## for a heart and a fix for the hazards waiting, as a MenuPage ("item_<n>",
-## "soda", "fix", "leave"); beside it the chosen item's icon, its lines and
-## what it does to your stats, and your cash. Buying is the trip's.
+## for a heart, a fix for the hazards waiting, and TRADE IN (port ADR-092:
+## left and right choose something from the locker or the bag, B sells it
+## for half its price), as a MenuPage ("item_<n>", "soda", "fix", "trade",
+## "leave"); beside it the chosen item's icon, its lines and what it does
+## to your stats, and your cash. Buying and selling are the trip's.
 class_name TripShop
 extends Control
 
@@ -15,6 +17,7 @@ var save: SaveGame
 var trip: RoadTrip
 var stock: Array = []
 var page: MenuPage
+var trade := 0                   ## TRADE IN's choice among trip.sellable()
 var _lock := LOCK
 var _icon: Sprite2D
 var _name: BitmapText
@@ -51,15 +54,18 @@ func _ready() -> void:
 		var id := String(stock[i])
 		rows.append({"id": "item_%d" % i, "label": String(RoadTrip.gear(id)["name"]),
 			"value": func(): return _price_label(id), "press": func(): _buy(id)})
-	rows.append({"id": "soda", "label": "SODA: A HEART BACK", "value": func(): return str(RoadTrip.SODA),
+	rows.append({"id": "soda", "label": "SODA: A HEART BACK", "value": func(): return str(trip.soda_price()),
 		"press": func(): _result(trip.buy_soda())})
 	rows.append({"id": "fix", "label": "FIX THE HAZARDS", "value": func(): return str(RoadTrip.FIX) if not trip.hazards.is_empty() else "",
 		"press": func(): _result(trip.buy_fix())})
+	rows.append({"id": "trade", "label": "TRADE IN", "value": func(): return _trade_label(),
+		"change": func(d): _change_trade(d), "press": func(): _sell()})
 	rows.append({"id": "leave", "label": "BACK ON THE ROAD", "press": func(): _leave()})
 	page = MenuPage.new().setup("shop", "PRO SHOP", rows,
 		Rect2(40, 60, 470, 64 + rows.size() * MenuPage.ROW_H + 50), [["hit", "BUY"], ["back", "LEAVE"]])
 	add_child(page)
 	page.hovered.connect(func(_id): _refresh())
+	page.changed.connect(func(_id): _refresh())
 	page.pressed.connect(func(_id): _refresh())
 	page.back_requested.connect(_leave)
 	UiKit.panel(Rect2(540, 60, 380, 300), self)
@@ -77,6 +83,32 @@ func _ready() -> void:
 	_sfx.setup("", false)
 	_refresh()
 	GameControls.clear_latch()
+
+
+## The item TRADE IN would sell, or "".
+func trade_id() -> String:
+	var all := trip.sellable()
+	if all.is_empty():
+		return ""
+	trade = clampi(trade, 0, all.size() - 1)
+	return String(all[trade])
+
+
+func _trade_label() -> String:
+	var id := trade_id()
+	return "NOTHING" if id == "" else "+%d" % trip.sell_price(id)
+
+
+func _change_trade(d: int) -> void:
+	var n := trip.sellable().size()
+	if n > 0:
+		trade = (trade + d + n) % n
+	_refresh()
+
+
+func _sell() -> void:
+	var id := trade_id()
+	_result(id != "" and trip.sell(id))
 
 
 func _price_label(id: String) -> String:
@@ -109,22 +141,15 @@ func _refresh() -> void:
 		l.text = ""
 	if id.begins_with("item_"):
 		var gid := String(stock[int(id.trim_prefix("item_"))])
-		var g := RoadTrip.gear(gid)
-		var icon := int(g["icon"])
-		_icon.texture = load(DIR + "trip_gear_icons.png") if icon >= 0 else load(DIR + "trip_paddle_plain.png")
-		_icon.region_enabled = icon >= 0
-		if icon >= 0:
-			_icon.region_rect = Rect2((icon % 8) * 64, (icon / 8) * 64, 64, 64)
-		_icon.visible = true
-		var nl := TripPick.wrap_name(String(g["name"]))
-		_name.text = String(nl[0]) if nl.size() == 1 else String(g["name"])
-		if BitmapText.measure("big_gold", _name.text) > 340:
-			_name.text = ""
-			_lines[0].text = String(g["name"])
-		_lines[1].text = String(g["lines"][0])
-		_lines[2].text = String(g["lines"][1])
-		if _lines[0].text == "":
-			_lines[0].text = String(g["rarity"]).to_upper()
+		_show_item(gid)
+	elif id == "trade":
+		var tid := trade_id()
+		if tid == "":
+			_lines[0].text = "NOTHING TO TRADE IN."
+			_lines[1].text = "PLAIN GEAR IS WORTHLESS."
+		else:
+			_show_item(tid)
+			_lines[2].text = "SELL IT FOR %d CASH" % trip.sell_price(tid)
 	elif id == "soda":
 		_lines[0].text = "A COLD ONE FROM THE COOLER."
 		_lines[1].text = "ONE HEART BACK."
@@ -135,14 +160,31 @@ func _refresh() -> void:
 		_lines[2].text = ", ".join(names.slice(2))
 
 
+## An item in the panel: its icon, name and two lines.
+func _show_item(gid: String) -> void:
+	var g := RoadTrip.gear(gid)
+	_icon.texture = TripArt.gear_icon(gid)
+	_icon.visible = true
+	var nl := TripPick.wrap_name(String(g["name"]))
+	_name.text = String(nl[0]) if nl.size() == 1 else String(g["name"])
+	if BitmapText.measure("big_gold", _name.text) > 340:
+		_name.text = ""
+		_lines[0].text = String(g["name"])
+	_lines[1].text = String(g["lines"][0])
+	_lines[2].text = String(g["lines"][1])
+	if _lines[0].text == "":
+		_lines[0].text = String(g["rarity"]).to_upper()
+
+
 func _process(_delta: float) -> void:
 	if _lock > 0:
 		_lock -= 1
 		return
-	var nav := page.drive(false)
-	if nav & MenuPage.NAV_MOVED:
+	var nav := page.drive()
+	if nav & (MenuPage.NAV_MOVED | MenuPage.NAV_CHANGED):
 		_beep("blip")
 		_refresh()
+
 	if nav & MenuPage.NAV_BACK:
 		_leave()
 

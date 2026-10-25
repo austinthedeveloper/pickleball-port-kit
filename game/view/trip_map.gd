@@ -5,8 +5,9 @@
 ## you're choosing. The arrows choose among the stops you can drive to
 ## (by id: "stop_<leg>_<col>_<lane>", select()), HIT drives there (the van
 ## goes along the road) and plays the stop (`go`); BACK saves and leaves.
-## A pick waiting (a match won, a yard sale) opens over it first. Reads a
-## RoadTrip; only the trip's own calls change it.
+## A pick waiting (a match won, a yard sale) opens over it first. The VAN
+## button opens THE VAN over it (stats, gear, the locker; port ADR-092).
+## Reads a RoadTrip; only the trip's own calls change it.
 class_name TripMap
 extends Control
 
@@ -26,7 +27,7 @@ const HOME := Vector2(40.0, 165.0)
 const DRIVE_FRAMES := 36
 const PIN := Vector2(32, 40)
 const PIN_INDEX := {"big": 0, "final": 1, "pickup": 2, "grudge": 3, "yard": 4, "shop": 5,
-	"motel": 6, "detour": 7}
+	"motel": 6, "detour": 7, "diner": 9, "rival": 10}
 const ROAD := Color(0.35, 0.33, 0.3, 0.75)
 const DRIVEN := Color(0.78, 0.12, 0.1, 0.95)
 const GOLD := Color("fbe46a")
@@ -37,6 +38,7 @@ var trip: RoadTrip
 var cursor := 0
 var scroll := 0.0
 var pick: TripPick                ## the pick open over the map, if any
+var van: TripVan                  ## THE VAN open over the map, if any
 var _targets: Array = []
 var _lock := LOCK
 var _drive := 0                   ## frames left of the van's drive
@@ -53,8 +55,6 @@ var _strip: Node2D
 var _info: Array = []
 var _prompts: PromptBar
 var _sfx: Sfx
-var _pin_tex: Texture2D
-var _gear_tex: Texture2D
 
 
 func setup(game_save: SaveGame, t: RoadTrip) -> TripMap:
@@ -63,15 +63,16 @@ func setup(game_save: SaveGame, t: RoadTrip) -> TripMap:
 	return self
 
 
+## The cassette in the deck (the GARAGE's), or the radio.
 func music_track() -> String:
-	return "title"
+	var tapes: Array = RoadTrip.data()["tapes"]
+	var tape := int(RoadTrip.meta(save)["looks"].get("tape", 0)) if save else 0
+	return String(tapes[clampi(tape, 0, tapes.size() - 1)]["track"])
 
 
 func _ready() -> void:
 	size = Vector2(960, 540)
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	_pin_tex = load(DIR + "trip_pins.png")
-	_gear_tex = load(DIR + "trip_gear_icons.png")
 	var bg := Sprite2D.new()
 	bg.texture = load(DIR + "trip_map_dashboard.webp")
 	bg.centered = false
@@ -109,8 +110,8 @@ func _ready() -> void:
 	for k in 3:
 		_info.append(UiKit.text("small", "", Vector2(70, 426 + k * 24), 0.0,
 			GOLD if k == 0 else Color.WHITE, self))
-	_prompts = PromptBar.new().setup([["dpad", "CHOOSE"], ["hit", "GO"], ["back", "LEAVE"]],
-		Vector2(672, 514))
+	_prompts = PromptBar.new().setup([["dpad", "CHOOSE"], ["hit", "GO"], ["slice", "VAN"], ["back", "LEAVE"]],
+		Vector2(600, 514))
 	add_child(_prompts)
 	_sfx = Sfx.new()
 	add_child(_sfx)
@@ -204,13 +205,18 @@ func _add_pin(leg: int, col: int, lane: int, index: int, done: bool, team := -1)
 	if index < 0:
 		return
 	var s := Sprite2D.new()
-	s.texture = _pin_tex
-	s.region_enabled = true
-	s.region_rect = Rect2(index * PIN.x, PIN.y if done else 0.0, PIN.x, PIN.y)
+	s.texture = TripArt.pin(index, done)
 	s.position = world_point(leg, col, lane)
 	s.offset = Vector2(0, -PIN.y / 2.0 + 6)
 	if index == 0 and team >= 0 and team < Opponents.count() and not done:
 		s.modulate = Color.WHITE.lerp(Story.team_color(team), 0.55)   # the crest in the team's colours
+	if index == PIN_INDEX["rival"] and not done:
+		var rv := Sprite2D.new()                # the ROAD HOGS' RV, parked by their court
+		rv.texture = load(DIR + "trip_rv.png")
+		rv.flip_h = true
+		rv.scale = Vector2(0.6, 0.6)
+		rv.position = world_point(leg, col, lane) + Vector2(-30, 4)
+		_pins.add_child(rv)
 	_pins.add_child(s)
 
 
@@ -277,20 +283,7 @@ func _strip_refresh() -> void:
 
 ## A gear item's icon (the plain paddle has its own), at `scale` of 64 px.
 func gear_icon(id: String, at: Vector2, scale: float, parent: Node) -> Sprite2D:
-	var g := RoadTrip.gear(id)
-	var s := Sprite2D.new()
-	var icon := int(g.get("icon", 0))
-	if icon < 0:
-		s.texture = load(DIR + "trip_paddle_plain.png")
-	else:
-		s.texture = _gear_tex
-		s.region_enabled = true
-		s.region_rect = Rect2((icon % 8) * 64, (icon / 8) * 64, 64, 64)
-	s.centered = false
-	s.scale = Vector2(scale, scale)
-	s.position = at
-	parent.add_child(s)
-	return s
+	return TripArt.sprite(TripArt.gear_icon(id), at, scale, parent)
 
 
 func _info_refresh() -> void:
@@ -341,7 +334,7 @@ func _dash(a: Vector2, b: Vector2, c: Color) -> void:
 
 
 func _draw_cursor() -> void:
-	if _targets.is_empty() or _drive > 0 or pick != null:
+	if _targets.is_empty() or _drive > 0 or pick != null or van != null:
 		return
 	var t: Array = _targets[cursor]
 	var p := world_point(trip.leg(), int(t[0]), int(t[1])) + Vector2(0, -24)
@@ -403,6 +396,30 @@ func _on_pick_closed() -> void:
 	refresh()
 
 
+## THE VAN, over the map: your stats, your gear, the locker.
+func open_van() -> void:
+	if van or pick or _drive > 0:
+		return
+	_beep("confirm")
+	_prompts.visible = false
+	van = TripVan.new().setup(save, trip)
+	van.closed.connect(_on_van_closed)
+	add_child(van)
+	_cursor_ring.queue_redraw()
+
+
+func _on_van_closed() -> void:
+	if van:
+		van.queue_free()
+	van = null
+	_prompts.visible = true
+	trip.store(save)
+	if save:
+		save.save_game()
+	_lock = LOCK
+	refresh()
+
+
 func _leave() -> void:
 	_beep("back")
 	trip.store(save)
@@ -431,10 +448,13 @@ func _process(_delta: float) -> void:
 			_van_frame(0)
 			go.emit(_targets[cursor])
 		return
-	if pick:
+	if pick or van:
 		return
 	if _lock > 0:
 		_lock -= 1
+		return
+	if Input.is_action_just_pressed("slice"):
+		open_van()
 		return
 	if GameControls.menu_pressed("move_right") or GameControls.menu_pressed("move_down"):
 		move(1)
@@ -449,8 +469,9 @@ func _process(_delta: float) -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
-	if pick or _drive > 0:
+	if pick or van or _drive > 0:
 		return
+
 	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_RIGHT:
 			_leave()

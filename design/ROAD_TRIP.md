@@ -744,3 +744,36 @@ Everything above is built (ADR-087 has the details), except:
   30 minutes. The balance is a first guess (KNOWN_ISSUES #82).
 - **Screenshots**: `godot --path game --resolution 960x540 -s res://tools/trip_shot.gd -- <home|garage|results|map|pick|shop|card|team|detour|motel|start|match> 60 out.png`.
 
+
+## Round two (2026-10-24, `feature/cld-trip-roads`, port ADR-092)
+
+Asked for: "some way to see stats for the player. Maybe they can also
+trade out equipment. Create more scenarios, items, other things you'd
+like. The story could also be layered where it evolves over multiple
+playthroughs." No sim change; ADR-092 has the details.
+
+- **THE VAN** (Y on a pad, I on the keyboard, on the map): your stats as
+  bars, each point coloured by where it comes from; your partner's; your
+  paddle and hat (left and right swap in one from **the locker**, where
+  everything you've replaced is kept), the bag, the **sets**.
+- **TRADE IN** at the PRO SHOP: half the price for something in the
+  locker or the bag.
+- **More road**: 19 items, 8 sets, 4 hazards, 13 detours (7 at the
+  painted venues), the **DINER** (a meal for the next match).
+- **The story across trips**: 20 beats in four arcs, each scene once,
+  when it's due:
+
+  | Arc | What happens | Lasting reward |
+  |---|---|---|
+  | THE VAN (with Pepper) | Grandpa's van and his first SUMMER OPEN; a photo in the glovebox; an old court with two names on the bench; the stranger on the coast (Dale Dawson) | GRANDPA'S PADDLE on the road |
+  | THE ROAD HOGS | A rival pair in an RV who turn up on the long drive every trip from the second; they get better, break down, and come round | The ROAD HOG PADDLE |
+  | THE CHAMPS | Ace's lines change after a trip won, then at HEAT 2 and 4; win at HEAT 4 to learn who taught Ace | The CHAMPION'S PADDLE |
+  | THE MIXTAPE | Side A, side B, the bonus track, the remix, as new legs start | Four cassettes for the map's music |
+
+  A captain partner opens a trip with their own lines, and a second trip
+  on has its own opening. The **SCRAPBOOK** on ROAD TRIP's page shows
+  the chapters seen, replays them, and hints at the next.
+- **The art**: eight images, prompts in `art/roadtrip-r5/PROMPTS.md`;
+  placeholders until then.
+- **Screenshots**: `tools/trip_shot.gd` also takes `van`, `scrapbook`,
+  `diner`, `rival`, `old_court` and `drive_in`.

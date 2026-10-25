@@ -1244,6 +1244,8 @@ func _trip_save(dir: String) -> SaveGame:
 	m["best_leg"] = 3
 	m["heat"] = 5
 	m["partners"] = [0, 1, 2, 3, 4, 5, 6, 7]
+	m["tapes"] = [1, 2, 3, 4]
+	m["story_pool"] = ["grandpas_paddle", "hog_paddle", "champ_paddle"]
 	return sv
 
 
@@ -1307,9 +1309,15 @@ func test_trip_home() -> void:
 			h._open_garage()
 			for v in g["vans"]:
 				for o in g["ornaments"]:
-					m["looks"] = {"van": int(v), "ornament": int(o)}
+					m["looks"] = {"van": int(v), "ornament": int(o), "tape": 0}
 					h.garage_page.refresh()
 					check_layout(h, "the GARAGE at %d miles, van %d, ornament %d (device %d)" % [miles, v, o, dev])
+			for tp in g["tapes"]:
+				m["looks"]["tape"] = int(tp)
+				h.garage_page.select("tape")
+				h.garage_page.refresh()
+				check_layout(h, "the GARAGE at %d miles, cassette %d (device %d)" % [miles, tp, dev])
+
 			var gnode := h._garage
 			h._close_garage()
 			gnode.free()
@@ -1425,15 +1433,25 @@ func test_trip_scenes() -> void:
 	for dev in _devices():
 		_device(dev)
 		var all := []
-		for key in ["start", "won", "over", "motel", "yard_sale", "pro_shop", "lost"]:
+		for key in ["start", "won", "over", "motel", "yard_sale", "pro_shop", "lost", "diner", "start_again"]:
 			all.append([key, scenes[key], -1])
+		for key in ["rival_again", "rival_friendly"]:
+			all.append([key, scenes[key], -1, RoadTrip.rival_members()])
 		for team in scenes["teams"].size():
 			all.append(["team %d" % team, scenes["teams"][team], team])
+		for p in scenes["partner_start"].size():
+			all.append(["partner start %d" % p, scenes["partner_start"][p], -1])
+		for b in RoadTrip.data()["beats"]:
+			var sc := RoadTrip.beat_scene(b)
+			all.append(["beat " + String(b["id"]), sc["pages"], int(sc["opts"].get("team", -1)),
+				sc["opts"].get("members", [])])
 		for e in all:
 			for partner in [RoadTrip.PEPPER, 3]:
 				t.partner = partner
 				var s := TripScene.new().setup(t, e[1], me, "WWWWWWWW", {"venue": "park", "team": int(e[2]),
+					"members": e[3] if e.size() > 3 else [],
 					"card": {"over": "LEG 2: THE LONG DRIVE", "title": "THE SUMMER OPEN",
+
 						"lines": ["VS " + (RoadTrip.opponent_name({"team": int(e[2])}) if int(e[2]) >= 0 else "SCHOOL GUARDS"),
 							"STATION NIGHT, FIRST TO 7", "TODAY: GHOST BALL, SUDDEN DEATH"]}})
 				runner.root.add_child(s)
@@ -1448,18 +1466,35 @@ func test_trip_scenes() -> void:
 			var choices := []
 			for ch in d["choices"]:
 				choices.append({"label": String(ch["label"]), "enabled": false, "value": "NEED 20"})
-			var s2 := TripScene.new().setup(t, [{"who": "narrator", "lines": d["lines"]}], me, "YOU",
-				{"art": String(d["art"]), "choices": choices})
+			var sc := RoadTrip.detour_scene(d)
+			var opts: Dictionary = sc["opts"]
+			opts["choices"] = choices
+			var s2 := TripScene.new().setup(t, sc["pages"], me, "YOU", opts)
 			runner.root.add_child(s2)
-			s2.shown = s2._text_of(s2._page()).length()
-			s2._process(0.0)
-			check_layout(s2, "detour %s, reading (device %d)" % [d["id"], dev])
+			for i in s2.pages.size():
+				s2.page = i
+				s2._show_page()
+				s2.shown = s2._text_of(s2._page()).length()
+				s2._process(0.0)
+				check_layout(s2, "detour %s, page %d (device %d)" % [d["id"], i, dev])
 			s2._open_choices()
 			for i in choices.size():
 				s2.choice_page.select("choice_%d" % i)
 				check_layout(s2, "detour %s, choice %d (device %d)" % [d["id"], i, dev])
 			s2.free()
+		var diner := TripScene.new().setup(t, scenes["diner"], me, "YOU", {"art": "diner", "choices": [
+			{"label": "PANCAKES: +3 POWER NEXT MATCH", "enabled": true},
+			{"label": "PIE: +3 CONTROL NEXT MATCH", "enabled": true},
+			{"label": "COFFEE: +3 SPEED NEXT MATCH", "enabled": true},
+			{"label": "THE WORKS: +2 ALL, 20 CASH", "enabled": false, "value": "NEED 20"}]})
+		runner.root.add_child(diner)
+		diner._open_choices()
+		for i in 4:
+			diner.choice_page.select("choice_%d" % i)
+			check_layout(diner, "the diner's menu, choice %d (device %d)" % [i, dev])
+		diner.free()
 		var motel := TripScene.new().setup(t, scenes["motel"], me, "YOU", {"art": "motel", "choices": [
+
 			{"label": "SLEEP IT OFF: A HEART BACK", "enabled": false, "value": "FULL"},
 			{"label": "PARTNER PRACTISES: +1 EACH STAT", "enabled": true}]})
 		runner.root.add_child(motel)
@@ -1469,3 +1504,106 @@ func test_trip_scenes() -> void:
 	GameControls.last_device = kept[0]
 	Settings.pad_glyphs = kept[1]
 	GameControls.device_serial += 1
+
+
+## THE VAN (port ADR-092): every row, every bag item and set, the longest
+## names in hand, the locker full, a meal and hazards along the bottom.
+func test_trip_van() -> void:
+	var kept := [GameControls.last_device, Settings.pad_glyphs]
+	var sv := _trip_save("user://test_layout_trip_van/")
+	for dev in _devices():
+		_device(dev)
+		for full in [false, true]:
+			var t := RoadTrip.create(4, 5, 3) if full else RoadTrip.create(4, 0, RoadTrip.PEPPER)
+			if full:
+				t = _full_trip(4)
+				t.hearts = RoadTrip.HEARTS_MAX
+				t.take("champ_paddle")
+				t.take("viking")
+				t.meal = "works"
+				t.hazards = ["wrong_glasses", "heat_wave", "flat_tire", "storm"]
+				t.seed = 99999
+				t.partner = 3
+			var v := TripVan.new().setup(sv, t)
+			runner.root.add_child(v)
+			if not v.is_node_ready():
+				v._ready()
+			for row in v.page.rows:
+				v.page.select(String(row["id"]))
+				v._refresh()
+				check_layout(v, "THE VAN, %s, full %s (device %d)" % [row["id"], full, dev])
+			v.page.select("bag")
+			for i in v.bag_items().size():
+				v.bag_i = i
+				v._refresh()
+				check_layout(v, "THE VAN, bag item %s" % v.bag_items()[i])
+			v.page.select("sets")
+			for i in v.sets_shown().size():
+				v.set_i = i
+				v._refresh()
+				check_layout(v, "THE VAN, set %s" % v.sets_shown()[i]["id"])
+			for kind in ["paddle", "hat"]:
+				v.page.select(kind)
+				for k in t.choices_of(kind).size():
+					v.page.change(1)
+					v._refresh()
+					check_layout(v, "THE VAN, %s %s" % [kind, t.paddle if kind == "paddle" else t.hat])
+			v.free()
+	GameControls.last_device = kept[0]
+	Settings.pad_glyphs = kept[1]
+	GameControls.device_serial += 1
+
+
+## The SCRAPBOOK (port ADR-092): every arc with nothing seen, then with
+## every chapter seen, each chapter chosen.
+func test_trip_scrapbook() -> void:
+	var kept := [GameControls.last_device, Settings.pad_glyphs]
+	var sv := _trip_save("user://test_layout_trip_scrap/")
+	var m := RoadTrip.meta(sv)
+	for dev in _devices():
+		_device(dev)
+		for seen in [false, true]:
+			m["beats"] = RoadTrip.data()["beats"].map(func(b): return String(b["id"])) if seen else []
+			var h := TripHome.new().setup(sv, {}, "scrapbook")
+			runner.root.add_child(h)
+			if not h.is_node_ready():
+				h._ready()
+			eq(h.view, "scrapbook")
+			for row in h.scrap_page.rows:
+				var id := String(row["id"])
+				h.scrap_page.select(id)
+				h._scrap_refresh()
+				check_layout(h, "the SCRAPBOOK, %s, seen %s (device %d)" % [id, seen, dev])
+				if id != "back":
+					for k in RoadTrip.arc_seen(m, id).size():
+						h.scrap_page.change(1)
+						h._scrap_refresh()
+						check_layout(h, "the SCRAPBOOK, %s chapter %d" % [id, h.chosen(id)])
+			h.free()
+	m["beats"] = []
+	GameControls.last_device = kept[0]
+	Settings.pad_glyphs = kept[1]
+	GameControls.device_serial += 1
+
+
+## The story's stops on the map's panel: the ROAD HOGS, a story detour
+## (with and without the ROAD ATLAS), the diner.
+func test_trip_story_stops() -> void:
+	var sv := _trip_save("user://test_layout_trip_story/")
+	var m := RoadTrip.meta(sv)
+	m["beats"] = ["van_1", "van_2"]
+	m["trips"] = 3
+	var t := RoadTrip.create(12, 0, RoadTrip.PEPPER, m)
+	t.take("road_atlas")
+	var map := TripMap.new().setup(sv, t)
+	runner.root.add_child(map)
+	if not map.is_node_ready():
+		map._ready()
+	for n in [t.map[1]["cols"][1].filter(func(x): return x["type"] == "rival")[0],
+			t.map[1]["cols"][0].filter(func(x): return x["type"] == "detour")[0],
+			{"type": "diner"}]:
+		var lines := t.info(n)
+		for k in 3:
+			map._info[k].text = String(lines[k]) if k < lines.size() else ""
+		check_layout(map, "the map's panel on a %s" % n["type"])
+	map.free()

@@ -1,15 +1,19 @@
 ## ROAD TRIP's home (port ADR-087): the garage, the mode's logo, and a
 ## MenuPage: CONTINUE (the trip in progress), NEW TRIP (pressed twice over
 ## a trip in progress), PARTNER (Pepper or a captain you've beaten), HEAT,
-## GARAGE and BACK; under it the trip records. GARAGE shows the ladder of
-## lasting rewards (the steps reached stamped, the next and the ones after)
-## and the looks you've unlocked (VAN, ORNAMENT). After a trip, its results
-## first: how far, the matches, the miles and the steps they reached.
+## GARAGE, SCRAPBOOK and BACK; under it the trip records. GARAGE shows the
+## ladder of lasting rewards (the steps reached stamped, the next and the
+## ones after) and the looks you've unlocked (VAN, ORNAMENT, CASSETTE).
+## SCRAPBOOK (port ADR-092) shows the story told across trips, arc by arc:
+## the chapters seen (left and right, B watches one again) and a hint at
+## the next. After a trip, its results first: how far, the matches, the
+## miles and the steps they reached.
 class_name TripHome
 extends Control
 
 signal start(trip: RoadTrip)     ## a new trip, stored
 signal resume(trip: RoadTrip)    ## the trip in progress
+signal replay(beat: Dictionary)  ## a SCRAPBOOK chapter to watch again
 signal leave
 
 const DIR := "res://assets/trip/"
@@ -24,7 +28,9 @@ const IN_WINDOW := 28.0                ## px a reward's picture fills
 var save: SaveGame
 var page: MenuPage
 var garage_page: MenuPage
-var view := "home"               ## "home", "garage", "results"
+var scrap_page: MenuPage
+var view := "home"               ## "home", "garage", "scrapbook", "results"
+var chapter := {}                ## the SCRAPBOOK's chapter chosen per arc
 var heat := 0
 var partner := RoadTrip.PEPPER
 var new_armed := false
@@ -35,12 +41,18 @@ var _lock := LOCK
 var _records: Array = []
 var _garage: Control
 var _results: Control
+var _scrap: Control
+var _scrap_lines: Array = []
+var _open := ""
+var _bg: Sprite2D
 var _sfx: Sfx
 
 
-func setup(game_save: SaveGame, ended: Dictionary = {}) -> TripHome:
+## `open`: a view to open on ("scrapbook", back from watching a chapter).
+func setup(game_save: SaveGame, ended: Dictionary = {}, open := "") -> TripHome:
 	save = game_save
 	results = ended
+	_open = open
 	var m := RoadTrip.meta(save)
 	heat = int(m["heat"])
 	return self
@@ -57,10 +69,10 @@ func meta() -> Dictionary:
 func _ready() -> void:
 	size = Vector2(960, 540)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var bg := Sprite2D.new()
-	bg.texture = load(DIR + "trip_garage.webp")
-	bg.centered = false
-	add_child(bg)
+	_bg = Sprite2D.new()
+	_bg.texture = load(DIR + "trip_garage.webp")
+	_bg.centered = false
+	add_child(_bg)
 	var shade := ColorRect.new()
 	shade.color = Color(0.02, 0.02, 0.06, 0.25)
 	shade.size = size
@@ -79,6 +91,8 @@ func _ready() -> void:
 	_build_records()
 	if not results.is_empty():
 		_show_results()
+	elif _open == "scrapbook":
+		_open_scrapbook()
 	GameControls.clear_latch()
 
 
@@ -100,9 +114,11 @@ func _build_home() -> void:
 		"change": func(d): heat = clampi(heat + d, 0, int(meta()["heat"]))})
 	rows.append({"id": "garage", "label": "GARAGE", "value": func(): return "STEP %d/%d" % [
 		RoadTrip.steps_reached(meta()), RoadTrip.data()["ladder"].size()], "press": func(): _open_garage()})
+	rows.append({"id": "scrapbook", "label": "SCRAPBOOK", "value": func(): return "%d/%d" % [
+		meta()["beats"].size(), RoadTrip.data()["beats"].size()], "press": func(): _open_scrapbook()})
 	rows.append({"id": "back", "label": "BACK", "press": func(): _leave()})
 	page = MenuPage.new().setup("trip", "", rows,
-		Rect2(540, 148, 400, 18 + rows.size() * MenuPage.ROW_H + 50), [["hit", "SELECT"], ["back", "BACK"]])
+		Rect2(540, 136, 400, 18 + rows.size() * MenuPage.ROW_H + 50), [["hit", "SELECT"], ["back", "BACK"]])
 	add_child(page)
 	page.pressed.connect(func(_id): page.refresh())
 	page.back_requested.connect(_on_back)
@@ -163,6 +179,8 @@ func _on_back() -> void:
 	match view:
 		"garage":
 			_close_garage()
+		"scrapbook":
+			_close_scrapbook()
 		"results":
 			_close_results()
 		_:
@@ -170,10 +188,10 @@ func _on_back() -> void:
 
 
 func _build_records() -> void:
-	var p := UiKit.panel(Rect2(540, 382, 400, 120), self)
+	var p := UiKit.panel(Rect2(540, 408, 400, 112), self)
 	p.name = "records"
 	for k in 3:
-		_records.append(UiKit.text("small", "", Vector2(560, 398 + k * 28), 0.0, DIM, self))
+		_records.append(UiKit.text("small", "", Vector2(560, 422 + k * 26), 0.0, DIM, self))
 	_refresh_records()
 
 
@@ -194,9 +212,9 @@ func _open_garage() -> void:
 	_garage = Control.new()
 	_garage.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_garage)
-	UiKit.panel(Rect2(40, 150, 880, 214), _garage)
+	UiKit.panel(Rect2(40, 136, 880, 206), _garage)
 	_show_records(false)
-	UiKit.text("big_gold", "THE GARAGE", Vector2(480, 162), 0.5, Color.WHITE, _garage)
+	UiKit.text("big_gold", "THE GARAGE", Vector2(480, 146), 0.5, Color.WHITE, _garage)
 	var m := meta()
 	var reached := RoadTrip.steps_reached(m)
 	var ladder: Array = RoadTrip.data()["ladder"]
@@ -206,7 +224,7 @@ func _open_garage() -> void:
 		var i := first + k
 		if i >= ladder.size():
 			break
-		var at := Vector2(480 - (TAGS_SHOWN * 160 - 40) / 2.0 + k * 160, 204)
+		var at := Vector2(480 - (TAGS_SHOWN * 160 - 40) / 2.0 + k * 160, 186)
 		var tag := Sprite2D.new()
 		tag.texture = tags
 		tag.region_enabled = true
@@ -221,10 +239,10 @@ func _open_garage() -> void:
 			GOLD if i == reached else DIM, _garage)
 	var nxt := "THE TOP OF THE LADDER!" if reached >= ladder.size() else \
 		"NEXT: " + RoadTrip.step_label(reached)
-	UiKit.text("small", nxt, Vector2(480, 304), 0.5, GOLD, _garage)
+	UiKit.text("small", nxt, Vector2(480, 284), 0.5, GOLD, _garage)
 	if reached < ladder.size():
 		UiKit.text("small", "%d MILES TO GO, %d DRIVEN" % [RoadTrip.miles_to_next(m), int(m["miles"])],
-			Vector2(480, 328), 0.5, DIM, _garage)
+			Vector2(480, 308), 0.5, DIM, _garage)
 	var g := RoadTrip.garage(m)
 	var looks: Dictionary = m["looks"]
 	garage_page = MenuPage.new().setup("garage", "", [
@@ -232,8 +250,10 @@ func _open_garage() -> void:
 			"change": func(d): looks["van"] = _cycle(g["vans"], int(looks["van"]), d)},
 		{"id": "ornament", "label": "ORNAMENT", "value": func(): return String(RoadTrip.data()["ornaments"][int(looks["ornament"])]),
 			"change": func(d): looks["ornament"] = _cycle(g["ornaments"], int(looks["ornament"]), d)},
+		{"id": "tape", "label": "CASSETTE", "value": func(): return String(RoadTrip.data()["tapes"][int(looks["tape"])]["name"]),
+			"change": func(d): looks["tape"] = _cycle(g["tapes"], int(looks["tape"]), d)},
 		{"id": "back", "label": "BACK", "press": func(): _close_garage()},
-	], Rect2(250, 372, 460, 18 + 3 * MenuPage.ROW_H + 50), [["dpad", "CHANGE"], ["back", "BACK"]])
+	], Rect2(250, 352, 460, 18 + 4 * MenuPage.ROW_H + 50), [["dpad", "CHANGE"], ["back", "BACK"]])
 	_garage.add_child(garage_page)
 	garage_page.back_requested.connect(_close_garage)
 	_lock = LOCK
@@ -252,9 +272,8 @@ func _step_icon(i: int, at: Vector2) -> void:
 	s.region_enabled = true
 	if step.has("pool") or step.has("start_paddle"):
 		var id := String(step["pool"][0]) if step.has("pool") else String(step["start_paddle"])
-		var icon := int(RoadTrip.gear(id)["icon"])
-		s.texture = load(DIR + "trip_gear_icons.png")
-		s.region_rect = Rect2((icon % 8) * 64, (icon / 8) * 64, 64, 64)
+		s.region_enabled = false
+		s.texture = TripArt.gear_icon(id)
 	elif step.has("van"):
 		s.texture = load(DIR + "trip_van_paints.png")
 		s.region_rect = Rect2(64 * int(step["van"]), 0, 64, 40)
@@ -271,7 +290,8 @@ func _step_icon(i: int, at: Vector2) -> void:
 		var t := UiKit.text("small", "+%d" % n, at + Vector2(0, -12), 0.5, Color(0.3, 0.25, 0.2), _garage)
 		t.ink = true
 		return
-	var k2 := IN_WINDOW / maxf(s.region_rect.size.x, s.region_rect.size.y)
+	var box := s.region_rect.size if s.region_enabled else s.texture.get_size()
+	var k2 := IN_WINDOW / maxf(box.x, box.y)
 	s.scale = Vector2(k2, k2)
 	_garage.add_child(s)
 
@@ -295,6 +315,100 @@ func _show_records(on: bool) -> void:
 	var p := get_node_or_null("records")
 	if p:
 		p.visible = on
+
+
+# --- The SCRAPBOOK ------------------------------------------------------------------
+
+func _open_scrapbook() -> void:
+	_beep("confirm")
+	view = "scrapbook"
+	page.visible = false
+	_show_records(false)
+	_scrap = Control.new()
+	_scrap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_scrap)
+	if TripArt.has_backdrop("scrapbook"):
+		_bg.texture = TripArt.backdrop("scrapbook")
+	var rows := []
+	for arc in RoadTrip.data()["arcs"]:
+		var id := String(arc["id"])
+		rows.append({"id": id, "label": String(arc["name"]), "value": func(): return _arc_value(id),
+			"change": func(d): _change_chapter(id, d), "press": func(): _watch(id)})
+	rows.append({"id": "back", "label": "BACK", "press": func(): _close_scrapbook()})
+	scrap_page = MenuPage.new().setup("scrapbook", "SCRAPBOOK", rows,
+		Rect2(200, 136, 560, 64 + rows.size() * MenuPage.ROW_H + 50),
+		[["dpad", "CHAPTER"], ["hit", "WATCH"], ["back", "BACK"]])
+	_scrap.add_child(scrap_page)
+	scrap_page.back_requested.connect(_close_scrapbook)
+	scrap_page.hovered.connect(func(_id): _scrap_refresh())
+	scrap_page.changed.connect(func(_id): _scrap_refresh())
+	UiKit.panel(Rect2(130, 396, 700, 110), _scrap)
+	for k in 3:
+		_scrap_lines.append(UiKit.text("small", "", Vector2(480, 410 + k * 28), 0.5,
+			GOLD if k == 0 else (Color.WHITE if k == 1 else DIM), _scrap))
+	_scrap_refresh()
+	_lock = LOCK
+
+
+func _arc_value(arc: String) -> String:
+	return "%d/%d" % [RoadTrip.arc_seen(meta(), arc).size(), RoadTrip.arc_beats(arc).size()]
+
+
+## The chapter chosen in an arc: the latest seen, until you choose another.
+func chosen(arc: String) -> int:
+	var seen := RoadTrip.arc_seen(meta(), arc)
+	return clampi(int(chapter.get(arc, seen.size() - 1)), 0, maxi(0, seen.size() - 1))
+
+
+func _change_chapter(arc: String, d: int) -> void:
+	var n := RoadTrip.arc_seen(meta(), arc).size()
+	if n > 0:
+		chapter[arc] = (chosen(arc) + d + n) % n
+	_scrap_refresh()
+
+
+func _watch(arc: String) -> void:
+	var seen := RoadTrip.arc_seen(meta(), arc)
+	if seen.is_empty():
+		_beep("back")
+		return
+	_beep("confirm")
+	replay.emit(seen[chosen(arc)])
+
+
+func _scrap_refresh() -> void:
+	scrap_page.refresh()
+	var arc := scrap_page.current_id()
+	for l in _scrap_lines:
+		l.text = ""
+	if arc == "back":
+		_scrap_lines[0].text = "%d OF %d CHAPTERS SEEN" % [meta()["beats"].size(), RoadTrip.data()["beats"].size()]
+		return
+	var seen := RoadTrip.arc_seen(meta(), arc)
+	if seen.is_empty():
+		_scrap_lines[0].text = "NOT STARTED"
+	else:
+		var i := chosen(arc)
+		_scrap_lines[0].text = "CHAPTER %d: %s" % [i + 1, String(seen[i]["title"])]
+	var hint := RoadTrip.arc_hint(meta(), arc)
+	_scrap_lines[1].text = "NEXT: " + hint if hint != "" else "THE END. FOR NOW."
+	if not seen.is_empty():
+		_scrap_lines[2].text = "WATCH IT AGAIN ANY TIME."
+
+
+func _close_scrapbook() -> void:
+	_beep("back")
+	view = "home"
+	if _scrap:
+		_scrap.queue_free()
+		_scrap = null
+		scrap_page = null
+	_scrap_lines.clear()
+	_bg.texture = load(DIR + "trip_garage.webp")
+	page.visible = true
+
+	_show_records(true)
+	_lock = LOCK
 
 
 # --- Results --------------------------------------------------------------------------
@@ -363,6 +477,14 @@ func _process(_delta: float) -> void:
 				_beep("blip")
 			if nav & MenuPage.NAV_BACK:
 				_close_garage()
+		"scrapbook":
+			var nav3 := scrap_page.drive()
+			if nav3 & (MenuPage.NAV_MOVED | MenuPage.NAV_CHANGED):
+				_beep("blip")
+				_scrap_refresh()
+			if nav3 & MenuPage.NAV_BACK:
+				_close_scrapbook()
+
 		_:
 			var nav2 := page.drive()
 			if nav2 & MenuPage.NAV_MOVED:

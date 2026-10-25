@@ -2,7 +2,9 @@
 ##   godot --path game --resolution 960x540 -s res://tools/trip_shot.gd -- <screen> <frames> <out.png> [seed=N] [pad]
 ## Screens: home, garage, results, map (a trip some stops in, gear on),
 ## map_start (a new trip), pick, shop, card (a big match's card), team (its
-## scene), detour, motel, start. A scratch save, nothing written.
+## scene), detour, motel, start; and port ADR-092's van (THE VAN),
+## scrapbook, diner, rival (the ROAD HOGS' scene), old_court (a story
+## detour), drive_in (a detour at a venue). A scratch save, nothing written.
 extends SceneTree
 
 var _frames := 0
@@ -35,13 +37,19 @@ func _initialize() -> void:
 	m["best_leg"] = 3
 	m["heat"] = 1
 	m["partners"] = [0, 1, 3]
-	m["looks"] = {"van": 2, "ornament": 1}
+	m["looks"] = {"van": 2, "ornament": 1, "tape": 1}
+	m["beats"] = ["van_1", "van_2", "hogs_1", "tape_1", "champs_1"]
+	m["tapes"] = [1]
 	var t := RoadTrip.create(seed_value, 0, RoadTrip.PEPPER, m)
 	t._meta_for_draw = m
 	if screen != "map_start" and screen != "start" and not "plain" in a:
 		_advance(t, 4)
-		for id in ["red_paddle", "visor", "grip_tape", "grip_tape", "spare_paddle", "pickle_jar", "dink_drill"]:
+		for id in ["red_paddle", "visor", "grip_tape", "grip_tape", "spare_paddle", "pickle_jar", "dink_drill",
+				"tricorn", "wood_paddle", "tip_jar"]:
 			t.take(id)
+		t.equip("red_paddle")
+		t.meal = "pancakes"
+		t.boost = [0, 1, 0, 0]
 		t.cash = 85
 		t.hearts = 3
 		t.hazards = ["storm"]
@@ -111,7 +119,38 @@ func _initialize() -> void:
 			mv.card_frames = -1
 			mv.sim.p1_bot = true
 			view = mv
+		"van":
+			view = TripVan.new().setup(sv, t)
+			root.add_child(view)
+		"scrapbook":
+			view = TripHome.new().setup(sv, {}, "scrapbook")
+			root.add_child(view)
+		"diner":
+			var sd := TripScene.new().setup(t, RoadTrip.data()["scenes"]["diner"], _me(t, sv), "YOU",
+				{"art": "diner", "choices": t.diner_choices()})
+			sd._open_choices()
+			view = sd
+			root.add_child(sd)
+		"rival":
+			var sr := TripScene.new().setup(t, RoadTrip.beat("hogs_1")["pages"], _me(t, sv), "YOU",
+				{"venue": "western", "time": CourtStyle.DUSK, "members": RoadTrip.rival_members()})
+			sr.page = 1
+			sr._show_page()
+			view = sr
+			root.add_child(sr)
+		"old_court", "drive_in":
+			var dd := RoadTrip.detour(screen)
+			var sc := RoadTrip.detour_scene(dd)
+			var opts: Dictionary = sc["opts"]
+			opts["choices"] = t.detour_choices(dd)
+			var so := TripScene.new().setup(t, sc["pages"], _me(t, sv), "YOU", opts)
+			if screen == "old_court":
+				so.page = 1
+				so._show_page()
+			view = so
+			root.add_child(so)
 		"start":
+
 			var s4 := TripScene.new().setup(t, RoadTrip.data()["scenes"]["start"], _me(t, sv), "YOU",
 				{"art": "garage"})
 			view = s4

@@ -112,6 +112,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-84 | The lite Web build: smaller music and ambience, no announcer, ROAD TRIP or painted venues; the Web zip 51 MB to 21 MB (port ADR-089) | `feature/cld-web-lite` | Ready to test |
 | PORT-85 | OPTIONS in the pause menu: the title's OPTIONS pages over a paused match (port ADR-090) | `feature/cld-pause-options` | Ready to test |
 | PORT-86 | ROAD TRIP tuning: leg 1 a bit harder, the partner late less often (port ADR-091) | `feature/cld-trip-tune` | Ready to test |
+| PORT-87 | ROAD TRIP round two: THE VAN (stats, the locker, sets), TRADE IN, 19 items, the diner, 13 detours, the ROAD HOGS, a story across trips and the SCRAPBOOK (port ADR-092) | `feature/cld-trip-roads` | Ready to test |
 
 ## Releases
 
@@ -488,10 +489,38 @@ the same request). Open: 36 and 40.
   - Status: **Ready to test**: play a trip. Say if leg 1 is now right, and
     whether Pepper still lets balls go by.
 
+### 87. `feature/cld-trip-roads`: ROAD TRIP round two (asked for 2026-10-24)
+
+- [x] `PORT-87` ROAD TRIP grows (port ADR-092, no sim change): THE VAN
+  over the map (Y / I) shows your stats as bars by where each point comes
+  from, your partner's, and your gear; replaced paddles and hats go in
+  the van's locker to swap back in; TRADE IN at the PRO SHOP; eight item
+  sets. 19 new items, 4 hazards, 13 detours (7 at painted venues), the
+  DINER (a meal for the next match). The story now grows across trips:
+  20 beats in four arcs (THE VAN, THE ROAD HOGS, THE CHAMPS, THE MIXTAPE)
+  with lasting rewards (three story paddles, cassettes for the map's
+  music), the ROAD HOGS as recurring rivals from the second trip, a
+  captain partner's own start, and the SCRAPBOOK on ROAD TRIP's page.
+  - Art: eight images to make, prompts in `art/roadtrip-r5/PROMPTS.md`;
+    placeholders in the game meanwhile (KNOWN_ISSUES #87).
+  - Verified: the full suite plus the e2e (new: `test_road_trip`'s
+    second-round tests, `test_trip_screens.test_the_story_across_trips`,
+    `test_layout`'s VAN, SCRAPBOOK and story cases); screenshots of THE
+    VAN, the map with the ROAD HOGS, their scene, the SCRAPBOOK, the
+    diner, a venue detour, the shop and the GARAGE.
+  - Status: **Ready to test**: take two or three trips.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
+
+- **PORT-87 ROAD TRIP round two:** take two or three trips (the story
+  starts on the second). Press Y (I on the keyboard) on the map for THE
+  VAN. Say which new items or sets feel dull or too strong, whether the
+  ROAD HOGS should be harder, and what you think of the story's beats
+  (they're in `data/trip.json` to edit). The art prompts are in
+  `art/roadtrip-r5/PROMPTS.md` whenever you want to generate them.
 
 - **PORT-84 the lite Web build:** listen to the Web build's music and
   crowd (q1, the crowd in mono). Say if it's too rough, or if you want

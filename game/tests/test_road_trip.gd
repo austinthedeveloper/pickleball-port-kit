@@ -32,7 +32,7 @@ func test_the_data() -> void:
 				bad.append("line: " + String(l))
 		if not _glyphs_ok(String(g["name"]), chars):
 			bad.append("glyph: " + String(g["name"]))
-		check(int(g["icon"]) >= -1 and int(g["icon"]) < 40, "an icon on the sheet: " + String(g["id"]))
+		check(int(g["icon"]) >= -1 and int(g["icon"]) < TripArt.ICONS_1 + 24, "an icon on the sheets: " + String(g["id"]))
 		check(String(g["kind"]) in ["bag", "paddle", "hat", "partner", "perk"])
 		check(String(g["rarity"]) in ["start", "common", "uncommon", "rare"])
 		if g.has("hat"):
@@ -63,8 +63,8 @@ func test_the_data() -> void:
 				check(not RoadTrip.hazard(String(ch["do"]["hazard"])).is_empty())
 	for key in d["scenes"]:
 		var pages: Array = []
-		if key == "teams":
-			for t in d["scenes"]["teams"]:
+		if key in ["teams", "partner_start"]:
+			for t in d["scenes"][key]:
 				pages.append_array(t)
 		else:
 			pages = d["scenes"][key]
@@ -523,3 +523,292 @@ func test_lucky_line_and_hot_hand() -> void:
 	eq(s3.meter[1], K.SPECIAL_METER_MAX, "your partner's too")
 	check(s3.meter[2] < K.SPECIAL_METER_MAX, "theirs isn't")
 	s3.dispose()
+
+
+# --- The second round (port ADR-092) ----------------------------------------------
+
+func test_the_new_data() -> void:
+	var d := RoadTrip.data()
+	var chars := String(BitmapText.load_font("small")["chars"])
+	var ids: Array = d["gear"].map(func(g): return String(g["id"]))
+	var beats: Array = d["beats"].map(func(b): return String(b["id"]))
+	var arcs: Array = d["arcs"].map(func(a): return String(a["id"]))
+	var bad := []
+	for st in d["sets"]:
+		check(st["items"].size() >= 2, "a set of two or more: " + String(st["id"]))
+		for id in st["items"]:
+			check(ids.has(String(id)), "the set's " + String(id))
+		var line := RoadTrip.bonus_label(st)
+		if line.length() > 26 or not _glyphs_ok(String(st["name"]) + line, chars):
+			bad.append("set: " + line)
+	for dish in d["diner"]:
+		if String(dish["label"]).length() > 32 or not _glyphs_ok(String(dish["label"]), chars):
+			bad.append("dish: " + String(dish["label"]))
+	eq(String(d["diner"][4]["id"]), "works", "THE WORKS last, the four dishes first")
+	for b in d["beats"]:
+		check(arcs.has(String(b["arc"])), "an arc: " + String(b["id"]))
+		check(String(b["slot"]) in ["start", "motel", "leg", "team", "rival", "beaten", "won", "over", "detour"],
+			"a slot: " + String(b["id"]))
+		for id in b.get("when", {}).get("needs", []):
+			check(beats.has(String(id)) and beats.find(String(id)) < beats.find(String(b["id"])),
+				"needs an earlier beat: " + String(b["id"]))
+		for id in b.get("reward", {}).get("pool", []):
+			check(ids.has(String(id)), "a reward on the road: " + String(id))
+		if b.get("reward", {}).has("tape"):
+			check(int(b["reward"]["tape"]) < d["tapes"].size())
+		if String(b["slot"]) != "detour":
+			check(not b.get("pages", []).is_empty(), "pages: " + String(b["id"]))
+		for p in b.get("pages", []):
+			check(String(p["who"]) in ["partner", "you", "captain", "mate", "narrator"])
+			check(p["lines"].size() >= 1 and p["lines"].size() <= 3)
+			for l in p["lines"]:
+				if String(l).length() > PAGE_LINE or not _glyphs_ok(String(l), chars):
+					bad.append("beat: " + String(l))
+		var hint := "NEXT: " + String(b["hint"])
+		var title := "CHAPTER 9: " + String(b["title"])
+		for l in [hint, title]:
+			if l.length() > PAGE_LINE or not _glyphs_ok(l, chars):
+				bad.append("scrapbook: " + l)
+	for dt in d["detours"]:
+		if dt.has("beat"):
+			check(beats.has(String(dt["beat"])) and String(RoadTrip.beat(String(dt["beat"]))["slot"]) == "detour")
+		if dt.has("venue"):
+			check(Settings.VENUES.has(String(dt["venue"])), "a venue the game has: " + String(dt["venue"]))
+		for p in dt.get("pages", []):
+			for l in p["lines"]:
+				if String(l).length() > PAGE_LINE or not _glyphs_ok(String(l), chars):
+					bad.append("detour page: " + String(l))
+	for tp in d["tapes"]:
+		check(Music.LOOPS.has(String(tp["track"])), "a track the game has: " + String(tp["track"]))
+		if String(tp["name"]).length() > 14 or not _glyphs_ok(String(tp["name"]), chars):
+			bad.append("tape: " + String(tp["name"]))
+	for m in d["rival"]["members"]:
+		check(String(m["who"]).length() <= 8)
+	eq(d["scenes"]["partner_start"].size(), Opponents.count(), "a start for every captain partner")
+	eq(bad, [], "every new text fits and can be drawn")
+
+
+func test_story_stops_on_the_map() -> void:
+	var m := {"trips": 1, "won": 0, "hogs": 2, "beats": ["van_1", "van_2", "van_3"], "story_pool": [], "tapes": []}
+	var ex := RoadTrip.story_extras(m, RoadTrip.PEPPER)
+	check(ex["rival"], "the ROAD HOGS from the second trip on")
+	eq(ex["detours"], [], "the old court once")
+	check(ex["dawson"], "the stranger, once the old court is found")
+	eq(RoadTrip.story_extras({"trips": 0, "beats": [], "hogs": 0}, RoadTrip.PEPPER)["rival"], false,
+		"not on the first trip")
+	check(not RoadTrip.story_extras(m, 3)["dawson"], "the van's story is Pepper's")
+	m["beats"] = ["van_1", "van_2"]
+	eq(RoadTrip.story_extras(m, RoadTrip.PEPPER)["detours"], ["old_court"])
+	for s in 200:
+		var ex2 := {"rival": true, "hogs": s % 6, "detours": ["old_court"], "dawson": true}
+		var map := RoadTrip.generate(s * 31 + 7, s % 6, ex2)
+		eq(map, RoadTrip.generate(s * 31 + 7, s % 6, ex2), "the same seed and story, the same map")
+		var rivals: Array = map[RoadTrip.RIVAL_LEG]["cols"][1].filter(func(n): return n["type"] == "rival")
+		eq(rivals.size(), 1, "the ROAD HOGS on the long drive")
+		eq(int(rivals[0]["level"]), s % 6)
+		eq(map[1]["cols"][0].filter(func(n): return String(n["detour"]) == "old_court").size(), 1, "the old court")
+		eq(map[2]["cols"][1].filter(func(n): return int(n["team"]) == Opponents.DAWSON).size(), 1, "the stranger")
+		for leg in RoadTrip.LEGS:
+			check(RoadTrip.valid_leg(map[leg], leg, s % 6), "seed %d leg %d keeps the rules" % [s, leg])
+			for col in map[leg]["cols"]:
+				for n in col:
+					if n["type"] == "detour" and leg != 1:
+						check(not RoadTrip.detour(String(n["detour"])).has("beat"), "story detours only where placed")
+
+
+func test_the_locker_and_trading() -> void:
+	var t := RoadTrip.create(5, 0, RoadTrip.PEPPER)
+	t.take("red_paddle")
+	t.take("wood_paddle")
+	t.take("visor")
+	eq(t.paddle, "wood_paddle")
+	eq(t.choices_of("paddle"), ["wood_paddle", "plain_paddle", "red_paddle"], "replaced paddles go in the locker")
+	eq(t.choices_of("hat"), ["visor", "plain_cap"])
+	check(not t.can_take("red_paddle"), "what's in the locker isn't offered again")
+	check(t.equip("red_paddle"))
+	eq(t.paddle, "red_paddle")
+	eq(t.stats()[0], 6, "the red paddle's +5 POWER, in hand")
+	check(t.locker.has("wood_paddle"))
+	check(not t.equip("gold_paddle"), "only what's in the locker")
+	eq(t.sellable(), ["wood_paddle"], "the locker's (the plain ones are worth nothing), then the bag's")
+	t.take("spare_paddle")
+	eq(t.max_hearts, 4)
+	var cash := t.cash
+	check(t.sell("spare_paddle"))
+	eq(t.cash, cash + RoadTrip.PRICES["common"] / 2, "half the price")
+	eq(t.max_hearts, 3, "a SPARE PADDLE sold takes its heart")
+	check(not t.sell("red_paddle"), "not the paddle in hand")
+	check(t.sell("wood_paddle"))
+	eq(t.choices_of("paddle"), ["red_paddle", "plain_paddle"])
+	var d := RoadTrip.from_dict(t.to_dict())
+	eq(d.locker, t.locker, "the locker is saved")
+
+
+func test_sets() -> void:
+	var t := RoadTrip.create(5, 0, RoadTrip.PEPPER)
+	t.take("tricorn")
+	eq(t.active_sets(), [])
+	t.take("red_paddle")
+	eq(t.active_sets().map(func(s): return s["id"]), ["pirate"], "TRICORN and RED PADDLE: the PIRATE'S KIT")
+	eq(t.stats(), [1 + 3 + 5 + 2, 1, 1, 1 + 1])
+	t.take("gold_paddle")
+	eq(t.active_sets(), [], "the red paddle in the locker breaks the set")
+	t.equip("red_paddle")
+	eq(t.active_sets().size(), 1)
+	eq(t.stat_parts()["sets"], [2, 0, 0, 1])
+
+
+func test_items_of_the_second_round() -> void:
+	var t := RoadTrip.create(21, 0, RoadTrip.PEPPER)
+	t.take("tip_jar")
+	var r := t.reachable()
+	var cash := t.cash
+	t.go(int(r[0][0]), int(r[0][1]))
+	eq(t.cash, cash + 3, "a TIP JAR at every stop")
+	t.take("partner_paddle")
+	t.take("team_jerseys")
+	eq(t.partner_now(), [9, 9, 9, 9], "partner gear: +2 and +1")
+	eq(t.config_for({"type": "pickup", "team": -1, "local": 0, "mod": ""}, Settings.p1_choice).trip_stats[1],
+		[9, 9, 9, 9])
+	t.take("sunscreen")
+	t.add_hazard("storm")
+	eq(t.hazards, [], "SUNSCREEN takes the first hazard")
+	t.add_hazard("storm")
+	eq(t.hazards, ["storm"], "once a trip")
+	# a CB RADIO's redraw: once a leg
+	t.offer_pick("yard", 0)
+	check(not t.can_redraw(), "no radio, no redraw")
+	t.take("cb_radio")
+	t.offer_pick("yard", 0)
+	var first: Array = t.pending["items"].duplicate()
+	check(t.redraw())
+	check(t.pending["items"] != first, "new cards")
+	check(not t.redraw(), "once a leg")
+	# the diner: three of the four dishes and THE WORKS, for the next match only
+	var menu := t.diner_menu()
+	eq(menu.size(), 4)
+	eq(menu[3], "works")
+	eq(t.diner_menu(), menu, "the same menu each time")
+	var before := t.stats()
+	check(t.order(0))
+	eq(t.stats(), before, "the meal isn't in your stats...")
+	check(t.stats(true) != before, "...until the match")
+	var cfg := t.config_for({"type": "pickup", "team": -1, "local": 0, "mod": ""}, Settings.p1_choice)
+	eq(cfg.trip_stats[0], t.stats(true))
+	t.at = [0, 0, 0]
+	t.record_match(true)
+	eq(t.meal, "", "eaten")
+	# GAS CARD, LUCKY DICE, the new effects
+	var d := RoadTrip.detour("drive_in")
+	t.cash = 0
+	check(not t.detour_choices(d)[0]["enabled"], "the movie costs 10")
+	t.take("gas_card")
+	check(t.detour_choices(d)[0]["enabled"], "free on the GAS CARD")
+	t.choose(d, 0)
+	eq(t.cash, 0)
+	eq(t.boost, [0, 1, 0, 0], "+1 CONTROL for the rest of the trip")
+	t.take("lucky_dice")
+	var wins := 0
+	for i in 5:
+		t.stops = i
+		t.choose(RoadTrip.detour("pie_contest"), 0)
+	eq(t.cash, 200, "LUCKY DICE: every coin flip won")
+	var miles := t.miles
+	t.choose(RoadTrip.detour("car_wash"), 1)
+	eq(t.miles, miles + 20)
+
+
+func test_heals_and_miles() -> void:
+	var t := RoadTrip.create(11, 0, RoadTrip.PEPPER)
+	t.take("first_aid")
+	t.take("thermos")
+	t.take("mixtape")
+	t.hearts = 1
+	t.at = [0, RoadTrip.GATE, 0]
+	var miles := t.miles
+	t.record_match(true)
+	eq(t.hearts, 3, "a heart for the big match (FIRST AID KIT), one for the new leg (THERMOS)")
+	eq(t.miles, miles + 10, "+5 for a win, +5 from the MIXTAPE")
+	eq(t.leg(), 1)
+
+
+func test_the_road_hogs() -> void:
+	var m := {"trips": 1, "won": 0, "hogs": 0, "beats": [], "story_pool": [], "tapes": [], "now": {},
+		"miles": 0, "best_leg": 0, "partners": [], "heat": 0, "best_heat": -1, "last_item": ""}
+	var t := RoadTrip.create(33, 0, RoadTrip.PEPPER, m)
+	m["trips"] = 2                       # as RoadTrip.begin counts it
+	var n: Dictionary = t.map[RoadTrip.RIVAL_LEG]["cols"][1].filter(func(x): return x["type"] == "rival")[0]
+	eq(RoadTrip.opponent_name(n), "ROAD HOGS")
+	eq(t.difficulty_for(n), K.DIFFICULTY_MEDIUM)
+	n["level"] = 3
+	eq(t.difficulty_for(n), K.DIFFICULTY_HARD, "serious after two losses")
+	eq(t.local_members(n).size(), 2)
+	eq(String(t.local_members(n)[0]["who"]), "BUCK")
+	var pages := t.rival_pages(m)
+	eq(pages, RoadTrip.beat("hogs_1")["pages"], "their first scene")
+	check(m["beats"].has("hogs_1"))
+	eq(t.rival_pages(m), RoadTrip.data()["scenes"]["rival_again"], "then a taunt")
+	t.at = [RoadTrip.RIVAL_LEG, 1, t.map[1]["cols"][1].find(n)]
+	t.record_match(true)
+	check(t.rival_won)
+	eq(t.pending.get("source"), "grudge", "a pick, as a grudge match")
+	t.state = "over"
+	var sv := SaveGame.new()
+	sv.data = {"trip": m}
+	t.finish(sv)
+	eq(int(m["hogs"]), 1, "beaten: their story goes on")
+
+
+func test_beats() -> void:
+	var m := {"trips": 2, "won": 0, "hogs": 0, "beats": [], "story_pool": [], "tapes": []}
+	var t := RoadTrip.create(8, 0, RoadTrip.PEPPER, m)
+	eq(t.start_pages(m), RoadTrip.beat("van_1")["pages"], "the second trip opens on the van's story")
+	eq(t.start_pages(m), RoadTrip.data()["scenes"]["start_again"], "once")
+	t.partner = 3
+	eq(t.start_pages(m), RoadTrip.data()["scenes"]["partner_start"][3], "a captain's own start")
+	t.partner = RoadTrip.PEPPER
+	eq(RoadTrip.beat_for(m, "motel", t.ctx(m))["id"], "van_2")
+	eq(RoadTrip.beat_for(m, "motel", t.ctx(m, {"partner": 3})), {}, "Pepper's story needs Pepper")
+	eq(RoadTrip.beat_for(m, "leg", t.ctx(m, {"leg": 1}))["id"], "tape_1")
+	eq(RoadTrip.beat_for(m, "leg", t.ctx(m, {"leg": 2})), {}, "side B after side A")
+	RoadTrip.see_beat(m, RoadTrip.beat("tape_1"))
+	eq(m["tapes"], [1], "a tape for the deck")
+	eq(RoadTrip.garage(m)["tapes"], [0, 1])
+	eq(RoadTrip.beat_for(m, "team", t.ctx(m, {"team": 7})), {}, "the Champs' story after a trip won")
+	m["won"] = 1
+	eq(RoadTrip.beat_for(m, "team", t.ctx(m, {"team": 7}))["id"], "champs_1")
+	eq(RoadTrip.beat_for(m, "team", t.ctx(m, {"team": 3})), {})
+	# a reward on the road
+	for id in ["van_1", "van_2", "van_3", "van_4"]:
+		RoadTrip.see_beat(m, RoadTrip.beat(id))
+	var b := RoadTrip.beat_for(m, "beaten", t.ctx(m, {"team": Opponents.DAWSON}))
+	eq(b["id"], "van_5")
+	RoadTrip.see_beat(m, b)
+	check(RoadTrip.pool(m).has("grandpas_paddle"), "GRANDPA'S PADDLE on the road")
+	eq(RoadTrip.arc_seen(m, "van").size(), 5)
+	eq(RoadTrip.arc_hint(m, "van"), RoadTrip.beat("van_6")["hint"])
+	# every beat's scene can be built
+	for bt in RoadTrip.data()["beats"]:
+		var sc := RoadTrip.beat_scene(bt)
+		check(not sc["pages"].is_empty(), "a scene for " + String(bt["id"]))
+
+
+func test_an_old_trip_loads() -> void:
+	# a trip saved before the second round: no locker, boost, meal; a gen 1 map
+	var t := RoadTrip.create(4127, 0, RoadTrip.PEPPER)
+	var d := t.to_dict()
+	for k in ["locker", "boost", "meal", "rival_won"]:
+		d.erase(k)
+	d["gen"] = 1
+	var back := RoadTrip.from_dict(d)
+	eq(back.locker, [])
+	eq(back.boost, [0, 0, 0, 0])
+	eq(back.stats(), [1, 1, 1, 1])
+	back.take("red_paddle")
+	eq(back.locker, ["plain_paddle"])
+	var sv := SaveGame.new()
+	sv.data = {"trip": {"miles": 10, "looks": {"van": 1, "ornament": 0}}}
+	var m := RoadTrip.meta(sv)
+	eq(m["looks"]["tape"], 0, "an old save's looks get the cassette")
+	eq(m["beats"], [])
+	eq(int(m["hogs"]), 0)

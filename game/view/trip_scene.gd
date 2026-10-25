@@ -17,7 +17,6 @@ const SCALE := 2.0
 const FEET_Y := 392.0
 const GOLD := Color("fbe46a")
 const DIM := Color(0.42, 0.44, 0.52)
-const ART := "res://assets/trip/trip_%s.webp"
 
 var trip: RoadTrip
 var pages: Array = []
@@ -27,6 +26,7 @@ var lock := LOCK_FRAMES
 var manifest: Dictionary
 var cast := {}
 var team := -1
+var members: Array = []          ## the right side's cast when it isn't a ladder team (the ROAD HOGS)
 var choices: Array = []          ## [{"label", "enabled", "value"}]
 var choice_page: MenuPage
 var _frame := 0
@@ -44,19 +44,25 @@ var _me_name := "YOU"
 
 ## `scene`: pages [{who, lines}] (who: partner, you, captain, mate,
 ## narrator). `opts`: "art" (a trip backdrop: roadside, motel, yard_sale,
-## pro_shop, summer_open, garage) or "venue" and "time"; "team" (the
-## right side's cast); "card" ({title, lines}: a card first); "choices".
+## pro_shop, summer_open, garage, diner, old_court; one still being made
+## shows its "venue" instead, or its stand-in) or "venue" and "time";
+## "team" (the right side's cast) or "members" (opponents.json members, a
+## "who" each: the ROAD HOGS); "card" ({title, lines}: a card first);
+## "choices".
 func setup(t: RoadTrip, scene: Array, me: PlayerLook, me_name: String, opts: Dictionary = {}) -> TripScene:
 	trip = t
 	manifest = MatchView.levels_manifest()
 	team = int(opts.get("team", -1))
+	members = opts.get("members", [])
 	_me_name = me_name
 	choices = opts.get("choices", [])
 	size = Vector2(960, 540)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	gui_input.connect(_on_gui_input)
-	if opts.has("art"):
-		_build_art(String(opts["art"]))
+	var art := String(opts.get("art", ""))
+	var art_name := "garage" if art == "garage" else "scene_" + art
+	if art != "" and (TripArt.has_backdrop(art_name) or not opts.has("venue")):
+		_build_art(art_name)
 	else:
 		_build_venue(String(opts.get("venue", "park")), int(opts.get("time", CourtStyle.DAY)))
 	_build_cast(me)
@@ -85,7 +91,7 @@ func _build_art(art: String) -> void:
 	_bg = Node2D.new()
 	add_child(_bg)
 	var s := Sprite2D.new()
-	s.texture = load(ART % ("garage" if art == "garage" else "scene_" + art))
+	s.texture = TripArt.backdrop(art)
 	s.centered = false
 	s.scale = Vector2(1.04, 1.04)
 	s.position = Vector2(-20, -10)
@@ -148,11 +154,13 @@ static func partner_member(t: RoadTrip) -> Dictionary:
 func _build_cast(me: PlayerLook) -> void:
 	cast["partner"] = _person(PlayerLook.from_member(partner_member(trip), manifest), 150, false)
 	cast["you"] = _person(me, 290, false)
+	var right: Array = members
 	if team >= 0 and Opponents.exists(team):
-		var members: Array = Opponents.team(team)["players"]
-		cast["captain"] = _person(PlayerLook.from_member(members[0], manifest), 690 if members.size() > 1 else 760, true)
-		if members.size() > 1:
-			cast["mate"] = _person(PlayerLook.from_member(members[1], manifest), 820, true)
+		right = Opponents.team(team)["players"]
+	if not right.is_empty():
+		cast["captain"] = _person(PlayerLook.from_member(right[0], manifest), 690 if right.size() > 1 else 760, true)
+		if right.size() > 1:
+			cast["mate"] = _person(PlayerLook.from_member(right[1], manifest), 820, true)
 	for k in cast:
 		var c: Dictionary = cast[k]
 		c["node"].position.x += -320.0 if c["x"] < 480 else 320.0    # they walk on
@@ -177,10 +185,12 @@ func who_name(who: String) -> String:
 		"you":
 			return _me_name
 		"captain":
-			return String(Opponents.team(team)["players"][0]["name"]) if team >= 0 else ""
+			if team < 0:
+				return String(members[0].get("who", "")) if not members.is_empty() else ""
+			return String(Opponents.team(team)["players"][0]["name"])
 		"mate":
 			if team < 0:
-				return ""
+				return String(members[mini(1, members.size() - 1)].get("who", "")) if not members.is_empty() else ""
 			var m: Array = Opponents.team(team)["players"]
 			return String(m[mini(1, m.size() - 1)]["name"])
 	return ""
@@ -193,7 +203,10 @@ func _who_tint(who: String) -> Color:
 		"you":
 			return Color("6aa0ff")
 		"captain", "mate":
+			if team < 0 and not members.is_empty():
+				return Color("e0605a")       # the ROAD HOGS' maroon, lightened to read
 			return Story.team_color(team) if team >= 0 and team < Opponents.count() else Color("ff9a5a")
+
 	return Color.WHITE
 
 

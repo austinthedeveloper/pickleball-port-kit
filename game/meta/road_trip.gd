@@ -33,12 +33,14 @@ const PARTNER_LATE_STEP := 2
 ## teams are late every 2nd or 3rd ball, so its rallies were 3 to 5 shots.
 const LEG_1_ERRORS := 60
 const PEPPER := -1               ## `partner`: Pepper, not a ladder captain
+const GEN := 2                   ## the generator's version: 2 adds the diner, the rival and story stops
+const RIVAL_LEG := 1             ## the ROAD HOGS turn up on the long drive (port ADR-092)
 
 ## Stop types. The ones that give gear (or a chance to buy it): no road
 ## has two stops without one in a row.
-const MATCHES := ["pickup", "grudge", "big", "final"]
-const PICKS := ["grudge", "yard", "shop", "detour"]
-const WEIGHTS := {"pickup": 40, "grudge": 14, "yard": 12, "shop": 12, "motel": 10, "detour": 16}
+const MATCHES := ["pickup", "grudge", "rival", "big", "final"]
+const PICKS := ["grudge", "rival", "yard", "shop", "detour"]
+const WEIGHTS := {"pickup": 40, "grudge": 14, "yard": 12, "shop": 12, "motel": 10, "detour": 16, "diner": 8}
 const RARITY_WEIGHTS := {"common": 60, "uncommon": 30, "rare": 10}
 const PRICES := {"common": 30, "uncommon": 45, "rare": 65}
 const SODA := 25                 ## the PRO SHOP's heart
@@ -61,6 +63,10 @@ var partner_stats: Array = [PARTNER_STAT, PARTNER_STAT, PARTNER_STAT, PARTNER_ST
 var paddle := "plain_paddle"
 var hat := "plain_cap"
 var bag: Array = []              ## gear ids, in the order picked
+var locker: Array = []           ## paddles and hats put away in the van (port ADR-092)
+var boost: Array = [0, 0, 0, 0]  ## stats won on the road for the rest of the trip (detours)
+var meal := ""                   ## the diner's dish: stats for the next match only
+var rival_won := false           ## the ROAD HOGS beaten on this trip
 var hazards: Array = []          ## hazard ids waiting for the next match
 var used: Array = []             ## once-only items spent (rain check, umbrella)
 var pending: Dictionary = {}     ## an offer not yet taken: {"kind": "pick", "items": [...]}
@@ -99,6 +105,20 @@ static func detour(id: String) -> Dictionary:
 	for d in data()["detours"]:
 		if String(d["id"]) == id:
 			return d
+	return {}
+
+
+static func dish(id: String) -> Dictionary:
+	for d in data()["diner"]:
+		if String(d["id"]) == id:
+			return d
+	return {}
+
+
+static func beat(id: String) -> Dictionary:
+	for b in data()["beats"]:
+		if String(b["id"]) == id:
+			return b
 	return {}
 
 
@@ -153,7 +173,8 @@ static func create(trip_seed: int, heat_level: int, who: int, meta_dict: Diction
 		t.seed = 1
 	t.heat = clampi(heat_level, 0, HEAT_MAX)
 	t.partner = who
-	t.map = generate(t.seed, t.heat)
+	t.gen = GEN
+	t.map = generate(t.seed, t.heat, story_extras(meta_dict, who))
 	var g := garage(meta_dict)
 	for i in 4:
 		t.base[i] = clampi(STAT_MIN + int(g["stats"][i]), STAT_MIN, STAT_MAX)
@@ -173,8 +194,9 @@ static func create(trip_seed: int, heat_level: int, who: int, meta_dict: Diction
 
 ## The map: per leg, COLS columns of LANES stops and the big match. Each
 ## leg is drawn until it keeps the rules (valid_leg); the same seed always
-## draws the same map.
-static func generate(s: int, heat_level: int) -> Array:
+## draws the same map. `extras` (story_extras) puts the story's stops on
+## it: the ROAD HOGS, a story detour, the stranger.
+static func generate(s: int, heat_level: int, extras: Dictionary = {}) -> Array:
 	var out := []
 	var used_detours := []
 	for leg in LEGS:
@@ -184,6 +206,7 @@ static func generate(s: int, heat_level: int) -> Array:
 		var leg_map := {}
 		for attempt in 400:
 			leg_map = _draw_leg(s, leg, attempt, big_team, heat_level, used_detours)
+			_place_story(leg_map, s, leg, attempt, extras)
 			if valid_leg(leg_map, leg, heat_level):
 				break
 		for col in leg_map["cols"]:
@@ -216,9 +239,10 @@ static func _draw_leg(s: int, leg: int, attempt: int, big_team: int, heat_level:
 			elif type == "pickup":
 				node["local"] = roll(s, k, 9, data()["locals"].size())
 			elif type == "detour":
-				var ds: Array = data()["detours"].filter(func(d): return not used_detours.has(d["id"]))
+				var ds: Array = data()["detours"].filter(func(d): return not used_detours.has(d["id"]) \
+					and not d.has("beat"))
 				if ds.is_empty():
-					ds = data()["detours"]
+					ds = data()["detours"].filter(func(d): return not d.has("beat"))
 				node["detour"] = String(ds[roll(s, k, 11, ds.size())]["id"])
 			col.append(node)
 		cols.append(col)
@@ -245,6 +269,54 @@ static func _draw_leg(s: int, leg: int, attempt: int, big_team: int, heat_level:
 		gate["venue"] = home if venues.has(home) else String(venues[roll(s, salt, 17, venues.size())])
 		gate["time"] = _time_of(s, salt + 99)
 	return {"cols": cols, "gate": gate}
+
+
+## The story's stops on a leg: the ROAD HOGS on the long drive's middle
+## column (port ADR-092), a story detour on its first, the stranger on the
+## coast. Each takes a lane the seed picks.
+static func _place_story(leg_map: Dictionary, s: int, leg: int, attempt: int, extras: Dictionary) -> void:
+	var salt := leg * 1000 + attempt * 37
+	if leg == RIVAL_LEG and extras.get("rival", false):
+		var n: Dictionary = leg_map["cols"][1][roll(s, salt, 61, LANES)]
+		n["type"] = "rival"
+		n["team"] = -1
+		n["local"] = -1
+		n["detour"] = ""
+		n["mod"] = ""
+		n["level"] = int(extras.get("hogs", 0))
+	var story: Array = extras.get("detours", [])
+	if leg == 1 and not story.is_empty():
+		var d: Dictionary = leg_map["cols"][0][roll(s, salt, 63, LANES)]
+		d["type"] = "detour"
+		d["team"] = -1
+		d["local"] = -1
+		d["mod"] = ""
+		d["detour"] = String(story[0])
+	if leg == 2 and extras.get("dawson", false):
+		var g: Dictionary = leg_map["cols"][1][roll(s, salt, 65, LANES)]
+		g["type"] = "grudge"
+		g["team"] = Opponents.DAWSON
+		g["local"] = -1
+		g["detour"] = ""
+		if String(g["mod"]) == "":
+			g["mod"] = String(data()["grudge_mods"][roll(s, salt, 67, data()["grudge_mods"].size())])
+
+
+## What the story puts on a new trip's map, from what lasts between trips:
+## the ROAD HOGS from the second trip on, a story detour whose beat is
+## due, and the stranger once the old court has been found.
+static func story_extras(meta_dict: Dictionary, who: int) -> Dictionary:
+	if meta_dict.is_empty():
+		return {}
+	var ctx := {"heat": 0, "partner": who, "trip": int(meta_dict.get("trips", 0)) + 1}
+	var out := {"rival": int(ctx["trip"]) >= 2, "hogs": int(meta_dict.get("hogs", 0)), "detours": []}
+	for d in data()["detours"]:
+		if d.has("beat") and beat_due(meta_dict, beat(String(d["beat"])), ctx):
+			out["detours"].append(String(d["id"]))
+	ctx["team"] = Opponents.DAWSON
+	out["dawson"] = beat_due(meta_dict, beat("van_4"), ctx)
+
+	return out
 
 
 static func _time_of(s: int, k: int) -> int:
@@ -290,6 +362,11 @@ static func _walk(leg_map: Dictionary, col: int, lane: int, so_far: Array, out: 
 ## two stops in a row without gear on offer, never the same kind twice in
 ## a row, and at least one match.
 static func valid_leg(leg_map: Dictionary, leg: int, heat_level: int) -> bool:
+	var rivals := 0
+	for col in leg_map["cols"]:
+		rivals += col.filter(func(n): return n["type"] == "rival").size()
+	if rivals > 1:
+		return false
 	for col in leg_map["cols"]:
 		for type in ["grudge", "shop", "yard"]:
 			if col.filter(func(n): return n["type"] == type).size() > 1:
@@ -370,6 +447,7 @@ func go(c: int, ln: int) -> Dictionary:
 	route.append(at.duplicate())
 	stops += 1
 	miles += 10 * (leg() + 1)
+	cash += _sum("tip")
 	return here()
 
 
@@ -408,7 +486,10 @@ const LOCAL_HATS := ["cap", "visor", "headband", "bandana", "beanie", "backcap",
 ## same every time: a shirt colour for the pair, each their own skin,
 ## hair, hat and body. Display only.
 func local_members(n: Dictionary) -> Array:
+	if String(n.get("type", "")) == "rival":
+		return rival_members()
 	var k := int(n.get("local", 0)) * 131 + leg() * 7
+
 	var base: Array = LOCAL_SHIRTS[roll(seed, k, 51, LOCAL_SHIRTS.size())]
 	var shirt := [[int(base[0]) * 3 / 5, int(base[1]) * 3 / 5, int(base[2]) * 3 / 5], base,
 		[mini(31, int(base[0]) + 5), mini(31, int(base[1]) + 5), mini(31, int(base[2]) + 5)]]
@@ -447,7 +528,7 @@ func info(n: Dictionary) -> Array:
 			if bits & int(row[2]):
 				names.append(String(row[1]))
 		var prize := "PRIZE: CASH"
-		if type in ["grudge", "big"]:
+		if type in ["grudge", "big", "rival"]:
 			prize = "PRIZE: A GEAR PICK, CASH"
 		elif type == "final":
 			prize = "THE SUMMER OPEN TITLE"
@@ -460,6 +541,8 @@ func info(n: Dictionary) -> Array:
 				out.append("GEAR, A SODA FOR A HEART, A FIX FOR A HAZARD.")
 			"motel":
 				out.append("A HEART BACK, OR YOUR PARTNER PRACTISES.")
+			"diner":
+				out.append("A HOT MEAL: STATS FOR THE NEXT MATCH.")
 			"detour":
 				if has_item("road_atlas"):
 					out.append(String(detour(String(n["detour"]))["lines"][0]))
@@ -488,16 +571,79 @@ func driver(career: Career.Player, p1: Dictionary) -> Career.Player:
 # --- Stats ----------------------------------------------------------------------------
 
 ## Your four stats (POWER, CONTROL, SPEED, FEET), 1 to 20: the GARAGE's
-## start, your paddle and hat, and the bag's items.
-func stats() -> Array:
-	var s: Array = base.duplicate()
+## start and what the road gave (boost), your paddle and hat, the bag's
+## items, the sets you've made, and in a match (`for_match`) the diner's
+## dish.
+func stats(for_match := false) -> Array:
+	var parts := stat_parts()
+	var s := []
+	for i in 4:
+		var v := 0
+		for k in ["base", "gear", "sets"]:
+			v += int(parts[k][i])
+		if for_match:
+			v += int(parts["meal"][i])
+		s.append(clampi(v, STAT_MIN, STAT_MAX))
+	return s
+
+
+## Where each stat comes from (THE VAN's bars): "base" (the GARAGE and the
+## road), "gear", "sets" and "meal", four ints each.
+func stat_parts() -> Dictionary:
+	var out := {"base": [], "gear": [0, 0, 0, 0], "sets": [0, 0, 0, 0], "meal": [0, 0, 0, 0]}
+	for i in 4:
+		out["base"].append(int(base[i]) + int(boost[i]))
 	for id in [paddle, hat] + bag:
 		var g := gear(String(id))
 		for i in 4:
-			s[i] = int(s[i]) + int(g.get(STATS[i], 0))
+			out["gear"][i] += int(g.get(STATS[i], 0))
+	for st in active_sets():
+		for i in 4:
+			out["sets"][i] += int(st.get(STATS[i], 0))
+	var d := dish(meal)
 	for i in 4:
-		s[i] = clampi(int(s[i]), STAT_MIN, STAT_MAX)
-	return s
+		out["meal"][i] = int(d.get(STATS[i], 0))
+	return out
+
+
+## The sets you've made: every item of a set held (the paddle and hat in
+## hand, not in the locker; the bag's).
+func active_sets() -> Array:
+	return data()["sets"].filter(func(st): return st["items"].all(func(id): return has_item(String(id))))
+
+
+## The sets an item belongs to.
+static func sets_of(id: String) -> Array:
+	return data()["sets"].filter(func(st): return st["items"].has(id))
+
+
+## A set's bonus (or a dish's) as a line: "+2 POWER, +1 FEET".
+static func bonus_label(st: Dictionary) -> String:
+	var v := int(st.get("power", 0))
+	if v != 0 and STATS.all(func(k): return int(st.get(k, 0)) == v):
+		return "%+d EVERY STAT" % v
+	var parts := []
+	for k in 4:
+		if int(st.get(STATS[k], 0)) != 0:
+			parts.append("%+d %s" % [int(st[STATS[k]]), STAT_NAMES[k]])
+	return ", ".join(parts)
+
+
+## The sum of a number the bag's items carry (tip, gas, lucky...).
+func _sum(key: String) -> int:
+	var n := 0
+	for id in bag:
+		n += int(gear(String(id)).get(key, 0))
+	return n
+
+
+## Your partner's stats: their own (the MOTEL's practice) and partner gear.
+func partner_now() -> Array:
+	var add := _sum("partner_all")
+	var out := []
+	for i in 4:
+		out.append(clampi(int(partner_stats[i]) + add, STAT_MIN, STAT_MAX))
+	return out
 
 
 func has_item(id: String) -> bool:
@@ -527,6 +673,8 @@ func perk_bits() -> int:
 
 ## The opponents' name, for the map and the cards.
 static func opponent_name(n: Dictionary) -> String:
+	if String(n.get("type", "")) == "rival":
+		return String(data()["rival"]["name"])
 	if int(n.get("team", -1)) >= 0:
 		return String(Opponents.team(int(n["team"]))["team"])
 	if int(n.get("local", -1)) >= 0:
@@ -540,6 +688,8 @@ static func stop_name(n: Dictionary) -> String:
 			return "PICKUP GAME"
 		"grudge":
 			return "GRUDGE MATCH"
+		"rival":
+			return "RIVALS!"
 		"big":
 			return "BIG MATCH"
 		"final":
@@ -552,6 +702,8 @@ static func stop_name(n: Dictionary) -> String:
 			return "MOTEL"
 		"detour":
 			return "DETOUR"
+		"diner":
+			return "DINER"
 	return ""
 
 
@@ -570,6 +722,10 @@ func points_for(n: Dictionary) -> int:
 func difficulty_for(n: Dictionary) -> int:
 	if String(n["type"]) == "final":
 		return K.DIFFICULTY_HARD
+	if String(n["type"]) == "rival":
+		# the ROAD HOGS get serious after two losses to you, friendly after five
+		var lv := int(n.get("level", 0))
+		return K.DIFFICULTY_HARD if lv >= 2 and lv < 5 else K.DIFFICULTY_MEDIUM
 	# leg 1's pickups are EASY; its grudge and big matches MEDIUM (port ADR-091)
 	return K.DIFFICULTY_EASY if leg() == 0 and String(n["type"]) == "pickup" else K.DIFFICULTY_MEDIUM
 
@@ -598,7 +754,7 @@ func partner_style() -> SimTypes.AiStyle:
 	else:
 		s = Opponents.partner_style()
 	if s.late_period > 0:
-		s.late_period = maxi(s.late_period, partner_late(int(partner_stats[1])))
+		s.late_period = maxi(s.late_period, partner_late(int(partner_now()[1])))
 	for id in bag:
 		var g := gear(String(id))
 		if g.has("style"):
@@ -638,7 +794,8 @@ func config_for(n: Dictionary, p1: Dictionary, spend := false,
 	cfg.paddle[0] = int(gear(paddle).get("look", Paddles.WOOD))
 	cfg.set_career(driver(career, p1))
 	cfg.trip = 1
-	cfg.trip_stats = [stats(), partner_stats.duplicate(), [], []]
+	cfg.trip_stats = [stats(true), partner_now(), [], []]
+
 	cfg.styles = [null, partner_style(), null, null]
 	cfg.perks = perk_bits()
 	return cfg
@@ -653,12 +810,13 @@ func record_match(won: bool) -> void:
 	if n.is_empty():
 		return
 	hazards.clear()
+	meal = ""
 	if won:
 		wins += 1
-		miles += 5
+		miles += 5 + _sum("win_miles")
 		var pay := 12 + 4 * leg()
 		match String(n["type"]):
-			"grudge":
+			"grudge", "rival":
 				pay = 20 + 5 * leg()
 			"big":
 				pay = 30
@@ -670,15 +828,19 @@ func record_match(won: bool) -> void:
 		var team := int(n.get("team", -1))
 		if team >= 0 and not beaten.has(team):
 			beaten.append(team)
+		if String(n["type"]) == "rival":
+			rival_won = true
 		n["done"] = true
-		if String(n["type"]) == "grudge":
+		if String(n["type"]) in ["grudge", "rival"]:
 			offer_pick("grudge", 1)
 		elif String(n["type"]) == "big":
 			offer_pick("big", 1)
+			heal(_sum("big_heal"))
 		if String(n["type"]) == "final":
 			state = "won"
 		elif col() == GATE:
 			at = [leg() + 1, START, 1]
+			heal(_sum("leg_heal"))
 		return
 	losses += 1
 	if has_item("rain_check") and not used.has("rain_check"):
@@ -696,13 +858,17 @@ func is_gate() -> bool:
 	return col() == GATE
 
 
+func heal(n: int) -> void:
+	hearts = mini(max_hearts, hearts + maxi(0, n))
+
+
 # --- Gear picks ---------------------------------------------------------------------
 
 ## The pool of gear a trip draws from: the starting pool and what the
 ## GARAGE has added.
 static func pool(meta_dict: Dictionary) -> Array:
 	var out: Array = data()["start_pool"].duplicate()
-	for id in garage(meta_dict)["pool"]:
+	for id in garage(meta_dict)["pool"] + meta_dict.get("story_pool", []):
 		if not out.has(id):
 			out.append(id)
 	return out
@@ -716,7 +882,7 @@ func can_take(id: String) -> bool:
 		return false
 	if g.get("stacks", false):
 		return true
-	return not has_item(id)
+	return not has_item(id) and not locker.has(id)
 
 
 ## Draws `count` different items for a pick (`source`: "grudge" leans
@@ -760,17 +926,94 @@ func offer_pick(source: String, extra_salt: int) -> void:
 		"items": draw(source, count, _stop_salt() * 3 + extra_salt, _meta_for_draw)}
 
 
+## Takes an item: a paddle or hat goes in your hand and the one you held
+## into the locker (port ADR-092), the rest into the bag.
 func take(id: String) -> void:
 	var g := gear(id)
 	match String(g.get("kind", "")):
 		"paddle":
+			locker.append(paddle)
 			paddle = id
 		"hat":
+			locker.append(hat)
 			hat = id
 		_:
 			bag.append(id)
 			_apply_hearts(id)
 	pending = {}
+
+
+## The paddles (or hats) you can switch between: the one in hand first,
+## then the locker's.
+func choices_of(kind: String) -> Array:
+	var out := [paddle if kind == "paddle" else hat]
+	for id in locker:
+		if String(gear(String(id)).get("kind", "")) == kind:
+			out.append(String(id))
+	return out
+
+
+## Swaps the paddle or hat in hand for one from the locker.
+func equip(id: String) -> bool:
+	var kind := String(gear(id).get("kind", ""))
+	if not locker.has(id) or not kind in ["paddle", "hat"]:
+		return false
+	locker.erase(id)
+	if kind == "paddle":
+		locker.append(paddle)
+		paddle = id
+	else:
+		locker.append(hat)
+		hat = id
+	return true
+
+
+## What the PRO SHOP pays for an item: half its price. The PLAIN ones are
+## worth nothing to anyone.
+func sell_price(id: String) -> int:
+	var g := gear(id)
+	if g.is_empty() or String(g["rarity"]) == "start":
+		return 0
+	return int(PRICES.get(String(g["rarity"]), 30)) / 2
+
+
+## The items the PRO SHOP takes: the locker's, then the bag's (one of each).
+func sellable() -> Array:
+	var out := []
+	for id in locker + bag:
+		if sell_price(String(id)) > 0 and not out.has(id):
+			out.append(String(id))
+	return out
+
+
+func sell(id: String) -> bool:
+	if not sellable().has(id):
+		return false
+	if locker.has(id):
+		locker.erase(id)
+	else:
+		bag.erase(id)
+		var h := int(gear(id).get("hearts", 0))
+		if h > 0:
+			max_hearts = maxi(1, max_hearts - h)
+			hearts = clampi(hearts, 1, max_hearts)
+	cash += sell_price(id)
+	return true
+
+
+## A CB RADIO's redraw: once a leg, the pick on offer drawn again.
+func can_redraw() -> bool:
+	return _sum("redraw") > 0 and not used.has("redraw_%d" % leg()) \
+		and String(pending.get("kind", "")) == "pick"
+
+
+func redraw() -> bool:
+	if not can_redraw():
+		return false
+	used.append("redraw_%d" % leg())
+	var count: int = pending["items"].size()
+	pending["items"] = draw(String(pending.get("source", "")), count, _stop_salt() * 3 + 911, _meta_for_draw)
+	return true
 
 
 func skip_pick() -> void:
@@ -794,9 +1037,14 @@ func price(id: String) -> int:
 	return p
 
 
-## The PRO SHOP's stock at this stop: four items (always the same ones).
+func soda_price() -> int:
+	return SODA / 2 if _sum("loyalty") > 0 else SODA
+
+
+## The PRO SHOP's stock at this stop: four items (five with a LOYALTY
+## CARD), always the same ones.
 func shop_stock(meta_dict: Dictionary) -> Array:
-	return draw("shop", 4, _stop_salt() * 5, meta_dict)
+	return draw("shop", 4 + mini(1, _sum("loyalty")), _stop_salt() * 5, meta_dict)
 
 
 func buy(id: String) -> bool:
@@ -809,9 +1057,9 @@ func buy(id: String) -> bool:
 
 
 func buy_soda() -> bool:
-	if cash < SODA or hearts >= max_hearts:
+	if cash < soda_price() or hearts >= max_hearts:
 		return false
-	cash -= SODA
+	cash -= soda_price()
 	hearts += 1
 	return true
 
@@ -834,13 +1082,34 @@ func rest(heal: bool) -> void:
 			partner_stats[i] = mini(STAT_MAX, int(partner_stats[i]) + 1)
 
 
+## A hazard for the next match, unless SUNSCREEN takes it (once a trip).
+func add_hazard(id: String) -> void:
+	if has_item("sunscreen") and not used.has("sunscreen"):
+		used.append("sunscreen")
+		return
+	hazards.append(id)
+
+
+## What a detour's choice asks of your cash: nothing with a GAS CARD,
+## except a bet.
+func cash_needed(ch: Dictionary) -> int:
+	if _sum("gas") > 0 and not ch["do"].has("gamble"):
+		return 0
+	return int(ch.get("needs_cash", 0))
+
+
+## A coin flip at this stop (a bet, a contest): LUCKY DICE always win.
+func _flip(salt: int) -> bool:
+	return _sum("lucky") > 0 or roll(seed, _stop_salt(), salt, 2) == 0
+
+
 ## A detour's choices as a scene shows them: each with whether you can
 ## afford it, and DRIVE ON after them when you can afford none.
 func detour_choices(d: Dictionary) -> Array:
 	var out := []
 	var any := false
 	for ch in d["choices"]:
-		var need := int(ch.get("needs_cash", 0))
+		var need := cash_needed(ch)
 		out.append({"label": String(ch["label"]), "enabled": cash >= need,
 			"value": "" if cash >= need else "NEED %d" % need})
 		any = any or cash >= need
@@ -856,20 +1125,76 @@ func choose(d: Dictionary, choice: int) -> bool:
 	if choice < 0 or choice >= d["choices"].size():
 		return true                  # DRIVE ON: nothing happens
 	var ch: Dictionary = d["choices"][choice]
-	if cash < int(ch.get("needs_cash", 0)):
+	if cash < cash_needed(ch):
 		return false
 	var e: Dictionary = ch["do"]
-	cash = maxi(0, cash + int(e.get("cash", 0)))
+	var spend := int(e.get("cash", 0))
+	if spend < 0 and cash_needed(ch) == 0 and int(ch.get("needs_cash", 0)) > 0:
+		spend = 0                    # on the GAS CARD
+	cash = maxi(0, cash + spend)
 	if e.has("heart"):
-		hearts = mini(max_hearts, hearts + int(e["heart"]))
+		heal(int(e["heart"]))
 	if e.has("hazard"):
-		hazards.append(String(e["hazard"]))
+		add_hazard(String(e["hazard"]))
 	if e.has("gamble"):
 		var bet := int(e["gamble"])
-		cash += bet if roll(seed, _stop_salt(), 43, 2) == 0 else -bet
+		cash += bet if _flip(43) else -bet
 		cash = maxi(0, cash)
+	if e.has("flip_cash") and _flip(45):
+		cash += int(e["flip_cash"])
+	if e.has("flip_pick") and _flip(47):
+		offer_pick(String(e["flip_pick"]), 3)
+	if e.has("boost"):
+		for k in e["boost"]:
+			var i := STATS.find(String(k))
+			if i >= 0:
+				boost[i] = int(boost[i]) + int(e["boost"][k])
+	if e.has("boost_all"):
+		for i in 4:
+			boost[i] = int(boost[i]) + int(e["boost_all"])
+	if e.has("miles"):
+		miles += int(e["miles"])
+	if e.has("partner"):
+		rest(false)
 	if e.has("pick"):
 		offer_pick(String(e["pick"]), 2)
+	return true
+
+
+## The diner's menu at this stop: three of the four dishes (the same each
+## time) and THE WORKS for cash.
+func diner_menu() -> Array:
+	var dishes: Array = data()["diner"].slice(0, 4)
+	var skip := roll(seed, _stop_salt(), 49, dishes.size())
+	var out := []
+	for i in dishes.size():
+		if i != skip:
+			out.append(String(dishes[i]["id"]))
+	out.append(String(data()["diner"][4]["id"]))
+	return out
+
+
+## The menu as a scene's choices.
+func diner_choices() -> Array:
+	var out := []
+	for id in diner_menu():
+		var d := dish(String(id))
+		var need := int(d.get("cash", 0))
+		out.append({"label": String(d["label"]), "enabled": cash >= need,
+			"value": "" if cash >= need else "NEED %d" % need})
+	return out
+
+
+## Orders the menu's `i`th dish: its stats for the next match.
+func order(i: int) -> bool:
+	var menu := diner_menu()
+	if i < 0 or i >= menu.size():
+		return false
+	var d := dish(String(menu[i]))
+	if cash < int(d.get("cash", 0)):
+		return false
+	cash -= int(d.get("cash", 0))
+	meal = String(d["id"])
 	return true
 
 
@@ -877,7 +1202,7 @@ func choose(d: Dictionary, choice: int) -> bool:
 
 const KEYS := ["seed", "gen", "heat", "partner", "map", "at", "hearts", "max_hearts", "cash",
 	"base", "partner_stats", "paddle", "hat", "bag", "hazards", "used", "pending", "beaten",
-	"route", "stops", "wins", "losses", "miles", "state"]
+	"route", "stops", "wins", "losses", "miles", "state", "locker", "boost", "meal", "rival_won"]
 
 
 func to_dict() -> Dictionary:
@@ -900,7 +1225,8 @@ static func from_dict(d: Dictionary) -> RoadTrip:
 ## What lasts between trips (save.data["trip"]), filled in if missing.
 static func meta(save: SaveGame) -> Dictionary:
 	var def := {"miles": 0, "trips": 0, "won": 0, "best_heat": -1, "best_leg": 0, "heat": 0,
-		"partners": [], "seen": 0, "looks": {"van": 0, "ornament": 0}, "last_item": "", "now": {}}
+		"partners": [], "seen": 0, "looks": {"van": 0, "ornament": 0, "tape": 0}, "last_item": "", "now": {},
+		"hogs": 0, "beats": [], "story_pool": [], "tapes": []}
 	if save == null:
 		return def
 	if not save.data.has("trip") or typeof(save.data["trip"]) != TYPE_DICTIONARY:
@@ -909,6 +1235,9 @@ static func meta(save: SaveGame) -> Dictionary:
 	for k in def:
 		if not m.has(k):
 			m[k] = def[k]
+	for k in def["looks"]:
+		if not m["looks"].has(k):
+			m["looks"][k] = def["looks"][k]
 	return m
 
 
@@ -963,6 +1292,8 @@ func finish(save: SaveGame) -> Array:
 	for team in beaten:
 		if team != Opponents.DAWSON and team != 7 and not partners.has(team):
 			partners.append(team)
+	if rival_won:
+		m["hogs"] = int(m["hogs"]) + 1
 	if state == "won":
 		m["won"] = int(m["won"]) + 1
 		m["best_heat"] = maxi(int(m["best_heat"]), heat)
@@ -1010,7 +1341,10 @@ static func miles_to_next(meta_dict: Dictionary) -> int:
 ## What the ladder's reached steps give every new trip.
 static func garage(meta_dict: Dictionary) -> Dictionary:
 	var out := {"stats": [0, 0, 0, 0], "hearts": 0, "cash": 0, "paddle": "", "item": "",
-		"pool": [], "vans": [0], "ornaments": [0]}
+		"pool": [], "vans": [0], "ornaments": [0], "tapes": [0]}
+	for t in meta_dict.get("tapes", []):
+		out["tapes"].append(int(t))
+
 	var ladder: Array = data()["ladder"]
 	for i in steps_reached(meta_dict):
 		var step: Dictionary = ladder[i]
@@ -1046,7 +1380,11 @@ static func step_label(i: int) -> String:
 			if int(step.get(STATS[k], 0)) != 0:
 				parts.append("+%d %s" % [int(step[STATS[k]]), STAT_NAMES[k]])
 	if step.has("heart"):
-		parts.append("A FOURTH HEART")
+		var nth := 0
+		for j in i + 1:
+			nth += int(data()["ladder"][j].get("heart", 0))
+		parts.append("A %s HEART" % ["FOURTH", "FIFTH", "SIXTH"][clampi(nth - 1, 0, 2)])
+
 	if step.has("cash"):
 		parts.append("START WITH %d CASH" % int(step["cash"]))
 	if step.has("start_paddle"):
@@ -1060,3 +1398,158 @@ static func step_label(i: int) -> String:
 	if step.has("ornament"):
 		parts.append("ORNAMENT: " + String(data()["ornaments"][int(step["ornament"])]))
 	return ", ".join(parts)
+
+
+# --- The story across trips (port ADR-092) ------------------------------------------
+
+## A story beat is a scene that plays once, at its slot (start, motel, leg,
+## team, rival, beaten, won, over, detour), when its "when" holds: trip
+## (this is at least the nth trip), won (trips won before), heat (this
+## trip's), hogs (ROAD HOGS beaten before), needs (beats seen), pepper
+## (Pepper is your partner), and the slot's own team or leg. `ctx` holds
+## this trip's heat, partner, trip number, and the slot's team, leg or
+## rival.
+static func beat_due(meta_dict: Dictionary, b: Dictionary, ctx: Dictionary) -> bool:
+	if b.is_empty() or meta_dict.get("beats", []).has(String(b["id"])):
+		return false
+	var w: Dictionary = b.get("when", {})
+	if int(ctx.get("trip", int(meta_dict.get("trips", 0)))) < int(w.get("trip", 0)):
+		return false
+	if int(meta_dict.get("won", 0)) < int(w.get("won", 0)):
+		return false
+	if int(ctx.get("heat", 0)) < int(w.get("heat", 0)):
+		return false
+	if int(meta_dict.get("hogs", 0)) < int(w.get("hogs", 0)):
+		return false
+	if w.get("pepper", false) and int(ctx.get("partner", PEPPER)) != PEPPER:
+		return false
+	for id in w.get("needs", []):
+		if not meta_dict.get("beats", []).has(String(id)):
+			return false
+	if b.has("team") and String(b["slot"]) in ["team", "beaten"] and int(ctx.get("team", -99)) != int(b["team"]):
+		return false
+	if b.get("rival", false) and not ctx.get("rival", false):
+		return false
+	if b.has("leg") and int(ctx.get("leg", -1)) != int(b["leg"]):
+		return false
+	return true
+
+
+## The first beat due at `slot`, or {}.
+static func beat_for(meta_dict: Dictionary, slot: String, ctx: Dictionary) -> Dictionary:
+	for b in data()["beats"]:
+		if String(b["slot"]) == slot and beat_due(meta_dict, b, ctx):
+			return b
+	return {}
+
+
+## A beat seen: kept, and its reward handed over (new gear on the road, a
+## tape for the deck).
+static func see_beat(meta_dict: Dictionary, b: Dictionary) -> void:
+	if b.is_empty() or meta_dict["beats"].has(String(b["id"])):
+		return
+	meta_dict["beats"].append(String(b["id"]))
+	var r: Dictionary = b.get("reward", {})
+	for id in r.get("pool", []):
+		if not meta_dict["story_pool"].has(String(id)):
+			meta_dict["story_pool"].append(String(id))
+	if r.has("tape") and not meta_dict["tapes"].has(int(r["tape"])):
+		meta_dict["tapes"].append(int(r["tape"]))
+
+
+## This trip as a beat's context (`more`: the slot's team, leg or rival).
+func ctx(meta_dict: Dictionary, more: Dictionary = {}) -> Dictionary:
+	var out := {"heat": heat, "partner": partner, "trip": int(meta_dict.get("trips", 1)), "leg": leg()}
+	out.merge(more, true)
+	return out
+
+
+## A trip's opening scene: a beat due, the captain partner's own, the
+## first trip's, or the one for every trip after.
+func start_pages(meta_dict: Dictionary) -> Array:
+	var b := beat_for(meta_dict, "start", ctx(meta_dict))
+	if not b.is_empty():
+		see_beat(meta_dict, b)
+		return b["pages"]
+	var scenes: Dictionary = data()["scenes"]
+	if partner >= 0 and partner < scenes["partner_start"].size():
+		return scenes["partner_start"][partner]
+	return scenes["start"] if int(meta_dict.get("trips", 1)) <= 1 else scenes["start_again"]
+
+
+## The ROAD HOGS' looks (opponents.json's member shape), for the match and
+## their scenes.
+static func rival_members() -> Array:
+	return data()["rival"]["members"].duplicate(true)
+
+
+## The ROAD HOGS' scene before their match: a beat due, or a taunt (a
+## friendly word once the arc is done).
+func rival_pages(meta_dict: Dictionary) -> Array:
+	var b := beat_for(meta_dict, "rival", ctx(meta_dict, {"rival": true}))
+	if not b.is_empty():
+		see_beat(meta_dict, b)
+		return b["pages"]
+	var done: bool = meta_dict.get("beats", []).has("hogs_5")
+	return data()["scenes"]["rival_friendly" if done else "rival_again"]
+
+
+## An arc's beats in order, and how many of them are seen.
+static func arc_beats(arc: String) -> Array:
+	return data()["beats"].filter(func(b): return String(b["arc"]) == arc)
+
+
+static func arc_seen(meta_dict: Dictionary, arc: String) -> Array:
+	return arc_beats(arc).filter(func(b): return meta_dict.get("beats", []).has(String(b["id"])))
+
+
+## The SCRAPBOOK's line for what comes next in an arc ("" when it's done).
+static func arc_hint(meta_dict: Dictionary, arc: String) -> String:
+	for b in arc_beats(arc):
+		if not meta_dict.get("beats", []).has(String(b["id"])):
+			return String(b.get("hint", ""))
+	return ""
+
+
+## A beat's scene as the SCRAPBOOK replays it: its pages (a story
+## detour's own) and where it's set.
+static func beat_scene(b: Dictionary) -> Dictionary:
+	var pages: Array = b.get("pages", [])
+	var opts := {}
+	match String(b["slot"]):
+		"start":
+			opts = {"art": "garage"}
+		"motel":
+			opts = {"art": "motel"}
+		"won":
+			opts = {"art": "summer_open"}
+		"rival":
+			opts = {"art": "roadside", "members": rival_members()}
+		"detour":
+			for d in data()["detours"]:
+				if String(d.get("beat", "")) == String(b["id"]):
+					var sc := detour_scene(d)
+					pages = sc["pages"]
+					opts = sc["opts"]
+
+		"beaten":
+			opts = {"art": "roadside", "members": rival_members()} if b.get("rival", false) else {}
+		_:
+			opts = {"art": "roadside"}
+	if b.has("team"):
+		opts = {"venue": Settings.home_venue(int(b["team"])), "team": int(b["team"])}
+		if String(b["slot"]) == "won":
+			opts["art"] = "summer_open"
+	return {"pages": pages, "opts": opts}
+
+
+## A detour's scene: its pages (a narrator reading its lines, or its own)
+## and where it's set (a trip backdrop, or a venue at a time of day).
+static func detour_scene(d: Dictionary) -> Dictionary:
+	var opts := {}
+	if d.has("art"):
+		opts["art"] = String(d["art"])
+	if d.has("venue"):
+		opts["venue"] = String(d["venue"])
+		opts["time"] = int(d.get("time", 0))
+	return {"pages": d.get("pages", [{"who": "narrator", "lines": d["lines"]}]), "opts": opts}

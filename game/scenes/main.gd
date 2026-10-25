@@ -247,15 +247,42 @@ func _on_tournament_match(cfg: SimTypes.MatchConfig, venue: String, pads: Array 
 
 # --- ROAD TRIP (port ADR-087) ------------------------------------------------------
 
-## ROAD TRIP's home; `ended`: the results of a trip that just ended.
-func show_trip_home(ended: Dictionary = {}) -> void:
+## ROAD TRIP's home; `ended`: the results of a trip that just ended;
+## `open`: a view to open on.
+func show_trip_home(ended: Dictionary = {}, open := "") -> void:
 	save.save_game()
-	var h := TripHome.new().setup(save, ended)
+	var h := TripHome.new().setup(save, ended, open)
 	h.leave.connect(show_title)
-	h.start.connect(func(t: RoadTrip): show_trip_scene(t, RoadTrip.data()["scenes"]["start"],
-		{"art": "garage"}, func(_c): show_trip_map(t)))
+	h.start.connect(func(t: RoadTrip):
+		var pages := t.start_pages(RoadTrip.meta(save))
+		save.save_game()
+		show_trip_scene(t, pages, {"art": "garage"}, func(_c): show_trip_map(t)))
 	h.resume.connect(show_trip_map)
+	h.replay.connect(_replay_beat)
 	_swap(h)
+
+
+## A SCRAPBOOK chapter watched again, then back to the SCRAPBOOK.
+func _replay_beat(b: Dictionary) -> void:
+	var sc := RoadTrip.beat_scene(b)
+	show_trip_scene(RoadTrip.new(), sc["pages"], sc["opts"], func(_c): show_trip_home({}, "scrapbook"))
+
+
+## The story beat due at `slot` now (port ADR-092), seen and its reward
+## handed over, or {}.
+func _trip_beat(t: RoadTrip, slot: String, more: Dictionary = {}) -> Dictionary:
+	var m := RoadTrip.meta(save)
+	var b := RoadTrip.beat_for(m, slot, t.ctx(m, more))
+	RoadTrip.see_beat(m, b)
+	return b
+
+
+## Scenes one after another ([pages, opts] each), then `then`.
+func _trip_scenes(t: RoadTrip, list: Array, then: Callable) -> void:
+	if list.is_empty():
+		then.call()
+		return
+	show_trip_scene(t, list[0][0], list[0][1], func(_c): _trip_scenes(t, list.slice(1), then))
 
 
 func show_trip_map(t: RoadTrip) -> void:
@@ -299,18 +326,29 @@ func _on_trip_go(t: RoadTrip, target: Array) -> void:
 	match String(n["type"]):
 		"pickup":
 			_trip_match(t, n)
-		"grudge", "big", "final":
+		"grudge", "big", "final", "rival":
 			var team := int(n["team"])
 			var pages: Array = scenes["teams"][team] if team >= 0 and team < scenes["teams"].size() else []
+			var b := _trip_beat(t, "team", {"team": team}) if team >= 0 else {}
+			if not b.is_empty():
+				pages = b["pages"]
+			if String(n["type"]) == "rival":
+				pages = t.rival_pages(RoadTrip.meta(save))
+			save.save_game()
 			var card_lines := ["VS " + RoadTrip.opponent_name(n)]
 			var info := t.info(n)
 			card_lines.append(String(info[1]))
 			if String(info[2]).begins_with("TODAY:"):
 				card_lines.append(String(info[2]).split("   ")[0])
 			var over := "LEG %d: %s" % [t.leg() + 1, String(RoadTrip.leg_info(t.leg())["name"])]
-			show_trip_scene(t, pages, {"venue": String(n["venue"]), "time": int(n["time"]), "team": team,
-				"card": {"over": over, "title": RoadTrip.stop_name(n), "lines": card_lines}},
-				func(_c): _trip_match(t, n))
+			if t.meal != "":
+				var dish := RoadTrip.dish(t.meal)
+				card_lines.append("%s: %s" % [String(dish["name"]), RoadTrip.bonus_label(dish)])
+			var opts := {"venue": String(n["venue"]), "time": int(n["time"]), "team": team,
+				"card": {"over": over, "title": RoadTrip.stop_name(n), "lines": card_lines}}
+			if String(n["type"]) == "rival":
+				opts["members"] = RoadTrip.rival_members()
+			show_trip_scene(t, pages, opts, func(_c): _trip_match(t, n))
 		"yard":
 			show_trip_scene(t, scenes["yard_sale"], {"art": "yard_sale"}, func(_c):
 				t.offer_pick("yard", 0)
@@ -324,7 +362,9 @@ func _on_trip_go(t: RoadTrip, target: Array) -> void:
 			_swap(shop)
 		"motel":
 			var heal_ok := t.hearts < t.max_hearts
-			show_trip_scene(t, scenes["motel"], {"art": "motel", "choices": [
+			var b := _trip_beat(t, "motel")
+			save.save_game()
+			show_trip_scene(t, scenes["motel"] if b.is_empty() else b["pages"], {"art": "motel", "choices": [
 				{"label": "SLEEP IT OFF: A HEART BACK", "enabled": heal_ok, "value": "" if heal_ok else "FULL"},
 				{"label": "PARTNER PRACTISES: +1 EACH STAT", "enabled": true}]}, func(c: int):
 					t.rest(c == 0)
@@ -332,10 +372,20 @@ func _on_trip_go(t: RoadTrip, target: Array) -> void:
 					show_trip_map(t))
 		"detour":
 			var d := RoadTrip.detour(String(n["detour"]))
-			var choices := t.detour_choices(d)
-			show_trip_scene(t, [{"who": "narrator", "lines": d["lines"]}],
-				{"art": String(d.get("art", "roadside")), "choices": choices}, func(c: int):
+			if d.has("beat"):
+				RoadTrip.see_beat(RoadTrip.meta(save), RoadTrip.beat(String(d["beat"])))
+				save.save_game()
+			var sc := RoadTrip.detour_scene(d)
+			var opts: Dictionary = sc["opts"]
+			opts["choices"] = t.detour_choices(d)
+			show_trip_scene(t, sc["pages"], opts, func(c: int):
 					t.choose(d, maxi(0, c))
+					t.finish_stop()
+					show_trip_map(t))
+		"diner":
+			var menu := t.diner_choices()
+			show_trip_scene(t, scenes["diner"], {"art": "diner", "choices": menu}, func(c: int):
+					t.order(c)
 					t.finish_stop()
 					show_trip_map(t))
 		_:
@@ -367,18 +417,47 @@ func _trip_match(t: RoadTrip, n: Dictionary) -> void:
 	m.setup(cfg, String(n["venue"]), false)
 
 
+## A match's end: the result kept, then the story's scenes (a beat after
+## beating someone, one as a new leg starts), then the trip's end, home or
+## the map.
 func _after_trip_match(t: RoadTrip, won: bool, leave: bool) -> void:
+	var n := t.here()
+	var leg_before := t.leg()
 	t.record_match(won)
 	var scenes: Dictionary = RoadTrip.data()["scenes"]
+	var list := []
+	if won and not n.is_empty():
+		var rival := String(n.get("type", "")) == "rival"
+		var b := _trip_beat(t, "beaten", {"team": int(n.get("team", -1)), "rival": rival})
+		if not b.is_empty():
+			var opts := {"venue": String(n["venue"]), "time": int(n.get("time", 0))}
+			if rival:
+				opts["members"] = RoadTrip.rival_members()
+			else:
+				opts["team"] = int(n.get("team", -1))
+			list.append([b["pages"], opts])
+	if t.state == "on" and t.leg() != leg_before:
+		var lb := _trip_beat(t, "leg")
+		if not lb.is_empty():
+			list.append([lb["pages"], {"art": "roadside"}])
 	if t.state == "won":
-		show_trip_scene(t, scenes["won"], {"art": "summer_open"}, func(_c): _end_trip(t))
+		var wb := _trip_beat(t, "won")
+		list.append([scenes["won"], {"art": "summer_open"}] if wb.is_empty() else
+			[wb["pages"], RoadTrip.beat_scene(wb)["opts"]])
 	elif t.state == "over":
-		show_trip_scene(t, scenes["over"], {"art": "roadside"}, func(_c): _end_trip(t))
-	elif leave:
-		t.store(save)
-		show_trip_home()
-	else:
-		show_trip_map(t)
+		var ob := _trip_beat(t, "over")
+		list.append([scenes["over"], {"art": "roadside"}] if ob.is_empty() else
+			[ob["pages"], RoadTrip.beat_scene(ob)["opts"]])
+	save.save_game()
+	_trip_scenes(t, list, func():
+		if t.state != "on":
+			_end_trip(t)
+		elif leave:
+			t.store(save)
+			show_trip_home()
+		else:
+			show_trip_map(t))
+
 
 
 ## The trip's end: its miles to the GARAGE, then the results at home.
