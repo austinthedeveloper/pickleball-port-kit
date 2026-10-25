@@ -98,7 +98,9 @@ second hazard sheet, two pins, the ROAD HOGS' RV, the diner, the old
 court, the van's inside, the scrapbook. The sheets ship as placeholders
 (`make_placeholders.py`, recoloured bits of the accepted art); a backdrop
 not in yet shows another (`TripArt.FALLBACK`), or a story detour its
-venue. `import.py` brings the finished art in, checking sizes.
+venue. `import.py` brings the finished art in, checking sizes. All
+eight were generated, accepted and imported the same day
+(`art/roadtrip-r5/REVIEW.md`).
 
 ### The save
 

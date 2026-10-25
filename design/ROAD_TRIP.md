@@ -773,7 +773,7 @@ playthroughs." No sim change; ADR-092 has the details.
   A captain partner opens a trip with their own lines, and a second trip
   on has its own opening. The **SCRAPBOOK** on ROAD TRIP's page shows
   the chapters seen, replays them, and hints at the next.
-- **The art**: eight images, prompts in `art/roadtrip-r5/PROMPTS.md`;
-  placeholders until then.
+- **The art**: eight images from `art/roadtrip-r5/PROMPTS.md`, all
+  accepted and in the game (`REVIEW.md`).
 - **Screenshots**: `tools/trip_shot.gd` also takes `van`, `scrapbook`,
   `diner`, `rival`, `old_court` and `drive_in`.

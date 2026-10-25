@@ -5,6 +5,7 @@ in game/assets/trip), at the exact size the real image will have, so the
 game runs and looks roughly right until PROMPTS.md's images replace them.
 Run from the repo root:  .venv/bin/python art/roadtrip-r5/make_placeholders.py
 Writes art/roadtrip-r5/placeholders/*.png and copies them into game/assets/trip.
+The real art is in now (REVIEW.md): running this again would overwrite it.
 """
 import colorsys
 import shutil

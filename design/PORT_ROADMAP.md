@@ -501,8 +501,8 @@ the same request). Open: 36 and 40.
   with lasting rewards (three story paddles, cassettes for the map's
   music), the ROAD HOGS as recurring rivals from the second trip, a
   captain partner's own start, and the SCRAPBOOK on ROAD TRIP's page.
-  - Art: eight images to make, prompts in `art/roadtrip-r5/PROMPTS.md`;
-    placeholders in the game meanwhile (KNOWN_ISSUES #87).
+  - Art: eight images from `art/roadtrip-r5/PROMPTS.md`, all accepted
+    and imported (`REVIEW.md`).
   - Verified: the full suite plus the e2e (new: `test_road_trip`'s
     second-round tests, `test_trip_screens.test_the_story_across_trips`,
     `test_layout`'s VAN, SCRAPBOOK and story cases); screenshots of THE
@@ -519,8 +519,7 @@ the chain: each has a default I've gone with.
   starts on the second). Press Y (I on the keyboard) on the map for THE
   VAN. Say which new items or sets feel dull or too strong, whether the
   ROAD HOGS should be harder, and what you think of the story's beats
-  (they're in `data/trip.json` to edit). The art prompts are in
-  `art/roadtrip-r5/PROMPTS.md` whenever you want to generate them.
+  (they're in `data/trip.json` to edit).
 
 - **PORT-84 the lite Web build:** listen to the Web build's music and
   crowd (q1, the crowd in mono). Say if it's too rough, or if you want

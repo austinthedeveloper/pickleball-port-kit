@@ -377,8 +377,15 @@ func press() -> void:
 	_cursor_ring.queue_redraw()
 
 
+## The stop's lines under the map, hidden under a pick or THE VAN.
+func _show_info(on: bool) -> void:
+	for t in _info:
+		t.visible = on
+
+
 func open_pick() -> void:
 	_prompts.visible = false
+	_show_info(false)
 	pick = TripPick.new().setup(save, trip)
 	pick.closed.connect(_on_pick_closed)
 	add_child(pick)
@@ -389,6 +396,7 @@ func _on_pick_closed() -> void:
 		pick.queue_free()
 	pick = null
 	_prompts.visible = true
+	_show_info(true)
 	trip.store(save)
 	if save:
 		save.save_game()
@@ -402,6 +410,7 @@ func open_van() -> void:
 		return
 	_beep("confirm")
 	_prompts.visible = false
+	_show_info(false)
 	van = TripVan.new().setup(save, trip)
 	van.closed.connect(_on_van_closed)
 	add_child(van)
@@ -413,6 +422,8 @@ func _on_van_closed() -> void:
 		van.queue_free()
 	van = null
 	_prompts.visible = true
+	_show_info(true)
+
 	trip.store(save)
 	if save:
 		save.save_game()
