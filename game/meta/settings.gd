@@ -82,6 +82,11 @@ const PARKS := [["park", "THE PARK", "res://assets/park/", "park"],
 static var park_i := 0                ## OPEN PLAY's location
 static var ball_speed := BALL_SPEED_DEFAULT   ## MODIFIERS > BALL SPEED, percent (ADR-071)
 static var cpu_errors := CPU_ERRORS_DEFAULT   ## CPU ERRORS, percent of the ROM's (ADR-073)
+## Smart play (port ADR-094): [KITCHEN, TOGETHER, AIM] by profile (kid,
+## easy, medium, hard, partner), data/ai_smarts.json's until tuned.
+static var smarts := {}
+const SMARTS_PATH := "res://data/ai_smarts.json"
+const SMART_PROFILES := ["kid", "easy", "medium", "hard"]   ## by K.DIFFICULTY_*
 static var ball_size := BALL_SIZE_DEFAULT     ## MODIFIERS > BALL SIZE, percent, display only (ADR-072)
 ## Window options: fullscreen, and integer scaling (crisp) or fit (fills).
 static var fullscreen := false
@@ -147,6 +152,12 @@ static func load_from(save: SaveGame) -> void:
 		size = BALL_SIZE_DEFAULT
 	ball_size = clampi(size, BALL_SIZE_MIN, BALL_SIZE_MAX)
 	cpu_errors = clampi(int(st.get("cpu_errors", CPU_ERRORS_DEFAULT)), 0, CPU_ERRORS_MAX)
+	smarts = smart_defaults()
+	var saved_smarts: Dictionary = st.get("ai_smarts", {}) if st.get("ai_smarts", {}) is Dictionary else {}
+	for k in smarts:
+		var v = saved_smarts.get(k, [])
+		if v is Array and v.size() == K.SMART_KNOBS:
+			smarts[k] = [clampi(int(v[0]), 0, 100), clampi(int(v[1]), 0, 100), clampi(int(v[2]), 0, 100)]
 	Sfx.setting = clampi(int(st.get("sound", 0)), 0, AudioMap.SOUND_NAMES.size() - 1)
 	Music.volume = clampi(int(st.get("music", Music.DEFAULT_VOLUME)), 0, Music.VOLUMES)
 	Announcer.enabled = int(st.get("announcer_on", 1)) != 0
@@ -190,7 +201,7 @@ static func store_to(save: SaveGame) -> void:
 		return
 	save.data["settings"].merge({"venue": venue_i, "difficulty": difficulty_i,
 		"points": points_i, "players": 2 if two_players else 1, "quick_doubles": 1 if quick_doubles else 0, "opponent": opponent_i,
-		"camera": camera_i, "mod_bits": mod_bits, "ball_speed": ball_speed, "park_location": park_i, "ball_speed_v": BALL_DEFAULTS_V, "ball_size": ball_size, "cpu_errors": cpu_errors, "sound": Sfx.setting,
+		"camera": camera_i, "mod_bits": mod_bits, "ball_speed": ball_speed, "park_location": park_i, "ball_speed_v": BALL_DEFAULTS_V, "ball_size": ball_size, "cpu_errors": cpu_errors, "ai_smarts": smart_table().duplicate(true), "sound": Sfx.setting,
 		"music": Music.volume, "announcer": Announcer.volume, "announcer_on": 1 if Announcer.enabled else 0, "commentary": Announcer.chatter,
 		"fullscreen": 1 if fullscreen else 0, "integer_scale": 1 if integer_scale else 0,
 		"player": [p1_choice["palette"], p1_choice["variant"], p1_choice["paddle"]],
@@ -273,8 +284,10 @@ static func config_for(doubles: bool, opponent: int, difficulty: int, points: in
 	cfg.points_to_win = points
 	cfg.ball_speed = ball_speed
 	cfg.cpu_errors = cpu_errors
+	cfg.smarts = smarts_for(cfg)
 	if not p2.is_empty():
 		return cfg
+
 	cfg.opponent = opponent
 	if opponent >= 0:
 		var members: Array = Opponents.team(opponent)["players"]
@@ -330,3 +343,51 @@ static func park_art() -> String:
 
 static func park_venue() -> String:
 	return String(PARKS[park_i][3])
+
+
+# --- Smart play (port ADR-094) ------------------------------------------------------
+
+## data/ai_smarts.json's profiles: name -> [KITCHEN, TOGETHER, AIM].
+static func smart_defaults() -> Dictionary:
+	var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(SMARTS_PATH))
+	var out := {}
+	for k in d["profiles"]:
+		out[String(k)] = d["profiles"][k].map(func(v): return int(v))
+	return out
+
+
+## The profiles in use (the defaults until a tuning panel or a save says).
+static func smart_table() -> Dictionary:
+	if smarts.is_empty():
+		smarts = smart_defaults()
+	return smarts
+
+
+## A profile's three knobs, a copy.
+static func smart_profile(name: String) -> Array:
+	return smart_table().get(name, [0, 0, 0]).duplicate()
+
+
+## The profile an opponent plays at a difficulty.
+static func smart_name(difficulty: int) -> String:
+	return String(SMART_PROFILES[clampi(difficulty, 0, SMART_PROFILES.size() - 1)])
+
+
+## A match's MatchConfig.smarts: each CPU slot's knobs, the partner's
+## profile on a side with a human, the difficulty's on the other; a
+## human's slot zeros.
+static func smarts_for(cfg: SimTypes.MatchConfig) -> Array:
+	var out := []
+	for slot in K.MAX_PLAYERS:
+		var side := slot & 2
+		var knobs: Array = [0, 0, 0]
+		if not cfg.human[slot]:
+			knobs = smart_profile("partner" if (cfg.human[side] or cfg.human[side + 1]) else smart_name(cfg.difficulty))
+		out.append_array(knobs)
+	return out
+
+
+## A knob of a profile `d` steps of 5 along, within 0 to 100.
+static func nudge_smart(name: String, knob: int, d: int) -> void:
+	var p: Array = smart_table()[name]
+	p[knob] = clampi(int(p[knob]) + 5 * d, 0, 100)

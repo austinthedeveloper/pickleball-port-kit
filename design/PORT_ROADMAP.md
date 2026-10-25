@@ -120,6 +120,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-92 | Postcards: one for every venue and detour, on the SCRAPBOOK (port ADR-093) | `feature/cld-trip-more` | Ready to test |
 | PORT-93 | The map pen and NOW PLAYING (port ADR-093) | `feature/cld-trip-more` | Ready to test |
 | PORT-94 | ROAD TRIP balance pass: the gear curve measured, sets easier to finish (port ADR-093) | `feature/cld-trip-more` | Ready to test |
+| PORT-95 | Smart play: CPUs at the kitchen line, moving up together, your partner following you, placed shots; tunable on F2 (port ADR-094) | `feature/cld-smart-ai` | Ready to test |
 
 ## Releases
 
@@ -575,10 +576,32 @@ the same request). Open: 36 and 40.
     islands map, POSTCARDS, the results, the home and the GARAGE.
   - Status: **Ready to test**: say how the sets feel.
 
+### 95. `feature/cld-smart-ai`: smart play (asked for 2026-10-25)
+
+- [x] `PORT-95` A remaster-only layer over the ROM's AI (port ADR-094),
+  three knobs a CPU: KITCHEN (wait just behind the kitchen line once the
+  rules allow), TOGETHER (a CPU pair level; your partner follows you up,
+  and half way back), AIM (third-shot drops, dinks cross-court, the ball
+  to whoever's back, drives down the middle). Profiles by difficulty and
+  for your partner in `data/ai_smarts.json`; F2 > SMART PLAY tunes them
+  live and saves them.
+  - Verified: the full suite plus the e2e (`test_smart_ai`, the tuning
+    page in `test_layout`; the conformance and golden traces unchanged);
+    `tools/smart_stats.gd`: the SNOWBIRDS wait at 58 px from the net
+    instead of 89; MEDIUM a touch harder (42% of points to the CPUs, was
+    39%), HARD clearly (54%).
+  - Status: **Ready to test**: play a doubles match at HARD, and press
+    F2 > SMART PLAY to change any knob mid-match.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
+
+- **PORT-95 smart play:** try MEDIUM and HARD doubles, and a match with
+  a CPU partner (come up to the kitchen: they should come with you). The
+  knobs are on F2 > SMART PLAY; tell me the numbers you settle on and
+  I'll make them the defaults.
 
 - **PORT-88 to 94 ROAD TRIP round three:** record the 29 ROAD TRIP
   lines when you can (`design/announcer/ADDITIONS.md`, group ROAD TRIP).

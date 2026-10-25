@@ -325,6 +325,16 @@ const AI_OPEN_MARGIN := 12
 const AI_SPLIT_DISTANCE := 32
 const AI_PREDICT_BLOCK := 8
 const AI_VOLLEY_MIN_Z := 4 << 4
+## Smart play (port ADR-094, remaster-only, MatchConfig.smarts): where a
+## CPU heading for the kitchen line stands (px from the net; the line is
+## 36, so just behind it), and the knobs' order in a slot's three.
+const AI_SMART_KITCHEN := 42
+const AI_SMART_AHEAD := 10       ## TOGETHER 100: px a CPU may stand ahead of its CPU partner
+const AI_SMART_AHEAD_SLACK := 60 ## ... and at TOGETHER 0, this much more
+const SMART_KITCHEN := 0
+const SMART_TOGETHER := 1
+const SMART_AIM := 2
+const SMART_KNOBS := 3
 
 const AIM_AWAY := 0
 const AIM_BODY := 1

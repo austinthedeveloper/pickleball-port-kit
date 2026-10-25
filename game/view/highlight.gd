@@ -26,7 +26,7 @@ var _cfg: Dictionary             ## the match's config at the start (a copy)
 var _career: Career.Player
 var _bot := false
 var _inputs := PackedInt32Array()   ## 8 a frame: per slot, [moves and aims, buttons]
-var _ops := {}                   ## frame -> [["new_match"] or ["retune", speed, errors]]
+var _ops := {}                   ## frame -> [["new_match"], ["retune", speed, errors] or ["smarts", [...]]]
 var _serve_at := 0               ## the frame the current point's serve began
 var _serve_snap: Array = []
 var _serve_hit := -1             ## the frame the serve was struck (PORT-71)
@@ -253,6 +253,8 @@ func _step_replay() -> Array:
 			replay.new_match()
 		elif o[0] == "retune":
 			replay.retune(int(o[1]), int(o[2]))
+		elif o[0] == "smarts":
+			replay.retune_smarts(o[1].map(func(v): return int(v)))
 	var human := []
 	for i in K.MAX_PLAYERS:
 		human.append(_intent(_frame, i))

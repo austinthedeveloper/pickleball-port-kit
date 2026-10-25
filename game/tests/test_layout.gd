@@ -937,7 +937,9 @@ func test_tuning() -> void:
 			Settings.ball_speed = ends[0]
 			Settings.ball_size = ends[1]
 			Settings.cpu_errors = ends[2]
-			for id in ["tune", "modifiers", "rules"]:
+			for prof in Settings.smart_table():
+				Settings.smarts[prof] = [0, 0, 0] if ends[2] == 0 else [100, 100, 100]
+			for id in ["tune", "modifiers", "rules", "smarts"]:
 				for all_on in [false, true]:
 					v.tuning.mods = 0x7fffffff if all_on else 0
 					v.tuning._show(id)
@@ -952,6 +954,7 @@ func test_tuning() -> void:
 	Settings.ball_speed = kept[2]
 	Settings.ball_size = kept[3]
 	Settings.cpu_errors = kept[4]
+	Settings.smarts = Settings.smart_defaults()
 	GameControls.device_serial += 1
 
 

@@ -2,7 +2,9 @@
 ## opened with F2 or the pause menu's TUNE. The match waits while it's open.
 ## BALL SPEED, BALL SIZE and CPU ERRORS change the match live and are saved
 ## as the settings; every modifier and rule can be switched for this match,
-## and APPLY restarts it with them. Not online, not in the demo.
+## and APPLY restarts it with them. SMART PLAY (port ADR-094) tunes how the
+## CPUs play, live and saved: the opponents' KITCHEN, TOGETHER and AIM at
+## this match's difficulty, and a CPU partner's (MATE). Not online, not in the demo.
 class_name TuningPanel
 extends CanvasLayer
 
@@ -33,6 +35,8 @@ func setup(v: MatchView) -> TuningPanel:
 		{"id": "modifiers", "label": "MODIFIERS", "value": _count.bind("modifiers"),
 			"press": func(): _show("modifiers")},
 		{"id": "rules", "label": "RULES", "value": _count.bind("rules"), "press": func(): _show("rules")},
+		{"id": "smarts", "label": "SMART PLAY", "value": func(): return Settings.smart_name(view.sim.config.difficulty).to_upper(),
+			"press": func(): _show("smarts")},
 		{"id": "apply", "label": "APPLY", "value": func():
 			if not pending():
 				return ""
@@ -51,8 +55,39 @@ func setup(v: MatchView) -> TuningPanel:
 				"change": func(_d): mods ^= bit})
 		rows.append({"id": "back", "label": "BACK", "press": func(): _show("tune")})
 		_add(group, "MODIFIERS" if group == "modifiers" else "RULES", rows)
+	var smart_rows := []
+	for who in [["them", "THEIR"], ["partner", "MATE"]]:
+		for knob in [[K.SMART_KITCHEN, "KITCHEN"], [K.SMART_TOGETHER, "TOGETHER"], [K.SMART_AIM, "AIM"]]:
+			var profile := String(who[0])
+			var k: int = knob[0]
+			smart_rows.append({"id": "%s_%s" % [profile, String(knob[1]).to_lower()],
+				"label": "%s %s" % [who[1], knob[1]],
+				"value": func(): return "%d%%" % int(Settings.smart_profile(_profile(profile))[k]),
+				"change": func(d):
+					Settings.nudge_smart(_profile(profile), k, d)
+					_retune_smarts()})
+	smart_rows.append({"id": "smart_defaults", "label": "DEFAULTS", "press": func():
+		Settings.smarts = Settings.smart_defaults()
+		_retune_smarts()})
+	smart_rows.append({"id": "back", "label": "BACK", "press": func(): _show("tune")})
+	_add("smarts", "SMART PLAY", smart_rows)
 	visible = false
 	return self
+
+
+## The profile a SMART PLAY row tunes: the partner's, or this match's
+## difficulty's for "them".
+func _profile(who: String) -> String:
+	return "partner" if who == "partner" else Settings.smart_name(view.sim.config.difficulty)
+
+
+## SMART PLAY's knobs on the live match (and its replay).
+func _retune_smarts() -> void:
+	var smarts := Settings.smarts_for(view.sim.config)
+	if view.highlight:
+		view.highlight.op(["smarts", smarts])
+	view.sim.retune_smarts(smarts)
+
 
 
 func _add(id: String, title: String, rows: Array) -> void:

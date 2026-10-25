@@ -1054,6 +1054,11 @@ func _activate_players() -> void:
 			if config.difficulty != K.DIFFICULTY_MEDIUM \
 					and not config.human[i & 2] and not config.human[(i & 2) + 1]:
 				Opponents.apply_difficulty(style, config.difficulty)
+			# smart play (port ADR-094): a CPU heading for the kitchen volleys
+			if config.smarts.size() == K.MAX_PLAYERS * K.SMART_KNOBS:
+				ai.smart[i] = config.smarts.slice(i * K.SMART_KNOBS, (i + 1) * K.SMART_KNOBS)
+				if int(ai.smart[i][K.SMART_KITCHEN]) >= 50:
+					style.volley = 1
 			ai.styles[i] = style
 			ai.slots[i].late_period = late_period(style.late_period, config.cpu_errors)
 			ai.slots[i].reaction_frames = style.reaction
@@ -1082,7 +1087,24 @@ func retune(speed: int, errors: int) -> void:
 func ball_speed() -> int:
 	return clampi(config.ball_speed, K.BALL_SPEED_MIN, K.BALL_SPEED_MAX)
 
+## The tuning panel's smart play (port ADR-094), between frames: each CPU
+## slot's KITCHEN, TOGETHER and AIM from `smarts` (MatchConfig.smarts'
+## shape), as if the match had started with them. An input, like retune.
+func retune_smarts(smarts: Array) -> void:
+	config.smarts = smarts.duplicate()
+	for i in K.MAX_PLAYERS:
+		if not players[i].cpu_controlled or (attract and i == 0) or ai.styles[i] == null:
+			continue
+		if smarts.size() == K.MAX_PLAYERS * K.SMART_KNOBS:
+			ai.smart[i] = smarts.slice(i * K.SMART_KNOBS, (i + 1) * K.SMART_KNOBS)
+			if int(ai.smart[i][K.SMART_KITCHEN]) >= 50:
+				ai.styles[i].volley = 1
+		else:
+			ai.smart[i] = []
+
+
 ## CPU ERRORS (port ADR-073): a CPU swings late every `period`th return;
+
 ## at `percent` of the ROM's errors, that many times as rarely (0: never).
 ## At 100 the period is the style's.
 static func late_period(period: int, percent: int) -> int:

@@ -3,7 +3,11 @@
 ## the ball near the top of its bounce, swings when the first contact of a
 ## swing pressed now would be in the sweet spot (or as a last chance), and
 ## is deliberately late every Nth ball. No randomness, and it never reads a
-## human's future input.
+## human's future input. Smart play (port ADR-094) is the remaster's, off
+## unless MatchConfig.smarts says otherwise: KITCHEN brings a CPU up to the
+## kitchen line when the rules let it come in, TOGETHER keeps it level with
+## its partner (a human partner leads), and AIM places its shots: dinks at
+## the net, drops from the back, deep to whoever isn't up, cross-court.
 class_name SimAI
 extends RefCounted
 
@@ -42,6 +46,8 @@ var open_aim := [2, 2, 2, 2]
 var volley_check := [0, 0, 0, 0]
 var last_think := [0, 0, 0, 0]
 var held_intent: Array = []
+var smart: Array = [[], [], [], []]   # per slot: [KITCHEN, TOGETHER, AIM], [] off (port ADR-094)
+var smart_aim := [2, 2, 2, 2]         # the lane a smart shot goes to (AI_AIM_PATTERN: none)
 
 # Landing cache.
 var land_valid := false
@@ -81,6 +87,8 @@ func initialize() -> void:
 	open_aim = [K.AI_AIM_PATTERN, K.AI_AIM_PATTERN, K.AI_AIM_PATTERN, K.AI_AIM_PATTERN]
 	volley_check = [0, 0, 0, 0]
 	last_think = [0, 0, 0, 0]
+	smart = [[], [], [], []]
+	smart_aim = [K.AI_AIM_PATTERN, K.AI_AIM_PATTERN, K.AI_AIM_PATTERN, K.AI_AIM_PATTERN]
 
 
 func _volleys_legal() -> bool:
@@ -213,6 +221,7 @@ func _plan_shot(p: Player, cz: int) -> void:
 	var dink := style.dink_period
 	var to_net := absi(K.from_fp(p.x_fp) - K.COURT_NET_X)
 	block_volley[slot] = 0
+	smart_aim[slot] = K.AI_AIM_PATTERN
 	if cz >= K.to_fp(style.putaway_z) and to_net < style.putaway_distance:
 		g.planned_shot = K.SHOT_DRIVE
 		g.planned_depth = 0
@@ -220,6 +229,8 @@ func _plan_shot(p: Player, cz: int) -> void:
 		g.planned_shot = K.SHOT_STANDARD
 		g.planned_depth = 0
 		block_volley[slot] = 1
+	elif _smart_shot(p, to_net):
+		pass                             # placed (port ADR-094)
 	elif style.tactics and (not partner_human or to_net < K.AI_UP_DISTANCE) \
 			and _opponent_at_net(p.team, K.AI_UP_DISTANCE):
 		g.planned_shot = K.SHOT_SOFT
@@ -246,6 +257,8 @@ func _choose_aim(p: Player, intent: Intent) -> void:
 		opponent = P[1] if p.team else P[3]
 	if block_volley[slot]:
 		intent.aim_y = 0
+	elif smart_aim[slot] < K.AI_AIM_PATTERN:
+		intent.aim_y = smart_aim[slot]
 	elif open_aim[slot] < K.AI_AIM_PATTERN:
 		intent.aim_y = open_aim[slot]
 	elif has_partner:
@@ -258,6 +271,101 @@ func _choose_aim(p: Player, intent: Intent) -> void:
 			intent.aim_y = -intent.aim_y
 	intent.aim_x = -g.planned_depth if p.team else g.planned_depth
 	intent.shot = g.planned_shot
+
+
+# --- Smart play (port ADR-094) --------------------------------------------------------
+
+## A knob of this slot's smart play (0 to 100; 0 when it's off).
+func _smart(knob: int) -> int:
+	var sm: Array = smart[slot]
+	return int(sm[knob]) if sm.size() == K.SMART_KNOBS else 0
+
+
+func _smart_on(knob: int) -> bool:
+	return _smart(knob) > 0
+
+
+## Both of the other side's players within `distance` of the net (one, if
+## they play alone).
+func _opponents_up(team: int, distance: int) -> bool:
+	var a: Player = sim.players[0] if team else sim.players[2]
+	var b: Player = sim.players[1] if team else sim.players[3]
+	var up_a := not a.active or absi(K.from_fp(a.x_fp) - K.COURT_NET_X) < distance
+	var up_b := not b.active or absi(K.from_fp(b.x_fp) - K.COURT_NET_X) < distance
+	return up_a and up_b and (a.active or b.active)
+
+
+## AIM, on this many shots in 100 (the shot counter's, no randomness): the
+## serving side's third shot a drop (so it can come in), a dink when both
+## sides are up, a drop from the back when they are and you aren't (now
+## and then a lob, if the style lobs), and otherwise a ball through the
+## middle depth (a deep one to a lane goes out off a stretched hit). It
+## goes to the one who isn't up, when one is back and the other at the
+## net; between two level players, a dink or drop goes cross-court and
+## anything else down the middle (a diagonal drive to a lane goes wide).
+## Volleys stay block volleys. True if placed.
+
+func _smart_shot(p: Player, to_net: int) -> bool:
+	var aim := _smart(K.SMART_AIM)
+	if aim <= 0 or (g.shot_counter * 37 + slot * 23) % 100 >= aim:
+		return false
+	var both_up := _opponents_up(p.team, K.AI_UP_DISTANCE)
+	var third := ((sim.shot_serial - sim.rally_start) & 0xff) == 2 and p.team == sim.serving_team
+	if third and to_net >= K.AI_UP_DISTANCE:
+		g.planned_shot = K.SHOT_SOFT
+		g.planned_depth = -1
+	elif both_up:
+
+		g.planned_shot = K.SHOT_SOFT
+		g.planned_depth = 1 if (to_net >= K.AI_UP_DISTANCE and style.lob_distance \
+			and (g.shot_counter & 3) == 3) else -1
+	else:
+		g.planned_shot = K.SHOT_STANDARD
+		g.planned_depth = 0
+	var a: Player = sim.players[0] if p.team else sim.players[2]
+
+	var b: Player = sim.players[1] if p.team else sim.players[3]
+	var back: Player = null
+	if a.active and b.active and not both_up:
+		var da := absi(K.from_fp(a.x_fp) - K.COURT_NET_X)
+		var db := absi(K.from_fp(b.x_fp) - K.COURT_NET_X)
+		if da > db + K.AI_SPLIT_DISTANCE:
+			back = a
+		elif db > da + K.AI_SPLIT_DISTANCE:
+			back = b
+	if back:
+		smart_aim[slot] = -1 if back.y_fp < K.to_fp(K.COURT_CENTERLINE_Y) else 1
+	elif g.planned_shot == K.SHOT_SOFT and g.planned_depth < 0:
+		smart_aim[slot] = 1 if p.y_fp < K.to_fp(K.COURT_CENTERLINE_Y) else -1   # cross-court
+	else:
+		smart_aim[slot] = 0              # down the middle, between them
+	return true
+
+
+## KITCHEN and TOGETHER: where a smart CPU waits between shots, px from the
+## net. KITCHEN moves `home` toward the kitchen line, when the rules let
+## the side come in. TOGETHER keeps a pair level: with a human partner the
+## CPU follows their depth up (you move up, they do too) and half of it
+## back (staying all the way back with you left the net open); beside another CPU
+
+## it gets no more than a few steps ahead of it, so the two come up the
+## court side by side.
+func _smart_home(p: Player, home: int) -> int:
+	var h := home
+	var up := _smart(K.SMART_KITCHEN)
+	if up > 0 and _may_come_in(p.team):
+		h += (K.AI_SMART_KITCHEN - h) * up / 100
+	var tog := _smart(K.SMART_TOGETHER)
+	if has_partner and tog > 0:
+		var mate_d := absi(K.from_fp(mate.x_fp) - K.COURT_NET_X)
+		if partner_human:
+			# you come up, they come up; you drop back, they give half the ground
+			var follow := clampi(mate_d, K.AI_SMART_KITCHEN, maxi(style.recover, home))
+			h += (follow - h) * tog / (100 if follow < h else 200)
+		else:
+			h = maxi(h, mate_d - (K.AI_SMART_AHEAD + (100 - tog) * K.AI_SMART_AHEAD_SLACK / 100))
+	return h
+
 
 
 # --- Swing lookahead ----------------------------------------------------------------
@@ -678,6 +786,8 @@ func _think(i: int, intent: Intent) -> void:
 		if style.team and partner_human and home == style.net \
 				and absi(K.from_fp(mate.x_fp) - K.COURT_NET_X) > K.AI_PAIR_UP_DISTANCE:
 			home = style.recover
+		if smart[i].size() == K.SMART_KNOBS:
+			home = _smart_home(p, home)
 		g.target_x = K.COURT_NET_X + home if p.team else K.COURT_NET_X - home
 		if not has_partner:
 			g.target_y = K.AI_RECOVER_Y
@@ -685,7 +795,9 @@ func _think(i: int, intent: Intent) -> void:
 			g.target_y = K.AI_RECOVER_Y_TOP
 		else:
 			g.target_y = K.AI_RECOVER_Y_BOTTOM
-		if has_partner and style.team and not Sim.x_on_side(b.x_fp, p.team):
+		if has_partner and (style.team or _smart_on(K.SMART_TOGETHER)) \
+				and not Sim.x_on_side(b.x_fp, p.team):
+
 			var shift := clampi((K.from_fp(b.y_fp) - K.COURT_CENTERLINE_Y) >> 2,
 				-K.AI_SHIFT_MAX, K.AI_SHIFT_MAX)
 			g.target_y += shift

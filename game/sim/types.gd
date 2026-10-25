@@ -227,6 +227,12 @@ class MatchConfig:
 	var trip_stats: Array = [[], [], [], []]
 	var styles: Array = [null, null, null, null]
 	var perks := 0
+	## Smart play (port ADR-094): a CPU slot's KITCHEN, TOGETHER and AIM,
+	## 0 to 100, three ints a slot (12 in all; [] off). Off, the AI is the
+	## ROM's (the golden and conformance traces); Settings fills it from
+	## data/ai_smarts.json and the tuning panel.
+	var smarts: Array = []
+
 
 	static func singles() -> MatchConfig:
 		return MatchConfig.new()

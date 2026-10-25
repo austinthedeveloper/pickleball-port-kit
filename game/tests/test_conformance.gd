@@ -7,7 +7,7 @@
 ## traces in (as a hash per line); the first frame that differs is where
 ## the port went wrong.
 ##
-## The port's remaster-only rules are off here (MatchConfig.overhead): the
+## The port's remaster-only rules are off here (MatchConfig.overhead, smarts): the
 ## traces are the ROM's.
 extends TestSuite
 
@@ -34,6 +34,7 @@ static func config(s: Array) -> SimTypes.MatchConfig:
 	cfg.overhead = 0
 	cfg.ball_speed = 100            # the ROM's ball (ADR-071, 072)
 	cfg.cpu_errors = 100            # and its CPUs' errors (ADR-073)
+	cfg.smarts = []                 # and its AI (port ADR-094)
 	return cfg
 
 

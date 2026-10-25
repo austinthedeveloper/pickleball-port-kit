@@ -1,0 +1,10 @@
+{
+  "comment": "Smart play (port ADR-094): each CPU's KITCHEN (how far up to the kitchen line it plays, when the rules let it come in), TOGETHER (how closely it keeps level with its partner; a human partner leads) and AIM (shots in 100 it places: dinks, drops, deep to whoever is back, cross-court), 0 to 100. The opponents use their difficulty's; a CPU on a human's side uses partner's. The tuning panel (F2) changes them, saved as settings; DEFAULTS brings these back.",
+  "profiles": {
+    "kid": [0, 0, 0],
+    "easy": [20, 30, 10],
+    "medium": [70, 80, 70],
+    "hard": [90, 100, 80],
+    "partner": [80, 100, 40]
+  }
+}

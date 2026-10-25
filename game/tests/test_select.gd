@@ -154,6 +154,7 @@ func test_red_paddle_flies_sooner_in_play() -> void:
 func _flight(paddle: int) -> Array:
 	var cfg := Settings.config_for(false, -1, K.DIFFICULTY_MEDIUM, 21,
 		PlayerSelect.new_choice(PlayerSelect.PAL_BLUE, K.VARIANT_MALE, paddle))
+	cfg.smarts = []                      # the paddle, not the CPU's placement (port ADR-094)
 	var sim := Sim.new(cfg)
 	sim.p1_bot = true
 	var total := 0
