@@ -309,3 +309,49 @@ func test_the_second_batch() -> void:
 	v.free()
 	a.free()
 	_restore(k)
+
+
+## ROAD TRIP's lines (port ADR-093): until recorded the match opens as
+## before; recorded, the stop's calls open it in place of the venue, a
+## one-sided rule's save is called, and the SUMMER OPEN won has its line.
+func test_the_trip_lines() -> void:
+	var k := _kept()
+	Announcer.volume = 8
+	Sfx.setting = AudioMap.SOUND_ALL
+	var a := _voice()
+	for id in a.clips.keys():
+		if String(id).begins_with("trip_"):
+			a.clips.erase(id)
+	var cfg := RoadTrip.create(3, 0, RoadTrip.PEPPER).config_for({"type": "final", "team": 7, "mod": "",
+		"venue": "sunset"}, Settings.p1_choice)
+	cfg.perks |= K.PERK_SECOND_WIND
+	var v := MatchView.new()
+	v.trip = true
+	v.trip_calls = ["trip_final", "trip_last_heart", "trip_meal"]
+	runner.root.add_child(v)
+	v.setup(cfg, "sunset", false)
+	check(not v.commentary._intro.has("trip_final"), "not recorded: the match opens as before")
+	a.clips["trip_final_1"] = 1.0
+	a.clips["trip_final_2"] = 1.0
+	a.families["trip_final"] = ["trip_final_1", "trip_final_2"]
+	a.clips["trip_meal_1"] = 1.0         # one take: its id
+	for id in ["trip_perk_lucky_line_1", "trip_perk_second_wind", "trip_won_1"]:
+		a.clips[id] = 1.0
+	var c := v.commentary
+	c.begin()
+	eq(c._intro, ["trip_final", "trip_meal_1"], "the final, then the meal (the last heart isn't recorded)")
+	c._intro = []
+	c.on_event([K.EVENT_PERK, 0, 0, K.PERK_LUCKY_LINE])
+	eq(c.heard.back(), "trip_perk_lucky_line_1", "LUCKY LINE called")
+	a.hush()
+	v.sim.team_score = [3, cfg.points_to_win - 1]
+	c.on_event([K.EVENT_POINT, 0, 0, 1])
+	check(c.heard.has("trip_perk_second_wind"), "match point against you: SECOND WIND (%s)" % [c.heard])
+	a.hush()
+	v.sim.team_score = [cfg.points_to_win, 3]
+	v.sim.match_winner = 0
+	c.on_match_over()
+	eq(c.heard.back(), "trip_won_1", "the SUMMER OPEN won")
+	v.free()
+	a.free()
+	_restore(k)

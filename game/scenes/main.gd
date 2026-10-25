@@ -271,6 +271,8 @@ func _replay_beat(b: Dictionary) -> void:
 ## The story beat due at `slot` now (port ADR-092), seen and its reward
 ## handed over, or {}.
 func _trip_beat(t: RoadTrip, slot: String, more: Dictionary = {}) -> Dictionary:
+	if t.daily > 0:
+		return {}                        # the day's trip is the same for everyone: no story
 	var m := RoadTrip.meta(save)
 	var b := RoadTrip.beat_for(m, slot, t.ctx(m, more))
 	RoadTrip.see_beat(m, b)
@@ -326,10 +328,11 @@ func _on_trip_go(t: RoadTrip, target: Array) -> void:
 	match String(n["type"]):
 		"pickup":
 			_trip_match(t, n)
-		"grudge", "big", "final", "rival":
+		"grudge", "big", "final", "rival", "encore":
 			var team := int(n["team"])
 			var pages: Array = scenes["teams"][team] if team >= 0 and team < scenes["teams"].size() else []
-			var b := _trip_beat(t, "team", {"team": team}) if team >= 0 else {}
+			var b := _trip_beat(t, "team", {"team": team, "encore": String(n["type"]) == "encore"}) \
+				if team >= 0 else {}
 			if not b.is_empty():
 				pages = b["pages"]
 			if String(n["type"]) == "rival":
@@ -372,6 +375,7 @@ func _on_trip_go(t: RoadTrip, target: Array) -> void:
 					show_trip_map(t))
 		"detour":
 			var d := RoadTrip.detour(String(n["detour"]))
+			RoadTrip.postcard(RoadTrip.meta(save), "d:" + String(d["id"]))
 			if d.has("beat"):
 				RoadTrip.see_beat(RoadTrip.meta(save), RoadTrip.beat(String(d["beat"])))
 				save.save_game()
@@ -407,6 +411,8 @@ func _trip_match(t: RoadTrip, n: Dictionary) -> void:
 		m.trip_name = RoadTrip.opponent_name(n)
 		m.trip_members = t.local_members(n)
 	m.trip_plain = t.paddle == "plain_paddle"
+	m.trip_calls = t.calls_for(n, RoadTrip.meta(save))
+	RoadTrip.postcard(RoadTrip.meta(save), "v:" + String(n["venue"]))
 	m.finished.connect(func(to_title: bool):
 		var over := m.sim.phase == K.PHASE_MATCH_RESULT
 		_after_trip_match(t, over and m.sim.match_winner == 0, to_title))
@@ -439,10 +445,14 @@ func _after_trip_match(t: RoadTrip, won: bool, leave: bool) -> void:
 	if t.state == "on" and t.leg() != leg_before:
 		var lb := _trip_beat(t, "leg")
 		if not lb.is_empty():
-			list.append([lb["pages"], {"art": "roadside"}])
+			list.append([lb["pages"], {"art": "summer_open" if t.leg() == RoadTrip.ISLANDS else "roadside"}])
+		elif t.leg() == RoadTrip.ISLANDS:
+			list.append([scenes["to_islands"], {"art": "summer_open"}])
 	if t.state == "won":
-		var wb := _trip_beat(t, "won")
-		list.append([scenes["won"], {"art": "summer_open"}] if wb.is_empty() else
+		var encore := String(n.get("type", "")) == "encore"
+		var wb := _trip_beat(t, "won", {"encore": encore})
+		var pages: Array = scenes["won_islands"] if encore else scenes["won"]
+		list.append([pages, {"art": "summer_open"}] if wb.is_empty() else
 			[wb["pages"], RoadTrip.beat_scene(wb)["opts"]])
 	elif t.state == "over":
 		var ob := _trip_beat(t, "over")
@@ -462,13 +472,19 @@ func _after_trip_match(t: RoadTrip, won: bool, leave: bool) -> void:
 
 ## The trip's end: its miles to the GARAGE, then the results at home.
 func _end_trip(t: RoadTrip) -> void:
-	var heat_before := int(RoadTrip.meta(save)["heat"])
+	var m := RoadTrip.meta(save)
+	var heat_before := int(m["heat"])
+	var bond_before := RoadTrip.bond_level(m, t.partner)
 	var steps := t.finish(save)
 	save.save_game()
-	var heat_now := int(RoadTrip.meta(save)["heat"])
-	show_trip_home({"won": t.state == "won", "leg": t.leg() + 1, "wins": t.wins, "losses": t.losses,
+	var heat_now := int(m["heat"])
+	var bond_now := RoadTrip.bond_level(m, t.partner)
+	show_trip_home({"won": t.won_title(), "leg": t.leg() + 1, "wins": t.wins, "losses": t.losses,
 		"stops": t.stops, "miles": t.miles, "steps": steps,
-		"heat_open": heat_now if heat_now > heat_before else -1})
+		"heat_open": heat_now if heat_now > heat_before else -1,
+		"islands": t.leg() == RoadTrip.ISLANDS, "encore": t.encore_won(),
+		"daily": t.daily, "partner": t.partner, "bond": bond_now if bond_now > bond_before else -1})
+
 
 
 # --- STORY: SAVE THE PARK (ADR-069) ------------------------------------------------

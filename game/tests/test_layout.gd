@@ -1246,6 +1246,9 @@ func _trip_save(dir: String) -> SaveGame:
 	m["partners"] = [0, 1, 2, 3, 4, 5, 6, 7]
 	m["tapes"] = [1, 2, 3, 4]
 	m["story_pool"] = ["grandpas_paddle", "hog_paddle", "champ_paddle"]
+	m["pens"] = [1, 2, 3, 4]
+	m["daily_won"] = 888
+	m["bonds"] = {"-1": 99, "0": 99, "1": 99, "2": 99, "3": 99, "4": 99, "5": 99, "6": 99, "7": 99}
 	return sv
 
 
@@ -1299,8 +1302,9 @@ func test_trip_home() -> void:
 			else:
 				check_layout(h, "ROAD TRIP home, row %s (device %d)" % [row["id"], dev])
 		h.new_armed = true
+		h.daily_armed = true
 		h.page.refresh()
-		check_layout(h, "ROAD TRIP home, NEW TRIP armed")
+		check_layout(h, "ROAD TRIP home, NEW TRIP and the day's trip armed")
 		# the GARAGE at the bottom, the middle and the top of its ladder
 		var m := RoadTrip.meta(sv)
 		for miles in [0, 500, 3000, 99999]:
@@ -1317,6 +1321,12 @@ func test_trip_home() -> void:
 				h.garage_page.select("tape")
 				h.garage_page.refresh()
 				check_layout(h, "the GARAGE at %d miles, cassette %d (device %d)" % [miles, tp, dev])
+			for pen in RoadTrip.pens_open(m):
+				m["looks"]["pen"] = int(pen)
+				h.garage_page.select("pen")
+				h.garage_page.refresh()
+				check_layout(h, "the GARAGE at %d miles, pen %d (device %d)" % [miles, pen, dev])
+			m["looks"]["pen"] = 0
 
 			var gnode := h._garage
 			h._close_garage()
@@ -1328,7 +1338,9 @@ func test_trip_home() -> void:
 		longest.sort_custom(func(a, b): return RoadTrip.step_label(a).length() > RoadTrip.step_label(b).length())
 		for won in [false, true]:
 			var r := TripHome.new().setup(sv, {"won": won, "leg": 3, "wins": 88, "losses": 88, "stops": 88,
-				"miles": 9999, "steps": longest.slice(0, 5), "heat_open": 5})
+				"miles": 9999, "steps": longest.slice(0, 5), "heat_open": 5, "islands": won, "encore": false,
+				"daily": 20261231, "partner": 1, "bond": 3})
+
 			runner.root.add_child(r)
 			if not r.is_node_ready():
 				r._ready()
@@ -1607,3 +1619,70 @@ func test_trip_story_stops() -> void:
 			map._info[k].text = String(lines[k]) if k < lines.size() else ""
 		check_layout(map, "the map's panel on a %s" % n["type"])
 	map.free()
+
+
+## POSTCARDS (port ADR-093): every page, with none collected and with all.
+func test_trip_postcards() -> void:
+	var kept := [GameControls.last_device, Settings.pad_glyphs]
+	var sv := _trip_save("user://test_layout_trip_cards/")
+	var m := RoadTrip.meta(sv)
+	for dev in _devices():
+		_device(dev)
+		for have in [false, true]:
+			m["postcards"] = RoadTrip.postcards_all().duplicate() if have else []
+			var h := TripHome.new().setup(sv, {}, "scrapbook")
+			runner.root.add_child(h)
+			if not h.is_node_ready():
+				h._ready()
+			h.scrap_page.select("postcards")
+			h._scrap_refresh()
+			check_layout(h, "the SCRAPBOOK's POSTCARDS row (device %d)" % dev)
+			h._open_postcards()
+			for p in h.postcard_pages():
+				h.card_page = p
+				h._build_cards()
+				check_layout(h, "POSTCARDS page %d, all %s (device %d)" % [p, have, dev])
+			h.free()
+	m["postcards"] = []
+	GameControls.last_device = kept[0]
+	Settings.pad_glyphs = kept[1]
+	GameControls.device_serial += 1
+
+
+## The islands on the map (port ADR-093): every stop of the fourth leg
+## and its encore, the NOW PLAYING card, the VAN on the day's trip.
+func test_trip_islands_map() -> void:
+	var sv := _trip_save("user://test_layout_trip_isles/")
+	var m := RoadTrip.meta(sv)
+	m["best_heat"] = 5
+	m["looks"]["tape"] = 4
+	var t := RoadTrip.create(17, 0, RoadTrip.PEPPER, m)
+	eq(t.legs(), 4)
+	t.at = [RoadTrip.ISLANDS, RoadTrip.START, 1]
+	t.title = true
+	var map := TripMap.new().setup(sv, t)
+	runner.root.add_child(map)
+	if not map.is_node_ready():
+		map._ready()
+	check(map._tape_card != null, "NOW PLAYING")
+	check_layout(map, "the map on the islands, NOW PLAYING")
+	for col in RoadTrip.COLS:
+		for lane in RoadTrip.LANES:
+			var lines := t.info(t.map[RoadTrip.ISLANDS]["cols"][col][lane])
+			for k in 3:
+				map._info[k].text = String(lines[k]) if k < lines.size() else ""
+			check_layout(map, "the islands, stop %d %d" % [col, lane])
+	var gl := t.info(t.map[RoadTrip.ISLANDS]["gate"])
+	for k in 3:
+		map._info[k].text = String(gl[k]) if k < gl.size() else ""
+	check_layout(map, "the islands' encore")
+	map.free()
+	m["looks"]["tape"] = 0
+	var d := RoadTrip.create(RoadTrip.daily_seed(20261231), 0, RoadTrip.PEPPER)
+	d.daily = 20261231
+	var v := TripVan.new().setup(sv, d)
+	runner.root.add_child(v)
+	if not v.is_node_ready():
+		v._ready()
+	check_layout(v, "THE VAN on the day's trip")
+	v.free()

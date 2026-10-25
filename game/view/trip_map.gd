@@ -25,11 +25,11 @@ const GATE_X := 530.0
 const LANE_Y := [85.0, 165.0, 245.0]
 const HOME := Vector2(40.0, 165.0)
 const DRIVE_FRAMES := 36
+const TAPE_SHOWN := 200            ## frames the NOW PLAYING card stays
 const PIN := Vector2(32, 40)
 const PIN_INDEX := {"big": 0, "final": 1, "pickup": 2, "grudge": 3, "yard": 4, "shop": 5,
-	"motel": 6, "detour": 7, "diner": 9, "rival": 10}
+	"motel": 6, "detour": 7, "diner": 9, "rival": 10, "encore": 1}
 const ROAD := Color(0.35, 0.33, 0.3, 0.75)
-const DRIVEN := Color(0.78, 0.12, 0.1, 0.95)
 const GOLD := Color("fbe46a")
 const DIM := Color(0.75, 0.78, 0.86)
 
@@ -55,6 +55,8 @@ var _strip: Node2D
 var _info: Array = []
 var _prompts: PromptBar
 var _sfx: Sfx
+var _tape_card: Node2D             ## NOW PLAYING, while it shows
+var _tape_frames := 0
 
 
 func setup(game_save: SaveGame, t: RoadTrip) -> TripMap:
@@ -91,6 +93,15 @@ func _ready() -> void:
 	paper.centered = false
 	paper.scale = Vector2(PAPER_SCALE, PAPER_SCALE)
 	_world.add_child(paper)
+	if trip.legs() > RoadTrip.LEGS:
+		var isles := Sprite2D.new()         # the islands, folded out past the coast (port ADR-093)
+		isles.texture = TripArt.islands_paper()
+		isles.centered = false
+		isles.scale = paper.scale
+		isles.position.x = PAPER_W * PAPER_SCALE
+		if TripArt.islands_placeholder():
+			isles.modulate = Color(0.78, 0.9, 1.08)
+		_world.add_child(isles)
 	_roads = Node2D.new()
 	_roads.draw.connect(_draw_roads)
 	_world.add_child(_roads)
@@ -122,6 +133,26 @@ func _ready() -> void:
 	GameControls.clear_latch()
 	if not trip.pending.is_empty():
 		open_pick()
+	_now_playing()
+
+
+## The cassette in the deck (the GARAGE's), on a card that slides over the
+## windscreen as the map opens and goes (the deck itself is under the
+## stop's panel).
+func _now_playing() -> void:
+	var tape := int(RoadTrip.meta(save)["looks"].get("tape", 0)) if save else 0
+	if tape <= 0:
+		return
+	_tape_card = Node2D.new()
+	add_child(_tape_card)
+	UiKit.panel(Rect2(600, 74, 300, 56), _tape_card, "sub")
+	var cas := AtlasTexture.new()
+	cas.atlas = load(DIR + "trip_dash_ornaments.png")
+	cas.region = Rect2(40 * clampi(tape - 1, 0, 3), 104, 40, 26)
+	TripArt.sprite(cas, Vector2(614, 89), 1.0, _tape_card)
+	UiKit.text("small", "NOW PLAYING", Vector2(664, 82), 0.0, DIM, _tape_card)
+	UiKit.text("small", String(RoadTrip.data()["tapes"][tape]["name"]), Vector2(664, 104), 0.0, GOLD, _tape_card)
+	_tape_frames = TAPE_SHOWN
 
 
 ## The van's paint and the dash ornament the GARAGE has on.
@@ -166,7 +197,7 @@ static func world_point(leg: int, col: int, lane: int) -> Vector2:
 
 
 func _scroll_for(x: float) -> float:
-	return clampf(x - VIEW.size.x * 0.35, 0.0, PAPER_W * PAPER_SCALE - VIEW.size.x)
+	return clampf(x - VIEW.size.x * 0.35, 0.0, LEG_W * trip.legs() * PAPER_SCALE - VIEW.size.x)
 
 
 func target_id(target: Array) -> String:
@@ -186,7 +217,7 @@ func refresh() -> void:
 		_pins.remove_child(c)
 		c.free()
 	_add_pin(0, RoadTrip.START, 0, -1, true)          # home
-	for leg in RoadTrip.LEGS:
+	for leg in trip.legs():
 		for col in RoadTrip.COLS:
 			for lane in RoadTrip.LANES:
 				var n: Dictionary = trip.map[leg]["cols"][col][lane]
@@ -223,7 +254,7 @@ func _add_pin(leg: int, col: int, lane: int, index: int, done: bool, team := -1)
 func _place_van() -> void:
 	var p := world_point(trip.leg(), trip.col(), trip.lane())
 	if trip.state == "won":
-		p = world_point(RoadTrip.LEGS - 1, RoadTrip.GATE, 0)
+		p = world_point(trip.legs() - 1, RoadTrip.GATE, 0)
 	_van.position = p + Vector2(0, -2)
 	_van_frame(0)
 
@@ -298,7 +329,7 @@ func _info_refresh() -> void:
 
 func _draw_roads() -> void:
 	var from_home := world_point(0, RoadTrip.START, 0)
-	for leg in RoadTrip.LEGS:
+	for leg in trip.legs():
 		var start := world_point(leg, RoadTrip.START, 0) if leg > 0 else from_home
 		for lane in RoadTrip.LANES:
 			_dash(start, world_point(leg, 0, lane), ROAD)
@@ -319,8 +350,16 @@ func _draw_roads() -> void:
 		if int(r[0]) != prev_leg:
 			prev = world_point(int(r[0]), RoadTrip.START, 0)
 			prev_leg = int(r[0])
-		_roads.draw_line(prev, p, DRIVEN, 3.0)
+		_roads.draw_line(prev, p, pen_colour(), 3.0)
 		prev = p
+
+
+## The road driven, in the GARAGE's map pen (red to start; port ADR-093).
+func pen_colour() -> Color:
+	var pens: Array = RoadTrip.data()["pens"]
+	var i := int(RoadTrip.meta(save)["looks"].get("pen", 0)) if save else 0
+	var c: Array = pens[clampi(i, 0, pens.size() - 1)]["rgb"]
+	return Color8(int(c[0]), int(c[1]), int(c[2]), 242)
 
 
 ## A printed road: 6 px dashes, 4 px gaps.
@@ -441,6 +480,15 @@ func _leave() -> void:
 
 func _process(_delta: float) -> void:
 	_frame += 1
+	if _tape_card:
+		_tape_frames -= 1
+		var k := clampf(minf(TAPE_SHOWN - _tape_frames, _tape_frames) / 20.0, 0.0, 1.0)
+		_tape_card.modulate.a = k
+		_tape_card.position.x = (1.0 - k) * 40.0
+		if _tape_frames <= 0:
+			_tape_card.queue_free()
+			_tape_card = null
+
 	if _frame % 4 == 0:
 		_cursor_ring.queue_redraw()
 	var want := _scroll_for(_van.position.x)

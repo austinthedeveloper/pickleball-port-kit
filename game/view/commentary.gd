@@ -5,7 +5,10 @@
 ## 20, 25 and 30 shots, how each point ended, streaks, comebacks, match
 ## point, now and then a shot or a pun, the close call, PLAY OF THE MATCH
 ## and the result. COMMENTARY says how much: LIGHT the big moments,
-## NORMAL the score and the points too, LOTS more of the rally.
+## NORMAL the score and the points too, LOTS more of the rally. In ROAD
+## TRIP the stop's own calls (MatchView.trip_calls: its kind, your last
+## heart, a hazard, the meal) open the match, a one-sided rule's save is
+## called, and the SUMMER OPEN or the island encore won has its line.
 class_name Commentary
 extends RefCounted
 
@@ -32,6 +35,11 @@ const MOD_LINES := [[K.MOD_SUDDEN_DEATH, "mod_sudden_death"], [K.MOD_MULTI_BALL,
 	[K.MOD_ICE, "mod_ice"], [K.MOD_GLOW, "mod_glow"], [K.MOD_INVERSE, "mod_inverse"],
 	[K.MOD_MOON, "mod_moon"], [K.MOD_BOUNCY, "mod_bouncy"], [K.MOD_WIND, "mod_wind"],
 	[K.MOD_SIDE_OUT, "mod_side_out"], [K.MOD_MOMENTUM, "mod_momentum"], [K.MOD_WIN_BY_2, "mod_win_by_2"]]
+## ROAD TRIP's one-sided rules (port ADR-087) as the announcer calls them.
+const PERK_LINES := {K.PERK_KITCHEN_PASS: "trip_perk_kitchen_pass", K.PERK_SECOND_SERVE: "trip_perk_second_serve",
+	K.PERK_LUCKY_LINE: "trip_perk_lucky_line", K.PERK_HOT_HAND: "trip_perk_hot_hand"}
+## A trip's match won: its line, by the opening call that marks it.
+const TRIP_WON := {"trip_final": "trip_won", "trip_encore": "trip_encore_won"}
 
 var view: MatchView
 var rng := RandomNumberGenerator.new()
@@ -50,6 +58,7 @@ var _deuces := 0                   ## times level past game point (WIN BY 2)
 var _smash_by := -1
 var _last_smash := false
 var _ready := [false, false, false, false]
+var _second_wind := false          ## SECOND WIND called this match
 
 
 func _init(v: MatchView) -> void:
@@ -96,7 +105,14 @@ func _chance(table: Array) -> bool:
 func begin() -> void:
 	var cfg := view.sim.config
 	_intro = []
-	if view.story_mode:
+	_second_wind = false
+	# ROAD TRIP: the stop's calls, the two first recorded, in place of the venue's
+	for f in view.trip_calls:
+		if _intro.size() < 2 and _line(f) != "":
+			_intro.append(_line(f))
+	if not _intro.is_empty():
+		pass                               # the trip's calls stand in for the venue
+	elif view.story_mode:
 		_intro.append("story_stakes_1")
 	elif _first(["venue_" + view.venue]) != "":
 		_intro.append("venue_" + view.venue)  # (ADR-085's four and ADR-088's seven are still to record)
@@ -104,7 +120,7 @@ func begin() -> void:
 		if cfg.modifiers & int(m[0]) and _first([m[1]]) != "":
 			_intro.append(m[1])
 			break
-	if _intro.size() == 1:
+	if _intro.size() == 1 and view.trip_calls.is_empty():
 		_intro.append("match_doubles" if cfg.mode == K.MODE_DOUBLES else "match_singles")
 	_server_before = view.sim.serving_team
 
@@ -134,6 +150,20 @@ func on_event(e: Array) -> void:
 			_on_hit(e)
 		K.EVENT_POINT:
 			_on_point(int(e[3]))
+			_on_second_wind()
+		K.EVENT_PERK:
+			if PERK_LINES.has(int(e[3])) and _line(String(PERK_LINES[int(e[3])])) != "":
+				_say(_line(String(PERK_LINES[int(e[3])])), Announcer.HIGH)
+
+
+## SECOND WIND (ROAD TRIP): the left side runs faster at match point
+## against it; called the first time it does.
+func _on_second_wind() -> void:
+	var s := view.sim
+	if not _second_wind and s.config.perks & K.PERK_SECOND_WIND and s.match_point(1) and not s.team_won(1):
+		_second_wind = true
+		if _line("trip_perk_second_wind") != "":
+			_say(_line("trip_perk_second_wind"), Announcer.HIGH, 0.6)
 
 
 ## A human's meter filling up (SPECIALS): once, when it does.
@@ -261,6 +291,14 @@ func _extended() -> bool:
 
 ## The first of these lines the announcer has (a later batch may not be
 ## recorded yet).
+## A line by its family ("trip_grudge": trip_grudge_1, _2...) or, with
+## one take recorded, that take ("trip_big" -> trip_big_1); "" if neither.
+func _line(f: String) -> String:
+	if f == "":
+		return ""
+	return _first([f, f + "_1"])
+
+
 func _first(families: Array) -> String:
 	var a := Announcer.current
 	for f in families:
@@ -315,6 +353,8 @@ func on_match_over() -> void:
 		_say("story_saved" if last else "story_stakes_2", Announcer.TOP)
 	elif view.cleared:
 		_say("ladder_cleared", Announcer.TOP)
+	elif w == mine and _line(_trip_won()) != "":
+		_say(_line(_trip_won()), Announcer.TOP)
 	elif w != mine:
 		_say("match_loss", Announcer.TOP)
 	elif lose == 0:
@@ -325,7 +365,17 @@ func on_match_over() -> void:
 		_say("match_win", Announcer.TOP)
 
 
+## The line for winning this trip match, if it's the SUMMER OPEN or the
+## island encore ("" otherwise).
+func _trip_won() -> String:
+	for f in view.trip_calls:
+		if TRIP_WON.has(f):
+			return String(TRIP_WON[f])
+	return ""
+
+
 func on_rematch() -> void:
+
 	_streak = [0, 0]
 	_deuces = 0
 	_was_down = [0, 0]

@@ -65,6 +65,7 @@ var trip := false
 var trip_name := ""
 var trip_members: Array = []     ## the locals' looks (RoadTrip.local_members)
 var trip_plain := false          ## you hold the PLAIN PADDLE
+var trip_calls: Array = []       ## the announcer's opening calls for a trip's stop (RoadTrip.calls_for)
 var story := Story.new()
 ## The intro card (ADR-026): the match waits under it, no sim, no AI.
 var card_frames := -1

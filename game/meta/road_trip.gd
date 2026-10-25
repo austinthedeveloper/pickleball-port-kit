@@ -35,10 +35,18 @@ const LEG_1_ERRORS := 60
 const PEPPER := -1               ## `partner`: Pepper, not a ladder captain
 const GEN := 2                   ## the generator's version: 2 adds the diner, the rival and story stops
 const RIVAL_LEG := 1             ## the ROAD HOGS turn up on the long drive (port ADR-092)
+const ISLANDS := 3               ## the secret fourth leg's index, past the SUMMER OPEN (port ADR-093)
+## A partner's bond (port ADR-093): points a trip together earns, and the
+## points each level needs: 1, +1 to their stats; 2, their own item; 3, +2.
+const BOND_LEVELS := [4, 12, 24]
+const BOND_TITLE := 3            ## bond points for a SUMMER OPEN won together
+## Postcards it takes for each map pen after the red one (the gold is the
+## islands' ending's).
+const PEN_POSTCARDS := [8, 16, 24]
 
 ## Stop types. The ones that give gear (or a chance to buy it): no road
 ## has two stops without one in a row.
-const MATCHES := ["pickup", "grudge", "rival", "big", "final"]
+const MATCHES := ["pickup", "grudge", "rival", "big", "final", "encore"]
 const PICKS := ["grudge", "rival", "yard", "shop", "detour"]
 const WEIGHTS := {"pickup": 40, "grudge": 14, "yard": 12, "shop": 12, "motel": 10, "detour": 16, "diner": 8}
 const RARITY_WEIGHTS := {"common": 60, "uncommon": 30, "rare": 10}
@@ -67,6 +75,8 @@ var locker: Array = []           ## paddles and hats put away in the van (port A
 var boost: Array = [0, 0, 0, 0]  ## stats won on the road for the rest of the trip (detours)
 var meal := ""                   ## the diner's dish: stats for the next match only
 var rival_won := false           ## the ROAD HOGS beaten on this trip
+var daily := 0                   ## TRIP OF THE DAY: its date (YYYYMMDD), 0 for any other trip
+var title := false               ## the SUMMER OPEN won, with the islands still to go
 var hazards: Array = []          ## hazard ids waiting for the next match
 var used: Array = []             ## once-only items spent (rain check, umbrella)
 var pending: Dictionary = {}     ## an offer not yet taken: {"kind": "pick", "items": [...]}
@@ -123,7 +133,12 @@ static func beat(id: String) -> Dictionary:
 
 
 static func leg_info(leg: int) -> Dictionary:
-	return data()["legs"][clampi(leg, 0, LEGS - 1)]
+	return data()["legs"][clampi(leg, 0, data()["legs"].size() - 1)]
+
+
+## Legs on this trip's map: three, four with the islands.
+func legs() -> int:
+	return map.size()
 
 
 static var _k_consts: Dictionary = {}
@@ -176,6 +191,12 @@ static func create(trip_seed: int, heat_level: int, who: int, meta_dict: Diction
 	t.gen = GEN
 	t.map = generate(t.seed, t.heat, story_extras(meta_dict, who))
 	var g := garage(meta_dict)
+	var bond := bond_level(meta_dict, who)
+	for i in 4:
+		t.partner_stats[i] = PARTNER_STAT + (1 if bond >= 1 else 0) + (1 if bond >= 3 else 0)
+	if bond >= 2:
+		t.bag.append(bond_item(who))
+		t._apply_hearts(bond_item(who))
 	for i in 4:
 		t.base[i] = clampi(STAT_MIN + int(g["stats"][i]), STAT_MIN, STAT_MAX)
 	t.max_hearts = (2 if t.heat >= 2 else HEARTS) + int(g["hearts"])
@@ -199,7 +220,7 @@ static func create(trip_seed: int, heat_level: int, who: int, meta_dict: Diction
 static func generate(s: int, heat_level: int, extras: Dictionary = {}) -> Array:
 	var out := []
 	var used_detours := []
-	for leg in LEGS:
+	for leg in LEGS + (1 if extras.get("islands", false) else 0):
 		var info := leg_info(leg)
 		var bigs: Array = info["big"]
 		var big_team := int(bigs[roll(s, leg, 1, bigs.size())])
@@ -259,10 +280,13 @@ static func _draw_leg(s: int, leg: int, attempt: int, big_team: int, heat_level:
 				cols[c][lane + 1]["edges"].append(lane)
 		for lane in LANES:
 			cols[c][lane]["edges"].sort()
-	var gate := {"type": "final" if leg == LEGS - 1 else "big", "team": big_team, "edges": [],
-		"local": -1, "mod": "", "detour": "", "done": false}
+	var gate := {"type": "final" if leg == LEGS - 1 else ("encore" if leg == ISLANDS else "big"),
+		"team": big_team, "edges": [], "local": -1, "mod": "", "detour": "", "done": false}
 	if leg == LEGS - 1:
 		gate["venue"] = "sunset"
+		gate["time"] = CourtStyle.NIGHT
+	elif leg == ISLANDS:
+		gate["venue"] = String(info.get("encore_venue", "pirate"))
 		gate["time"] = CourtStyle.NIGHT
 	else:
 		var home := Settings.home_venue(big_team)
@@ -315,8 +339,17 @@ static func story_extras(meta_dict: Dictionary, who: int) -> Dictionary:
 			out["detours"].append(String(d["id"]))
 	ctx["team"] = Opponents.DAWSON
 	out["dawson"] = beat_due(meta_dict, beat("van_4"), ctx)
-
+	out["islands"] = islands_open(meta_dict)
 	return out
+
+
+## The islands are open once an arc of the story is finished (THE VAN,
+## THE ROAD HOGS or THE CHAMPS) or a trip is won at HEAT 5.
+static func islands_open(meta_dict: Dictionary) -> bool:
+	var seen: Array = meta_dict.get("beats", [])
+	return seen.has("van_6") or seen.has("hogs_6") or seen.has("champs_4") \
+		or int(meta_dict.get("best_heat", -1)) >= HEAT_MAX
+
 
 
 static func _time_of(s: int, k: int) -> int:
@@ -532,6 +565,8 @@ func info(n: Dictionary) -> Array:
 			prize = "PRIZE: A GEAR PICK, CASH"
 		elif type == "final":
 			prize = "THE SUMMER OPEN TITLE"
+		elif type == "encore":
+			prize = "THE ISLAND ENCORE"
 		out.append(("TODAY: " + ", ".join(names) + "   " if not names.is_empty() else "") + prize)
 	else:
 		match type:
@@ -544,7 +579,7 @@ func info(n: Dictionary) -> Array:
 			"diner":
 				out.append("A HOT MEAL: STATS FOR THE NEXT MATCH.")
 			"detour":
-				if has_item("road_atlas"):
+				if _sum("atlas") > 0:
 					out.append(String(detour(String(n["detour"]))["lines"][0]))
 				else:
 					out.append("WHO KNOWS WHAT'S DOWN THIS ROAD?")
@@ -646,6 +681,17 @@ func partner_now() -> Array:
 	return out
 
 
+## Whether the trip ends a winner: the SUMMER OPEN won (on the islands or
+## not).
+func won_title() -> bool:
+	return title or state == "won"
+
+
+## Whether the island encore was won (the islands' gate done).
+func encore_won() -> bool:
+	return legs() > LEGS and bool(map[ISLANDS]["gate"]["done"])
+
+
 func has_item(id: String) -> bool:
 	return bag.has(id) or paddle == id or hat == id
 
@@ -694,6 +740,8 @@ static func stop_name(n: Dictionary) -> String:
 			return "BIG MATCH"
 		"final":
 			return "THE SUMMER OPEN"
+		"encore":
+			return "THE ENCORE"
 		"yard":
 			return "YARD SALE"
 		"shop":
@@ -712,7 +760,7 @@ func points_for(n: Dictionary) -> int:
 	match String(n["type"]):
 		"pickup":
 			return 3
-		"final":
+		"final", "encore":
 			return 7
 		"big":
 			return 7 if heat >= 4 else 5
@@ -720,7 +768,7 @@ func points_for(n: Dictionary) -> int:
 
 
 func difficulty_for(n: Dictionary) -> int:
-	if String(n["type"]) == "final":
+	if String(n["type"]) in ["final", "encore"]:
 		return K.DIFFICULTY_HARD
 	if String(n["type"]) == "rival":
 		# the ROAD HOGS get serious after two losses to you, friendly after five
@@ -820,7 +868,7 @@ func record_match(won: bool) -> void:
 				pay = 20 + 5 * leg()
 			"big":
 				pay = 30
-			"final":
+			"final", "encore":
 				pay = 0
 		if has_item("piggy_bank"):
 			pay += pay / 2
@@ -836,11 +884,17 @@ func record_match(won: bool) -> void:
 		elif String(n["type"]) == "big":
 			offer_pick("big", 1)
 			heal(_sum("big_heal"))
-		if String(n["type"]) == "final":
+		if String(n["type"]) == "final" and legs() > LEGS:
+			title = true                 # the SUMMER OPEN won; the islands next
+			at = [ISLANDS, START, 1]
+			heal(_sum("leg_heal"))
+			cash += _sum("leg_cash")
+		elif String(n["type"]) in ["final", "encore"]:
 			state = "won"
 		elif col() == GATE:
 			at = [leg() + 1, START, 1]
 			heal(_sum("leg_heal"))
+			cash += _sum("leg_cash")
 		return
 	losses += 1
 	if has_item("rain_check") and not used.has("rain_check"):
@@ -848,7 +902,7 @@ func record_match(won: bool) -> void:
 	else:
 		hearts -= 1
 	if hearts <= 0:
-		state = "over"
+		state = "won" if title else "over"   # lost on the islands, but the title's yours
 		return
 	if not is_gate():
 		n["done"] = true            # a lost stop: no prize, drive on
@@ -878,7 +932,7 @@ static func pool(meta_dict: Dictionary) -> Array:
 ## have, or the paddle or hat you hold, wouldn't.
 func can_take(id: String) -> bool:
 	var g := gear(id)
-	if g.is_empty() or String(g["rarity"]) == "start":
+	if g.is_empty() or String(g["rarity"]) in ["start", "bond"]:
 		return false
 	if g.get("stacks", false):
 		return true
@@ -910,7 +964,26 @@ func draw(source: String, count: int, salt: int, meta_dict: Dictionary) -> Array
 		var id2 := String(candidates[roll(seed, salt + out.size(), 41, candidates.size())])
 		out.append(id2)
 		candidates.erase(id2)
+	# a set you've started: one card in two is a piece it's missing (port ADR-093)
+	var pieces := set_pieces(meta_dict).filter(func(id): return not out.has(id))
+	if not out.is_empty() and not pieces.is_empty() and roll(seed, salt, 71, 2) == 0:
+		out[out.size() - 1] = String(pieces[roll(seed, salt, 73, pieces.size())])
 	return out
+
+
+## The pieces missing from the sets you've started (one item held, in hand,
+## in the bag or the locker), that can turn up on the road.
+func set_pieces(meta_dict: Dictionary) -> Array:
+	var in_pool := pool(meta_dict)
+	var out := []
+	for st in data()["sets"]:
+		if not st["items"].any(func(id): return has_item(String(id)) or locker.has(String(id))):
+			continue
+		for id in st["items"]:
+			if in_pool.has(id) and can_take(String(id)) and not out.has(id):
+				out.append(String(id))
+	return out
+
 
 
 func _stop_salt() -> int:
@@ -972,7 +1045,7 @@ func equip(id: String) -> bool:
 ## worth nothing to anyone.
 func sell_price(id: String) -> int:
 	var g := gear(id)
-	if g.is_empty() or String(g["rarity"]) == "start":
+	if g.is_empty() or String(g["rarity"]) in ["start", "bond"]:
 		return 0
 	return int(PRICES.get(String(g["rarity"]), 30)) / 2
 
@@ -1084,7 +1157,7 @@ func rest(heal: bool) -> void:
 
 ## A hazard for the next match, unless SUNSCREEN takes it (once a trip).
 func add_hazard(id: String) -> void:
-	if has_item("sunscreen") and not used.has("sunscreen"):
+	if used.count("sunscreen") < _sum("sunscreen"):
 		used.append("sunscreen")
 		return
 	hazards.append(id)
@@ -1202,7 +1275,8 @@ func order(i: int) -> bool:
 
 const KEYS := ["seed", "gen", "heat", "partner", "map", "at", "hearts", "max_hearts", "cash",
 	"base", "partner_stats", "paddle", "hat", "bag", "hazards", "used", "pending", "beaten",
-	"route", "stops", "wins", "losses", "miles", "state", "locker", "boost", "meal", "rival_won"]
+	"route", "stops", "wins", "losses", "miles", "state", "locker", "boost", "meal", "rival_won",
+	"daily", "title"]
 
 
 func to_dict() -> Dictionary:
@@ -1225,8 +1299,10 @@ static func from_dict(d: Dictionary) -> RoadTrip:
 ## What lasts between trips (save.data["trip"]), filled in if missing.
 static func meta(save: SaveGame) -> Dictionary:
 	var def := {"miles": 0, "trips": 0, "won": 0, "best_heat": -1, "best_leg": 0, "heat": 0,
-		"partners": [], "seen": 0, "looks": {"van": 0, "ornament": 0, "tape": 0}, "last_item": "", "now": {},
-		"hogs": 0, "beats": [], "story_pool": [], "tapes": []}
+		"partners": [], "seen": 0, "looks": {"van": 0, "ornament": 0, "tape": 0, "pen": 0}, "last_item": "",
+		"now": {},
+		"hogs": 0, "beats": [], "story_pool": [], "tapes": [], "bonds": {}, "bond_seen": [],
+		"daily": {}, "daily_won": 0, "postcards": [], "pens": []}
 	if save == null:
 		return def
 	if not save.data.has("trip") or typeof(save.data["trip"]) != TYPE_DICTIONARY:
@@ -1248,7 +1324,7 @@ static func title_label(save: SaveGame) -> String:
 		return ""
 	var t := current(save)
 	if t != null:
-		return "LEG %d/%d" % [t.leg() + 1, LEGS]
+		return "LEG %d/%d" % [t.leg() + 1, t.legs()]
 	var won := int(meta(save)["won"])
 	return "WON %d" % won if won > 0 else ""
 
@@ -1288,14 +1364,25 @@ func finish(save: SaveGame) -> Array:
 	var before := steps_reached(m)
 	m["miles"] = int(m["miles"]) + miles
 	m["best_leg"] = maxi(int(m["best_leg"]), leg() + (1 if state == "won" else 0))
+	var key := str(partner)
+	m["bonds"][key] = int(m["bonds"].get(key, 0)) + wins + (BOND_TITLE if won_title() else 0)
+	if daily > 0:
+		var best: Dictionary = m["daily"] if int(m["daily"].get("date", 0)) == daily else {"date": daily}
+		if won_title() and not best.get("won", false):
+			m["daily_won"] = int(m["daily_won"]) + 1
+		best["won"] = best.get("won", false) or won_title()
+		best["leg"] = maxi(int(best.get("leg", 0)), leg() + 1)
+		best["tries"] = int(best.get("tries", 0)) + 1
+		m["daily"] = best
 	var partners: Array = m["partners"]
 	for team in beaten:
 		if team != Opponents.DAWSON and team != 7 and not partners.has(team):
 			partners.append(team)
 	if rival_won:
 		m["hogs"] = int(m["hogs"]) + 1
-	if state == "won":
+	if won_title():
 		m["won"] = int(m["won"]) + 1
+
 		m["best_heat"] = maxi(int(m["best_heat"]), heat)
 		if heat >= int(m["heat"]):
 			m["heat"] = mini(HEAT_MAX, heat + 1)
@@ -1432,6 +1519,8 @@ static func beat_due(meta_dict: Dictionary, b: Dictionary, ctx: Dictionary) -> b
 		return false
 	if b.has("leg") and int(ctx.get("leg", -1)) != int(b["leg"]):
 		return false
+	if b.get("encore", false) and not ctx.get("encore", false):
+		return false
 	return true
 
 
@@ -1455,6 +1544,9 @@ static func see_beat(meta_dict: Dictionary, b: Dictionary) -> void:
 			meta_dict["story_pool"].append(String(id))
 	if r.has("tape") and not meta_dict["tapes"].has(int(r["tape"])):
 		meta_dict["tapes"].append(int(r["tape"]))
+	if r.has("pen") and meta_dict.has("pens") and not meta_dict["pens"].has(int(r["pen"])):
+		meta_dict["pens"].append(int(r["pen"]))
+
 
 
 ## This trip as a beat's context (`more`: the slot's team, leg or rival).
@@ -1467,14 +1559,25 @@ func ctx(meta_dict: Dictionary, more: Dictionary = {}) -> Dictionary:
 ## A trip's opening scene: a beat due, the captain partner's own, the
 ## first trip's, or the one for every trip after.
 func start_pages(meta_dict: Dictionary) -> Array:
+	var scenes: Dictionary = data()["scenes"]
+	if daily > 0:
+		return scenes["daily"]
+	var pages: Array = []
 	var b := beat_for(meta_dict, "start", ctx(meta_dict))
 	if not b.is_empty():
 		see_beat(meta_dict, b)
-		return b["pages"]
-	var scenes: Dictionary = data()["scenes"]
-	if partner >= 0 and partner < scenes["partner_start"].size():
-		return scenes["partner_start"][partner]
-	return scenes["start"] if int(meta_dict.get("trips", 1)) <= 1 else scenes["start_again"]
+		pages = b["pages"]
+	elif partner >= 0 and partner < scenes["partner_start"].size():
+		pages = scenes["partner_start"][partner]
+	else:
+		pages = scenes["start"] if int(meta_dict.get("trips", 1)) <= 1 else scenes["start_again"]
+	# a partner's bond at level 2 the first time: their own scene, and their item
+	var key := str(partner)
+	if bond_level(meta_dict, partner) >= 2 and not meta_dict.get("bond_seen", []).has(key):
+		meta_dict["bond_seen"].append(key)
+		pages = pages + data()["bonds"][key]["pages"]
+	return pages
+
 
 
 ## The ROAD HOGS' looks (opponents.json's member shape), for the match and
@@ -1553,3 +1656,141 @@ static func detour_scene(d: Dictionary) -> Dictionary:
 		opts["venue"] = String(d["venue"])
 		opts["time"] = int(d.get("time", 0))
 	return {"pages": d.get("pages", [{"who": "narrator", "lines": d["lines"]}]), "opts": opts}
+
+
+# --- Round three (port ADR-093): the day's trip, bonds, postcards, pens ---------------
+
+## TRIP OF THE DAY: today's date as YYYYMMDD (`date_override` in the tests).
+static var date_override := 0
+
+static func today() -> int:
+	if date_override > 0:
+		return date_override
+	var d := Time.get_date_dict_from_system()
+	return int(d["year"]) * 10000 + int(d["month"]) * 100 + int(d["day"])
+
+
+## A date's seed: the same day, the same map, for everyone.
+static func daily_seed(date: int) -> int:
+	return roll(date, 2026, 94, 0x7ffffff) + 1
+
+
+## The day's trip, stored: HEAT 0, Pepper, and nothing from the GARAGE or
+## the story (everyone starts it the same); its end is kept by the date.
+static func begin_daily(save: SaveGame, date: int) -> RoadTrip:
+	var m := meta(save)
+	var t := create(daily_seed(date), 0, PEPPER)
+	t.daily = date
+	t._meta_for_draw = m
+	m["trips"] = int(m["trips"]) + 1
+	t.store(save)
+	return t
+
+
+## ROAD TRIP's row for the day's trip: today's best ("WON", "LEG 2") or "".
+static func daily_label(meta_dict: Dictionary) -> String:
+	var d: Dictionary = meta_dict.get("daily", {})
+	if int(d.get("date", 0)) != today():
+		return ""
+	return "WON" if d.get("won", false) else "LEG %d" % int(d.get("leg", 1))
+
+
+## A date as the screens show it ("10/24").
+static func date_label(date: int) -> String:
+	return "%d/%d" % [(date / 100) % 100, date % 100]
+
+
+## A partner's bond: its points and level (0 to 3) with `who`.
+static func bond_points(meta_dict: Dictionary, who: int) -> int:
+	return int(meta_dict.get("bonds", {}).get(str(who), 0))
+
+
+static func bond_level(meta_dict: Dictionary, who: int) -> int:
+	var p := bond_points(meta_dict, who)
+	var lv := 0
+	for need in BOND_LEVELS:
+		if p >= int(need):
+			lv += 1
+	return lv
+
+
+## The partner's own item, from bond level 2.
+static func bond_item(who: int) -> String:
+	return String(data()["bonds"][str(who)]["item"])
+
+
+## The announcer's opening calls for a stop's match (MatchView.trip_calls;
+## the first two recorded are said): the islands' arrival, the stop's
+## kind, your last heart, a hazard, the meal, HEAD START, a strong bond.
+func calls_for(n: Dictionary, meta_dict: Dictionary = {}) -> Array:
+	var out := []
+	var type := String(n.get("type", ""))
+	if daily > 0 and wins + losses == 0:
+		out.append("trip_daily")
+	if leg() == ISLANDS and col() == 0:
+		out.append("trip_islands")
+	match type:
+		"pickup":
+			out.append("trip_pickup")
+		"grudge":
+			out.append("trip_stranger" if int(n.get("team", -1)) == Opponents.DAWSON else "trip_grudge")
+		"rival":
+			out.append("trip_rival" if int(n.get("level", 0)) == 0 else "trip_rival_again")
+		"big", "final", "encore":
+			out.append("trip_" + type)
+	if hearts == 1:
+		out.append("trip_last_heart")
+	var hz := {"fog": "trip_hazard_fog", "heat_wave": "trip_hazard_heat", "full_moon": "trip_hazard_moon",
+		"wrong_glasses": "trip_hazard_glasses", "flat_tire": "trip_hazard_flat"}
+	for h in hazards:
+		if hz.has(String(h)):
+			out.append(String(hz[String(h)]))
+	if meal != "":
+		out.append("trip_meal")
+	if has_perk("head_start"):
+		out.append("trip_perk_head_start")
+	if type in ["big", "final", "encore"] and bond_level(meta_dict, partner) >= 3:
+		out.append("trip_bond")
+	return out
+
+
+## Every postcard there is: a card for each venue a trip can play and each
+## detour ("v:park", "d:hitchhiker").
+static func postcards_all() -> Array:
+	var out := []
+	for leg in data()["legs"]:
+		for v in leg["venues"] + [String(leg.get("encore_venue", "sunset"))]:
+			if not out.has("v:" + String(v)):
+				out.append("v:" + String(v))
+	for d in data()["detours"]:
+		out.append("d:" + String(d["id"]))
+	return out
+
+
+## A postcard collected (a venue played on a trip, a detour taken); the
+## map pens it earns.
+static func postcard(meta_dict: Dictionary, key: String) -> void:
+	if not meta_dict.has("postcards") or meta_dict["postcards"].has(key) or not postcards_all().has(key):
+		return
+	meta_dict["postcards"].append(key)
+	for i in PEN_POSTCARDS.size():
+		if meta_dict["postcards"].size() >= int(PEN_POSTCARDS[i]) and not meta_dict["pens"].has(i + 1):
+			meta_dict["pens"].append(i + 1)
+
+
+## A postcard's name: the venue's, or the detour's.
+static func postcard_name(key: String) -> String:
+	var id := key.substr(2)
+	if key.begins_with("v:"):
+		return String(Settings.VENUE_NAMES[maxi(0, Settings.VENUES.find(id))])
+	return String(detour(id).get("name", id.to_upper()))
+
+
+## The map pens you can pick in the GARAGE: the red, and those earned.
+static func pens_open(meta_dict: Dictionary) -> Array:
+	var out := [0]
+	for p in meta_dict.get("pens", []):
+		if not out.has(int(p)):
+			out.append(int(p))
+	out.sort()
+	return out

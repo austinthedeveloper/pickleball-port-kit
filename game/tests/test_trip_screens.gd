@@ -367,3 +367,61 @@ func test_the_story_across_trips() -> void:
 	eq(home.view, "scrapbook", "back in the SCRAPBOOK")
 	TripHome.seed_override = 0
 	_done(main, kept)
+
+
+## TODAY'S TRIP from the home (port ADR-093), and the islands: the final
+## won goes on to the ferry and the fourth leg instead of the trip's end.
+func test_the_days_trip_and_the_islands() -> void:
+	var kept := SaveGame.default_dir
+	RoadTrip.date_override = 20261031
+	var main := _main()
+	var t: TitleScreen = main._screen
+	if not t.is_node_ready():
+		t._ready()
+	t.pages["main"].select("trip")
+	t.pages["main"].press()
+	var home: TripHome = _settle(main)
+	home.page.select("daily")
+	eq(home.page.value_of("daily"), "10/31", "today's date")
+	home.page.press()
+	var sc: TripScene = _settle(main)
+	eq(sc.pages, RoadTrip.data()["scenes"]["daily"])
+	sc.done.emit(-1)
+	var map: TripMap = _settle(main)
+	eq(map.trip.daily, 20261031, "the day's trip")
+	eq(map.trip.seed, RoadTrip.daily_seed(20261031) & 0x7fffffff)
+	map._leave()
+	# the islands: open, a trip at the final
+	var m := RoadTrip.meta(main.save)
+	m["best_heat"] = 5
+	home = _settle(main)
+	home.page.select("new")
+	home.page.press()
+	home.page.press()                    # over the day's trip: twice
+	sc = _settle(main)
+	sc.done.emit(-1)
+	map = _settle(main)
+	var trip: RoadTrip = map.trip
+	eq(trip.legs(), 4, "the islands on the map")
+	trip.at = [2, RoadTrip.COLS - 1, 0]
+	trip.map[2]["cols"][RoadTrip.COLS - 1][0]["done"] = true
+	trip.store(main.save)
+	map.refresh()
+	map.select("stop_2_%d_0" % RoadTrip.GATE)
+	map.press()
+	for f in TripMap.DRIVE_FRAMES + 2:
+		map._process(1.0 / 60.0)
+	sc = _settle(main)
+	sc.done.emit(-1)
+	var mv: MatchView = _settle(main)
+	check(mv.trip_calls.has("trip_final"), "the final's call")
+	_win(main, mv)
+	var nxt: Node = _settle(main)
+	check(nxt is TripScene, "the ferry")
+	nxt.done.emit(-1)
+	map = _settle(main)
+	check(map is TripMap and map.trip.leg() == RoadTrip.ISLANDS, "on to the islands")
+	check(map.trip.title, "the SUMMER OPEN already won")
+	check(RoadTrip.meta(main.save)["postcards"].has("v:sunset"), "a postcard from the final's venue")
+	RoadTrip.date_override = 0
+	_done(main, kept)

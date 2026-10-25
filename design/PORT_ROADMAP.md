@@ -113,6 +113,13 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-85 | OPTIONS in the pause menu: the title's OPTIONS pages over a paused match (port ADR-090) | `feature/cld-pause-options` | Ready to test |
 | PORT-86 | ROAD TRIP tuning: leg 1 a bit harder, the partner late less often (port ADR-091) | `feature/cld-trip-tune` | Ready to test |
 | PORT-87 | ROAD TRIP round two: THE VAN (stats, the locker, sets), TRADE IN, 19 items, the diner, 13 detours, the ROAD HOGS, a story across trips and the SCRAPBOOK (port ADR-092) | `feature/cld-trip-roads` | Ready to test |
+| PORT-88 | The announcer's ROAD TRIP lines: 29 on the list to record, wired in (port ADR-093) | `feature/cld-trip-more` | Ready to test |
+| PORT-89 | TODAY'S TRIP: the date's map, the same for everyone (port ADR-093) | `feature/cld-trip-more` | Ready to test |
+| PORT-90 | Partner bonds: levels, their own items and scenes (port ADR-093) | `feature/cld-trip-more` | Ready to test |
+| PORT-91 | The islands: a secret fourth leg and the encore against Dale Dawson (port ADR-093) | `feature/cld-trip-more` | Ready to test |
+| PORT-92 | Postcards: one for every venue and detour, on the SCRAPBOOK (port ADR-093) | `feature/cld-trip-more` | Ready to test |
+| PORT-93 | The map pen and NOW PLAYING (port ADR-093) | `feature/cld-trip-more` | Ready to test |
+| PORT-94 | ROAD TRIP balance pass: the gear curve measured, sets easier to finish (port ADR-093) | `feature/cld-trip-more` | Ready to test |
 
 ## Releases
 
@@ -510,10 +517,71 @@ the same request). Open: 36 and 40.
     diner, a venue detour, the shop and the GARAGE.
   - Status: **Ready to test**: take two or three trips.
 
+### 88. `feature/cld-trip-more`: the announcer's ROAD TRIP lines (asked for 2026-10-24)
+
+- [x] `PORT-88` 29 ROAD TRIP lines added to the announcer's second batch
+  (`design/announcer/ADDITIONS.md`, now 105 lines) and wired in: a
+  stop's kind opens its match, your last heart, hazards, the meal, the
+  one-sided rules' saves, the SUMMER OPEN and the encore won. Each is
+  used once recorded.
+  - Status: **Ready to test** once you've recorded them.
+
+### 89. `feature/cld-trip-more`: TODAY'S TRIP (asked for 2026-10-24)
+
+- [x] `PORT-89` A row on ROAD TRIP's page: today's map (from the date),
+  HEAT 0, Pepper, no GARAGE or story, so it's the same for everyone; the
+  best result kept for the day, days won on the records.
+  - Status: **Ready to test**.
+
+### 90. `feature/cld-trip-more`: partner bonds (asked for 2026-10-24)
+
+- [x] `PORT-90` Every partner earns bond points with you (a win each,
+  three for a title). Level 1: +1 to their stats; 2: their own item and a
+  scene; 3: +2 and a line from the announcer at the big matches.
+  - Status: **Ready to test**.
+
+### 91. `feature/cld-trip-more`: the islands (asked for 2026-10-24)
+
+- [x] `PORT-91` A secret fourth leg past the SUMMER OPEN, open once a
+  story is finished or HEAT 5 is won: THE ISLANDS, ending in THE ENCORE
+  against Dale Dawson, with its own three-chapter story.
+  - Art: the islands' map paper (`art/roadtrip-r6/PROMPTS.md`;
+    placeholder meanwhile).
+  - Status: **Ready to test** (to see it now: finish a story, or ask me
+    for a save that has one).
+
+### 92. `feature/cld-trip-more`: postcards (asked for 2026-10-24)
+
+- [x] `PORT-92` A postcard for every venue played and detour taken (38),
+  on the SCRAPBOOK; 8, 16 and 24 earn new map pens.
+  - Status: **Ready to test**.
+
+### 93. `feature/cld-trip-more`: the map pen and NOW PLAYING (asked for 2026-10-24)
+
+- [x] `PORT-93` MAP PEN in the GARAGE colours the road driven; the
+  cassette chosen shows on a NOW PLAYING card as the map opens.
+  - Status: **Ready to test**.
+
+### 94. `feature/cld-trip-more`: a ROAD TRIP balance pass (asked for 2026-10-24)
+
+- [x] `PORT-94` `tools/trip_gear_stats.gd` measures how far gear takes
+  the stats: no runaway POWER (7 at the final on a new GARAGE), but sets
+  were rarely finished, so one card in two is now a missing piece of a
+  set you've started (0.2 sets a trip to 0.5).
+  - Verified (88 to 94): the full suite plus the e2e; screenshots of the
+    islands map, POSTCARDS, the results, the home and the GARAGE.
+  - Status: **Ready to test**: say how the sets feel.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
+
+- **PORT-88 to 94 ROAD TRIP round three:** record the 29 ROAD TRIP
+  lines when you can (`design/announcer/ADDITIONS.md`, group ROAD TRIP).
+  Try TODAY'S TRIP. The islands open once a story is finished or HEAT 5
+  is won; say if you'd like them easier to reach. Two images to make:
+  `art/roadtrip-r6/PROMPTS.md`.
 
 - **PORT-87 ROAD TRIP round two:** take two or three trips (the story
   starts on the second). Press Y (I on the keyboard) on the map for THE

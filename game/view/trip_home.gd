@@ -24,16 +24,21 @@ const TAG := Vector2(120, 72)
 const TAGS_SHOWN := 5
 const WINDOW := Vector2(89, 36)        ## the centre of a tag's window
 const IN_WINDOW := 28.0                ## px a reward's picture fills
+const RESULT_LINES := 8                ## lines a trip's results hold
+const CARDS_PER_PAGE := 8              ## POSTCARDS: two rows of four
+const CARD := Vector2(216, 150)
 
 var save: SaveGame
 var page: MenuPage
 var garage_page: MenuPage
 var scrap_page: MenuPage
-var view := "home"               ## "home", "garage", "scrapbook", "results"
+var view := "home"               ## "home", "garage", "scrapbook", "postcards", "results"
 var chapter := {}                ## the SCRAPBOOK's chapter chosen per arc
 var heat := 0
 var partner := RoadTrip.PEPPER
 var new_armed := false
+var daily_armed := false         ## TRIP OF THE DAY pressed once over a trip in progress
+var card_page := 0               ## POSTCARDS' page
 var results: Dictionary = {}     ## the trip just ended: its numbers, steps reached
 ## A new trip's seed in the tests (0: the clock's).
 static var seed_override := 0
@@ -45,6 +50,8 @@ var _scrap: Control
 var _scrap_lines: Array = []
 var _open := ""
 var _bg: Sprite2D
+var _logo: Sprite2D
+var _cards: Control
 var _sfx: Sfx
 
 
@@ -78,12 +85,12 @@ func _ready() -> void:
 	shade.size = size
 	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(shade)
-	var logo := Sprite2D.new()
-	logo.texture = load(DIR + "trip_title_card.png")
-	logo.centered = false
-	logo.scale = Vector2(0.6, 0.6)
-	logo.position = Vector2(540, 8)
-	add_child(logo)
+	_logo = Sprite2D.new()
+	_logo.texture = load(DIR + "trip_title_card.png")
+	_logo.centered = false
+	_logo.scale = Vector2(0.6, 0.6)
+	_logo.position = Vector2(540, 8)
+	add_child(_logo)
 	_sfx = Sfx.new()
 	add_child(_sfx)
 	_sfx.setup("", false)
@@ -108,7 +115,9 @@ func _build_home() -> void:
 			"press": func(): _continue()})
 	rows.append({"id": "new", "label": "NEW TRIP", "value": func(): return "PRESS AGAIN" if new_armed else "",
 		"press": func(): _new()})
-	rows.append({"id": "partner", "label": "PARTNER", "value": func(): return partner_name(partner),
+	rows.append({"id": "daily", "label": "TODAY'S TRIP", "value": func(): return _daily_value(),
+		"press": func(): _daily()})
+	rows.append({"id": "partner", "label": "PARTNER", "value": func(): return _partner_value(),
 		"change": func(d): _change_partner(d)})
 	rows.append({"id": "heat", "label": "HEAT", "value": func(): return str(heat),
 		"change": func(d): heat = clampi(heat + d, 0, int(meta()["heat"]))})
@@ -118,7 +127,7 @@ func _build_home() -> void:
 		meta()["beats"].size(), RoadTrip.data()["beats"].size()], "press": func(): _open_scrapbook()})
 	rows.append({"id": "back", "label": "BACK", "press": func(): _leave()})
 	page = MenuPage.new().setup("trip", "", rows,
-		Rect2(540, 136, 400, 18 + rows.size() * MenuPage.ROW_H + 50), [["hit", "SELECT"], ["back", "BACK"]])
+		Rect2(540, 130, 400, 18 + rows.size() * MenuPage.ROW_H + 50), [["hit", "SELECT"], ["back", "BACK"]])
 	add_child(page)
 	page.pressed.connect(func(_id): page.refresh())
 	page.back_requested.connect(_on_back)
@@ -143,6 +152,33 @@ static func partner_name(p: int) -> String:
 	if p >= 0 and Opponents.exists(p):
 		return String(Opponents.team(p)["players"][0]["name"])
 	return String(StoryMode.partner()["name"])
+
+
+## PARTNER's value: the name, and the bond once there is one.
+func _partner_value() -> String:
+	var lv := RoadTrip.bond_level(meta(), partner)
+	return partner_name(partner) + ("  BOND %d" % lv if lv > 0 else "")
+
+
+## TRIP OF THE DAY's value: PRESS AGAIN, today's best, or the date.
+func _daily_value() -> String:
+	if daily_armed:
+		return "PRESS AGAIN"
+	var best := RoadTrip.daily_label(meta())
+	return best if best != "" else RoadTrip.date_label(RoadTrip.today())
+
+
+## TRIP OF THE DAY (port ADR-093): today's seed for everyone, HEAT 0 and
+## Pepper, nothing from the GARAGE (pressed twice over a trip in progress).
+func _daily() -> void:
+	if RoadTrip.current(save) != null and not daily_armed:
+		daily_armed = true
+		_beep("blip")
+		return
+	_beep("confirm")
+	var t := RoadTrip.begin_daily(save, RoadTrip.today())
+	save.save_game()
+	start.emit(t)
 
 
 func _change_partner(d: int) -> void:
@@ -181,6 +217,8 @@ func _on_back() -> void:
 			_close_garage()
 		"scrapbook":
 			_close_scrapbook()
+		"postcards":
+			_close_postcards()
 		"results":
 			_close_results()
 		_:
@@ -188,10 +226,10 @@ func _on_back() -> void:
 
 
 func _build_records() -> void:
-	var p := UiKit.panel(Rect2(540, 408, 400, 112), self)
+	var p := UiKit.panel(Rect2(540, 428, 400, 98), self)
 	p.name = "records"
 	for k in 3:
-		_records.append(UiKit.text("small", "", Vector2(560, 422 + k * 26), 0.0, DIM, self))
+		_records.append(UiKit.text("small", "", Vector2(560, 440 + k * 24), 0.0, DIM, self))
 	_refresh_records()
 
 
@@ -200,7 +238,8 @@ func _refresh_records() -> void:
 	var best := int(m["best_heat"])
 	_records[0].text = "TRIPS %d    WON %d" % [int(m["trips"]), int(m["won"])]
 	_records[1].text = "BEST HEAT %s    FARTHEST LEG %d" % ["-" if best < 0 else str(best), maxi(1, int(m["best_leg"]))]
-	_records[2].text = "MILES %d" % int(m["miles"])
+	_records[2].text = "MILES %d    DAYS WON %d" % [int(m["miles"]), int(m["daily_won"])]
+
 
 
 # --- The GARAGE ------------------------------------------------------------------------
@@ -212,9 +251,8 @@ func _open_garage() -> void:
 	_garage = Control.new()
 	_garage.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_garage)
-	UiKit.panel(Rect2(40, 136, 880, 206), _garage)
+	UiKit.panel(Rect2(40, 136, 880, 162), _garage)
 	_show_records(false)
-	UiKit.text("big_gold", "THE GARAGE", Vector2(480, 146), 0.5, Color.WHITE, _garage)
 	var m := meta()
 	var reached := RoadTrip.steps_reached(m)
 	var ladder: Array = RoadTrip.data()["ladder"]
@@ -224,7 +262,7 @@ func _open_garage() -> void:
 		var i := first + k
 		if i >= ladder.size():
 			break
-		var at := Vector2(480 - (TAGS_SHOWN * 160 - 40) / 2.0 + k * 160, 186)
+		var at := Vector2(480 - (TAGS_SHOWN * 160 - 40) / 2.0 + k * 160, 146)
 		var tag := Sprite2D.new()
 		tag.texture = tags
 		tag.region_enabled = true
@@ -239,10 +277,10 @@ func _open_garage() -> void:
 			GOLD if i == reached else DIM, _garage)
 	var nxt := "THE TOP OF THE LADDER!" if reached >= ladder.size() else \
 		"NEXT: " + RoadTrip.step_label(reached)
-	UiKit.text("small", nxt, Vector2(480, 284), 0.5, GOLD, _garage)
+	UiKit.text("small", nxt, Vector2(480, 242), 0.5, GOLD, _garage)
 	if reached < ladder.size():
 		UiKit.text("small", "%d MILES TO GO, %d DRIVEN" % [RoadTrip.miles_to_next(m), int(m["miles"])],
-			Vector2(480, 308), 0.5, DIM, _garage)
+			Vector2(480, 266), 0.5, DIM, _garage)
 	var g := RoadTrip.garage(m)
 	var looks: Dictionary = m["looks"]
 	garage_page = MenuPage.new().setup("garage", "", [
@@ -252,8 +290,11 @@ func _open_garage() -> void:
 			"change": func(d): looks["ornament"] = _cycle(g["ornaments"], int(looks["ornament"]), d)},
 		{"id": "tape", "label": "CASSETTE", "value": func(): return String(RoadTrip.data()["tapes"][int(looks["tape"])]["name"]),
 			"change": func(d): looks["tape"] = _cycle(g["tapes"], int(looks["tape"]), d)},
+		{"id": "pen", "label": "MAP PEN", "value": func(): return String(RoadTrip.data()["pens"][int(looks["pen"])]["name"]),
+			"change": func(d): looks["pen"] = _cycle(RoadTrip.pens_open(m), int(looks["pen"]), d)},
 		{"id": "back", "label": "BACK", "press": func(): _close_garage()},
-	], Rect2(250, 352, 460, 18 + 4 * MenuPage.ROW_H + 50), [["dpad", "CHANGE"], ["back", "BACK"]])
+	], Rect2(250, 306, 460, 18 + 5 * MenuPage.ROW_H + 50), [["dpad", "CHANGE"], ["back", "BACK"]])
+
 	_garage.add_child(garage_page)
 	garage_page.back_requested.connect(_close_garage)
 	_lock = LOCK
@@ -329,22 +370,25 @@ func _open_scrapbook() -> void:
 	add_child(_scrap)
 	if TripArt.has_backdrop("scrapbook"):
 		_bg.texture = TripArt.backdrop("scrapbook")
+	_logo.visible = false
 	var rows := []
 	for arc in RoadTrip.data()["arcs"]:
 		var id := String(arc["id"])
 		rows.append({"id": id, "label": String(arc["name"]), "value": func(): return _arc_value(id),
 			"change": func(d): _change_chapter(id, d), "press": func(): _watch(id)})
+	rows.append({"id": "postcards", "label": "POSTCARDS", "value": func(): return "%d/%d" % [
+		meta()["postcards"].size(), RoadTrip.postcards_all().size()], "press": func(): _open_postcards()})
 	rows.append({"id": "back", "label": "BACK", "press": func(): _close_scrapbook()})
 	scrap_page = MenuPage.new().setup("scrapbook", "SCRAPBOOK", rows,
-		Rect2(200, 136, 560, 64 + rows.size() * MenuPage.ROW_H + 50),
+		Rect2(200, 20, 560, 64 + rows.size() * MenuPage.ROW_H + 50),
 		[["dpad", "CHAPTER"], ["hit", "WATCH"], ["back", "BACK"]])
 	_scrap.add_child(scrap_page)
 	scrap_page.back_requested.connect(_close_scrapbook)
 	scrap_page.hovered.connect(func(_id): _scrap_refresh())
 	scrap_page.changed.connect(func(_id): _scrap_refresh())
-	UiKit.panel(Rect2(130, 396, 700, 110), _scrap)
+	UiKit.panel(Rect2(130, 352, 700, 110), _scrap)
 	for k in 3:
-		_scrap_lines.append(UiKit.text("small", "", Vector2(480, 410 + k * 28), 0.5,
+		_scrap_lines.append(UiKit.text("small", "", Vector2(480, 366 + k * 28), 0.5,
 			GOLD if k == 0 else (Color.WHITE if k == 1 else DIM), _scrap))
 	_scrap_refresh()
 	_lock = LOCK
@@ -384,6 +428,12 @@ func _scrap_refresh() -> void:
 	if arc == "back":
 		_scrap_lines[0].text = "%d OF %d CHAPTERS SEEN" % [meta()["beats"].size(), RoadTrip.data()["beats"].size()]
 		return
+	if arc == "postcards":
+		_scrap_lines[0].text = "A POSTCARD FROM EVERY PLACE YOU GO"
+		_scrap_lines[1].text = "EVERY VENUE A TRIP PLAYS, EVERY DETOUR"
+		_scrap_lines[2].text = "THEY EARN NEW PENS FOR THE MAP."
+		return
+
 	var seen := RoadTrip.arc_seen(meta(), arc)
 	if seen.is_empty():
 		_scrap_lines[0].text = "NOT STARTED"
@@ -405,8 +455,8 @@ func _close_scrapbook() -> void:
 		scrap_page = null
 	_scrap_lines.clear()
 	_bg.texture = load(DIR + "trip_garage.webp")
+	_logo.visible = true
 	page.visible = true
-
 	_show_records(true)
 	_lock = LOCK
 
@@ -437,18 +487,107 @@ func _show_results() -> void:
 			int(results.get("stops", 0))],
 		"+%d MILES" % int(results.get("miles", 0)),
 	]
-	var steps: Array = results.get("steps", [])
-	for i in mini(2, steps.size()):
-		lines.append("GARAGE: " + RoadTrip.step_label(int(steps[i])))
-	if steps.size() > 2:
-		lines.append("AND %d MORE IN THE GARAGE" % (steps.size() - 2))
+	var extra := []
+	if results.get("encore", false):
+		extra.append("AND THE ISLAND ENCORE TOO!")
+	elif results.get("islands", false):
+		extra.append("THE ISLANDS GOT THE BETTER OF YOU")
+	if int(results.get("daily", 0)) > 0:
+		extra.append("TRIP OF THE DAY, " + RoadTrip.date_label(int(results["daily"])))
+	if int(results.get("bond", -1)) > 0:
+		extra.append("%s'S BOND: LEVEL %d!" % [partner_name(int(results.get("partner", RoadTrip.PEPPER))),
+			int(results["bond"])])
 	if won and int(results.get("heat_open", -1)) >= 0:
-		lines.append("HEAT %d IS OPEN" % int(results["heat_open"]))
+		extra.append("HEAT %d IS OPEN" % int(results["heat_open"]))
+	var steps: Array = results.get("steps", [])
+	var room := RESULT_LINES - lines.size() - extra.size()
+	for i in mini(room, steps.size()):
+		if i == room - 1 and steps.size() > room:
+			lines.append("AND %d MORE IN THE GARAGE" % (steps.size() - i))
+		else:
+			lines.append("GARAGE: " + RoadTrip.step_label(int(steps[i])))
+	lines.append_array(extra)
 	for i in lines.size():
-		UiKit.text("small", String(lines[i]), Vector2(480, 184 + i * 30), 0.5,
+		UiKit.text("small", String(lines[i]), Vector2(480, 176 + i * 28), 0.5,
 			GOLD if String(lines[i]).begins_with("GARAGE") or i == 2 else Color.WHITE, _results)
 	_results.add_child(PromptBar.new().setup([["hit", "OK"]], Vector2(480, 432)))
 	_lock = LOCK * 2
+
+
+# --- POSTCARDS (port ADR-093) -------------------------------------------------------
+
+## The postcards a page shows, in the order postcards_all lists them.
+func postcard_pages() -> int:
+	return ceili(RoadTrip.postcards_all().size() / float(CARDS_PER_PAGE))
+
+
+func _open_postcards() -> void:
+	_beep("confirm")
+	view = "postcards"
+	_scrap.visible = false
+	card_page = clampi(card_page, 0, postcard_pages() - 1)
+	_build_cards()
+	_lock = LOCK
+
+
+## A page of postcards: a picture of each place you've been (a venue at
+## dusk, a detour's scene), "?" for the rest.
+func _build_cards() -> void:
+	if _cards:
+		_cards.free()
+	_cards = Control.new()
+	_cards.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_cards)
+	var m := meta()
+	var all := RoadTrip.postcards_all()
+	UiKit.text("big_gold", "POSTCARDS %d/%d" % [m["postcards"].size(), all.size()], Vector2(480, 18), 0.5,
+		Color.WHITE, _cards)
+	var left := 480.0 - (4 * CARD.x + 3 * 10) / 2.0
+	for k in CARDS_PER_PAGE:
+		var i := card_page * CARDS_PER_PAGE + k
+		if i >= all.size():
+			break
+		var at := Vector2(left + (k % 4) * (CARD.x + 10), 76 + (k / 4) * (CARD.y + 14))
+		UiKit.panel(Rect2(at, CARD), _cards, "sub")
+		var key := String(all[i])
+		var have: bool = m["postcards"].has(key)
+		var pic := Rect2(at + Vector2(8, 8), Vector2(CARD.x - 16, 100))
+		if have:
+			_cards.add_child(TripArt.postcard_picture(key, pic))
+		else:
+			var dark := ColorRect.new()
+			dark.color = Color(0.05, 0.06, 0.1)
+			dark.position = pic.position
+			dark.size = pic.size
+			_cards.add_child(dark)
+			UiKit.text("big_gold", "?", pic.get_center() - Vector2(0, 14), 0.5, DIM, _cards)
+		UiKit.text("small", RoadTrip.postcard_name(key) if have else "???", Vector2(at.x + CARD.x / 2.0, at.y + 116),
+			0.5, Color.WHITE if have else DIM, _cards)
+	UiKit.text("small", "PAGE %d/%d" % [card_page + 1, postcard_pages()], Vector2(480, 418), 0.5, DIM, _cards)
+	var pens := ["", "THE BLUE PEN", "THE GREEN PEN", "THE PURPLE PEN"]
+	var next := ""
+	for p in RoadTrip.PEN_POSTCARDS.size():
+		if m["postcards"].size() < int(RoadTrip.PEN_POSTCARDS[p]):
+			next = "%d MORE FOR %s" % [int(RoadTrip.PEN_POSTCARDS[p]) - m["postcards"].size(), pens[p + 1]]
+			break
+	UiKit.text("small", next, Vector2(480, 446), 0.5, GOLD, _cards)
+	_cards.add_child(PromptBar.new().setup([["dpad", "PAGE"], ["back", "BACK"]], Vector2(480, 506)))
+
+
+func turn_page(d: int) -> void:
+	card_page = (card_page + d + postcard_pages()) % postcard_pages()
+	_build_cards()
+
+
+func _close_postcards() -> void:
+	_beep("back")
+	view = "scrapbook"
+	if _cards:
+		_cards.queue_free()
+		_cards = null
+	_scrap.visible = true
+	_scrap_refresh()
+	_lock = LOCK
 
 
 func _close_results() -> void:
@@ -477,8 +616,18 @@ func _process(_delta: float) -> void:
 				_beep("blip")
 			if nav & MenuPage.NAV_BACK:
 				_close_garage()
+		"postcards":
+			if GameControls.menu_pressed("move_right"):
+				_beep("blip")
+				turn_page(1)
+			elif GameControls.menu_pressed("move_left"):
+				_beep("blip")
+				turn_page(-1)
+			elif Input.is_action_just_pressed("soft") or Input.is_action_just_pressed("drive"):
+				_close_postcards()
 		"scrapbook":
 			var nav3 := scrap_page.drive()
+
 			if nav3 & (MenuPage.NAV_MOVED | MenuPage.NAV_CHANGED):
 				_beep("blip")
 				_scrap_refresh()

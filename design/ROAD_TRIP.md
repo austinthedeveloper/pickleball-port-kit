@@ -777,3 +777,22 @@ playthroughs." No sim change; ADR-092 has the details.
   accepted and in the game (`REVIEW.md`).
 - **Screenshots**: `tools/trip_shot.gd` also takes `van`, `scrapbook`,
   `diner`, `rival`, `old_court` and `drive_in`.
+
+## Round three (2026-10-24, `feature/cld-trip-more`, port ADR-093)
+
+- **The announcer** has 29 ROAD TRIP lines on the list to record, wired
+  in: each is said once it's recorded.
+- **TODAY'S TRIP**: the date's map, the same for everyone (HEAT 0,
+  Pepper, nothing from the GARAGE or the story); the day's best kept.
+- **Partner bonds**: levels at 4, 12 and 24 points (a win each, three for
+  a title): +1 to their stats, then their own item and a scene, then +2.
+- **The islands**: a fourth leg past the SUMMER OPEN once a story is
+  finished or HEAT 5 is won, ending in THE ENCORE against Dale Dawson,
+  with its own story and the gold map pen.
+- **Postcards**: one for every venue played and detour taken, on the
+  SCRAPBOOK; they earn map pens.
+- **The GARAGE's MAP PEN** and a NOW PLAYING card for the cassette.
+- **Balance**: `tools/trip_gear_stats.gd`; sets now come easier.
+- **Art**: two images, prompts in `art/roadtrip-r6/PROMPTS.md`.
+- **Screenshots**: `tools/trip_shot.gd` also takes `islands` and
+  `postcards`.

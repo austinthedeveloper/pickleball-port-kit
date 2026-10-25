@@ -32,9 +32,9 @@ func test_the_data() -> void:
 				bad.append("line: " + String(l))
 		if not _glyphs_ok(String(g["name"]), chars):
 			bad.append("glyph: " + String(g["name"]))
-		check(int(g["icon"]) >= -1 and int(g["icon"]) < TripArt.ICONS_1 + 24, "an icon on the sheets: " + String(g["id"]))
+		check(int(g["icon"]) >= -1 and int(g["icon"]) < TripArt.ICONS_2 + 16, "an icon on the sheets: " + String(g["id"]))
 		check(String(g["kind"]) in ["bag", "paddle", "hat", "partner", "perk"])
-		check(String(g["rarity"]) in ["start", "common", "uncommon", "rare"])
+		check(String(g["rarity"]) in ["start", "common", "uncommon", "rare", "bond"])
 		if g.has("hat"):
 			check(Career.hat_names.has(String(g["hat"])) or Career.hats() > 0 and Career.hat_names.has(String(g["hat"])),
 				"a hat the game has: " + String(g["hat"]))
@@ -812,3 +812,190 @@ func test_an_old_trip_loads() -> void:
 	eq(m["looks"]["tape"], 0, "an old save's looks get the cassette")
 	eq(m["beats"], [])
 	eq(int(m["hogs"]), 0)
+
+
+# --- Round three (port ADR-093) ---------------------------------------------------
+
+func _meta() -> Dictionary:
+	var sv := SaveGame.new()
+	sv.data = {}
+	return RoadTrip.meta(sv)
+
+
+func test_the_trip_of_the_day() -> void:
+	var sv := SaveGame.new()
+	sv.data = {}
+	var m := RoadTrip.meta(sv)
+	m["miles"] = 99999                   # a full GARAGE, which the day's trip ignores
+	m["trips"] = 5
+	RoadTrip.date_override = 20261024
+	eq(RoadTrip.today(), 20261024)
+	eq(RoadTrip.daily_seed(20261024), RoadTrip.daily_seed(20261024), "the same day, the same seed")
+	check(RoadTrip.daily_seed(20261024) != RoadTrip.daily_seed(20261025), "another day, another")
+	var t := RoadTrip.begin_daily(sv, 20261024)
+	eq(t.daily, 20261024)
+	eq(t.stats(), [1, 1, 1, 1], "nothing from the GARAGE")
+	eq(t.partner, RoadTrip.PEPPER)
+	eq(t.heat, 0)
+	eq(t.map, RoadTrip.create(RoadTrip.daily_seed(20261024), 0, RoadTrip.PEPPER).map, "everyone's map")
+	for leg in t.legs():
+		for col in t.map[leg]["cols"]:
+			for n in col:
+				check(n["type"] != "rival", "no story on the day's trip")
+	eq(t.start_pages(m), RoadTrip.data()["scenes"]["daily"])
+	eq(RoadTrip.current(sv).daily, 20261024, "saved")
+	eq(RoadTrip.daily_label(m), "", "not played yet")
+	t.at = [1, 0, 0]
+	t.state = "over"
+	t.finish(sv)
+	eq(RoadTrip.daily_label(m), "LEG 2")
+	var t2 := RoadTrip.begin_daily(sv, 20261024)
+	t2.state = "won"
+	t2.finish(sv)
+	eq(RoadTrip.daily_label(m), "WON")
+	eq(int(m["daily_won"]), 1)
+	eq(int(m["daily"]["tries"]), 2)
+	var t3 := RoadTrip.begin_daily(sv, 20261024)
+	t3.state = "won"
+	t3.finish(sv)
+	eq(int(m["daily_won"]), 1, "a day won counts once")
+	RoadTrip.date_override = 20261025
+	eq(RoadTrip.daily_label(m), "", "a new day")
+	RoadTrip.date_override = 0
+
+
+func test_bonds() -> void:
+	var m := _meta()
+	eq(RoadTrip.bond_level(m, RoadTrip.PEPPER), 0)
+	var t := RoadTrip.create(9, 0, RoadTrip.PEPPER, m)
+	eq(t.partner_stats, [6, 6, 6, 6])
+	m["bonds"] = {"-1": 4, "3": 12, "7": 24}
+	eq(RoadTrip.bond_level(m, RoadTrip.PEPPER), 1)
+	eq(RoadTrip.bond_level(m, 3), 2)
+	eq(RoadTrip.bond_level(m, 7), 3)
+	eq(RoadTrip.create(9, 0, RoadTrip.PEPPER, m).partner_stats, [7, 7, 7, 7], "level 1: +1")
+	var pete := RoadTrip.create(9, 0, 3, m)
+	eq(pete.bag, ["petes_spyglass"], "level 2: their own item")
+	check(pete.partner_style().net == 44, "Pete's spyglass: the kitchen line")
+	check(not pete.can_take("petes_spyglass") and pete.sell_price("petes_spyglass") == 0, "not offered, not sold")
+	var d := RoadTrip.detour("stand")
+	pete.at = [1, 0, 0]
+	check(pete.info({"type": "detour", "detour": "stand"})[1] == String(d["lines"][0]), "it shows every detour")
+	var ace := RoadTrip.create(9, 0, 7, m)
+	eq(ace.partner_stats, [8, 8, 8, 8], "level 3: +2")
+	m["trips"] = 3
+	var pages := pete.start_pages(m)
+	eq(pages.slice(pages.size() - RoadTrip.data()["bonds"]["3"]["pages"].size()),
+		RoadTrip.data()["bonds"]["3"]["pages"], "their bond scene, after the start")
+	check(m["bond_seen"].has("3"))
+	check(pete.start_pages(m).size() < pages.size(), "once")
+	# points: a win each, and the title
+	var sv := SaveGame.new()
+	sv.data = {"trip": m}
+	var t2 := RoadTrip.create(9, 0, 5, m)
+	t2.wins = 6
+	t2.state = "won"
+	t2.finish(sv)
+	eq(RoadTrip.bond_points(m, 5), 6 + RoadTrip.BOND_TITLE)
+	var cal := RoadTrip.create(9, 0, 7, m)
+	cal.hearts = 1
+	var calls := cal.calls_for({"type": "final", "team": 7}, m)
+	eq(calls, ["trip_final", "trip_last_heart", "trip_bond"], "the final, the last heart, a strong bond")
+
+
+func test_the_islands() -> void:
+	var m := _meta()
+	check(not RoadTrip.islands_open(m))
+	m["beats"] = ["van_6"]
+	check(RoadTrip.islands_open(m), "THE VAN's story finished")
+	m["beats"] = []
+	m["best_heat"] = 5
+	check(RoadTrip.islands_open(m), "a trip won at HEAT 5")
+	var t := RoadTrip.create(41, 0, RoadTrip.PEPPER, m)
+	eq(t.legs(), 4, "a fourth leg")
+	var gate: Dictionary = t.map[RoadTrip.ISLANDS]["gate"]
+	eq(gate["type"], "encore")
+	eq(int(gate["team"]), Opponents.DAWSON)
+	eq(t.points_for(gate), 7)
+	eq(t.difficulty_for(gate), K.DIFFICULTY_HARD)
+	check(RoadTrip.valid_leg(t.map[RoadTrip.ISLANDS], RoadTrip.ISLANDS, 0))
+	# win to the final, then on to the islands
+	t.at = [2, RoadTrip.GATE, 0]
+	t.record_match(true)
+	eq(t.state, "on", "the SUMMER OPEN won, the trip goes on")
+	check(t.title and t.won_title())
+	eq(t.leg(), RoadTrip.ISLANDS)
+	eq(RoadTrip.title_label(null), "")
+	# losing every heart on the islands still wins the trip
+	var lost := RoadTrip.from_dict(t.to_dict())
+	lost.at = [RoadTrip.ISLANDS, 0, 0]
+	lost.hearts = 1
+	lost.record_match(false)
+	eq(lost.state, "won", "the title is yours")
+	check(not lost.encore_won())
+	t.at = [RoadTrip.ISLANDS, RoadTrip.GATE, 0]
+	t.record_match(true)
+	eq(t.state, "won")
+	check(t.encore_won())
+	eq(RoadTrip.create(41, 0, RoadTrip.PEPPER, _meta()).legs(), 3, "closed: three legs")
+	eq(RoadTrip.create(RoadTrip.daily_seed(1), 0, RoadTrip.PEPPER).legs(), 3)
+	# the islands' story
+	var b := RoadTrip.beat_for(m, "leg", {"leg": 3, "trip": 2})
+	eq(b["id"], "islands_1")
+	RoadTrip.see_beat(m, b)
+	eq(RoadTrip.beat_for(m, "team", {"team": 8, "trip": 2, "partner": 3}), {}, "the encore's scene needs the encore")
+	eq(RoadTrip.beat_for(m, "team", {"team": 8, "trip": 2, "encore": true})["id"], "islands_2")
+	RoadTrip.see_beat(m, RoadTrip.beat("islands_2"))
+	RoadTrip.see_beat(m, RoadTrip.beat("islands_3"))
+	check(RoadTrip.pens_open(m).has(4), "the gold pen")
+
+
+func test_postcards_and_pens() -> void:
+	var m := _meta()
+	var all := RoadTrip.postcards_all()
+	check(all.has("v:park") and all.has("v:pirate") and all.has("d:hitchhiker"))
+	eq(all.size(), all.filter(func(k): return all.count(k) == 1).size(), "each once")
+	for k in all:
+		check(RoadTrip.postcard_name(String(k)).length() <= 14, "a name that fits a card: " + String(k))
+	RoadTrip.postcard(m, "v:park")
+	RoadTrip.postcard(m, "v:park")
+	RoadTrip.postcard(m, "v:nowhere")
+	eq(m["postcards"], ["v:park"], "once each, real places only")
+	eq(RoadTrip.pens_open(m), [0])
+	for k in all.slice(0, RoadTrip.PEN_POSTCARDS[0]):
+		RoadTrip.postcard(m, String(k))
+	eq(RoadTrip.pens_open(m), [0, 1], "the blue pen")
+	for k in all:
+		RoadTrip.postcard(m, String(k))
+	eq(RoadTrip.pens_open(m), [0, 1, 2, 3])
+	eq(RoadTrip.data()["pens"].size(), 5)
+
+
+func test_announcer_calls() -> void:
+	var t := RoadTrip.create(3, 0, RoadTrip.PEPPER)
+	t.at = [0, 0, 0]
+	eq(t.calls_for({"type": "pickup"}), ["trip_pickup"])
+	eq(t.calls_for({"type": "grudge", "team": Opponents.DAWSON}), ["trip_stranger"])
+	eq(t.calls_for({"type": "rival", "level": 0}), ["trip_rival"])
+	eq(t.calls_for({"type": "rival", "level": 2}), ["trip_rival_again"])
+	t.hazards = ["fog", "storm"]
+	t.meal = "pie"
+	t.take("head_start")
+	eq(t.calls_for({"type": "big"}), ["trip_big", "trip_hazard_fog", "trip_meal", "trip_perk_head_start"])
+	t.daily = 20261024
+	t.hazards = []
+	eq(t.calls_for({"type": "pickup"})[0], "trip_daily", "the day's first match")
+	var ids: Array = []
+	var f := FileAccess.open(ProjectSettings.globalize_path("res://").path_join("../design/announcer/additions.csv"), FileAccess.READ)
+	if f:
+		while not f.eof_reached():
+			ids.append(f.get_csv_line()[0])
+	check(not ids.is_empty(), "the list to record is there")
+	for fam in ["trip_pickup", "trip_grudge", "trip_big", "trip_final", "trip_encore", "trip_rival",
+			"trip_rival_again", "trip_stranger", "trip_last_heart", "trip_meal", "trip_daily", "trip_bond",
+			"trip_islands", "trip_hazard_fog", "trip_hazard_heat", "trip_hazard_moon", "trip_hazard_glasses",
+			"trip_hazard_flat", "trip_perk_head_start", "trip_won", "trip_encore_won",
+			"trip_perk_kitchen_pass", "trip_perk_second_serve", "trip_perk_lucky_line", "trip_perk_second_wind",
+			"trip_perk_hot_hand"]:
+		if not ids.is_empty():
+			check(ids.has(fam) or ids.has(fam + "_1"), "on the list to record: " + fam)

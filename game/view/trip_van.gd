@@ -237,7 +237,8 @@ func _strip_refresh() -> void:
 	cash.region = Rect2(48, 0, 24, 24)
 	TripArt.sprite(cash, Vector2(282, 443), 1.0, _strip)
 	UiKit.text("small", str(trip.cash), Vector2(310, 445), 0.0, GOLD, _strip)
-	UiKit.text("small", "TRIP %d  HEAT %d" % [trip.seed % 10000, trip.heat], Vector2(366, 445), 0.0, DIM, _strip)
+	var which := "DAY " + RoadTrip.date_label(trip.daily) if trip.daily > 0 else "TRIP %d" % (trip.seed % 10000)
+	UiKit.text("small", "%s  HEAT %d" % [which, trip.heat], Vector2(366, 445), 0.0, DIM, _strip)
 	for i in mini(4, trip.hazards.size()):
 		TripArt.sprite(TripArt.hazard_icon(String(trip.hazards[i])), Vector2(596 + i * 26, 442), 0.375, _strip)
 	if trip.meal != "":

@@ -9,7 +9,8 @@ extends RefCounted
 
 const DIR := "res://assets/trip/"
 const ICON := 64
-const ICONS_1 := 40              ## cells on trip_gear_icons.png; the rest are on _2
+const ICONS_1 := 40              ## cells on trip_gear_icons.png
+const ICONS_2 := 64              ## then _2's, then _3's (the partners' bond items)
 const HAZARDS_1 := 5             ## cells on trip_hazard_icons.png
 const PIN := Vector2(32, 40)
 const PINS_1 := 9                ## columns on trip_pins.png; the rest are on _2
@@ -46,7 +47,9 @@ static func gear_icon(id: String) -> Texture2D:
 		return load(DIR + "trip_paddle_plain.png")
 	if icon < ICONS_1:
 		return _cell(load(DIR + "trip_gear_icons.png"), icon, 8, Vector2(ICON, ICON))
-	return _cell(load(DIR + "trip_gear_icons_2.png"), icon - ICONS_1, 8, Vector2(ICON, ICON))
+	if icon < ICONS_2:
+		return _cell(load(DIR + "trip_gear_icons_2.png"), icon - ICONS_1, 8, Vector2(ICON, ICON))
+	return _cell(load(DIR + "trip_gear_icons_3.png"), icon - ICONS_2, 8, Vector2(ICON, ICON))
 
 
 ## A hazard's 64 x 64 icon.
@@ -79,3 +82,64 @@ static func sprite(tex: Texture2D, at: Vector2, scale: float, parent: Node) -> S
 	s.position = at
 	parent.add_child(s)
 	return s
+
+
+## A postcard's picture in `rect`: the venue at dusk, or the detour's scene
+## (its backdrop, or its venue), scaled down and clipped.
+static func postcard_picture(key: String, rect: Rect2) -> Control:
+	var clip := Control.new()
+	clip.position = rect.position
+	clip.size = rect.size
+	clip.clip_contents = true
+	clip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var world := Node2D.new()
+	var k := rect.size.x / 960.0
+	world.scale = Vector2(k, k)
+	world.position.y = (rect.size.y - 540.0 * k) / 2.0
+	clip.add_child(world)
+	var venue := ""
+	var time := CourtStyle.DUSK
+	if key.begins_with("v:"):
+		venue = key.substr(2)
+	else:
+		var d := RoadTrip.detour(key.substr(2))
+		var art := String(d.get("art", ""))
+		var name := "garage" if art == "garage" else "scene_" + art
+		if art != "" and (has_backdrop(name) or not d.has("venue")):
+			var s := Sprite2D.new()
+			s.texture = backdrop(name)
+			s.centered = false
+			world.add_child(s)
+			return clip
+		venue = String(d.get("venue", "park"))
+		time = int(d.get("time", CourtStyle.DAY))
+	var manifest := MatchView.levels_manifest()
+	if not manifest["venues"].has(venue):
+		venue = "park"
+	var scales := CourtStyle.time_scales(time)
+	for layer in manifest["venues"][venue]["layers"]:
+		if layer["name"] in ["net"]:
+			continue
+		var s2 := Sprite2D.new()
+		s2.texture = load(MatchView.LEVELS + String(layer["file"]))
+		s2.centered = false
+		s2.position = Vector2(layer["origin"][0], layer["origin"][1])
+		s2.modulate = scales[1] if layer["name"] == "ground" else scales[0]
+		world.add_child(s2)
+	return clip
+
+
+## The islands' part of the paper map (600 x 330 at the paper's scale):
+## its own art, or the coast's third of the paper tinted to the sea.
+static func islands_paper() -> Texture2D:
+	var path := DIR + "trip_map_islands.webp"
+	if ResourceLoader.exists(path):
+		return load(path)
+	var a := AtlasTexture.new()
+	a.atlas = load(DIR + "trip_map_paper.webp")
+	a.region = Rect2(1200, 0, 600, 330)
+	return a
+
+
+static func islands_placeholder() -> bool:
+	return not ResourceLoader.exists(DIR + "trip_map_islands.webp")

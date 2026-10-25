@@ -1,6 +1,6 @@
 # The Announcer: additions to record
 
-The second batch: **76 lines**, the same voice and settings as the first
+The second batch: **105 lines**, the same voice and settings as the first
 (`SCRIPT.md`, whose recording spec holds here too). `additions.csv` has
 one row per file. Put the recordings in `audio/announcer/raw/` beside the
 first batch; the game already asks for these (all but the power-ups, which
@@ -119,6 +119,42 @@ covered (a game past 25-all is called by the score on the board).
 | `smash_winner_3` | Smashed to bits! | Dry, playful, a little deadpan; let the pun land. | 1.5 |
 | `smash_finish_1` | Set it up and knock it down! | Big, booming 1994 TV sports energy. | 2.0 |
 | `smash_finish_2` | And they finish the job! | Big, booming 1994 TV sports energy. | 1.8 |
+
+## ROAD TRIP
+
+*In ROAD TRIP's matches (port ADR-087, 092, 093): the stop's kind as the match opens (in place of the venue's welcome), your last heart, a hazard or the diner's meal, a one-sided rule saving a point, and the SUMMER OPEN or the island encore won. Until a line is recorded the match says what it said before.*
+
+| id | line | delivery | max s |
+|---|---|---|---|
+| `trip_pickup_1` | A pickup game! Winner keeps the court. | Warm, friendly, a smile in the voice. | 2.5 |
+| `trip_pickup_2` | Pickup game! The locals against the visitors! | Big, booming 1994 TV sports energy. | 2.5 |
+| `trip_grudge_1` | This one's personal, folks. It's a grudge match! | Big, booming 1994 TV sports energy. | 3.0 |
+| `trip_grudge_2` | Grudge match! Somebody owes somebody a rematch. | Dry, playful, a little deadpan; let the pun land. | 3.0 |
+| `trip_big_1` | It's a big one! Win here and the road goes on. | Big, booming 1994 TV sports energy. | 3.0 |
+| `trip_final_1` | Live from the coast, it's the Summer Open! | Big, booming 1994 TV sports energy. | 2.5 |
+| `trip_final_2` | The lights are up, the crowd is in. It's the final! | Big, booming 1994 TV sports energy. | 3.0 |
+| `trip_rival_1` | Uh oh. It's the Road Hogs! | Dry, playful, a little deadpan; let the pun land. | 1.8 |
+| `trip_rival_again_1` | The Road Hogs are back, and they brought the horn. | Dry, playful, a little deadpan; let the pun land. | 3.0 |
+| `trip_stranger_1` | A stranger in a long coat. Nobody knows his name. Well, almost nobody. | Dry, playful, a little deadpan; let the pun land. | 4.0 |
+| `trip_last_heart_1` | One heart left. No more second chances! | Big, booming 1994 TV sports energy. | 2.5 |
+| `trip_meal_1` | Somebody stopped at the diner. You can tell! | Dry, playful, a little deadpan; let the pun land. | 2.5 |
+| `trip_won_1` | Summer Open champions! What a road trip! | Big, booming 1994 TV sports energy. | 2.8 |
+| `trip_perk_kitchen_pass` | Kitchen pass! We'll let that one go. | Dry, playful, a little deadpan; let the pun land. | 2.2 |
+| `trip_perk_second_serve` | Take two! A second serve! | Big, booming 1994 TV sports energy. | 1.8 |
+| `trip_perk_lucky_line` | Lucky! It just caught the line! | Big, booming 1994 TV sports energy. | 2.0 |
+| `trip_perk_head_start` | And they start a point up! | Warm, friendly, a smile in the voice. | 1.8 |
+| `trip_perk_second_wind` | Second wind! Look at them go! | Big, booming 1994 TV sports energy. | 1.8 |
+| `trip_perk_hot_hand` | Three in a row! They're on fire! | Big, booming 1994 TV sports energy. | 2.0 |
+| `trip_hazard_fog` | Can anybody see the ball? Anybody? | Dry, playful, a little deadpan; let the pun land. | 2.2 |
+| `trip_hazard_heat` | It's a scorcher out here, folks. | Warm, friendly, a smile in the voice. | 2.0 |
+| `trip_hazard_moon` | Full moon tonight. Things get weird. | Dry, playful, a little deadpan; let the pun land. | 2.2 |
+| `trip_hazard_glasses` | Is it me, or is the court upside down? | Dry, playful, a little deadpan; let the pun land. | 2.2 |
+| `trip_hazard_flat` | They made it, flat tire and all! | Warm, friendly, a smile in the voice. | 2.0 |
+| `trip_daily_1` | It's the trip of the day! Same road for everybody. | Warm, friendly, a smile in the voice. | 3.0 |
+| `trip_bond_1` | These two play like they've been on the road all summer! | Warm, friendly, a smile in the voice. | 3.0 |
+| `trip_islands_1` | Out past the coast, one more court. Welcome to the islands! | Big, booming 1994 TV sports energy. | 3.5 |
+| `trip_encore_1` | The stranger and the van. One last time! | Big, booming 1994 TV sports energy. | 2.5 |
+| `trip_encore_won_1` | Unbelievable! The island encore is theirs! | Big, booming 1994 TV sports energy. | 2.8 |
 
 ## Power-ups (for later)
 

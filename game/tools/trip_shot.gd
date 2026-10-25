@@ -4,7 +4,9 @@
 ## map_start (a new trip), pick, shop, card (a big match's card), team (its
 ## scene), detour, motel, start; and port ADR-092's van (THE VAN),
 ## scrapbook, diner, rival (the ROAD HOGS' scene), old_court (a story
-## detour), drive_in (a detour at a venue). A scratch save, nothing written.
+## detour), drive_in (a detour at a venue); and port ADR-093's islands
+## (the map on the fourth leg, NOW PLAYING) and postcards. A scratch save,
+## nothing written.
 extends SceneTree
 
 var _frames := 0
@@ -40,6 +42,14 @@ func _initialize() -> void:
 	m["looks"] = {"van": 2, "ornament": 1, "tape": 1}
 	m["beats"] = ["van_1", "van_2", "hogs_1", "tape_1", "champs_1"]
 	m["tapes"] = [1]
+	m["pens"] = [1]
+	m["looks"]["pen"] = 1
+	m["bonds"] = {"-1": 13}
+	m["postcards"] = ["v:park", "v:lakeside", "v:fair", "v:motel", "v:western", "d:hitchhiker", "d:drive_in",
+		"d:old_court", "v:pirate"]
+	if screen == "islands":
+		m["best_heat"] = 5
+		m["looks"]["tape"] = 2
 	var t := RoadTrip.create(seed_value, 0, RoadTrip.PEPPER, m)
 	t._meta_for_draw = m
 	if screen != "map_start" and screen != "start" and not "plain" in a:
@@ -63,9 +73,24 @@ func _initialize() -> void:
 			if screen == "garage":
 				h.ready.connect(h._open_garage)
 		"results":
-			view = TripHome.new().setup(sv, {"won": false, "leg": 2, "wins": 5, "losses": 3, "stops": 7,
-				"miles": 150, "steps": [12, 13]})
+			view = TripHome.new().setup(sv, {"won": true, "leg": 4, "wins": 11, "losses": 2, "stops": 15,
+				"miles": 310, "steps": [12, 13], "islands": true, "encore": true, "partner": -1, "bond": 2,
+				"heat_open": 1})
 			root.add_child(view)
+		"postcards":
+			var hp := TripHome.new().setup(sv, {}, "scrapbook")
+			view = hp
+			root.add_child(hp)
+			hp.ready.connect(hp._open_postcards)
+		"islands":
+			t = RoadTrip.create(seed_value, 0, RoadTrip.PEPPER, m)
+			t.at = [RoadTrip.ISLANDS, RoadTrip.START, 1]
+			t.title = true
+			t.route = [[0, 0, 1], [0, 1, 1], [0, 2, 1], [0, 3, 0], [1, 0, 1], [1, 1, 1], [1, 2, 1], [1, 3, 0],
+				[2, 0, 1], [2, 1, 1], [2, 2, 1], [2, 3, 0]]
+			view = TripMap.new().setup(sv, t)
+			root.add_child(view)
+
 		"map", "map_start":
 			view = TripMap.new().setup(sv, t)
 			root.add_child(view)

@@ -83,3 +83,4 @@ first decisions, are rows in `design/07_DECISIONS_AND_RISKS.md`.
 | 090 | [OPTIONS in the Pause Menu](ADR-090-pause-options.md) | Accepted 2026-10-24 |
 | 091 | [ROAD TRIP: a Harder Leg 1, a Steadier Partner](ADR-091-trip-tuning.md) | Accepted 2026-10-24 |
 | 092 | [ROAD TRIP, Round Two: the Van, More Road, a Story Across Trips](ADR-092-trip-round-two.md) | Accepted 2026-10-24 |
+| 093 | [ROAD TRIP, Round Three: the Day's Trip, Bonds, the Islands, Postcards](ADR-093-trip-round-three.md) | Accepted 2026-10-24 |
