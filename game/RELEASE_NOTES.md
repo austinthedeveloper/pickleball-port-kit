@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.34.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.35.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-80 of 83 roadmap tasks are in.
+81 of 84 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -502,3 +502,9 @@ Status: **Ready to test**: play a trip or three. Say how it feels: too easy or h
 Seven venues from generated paintings (port ADR-088), after STATION on COURT > VENUE: WESTERN, ROOFTOP, PIRATES, MOTEL (the drained pool from ROAD TRIP's motel), FAIR, DRIVE-IN, MALL. The loop was ROAD TRIP's: I wrote the prompts and reviewed each round, you generated (`art/venues-r1`: prompts, references, concepts, plates, cutouts, locals, both reviews; MOTEL's re-layout in `art/venues-r2-fixes`). `art/levels/tools/painted.py` cuts the layers and paints the court on each floor; every venue has its own locals (`Crowd` takes a venue's sheet), its court presets, its own ambience and match track. MALL and the DRIVE-IN ignore TIME (indoors; already night). ROAD TRIP's legs visit them.
 
 Status: **Ready to test**: play a match at each. Say if a scene, its crowd or its sound should change. Not done: the announcer's lines (KNOWN_ISSUES #85); no parallax (#86).
+
+## PORT-84: the lite Web build (asked for 2026-10-24)
+
+The Web build thinned, the desktop builds untouched (port ADR-089). Its preset carries the `lite` feature and leaves out the announcer, ROAD TRIP's art and the seven painted venues; the game, with `Settings.lite` on, hides ROAD TRIP and the announcer's rows and goes round the first eleven venues. `export.sh` exports it from a copy with its music and ambience re-encoded smaller (q1, the ambience mono). The Web pack is 12 MB (was 41), the zip 21 MB (was 51).
+
+Status: **Ready to test**: open the Web build and listen to the music and the crowd. If q1 sounds rough, the setting is `WEB_QUALITY` in `game/tools/encode_ogg.py`.

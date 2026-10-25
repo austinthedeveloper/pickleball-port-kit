@@ -229,6 +229,8 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.34.0** (2026-10-24): PORT-83 the painted venues: WESTERN, ROOFTOP,
   PIRATES, MOTEL, FAIR, DRIVE-IN, MALL (tag `v0.34.0`, on
   `feature/cld-release-0.34.0`).
+- **v0.35.0** (2026-10-24): PORT-84 the lite Web build (tag `v0.35.0`, on
+  `feature/cld-release-0.35.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 
