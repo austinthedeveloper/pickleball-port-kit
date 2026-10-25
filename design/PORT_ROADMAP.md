@@ -120,6 +120,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-92 | Postcards: one for every venue and detour, on the SCRAPBOOK (port ADR-093) | `feature/cld-trip-more` | Ready to test |
 | PORT-93 | The map pen and NOW PLAYING (port ADR-093) | `feature/cld-trip-more` | Ready to test |
 | PORT-94 | ROAD TRIP balance pass: the gear curve measured, sets easier to finish (port ADR-093) | `feature/cld-trip-more` | Ready to test |
+| PORT-96 | ROAD TRIP fuzz tests (random trips, the story over many trips, every story map, old saves); the generator's rare rule-breaking leg fixed | `feature/cld-trip-tests` | Done |
 | PORT-95 | Smart play: CPUs at the kitchen line, moving up together, your partner following you, placed shots; tunable on F2 (port ADR-094) | `feature/cld-smart-ai` | Ready to test |
 
 ## Releases
@@ -575,6 +576,19 @@ the same request). Open: 36 and 40.
   - Verified (88 to 94): the full suite plus the e2e; screenshots of the
     islands map, POSTCARDS, the results, the home and the GARAGE.
   - Status: **Ready to test**: say how the sets feel.
+
+### 96. `feature/cld-trip-tests`: more ROAD TRIP tests (asked for 2026-10-25)
+
+- [x] `PORT-96` `test_trip_fuzz`: 120 random trips checked after every
+  step (hearts, cash, stats, the locker, save round trips, picks, always
+  a way on, an end), 50 trips on one save (beats in order and once, the
+  scrapbook and postcards only growing, the islands once open), every
+  story map, the islands end to end, the day's trip the same for a full
+  and a new save, bonds across finishes, a pre-round-two save played to
+  its end, and the data's references. It found a bug, fixed: when 400
+  draws of a leg all broke the leg rules, the generator kept the last
+  (1 leg in 7,000); generator 3 keeps drawing.
+  - Verified: the full suite plus the e2e (about 9 s added).
 
 ### 95. `feature/cld-smart-ai`: smart play (asked for 2026-10-25)
 
