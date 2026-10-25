@@ -27,6 +27,8 @@ signal open_trip                ## port ADR-087: ROAD TRIP's home
 signal open_course              ## ADR-070: PICKLEBALL 101, the real game's rules
 
 const SWITCH_LOCK := MenuPage.TRANSITION   ## no menu input while a page slides in
+## Rows the lite (Web) build has no content for (port ADR-089).
+const LITE_HIDDEN := ["trip", "announcer", "voice", "commentary"]
 
 ## The main page's cursor, kept across matches.
 static var main_cursor := 1             ## PLAY (STORY is above it)
@@ -191,6 +193,8 @@ func _ready() -> void:
 
 func _add_page(id: String, title: String, rows: Array, help: Array,
 		at := Rect2(300, 172, 360, 0)) -> void:
+	if Settings.lite:                         # ADR-089: what the Web build leaves out
+		rows = rows.filter(func(r): return not String(r["id"]) in LITE_HIDDEN)
 	if not id in ["main", "notice"]:          # the notice's OK is its way back
 		rows.append({"id": "back", "label": "BACK", "press": back})
 	# top pad, the rows, then a footer that keeps the prompt bar clear of them

@@ -42,7 +42,7 @@ project lead's; the remaster is one of its artifacts and may not
 contradict it). `design/BIBLE_PLAN.md` lists what it asks of the port and
 the gaps (phase 5 in the roadmap). The SNES repo's decisions are cited as
 "SNES ADR-n": its numbers from 052 on are not this repo's. This repo keeps
-its own numbering (next: ADR-089; `decisions/README.md` indexes them).
+its own numbering (next: ADR-090; `decisions/README.md` indexes them).
 
 ## Rules of the code (game/)
 

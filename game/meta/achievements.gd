@@ -107,7 +107,7 @@ static func check_match(save: SaveGame, m: Dictionary) -> Array:
 	want.call("on_fire", int(m["longest"]) >= ON_FIRE_SHOTS)
 	want.call("comeback", won and int(m["behind"]) >= COMEBACK_BEHIND)
 	want.call("mad_scientist", won and mods >= MAD_MODIFIERS)
-	want.call("globetrotter", won and Settings.VENUES.all(func(v): return v in save.data["achievement_venues"]))
+	want.call("globetrotter", won and Settings.venues().all(func(v): return v in save.data["achievement_venues"]))
 	want.call("ladder", bool(m.get("cleared", false)))
 	want.call("cover_man", won and int(m["opponent"]) == Opponents.DAWSON)
 	return got

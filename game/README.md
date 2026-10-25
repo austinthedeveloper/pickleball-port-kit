@@ -144,7 +144,8 @@ python3 game/tools/release_notes.py # game/RELEASE_NOTES.md from the roadmap and
 Builds for each release are on the GitHub releases page, from v0.2.1.
 macOS builds are ad-hoc signed, not notarized: the first time, right-click
 the app and choose Open. The Web build needs to be served over HTTP (not
-opened as a file).
+opened as a file). It's the lite build (port ADR-089): smaller music and
+ambience, and no announcer, ROAD TRIP or painted venues.
 
 `export.sh` refuses a tree with uncommitted changes (`--dev` allows it)
 and writes `build_id.txt` (`git describe --always --dirty`), which the

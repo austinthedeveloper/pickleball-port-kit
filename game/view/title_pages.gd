@@ -85,7 +85,7 @@ static func build(t: TitleScreen) -> void:
 		"change": func(_d): Settings.replays_in_demo = not Settings.replays_in_demo})
 	t._add_page("replays", "REPLAYS", replay_rows, help, Rect2(260, 60, 440, 0))
 	var court_rows := [{"id": "venue", "label": "VENUE", "value": func(): return Settings.VENUE_NAMES[Settings.venue_i],
-		"change": func(d): Settings.venue_i = (Settings.venue_i + d + Settings.VENUES.size()) % Settings.VENUES.size(); t._start_demo()},
+		"change": func(d): Settings.venue_i = (Settings.venue_i + d + Settings.venue_count()) % Settings.venue_count(); t._start_demo()},
 		{"id": "time", "label": "TIME", "value": func(): return CourtStyle.time_names()[Settings.time_i],
 			"change": func(d):
 				var n := CourtStyle.time_names().size()

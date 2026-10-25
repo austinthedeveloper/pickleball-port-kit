@@ -7,6 +7,11 @@
 #   game/tools/export.sh            # every preset (needs templates)
 #   game/tools/export.sh --check    # the .pck check only
 #   game/tools/export.sh --dev      # allow a dirty tree (the ID says -dirty)
+# The Web build (port ADR-089) is exported from a copy of the project in
+# build/web-src with smaller music and ambience (encode_ogg.py --web, from
+# the WAVs in audio/; needs soundfile: .venv, else python3), and its preset
+# carries the "lite" feature, whose exclude_filter leaves out the
+# announcer, ROAD TRIP and the painted venues. Its pack is booted too.
 cd "$(dirname "$0")/.." || exit 2
 KIT="$(cd .. && pwd)"
 check=0
@@ -44,13 +49,39 @@ if [ ! -d "$templates" ]; then
   echo "no export templates for $ver: install them (Editor > Manage Export Templates), then re-run"
   exit 3
 fi
+py="$KIT/.venv/bin/python"
+[ -x "$py" ] || py=python3
+web_src() {
+  src="$KIT/build/web-src"
+  mkdir -p "$src"
+  rsync -a --delete --exclude=/build_id.txt ./ "$src/" && cp build_id.txt "$src/" || return 1
+  "$py" tools/encode_ogg.py --web "$src/assets/audio" \
+    "$KIT/audio/music/out/"music_*.wav "$KIT/audio/hd-sfx/out/"ambience_*.wav || return 1
+  godot --headless --path "$src" --import >/dev/null 2>&1
+}
 for p in macOS Windows Linux Web; do
   dest=$(awk -v p="$p" '$0=="name=\""p"\"" {f=1} f && /^export_path=/ {gsub(/export_path=|"/,""); print; exit}' export_presets.cfg)
   mkdir -p "$(dirname "$dest")"
-  if godot --headless --path . --export-release "$p" "$dest" >/dev/null 2>&1 && [ -e "$dest" ]; then
-    echo "ok   $p -> build/${dest#../build/}"
+  proj=.
+  if [ "$p" = "Web" ]; then
+    web_src || { echo "FAIL Web: its smaller audio"; status=1; continue; }
+    proj="$KIT/build/web-src"
+    dest="$(cd "$(dirname "$dest")" && pwd)/$(basename "$dest")"
+  fi
+  if godot --headless --path "$proj" --export-release "$p" "$dest" >/dev/null 2>&1 && [ -e "$dest" ]; then
+    echo "ok   $p -> build/${dest#*/build/}"
   else
     echo "FAIL $p"; status=1
   fi
 done
+# the Web build's pack boots on the desktop engine too: it has "lite" on
+# and none of what it leaves out is asked for at the title or in a demo
+if [ -s "$KIT/build/web/index.pck" ]; then
+  out=$(godot --headless --main-pack "$KIT/build/web/index.pck" --quit-after 600 2>&1)
+  if echo "$out" | grep -qE "SCRIPT ERROR|ERROR: .*(load|Resource)"; then
+    echo "$out" | grep -E "SCRIPT ERROR|ERROR"; echo "FAIL: the Web pack doesn't boot cleanly"; status=1
+  else
+    echo "ok   the Web pack boots ($(du -h "$KIT/build/web/index.pck" | cut -f1))"
+  fi
+fi
 exit $status
