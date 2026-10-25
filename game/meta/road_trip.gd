@@ -33,7 +33,8 @@ const PARTNER_LATE_STEP := 2
 ## teams are late every 2nd or 3rd ball, so its rallies were 3 to 5 shots.
 const LEG_1_ERRORS := 60
 const PEPPER := -1               ## `partner`: Pepper, not a ladder captain
-const GEN := 2                   ## the generator's version: 2 adds the diner, the rival and story stops
+const GEN := 3                   ## the generator's version: 2 adds the diner, the rival and story stops; 3 never keeps a leg that breaks the rules
+const DRAWS_MAX := 20000         ## draws of a leg, at most (a valid one comes long before)
 const RIVAL_LEG := 1             ## the ROAD HOGS turn up on the long drive (port ADR-092)
 const ISLANDS := 3               ## the secret fourth leg's index, past the SUMMER OPEN (port ADR-093)
 ## A partner's bond (port ADR-093): points a trip together earns, and the
@@ -225,7 +226,9 @@ static func generate(s: int, heat_level: int, extras: Dictionary = {}) -> Array:
 		var bigs: Array = info["big"]
 		var big_team := int(bigs[roll(s, leg, 1, bigs.size())])
 		var leg_map := {}
-		for attempt in 400:
+		# draws until one keeps the rules (1 leg in 7,000 needs more than 400;
+		# generator 2 kept the 400th, rules or not)
+		for attempt in DRAWS_MAX:
 			leg_map = _draw_leg(s, leg, attempt, big_team, heat_level, used_detours)
 			_place_story(leg_map, s, leg, attempt, extras)
 			if valid_leg(leg_map, leg, heat_level):

@@ -256,10 +256,9 @@ func test_the_story_across_many_trips() -> void:
 
 
 ## Every map the story can draw: every stop reachable from the leg's start,
-## every stop with a way on to the gate, the gates right. (The leg rules
-## are test_road_trip's: the generator keeps its 400th try when none keeps
-## them, about 1 leg in 7,000, e.g. seed 123472's leg 3; reported, not
-## asserted here.)
+## every stop with a way on to the gate, the gates right, and every leg
+## keeping the rules (generator 3: the 400th draw is no longer kept when it
+## breaks them, as seed 123472's coast once did).
 func test_every_story_map() -> void:
 	var bad: Array = []
 	for mask in 16:
@@ -272,6 +271,8 @@ func test_every_story_map() -> void:
 				bad.append("mask %d seed %d: %d legs" % [mask, s, map.size()])
 			for leg in map.size():
 				var lm: Dictionary = map[leg]
+				if not RoadTrip.valid_leg(lm, leg, heat):
+					bad.append("mask %d seed %d leg %d breaks the leg rules" % [mask, s, leg])
 				var reach := [0, 1, 2]
 				for c in RoadTrip.COLS - 1:
 					var next := []
@@ -447,3 +448,24 @@ func _on_ladder(id: String) -> bool:
 		if step.get("pool", []).has(id):
 			return true
 	return false
+
+
+## Generator 3 (found by this suite): a leg is drawn until it keeps the
+## rules. Seed 123472's coast broke them under generator 2 (two yard sales
+## in a column, a road yard to yard).
+func test_every_leg_keeps_the_rules_at_last() -> void:
+	var broken := 0
+	for heat in RoadTrip.HEAT_MAX + 1:
+		var map := RoadTrip.generate(123472, heat)
+		for leg in map.size():
+			if not RoadTrip.valid_leg(map[leg], leg, heat):
+				broken += 1
+	eq(broken, 0, "seed 123472 at every HEAT")
+	var bad := 0
+	for i in 300:
+		var map2 := RoadTrip.generate(i * 7717, i % (RoadTrip.HEAT_MAX + 1))
+		for leg in map2.size():
+			if not RoadTrip.valid_leg(map2[leg], leg, i % (RoadTrip.HEAT_MAX + 1)):
+				bad += 1
+	eq(bad, 0, "300 more seeds' legs")
+	eq(RoadTrip.create(5, 0, RoadTrip.PEPPER).gen, 3, "generator 3 on new trips")
