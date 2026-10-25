@@ -4,6 +4,46 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.36.0] - 2026-10-25
+
+ROAD TRIP grows: the van, a longer road, and a story that unfolds over
+many trips.
+
+### Added
+- **THE VAN**: press Y (I on the keyboard) on ROAD TRIP's map to see
+  your stats, where each point comes from, your partner's, and your
+  gear. Paddles and hats you replace now go in the van's locker, so you
+  can swap them back in.
+- **TRADE IN** at the PRO SHOP: sell gear for half its price.
+- **Sets**: some items held together add stats (PIRATE'S KIT, GYM RAT,
+  BEACH BUM and more), and a pick is more likely to offer the piece
+  you're missing.
+- **More road**: 19 new items, 4 new hazards, 13 new detours (seven at
+  the painted venues), and the **DINER**, where a meal helps your next
+  match.
+- **A story across trips**: from your second trip, scenes that play once
+  each as you go, in five stories (THE VAN, THE ROAD HOGS, THE CHAMPS,
+  THE MIXTAPE, THE ISLANDS), some with rewards that last: new paddles,
+  cassettes for the map's music, a gold map pen. The **ROAD HOGS** are
+  your rivals on the road. A **SCRAPBOOK** on ROAD TRIP's page replays
+  the chapters you've seen.
+- **TODAY'S TRIP**: one map a day, the same for everyone, with your best
+  result for the day kept.
+- **Partner bonds**: the more you win with a partner, the stronger they
+  get, and at level 2 they give you their own item.
+- **The islands**: a secret leg past the SUMMER OPEN, once you've
+  finished a story or won at HEAT 5.
+- **Postcards** from every place you visit, which earn new map pens; the
+  GARAGE's **MAP PEN** and **CASSETTE**.
+- **OPTIONS in the pause menu**: change the sound or the camera without
+  leaving the match.
+- The announcer has new ROAD TRIP lines waiting to be recorded; matches
+  sound as before until they are.
+
+### Changed
+- ROAD TRIP's first leg is a little harder, and your partner lets fewer
+  balls go by.
+
 ## [0.35.0] - 2026-10-24
 
 A lighter web build.

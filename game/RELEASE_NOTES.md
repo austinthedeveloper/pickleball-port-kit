@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.35.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.36.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-81 of 84 roadmap tasks are in.
+91 of 94 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -508,3 +508,63 @@ Status: **Ready to test**: play a match at each. Say if a scene, its crowd or it
 The Web build thinned, the desktop builds untouched (port ADR-089). Its preset carries the `lite` feature and leaves out the announcer, ROAD TRIP's art and the seven painted venues; the game, with `Settings.lite` on, hides ROAD TRIP and the announcer's rows and goes round the first eleven venues. `export.sh` exports it from a copy with its music and ambience re-encoded smaller (q1, the ambience mono). The Web pack is 12 MB (was 41), the zip 21 MB (was 51).
 
 Status: **Ready to test**: open the Web build and listen to the music and the crowd. If q1 sounds rough, the setting is `WEB_QUALITY` in `game/tools/encode_ogg.py`.
+
+## PORT-85: OPTIONS in the pause menu (asked for 2026-10-24)
+
+Pause > OPTIONS (port ADR-090): the title's OPTIONS, ACCESSIBILITY, CONTROLS and CONTROLLER pages over a paused match, from one builder (`view/options_pages.gd`) both screens use. Closing saves them and applies CAMERA and HUD TEXT to the match.
+
+Status: **Ready to test**: pause a match and change the sound.
+
+## PORT-86: ROAD TRIP tuning (asked for 2026-10-24)
+
+After your first trip (port ADR-091): leg 1's grudge and big matches are MEDIUM and its CPU errors 60% of the rest's, so its rallies are about twice as long. The partner is late on every 12th ball (was 7th), further apart with each CONTROL point from the MOTEL. Legs 2 and 3 and the final are unchanged.
+
+Status: **Ready to test**: play a trip. Say if leg 1 is now right, and whether Pepper still lets balls go by.
+
+## PORT-87: ROAD TRIP round two (asked for 2026-10-24)
+
+ROAD TRIP grows (port ADR-092, no sim change): THE VAN over the map (Y / I) shows your stats as bars by where each point comes from, your partner's, and your gear; replaced paddles and hats go in the van's locker to swap back in; TRADE IN at the PRO SHOP; eight item sets. 19 new items, 4 hazards, 13 detours (7 at painted venues), the DINER (a meal for the next match). The story now grows across trips: 20 beats in four arcs (THE VAN, THE ROAD HOGS, THE CHAMPS, THE MIXTAPE) with lasting rewards (three story paddles, cassettes for the map's music), the ROAD HOGS as recurring rivals from the second trip, a captain partner's own start, and the SCRAPBOOK on ROAD TRIP's page.
+
+Status: **Ready to test**: take two or three trips.
+
+## PORT-88: the announcer's ROAD TRIP lines (asked for 2026-10-24)
+
+29 ROAD TRIP lines added to the announcer's second batch (`design/announcer/ADDITIONS.md`, now 105 lines) and wired in: a stop's kind opens its match, your last heart, hazards, the meal, the one-sided rules' saves, the SUMMER OPEN and the encore won. Each is used once recorded.
+
+Status: **Ready to test** once you've recorded them.
+
+## PORT-89: TODAY'S TRIP (asked for 2026-10-24)
+
+A row on ROAD TRIP's page: today's map (from the date), HEAT 0, Pepper, no GARAGE or story, so it's the same for everyone; the best result kept for the day, days won on the records.
+
+Status: **Ready to test**.
+
+## PORT-90: partner bonds (asked for 2026-10-24)
+
+Every partner earns bond points with you (a win each, three for a title). Level 1: +1 to their stats; 2: their own item and a scene; 3: +2 and a line from the announcer at the big matches.
+
+Status: **Ready to test**.
+
+## PORT-91: the islands (asked for 2026-10-24)
+
+A secret fourth leg past the SUMMER OPEN, open once a story is finished or HEAT 5 is won: THE ISLANDS, ending in THE ENCORE against Dale Dawson, with its own three-chapter story.
+
+Status: **Ready to test** (to see it now: finish a story, or ask me for a save that has one).
+
+## PORT-92: postcards (asked for 2026-10-24)
+
+A postcard for every venue played and detour taken (38), on the SCRAPBOOK; 8, 16 and 24 earn new map pens.
+
+Status: **Ready to test**.
+
+## PORT-93: the map pen and NOW PLAYING (asked for 2026-10-24)
+
+MAP PEN in the GARAGE colours the road driven; the cassette chosen shows on a NOW PLAYING card as the map opens.
+
+Status: **Ready to test**.
+
+## PORT-94: a ROAD TRIP balance pass (asked for 2026-10-24)
+
+`tools/trip_gear_stats.gd` measures how far gear takes the stats: no runaway POWER (7 at the final on a new GARAGE), but sets were rarely finished, so one card in two is now a missing piece of a set you've started (0.2 sets a trip to 0.5).
+
+Status: **Ready to test**: say how the sets feel.

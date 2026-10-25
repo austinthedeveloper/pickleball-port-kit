@@ -241,6 +241,9 @@ status in the same commit. The finished tasks, in full, are in
   `feature/cld-release-0.34.0`).
 - **v0.35.0** (2026-10-24): PORT-84 the lite Web build (tag `v0.35.0`, on
   `feature/cld-release-0.35.0`).
+- **v0.36.0** (2026-10-25): ROAD TRIP round two and three: THE VAN, a
+  story across trips, TODAY'S TRIP, bonds, the islands, postcards; pause
+  OPTIONS (tag `v0.36.0`, on `feature/cld-release-0.36.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 
