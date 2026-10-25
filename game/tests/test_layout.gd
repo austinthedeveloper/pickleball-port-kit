@@ -955,6 +955,44 @@ func test_tuning() -> void:
 	GameControls.device_serial += 1
 
 
+## The pause menu's OPTIONS (ADR-090): every page over a paused match,
+## every value of every row tried.
+func test_pause_options() -> void:
+	var kept := [Settings.camera_i, Sfx.setting, Music.volume, Announcer.volume, Announcer.chatter,
+		Settings.shake_i, Settings.pad_glyphs, Settings.touch_pad, Settings.hud_large]
+	var v := MatchView.new()
+	runner.root.add_child(v)
+	v.setup(Settings.config_for(true, 3, K.DIFFICULTY_MEDIUM, 11), "park", false)
+	v.card_frames = -1
+	v.sim.paused = 1
+	v._update_visuals()
+	v.options.open_panel()
+	for id in ["options", "access", "controls", "pad"]:
+		v.options._show(id)
+		var p: MenuPage = v.options.pages[id]
+		p.settle()
+		check_layout(v, "pause options %s" % id)
+		for row in p.rows:
+			if not row.has("change") or row["id"] in ["fullscreen", "scale", "vibration"]:
+				continue
+			p.select(row["id"])
+			for k in 12:
+				p.change(1)
+				p.settle()
+				check_layout(v, "pause options %s / %s = %s" % [id, row["id"], p.value_of(row["id"])])
+	v.free()
+	Settings.camera_i = kept[0]
+	Sfx.setting = kept[1]
+	Music.volume = kept[2]
+	Announcer.volume = kept[3]
+	Announcer.chatter = kept[4]
+	Settings.shake_i = kept[5]
+	Settings.pad_glyphs = kept[6]
+	Settings.touch_pad = kept[7]
+	Settings.hud_large = kept[8]
+	GameControls.device_serial += 1
+
+
 ## PORT-51: PLAY OF THE MATCH's card, catching up and playing, with the
 ## longest caption (an 8-letter name, every ending), keyboard and pad.
 func test_highlight() -> void:

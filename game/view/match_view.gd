@@ -21,6 +21,7 @@ const INPUT_LOCK_FRAMES := 12
 
 var glide := BallGlide.new()       ## a paced ball drawn gliding (ADR-073)
 var tuning: TuningPanel            ## F2 / TUNE (ADR-074); null in the demo
+var options: OptionsPanel          ## the pause menu's OPTIONS (ADR-090); null in the demo
 var highlight: Highlight           ## PLAY OF THE MATCH (ADR-075); null when there's none
 var commentary: Commentary         ## the announcer's lines (ADR-076); null in the demo and practice
 var _base_time := CourtStyle.DAY    ## the owner's time and court, before GLOW's
@@ -157,6 +158,8 @@ func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void
 	sim = Sim.new(cfg)
 	if tuning == null and not demo:
 		tuning = TuningPanel.new().setup(self)     # before the HUD: the pause menu's TUNE
+	if options == null and not demo:
+		options = OptionsPanel.new().setup(self)   # and its OPTIONS (ADR-090)
 	if demo:
 		sim.start_attract()
 	input_lock = INPUT_LOCK_FRAMES
@@ -311,6 +314,8 @@ func _build() -> void:
 	add_child(_debug)
 	if tuning and tuning.get_parent() == null:
 		add_child(tuning)
+	if options and options.get_parent() == null:
+		add_child(options)
 	highlight = Highlight.new(self)
 	if not highlight.wanted():
 		highlight = null
@@ -327,6 +332,8 @@ func _build() -> void:
 func rebuild(cfg: SimTypes.MatchConfig) -> void:
 	if tuning:
 		remove_child(tuning)
+	if options:
+		remove_child(options)
 	for c in get_children():
 		remove_child(c)
 		c.queue_free()
@@ -506,6 +513,10 @@ func marker_color(slot: int) -> Color:
 func _physics_process(_delta: float) -> void:
 	if tuning and tuning.open:
 		tuning.update()                      # the match waits (ADR-074)
+		_update_visuals()
+		return
+	if options and options.open:
+		options.update()                     # the match waits (ADR-090)
 		_update_visuals()
 		return
 	if highlight and highlight.playing():

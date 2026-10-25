@@ -135,6 +135,8 @@ func pause_rows() -> Array:
 			"press": func(): pause_choice = "save_rally"})     # PORT-69
 	if v.tuning and v.tuning.available():
 		rows.append({"id": "tune", "label": "TUNE", "press": func(): pause_choice = "tune"})
+	if v.options:
+		rows.append({"id": "options", "label": "OPTIONS", "press": func(): pause_choice = "options"})   # ADR-090
 	rows.append({"id": "menu", "label": "PARK" if v.park and v.sim.config.practice else "MAIN MENU",
 		"press": func(): pause_choice = "menu"})
 	return rows
@@ -161,6 +163,9 @@ func pause_input(it: SimTypes.Intent) -> bool:
 			it.pause_pressed = 1         # the sim unpauses on its own Start
 		"tune":
 			v.tuning.open_panel()        # ADR-074: over the pause menu
+			return true
+		"options":
+			v.options.open_panel()       # ADR-090: the title's OPTIONS, over it
 			return true
 		"save_rally":
 			v._sfx.play("confirm" if v.save_rally() else "back")

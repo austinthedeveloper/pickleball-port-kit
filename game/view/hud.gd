@@ -197,13 +197,7 @@ func setup(v: MatchView) -> void:
 	add_child(_quip)
 	_quip_text = _text("small", "", Vector2(480, 320), 0.5, Color.WHITE, _quip)
 	_result_line = _text("small", "", Vector2(480, 316), 0.5)
-	if Settings.hud_large:
-		# HUD TEXT LARGE (PORT-12): the banners, quips and lines grow
-		for t in [_banner, _banner_sub, _quip_text, _result_line]:
-			t.scale = Vector2(1.5, 1.5)
-		_banner_sub.position.y += 12
-		_quip_text.position.y += 22
-		_result_line.position.y += 22
+	apply_text_size()
 	_result_prompts = PromptBar.new().setup([["hit", "REMATCH"], ["start", "MENU"]], Vector2(480, 296))
 	_result_prompts.visible = false
 	add_child(_result_prompts)
@@ -228,6 +222,18 @@ func setup(v: MatchView) -> void:
 		mp.reparent(_practice_menu)
 		_practice_menu.add_child(PromptBar.new().setup([["start", "PAUSE"]], Vector2(480, 507)))
 	refresh()
+
+
+## HUD TEXT LARGE (PORT-12): the banners, quips and lines grow. Again
+## after the pause menu's OPTIONS (ADR-090), so either way works.
+func apply_text_size() -> void:
+	var k := 1.5 if Settings.hud_large else 1.0
+	var big := Settings.hud_large
+	for t in [_banner, _banner_sub, _quip_text, _result_line]:
+		t.scale = Vector2(k, k)
+	_banner_sub.position.y = 288 + (12 if big else 0)
+	_quip_text.position.y = 320 + (22 if big else 0)
+	_result_line.position.y = 316 + (22 if big else 0)
 
 
 func close_card() -> void:

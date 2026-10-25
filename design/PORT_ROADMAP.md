@@ -110,6 +110,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-82 | ROAD TRIP: a roguelike mode beside STORY, a road map of branching stops, a match at each, gear to pick, a garage between trips (port ADR-087) | `feature/cld-trip-run` | Ready to test |
 | PORT-83 | The painted venues: WESTERN, ROOFTOP, PIRATES, MOTEL, FAIR, DRIVE-IN, MALL, from generated paintings (port ADR-088) | `feature/cld-venue-art-r1` | Ready to test |
 | PORT-84 | The lite Web build: smaller music and ambience, no announcer, ROAD TRIP or painted venues; the Web zip 51 MB to 21 MB (port ADR-089) | `feature/cld-web-lite` | Ready to test |
+| PORT-85 | OPTIONS in the pause menu: the title's OPTIONS pages over a paused match (port ADR-090) | `feature/cld-pause-options` | Ready to test |
 
 ## Releases
 
@@ -460,6 +461,18 @@ the same request). Open: 36 and 40.
   - Status: **Ready to test**: open the Web build and listen to the
     music and the crowd. If q1 sounds rough, the setting is
     `WEB_QUALITY` in `game/tools/encode_ogg.py`.
+
+### 85. `feature/cld-pause-options`: OPTIONS in the pause menu (asked for 2026-10-24)
+
+- [x] `PORT-85` Pause > OPTIONS (port ADR-090): the title's OPTIONS,
+  ACCESSIBILITY, CONTROLS and CONTROLLER pages over a paused match, from
+  one builder (`view/options_pages.gd`) both screens use. Closing saves
+  them and applies CAMERA and HUD TEXT to the match.
+  - Verified: the full suite plus the e2e (`test_menus.test_pause_options`:
+    the same rows as the title's, the match waits, saved and applied;
+    `test_layout.test_pause_options`: every page, every value);
+    screenshots of the pause menu, OPTIONS and ACCESSIBILITY over a match.
+  - Status: **Ready to test**: pause a match and change the sound.
 
 ## For you
 

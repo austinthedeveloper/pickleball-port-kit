@@ -311,14 +311,69 @@ func _pick(view: MatchView, row: String) -> bool:
 func test_pause_menu_rows() -> void:
 	var view := _paused_view(SimTypes.MatchConfig.singles())
 	var ids := view._hud.pause_menu.rows.map(func(r): return r["id"])
-	eq(ids, ["resume", "restart", "save_rally", "tune", "menu"],
-		"SAVE LAST RALLY (PORT-69), TUNE: the tuning panel (ADR-074)")
+	eq(ids, ["resume", "restart", "save_rally", "tune", "options", "menu"],
+		"SAVE LAST RALLY (PORT-69), TUNE: the tuning panel (ADR-074), OPTIONS (ADR-090)")
 	check(view._hud._paused.visible, "it shows while paused")
 	view.free()
 	var practice := _paused_view(SimTypes.MatchConfig.practice_session(Practice.DEFAULTS, 0))
 	ids = practice._hud.pause_menu.rows.map(func(r): return r["id"])
-	eq(ids, ["resume", "tune", "menu"], "practice has no RESTART")
+	eq(ids, ["resume", "tune", "options", "menu"], "practice has no RESTART")
 	practice.free()
+
+
+## The pause menu's OPTIONS (ADR-090): the title's OPTIONS pages, the
+## same rows, over the paused match; closing saves and applies them.
+func test_pause_options() -> void:
+	var kept := [Sfx.setting, Settings.camera_i, Settings.hud_large]
+	var sv := fresh_save("user://test_menus/")
+	var t := title_screen(sv)
+	var view := _paused_view(SimTypes.MatchConfig.singles())
+	view.save = sv
+	check(_pick(view, "options"), "OPTIONS ends the frame")
+	var panel := view.options
+	check(panel.open and panel.visible, "the panel opens")
+	check(not view._hud.visible, "over the HUD")
+	eq(panel.page, "options")
+	for id in ["options", "access", "controls", "pad"]:
+		eq(panel.pages[id].rows.map(func(r): return r["id"]), t.pages[id].rows.map(func(r): return r["id"]),
+			"%s has the title's rows" % id)
+	# the match waits while it's open
+	var frame := view.sim.frame_count
+	view._physics_process(1.0 / 60.0)
+	eq(view.sim.frame_count, frame, "the match waits")
+	var page: MenuPage = panel.pages["options"]
+	page.select("sound")
+	Sfx.setting = 0
+	page.change(1)
+	eq(Sfx.setting, 1, "SOUND changes")
+	page.select("access")
+	page.press()
+	eq(panel.page, "access", "ACCESSIBILITY opens")
+	panel.pages["access"].select("hud")
+	Settings.hud_large = false
+	panel.pages["access"].change(1)
+	panel.back()
+	eq(panel.page, "options", "back to OPTIONS")
+	eq(page.current_id(), "access", "on the row that opened it")
+	page.select("camera")
+	Settings.camera_i = 0
+	page.change(1)
+	panel.back()
+	check(not panel.open and view._hud.visible, "OPTIONS' back closes it")
+	check(view.input_lock > 0, "the closing press is swallowed")
+	eq(view.camera.percent, Settings.CAMERAS[1], "CAMERA applies to the match")
+	eq(view._hud._banner.scale, Vector2(1.5, 1.5), "HUD TEXT applies to the match")
+	var back := SaveGame.new()
+	back.dir = "user://test_menus/"
+	back.load_game()
+	eq(int(back.data["settings"]["sound"]), 1, "saved")
+	check(view.sim.paused != 0, "still paused")
+	view.free()
+	t.free()
+	Sfx.setting = kept[0]
+	Settings.camera_i = kept[1]
+	Settings.hud_large = kept[2]
+	wipe_saves("user://test_menus/")
 
 
 func test_pause_menu_actions() -> void:

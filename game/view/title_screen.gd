@@ -783,52 +783,15 @@ var pad_mapper := PadMapper.new()
 var pad_map_screen: PadMapScreen
 
 
-## MAP BUTTONS: asks the pad in hand for its buttons, if it's one SDL
-## doesn't know (or one mapped before); a standard pad needs none.
+## MAP BUTTONS (view/options_pages.gd, port ADR-082).
 func open_pad_map() -> void:
-	var dev := PadMaps.target_pad()
-	if not PadMaps.status(dev) in [PadMaps.UNKNOWN, PadMaps.MAPPED]:
-		if _sfx:
-			_sfx.play("back")
-		return
-	pad_mapper.begin(dev)
-	_show("padmap")
-	pad_map_screen.refresh()
+	OptionsPages.open_pad_map(self)
+
+
+## The press that closed a page or a rebind never reaches the next (rule 9).
+func swallow() -> void:
 	_lock = SWITCH_LOCK
 	GameControls.clear_latch()
-
-
-## Leaves MAP BUTTONS for CONTROLLER (its row), the closing press swallowed.
-func _close_pad_map() -> void:
-	back_to("pad", "map")
-
-
-## One input event while MAP BUTTONS is open: the pad's answers; Esc
-## cancels and Backspace steps back. All of it is swallowed (rule 9).
-func pad_map_input(event: InputEvent) -> void:
-	if event.is_echo():
-		return
-	if event is InputEventKey and event.is_pressed():
-		var code: int = event.physical_keycode if event.physical_keycode else event.keycode
-		if code == KEY_ESCAPE:
-			pad_mapper.cancel()
-			_close_pad_map()
-			if _sfx:
-				_sfx.play("back")
-		elif code == KEY_BACKSPACE:
-			pad_mapper.undo()
-			pad_map_screen.refresh()
-			if _sfx:
-				_sfx.play("blip")
-	elif event is InputEventJoypadButton or event is InputEventJoypadMotion:
-		var r := pad_mapper.feed(event)
-		if r == PadMapper.DONE:
-			_save_settings()
-			_close_pad_map()
-		else:
-			pad_map_screen.refresh()
-		if r != PadMapper.IGNORED and _sfx:
-			_sfx.play("confirm" if r == PadMapper.DONE else "blip")
 
 
 func listen(action: String) -> void:
@@ -836,35 +799,10 @@ func listen(action: String) -> void:
 	pages["controls"].refresh()
 
 
-## While listening, the next key or pad button press rebinds the action
-## (Esc cancels) and is swallowed (rule 9).
+## MAP BUTTONS' answers and CONTROLS' rebinding (view/options_pages.gd).
 func _input(event: InputEvent) -> void:
-	if page == "padmap":
-		pad_map_input(event)
-		if is_inside_tree():
-			get_viewport().set_input_as_handled()
-		return
-	if listening == "" or not event.is_pressed() or event.is_echo():
-		return
-	var done := false
-	if event is InputEventKey:
-		var code: int = event.physical_keycode if event.physical_keycode else event.keycode
-		if code != KEY_ESCAPE:
-			Bindings.rebind_key(listening, code)
-		done = true
-	elif event is InputEventJoypadButton:
-		Bindings.rebind_pad(listening, event.button_index)
-		done = true
-	if done:
-		if is_inside_tree():
-			get_viewport().set_input_as_handled()
-		listening = ""
-		_store_settings()
-		_lock = SWITCH_LOCK
-		GameControls.clear_latch()
-		pages["controls"].refresh()
-		if _sfx:
-			_sfx.play("confirm")
+	if OptionsPages.input(self, event) and is_inside_tree():
+		get_viewport().set_input_as_handled()
 
 
 ## ADR-077: under ACHIEVEMENTS, how to earn the one selected (and the day
