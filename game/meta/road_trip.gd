@@ -23,6 +23,15 @@ const HEARTS := 3
 const HEARTS_MAX := 9
 const HEAT_MAX := 5
 const PARTNER_STAT := 6          ## a partner's stats at the start of a trip
+## A partner's late swing (port ADR-091): every PARTNER_LATE-th ball at the
+## start of a trip (a ladder partner's Pepper is every 7th, which let too
+## many go by), PARTNER_LATE_STEP more balls apart per CONTROL point over
+## PARTNER_STAT. A partner who is never late stays so.
+const PARTNER_LATE := 12
+const PARTNER_LATE_STEP := 2
+## Leg 1's CPU ERRORS, % of the rest of the trip's (port ADR-091): its
+## teams are late every 2nd or 3rd ball, so its rallies were 3 to 5 shots.
+const LEG_1_ERRORS := 60
 const PEPPER := -1               ## `partner`: Pepper, not a ladder captain
 
 ## Stop types. The ones that give gear (or a chance to buy it): no road
@@ -561,7 +570,8 @@ func points_for(n: Dictionary) -> int:
 func difficulty_for(n: Dictionary) -> int:
 	if String(n["type"]) == "final":
 		return K.DIFFICULTY_HARD
-	return K.DIFFICULTY_EASY if leg() == 0 else K.DIFFICULTY_MEDIUM
+	# leg 1's pickups are EASY; its grudge and big matches MEDIUM (port ADR-091)
+	return K.DIFFICULTY_EASY if leg() == 0 and String(n["type"]) == "pickup" else K.DIFFICULTY_MEDIUM
 
 
 ## The modifiers a match is played with: the stop's twist (lifted by an
@@ -587,6 +597,8 @@ func partner_style() -> SimTypes.AiStyle:
 		s = Opponents.team(partner)["players"][0]["style_obj"].copy()
 	else:
 		s = Opponents.partner_style()
+	if s.late_period > 0:
+		s.late_period = maxi(s.late_period, partner_late(int(partner_stats[1])))
 	for id in bag:
 		var g := gear(String(id))
 		if g.has("style"):
@@ -601,6 +613,17 @@ func partner_style() -> SimTypes.AiStyle:
 	return s
 
 
+## CPU ERRORS for this leg's matches: fewer from HEAT 1, fewer in leg 1.
+func errors_for() -> int:
+	var errors := 75 if heat >= 1 else 100
+	return errors * LEG_1_ERRORS / 100 if leg() == 0 else errors
+
+
+## How many balls apart the partner's late swings are, at `control`.
+static func partner_late(control: int) -> int:
+	return PARTNER_LATE + PARTNER_LATE_STEP * maxi(0, control - PARTNER_STAT)
+
+
 ## The match at stop `n`: doubles, you and your partner, your trip stats,
 ## the stop's opponents, venue and twist. `p1`: your look (a Player Select
 ## choice). Records nothing (MatchView.trip).
@@ -609,7 +632,7 @@ func config_for(n: Dictionary, p1: Dictionary, spend := false,
 	var team := int(n.get("team", -1))
 	var cfg := Settings.config_for(true, team, difficulty_for(n), points_for(n), p1)
 	cfg.ball_speed = 100
-	cfg.cpu_errors = 75 if heat >= 1 else 100
+	cfg.cpu_errors = errors_for()
 	cfg.set_partner(partner if partner >= 0 else Opponents.PEPPER)
 	cfg.modifiers = modifiers_for(n, spend)
 	cfg.paddle[0] = int(gear(paddle).get("look", Paddles.WOOD))

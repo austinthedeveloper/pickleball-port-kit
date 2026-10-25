@@ -402,6 +402,33 @@ func test_trip_stats_in_the_sim() -> void:
 	s2.dispose()
 
 
+## Port ADR-091: leg 1 is a bit harder (its grudge and big matches
+## MEDIUM, fewer CPU errors); the partner is late less often, less still
+## with more CONTROL.
+func test_the_tuning() -> void:
+	var t := RoadTrip.create(9, 0, RoadTrip.PEPPER)
+	var pickup := {"type": "pickup", "team": -1, "local": 0, "mod": ""}
+	var big := {"type": "big", "team": 1, "mod": ""}
+	eq(t.difficulty_for(pickup), K.DIFFICULTY_EASY, "leg 1's pickups are EASY")
+	eq(t.difficulty_for(big), K.DIFFICULTY_MEDIUM, "its big match MEDIUM")
+	eq(t.difficulty_for({"type": "final", "team": 7, "mod": ""}), K.DIFFICULTY_HARD)
+	eq(t.config_for(big, Settings.p1_choice).cpu_errors, RoadTrip.LEG_1_ERRORS, "fewer CPU errors in leg 1")
+	t.at = [1, 0, 0]
+	eq(t.config_for(big, Settings.p1_choice).cpu_errors, 100, "the game's from leg 2")
+	t.heat = 1
+	eq(t.errors_for(), 75, "HEAT 1's from leg 2")
+	t.at = [0, 0, 0]
+	eq(t.errors_for(), 75 * RoadTrip.LEG_1_ERRORS / 100, "and less in leg 1")
+	eq(Opponents.partner_style().late_period, 7, "a ladder partner's Pepper is late every 7th ball")
+	eq(t.partner_style().late_period, RoadTrip.PARTNER_LATE, "ROAD TRIP's every 12th")
+	t.partner_stats = [8, 10, 8, 8]
+	eq(t.partner_style().late_period, RoadTrip.PARTNER_LATE + 4 * RoadTrip.PARTNER_LATE_STEP, "less often with CONTROL")
+	var s := Sim.new(t.config_for(big, Settings.p1_choice))
+	eq(s.ai.slots[1].late_period, Sim.late_period(t.partner_style().late_period, t.errors_for()),
+		"the sim's partner is late as tuned")
+	s.dispose()
+
+
 func test_the_one_sided_rules() -> void:
 	var cfg := Settings.config_for(true, 0, K.DIFFICULTY_MEDIUM, 5, Settings.p1_choice)
 	cfg.trip = 1

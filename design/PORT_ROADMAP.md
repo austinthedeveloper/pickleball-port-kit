@@ -111,6 +111,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-83 | The painted venues: WESTERN, ROOFTOP, PIRATES, MOTEL, FAIR, DRIVE-IN, MALL, from generated paintings (port ADR-088) | `feature/cld-venue-art-r1` | Ready to test |
 | PORT-84 | The lite Web build: smaller music and ambience, no announcer, ROAD TRIP or painted venues; the Web zip 51 MB to 21 MB (port ADR-089) | `feature/cld-web-lite` | Ready to test |
 | PORT-85 | OPTIONS in the pause menu: the title's OPTIONS pages over a paused match (port ADR-090) | `feature/cld-pause-options` | Ready to test |
+| PORT-86 | ROAD TRIP tuning: leg 1 a bit harder, the partner late less often (port ADR-091) | `feature/cld-trip-tune` | Ready to test |
 
 ## Releases
 
@@ -473,6 +474,19 @@ the same request). Open: 36 and 40.
     `test_layout.test_pause_options`: every page, every value);
     screenshots of the pause menu, OPTIONS and ACCESSIBILITY over a match.
   - Status: **Ready to test**: pause a match and change the sound.
+
+### 86. `feature/cld-trip-tune`: ROAD TRIP tuning (asked for 2026-10-24)
+
+- [x] `PORT-86` After your first trip (port ADR-091): leg 1's grudge and
+  big matches are MEDIUM and its CPU errors 60% of the rest's, so its
+  rallies are about twice as long. The partner is late on every 12th ball
+  (was 7th), further apart with each CONTROL point from the MOTEL. Legs 2
+  and 3 and the final are unchanged.
+  - Verified: the full suite plus the e2e (`test_road_trip.test_the_tuning`);
+    the bot's runs before and after (`tools/trip_balance.gd`, and counts of
+    how each point ended).
+  - Status: **Ready to test**: play a trip. Say if leg 1 is now right, and
+    whether Pepper still lets balls go by.
 
 ## For you
 

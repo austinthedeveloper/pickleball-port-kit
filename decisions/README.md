@@ -81,3 +81,4 @@ first decisions, are rows in `design/07_DECISIONS_AND_RISKS.md`.
 | 088 | [The Painted Venues](ADR-088-painted-venues.md) | Accepted 2026-10-24 |
 | 089 | [The Lite Web Build](ADR-089-lite-web-build.md) | Accepted 2026-10-24 |
 | 090 | [OPTIONS in the Pause Menu](ADR-090-pause-options.md) | Accepted 2026-10-24 |
+| 091 | [ROAD TRIP: a Harder Leg 1, a Steadier Partner](ADR-091-trip-tuning.md) | Accepted 2026-10-24 |
