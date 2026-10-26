@@ -28,6 +28,22 @@
     ["CHEF", "CHEF"],
     ["VIKING", "VIKING"]
   ],
+  "patterns_comment": "Shirt patterns (port ADR-095, remaster only): [name, the manifest's pattern sheet, unlock]. PLAIN (the ROM's shirt) and RINGER are free. A pattern draws over the shirt colour in palettes.json's default design colour for it; the ladder teams wear their own (opponents.json 'pattern'). Beating a team unlocks its pattern.",
+  "patterns": [
+    ["PLAIN", ""],
+    ["RINGER", "ringer"],
+    ["POLKA DOTS", "dots", "POLKA DOTS"],
+    ["CHEVRON", "chevron", "CHEVRON"],
+    ["HAWAIIAN", "hawaii", "HAWAIIAN"],
+    ["CHEST BAND", "band", "CHEST BAND"],
+    ["RAGLAN", "raglan", "RAGLAN"],
+    ["RUGBY", "rugby", "RUGBY"],
+    ["PINSTRIPE", "pinstripe", "PINSTRIPE"],
+    ["TIE-DYE", "tiedye", "TIE-DYE"],
+    ["SPLIT", "split", "SPLIT"],
+    ["SASH", "sash", "SASH"],
+    ["FLAMES", "flames", "FLAMES"]
+  ],
   "gear": {
     "comment": "Stage 4 (ADR-047): a career player's hat moves one paddle stat point to another (power, control, speed), so the paddle budget holds and every pairing stays within ADR-015's 15% (checked). A stat can't pass 5: on a paddle that already maxes the stat a hat raises, the hat changes nothing. A hat not listed (CAP, NONE) changes nothing. CPUs' hats are looks only.",
     "VISOR": {"control": 1, "power": -1},
@@ -51,6 +67,17 @@
     {"name": "WHIRLY", "rule": "RALLY", "value": 30, "how": "A 30-SHOT RALLY"},
     {"name": "VIKING", "rule": "BEAT", "value": "GYM BROS", "how": "BEAT THE GYM BROS"},
     {"name": "CHEF", "rule": "STREAK", "value": 10, "how": "A 10-WIN STREAK"},
-    {"name": "CROWN", "rule": "CLEARS", "value": 3, "how": "3 LADDER CLEARS"}
+    {"name": "CROWN", "rule": "CLEARS", "value": 3, "how": "3 LADDER CLEARS"},
+    {"name": "HAWAIIAN", "rule": "BEAT", "value": "HENDERSON", "how": "BEAT HENDERSONS"},
+    {"name": "CHEST BAND", "rule": "BEAT", "value": "SNOWBIRDS", "how": "BEAT THE SNOWBIRDS"},
+    {"name": "RAGLAN", "rule": "BEAT", "value": "GYM BROS", "how": "BEAT THE GYM BROS"},
+    {"name": "RUGBY", "rule": "BEAT", "value": "PIRATES", "how": "BEAT THE PIRATES"},
+    {"name": "PINSTRIPE", "rule": "BEAT", "value": "GOTH CLUB", "how": "BEAT THE GOTH CLUB"},
+    {"name": "TIE-DYE", "rule": "BEAT", "value": "SURF CREW", "how": "BEAT THE SURF CREW"},
+    {"name": "SPLIT", "rule": "BEAT", "value": "TWINS", "how": "BEAT THE TWINS"},
+    {"name": "SASH", "rule": "BEAT", "value": "CHAMPS", "how": "BEAT THE CHAMPS"},
+    {"name": "POLKA DOTS", "rule": "WINS", "value": 5, "how": "WIN 5 MATCHES"},
+    {"name": "CHEVRON", "rule": "ACES", "value": 10, "how": "10 ACES"},
+    {"name": "FLAMES", "rule": "CLEARS", "value": 2, "how": "2 LADDER CLEARS"}
   ]
 }

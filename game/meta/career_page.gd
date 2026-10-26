@@ -37,9 +37,10 @@ const EDIT_BODY := 1
 const EDIT_SKIN := 2
 const EDIT_HAIR := 3
 const EDIT_SHIRT := 4
-const EDIT_HAT := 5
-const EDIT_PADDLE := 6
-const EDIT_ROWS := 7
+const EDIT_PATTERN := 5          ## the remaster's (ADR-095)
+const EDIT_HAT := 6
+const EDIT_PADDLE := 7
+const EDIT_ROWS := 8
 
 ## input() results.
 const STAY := 0
@@ -93,6 +94,8 @@ static func look_value(player: Career.Player, look_row: int) -> int:
 			return player.hair
 		EDIT_SHIRT:
 			return player.shirt
+		EDIT_PATTERN:
+			return player.pattern
 		EDIT_HAT:
 			return player.hat
 		EDIT_PADDLE:
@@ -301,7 +304,7 @@ func _naming(player: Career.Player, pressed: int) -> int:
 	return STAY
 
 
-## Left/Right on a look row; hair and hats skip what is locked.
+## Left/Right on a look row; hair, patterns and hats skip what is locked.
 func _change(player: Career.Player, look_row: int, pressed: int) -> void:
 	match look_row:
 		EDIT_BODY:
@@ -317,6 +320,13 @@ func _change(player: Career.Player, look_row: int, pressed: int) -> void:
 					break
 		EDIT_SHIRT:
 			player.shirt = _page_step(player.shirt, PlayerSelect.PAL_COUNT, pressed)
+		EDIT_PATTERN:
+			var tries := Career.patterns()
+			while true:
+				player.pattern = _page_step(player.pattern, Career.patterns(), pressed)
+				tries -= 1
+				if Career.pattern_unlocked(player, player.pattern) or tries == 0:
+					break
 		EDIT_HAT:
 			var tries := Career.hats()
 			while true:

@@ -29,6 +29,7 @@
       "name": "DAWSON", "variant": "male", "paddle": "wood", "hat": "headband", "celebrate": "thumbs_up", "skin": "light",
       "hair": [14, 9, 4],
       "shirt": [[18, 3, 4], [28, 6, 7], [31, 31, 31]],
+      "pattern": "flames", "pattern_color": [[31, 14, 2], [31, 26, 6]],
       "shorts": [[3, 4, 10], [6, 8, 16]],
       "shoe": [31, 31, 31],
       "style": {

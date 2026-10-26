@@ -367,7 +367,7 @@ func test_career_screens() -> void:
 	card.select("delete")
 	card.press()
 	check_layout(t, "career card, delete armed")
-	p0.unlocked = 0x1ff
+	p0.unlocked = (1 << Career.unlocks()) - 1       # every hat and pattern to try
 	card.select("edit")
 	card.press()
 	var edit: MenuPage = t.pages["career_edit"]
@@ -376,7 +376,7 @@ func test_career_screens() -> void:
 		if not row.has("change"):
 			continue
 		edit.select(row["id"])
-		for k in 12:
+		for k in maxi(Career.hats(), Career.patterns()):
 			edit.change(1)
 			edit.settle()
 			check_layout(t, "career edit %s = %s" % [row["id"], edit.value_of(row["id"])])

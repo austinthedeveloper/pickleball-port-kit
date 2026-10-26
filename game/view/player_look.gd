@@ -11,6 +11,7 @@ const TEAMS := ["blue", "red", "green", "gold"]
 
 var variant := "male"
 var hat := "cap"                 ## "cap", a manifest roles hat, or "hair" (none)
+var pattern := ""                ## a manifest roles pattern (ADR-095), "" plain
 var palette := PackedColorArray()
 
 
@@ -73,6 +74,8 @@ static func for_team(team: int, body_variant: int, paddle: int, manifest: Dictio
 			c[k] = _rgb8(src[k])
 	c["k"] = _rgb8(t["M"])
 	c["K"] = _rgb8(t["d"])
+	c["y"] = c["d"]              # no pattern: the design ramp is the shirt's
+	c["Y"] = c["M"]
 	var order := String(roles["order"])
 	look.palette.resize(ROLE_COUNT)
 	for i in order.length():
@@ -105,6 +108,7 @@ static func for_career(player: Career.Player, shirt: int, body_variant: int, pad
 			look.palette[i] = c[k]
 	var hat: String = String(Career.hat_names[player.hat]).to_lower()
 	look.hat = "hair" if hat == "none" else hat
+	look.set_pattern(String(Career.pattern_sheets[player.pattern % Career.patterns()]), [], manifest)
 	return look
 
 
@@ -115,7 +119,29 @@ static func from_member(m: Dictionary, manifest: Dictionary) -> PlayerLook:
 	var roles: Dictionary = manifest["sprites"]["players"]["roles"]
 	var pals := palettes(roles)
 	look.palette = palette_for(m, String(roles["order"]), pals)
+	look.set_pattern(String(m.get("pattern", "")), m.get("pattern_color", []), manifest)
 	return look
+
+
+## A shirt pattern (ADR-095) and its design ramp (y shadow, Y base): 5-bit
+## [shadow, base] from opponents.json, else palettes.json's default.
+func set_pattern(name: String, rgb5s: Array, manifest: Dictionary) -> void:
+	var roles: Dictionary = manifest["sprites"]["players"]["roles"]
+	if name == "" or not roles["patterns"].has(name):
+		pattern = ""
+		return
+	pattern = name
+	var order := String(roles["order"])
+	var c := {}
+	if rgb5s.size() == 2:
+		c["y"] = rgb5(rgb5s[0])
+		c["Y"] = rgb5(rgb5s[1])
+	else:
+		var d: Dictionary = palettes(roles)["patterns"][name]
+		c["y"] = _rgb8(d["y"])
+		c["Y"] = _rgb8(d["Y"])
+	for k in c:
+		palette[order.find(k)] = c[k]
 
 
 ## Roles a pre-coloured sheet takes from palettes.json (base, the paddle)
@@ -197,14 +223,14 @@ func glow(manifest: Dictionary) -> void:
 	palette[order.find("o")] = NEON
 	for k in GLOW_PADDLE:
 		palette[order.find(k)] = GLOW_PADDLE[k]
-	for k in "DdMLkK":
+	for k in "DdMLkKyY":
 		var i := order.find(k)
 		palette[i] = neon(palette[i])
 
 
 ## The role sheets (hat "" for bareheaded) and one material for both.
 func body_sheet(manifest: Dictionary) -> String:
-	return manifest["sprites"]["players"]["roles"]["files"][variant]["body"]
+	return manifest["sprites"]["players"]["roles"]["files"][variant]["body_" + pattern if pattern else "body"]
 
 
 func hat_sheet(manifest: Dictionary) -> String:

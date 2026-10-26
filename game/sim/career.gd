@@ -7,6 +7,8 @@
 ##
 ## The data (skins, hair colours, hats, unlocks, gear) is data/career.json,
 ## the SNES asset build's source; career_data.h's tables are read from it.
+## Shirt patterns and their unlocks (after the ROM's sixteen) are the
+## remaster's (port ADR-095).
 class_name Career
 extends RefCounted
 
@@ -18,6 +20,9 @@ const TEAMS := 8                 ## ladder teams (Opponents.count(), checked)
 const NONE := -1                 ## no active player (CAREER_NONE)
 const FREE := -1                 ## an item no unlock gates (CAREER_FREE)
 const COUNTER_MAX := 9999        ## SAVE_COUNTER_MAX: four digits on screen
+## The unlocked mask: the ROM's u16, widened for the patterns' unlocks
+## (ADR-095; an older save's bits mean the same).
+const UNLOCK_MASK := 0xffffffff
 ## Player.park (SNES ADR-070), save.h's byte: the highest court reached in
 ## the top two bits, the rating less PARK_BASE tenths below (0: unrated).
 const PARK_BASE := 19            ## 2.0 is stored as 1
@@ -48,6 +53,9 @@ static var unlock_value: Array = []      ## BEAT: the ladder team's index
 static var unlock_how: Array = []        ## the card's hint (NEXT: ...)
 ## Per hat: [power, control, speed] shifts (stage 4's gear).
 static var hat_gear: Array = []
+static var pattern_names: Array = []     ## 0 PLAIN, the ROM's shirt (ADR-095)
+static var pattern_sheets: Array = []    ## the manifest's pattern ("" none)
+static var pattern_unlock: Array = []
 
 
 static func _load() -> void:
@@ -69,6 +77,10 @@ static func _load() -> void:
 		hat_unlock.append(names.find(String(h[1])) if h.size() > 1 else FREE)
 		var g: Dictionary = d["gear"].get(String(h[0]), {})
 		hat_gear.append([int(g.get("power", 0)), int(g.get("control", 0)), int(g.get("speed", 0))])
+	for pt in d["patterns"]:
+		pattern_names.append(String(pt[0]))
+		pattern_sheets.append(String(pt[1]))
+		pattern_unlock.append(names.find(String(pt[2])) if pt.size() > 2 else FREE)
 	for u in d["unlocks"]:
 		unlock_names.append(String(u["name"]))
 		var rule := RULE_NAMES.find(String(u["rule"]))
@@ -111,6 +123,11 @@ static func unlocks() -> int:
 	return unlock_names.size()
 
 
+static func patterns() -> int:
+	_load()
+	return pattern_names.size()
+
+
 ## A career player (save.h's CareerPlayer): counters, then the look.
 ## Counters saturate at COUNTER_MAX, beaten[] at 255.
 class Player:
@@ -125,7 +142,7 @@ class Player:
 	var longest_rally := 0
 	var ladder_clears := 0
 	var open_play := 0           ## open play games finished
-	var unlocked := 0            ## bit n: career.json's unlock n
+	var unlocked := 0            ## bit n: career.json's unlock n (ADR-095: past 16)
 	var used := 0                ## 0: an empty slot
 	var name := "        "       ## NAME letters, space-padded
 	var variant := K.VARIANT_MALE
@@ -133,6 +150,7 @@ class Player:
 	var hair := 0
 	var shirt := 0               ## a PlayerSelect.PAL_* team colour
 	var hat := 0                 ## HAT id, 0 the cap
+	var pattern := 0             ## a shirt pattern (ADR-095), 0 PLAIN
 	var paddle := Paddles.STANDARD
 	var beaten := [0, 0, 0, 0, 0, 0, 0, 0]   ## wins over each ladder team
 	var park := 0                ## the park rating and court (PARK_*), 0 a new player
@@ -142,7 +160,8 @@ class Player:
 
 	const KEYS := ["wins", "losses", "points_won", "points_lost", "aces", "shutouts",
 		"streak", "best_streak", "longest_rally", "ladder_clears", "open_play", "unlocked",
-		"used", "name", "variant", "skin", "hair", "shirt", "hat", "paddle", "beaten", "park"]
+		"used", "name", "variant", "skin", "hair", "shirt", "hat", "paddle", "beaten", "park",
+		"pattern"]
 
 	func copy() -> Player:
 		var p := Player.new()
@@ -177,7 +196,7 @@ class Player:
 		var b: Array = d.get("beaten", [])
 		for i in mini(b.size(), TEAMS):
 			p.beaten[i] = clampi(int(b[i]), 0, 255)
-		p.unlocked = int(d.get("unlocked", 0)) & 0xffff
+		p.unlocked = int(d.get("unlocked", 0)) & UNLOCK_MASK
 		p.park = int(d.get("park", 0)) & 0xff
 		p.used = 1 if int(d.get("used", 0)) else 0
 		p.name = (String(d.get("name", "")) + "        ").substr(0, NAME)
@@ -186,6 +205,7 @@ class Player:
 		p.hair = clampi(int(d.get("hair", 0)), 0, Career.hairs() - 1)
 		p.shirt = clampi(int(d.get("shirt", 0)), 0, PlayerSelect.PAL_COUNT - 1)
 		p.hat = clampi(int(d.get("hat", 0)), 0, Career.hats() - 1)
+		p.pattern = clampi(int(d.get("pattern", 0)), 0, Career.patterns() - 1)
 		p.paddle = clampi(int(d.get("paddle", Paddles.STANDARD)), 0, Paddles.NAMES.size() - 1)
 		return p
 
@@ -294,6 +314,12 @@ static func hat_unlocked(player: Player, hat: int) -> bool:
 	if hat < 0 or hat >= hats():
 		return false
 	return _unlock_held(player, hat_unlock[hat])
+
+
+static func pattern_unlocked(player: Player, pattern: int) -> bool:
+	if pattern < 0 or pattern >= patterns():
+		return false
+	return _unlock_held(player, pattern_unlock[pattern])
 
 
 static func _bump(v: int) -> int:
