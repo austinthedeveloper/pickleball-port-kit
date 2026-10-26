@@ -80,15 +80,28 @@ def pitch_1d(edges, lo, hi):
     return best[1], best[2]
 
 
-def snap_head(rgba):
+def head_pitch(rgba):
+    """One head's own estimate of the pitch (the outline's thickness bounds
+    the search)."""
+    rgb = rgba[..., :3].astype(float)
+    dx = np.abs(np.diff(rgb, axis=1)).sum(2)
+    dy = np.abs(np.diff(rgb, axis=0)).sum(2)
+    t = outline_px(rgba)
+    px, _ = pitch_1d(np.concatenate([[0], dx.sum(0)]), t - 1.5, t + 1.5)
+    py, _ = pitch_1d(np.concatenate([[0], dy.sum(1)]), t - 1.5, t + 1.5)
+    return (px + py) / 2
+
+
+def snap_head(rgba, p):
+    """Sample one colour per art pixel on a grid of pitch p (the sheet's:
+    a generated image keeps one grid, so a single head's outlier estimate
+    doesn't shrink or grow it), at the phase that fits this head."""
     rgb = rgba[..., :3].astype(float)
     a = rgba[..., 3]
     dx = np.abs(np.diff(rgb, axis=1)).sum(2)
     dy = np.abs(np.diff(rgb, axis=0)).sum(2)
-    t = outline_px(rgba)            # outlines run a little thin
-    px, phx = pitch_1d(np.concatenate([[0], dx.sum(0)]), t - 0.5, t + 2.5)
-    py, phy = pitch_1d(np.concatenate([[0], dy.sum(1)]), t - 0.5, t + 2.5)
-    p = (px + py) / 2
+    _, phx = pitch_1d(np.concatenate([[0], dx.sum(0)]), p, p)
+    _, phy = pitch_1d(np.concatenate([[0], dy.sum(1)]), p, p)
     h, w = a.shape
     out = {}
     for j, y0 in enumerate(np.arange(phy - p, h, p)):
@@ -132,9 +145,10 @@ def main(paths):
         im = np.array(Image.open(path).convert("RGBA"))
         spans = blobs(im[..., 3])
         prev = Image.new("RGBA", (len(spans) * CELL * 8, CELL * 8), (200, 214, 200, 255))
-        for n, (x0, x1) in enumerate(spans):
-            crop = im[:, max(x0 - 4, 0):x1 + 4]
-            px, p = snap_head(crop)
+        crops = [im[:, max(x0 - 4, 0):x1 + 4] for x0, x1 in spans]
+        p = float(np.median([head_pitch(c) for c in crops]))
+        for n, crop in enumerate(crops):
+            px, p = snap_head(crop, p)
             rows, lost = place(px)
             name = f"{sheet[-1]}{n + 1}"
             heads[name] = rows

@@ -71,3 +71,70 @@ Keep 10, retry 5, drop 5. Round 2 (`PROMPTS_R2.md`) redraws the keepers
 cleaner from their snapped versions (`refs/`), retries the five, and adds
 five new heads in the style that worked: the far end of goofy, including
 women.
+
+# Round 2
+
+`faces_e.png` to `faces_h.png`, from `PROMPTS_R2.md`. `lineup_r2.png` puts
+the proposed set side by side, with the current man and woman first:
+bare, in the cap, and dark skin with black hair.
+
+## What changed in the tools
+
+- `snap.py` measures the pitch **once per sheet** (the median of each
+  head's estimate) and fits only each head's grid offset. Per-head
+  estimates were wrong on a few heads (h3, h4 and f2 came out about 20%
+  small and sat on long necks); a generated sheet keeps one grid, so the
+  median is safe. Round 1's heads were re-snapped the same way and grew
+  slightly. (Fitting the grid by the least colour variance inside blocks
+  doesn't work: smaller blocks always win.)
+- `review.py` gives round 2's women the game's own ponytail, so the run
+  and swing columns show it flying.
+- `review.lineup()` draws `lineup_r2.png`.
+
+## What worked
+
+- **Even grid, right size.** Every head snaps to 24 to 31 px wide and 29
+  to 34 tall, the jaws reach the guide's rows, and the necks match the
+  body's.
+- **No baked ponytails**: the women take the game's, and it animates.
+- **The keepers survived the redraw.** All ten from round 1 came back as
+  themselves, cleaner.
+- **The retries mostly landed**: the horse face is long now, the mutton
+  chops read as hair, the bulldog shows its teeth.
+
+## Per head
+
+| Head | Verdict | Notes |
+|---|---|---|
+| e1 crescent chin | Keep | Still the best. |
+| e2 potato nose | Keep | |
+| e3 manic yell | Keep | |
+| e4 bald old man | Keep | The ear is cleaner; still dark on the darkest skin. |
+| e5 walrus moustache | Keep | |
+| f1 lantern jaw, stubble | Keep | |
+| f2 beard | Keep | |
+| f3 unibrow, buck teeth | Keep | The unibrow reads now. |
+| f4 glasses | Keep | |
+| f5 big grin | Keep | |
+| g1 the current man, redrawn | Drop | Clean but blander than the procedural head it copies; keep that one. |
+| g2 the current woman, redrawn | Keep | Upturned nose and lash read; the long chin is back. |
+| g3 bulldog | Keep | Reads as a bulldog now: teeth over the lip, heavy brow. |
+| g4 horse face | Keep | Long and deadpan, as asked. |
+| g5 mutton chops | Keep | |
+| h1 jutting chin, smirk | Keep | |
+| h2 beak nose | Keep | One of the best new ones. |
+| h3 toothless pucker | Drop | Reads as a squint, not a pucker. |
+| h4 giant ears, nervous grin | Keep | |
+| h5 double chin | Keep | |
+
+18 kept, 2 dropped. With the current man and woman that's 20 heads,
+6 of them women (g2, f4, f5, h1, h2 and the current one).
+
+## Left to decide
+
+- Whether the set is final, or a round 3 should add more women or swap
+  out any of the 18.
+- How the game uses them. Nothing reads `heads.json` yet: the heads
+  would join `players.py` as head variants (each one's role grid stamped
+  at the neck, the cap and hats unchanged), with a CAREER EDIT row and
+  per-opponent heads. That's a design change and needs an ADR.
