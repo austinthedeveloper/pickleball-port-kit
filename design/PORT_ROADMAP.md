@@ -123,6 +123,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-96 | ROAD TRIP fuzz tests (random trips, the story over many trips, every story map, old saves); the generator's rare rule-breaking leg fixed | `feature/cld-trip-tests` | Done |
 | PORT-95 | Smart play: CPUs at the kitchen line, moving up together, your partner following you, placed shots; tunable on F2 (port ADR-094) | `feature/cld-smart-ai` | Ready to test |
 | PORT-97 | Shirt patterns: twelve for the ladder teams, Dawson and the ROAD HOGS, and a career PATTERN row; beat a team to wear theirs (port ADR-095) | `feature/cld-shirts` | Ready to test |
+| PORT-98 | ROAD TRIP plays every modifier (INVERSE, GLOW, MULTI BALL...) as a grudge twist; SHORT held slows your feet (port ADR-096) | `feature/cld-trip-mods-dink` | Ready to test |
 
 ## Releases
 
@@ -631,10 +632,28 @@ the same request). Open: 36 and 40.
   - Status: **Ready to test**: play the ladder and say which patterns or
     colours miss.
 
+### 98. `feature/cld-trip-mods-dink`: every modifier on a trip, SHORT held (asked for 2026-10-26)
+
+- [x] `PORT-98` A grudge's twist draws from every modifier and rule
+  (FAST BALL, GLOW, INVERSE, WIN BY 2, SIDE-OUT, MOMENTUM, SUDDEN DEATH
+  and MULTI BALL added); the map's panel gives TODAY its own line.
+  Holding SHORT slows a human to 7/8 top speed, remaster only (port
+  ADR-096).
+  - Verified: the full suite plus the e2e (`test_shots`
+    `test_short_held_slows_the_feet`, `test_road_trip.test_the_data`
+    checks every toggle is reachable, `test_layout` every twist with a
+    hazard and SPECIALS on the map); golden and conformance traces
+    unchanged; screenshots of the map panel and an INVERSE match.
+  - Status: **Ready to test**: hold SHORT and feel the drag; play a few
+    grudges for the new twists.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
+
+- **PORT-98 SHORT held:** 7/8 top speed is a guess at "slight"
+  (`K.SHORT_HELD_SPEED`). Say if it should bite more, or less.
 
 - **PORT-97 shirt patterns:** play a few ladder teams and open CAREER >
   EDIT > PATTERN. Say which patterns or team colours miss; mocks of a

@@ -11,7 +11,8 @@
     "LIFEGUARDS", "DINER CREW", "THE ROOFERS", "SCOUT LEADERS", "THE MECHANICS", "BINGO NIGHT",
     "TOUR GUIDES", "SCHOOL GUARDS", "THE PAPERBOYS", "THE PLUMBERS", "TOWN COUNCIL"],
   "grudge_mods": ["MOD_LAVA", "MOD_ICE", "MOD_GHOST_BALL", "MOD_POPCORN", "MOD_BIG_BALL", "MOD_BOUNCY",
-    "MOD_MOON", "MOD_WIND", "MOD_DINK_OR_DIE"],
+    "MOD_MOON", "MOD_WIND", "MOD_DINK_OR_DIE", "MOD_FAST_BALL", "MOD_GLOW", "MOD_INVERSE", "MOD_WIN_BY_2",
+    "MOD_SIDE_OUT", "MOD_MOMENTUM", "MOD_SUDDEN_DEATH", "MOD_MULTI_BALL"],
   "gear": [
     {"id": "spare_paddle", "name": "SPARE PADDLE", "kind": "bag", "rarity": "common", "icon": 0, "lines": ["ONE MORE HEART.", "STACKS."], "hearts": 1, "stacks": true},
     {"id": "piggy_bank", "name": "PIGGY BANK", "kind": "bag", "rarity": "common", "icon": 1, "lines": ["HALF AS MUCH CASH AGAIN", "FROM EVERY WIN."], "cash_pct": 50},

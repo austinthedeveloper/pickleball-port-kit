@@ -114,6 +114,7 @@ func _merge(it: SimTypes.Intent) -> void:
 	_pending.aim_x = it.aim_x
 	_pending.aim_y = it.aim_y
 	_pending.hit_held = it.hit_held
+	_pending.short_held = it.short_held
 	if it.hit_pressed:
 		_pending.hit_pressed = 1
 		_pending.shot = it.shot

@@ -51,6 +51,14 @@ func test_the_data() -> void:
 			bad.append("hazard: " + String(h["line"]))
 	for m in d["grudge_mods"]:
 		check(RoadTrip.mod_bits(String(m)) != 0, "a grudge twist the game has: " + String(m))
+	# every modifier turns up on a trip: a twist, a hazard, or the PICKLE JAR's SPECIALS (port ADR-096)
+	var seen := K.MOD_SPECIALS
+	for m in d["grudge_mods"]:
+		seen |= RoadTrip.mod_bits(String(m))
+	for h in d["hazards"]:
+		seen |= RoadTrip.mod_bits(String(h["mod"]))
+	for row in Settings.MOD_ROWS:
+		check(seen & int(row[2]) != 0, "a trip can play " + String(row[1]))
 	for dt in d["detours"]:
 		check(dt["lines"].size() <= 3)
 		for l in dt["lines"]:

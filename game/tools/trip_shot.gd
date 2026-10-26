@@ -108,7 +108,7 @@ func _initialize() -> void:
 			var s := TripScene.new().setup(t, RoadTrip.data()["scenes"]["teams"][team], _me(t, sv), "YOU",
 				{"venue": String(n["venue"]), "time": int(n["time"]), "team": team,
 				"card": {"over": "LEG 1: OUT OF TOWN", "title": RoadTrip.stop_name(n),
-					"lines": ["VS " + RoadTrip.opponent_name(n), String(info[1])]}})
+					"lines": ["VS " + RoadTrip.opponent_name(n), String(info[1]).split("   ")[0]]}})
 			if screen == "team":
 				s.page = 1
 				s._show_page()

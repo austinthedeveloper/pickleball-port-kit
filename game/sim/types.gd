@@ -91,6 +91,7 @@ class Intent:
 	var shot := K.SHOT_STANDARD
 	var pause_pressed := 0
 	var hit_held := 0
+	var short_held := 0              ## SHORT held (port ADR-096): a human's feet slow
 
 	func clear() -> void:
 		move_x = 0
@@ -101,6 +102,7 @@ class Intent:
 		shot = K.SHOT_STANDARD
 		pause_pressed = 0
 		hit_held = 0
+		short_held = 0
 
 	func copy_from(o: Intent) -> void:
 		move_x = o.move_x
@@ -111,6 +113,7 @@ class Intent:
 		shot = o.shot
 		pause_pressed = o.pause_pressed
 		hit_held = o.hit_held
+		short_held = o.short_held
 
 
 ## CPU play style (ADR-023); the defaults are data/opponents.json

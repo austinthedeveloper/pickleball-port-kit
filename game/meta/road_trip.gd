@@ -557,7 +557,7 @@ func info(n: Dictionary) -> Array:
 		var where := String(Settings.VENUE_NAMES[maxi(0, Settings.VENUES.find(String(n["venue"])))])
 		if int(n.get("time", 0)) != CourtStyle.DAY:
 			where += " " + String(CourtStyle.time_names()[int(n["time"])])
-		out.append("%s, FIRST TO %d" % [where, points_for(n)])
+		var at_line := "%s, FIRST TO %d" % [where, points_for(n)]
 		var bits := modifiers_for(n)
 		var names := []
 		for row in Settings.MOD_ROWS:
@@ -570,7 +570,10 @@ func info(n: Dictionary) -> Array:
 			prize = "THE SUMMER OPEN TITLE"
 		elif type == "encore":
 			prize = "THE ISLAND ENCORE"
-		out.append(("TODAY: " + ", ".join(names) + "   " if not names.is_empty() else "") + prize)
+		# the prize beside the venue, so the day's modifiers have a line
+		out.append(at_line + "   " + prize)
+		if not names.is_empty():
+			out.append("TODAY: " + ", ".join(names))
 	else:
 		match type:
 			"yard":

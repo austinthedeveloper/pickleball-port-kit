@@ -1380,6 +1380,18 @@ func test_trip_map() -> void:
 				for k in 3:
 					map._info[k].text = String(gl[k]) if k < gl.size() else ""
 				check_layout(map, "the map, seed %d, leg %d's %s, again" % [seed_value, leg, g["type"]])
+			# every twist, with a hazard and SPECIALS on top (port ADR-096)
+			var plain := RoadTrip.create(seed_value, 0, RoadTrip.PEPPER)
+			plain.bag.append("pickle_jar")
+			plain.hazards = ["late_start"]
+			var stop: Dictionary = t.map[1]["cols"][0][0].duplicate()
+			stop["type"] = "grudge"
+			for m in RoadTrip.data()["grudge_mods"]:
+				stop["mod"] = String(m)
+				var ml := plain.info(stop)
+				for k in 3:
+					map._info[k].text = String(ml[k]) if k < ml.size() else ""
+				check_layout(map, "the map, a grudge with %s (device %d)" % [m, dev])
 			map.free()
 	# every local's name on a match's HUD
 	for name in RoadTrip.data()["locals"]:

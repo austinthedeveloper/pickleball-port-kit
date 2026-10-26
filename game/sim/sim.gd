@@ -449,7 +449,7 @@ const ANIM_RUN_CELS := 4
 const IDLE_CEL_FRAMES := 20
 const RUN_CEL_FRAMES := 6
 
-static func player_step(p: Player, intent: Intent, ice := false) -> void:
+static func player_step(p: Player, intent: Intent, ice := false, remaster := false) -> void:
 	if p.flash_timer:
 		p.flash_timer -= 1
 	var mx := intent.move_x
@@ -480,6 +480,8 @@ static func player_step(p: Player, intent: Intent, ice := false) -> void:
 		p.state = K.STATE_MOVE if (mx or my) else K.STATE_IDLE
 	var limit := Paddles.swing_limit(p.paddle) if p.state >= K.STATE_WINDUP \
 		else p.max_speed_fp
+	if remaster and intent.short_held and p.state < K.STATE_WINDUP:
+		limit = limit * K.SHORT_HELD_SPEED[0] / K.SHORT_HELD_SPEED[1]
 	var accel := K.PLAYER_ICE_ACCEL_FP if ice else K.PLAYER_ACCEL_FP
 	if mx and my:
 		accel = K.PLAYER_ICE_DIAGONAL_ACCEL_FP if ice else K.PLAYER_DIAGONAL_ACCEL_FP
@@ -533,7 +535,7 @@ func players_update() -> void:
 	for i in K.MAX_PLAYERS:
 		var p: Player = players[i]
 		if p.active:
-			player_step(p, intents[p.logical_input_slot], ice)
+			player_step(p, intents[p.logical_input_slot], ice, config.overhead != 0)
 
 ## Doubles (ADR-018): nudge crowded teammates 1 px apart in y.
 func separate_teammates() -> void:

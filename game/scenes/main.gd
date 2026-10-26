@@ -340,9 +340,9 @@ func _on_trip_go(t: RoadTrip, target: Array) -> void:
 			save.save_game()
 			var card_lines := ["VS " + RoadTrip.opponent_name(n)]
 			var info := t.info(n)
-			card_lines.append(String(info[1]))
-			if String(info[2]).begins_with("TODAY:"):
-				card_lines.append(String(info[2]).split("   ")[0])
+			card_lines.append(String(info[1]).split("   ")[0])
+			if info.size() > 2:
+				card_lines.append(String(info[2]))
 			var over := "LEG %d: %s" % [t.leg() + 1, String(RoadTrip.leg_info(t.leg())["name"])]
 			if t.meal != "":
 				var dish := RoadTrip.dish(t.meal)
