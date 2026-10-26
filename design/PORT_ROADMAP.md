@@ -256,6 +256,8 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.38.0** (2026-10-26): PORT-98 every modifier on a trip and SHORT
   held, PORT-99 FROM THE GARAGE (tag `v0.38.0`, on
   `feature/cld-release-0.38.0`).
+- **v0.39.0** (2026-10-26): PORT-100 the map previews where a choice leads
+  (tag `v0.39.0`, on `feature/cld-release-0.39.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 

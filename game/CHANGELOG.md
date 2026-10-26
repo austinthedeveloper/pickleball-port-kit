@@ -4,6 +4,16 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.39.0] - 2026-10-26
+
+ROAD TRIP's map shows where each choice leads.
+
+### Added
+- **See where a road goes**: on ROAD TRIP's map, the stop under the
+  cursor lights up every road you could still take from it, in gold, all
+  the way to the leg's big match, and the stops you'd miss fade. No more
+  finding out after the fact that the top stop keeps you on the top road.
+
 ## [0.38.0] - 2026-10-26
 
 ROAD TRIP throws every twist at you, and shows what your miles bought.
