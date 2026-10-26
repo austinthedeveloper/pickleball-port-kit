@@ -4,6 +4,17 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.39.1] - 2026-10-26
+
+A controller fix for two players on one pad.
+
+### Fixed
+- **MATCH SETUP no longer freezes on PLAYERS 2P**: with one controller
+  and a keyboard, setting PLAYERS to 2P handed the controller to player
+  2 straight away, and the menus stopped answering it. Every menu now
+  listens to every controller; the controller is player 2's only once a
+  2P match starts.
+
 ## [0.39.0] - 2026-10-26
 
 ROAD TRIP's map shows where each choice leads.
