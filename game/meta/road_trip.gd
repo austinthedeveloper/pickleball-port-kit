@@ -512,6 +512,28 @@ func node_for(target: Array) -> Dictionary:
 	return node_at(leg(), int(target[0]), int(target[1]))
 
 
+## The stops this leg's roads still reach from `target` ([col, lane]),
+## itself included, as [col, lane] pairs: the map's preview of where a
+## choice leads (port ADR-098). Empty for the big match.
+func ahead(target: Array) -> Array:
+	var col := int(target[0])
+	if col < 0 or col >= COLS:
+		return []
+	var out := [[col, int(target[1])]]
+	var lanes := [int(target[1])]
+	for c in range(col, COLS - 1):
+		var next := []
+		for lane in lanes:
+			for e in node_at(leg(), c, int(lane))["edges"]:
+				if not next.has(int(e)):
+					next.append(int(e))
+		next.sort()
+		for lane in next:
+			out.append([c + 1, int(lane)])
+		lanes = next
+	return out
+
+
 ## Shirts the locals wear (5-bit base colours; each a dark, mid and light
 ## ramp), and their hats ("hair": bareheaded).
 const LOCAL_SHIRTS := [[24, 6, 6], [6, 14, 26], [6, 20, 10], [26, 20, 4], [18, 8, 22], [4, 20, 20],

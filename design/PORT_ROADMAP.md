@@ -125,6 +125,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-97 | Shirt patterns: twelve for the ladder teams, Dawson and the ROAD HOGS, and a career PATTERN row; beat a team to wear theirs (port ADR-095) | `feature/cld-shirts` | Ready to test |
 | PORT-98 | ROAD TRIP plays every modifier (INVERSE, GLOW, MULTI BALL...) as a grudge twist; SHORT held slows your feet (port ADR-096) | `feature/cld-trip-mods-dink` | Ready to test |
 | PORT-99 | ROAD TRIP: a FROM THE GARAGE card before a trip, your starting stats and what the GARAGE (and what is NEW) adds (port ADR-097) | `feature/cld-trip-mods-dink` | Ready to test |
+| PORT-100 | ROAD TRIP map: the roads on from the stop under the cursor in gold, the stops they miss faded (port ADR-098) | `feature/cld-trip-path-preview` | Ready to test |
 
 ## Releases
 
@@ -662,6 +663,19 @@ the same request). Open: 36 and 40.
     (`test_road_trip.test_the_garage_card`, the card at the ladder's top
     in `test_layout`); a screenshot (`trip_shot.gd start_garage`).
   - Status: **Ready to test**: start a trip once you have some MILES.
+
+### 100. `feature/cld-trip-path-preview`: where a choice leads (asked for 2026-10-26)
+
+- [x] `PORT-100` On ROAD TRIP's map, the stop under the cursor shows
+  where it leads: a gold highlighter from the van to it and along every
+  road on to the big match, and the leg's stops those roads miss faded.
+  Display only (port ADR-098).
+  - Verified: the full suite plus the e2e
+    (`test_road_trip.test_where_a_choice_leads`, `test_trip_screens`);
+    screenshots of each first choice and a leg-2 stop
+    (`trip_shot.gd map cursor=N`).
+  - Status: **Ready to test**: move the cursor over the first column's
+    stops on a new trip.
 
 ## For you
 
