@@ -4,6 +4,25 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.38.0] - 2026-10-26
+
+ROAD TRIP throws every twist at you, and shows what your miles bought.
+
+### Added
+- **Every modifier on the road**: a ROAD TRIP grudge match can now be
+  played with any modifier or rule in the game, INVERSE's flipped
+  colours, GLOW's lights-out neon, MULTI BALL, SIDE-OUT, MOMENTUM, WIN BY
+  2, FAST BALL and SUDDEN DEATH included. The map shows the day's
+  modifiers on their own line.
+- **FROM THE GARAGE**: a new trip opens on a card with the stats you
+  start with, what the GARAGE's ladder adds to them, and (in gold) what's
+  new since your last trip.
+
+### Changed
+- **Holding SHORT** (L, LB, LT or Shift) now slows you down a little
+  while it's held: every shot a dink has a cost. Aiming short with the
+  D-pad is unchanged.
+
 ## [0.37.0] - 2026-10-25
 
 New shirts to earn, and smarter opponents.

@@ -252,6 +252,9 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.37.0** (2026-10-25): PORT-95 smart play, PORT-96 ROAD TRIP fuzz
   tests and the generator fix, PORT-97 shirt patterns (tag `v0.37.0`, on
   `feature/cld-release-0.37.0`).
+- **v0.38.0** (2026-10-26): PORT-98 every modifier on a trip and SHORT
+  held, PORT-99 FROM THE GARAGE (tag `v0.38.0`, on
+  `feature/cld-release-0.38.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 

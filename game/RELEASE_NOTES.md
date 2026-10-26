@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.37.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.38.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-94 of 97 roadmap tasks are in.
+96 of 99 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -586,3 +586,15 @@ Status: Planned
 Twelve shirt patterns (port ADR-095), generated on the player rig in `players.py` so they follow every pose: RUGBY, CHEST BAND, SASH, RAGLAN, RINGER, PINSTRIPE, POLKA DOTS, TIE-DYE, FLAMES, HAWAIIAN, CHEVRON, SPLIT, each a body sheet in a new design colour (two palette roles). Every ladder team wears one in its own colours, and so do Dale Dawson (FLAMES) and the ROAD HOGS (CHEVRON). A career player picks one on EDIT's PATTERN row: PLAIN and RINGER free, a team's pattern for beating them, and POLKA DOTS, CHEVRON and FLAMES from wins, aces and ladder clears (eleven unlocks after the ROM's sixteen; the mask widened, the save still v6). Player Select is unchanged.
 
 Status: **Ready to test**: play the ladder and say which patterns or colours miss.
+
+## PORT-98: every modifier on a trip, SHORT held (asked for 2026-10-26)
+
+A grudge's twist draws from every modifier and rule (FAST BALL, GLOW, INVERSE, WIN BY 2, SIDE-OUT, MOMENTUM, SUDDEN DEATH and MULTI BALL added); the map's panel gives TODAY its own line. Holding SHORT slows a human to 7/8 top speed, remaster only (port ADR-096).
+
+Status: **Ready to test**: hold SHORT and feel the drag; play a few grudges for the new twists.
+
+## PORT-99: FROM THE GARAGE (asked for 2026-10-26)
+
+A new trip opens on a FROM THE GARAGE card: the stats you start with, what the GARAGE adds (stats, hearts, cash, paddle), and in gold what's NEW since the last trip began (meta `garage_steps`, save still v6). None before the first step, none on TODAY'S TRIP (port ADR-097).
+
+Status: **Ready to test**: start a trip once you have some MILES.
