@@ -20,7 +20,8 @@ import build as B  # noqa: E402
 import players as P  # noqa: E402
 
 FEMALE = {"b1", "b2", "b3", "b4", "b5", "d5",           # round 1
-          "f4", "f5", "g2", "h1", "h2", "h3"}             # round 2
+          "f4", "f5", "g2", "h1", "h2", "h3",             # round 2
+          "n1", "n2", "n3", "n4", "n5", "o5", "p3", "p4", "p5"}  # round 3
 BAKED_TAIL = {"b1", "b2", "b3", "b4", "b5", "d5"}  # round 1 painted its own
 COLS = ([("idle0", None, "light", "brown"), ("idle0", "cap", "light", "brown")]
         + [("idle0", h, "light", "brown") for h in P.HATS]
