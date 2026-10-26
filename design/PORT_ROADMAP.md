@@ -247,6 +247,9 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.36.0** (2026-10-25): ROAD TRIP round two and three: THE VAN, a
   story across trips, TODAY'S TRIP, bonds, the islands, postcards; pause
   OPTIONS (tag `v0.36.0`, on `feature/cld-release-0.36.0`).
+- **v0.37.0** (2026-10-25): PORT-95 smart play, PORT-96 ROAD TRIP fuzz
+  tests and the generator fix, PORT-97 shirt patterns (tag `v0.37.0`, on
+  `feature/cld-release-0.37.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 

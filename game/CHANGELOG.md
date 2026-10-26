@@ -4,6 +4,29 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.37.0] - 2026-10-25
+
+New shirts to earn, and smarter opponents.
+
+### Added
+- **Shirt patterns**: every ladder team now has its own shirt: the
+  HENDERSONS in matching Hawaiian shirts, the PIRATES in rugby stripes,
+  the SURF CREW in tie-dye, the CHAMPS with a sash, and more. Dale
+  Dawson wears flames and the ROAD HOGS chevrons. Beat a team to wear
+  their pattern yourself: CAREER > EDIT has a new **PATTERN** row, with
+  twelve patterns in all (RINGER is free; POLKA DOTS, CHEVRON and
+  FLAMES come from wins, aces and ladder clears). Player Select keeps
+  its four plain colours.
+
+### Changed
+- **Smarter CPUs** at MEDIUM and HARD: they play from the kitchen line,
+  move up together, hit third-shot drops and dinks, and aim at whoever
+  is hanging back. A CPU partner comes up to the line when you do.
+
+### Fixed
+- ROAD TRIP could, very rarely (about 1 leg in 7,000), draw a leg that
+  broke its own rules.
+
 ## [0.36.0] - 2026-10-25
 
 ROAD TRIP grows: the van, a longer road, and a story that unfolds over

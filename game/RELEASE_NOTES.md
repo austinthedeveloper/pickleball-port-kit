@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.36.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.37.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-91 of 94 roadmap tasks are in.
+94 of 97 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -568,3 +568,21 @@ Status: **Ready to test**.
 `tools/trip_gear_stats.gd` measures how far gear takes the stats: no runaway POWER (7 at the final on a new GARAGE), but sets were rarely finished, so one card in two is now a missing piece of a set you've started (0.2 sets a trip to 0.5).
 
 Status: **Ready to test**: say how the sets feel.
+
+## PORT-95: smart play (asked for 2026-10-25)
+
+A remaster-only layer over the ROM's AI (port ADR-094), three knobs a CPU: KITCHEN (wait just behind the kitchen line once the rules allow), TOGETHER (a CPU pair level; your partner follows you up, and half way back), AIM (third-shot drops, dinks cross-court, the ball to whoever's back, drives down the middle). Profiles by difficulty and for your partner in `data/ai_smarts.json`; F2 > SMART PLAY tunes them live and saves them.
+
+Status: **Ready to test**: play a doubles match at HARD, and press F2 > SMART PLAY to change any knob mid-match.
+
+## PORT-96: more ROAD TRIP tests (asked for 2026-10-25)
+
+`test_trip_fuzz`: 120 random trips checked after every step (hearts, cash, stats, the locker, save round trips, picks, always a way on, an end), 50 trips on one save (beats in order and once, the scrapbook and postcards only growing, the islands once open), every story map, the islands end to end, the day's trip the same for a full and a new save, bonds across finishes, a pre-round-two save played to its end, and the data's references. It found a bug, fixed: when 400 draws of a leg all broke the leg rules, the generator kept the last (1 leg in 7,000); generator 3 keeps drawing.
+
+Status: Planned
+
+## PORT-97: shirt patterns (asked for 2026-10-25)
+
+Twelve shirt patterns (port ADR-095), generated on the player rig in `players.py` so they follow every pose: RUGBY, CHEST BAND, SASH, RAGLAN, RINGER, PINSTRIPE, POLKA DOTS, TIE-DYE, FLAMES, HAWAIIAN, CHEVRON, SPLIT, each a body sheet in a new design colour (two palette roles). Every ladder team wears one in its own colours, and so do Dale Dawson (FLAMES) and the ROAD HOGS (CHEVRON). A career player picks one on EDIT's PATTERN row: PLAIN and RINGER free, a team's pattern for beating them, and POLKA DOTS, CHEVRON and FLAMES from wins, aces and ladder clears (eleven unlocks after the ROM's sixteen; the mask widened, the save still v6). Player Select is unchanged.
+
+Status: **Ready to test**: play the ladder and say which patterns or colours miss.
