@@ -35,6 +35,7 @@ func test_pad_assignment() -> void:
 	eq(GameControls.p1_pad, -1, "one-player: whichever pad you pick up")
 	check(_pad_devices("hit").all(func(d): return d == -1), "P1's pad events listen on every pad")
 	check(_pad_devices("move_left").size() >= 2, "the D-pad and the stick")
+	GameControls.set_split(true)               # a 2P match on screen
 	GameControls.assign_pads([3, 1], true)
 	eq([GameControls.p1_pad, GameControls.p2_pad], [1, 3], "2P with two pads: the first is P1's")
 	check(_pad_devices("hit").all(func(d): return d == 1), "P1 listens on their pad only")
@@ -51,6 +52,40 @@ func test_pad_assignment() -> void:
 	check(_pad_devices("hit").all(func(d): return d == GameControls.p1_device()),
 		"a remap keeps the player's pad")
 	Bindings.reset()
+	GameControls.set_split(false)
+	_restore()
+
+
+## A tester's report: PLAYERS 2P with one pad gave the pad to 2P, and
+## MATCH SETUP stopped hearing it. The split holds on the court only.
+func test_menus_hear_every_pad() -> void:
+	_keep()
+	GameControls.set_split(false)
+	GameControls.assign_pads([2], true)
+	eq([GameControls.p1_pad, GameControls.p2_pad], [GameControls.NO_PAD, 2], "2P still owns the pad")
+	check(_pad_devices("hit").all(func(d): return d == -1), "but the menus hear it")
+	check(_pad_devices("move_down").all(func(d): return d == -1))
+	GameControls.set_split(true)
+	check(not 2 in _pad_devices("hit"), "on the court it's 2P's alone")
+	GameControls.set_split(false)
+	check(_pad_devices("hit").all(func(d): return d == -1), "and back in the menus, everyone's")
+	var Main: GDScript = load("res://scenes/main.gd")
+	var cfg := SimTypes.MatchConfig.singles()
+	var one := MatchView.new()
+	one.setup(cfg, "park", false)
+	check(not Main._splits_pads(one), "a 1P match: no split")
+	var two_cfg := SimTypes.MatchConfig.singles()
+	two_cfg.human[2] = 1
+	var two := MatchView.new()
+	two.setup(two_cfg, "park", false)
+	check(Main._splits_pads(two), "2P on the court: split")
+	var demo := MatchView.new()
+	demo.setup(two_cfg, "park", true)
+	check(not Main._splits_pads(demo), "the title's demo: no split")
+	var menu := Node.new()
+	check(not Main._splits_pads(menu), "a menu screen: no split")
+	for n in [one, two, demo, menu]:
+		n.free()
 	_restore()
 
 

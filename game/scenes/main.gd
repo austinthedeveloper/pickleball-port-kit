@@ -73,11 +73,24 @@ func _enter(n: Node) -> void:
 	if _screen:
 		_screen.queue_free()
 	_screen = n
+	GameControls.set_split(_splits_pads(n))
 	add_child(n)
 	if music and n.has_method("music_track"):
 		music.play_loop(n.music_track())
 	_fade = FADE_IN
 	GameControls.clear_latch()
+
+
+## Whether a screen puts P1 and 2P on their own pads: a match with 2P
+## in it, or the park (where 2P can join). Menus hear every pad.
+static func _splits_pads(n: Node) -> bool:
+	if n is ParkView:
+		return true
+	if n is MatchView:
+		var m := n as MatchView
+		return not m.demo and not m.multiplayer() and m.net == null \
+			and (m.sim.config.human[1] or m.sim.config.human[2])
+	return false
 
 
 func fading() -> bool:
