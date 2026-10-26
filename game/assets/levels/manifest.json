@@ -247,7 +247,19 @@
       "crown": "sprites/players/roles/player_male_crown.png",
       "whirly": "sprites/players/roles/player_male_whirly.png",
       "chef": "sprites/players/roles/player_male_chef.png",
-      "viking": "sprites/players/roles/player_male_viking.png"
+      "viking": "sprites/players/roles/player_male_viking.png",
+      "body_rugby": "sprites/players/roles/player_male_body_rugby.png",
+      "body_band": "sprites/players/roles/player_male_body_band.png",
+      "body_sash": "sprites/players/roles/player_male_body_sash.png",
+      "body_raglan": "sprites/players/roles/player_male_body_raglan.png",
+      "body_ringer": "sprites/players/roles/player_male_body_ringer.png",
+      "body_pinstripe": "sprites/players/roles/player_male_body_pinstripe.png",
+      "body_dots": "sprites/players/roles/player_male_body_dots.png",
+      "body_tiedye": "sprites/players/roles/player_male_body_tiedye.png",
+      "body_flames": "sprites/players/roles/player_male_body_flames.png",
+      "body_hawaii": "sprites/players/roles/player_male_body_hawaii.png",
+      "body_chevron": "sprites/players/roles/player_male_body_chevron.png",
+      "body_split": "sprites/players/roles/player_male_body_split.png"
      },
      "female": {
       "body": "sprites/players/roles/player_female_body.png",
@@ -262,7 +274,19 @@
       "crown": "sprites/players/roles/player_female_crown.png",
       "whirly": "sprites/players/roles/player_female_whirly.png",
       "chef": "sprites/players/roles/player_female_chef.png",
-      "viking": "sprites/players/roles/player_female_viking.png"
+      "viking": "sprites/players/roles/player_female_viking.png",
+      "body_rugby": "sprites/players/roles/player_female_body_rugby.png",
+      "body_band": "sprites/players/roles/player_female_body_band.png",
+      "body_sash": "sprites/players/roles/player_female_body_sash.png",
+      "body_raglan": "sprites/players/roles/player_female_body_raglan.png",
+      "body_ringer": "sprites/players/roles/player_female_body_ringer.png",
+      "body_pinstripe": "sprites/players/roles/player_female_body_pinstripe.png",
+      "body_dots": "sprites/players/roles/player_female_body_dots.png",
+      "body_tiedye": "sprites/players/roles/player_female_body_tiedye.png",
+      "body_flames": "sprites/players/roles/player_female_body_flames.png",
+      "body_hawaii": "sprites/players/roles/player_female_body_hawaii.png",
+      "body_chevron": "sprites/players/roles/player_female_body_chevron.png",
+      "body_split": "sprites/players/roles/player_female_body_split.png"
      }
     },
     "hats": [
@@ -280,7 +304,22 @@
      "viking"
     ],
     "hats_doc": "Hat overlays (role sheets only), drawn like the cap: visor and headband in the shoe accent (k, K), tricorn in hair with a white (Z) trim, bandana in the shirt ramp. SNES ADR-060 (PORT-38): beanie, whirly, backcap, bucket in the shirt ramp (whirly blades in the accent), crown silver with shirt jewels, chef white, viking grey with white horns and a shirt band.",
-    "order": ".o1234hHiDdMLqwWsSxXgkKpPfeEGZ",
+    "patterns": [
+     "rugby",
+     "band",
+     "sash",
+     "raglan",
+     "ringer",
+     "pinstripe",
+     "dots",
+     "tiedye",
+     "flames",
+     "hawaii",
+     "chevron",
+     "split"
+    ],
+    "patterns_doc": "Shirt patterns (port ADR-095): body_<pattern> replaces the body sheet, the same frames with the shirt patterned in the design ramp (y shadow, Y base; palettes.json 'patterns' has each one's default) and the whites (Z, W).",
+    "order": ".o1234hHiDdMLqwWsSxXgkKpPfeEGZyY",
     "palettes": "palettes.json",
     "doc": "Pixel value = index into 'order' (0 transparent). Build a palette from palettes.json: base + team + paddle + skin + hair; shoe accent k/K = team M/d."
    }

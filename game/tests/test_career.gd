@@ -29,7 +29,8 @@ func _team(name: String) -> int:
 func test_data_matches_the_ladder() -> void:
 	Career._load()
 	check(Opponents.count() <= Career.TEAMS, "beaten[] holds one count per ladder team")
-	check(Career.unlocks() <= 16, "the unlocked mask is a u16")
+	check(Career.unlocks() <= 32, "the unlocked mask is the ROM's u16 widened to 32 bits (ADR-095)")
+	eq(Career.unlock_names.slice(0, 16).back(), "CROWN", "the ROM's sixteen first, in its order")
 	eq(Career.skins(), 4, "opponents.json's four skins")
 	eq(Career.hair_unlock[0], Career.FREE, "the first hair colour is free")
 	eq(Career.hat_unlock[0], Career.FREE, "the cap is free")
@@ -123,9 +124,9 @@ func test_unlocks() -> void:
 	c.record_match(K.MODE_SINGLES, true, 3, -1, 0)
 	eq(c.new_unlocks, 0, "earned once")
 	# A shutout of the PIRATES, the third win: their hat, the pink hair,
-	# and the beanie together (SNES ADR-060).
+	# and the beanie together (SNES ADR-060), and their shirt (ADR-095).
 	c.record_match(K.MODE_SINGLES, true, 0, 3, 0)
-	eq(c.new_unlocks, tricorn | pink | beanie, "three at once")
+	eq(c.new_unlocks, tricorn | pink | beanie | (1 << _unlock_bit("RUGBY")), "four at once")
 	# A ladder clear: the gold hair; a loss earns nothing.
 	c.record_match(K.MODE_SINGLES, false, 5, 1, 0)
 	eq(c.new_unlocks, 0, "a loss earns nothing")
@@ -177,6 +178,58 @@ func test_saved_player_is_made_valid() -> void:
 	eq(p.hat, Career.hats() - 1, "hat clamped")
 	eq(p.wins, [3, Career.COUNTER_MAX], "counters clamped")
 	eq(p.skin, 0, "skin clamped")
+
+
+## ADR-095: shirt patterns. Every one has its sheets; each ladder team
+## wears the pattern that beating them unlocks; PLAIN and RINGER are free.
+func test_patterns() -> void:
+	var manifest := MatchView.levels_manifest()
+	var roles: Dictionary = manifest["sprites"]["players"]["roles"]
+	eq(Career.pattern_sheets[0], "", "PLAIN first: the ROM's shirt")
+	for i in Career.patterns():
+		var sheet: String = Career.pattern_sheets[i]
+		if i > 0:
+			check(roles["patterns"].has(sheet), "%s has a sheet" % Career.pattern_names[i])
+			for v in ["male", "female"]:
+				check(ResourceLoader.exists(MatchView.LEVELS + roles["files"][v]["body_" + sheet]),
+					"%s %s" % [sheet, v])
+		var free: bool = Career.pattern_unlock[i] == Career.FREE
+		eq(free, Career.pattern_names[i] in ["PLAIN", "RINGER"], "%s free or not" % Career.pattern_names[i])
+		check(free or Career.pattern_unlock[i] >= 16, "after the ROM's sixteen")
+	for t in Opponents.count():
+		var team: Dictionary = Opponents.team(t)
+		var worn := String(team["players"][0]["pattern"])
+		var given := ""
+		for i in Career.patterns():
+			var u: int = Career.pattern_unlock[i]
+			if u != Career.FREE and Career.unlock_rule[u] == Career.RULE_BEAT and Career.unlock_value[u] == t:
+				given = Career.pattern_sheets[i]
+		eq(given, worn, "beating %s unlocks their shirt" % team["team"])
+		for m in team["players"]:
+			check(roles["patterns"].has(String(m["pattern"])) and (m["pattern_color"] as Array).size() == 2,
+				"%s's pattern" % m["name"])
+	# saved, and an older player (no key, a u16 mask) is PLAIN
+	var c := Career.new()
+	c.create(0, "TESS")
+	var p := c.active_player()
+	p.pattern = Career.patterns() - 1
+	p.unlocked = 1 << (Career.unlocks() - 1)
+	var back := Career.from_dict(c.to_dict()).players[0] as Career.Player
+	check(back.pattern == p.pattern and back.unlocked == p.unlocked, "pattern and the wide mask kept")
+	var old := c.to_dict()
+	old["players"][0].erase("pattern")
+	eq((Career.from_dict(old).players[0] as Career.Player).pattern, 0, "an older player: PLAIN")
+	old["players"][0]["pattern"] = 99
+	eq((Career.from_dict(old).players[0] as Career.Player).pattern, Career.patterns() - 1, "clamped")
+	# the career look draws it in the pattern's default colour
+	var look := PlayerLook.for_career(p, p.shirt, p.variant, p.paddle, manifest)
+	var sheet: String = Career.pattern_sheets[p.pattern]
+	check(look.body_sheet(manifest).ends_with("_body_%s.png" % sheet), "the patterned body")
+	var d: Array = PlayerLook.palettes(roles)["patterns"][sheet]["Y"]
+	eq(look.palette[String(roles["order"]).find("Y")], Color8(d[0], d[1], d[2]), "its default colour")
+	p.pattern = 0
+	look = PlayerLook.for_career(p, p.shirt, p.variant, p.paddle, manifest)
+	check(look.body_sheet(manifest).ends_with("_body.png"), "PLAIN: the plain body")
 
 
 ## Stage 4: hats shift paddle stats. Every pairing keeps the budget; a
@@ -364,6 +417,11 @@ func test_page_edit_look() -> void:
 	_press(CareerPage.PAD_DOWN)                  # SHIRT
 	_press(CareerPage.PAD_RIGHT)
 	eq(p.shirt, PlayerSelect.PAL_RED, "shirt")
+	_press(CareerPage.PAD_DOWN)                  # PATTERN: only the free ones
+	_press(CareerPage.PAD_RIGHT)
+	eq(Career.pattern_names[p.pattern], "RINGER", "past PLAIN: the ringer")
+	_press(CareerPage.PAD_RIGHT)
+	eq(p.pattern, 0, "past the locked: PLAIN")
 	_press(CareerPage.PAD_DOWN)                  # HAT: nothing won yet
 	_press(CareerPage.PAD_RIGHT)
 	eq(p.hat, Career.hat_none(), "past the locked: NONE")
@@ -495,8 +553,9 @@ func test_match_records_and_unlock_card() -> void:
 	eq(p.wins[K.MODE_SINGLES], 1, "a career win")
 	check(p.shutouts == 1 and p.beaten[_team("PIRATES")] == 1, "a shutout of the PIRATES")
 	eq(p.points_won, 1, "the last point counted")
-	var earned := (1 << _unlock_bit("VISOR")) | (1 << _unlock_bit("TRICORN")) | (1 << _unlock_bit("PINK HAIR"))
-	eq(s.career.new_unlocks, earned, "three unlocks")
+	var earned := (1 << _unlock_bit("VISOR")) | (1 << _unlock_bit("TRICORN")) | (1 << _unlock_bit("PINK HAIR")) \
+		| (1 << _unlock_bit("RUGBY"))
+	eq(s.career.new_unlocks, earned, "four unlocks")
 	var t := SaveGame.new()
 	t.dir = DIR
 	t.load_game()
@@ -508,7 +567,7 @@ func test_match_records_and_unlock_card() -> void:
 	check(v.unlock_open(), "then UNLOCKED!")
 	v._hud.refresh()
 	check(v._hud.cards.unlock.visible and v._hud._banner.text == "", "the card, not the result")
-	eq(v._hud.cards.unlock_line.text, "VISOR, TRICORN, PINK HAIR", "what was earned")
+	eq(v._hud.cards.unlock_line.text, "VISOR, TRICORN, PINK HAIR +1", "what was earned (the rugby shirt the +1)")
 	var frame := v.sim.frame_count
 	for f in MatchEnd.UNLOCK_FRAMES - 2:
 		v._physics_process(1.0 / 60.0)

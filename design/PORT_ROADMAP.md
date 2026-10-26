@@ -122,6 +122,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-94 | ROAD TRIP balance pass: the gear curve measured, sets easier to finish (port ADR-093) | `feature/cld-trip-more` | Ready to test |
 | PORT-96 | ROAD TRIP fuzz tests (random trips, the story over many trips, every story map, old saves); the generator's rare rule-breaking leg fixed | `feature/cld-trip-tests` | Done |
 | PORT-95 | Smart play: CPUs at the kitchen line, moving up together, your partner following you, placed shots; tunable on F2 (port ADR-094) | `feature/cld-smart-ai` | Ready to test |
+| PORT-97 | Shirt patterns: twelve for the ladder teams, Dawson and the ROAD HOGS, and a career PATTERN row; beat a team to wear theirs (port ADR-095) | `feature/cld-shirts` | Ready to test |
 
 ## Releases
 
@@ -607,10 +608,35 @@ the same request). Open: 36 and 40.
   - Status: **Ready to test**: play a doubles match at HARD, and press
     F2 > SMART PLAY to change any knob mid-match.
 
+### 97. `feature/cld-shirts`: shirt patterns (asked for 2026-10-25)
+
+- [x] `PORT-97` Twelve shirt patterns (port ADR-095), generated on the
+  player rig in `players.py` so they follow every pose: RUGBY, CHEST
+  BAND, SASH, RAGLAN, RINGER, PINSTRIPE, POLKA DOTS, TIE-DYE, FLAMES,
+  HAWAIIAN, CHEVRON, SPLIT, each a body sheet in a new design colour
+  (two palette roles). Every ladder team wears one in its own colours,
+  and so do Dale Dawson (FLAMES) and the ROAD HOGS (CHEVRON). A career
+  player picks one on EDIT's PATTERN row: PLAIN and RINGER free, a
+  team's pattern for beating them, and POLKA DOTS, CHEVRON and FLAMES
+  from wins, aces and ladder clears (eleven unlocks after the ROM's
+  sixteen; the mask widened, the save still v6). Player Select is
+  unchanged.
+  - Verified: the full suite plus the e2e (`test_career.test_patterns`,
+    `test_view`, every pattern on EDIT in `test_layout`); screenshots of
+    a doubles match against every team and the EDIT page; a lineup of
+    every opponent.
+  - Status: **Ready to test**: play the ladder and say which patterns or
+    colours miss.
+
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
+
+- **PORT-97 shirt patterns:** play a few ladder teams and open CAREER >
+  EDIT > PATTERN. Say which patterns or team colours miss; mocks of a
+  motif you'd like (a logo, a number) are welcome, and the patterns are
+  easy to retune in `art/levels/tools/players.py`.
 
 - **PORT-95 smart play:** try MEDIUM and HARD doubles, and a match with
   a CPU partner (come up to the kitchen: they should come with you). The

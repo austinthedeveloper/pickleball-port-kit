@@ -75,10 +75,12 @@ def rows_index(rows):
 def build_players():
     frames = {}
     hat_rows = {}
+    pattern_rows = {}
     for variant in ("male", "female"):
         fem = variant == "female"
         bare, capped = [], []
         hats = {h: [] for h in PL.HATS}
+        patterned = {f"body_{pt}": [] for pt in PL.PATTERNS}
         for name in PL.SLOTS:
             b, clip_b = PL.render(PL.POSES[name], fem, hat=None)
             c, clip_c = PL.render(PL.POSES[name], fem, hat="cap")
@@ -89,15 +91,21 @@ def build_players():
                 r, clip = PL.render(PL.POSES[name], fem, hat=h)
                 assert not clip, f"{variant} {name} {h} clipped"
                 hats[h].append(PL.cap_overlay(b, r))
+            for pt in PL.PATTERNS:
+                r, clip = PL.render(PL.POSES[name], fem, hat=None, pattern=pt)
+                assert not clip, f"{variant} {name} {pt} clipped"
+                patterned[f"body_{pt}"].append(r)
         frames[variant] = (bare, capped)
         hat_rows[variant] = hats
+        pattern_rows[variant] = patterned
     sheets = {}
     n = len(PL.SLOTS)
     for variant, (bare, capped) in frames.items():
         caps = [PL.cap_overlay(b, c) for b, c in zip(bare, capped)]
         # indexed role sheets (palette swap in a shader) ...
         for kind, rows_list in (("body", bare), ("cap", caps),
-                                *hat_rows[variant].items()):
+                                *hat_rows[variant].items(),
+                                *pattern_rows[variant].items()):
             idx = np.zeros((PL.H, PL.W * n), np.uint8)
             for i, rows in enumerate(rows_list):
                 idx[:, i * PL.W:(i + 1) * PL.W] = rows_index(rows)
@@ -132,7 +140,8 @@ def build_players():
                    "right after the body. Leave it off for bareheaded players "
                    "or swap in another hat.",
         "roles": {"files": {v: {k: f"sprites/players/roles/player_{v}_{k}.png"
-                                for k in ("body", "cap", *PL.HATS)}
+                                for k in ("body", "cap", *PL.HATS,
+                                          *(f"body_{pt}" for pt in PL.PATTERNS))}
                             for v in ("male", "female")},
                   "hats": ["cap", *PL.HATS],
                   "hats_doc": "Hat overlays (role sheets only), drawn like the "
@@ -143,6 +152,12 @@ def build_players():
                               "the shirt ramp (whirly blades in the accent), "
                               "crown silver with shirt jewels, chef white, "
                               "viking grey with white horns and a shirt band.",
+                  "patterns": list(PL.PATTERNS),
+                  "patterns_doc": "Shirt patterns (port ADR-095): body_<pattern> "
+                                  "replaces the body sheet, the same frames with the "
+                                  "shirt patterned in the design ramp (y shadow, Y "
+                                  "base; palettes.json 'patterns' has each one's "
+                                  "default) and the whites (Z, W).",
                   "order": PL.ROLES,
                   "palettes": "palettes.json",
                   "doc": "Pixel value = index into 'order' (0 transparent). "

@@ -61,7 +61,7 @@ func build_pages() -> void:
 		"press": func(): edit_row(CareerPage.EDIT_NAME, CareerPage.PAD_B)}]
 	var looks := [["body", "BODY", CareerPage.EDIT_BODY], ["skin", "SKIN", CareerPage.EDIT_SKIN],
 		["hair", "HAIR", CareerPage.EDIT_HAIR], ["shirt", "SHIRT", CareerPage.EDIT_SHIRT],
-		["hat", "HAT", CareerPage.EDIT_HAT], ["paddle", "PADDLE", CareerPage.EDIT_PADDLE]]
+		["pattern", "PATTERN", CareerPage.EDIT_PATTERN], ["hat", "HAT", CareerPage.EDIT_HAT], ["paddle", "PADDLE", CareerPage.EDIT_PADDLE]]
 	for l in looks:
 		var r: int = l[2]
 		edit_rows.append({"id": l[0], "label": l[1], "value": func(): return look_name(r),
@@ -95,6 +95,8 @@ func look_name(r: int) -> String:
 			return Career.hair_names[v % Career.hairs()]
 		CareerPage.EDIT_SHIRT:
 			return Career.shirt_name(v)
+		CareerPage.EDIT_PATTERN:
+			return Career.pattern_names[v % Career.patterns()]
 		CareerPage.EDIT_HAT:
 			return Career.hat_names[v % Career.hats()]
 	return Career.paddle_name(v)
@@ -187,7 +189,7 @@ func sync(changed: bool, dir := 1) -> void:
 			if changed:
 				t.pages["career_card"].select("edit")
 		CareerPage.VIEW_EDIT:
-			t.pages["career_edit"].select(["name", "body", "skin", "hair", "shirt", "hat", "paddle"][t.career_page.row])
+			t.pages["career_edit"].select(["name", "body", "skin", "hair", "shirt", "pattern", "hat", "paddle"][t.career_page.row])
 		CareerPage.VIEW_RECORDS:
 			if changed:
 				t.pages["records"].select("singles")

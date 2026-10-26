@@ -18,7 +18,7 @@ GROUND = 58 * S                        # feet end on this row
 ANCHOR_X = 28 * S                      # body centre for flipping
 LIGHT = (-0.55, -0.83)
 
-ROLES = (".o" "1234" "hHi" "DdML" "qwW" "sS" "xXgkK" "pPfeEG" "Z")
+ROLES = (".o" "1234" "hHi" "DdML" "qwW" "sS" "xXgkK" "pPfeEG" "Z" "yY")
 
 RAMP = {
     "skin": ("1", "2", "3", "4"),
@@ -138,9 +138,84 @@ def hem(p, cloth=SHIRT, skin=SKIN):
             p.px[(x, y)] = DARKER[ch]
 
 
+# --- Shirt patterns (port ADR-095) ---------------------------------------------
+# A pattern recolours shirt pixels by where they sit on the torso: t runs
+# down the spine (0 the neck, 1 the hem), sd across it in 1x px (+ the
+# front). Its second colour is the design ramp y (shadow) / Y (base), which
+# follows the shirt's shading; some use the whites (Z, W) too.
+
+PATTERNS = ("rugby", "band", "sash", "raglan", "ringer", "pinstripe", "dots",
+            "tiedye", "flames", "hawaii", "chevron", "split")
+DESIGN = {"D": "y", "d": "y", "M": "Y", "L": "Y"}
+WHITE = {"D": "W", "d": "W", "M": "Z", "L": "Z"}
+
+
+def torso_pattern(pattern, t, sd, tp, x, y, ch):
+    """The role of a shirt pixel (ch) at (t, sd); tp is t in 1x px."""
+    lit = ch in "ML"
+    if pattern == "rugby":                 # hoops
+        return DESIGN[ch] if int(tp / 2.4) % 2 == 1 else ch
+    if pattern == "band":                  # one wide chest band, trimmed white
+        if 0.28 < t < 0.54:
+            return DESIGN[ch]
+        if 0.22 < t < 0.6:
+            return WHITE[ch]
+        return ch
+    if pattern == "sash":                  # front shoulder to back hip
+        return DESIGN[ch] if abs(tp + sd * 1.1 - 6.5) < 1.8 else ch
+    if pattern == "raglan":                # contrast yoke (and sleeves)
+        return DESIGN[ch] if t < 0.24 - 0.02 * sd else ch
+    if pattern == "ringer":                # contrast hem (cuffs, collar)
+        return DESIGN[ch] if t > 0.88 else ch
+    if pattern == "pinstripe":
+        return DESIGN[ch] if round(sd * S) % 4 == 0 else ch
+    if pattern == "dots":
+        gx, gy = x % 6, (y + 3 * ((x // 6) % 2)) % 6
+        return DESIGN[ch] if gx < 2 and gy < 2 else ch
+    if pattern == "tiedye":                # rings from the chest: shirt, design, white
+        r = math.hypot(sd * S - 1, tp * S - 13) + 1.3 * math.sin(math.atan2(tp, sd) * 5)
+        k = int(r / 2.6) % 3
+        return ch if k == 0 else (DESIGN[ch] if k == 1 else WHITE[ch])
+    if pattern == "flames":                # licks up from the hem: deep at the root, bright tips
+        lick = 0.62 - 0.17 * abs(math.sin(sd * 1.15 + 0.6))
+        if t > lick + 0.14:
+            return "y"
+        if t > lick:
+            return "Y"
+        return ch
+    if pattern == "hawaii":                # flowers in staggered rows: petals round a white eye
+        row = y // 6
+        ox = 3 * (row % 2)
+        dx, dy = x - (((x + ox) // 6) * 6 + 3 - ox), y - (row * 6 + 3)
+        if dx == 0 and dy == 0:
+            return "Z"
+        if max(abs(dx), abs(dy)) == 1:
+            return "Y" if lit else "y"
+        return ch
+    if pattern == "chevron":               # two Vs on the chest, points down
+        v = tp + 1.1 * abs(sd - 0.3)
+        return DESIGN[ch] if abs(v - 6.5) < 1.1 or abs(v - 10.5) < 1.1 else ch
+    if pattern == "split":                 # the front half in the design colour
+        return DESIGN[ch] if sd > 0.3 else ch
+    return ch
+
+
+def sleeve_pattern(pattern, near_shoulder, far, ch):
+    """The role of an arm's shirt pixel: the sleeve (near_shoulder) or the wristband."""
+    if pattern in ("raglan", "rugby") and near_shoulder:
+        return DESIGN[ch] if pattern == "raglan" else ch
+    if pattern == "rugby" and not near_shoulder:
+        return DESIGN[ch]
+    if pattern == "ringer" and not near_shoulder:
+        return DESIGN[ch]                  # the wristband, like the cuffs
+    if pattern == "split" and not far and near_shoulder:
+        return DESIGN[ch]
+    return ch
+
+
 # --- Body parts (radii are the 48 px rig's, times S) --------------------------
 
-def arm(shoulder, elbow, hand, far=False, band=True):
+def arm(shoulder, elbow, hand, far=False, band=True, pattern=None):
     p = Part()
     sk = "skin_far" if far else "skin"
     sh = "shirt_far" if far else "shirt"
@@ -153,6 +228,11 @@ def arm(shoulder, elbow, hand, far=False, band=True):
     p.capsule(hand, hand, 1.6 * S, 1.6 * S, sk)
     p.despeckle()
     hem(p)
+    if pattern:
+        for (x, y), ch in list(p.px.items()):
+            if ch in SHIRT:
+                near = math.hypot(x - shoulder[0], y - shoulder[1]) < 3.2 * S
+                p.px[(x, y)] = sleeve_pattern(pattern, near, far, ch)
     # knuckle highlight on the fist
     hx, hy = round(hand[0] - 0.5), round(hand[1] - 0.5)
     if not far and (hx - 1, hy - 1) in p.px:
@@ -214,7 +294,7 @@ def shoe(p, ankle, toe_dir, far):
                 p.px[(x, y)] = "x"
 
 
-def torso(neck, hip):
+def torso(neck, hip, pattern=None):
     """Shirt as a shaped polygon along the spine: broad shoulders and chest,
     a V taper to the waist (not a bean), and a hem that flares a little over
     the shorts, shaded across its width (lit at the back)."""
@@ -273,10 +353,17 @@ def torso(neck, hip):
         fy = round(neck[1] + uy * t * L + ny * sd * S)
         if p.px.get((fx, fy)) in ("M", "L"):
             p.px[(fx, fy)] = "d"
+    if pattern:
+        for (x, y), ch in list(p.px.items()):
+            if ch in SHIRT:
+                px, py = x + 0.5, y + 0.5
+                t = ((px - neck[0]) * ux + (py - neck[1]) * uy) / L
+                sd = ((px - neck[0]) * nx + (py - neck[1]) * ny) / S
+                p.px[(x, y)] = torso_pattern(pattern, t, sd, t * L / S, x, y, ch)
     return p
 
 
-def collar(neck):
+def collar(neck, pattern=None):
     p = Part(outlined=False)
     nx, ny = round(neck[0] - 0.5), round(neck[1] - 0.5)
     rows = ["LLL..LL",
@@ -287,6 +374,10 @@ def collar(neck):
         for x, ch in enumerate(row):
             if ch != ".":
                 p.px[(nx - 3 + x, ny + 3 + y)] = ch
+    if pattern in ("ringer", "raglan", "band", "chevron"):
+        for k, ch in list(p.px.items()):
+            if ch in SHIRT:
+                p.px[k] = DESIGN[ch]
     return p
 
 
@@ -836,32 +927,32 @@ def scaled(pose):
     return P
 
 
-def render(pose, female=False, hat="cap"):
-    """hat: None (bare), "cap", or one of HATS."""
+def render(pose, female=False, hat="cap", pattern=None):
+    """hat: None (bare), "cap", or one of HATS; pattern None or one of PATTERNS."""
     c = Canvas()
     P = scaled(pose)
     if P["paddle"][1] == "back":
         c.draw(paddle(P["ha_n"], P["paddle"][0]))
-    c.draw(arm(P["sh_f"], P["el_f"], P["ha_f"], far=True))
+    c.draw(arm(P["sh_f"], P["el_f"], P["ha_f"], far=True, pattern=pattern))
     c.draw(leg(P["hip"], P["kn_f"], P["an_f"], P["toe_f"], far=True))
     head, cap, tail = head_parts(P["neck"], female, P.get("pony", "hang"))
     if tail is not None:
         c.draw(tail)
     c.draw(leg(add(P["hip"], (2 * S, 0)), P["kn_n"], P["an_n"], P["toe_n"]))
     c.draw(shorts(P["hip"], P["kn_n"], P["kn_f"]))
-    c.draw(torso(P["neck"], P["hip"]))
+    c.draw(torso(P["neck"], P["hip"], pattern))
     c.draw(neck_part(P["neck"]))
     c.draw(head)
     if hat == "cap":
         c.draw(cap)
     elif hat is not None:
         c.draw(hat_part(P["neck"], hat))
-    c.draw(collar(P["neck"]))
+    c.draw(collar(P["neck"], pattern))
     ang, layer = P["paddle"]
     pad = paddle(P["ha_n"], ang)
     if layer == "mid":
         c.draw(pad)
-    c.draw(arm(P["sh_n"], P["el_n"], P["ha_n"]))
+    c.draw(arm(P["sh_n"], P["el_n"], P["ha_n"], pattern=pattern))
     if layer == "front":
         c.draw(pad)
         fist = Part()
