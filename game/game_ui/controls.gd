@@ -282,7 +282,8 @@ static func read_intent(team := 0) -> SimTypes.Intent:
 		it.move_y = -1
 	elif Input.is_action_pressed("move_down"):
 		it.move_y = 1
-	it.aim_x = (1 if team else -1) if Input.is_action_pressed("short") else it.move_x
+	it.short_held = 1 if Input.is_action_pressed("short") else 0
+	it.aim_x = (1 if team else -1) if it.short_held else it.move_x
 	it.aim_y = it.move_y
 	var b := _pressed("hit")
 	var a := _pressed("drive")
@@ -372,6 +373,7 @@ static func read_pad_intent(device: int, team := 0) -> SimTypes.Intent:
 	elif joy_button(device, JOY_BUTTON_DPAD_DOWN) or ay > 0.4:
 		it.move_y = 1
 	var short := joy_button(device, JOY_BUTTON_LEFT_SHOULDER) or joy_axis(device, JOY_AXIS_TRIGGER_LEFT) > 0.5
+	it.short_held = 1 if short else 0
 	it.aim_x = (1 if team else -1) if short else it.move_x
 	it.aim_y = it.move_y
 	var held := {}

@@ -271,6 +271,9 @@ const MOD_SUDDEN_DEATH := 32768 ## one point takes the match
 ## SPECIALS (port ADR-080), remaster-only: a meter that fills with play and
 ## a SPECIAL button that spends it on PICKLE SMASH.
 const MOD_SPECIALS := 131072
+## SHORT held (port ADR-096, remaster-only): every shot a dink costs a
+## human some foot speed, top speed times 7/8, while the button is down.
+const SHORT_HELD_SPEED := [7, 8]
 const MOON_GRAVITY_FP := -2     ## a third less than BALL_GRAVITY_FP
 const MOON_FLIGHT := [3, 2]     ## a shot's frames, times 3/2
 const BALL_SPEED_MIN := 70       ## MODIFIERS > BALL SPEED, percent (port ADR-071)

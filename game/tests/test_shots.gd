@@ -146,6 +146,38 @@ func test_slice_and_short_hold() -> void:
 	GameControls.fake_pads = {}
 
 
+## SHORT held slows a human's feet to 7/8 (port ADR-096), but not a swing,
+## and not in the ROM's rules (overhead off). The pad sets it, and it rides
+## the online packet.
+func test_short_held_slows_the_feet() -> void:
+	var run := func(short: int, remaster: bool) -> int:
+		var p := SimTypes.Player.new()
+		p.active = 1
+		p.max_speed_fp = K.PLAYER_MAX_SPEED_FP
+		p.x_fp = K.to_fp(60)
+		p.y_fp = K.to_fp(112)
+		var it := SimTypes.Intent.new()
+		it.move_x = 1
+		it.short_held = short
+		for f in 30:
+			Sim.player_step(p, it, false, remaster)
+		return p.x_fp - K.to_fp(60)
+	var free: int = run.call(0, true)
+	var held: int = run.call(1, true)
+	check(held < free, "SHORT held runs slower")
+	check(held * 8 >= free * 6, "but only a little")
+	eq(run.call(1, false), free, "the ROM's rules: no change")
+	var dev := 42
+	GameControls.fake_pads = {dev: {"buttons": [JOY_BUTTON_LEFT_SHOULDER]}}
+	eq(GameControls.read_pad_intent(dev, 0).short_held, 1, "LB is SHORT held")
+	GameControls.fake_pads = {dev: {"buttons": [JOY_BUTTON_DPAD_LEFT]}}
+	eq(GameControls.read_pad_intent(dev, 0).short_held, 0, "the D-pad aiming short is not")
+	GameControls.fake_pads = {}
+	var it := SimTypes.Intent.new()
+	it.short_held = 1
+	eq(Lockstep.unpack(Lockstep.pack(it)).short_held, 1, "online too")
+
+
 ## The keyboard and P1's pad through the input map: SLICE and SHORT are
 ## actions (remappable on CONTROLS), SLICE is I; SHORT is LB and the left
 ## trigger, SPECIAL O, RB and the right trigger (port ADR-082).

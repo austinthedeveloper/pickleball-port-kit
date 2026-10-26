@@ -1380,6 +1380,18 @@ func test_trip_map() -> void:
 				for k in 3:
 					map._info[k].text = String(gl[k]) if k < gl.size() else ""
 				check_layout(map, "the map, seed %d, leg %d's %s, again" % [seed_value, leg, g["type"]])
+			# every twist, with a hazard and SPECIALS on top (port ADR-096)
+			var plain := RoadTrip.create(seed_value, 0, RoadTrip.PEPPER)
+			plain.bag.append("pickle_jar")
+			plain.hazards = ["late_start"]
+			var stop: Dictionary = t.map[1]["cols"][0][0].duplicate()
+			stop["type"] = "grudge"
+			for m in RoadTrip.data()["grudge_mods"]:
+				stop["mod"] = String(m)
+				var ml := plain.info(stop)
+				for k in 3:
+					map._info[k].text = String(ml[k]) if k < ml.size() else ""
+				check_layout(map, "the map, a grudge with %s (device %d)" % [m, dev])
 			map.free()
 	# every local's name on a match's HUD
 	for name in RoadTrip.data()["locals"]:
@@ -1477,6 +1489,14 @@ func test_trip_scenes() -> void:
 					s._process(0.0)
 					check_layout(s, "trip scene %s page %d, partner %d (device %d)" % [e[0], i, partner, dev])
 				s.free()
+		# FROM THE GARAGE at the ladder's top, all of it new (port ADR-097)
+		var gm := {"miles": 100000, "last_item": "pickle_jar"}
+		var gt := RoadTrip.create(1, 0, RoadTrip.PEPPER, gm)
+		gt.garage_since = 0
+		var gs := TripScene.new().setup(gt, scenes["start"], me, "YOU", {"art": "garage", "card": gt.garage_card(gm)})
+		runner.root.add_child(gs)
+		check_layout(gs, "FROM THE GARAGE (device %d)" % dev)
+		gs.free()
 		for d in RoadTrip.data()["detours"]:
 			var choices := []
 			for ch in d["choices"]:

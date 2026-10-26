@@ -255,8 +255,12 @@ func show_trip_home(ended: Dictionary = {}, open := "") -> void:
 	h.leave.connect(show_title)
 	h.start.connect(func(t: RoadTrip):
 		var pages := t.start_pages(RoadTrip.meta(save))
+		var opts := {"art": "garage"}
+		var card := t.garage_card(RoadTrip.meta(save))
+		if not card.is_empty():
+			opts["card"] = card
 		save.save_game()
-		show_trip_scene(t, pages, {"art": "garage"}, func(_c): show_trip_map(t)))
+		show_trip_scene(t, pages, opts, func(_c): show_trip_map(t)))
 	h.resume.connect(show_trip_map)
 	h.replay.connect(_replay_beat)
 	_swap(h)
@@ -340,9 +344,9 @@ func _on_trip_go(t: RoadTrip, target: Array) -> void:
 			save.save_game()
 			var card_lines := ["VS " + RoadTrip.opponent_name(n)]
 			var info := t.info(n)
-			card_lines.append(String(info[1]))
-			if String(info[2]).begins_with("TODAY:"):
-				card_lines.append(String(info[2]).split("   ")[0])
+			card_lines.append(String(info[1]).split("   ")[0])
+			if info.size() > 2:
+				card_lines.append(String(info[2]))
 			var over := "LEG %d: %s" % [t.leg() + 1, String(RoadTrip.leg_info(t.leg())["name"])]
 			if t.meal != "":
 				var dish := RoadTrip.dish(t.meal)
