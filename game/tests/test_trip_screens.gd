@@ -98,6 +98,19 @@ func test_title_to_the_map() -> void:
 	check(map.select("stop_0_0_2"), "a stop by id")
 	eq(map.current_id(), "stop_0_0_2")
 	check(not map.select("stop_0_1_0"), "not a stop out of reach")
+	# the preview (port ADR-098): the stops a choice's roads miss are dimmed
+	for lane in RoadTrip.LANES:
+		map.select("stop_0_0_%d" % lane)
+		var on := map.trip.ahead([0, lane])
+		for col in range(1, RoadTrip.COLS):
+			for l2 in RoadTrip.LANES:
+				eq(map.cut_off(col, l2), not on.has([col, l2]),
+					"lane %d: stop %d,%d %s" % [lane, col, l2, "on the way" if on.has([col, l2]) else "cut off"])
+		for l2 in RoadTrip.LANES:
+			check(not map.cut_off(0, l2), "the other choices stay plain")
+	map.open_van()
+	eq(map.hovered(), [], "no preview under THE VAN")
+	map._on_van_closed()
 	# the title shows it in progress
 	map._leave()
 	home = _settle(main)

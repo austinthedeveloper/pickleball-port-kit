@@ -32,6 +32,9 @@ const PIN_INDEX := {"big": 0, "final": 1, "pickup": 2, "grudge": 3, "yard": 4, "
 const ROAD := Color(0.35, 0.33, 0.3, 0.75)
 const GOLD := Color("fbe46a")
 const DIM := Color(0.75, 0.78, 0.86)
+const PATH := Color(0.98, 0.83, 0.25, 0.85)   ## the roads on from the stop chosen (port ADR-098)
+const PATH_EDGE := Color(0.25, 0.16, 0.06, 0.55)
+const CUT_OFF := 0.35                         ## a stop those roads miss: its pin's alpha
 
 var save: SaveGame
 var trip: RoadTrip
@@ -53,6 +56,7 @@ var _cursor_ring: Node2D
 var _van: Sprite2D
 var _strip: Node2D
 var _info: Array = []
+var _pin_at := {}                  ## "leg_col_lane" -> its pin (the preview dims them)
 var _prompts: PromptBar
 var _sfx: Sfx
 var _tape_card: Node2D             ## NOW PLAYING, while it shows
@@ -216,6 +220,7 @@ func refresh() -> void:
 	for c in _pins.get_children():
 		_pins.remove_child(c)
 		c.free()
+	_pin_at.clear()
 	_add_pin(0, RoadTrip.START, 0, -1, true)          # home
 	for leg in trip.legs():
 		for col in RoadTrip.COLS:
@@ -230,6 +235,7 @@ func refresh() -> void:
 	_cursor_ring.queue_redraw()
 	_strip_refresh()
 	_info_refresh()
+	_preview()
 
 
 func _add_pin(leg: int, col: int, lane: int, index: int, done: bool, team := -1) -> void:
@@ -241,6 +247,8 @@ func _add_pin(leg: int, col: int, lane: int, index: int, done: bool, team := -1)
 	s.offset = Vector2(0, -PIN.y / 2.0 + 6)
 	if index == 0 and team >= 0 and team < Opponents.count() and not done:
 		s.modulate = Color.WHITE.lerp(Story.team_color(team), 0.55)   # the crest in the team's colours
+	s.set_meta("tint", s.modulate)
+	_pin_at["%d_%d_%d" % [leg, col, lane]] = s
 	if index == PIN_INDEX["rival"] and not done:
 		var rv := Sprite2D.new()                # the ROAD HOGS' RV, parked by their court
 		rv.texture = load(DIR + "trip_rv.png")
@@ -342,6 +350,7 @@ func _draw_roads() -> void:
 				else:
 					for e in n["edges"]:
 						_dash(a, world_point(leg, col + 1, int(e)), ROAD)
+	_draw_path()
 	# the road driven, in red pen
 	var prev := from_home
 	var prev_leg := 0
@@ -370,6 +379,62 @@ func _dash(a: Vector2, b: Vector2, c: Color) -> void:
 	while t < len:
 		_roads.draw_line(a + dir * t, a + dir * minf(t + 6.0, len), c, 2.0)
 		t += 10.0
+
+
+## The roads on from the stop under the cursor, to the big match, in a
+## highlighter's gold (port ADR-098): where choosing it still lets you go.
+func _draw_path() -> void:
+	var t := hovered()
+	if t.is_empty():
+		return
+	var lg := trip.leg()
+	var from := world_point(trip.leg(), trip.col(), trip.lane())
+	_path_line(from, world_point(lg, int(t[0]), int(t[1])))
+	var on := trip.ahead(t)
+	for a in on:
+		var c := int(a[0])
+		var p := world_point(lg, c, int(a[1]))
+		if c == RoadTrip.COLS - 1:
+			_path_line(p, world_point(lg, RoadTrip.GATE, 0))
+			continue
+		for e in trip.node_at(lg, c, int(a[1]))["edges"]:
+			_path_line(p, world_point(lg, c + 1, int(e)))
+
+
+## A highlighter stroke, on a dark edge so it reads on sand and water.
+func _path_line(a: Vector2, b: Vector2) -> void:
+	_roads.draw_line(a, b, PATH_EDGE, 7.0)
+	_roads.draw_line(a, b, PATH, 4.0)
+
+
+## The target under the cursor while choosing (not driving, nor under a
+## pick or THE VAN), or [].
+func hovered() -> Array:
+	if _targets.is_empty() or _drive > 0 or pick != null or van != null or trip.state != "on":
+		return []
+	return _targets[cursor]
+
+
+## Dims the leg's stops further on that the hovered stop's roads miss.
+func _preview() -> void:
+	var t := hovered()
+	var on := trip.ahead(t) if not t.is_empty() else []
+	var lg := trip.leg()
+	for col in RoadTrip.COLS:
+		for lane in RoadTrip.LANES:
+			var s: Sprite2D = _pin_at.get("%d_%d_%d" % [lg, col, lane])
+			if s == null:
+				continue
+			var tint: Color = s.get_meta("tint")
+			var cut := not t.is_empty() and col > int(t[0]) and not on.has([col, lane])
+			s.modulate = Color(tint, tint.a * CUT_OFF) if cut else tint
+	_roads.queue_redraw()
+
+
+## True when the pin at this leg's [col, lane] is dimmed by the preview.
+func cut_off(col: int, lane: int) -> bool:
+	var s: Sprite2D = _pin_at.get("%d_%d_%d" % [trip.leg(), col, lane])
+	return s != null and s.modulate.a < s.get_meta("tint").a
 
 
 func _draw_cursor() -> void:
@@ -401,6 +466,7 @@ func move(d: int) -> void:
 
 func _moved() -> void:
 	_info_refresh()
+	_preview()
 	_cursor_ring.queue_redraw()
 
 
@@ -413,6 +479,7 @@ func press() -> void:
 	_drive_from = _van.position
 	_drive_to = world_point(trip.leg(), int(t[0]), int(t[1])) + Vector2(0, -2)
 	_drive = DRIVE_FRAMES if _drive_from.distance_to(_drive_to) > 1.0 else 1
+	_preview()
 	_cursor_ring.queue_redraw()
 
 

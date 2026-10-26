@@ -88,3 +88,4 @@ first decisions, are rows in `design/07_DECISIONS_AND_RISKS.md`.
 | 095 | [Shirt Patterns for Opponents and Career Unlocks](ADR-095-shirt-patterns.md) | Accepted 2026-10-25 |
 | 096 | [ROAD TRIP Plays Every Modifier; SHORT Held Slows Your Feet](ADR-096-trip-every-modifier-short-held.md) | Accepted 2026-10-26 |
 | 097 | [ROAD TRIP: FROM THE GARAGE, Before a Trip](ADR-097-trip-garage-card.md) | Accepted 2026-10-26 |
+| 098 | [ROAD TRIP: the Map Previews Where a Choice Leads](ADR-098-trip-path-preview.md) | Accepted 2026-10-26 |

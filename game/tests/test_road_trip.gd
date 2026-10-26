@@ -401,6 +401,28 @@ func test_the_garage_card() -> void:
 	check(not String(t.garage_card(m)["lines"][-1]).begins_with("NEW"), "an older save: nothing called new")
 
 
+## The map's preview (port ADR-098): from a stop, the stops its roads can
+## still reach, column by column, are exactly the ones on some road
+## through it.
+func test_where_a_choice_leads() -> void:
+	for seed_value in [1, 2, 3, 4127]:
+		var t := RoadTrip.create(seed_value, 0, RoadTrip.PEPPER)
+		var all := RoadTrip.roads(t.map[0])
+		for col in RoadTrip.COLS:
+			for lane in RoadTrip.LANES:
+				var want := []
+				for road in all:
+					if int(road[col]) == lane:
+						for c in range(col, RoadTrip.COLS):
+							if not want.has([c, int(road[c])]):
+								want.append([c, int(road[c])])
+				var got := t.ahead([col, lane])
+				got.sort()
+				want.sort()
+				eq(got, want, "seed %d, stop %d,%d" % [seed_value, col, lane])
+		eq(t.ahead([RoadTrip.GATE, 0]), [], "nothing past the big match")
+
+
 func test_an_old_save_without_a_trip() -> void:
 	var sv := fresh_save("user://test_road_trip_old/")
 	sv.data.erase("trip")

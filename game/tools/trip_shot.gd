@@ -7,8 +7,10 @@
 ## detour), drive_in (a detour at a venue); and port ADR-093's islands
 ## (the map on the fourth leg, NOW PLAYING) and postcards; port ADR-097's
 ## start_garage (FROM THE GARAGE before the first scene). A scratch save,
-## nothing written.
+## nothing written. cursor=N puts the map's cursor on its Nth choice.
 extends SceneTree
+
+var _cursor := 0                  ## cursor=N: the map's cursor on its Nth target (the path preview)
 
 var _frames := 0
 var _target := 60
@@ -24,6 +26,8 @@ func _initialize() -> void:
 	for arg in a.slice(3):
 		if arg.begins_with("seed="):
 			seed_value = int(arg.substr(5))
+		if arg.begins_with("cursor="):
+			_cursor = int(arg.substr(7))
 		if arg == "pad":
 			GameControls.last_device = GameControls.PAD
 	var controls = load("res://game_ui/controls.gd").new()
@@ -93,8 +97,12 @@ func _initialize() -> void:
 			root.add_child(view)
 
 		"map", "map_start":
-			view = TripMap.new().setup(sv, t)
+			var tm := TripMap.new().setup(sv, t)
+			view = tm
 			root.add_child(view)
+			tm.ready.connect(func():
+				tm.cursor = _cursor
+				tm._moved())
 		"pick":
 			t.offer_pick("grudge", 1)
 			view = TripMap.new().setup(sv, t)
