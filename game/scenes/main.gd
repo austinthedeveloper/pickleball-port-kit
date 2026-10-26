@@ -255,8 +255,12 @@ func show_trip_home(ended: Dictionary = {}, open := "") -> void:
 	h.leave.connect(show_title)
 	h.start.connect(func(t: RoadTrip):
 		var pages := t.start_pages(RoadTrip.meta(save))
+		var opts := {"art": "garage"}
+		var card := t.garage_card(RoadTrip.meta(save))
+		if not card.is_empty():
+			opts["card"] = card
 		save.save_game()
-		show_trip_scene(t, pages, {"art": "garage"}, func(_c): show_trip_map(t)))
+		show_trip_scene(t, pages, opts, func(_c): show_trip_map(t)))
 	h.resume.connect(show_trip_map)
 	h.replay.connect(_replay_beat)
 	_swap(h)

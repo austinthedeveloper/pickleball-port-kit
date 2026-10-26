@@ -87,3 +87,4 @@ first decisions, are rows in `design/07_DECISIONS_AND_RISKS.md`.
 | 094 | [Smart Play: CPUs That Play the Kitchen, Together, and Place Their Shots](ADR-094-smart-play.md) | Accepted 2026-10-25 |
 | 095 | [Shirt Patterns for Opponents and Career Unlocks](ADR-095-shirt-patterns.md) | Accepted 2026-10-25 |
 | 096 | [ROAD TRIP Plays Every Modifier; SHORT Held Slows Your Feet](ADR-096-trip-every-modifier-short-held.md) | Accepted 2026-10-26 |
+| 097 | [ROAD TRIP: FROM THE GARAGE, Before a Trip](ADR-097-trip-garage-card.md) | Accepted 2026-10-26 |

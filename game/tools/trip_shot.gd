@@ -5,7 +5,8 @@
 ## scene), detour, motel, start; and port ADR-092's van (THE VAN),
 ## scrapbook, diner, rival (the ROAD HOGS' scene), old_court (a story
 ## detour), drive_in (a detour at a venue); and port ADR-093's islands
-## (the map on the fourth leg, NOW PLAYING) and postcards. A scratch save,
+## (the map on the fourth leg, NOW PLAYING) and postcards; port ADR-097's
+## start_garage (FROM THE GARAGE before the first scene). A scratch save,
 ## nothing written.
 extends SceneTree
 
@@ -52,7 +53,7 @@ func _initialize() -> void:
 		m["looks"]["tape"] = 2
 	var t := RoadTrip.create(seed_value, 0, RoadTrip.PEPPER, m)
 	t._meta_for_draw = m
-	if screen != "map_start" and screen != "start" and not "plain" in a:
+	if not screen in ["map_start", "start", "start_garage"] and not "plain" in a:
 		_advance(t, 4)
 		for id in ["red_paddle", "visor", "grip_tape", "grip_tape", "spare_paddle", "pickle_jar", "dink_drill",
 				"tricorn", "wood_paddle", "tip_jar"]:
@@ -174,10 +175,12 @@ func _initialize() -> void:
 				so._show_page()
 			view = so
 			root.add_child(so)
-		"start":
-
-			var s4 := TripScene.new().setup(t, RoadTrip.data()["scenes"]["start"], _me(t, sv), "YOU",
-				{"art": "garage"})
+		"start", "start_garage":
+			var so4 := {"art": "garage"}
+			if screen == "start_garage":
+				t.garage_since = RoadTrip.steps_reached(m) - 3
+				so4["card"] = t.garage_card(m)
+			var s4 := TripScene.new().setup(t, RoadTrip.data()["scenes"]["start"], _me(t, sv), "YOU", so4)
 			view = s4
 			root.add_child(s4)
 

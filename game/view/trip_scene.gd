@@ -266,6 +266,8 @@ func _make_card() -> Control:
 		var tint := Color.WHITE if i == 0 else Color(0.85, 0.88, 0.95)
 		if String(lines[i]).begins_with("TODAY:") or String(lines[i]).begins_with("HAZARD"):
 			tint = Color("ff9a5a")
+		elif String(lines[i]).begins_with("NEW:"):
+			tint = GOLD
 		UiKit.text("small", String(lines[i]), Vector2(480, 252 + i * 30), 0.5, tint, c)
 	return c
 

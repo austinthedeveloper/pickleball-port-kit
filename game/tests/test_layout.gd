@@ -1489,6 +1489,14 @@ func test_trip_scenes() -> void:
 					s._process(0.0)
 					check_layout(s, "trip scene %s page %d, partner %d (device %d)" % [e[0], i, partner, dev])
 				s.free()
+		# FROM THE GARAGE at the ladder's top, all of it new (port ADR-097)
+		var gm := {"miles": 100000, "last_item": "pickle_jar"}
+		var gt := RoadTrip.create(1, 0, RoadTrip.PEPPER, gm)
+		gt.garage_since = 0
+		var gs := TripScene.new().setup(gt, scenes["start"], me, "YOU", {"art": "garage", "card": gt.garage_card(gm)})
+		runner.root.add_child(gs)
+		check_layout(gs, "FROM THE GARAGE (device %d)" % dev)
+		gs.free()
 		for d in RoadTrip.data()["detours"]:
 			var choices := []
 			for ch in d["choices"]:

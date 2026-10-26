@@ -124,6 +124,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-95 | Smart play: CPUs at the kitchen line, moving up together, your partner following you, placed shots; tunable on F2 (port ADR-094) | `feature/cld-smart-ai` | Ready to test |
 | PORT-97 | Shirt patterns: twelve for the ladder teams, Dawson and the ROAD HOGS, and a career PATTERN row; beat a team to wear theirs (port ADR-095) | `feature/cld-shirts` | Ready to test |
 | PORT-98 | ROAD TRIP plays every modifier (INVERSE, GLOW, MULTI BALL...) as a grudge twist; SHORT held slows your feet (port ADR-096) | `feature/cld-trip-mods-dink` | Ready to test |
+| PORT-99 | ROAD TRIP: a FROM THE GARAGE card before a trip, your starting stats and what the GARAGE (and what is NEW) adds (port ADR-097) | `feature/cld-trip-mods-dink` | Ready to test |
 
 ## Releases
 
@@ -646,6 +647,18 @@ the same request). Open: 36 and 40.
     unchanged; screenshots of the map panel and an INVERSE match.
   - Status: **Ready to test**: hold SHORT and feel the drag; play a few
     grudges for the new twists.
+
+### 99. `feature/cld-trip-mods-dink`: FROM THE GARAGE (asked for 2026-10-26)
+
+- [x] `PORT-99` A new trip opens on a FROM THE GARAGE card: the stats
+  you start with, what the GARAGE adds (stats, hearts, cash, paddle), and
+  in gold what's NEW since the last trip began (meta `garage_steps`, save
+  still v6). None before the first step, none on TODAY'S TRIP (port
+  ADR-097).
+  - Verified: the full suite plus the e2e
+    (`test_road_trip.test_the_garage_card`, the card at the ladder's top
+    in `test_layout`); a screenshot (`trip_shot.gd start_garage`).
+  - Status: **Ready to test**: start a trip once you have some MILES.
 
 ## For you
 

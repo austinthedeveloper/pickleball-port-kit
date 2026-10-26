@@ -372,6 +372,35 @@ func test_the_save_and_the_garage() -> void:
 	eq(again.career.active_player(), null)
 
 
+## FROM THE GARAGE (port ADR-097): no card before the GARAGE adds
+## anything, then the stats you start with, what the GARAGE adds, and
+## what's new since the last trip began; none on the day's trip.
+func test_the_garage_card() -> void:
+	var sv := fresh_save("user://test_road_trip_garage/")
+	var t := RoadTrip.begin(sv, 5, 0, RoadTrip.PEPPER)
+	var m := RoadTrip.meta(sv)
+	eq(t.garage_card(m), {}, "nothing from the GARAGE yet: no card")
+	eq(int(m["garage_steps"]), 0, "the steps reached are kept as the trip begins")
+	m["miles"] = 60 + 80 + 100 + 120
+	t = RoadTrip.begin(sv, 6, 0, RoadTrip.PEPPER)
+	eq(t.garage_since, 0)
+	var card := t.garage_card(m)
+	eq(card["title"], "FROM THE GARAGE")
+	eq(card["lines"], ["POWER 2   CONTROL 1   SPEED 1   FEET 2", "THE GARAGE: +1 POWER, +1 FEET",
+		"NEW: +1 POWER, +1 FEET"])
+	t = RoadTrip.begin(sv, 7, 0, RoadTrip.PEPPER)
+	eq(t.garage_card(m)["lines"].size(), 2, "nothing new since: no NEW line")
+	m["miles"] = 100000
+	t = RoadTrip.begin(sv, 8, 0, RoadTrip.PEPPER)
+	card = t.garage_card(m)
+	check(String(card["lines"][1]).ends_with("TO EVERY STAT"), "every stat alike: one phrase")
+	check(String(card["lines"][2]).begins_with("AND 2 MORE HEARTS, 20 CASH, A "), "and the rest")
+	eq(RoadTrip.begin_daily(sv, 20261026).garage_card(m), {}, "the day's trip has no GARAGE")
+	t = RoadTrip.begin(sv, 9, 0, RoadTrip.PEPPER)
+	t.garage_since = -1
+	check(not String(t.garage_card(m)["lines"][-1]).begins_with("NEW"), "an older save: nothing called new")
+
+
 func test_an_old_save_without_a_trip() -> void:
 	var sv := fresh_save("user://test_road_trip_old/")
 	sv.data.erase("trip")

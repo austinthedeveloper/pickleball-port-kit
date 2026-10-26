@@ -88,6 +88,7 @@ var wins := 0
 var losses := 0
 var miles := 0                   ## this trip's
 var state := "on"                ## "on", "won", "over"
+var garage_since := -1           ## the GARAGE's steps before this trip began (not saved; -1 unknown)
 
 
 # --- Data ------------------------------------------------------------------------
@@ -1308,7 +1309,7 @@ static func meta(save: SaveGame) -> Dictionary:
 		"partners": [], "seen": 0, "looks": {"van": 0, "ornament": 0, "tape": 0, "pen": 0}, "last_item": "",
 		"now": {},
 		"hogs": 0, "beats": [], "story_pool": [], "tapes": [], "bonds": {}, "bond_seen": [],
-		"daily": {}, "daily_won": 0, "postcards": [], "pens": []}
+		"daily": {}, "daily_won": 0, "postcards": [], "pens": [], "garage_steps": -1}
 	if save == null:
 		return def
 	if not save.data.has("trip") or typeof(save.data["trip"]) != TYPE_DICTIONARY:
@@ -1357,6 +1358,8 @@ static func begin(save: SaveGame, trip_seed: int, heat_level: int, who: int) -> 
 	var m := meta(save)
 	var t := create(trip_seed, heat_level, who, m)
 	t._meta_for_draw = m
+	t.garage_since = int(m["garage_steps"])
+	m["garage_steps"] = steps_reached(m)
 	m["trips"] = int(m["trips"]) + 1
 	t.store(save)
 	return t
@@ -1459,6 +1462,54 @@ static func garage(meta_dict: Dictionary) -> Dictionary:
 
 
 ## A ladder step's reward as a line ("+1 FEET TO START").
+## The card before a new trip's first scene (port ADR-097): the stats you
+## start with, what the GARAGE adds to them, and what's new since the last
+## trip began. {} when the GARAGE adds nothing yet, and on the day's trip.
+func garage_card(meta_dict: Dictionary) -> Dictionary:
+	if daily > 0:
+		return {}
+	var g := garage(meta_dict)
+	var adds := _stat_gains(g["stats"])
+	var more := []
+	if int(g["hearts"]) > 0:
+		more.append("%d MORE HEART%s" % [int(g["hearts"]), "S" if int(g["hearts"]) > 1 else ""])
+	if int(g["cash"]) > 0:
+		more.append("%d CASH" % int(g["cash"]))
+	if String(g["paddle"]) != "":
+		more.append("A " + String(gear(String(g["paddle"]))["name"]))
+	if adds == "" and more.is_empty():
+		return {}
+	var now := stats()
+	var parts := []
+	for i in 4:
+		parts.append("%s %d" % [STAT_NAMES[i], int(now[i])])
+	var lines := ["   ".join(parts)]
+	if adds != "":
+		lines.append("THE GARAGE: " + adds)
+	if not more.is_empty():
+		lines.append(("AND " if adds != "" else "THE GARAGE: ") + ", ".join(more))
+	if garage_since >= 0:
+		var fresh := [0, 0, 0, 0]
+		var ladder: Array = data()["ladder"]
+		for i in range(garage_since, mini(steps_reached(meta_dict), ladder.size())):
+			for k in 4:
+				fresh[k] += int(ladder[i].get(STATS[k], 0))
+		if _stat_gains(fresh) != "":
+			lines.append("NEW: " + _stat_gains(fresh))
+	return {"over": "YOUR STATS TO START", "title": "FROM THE GARAGE", "lines": lines}
+
+
+## "+1 POWER, +2 FEET", or "+2 TO EVERY STAT", or "" for none.
+static func _stat_gains(add: Array) -> String:
+	if int(add[0]) > 0 and add.all(func(v): return int(v) == int(add[0])):
+		return "+%d TO EVERY STAT" % int(add[0])
+	var parts := []
+	for k in 4:
+		if int(add[k]) > 0:
+			parts.append("+%d %s" % [int(add[k]), STAT_NAMES[k]])
+	return ", ".join(parts)
+
+
 static func step_label(i: int) -> String:
 	var step: Dictionary = data()["ladder"][i]
 	var parts := []
