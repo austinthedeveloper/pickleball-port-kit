@@ -5,7 +5,9 @@
 ## PlayStation, Switch, generic) on the Xbox layout, so one binding fits
 ## all. In one-player any pad drives P1; with 2P on and two pads the first
 ## is P1's and the second P2's (one pad: P1 on the keyboard, P2 the pad).
-## Pads can come and go at any time.
+## Pads can come and go at any time. The split only holds while 2P is on
+## the court (`split`): every menu hears every pad, so a lone pad that 2P
+## took still drives MATCH SETUP.
 class_name GameControls
 extends Node
 
@@ -42,6 +44,9 @@ const PAD_BUTTONS := {
 const NO_PAD := -2
 static var p1_pad := -1
 static var p2_pad := NO_PAD
+## A 2P match (or the park with 2P) is on screen: P1's input map hears
+## only p1_pad. Off, it hears every pad (the menus).
+static var split := false
 ## Connection news for a toast: ["CONNECTED" | "DISCONNECTED", device], and
 ## a counter; `lost_serial` counts disconnects only (a match pauses).
 static var pad_news: Array = []
@@ -71,9 +76,18 @@ static func refresh_pads() -> void:
 
 
 ## The device P1's pad events listen on (a pad id, -1 for all, or one no
-## pad has when P1 is on the keyboard).
+## pad has when P1 is on the keyboard); every pad outside the split.
 static func p1_device() -> int:
+	if not split:
+		return -1
 	return 99 if p1_pad == NO_PAD else p1_pad
+
+
+## Main sets it as each screen comes in.
+static func set_split(on: bool) -> void:
+	if on != split:
+		split = on
+		apply_devices()
 
 
 static func apply_devices() -> void:

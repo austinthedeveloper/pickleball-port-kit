@@ -126,6 +126,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-98 | ROAD TRIP plays every modifier (INVERSE, GLOW, MULTI BALL...) as a grudge twist; SHORT held slows your feet (port ADR-096) | `feature/cld-trip-mods-dink` | Ready to test |
 | PORT-99 | ROAD TRIP: a FROM THE GARAGE card before a trip, your starting stats and what the GARAGE (and what is NEW) adds (port ADR-097) | `feature/cld-trip-mods-dink` | Ready to test |
 | PORT-100 | ROAD TRIP map: the roads on from the stop under the cursor in gold, the stops they miss faded (port ADR-098) | `feature/cld-trip-path-preview` | Ready to test |
+| PORT-101 | PLAYERS 2P with one pad no longer locks the menus: every menu hears every pad; the pad is 2P's only on the court (known issue #93) | `feature/cld-2p-menu-pad` | Ready to test |
 
 ## Releases
 
@@ -678,6 +679,20 @@ the same request). Open: 36 and 40.
     (`trip_shot.gd map cursor=N`).
   - Status: **Ready to test**: move the cursor over the first column's
     stops on a new trip.
+
+### 101. `feature/cld-2p-menu-pad`: one pad and PLAYERS 2P (a tester's report, 2026-10-26)
+
+- [x] `PORT-101` With one pad, PLAYERS 2P gave the pad to 2P and put P1
+  on the keyboard by re-pointing the input map's pad events at no pad, so
+  MATCH SETUP (and every menu after it) stopped hearing the pad: the
+  menu looked frozen until a key set PLAYERS back. The split now holds
+  only while 2P is on the court (`GameControls.split`, set by main for a
+  match with 2P in it and the park); everywhere else the input map hears
+  every pad. Player Select's 2P turn still reads 2P's pad as before.
+  - Verified: the full suite plus the e2e
+    (`test_controller.test_menus_hear_every_pad`).
+  - Status: **Ready to test**: one pad, MATCH SETUP > PLAYERS 2P, then
+    move on the pad; start a 2P match (keyboard is P1, the pad 2P).
 
 ## For you
 
