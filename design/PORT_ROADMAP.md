@@ -127,7 +127,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-99 | ROAD TRIP: a FROM THE GARAGE card before a trip, your starting stats and what the GARAGE (and what is NEW) adds (port ADR-097) | `feature/cld-trip-mods-dink` | Ready to test |
 | PORT-100 | ROAD TRIP map: the roads on from the stop under the cursor in gold, the stops they miss faded (port ADR-098) | `feature/cld-trip-path-preview` | Ready to test |
 | PORT-101 | PLAYERS 2P with one pad no longer locks the menus: every menu hears every pad; the pad is 2P's only on the court (known issue #93) | `feature/cld-2p-menu-pad` | Ready to test |
-| PORT-102 | New player heads: generated rounds snapped to the game's pixels and tried under every hat; round 3 turns to conventional faces (`art/faces-r1`) | `feature/cld-faces-r1` | In progress |
+| PORT-102 | New player heads: generated rounds snapped to the game's pixels and tried under every hat; round 3's conventional faces proposed (`art/faces-r1`) | `feature/cld-faces-r1` | In progress |
 
 ## Releases
 
@@ -709,17 +709,19 @@ the same request). Open: 36 and 40.
   there are 20 heads, 6 of them women (`lineup_r2.png`). Nothing in the
   game uses them yet. Those read as plain ugly, so round 3
   (`PROMPTS_R3.md`) asks for conventional faces: natural proportions,
-  character from age, hair, facial hair and expression.
-  - Status: **In progress**: round 3's images.
+  character from age, hair, facial hair and expression. Round 3: 18 of
+  20 kept, 10 men and 8 women (`lineup_r3.png`); `snap.py` now resizes
+  a sheet drawn bigger than the guide so its skulls fit the hats.
+  - Status: **In progress**: your pick, then wiring them into the game
+    (an ADR).
 
 ## For you
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
 
-- **PORT-102 new heads:** send `art/faces-r1/PROMPTS_R3.md` (with the
-  guides and `refs/` it lists) to the image agent and save
-  `faces_m.png` to `faces_p.png` in `art/faces-r1/`.
+- **PORT-102 new heads:** look at `art/faces-r1/lineup_r3.png` and say
+  which to keep, and whether the current man and woman stay beside them.
 
 - **PORT-98 SHORT held:** 7/8 top speed is a guess at "slight"
   (`K.SHORT_HELD_SPEED`). Say if it should bite more, or less.

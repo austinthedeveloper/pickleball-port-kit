@@ -138,3 +138,78 @@ bare, in the cap, and dark skin with black hair.
   would join `players.py` as head variants (each one's role grid stamped
   at the neck, the cap and hats unchanged), with a CAREER EDIT row and
   per-opponent heads. That's a design change and needs an ADR.
+
+# Round 3: conventional faces
+
+Rounds 1 and 2 read as plain ugly, so `PROMPTS_R3.md` asked for ordinary,
+likeable people. `faces_m.png` to `faces_p.png`; `lineup_r3.png` shows all
+twenty next to the current man and woman (bare, in the cap, dark skin with
+black hair).
+
+## The tools
+
+- **Sheets M, N and O were drawn about 15% bigger than the guide.**
+  Snapped on their own grid, the skulls overflowed the hats (hair out the
+  back of the cap) and hid the women's ponytail. `snap.py` now checks
+  each sheet's skull width against the guide's (22 px, 8 rows below the
+  top) and, when the heads are more than 8% too big, resamples the source
+  on the coarser grid that fits them to the dome. That's cleaner than
+  shrinking snapped pixels, since the source is high resolution. Round
+  1's sheet B is caught too (its baked ponytails widen the skull); it
+  shrinks a little, which doesn't matter now.
+- All twenty fit every hat after that, and the game's ponytail shows on
+  every woman.
+
+## What worked
+
+- **The direction.** They read as one believable roster: natural noses
+  and chins, clear eyes, and expressions you can tell apart at 1x (the
+  smiles, n2's focus, n5's laugh, o3's smirk).
+- **Variety from the right places**: beards (m2 short, p2 full), stubble
+  (p1), a goatee (o3), a moustache (m5), glasses (o2, n3, p3), bald (o4),
+  thinning (m5), shaggy (o1), age lines (n4).
+- They hold up on the dark skin.
+
+## What didn't
+
+- **Sameness among the clean-shaven.** m1, m3, m4 and o1 are close, and
+  so are n1 and p5. Hair colour and skin will separate them in a match,
+  but they're near duplicates.
+- **Hairlines vanish under hats.** m3's receding hairline (the point of
+  the head) is covered by every hat but the headband.
+- **The long chin is gone.** These are rounder and shorter than the
+  current heads, which still look like the odd ones out next to them.
+
+## Per head
+
+| Head | Verdict | Notes |
+|---|---|---|
+| m1 young, crew cut | Keep | |
+| m2 short beard | Keep | |
+| m3 receding hairline | Drop | Close to m1; the hairline is under the hat. |
+| m4 athlete, square jaw | Keep | |
+| m5 older, moustache | Keep | |
+| n1 young, bangs | Keep | |
+| n2 determined | Keep | |
+| n3 glasses | Keep | |
+| n4 older, laugh lines | Keep | |
+| n5 teen, laughing | Keep | |
+| o1 teen boy, shaggy | Keep | |
+| o2 round glasses | Keep | |
+| o3 goatee, smirk | Keep | |
+| o4 bald, cheerful | Keep | |
+| o5 wide smile | Keep | |
+| p1 stubble | Keep | Round 2's lantern jaw, made natural. |
+| p2 full beard | Keep | Fuller than m2, so different enough. |
+| p3 round glasses | Keep | |
+| p4 grin | Keep | |
+| p5 young, upturned nose | Drop | Too close to n1. |
+
+18 kept: 10 men, 8 women.
+
+## Left to decide
+
+- Whether the current man and woman stay in the set beside these, and
+  whether any of round 2's milder heads (the walrus moustache, the bald
+  old man, the beard) belong in it.
+- Wiring them in (an ADR, as above).

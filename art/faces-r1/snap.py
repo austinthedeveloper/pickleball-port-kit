@@ -92,6 +92,18 @@ def head_pitch(rgba):
     return (px + py) / 2
 
 
+GUIDE_SKULL_W = 22      # the guide head's width 8 rows below its top
+
+
+def skull_pitch(rgba, p):
+    """The pitch that makes this head's skull as wide as the guide's, 8
+    art rows below the top (p is the grid's pitch, to find that row)."""
+    a = rgba[..., 3] > 128
+    top = int(np.argmax(a.any(1)))
+    xs = np.where(a[min(int(top + 8 * p), a.shape[0] - 1)])[0]
+    return (xs.max() - xs.min() + 1) / GUIDE_SKULL_W
+
+
 def snap_head(rgba, p):
     """Sample one colour per art pixel on a grid of pitch p (the sheet's:
     a generated image keeps one grid, so a single head's outlier estimate
@@ -147,6 +159,13 @@ def main(paths):
         prev = Image.new("RGBA", (len(spans) * CELL * 8, CELL * 8), (200, 214, 200, 255))
         crops = [im[:, max(x0 - 4, 0):x1 + 4] for x0, x1 in spans]
         p = float(np.median([head_pitch(c) for c in crops]))
+        # A sheet drawn bigger than the guide (round 3's M to O) would
+        # poke out of the hats: resample it on a coarser grid that fits
+        # the skulls to the dome. Within 8%, the drawn grid wins.
+        fit = float(np.median([skull_pitch(c, p) for c in crops]))
+        if fit > p * 1.08:
+            print(f"{sheet}: drawn {fit / p:.2f}x the guide; pitch {p:.2f} -> {fit:.2f}")
+            p = fit
         for n, crop in enumerate(crops):
             px, p = snap_head(crop, p)
             rows, lost = place(px)
