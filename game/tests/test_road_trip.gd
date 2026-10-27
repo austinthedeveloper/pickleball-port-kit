@@ -83,6 +83,24 @@ func test_the_data() -> void:
 				if String(l).length() > PAGE_LINE or not _glyphs_ok(String(l), chars):
 					bad.append("scene: " + String(l))
 	eq(d["scenes"]["teams"].size(), Opponents.count() + 1, "a scene for every ladder team and Dawson")
+	# the talks after the first (port ADR-104): four more for everyone
+	var talk_sets := []
+	for team in d["scenes"]["teams"].size():
+		talk_sets.append(["team %d" % team, RoadTrip.talks("teams", team)])
+	for kind in ["start", "motel", "diner"]:
+		for p in range(RoadTrip.PEPPER, d["scenes"]["partner_start"].size()):
+			talk_sets.append(["%s %d" % [kind, p], RoadTrip.talks(kind, p)])
+	for kind in ["rival_again", "rival_friendly"]:
+		talk_sets.append([kind, RoadTrip.talks(kind, -1)])
+	for ts in talk_sets:
+		eq(ts[1].size(), 4, "four more talks: " + String(ts[0]))
+		for sc in ts[1]:
+			for p in sc:
+				check(String(p["who"]) in ["partner", "you", "captain", "mate"], String(ts[0]))
+				check(p["lines"].size() >= 1 and p["lines"].size() <= 3)
+				for l in p["lines"]:
+					if String(l).length() > PAGE_LINE or not _glyphs_ok(String(l), chars):
+						bad.append("talk: " + String(l))
 	for i in RoadTrip.data()["ladder"].size():
 		var l := RoadTrip.step_label(i)
 		if l.length() > PAGE_LINE or not _glyphs_ok(l, chars):
@@ -816,6 +834,50 @@ func test_the_road_hogs() -> void:
 	sv.data = {"trip": m}
 	t.finish(sv)
 	eq(int(m["hogs"]), 1, "beaten: their story goes on")
+
+
+func test_talks() -> void:
+	var m := {"trips": 3, "won": 0, "hogs": 0, "beats": ["van_1"], "story_pool": [], "tapes": []}
+	var t := RoadTrip.create(8, 0, RoadTrip.PEPPER, m)
+	var scenes: Dictionary = RoadTrip.data()["scenes"]
+	var heard := []
+	for i in 6:
+		heard.append(t.team_pages(m, 1))
+	eq(heard[0], scenes["teams"][1], "the first meeting: the scene there's always been")
+	for i in 4:
+		eq(heard[i + 1], RoadTrip.talks("teams", 1)[i], "then the next talk, in order")
+	eq(heard[5], heard[0], "and round again")
+	eq(int(m["talks"]["teams:1"]), 6)
+	eq(t.team_pages(m, 2), scenes["teams"][2], "each team counts its own")
+	# partners: their own count per kind; Pepper's start after the first trip
+	eq(t.stop_pages(m, "motel"), scenes["motel"])
+	eq(t.stop_pages(m, "motel"), RoadTrip.talks("motel", RoadTrip.PEPPER)[0])
+	t.partner = 3
+	eq(t.stop_pages(m, "motel"), scenes["motel"], "Pete's motel talk starts at the first")
+	eq(t.stop_pages(m, "diner"), scenes["diner"])
+	eq(t.stop_pages(m, "diner"), RoadTrip.talks("diner", 3)[0])
+	eq(t.start_pages(m), scenes["partner_start"][3])
+	eq(t.start_pages(m), RoadTrip.talks("start", 3)[0])
+	t.partner = RoadTrip.PEPPER
+	eq(t.start_pages(m), scenes["start_again"])
+	eq(t.start_pages(m), RoadTrip.talks("start", RoadTrip.PEPPER)[0])
+	# the ROAD HOGS: taunts, then friendly ones after their arc
+	m["beats"] = ["hogs_1", "hogs_2", "hogs_3", "hogs_4"]
+	eq(t.rival_pages(m), scenes["rival_again"])
+	eq(t.rival_pages(m), RoadTrip.talks("rival_again", -1)[0])
+	m["beats"].append("hogs_5")
+	m["beats"].append("hogs_6")
+	eq(t.rival_pages(m), scenes["rival_friendly"])
+	# the day's trip: the same for everyone, so the first, uncounted
+	var day := RoadTrip.create(8, 0, RoadTrip.PEPPER, m)
+	day.daily = 20261026
+	eq(day.team_pages(m, 1), scenes["teams"][1])
+	eq(day.stop_pages(m, "diner"), scenes["diner"])
+	eq(int(m["talks"]["teams:1"]), 6, "not counted")
+	# a save from before the talks: the key fills in
+	var sv := SaveGame.new()
+	sv.data = {"trip": {"trips": 4}}
+	eq(RoadTrip.meta(sv)["talks"], {})
 
 
 func test_beats() -> void:
