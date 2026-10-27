@@ -4,6 +4,24 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.40.0] - 2026-10-26
+
+New faces: eighteen heads for the ladder, the story, ROAD TRIP and your
+career player.
+
+### Added
+- **New heads**: ten for men (CREW CUT, BEARD, ATHLETE, MOUSTACHE,
+  SHAGGY, GLASSES, GOATEE, BALD, STUBBLE, FULL BEARD) and eight for women
+  (BANGS, FOCUSED, GLASSES, LAUGH LINES, LAUGHING, SMILE, ROUND SPECS,
+  GRIN), beside the classic long-chinned head. Every one fits under every
+  hat and takes every skin and hair colour.
+- **The ladder has faces**: each team wears its own, from Dad's moustache
+  and Walt's bald head to the Pirates' beards and Jade's bangs. The Twins
+  and Dale Dawson keep the classic head; Pepper grins; the ROAD HOGS and
+  ROAD TRIP's locals have theirs.
+- **HEAD on CAREER > EDIT**, under BODY: pick any head for your career
+  player, free. Player Select keeps the classic head.
+
 ## [0.39.1] - 2026-10-26
 
 A controller fix for two players on one pad.

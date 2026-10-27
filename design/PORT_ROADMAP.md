@@ -262,6 +262,9 @@ status in the same commit. The finished tasks, in full, are in
   (tag `v0.39.0`, on `feature/cld-release-0.39.0`).
 - **v0.39.1** (2026-10-26): PORT-101 PLAYERS 2P with one pad no longer
   locks the menus (tag `v0.39.1`, on `feature/cld-release-0.39.1`).
+- **v0.40.0** (2026-10-26): PORT-102 new heads: eighteen faces for the
+  ladder, the story, ROAD TRIP and career players (ADR-099) (tag
+  `v0.40.0`, on `feature/cld-release-0.40.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 
