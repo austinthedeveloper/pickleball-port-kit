@@ -107,8 +107,15 @@ func test_lockstep_keeps_two_sims_the_same() -> void:
 		b.dispose()
 
 
-## A desync (a bug) is caught at the next hash, and both sides stop.
+## A desync (a bug) is caught at the next hash, and both sides stop: in the
+## traced state or out of it (the hash is the whole state, port ADR-100).
 func test_a_desync_is_caught() -> void:
+	_desync("the ball", func(s: Sim): s.ball.x_fp += 1)
+	_desync("an untraced field", func(s: Sim): s.hot_streak += 1)
+	_desync("the AI's cache", func(s: Sim): s.ai.last_think[3] += 1)
+
+
+func _desync(what: String, bug: Callable) -> void:
 	var links := LoopbackLink.pair(1)
 	var ls := [Lockstep.new(0, 2), Lockstep.new(2, 0)]
 	var sims := [Sim.new(SimTypes.MatchConfig.singles()), Sim.new(SimTypes.MatchConfig.singles())]
@@ -127,12 +134,12 @@ func test_a_desync_is_caught() -> void:
 			l.send(out[0])
 			sims[side].step(out[1])
 			if ls[side].frame == Lockstep.HASH_EVERY + 1 and side == 1:
-				sims[1].ball.x_fp += 1          # the bug
+				bug.call(sims[1])
 			var h: Array = ls[side].hash_after(ls[side].frame - 1, sims[side])
 			if not h.is_empty():
 				l.send(h)
 		f += 1
-	check(ls[0].desync > 0, "the host saw the desync at frame %d" % ls[0].desync)
+	check(ls[0].desync > 0, "%s: the host saw the desync at frame %d" % [what, ls[0].desync])
 	for s in sims:
 		s.dispose()
 

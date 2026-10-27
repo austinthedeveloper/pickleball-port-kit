@@ -128,6 +128,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-100 | ROAD TRIP map: the roads on from the stop under the cursor in gold, the stops they miss faded (port ADR-098) | `feature/cld-trip-path-preview` | Ready to test |
 | PORT-101 | PLAYERS 2P with one pad no longer locks the menus: every menu hears every pad; the pad is 2P's only on the court (known issue #93) | `feature/cld-2p-menu-pad` | Ready to test |
 | PORT-102 | New heads: 18 generated faces for the ladder, the story, ROAD TRIP and career players, fitting every hat (port ADR-099) | `feature/cld-faces-r1` | Ready to test |
+| PORT-103 | The sim's whole state saved and loaded (rollback and rejoin groundwork); online's desync check hashes all of it (port ADR-100) | `feature/cld-sim-state` | Done |
 
 ## Releases
 
@@ -726,6 +727,25 @@ the same request). Open: 36 and 40.
     `test_page_edit_look`, `test_view`'s ladder opponents, every head on
     EDIT in `test_layout`); screenshots of a ladder match and EDIT.
   - Status: **Ready to test**: play the ladder, and CAREER > EDIT > HEAD.
+
+### 103. `feature/cld-sim-state`: the sim's whole state (asked for 2026-10-26)
+
+- [x] `PORT-103` Groundwork for online play over the internet (port
+  ADR-100). `Sim.save_state()` and `load_state()` save and load
+  everything the sim carries (`sim/sim_state.gd`, by reflection, so a new
+  variable can't be left out). Loading keeps object identity (MULTI
+  BALL's ball) and works in place. A state is plain data, so it can go
+  over a line as bytes. Online's desync check now hashes the whole state
+  (`Sim.state_hash`), not the traced snapshot, so it sees the AI's caches
+  and the untraced rules too. Play is unchanged: the golden traces are
+  the same.
+  - Verified: the full suite plus the e2e (`test_sim_state`: 26 matches
+    saved at five points, loaded back and into a new sim, stepped 300
+    frames against the sim that never stopped; `test_online`'s desync
+    test catches untraced fields).
+  - Status: **Done**: nothing to play. Next for online: tag events by
+    frame, and route `retune`/`new_match` through the inputs (ADR-100),
+    then rollback.
 
 ## For you
 

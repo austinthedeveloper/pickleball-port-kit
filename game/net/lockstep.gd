@@ -5,8 +5,9 @@
 ## a slow packet makes both wait (the match pauses, nothing diverges).
 ## Frames 0..DELAY-1 start with empty inputs on both sides.
 ##
-## Every HASH_EVERY frames each side sends a hash of its sim; a different
-## hash from the other side is a desync (a bug: the sim must be exact).
+## Every HASH_EVERY frames each side sends a hash of its sim's whole state
+## (port ADR-100); a different hash from the other side is a desync (a bug:
+## the sim must be exact).
 class_name Lockstep
 extends RefCounted
 
@@ -98,7 +99,7 @@ func on_message(m: Array) -> void:
 func hash_after(f: int, sim: Sim) -> Array:
 	if f % HASH_EVERY != 0:
 		return []
-	var h := str(sim.snapshot()).hash()
+	var h := sim.state_hash()
 	_hash(f, 0, h)
 	return ["H", f, h]
 

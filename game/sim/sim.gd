@@ -1519,6 +1519,19 @@ func set_bot_skill(late: int, match_index: int) -> void:
 	players[0].max_speed_fp = 16 + (match_index % 3) * 4
 
 
+## The whole state (port ADR-100, sim/sim_state.gd): load_state(save_state())
+## leaves the sim stepping exactly as before. snapshot() is the traced part.
+func save_state() -> Array:
+	return SimState.save(self)
+
+func load_state(state: Array) -> bool:
+	return SimState.load_into(self, state)
+
+## The whole state's hash, for online's desync check.
+func state_hash() -> int:
+	return hash(save_state())
+
+
 ## The traced simulation state (GameState, ServeState, players, ball, AI
 ## slots), as the golden trace compares it.
 func snapshot() -> Array:
