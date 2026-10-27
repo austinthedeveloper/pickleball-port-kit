@@ -94,3 +94,4 @@ first decisions, are rows in `design/07_DECISIONS_AND_RISKS.md`.
 | 101 | [Sim Events by Step: Played Once, Counted When Confirmed](ADR-101-events-by-step.md) | Accepted 2026-10-26 |
 | 102 | [Commands: a Match's Changes Travel With Its Inputs](ADR-102-sim-commands.md) | Accepted 2026-10-26 |
 | 103 | [Rollback for Online Play](ADR-103-rollback.md) | Accepted 2026-10-26 |
+| 104 | [ROAD TRIP Talks: Conversations That Go Deeper](ADR-104-trip-talks.md) | Accepted 2026-10-26 |

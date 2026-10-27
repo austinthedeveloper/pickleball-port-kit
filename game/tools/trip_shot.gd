@@ -7,10 +7,14 @@
 ## detour), drive_in (a detour at a venue); and port ADR-093's islands
 ## (the map on the fourth leg, NOW PLAYING) and postcards; port ADR-097's
 ## start_garage (FROM THE GARAGE before the first scene). A scratch save,
-## nothing written. cursor=N puts the map's cursor on its Nth choice.
+## nothing written. cursor=N puts the map's cursor on its Nth choice;
+## talk=N shows team, motel and diner's Nth talk (port ADR-104; 0 the first);
+## partner=N the partner (-1 Pepper).
 extends SceneTree
 
 var _cursor := 0                  ## cursor=N: the map's cursor on its Nth target (the path preview)
+var _talk := 0                    ## talk=N: the Nth of a conversation (port ADR-104)
+var _partner := -2                ## partner=N: the trip's partner (-2: the scratch trip's own)
 
 var _frames := 0
 var _target := 60
@@ -28,6 +32,10 @@ func _initialize() -> void:
 			seed_value = int(arg.substr(5))
 		if arg.begins_with("cursor="):
 			_cursor = int(arg.substr(7))
+		if arg.begins_with("talk="):
+			_talk = int(arg.substr(5))
+		if arg.begins_with("partner="):
+			_partner = int(arg.substr(8))
 		if arg == "pad":
 			GameControls.last_device = GameControls.PAD
 	var controls = load("res://game_ui/controls.gd").new()
@@ -55,7 +63,7 @@ func _initialize() -> void:
 	if screen == "islands":
 		m["best_heat"] = 5
 		m["looks"]["tape"] = 2
-	var t := RoadTrip.create(seed_value, 0, RoadTrip.PEPPER, m)
+	var t := RoadTrip.create(seed_value, 0, RoadTrip.PEPPER if _partner < -1 else _partner, m)
 	t._meta_for_draw = m
 	if not screen in ["map_start", "start", "start_garage"] and not "plain" in a:
 		_advance(t, 4)
@@ -114,7 +122,8 @@ func _initialize() -> void:
 			var n: Dictionary = t.map[t.leg()]["gate"]
 			var team := int(n["team"])
 			var info := t.info(n)
-			var s := TripScene.new().setup(t, RoadTrip.data()["scenes"]["teams"][team], _me(t, sv), "YOU",
+			m["talks"] = {"teams:%d" % team: _talk}
+			var s := TripScene.new().setup(t, t.team_pages(m, team), _me(t, sv), "YOU",
 				{"venue": String(n["venue"]), "time": int(n["time"]), "team": team,
 				"card": {"over": "LEG 1: OUT OF TOWN", "title": RoadTrip.stop_name(n),
 					"lines": ["VS " + RoadTrip.opponent_name(n), String(info[1]).split("   ")[0]]}})
@@ -132,7 +141,8 @@ func _initialize() -> void:
 			view = s2
 			root.add_child(s2)
 		"motel":
-			var s3 := TripScene.new().setup(t, RoadTrip.data()["scenes"]["motel"], _me(t, sv), "YOU",
+			m["talks"] = {"motel:%d" % t.partner: _talk}
+			var s3 := TripScene.new().setup(t, t.stop_pages(m, "motel"), _me(t, sv), "YOU",
 				{"art": "motel"})
 			view = s3
 			root.add_child(s3)
@@ -160,7 +170,8 @@ func _initialize() -> void:
 			view = TripHome.new().setup(sv, {}, "scrapbook")
 			root.add_child(view)
 		"diner":
-			var sd := TripScene.new().setup(t, RoadTrip.data()["scenes"]["diner"], _me(t, sv), "YOU",
+			m["talks"] = {"diner:%d" % t.partner: _talk}
+			var sd := TripScene.new().setup(t, t.stop_pages(m, "diner"), _me(t, sv), "YOU",
 				{"art": "diner", "choices": t.diner_choices()})
 			sd._open_choices()
 			view = sd

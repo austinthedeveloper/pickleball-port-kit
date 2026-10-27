@@ -1335,7 +1335,7 @@ static func meta(save: SaveGame) -> Dictionary:
 		"partners": [], "seen": 0, "looks": {"van": 0, "ornament": 0, "tape": 0, "pen": 0}, "last_item": "",
 		"now": {},
 		"hogs": 0, "beats": [], "story_pool": [], "tapes": [], "bonds": {}, "bond_seen": [],
-		"daily": {}, "daily_won": 0, "postcards": [], "pens": [], "garage_steps": -1}
+		"daily": {}, "daily_won": 0, "postcards": [], "pens": [], "garage_steps": -1, "talks": {}}
 	if save == null:
 		return def
 	if not save.data.has("trip") or typeof(save.data["trip"]) != TYPE_DICTIONARY:
@@ -1651,9 +1651,11 @@ func start_pages(meta_dict: Dictionary) -> Array:
 		see_beat(meta_dict, b)
 		pages = b["pages"]
 	elif partner >= 0 and partner < scenes["partner_start"].size():
-		pages = scenes["partner_start"][partner]
+		pages = talk(meta_dict, "start", partner, scenes["partner_start"][partner])
+	elif int(meta_dict.get("trips", 1)) <= 1:
+		pages = scenes["start"]
 	else:
-		pages = scenes["start"] if int(meta_dict.get("trips", 1)) <= 1 else scenes["start_again"]
+		pages = talk(meta_dict, "start", partner, scenes["start_again"])
 	# a partner's bond at level 2 the first time: their own scene, and their item
 	var key := str(partner)
 	if bond_level(meta_dict, partner) >= 2 and not meta_dict.get("bond_seen", []).has(key):
@@ -1676,8 +1678,48 @@ func rival_pages(meta_dict: Dictionary) -> Array:
 	if not b.is_empty():
 		see_beat(meta_dict, b)
 		return b["pages"]
-	var done: bool = meta_dict.get("beats", []).has("hogs_5")
-	return data()["scenes"]["rival_friendly" if done else "rival_again"]
+	var key := "rival_friendly" if meta_dict.get("beats", []).has("hogs_5") else "rival_again"
+	return talk(meta_dict, key, -1, data()["scenes"][key])
+
+
+## A team's scene before their match (no beat due): the next of their talks.
+func team_pages(meta_dict: Dictionary, team: int) -> Array:
+	var teams: Array = data()["scenes"]["teams"]
+	return talk(meta_dict, "teams", team, teams[team]) if team >= 0 and team < teams.size() else []
+
+
+## The partner's word at a motel or a diner (`kind`): the next of their talks.
+func stop_pages(meta_dict: Dictionary, kind: String) -> Array:
+	return talk(meta_dict, kind, partner, data()["scenes"][kind])
+
+
+## A conversation that goes on (port ADR-104): `first`, then the talks
+## after it (trip.json's `talks[kind]`, by team or partner `who`), one each
+## time it comes up, in order, so a character says more of themselves the
+## more you meet them; round again once all are heard. Counted in the meta's
+## `talks`. The day's trip, the same for everyone, always hears the first.
+func talk(meta_dict: Dictionary, kind: String, who: int, first: Array) -> Array:
+	if daily > 0:
+		return first
+	var all: Array = [first]
+	all.append_array(talks(kind, who))
+	var key := kind if kind.begins_with("rival") else "%s:%d" % [kind, who]
+	if not meta_dict.has("talks"):
+		meta_dict["talks"] = {}
+	var n := int(meta_dict["talks"].get(key, 0))
+	meta_dict["talks"][key] = n + 1
+	return all[n % all.size()]
+
+
+## The talks after the first: by team (`teams`), by partner (`start`,
+## `motel`, `diner`; Pepper is -1) or the ROAD HOGS' (`who` -1).
+static func talks(kind: String, who: int) -> Array:
+	var t: Variant = data()["talks"].get(kind, [])
+	if t is Dictionary:
+		return t.get(str(who), [])
+	if kind == "teams":
+		return t[who] if who >= 0 and who < t.size() else []
+	return t
 
 
 ## An arc's beats in order, and how many of them are seen.

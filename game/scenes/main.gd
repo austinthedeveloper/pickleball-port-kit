@@ -347,13 +347,13 @@ func _on_trip_go(t: RoadTrip, target: Array) -> void:
 			_trip_match(t, n)
 		"grudge", "big", "final", "rival", "encore":
 			var team := int(n["team"])
-			var pages: Array = scenes["teams"][team] if team >= 0 and team < scenes["teams"].size() else []
-			var b := _trip_beat(t, "team", {"team": team, "encore": String(n["type"]) == "encore"}) \
-				if team >= 0 else {}
-			if not b.is_empty():
-				pages = b["pages"]
+			var pages: Array = []
 			if String(n["type"]) == "rival":
 				pages = t.rival_pages(RoadTrip.meta(save))
+			else:
+				var b := _trip_beat(t, "team", {"team": team, "encore": String(n["type"]) == "encore"}) \
+					if team >= 0 else {}
+				pages = t.team_pages(RoadTrip.meta(save), team) if b.is_empty() else b["pages"]
 			save.save_game()
 			var card_lines := ["VS " + RoadTrip.opponent_name(n)]
 			var info := t.info(n)
@@ -384,7 +384,7 @@ func _on_trip_go(t: RoadTrip, target: Array) -> void:
 			var heal_ok := t.hearts < t.max_hearts
 			var b := _trip_beat(t, "motel")
 			save.save_game()
-			show_trip_scene(t, scenes["motel"] if b.is_empty() else b["pages"], {"art": "motel", "choices": [
+			show_trip_scene(t, t.stop_pages(RoadTrip.meta(save), "motel") if b.is_empty() else b["pages"], {"art": "motel", "choices": [
 				{"label": "SLEEP IT OFF: A HEART BACK", "enabled": heal_ok, "value": "" if heal_ok else "FULL"},
 				{"label": "PARTNER PRACTISES: +1 EACH STAT", "enabled": true}]}, func(c: int):
 					t.rest(c == 0)
@@ -405,7 +405,9 @@ func _on_trip_go(t: RoadTrip, target: Array) -> void:
 					show_trip_map(t))
 		"diner":
 			var menu := t.diner_choices()
-			show_trip_scene(t, scenes["diner"], {"art": "diner", "choices": menu}, func(c: int):
+			var pages := t.stop_pages(RoadTrip.meta(save), "diner")
+			save.save_game()
+			show_trip_scene(t, pages, {"art": "diner", "choices": menu}, func(c: int):
 					t.order(c)
 					t.finish_stop()
 					show_trip_map(t))

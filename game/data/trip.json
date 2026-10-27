@@ -1,5 +1,5 @@
 {
-  "comment": "ROAD TRIP (PORT-82, design/ROAD_TRIP.md, port ADR-087, ADR-092): the remaster's roguelike mode. icons from 40 are trip_gear_icons_2.png, hazards from 5 trip_hazard_icons_2.png. sets: items that together add stats. diner: dishes for the next match. rival: the ROAD HOGS. beats: the story across trips, each once, at its slot, when its conditions hold (RoadTrip.beat_due). legs: three stretches of road, each with its venues, the ladder teams that turn up as grudge matches, and the teams one of which ends it (the last leg ends in the final). gear: id, name, kind (bag, paddle, hat, partner, perk), rarity (common, uncommon, rare), icon (trip_gear_icons.png's cell, -1 the plain paddle's own icon), the two lines its card shows, and what it does. hazards: one modifier for the next match. detours: a page and two or three choices. ladder: the GARAGE's steps, in order. Text is the small font's: capitals, digits, spaces and !?.,:-'/%+, a line at most 30 characters on a card or 46 on a page.",
+  "comment": "ROAD TRIP (PORT-82, design/ROAD_TRIP.md, port ADR-087, ADR-092): the remaster's roguelike mode. icons from 40 are trip_gear_icons_2.png, hazards from 5 trip_hazard_icons_2.png. sets: items that together add stats. diner: dishes for the next match. rival: the ROAD HOGS. talks (port ADR-104): the conversations heard again, after the first one in scenes: four more each, in order, one per meeting, a character saying more of themselves each time (teams by ladder index, start/motel/diner by partner with Pepper -1, the ROAD HOGS by their arc). beats: the story across trips, each once, at its slot, when its conditions hold (RoadTrip.beat_due). legs: three stretches of road, each with its venues, the ladder teams that turn up as grudge matches, and the teams one of which ends it (the last leg ends in the final). gear: id, name, kind (bag, paddle, hat, partner, perk), rarity (common, uncommon, rare), icon (trip_gear_icons.png's cell, -1 the plain paddle's own icon), the two lines its card shows, and what it does. hazards: one modifier for the next match. detours: a page and two or three choices. ladder: the GARAGE's steps, in order. Text is the small font's: capitals, digits, spaces and !?.,:-'/%+, a line at most 30 characters on a card or 46 on a page.",
   "legs": [
     {"name": "OUT OF TOWN", "venues": ["park", "lakeside", "fair", "motel"], "grudge": [0, 1, 2], "big": [1, 2]},
     {"name": "THE LONG DRIVE", "venues": ["dinosaur", "undersea", "space", "ruins", "glacier", "western", "drivein"], "grudge": [2, 3, 4, 5], "big": [3, 4, 5]},
@@ -288,6 +288,244 @@
     ],
     "rival_again": [{"who": "captain", "lines": ["BACK FOR ANOTHER LESSON?"]}, {"who": "mate", "lines": ["THIS IS STILL OUR HIGHWAY."]}],
     "rival_friendly": [{"who": "captain", "lines": ["NO HARD FEELINGS TODAY.", "JUST HARD SERVES."]}, {"who": "mate", "lines": ["LOSERS BUY THE PIE!"]}]
+  },
+  "talks": {
+    "teams": [
+      [
+        [{"who": "captain", "lines": ["KIDDO, TELL THEM THE ONE ABOUT", "THE PICKLE AND THE PARKING LOT."]}, {"who": "mate", "lines": ["I'M NOT TELLING THAT ONE, DAD."]}, {"who": "captain", "lines": ["SHE WROTE IT. SHE'S JUST SHY."]}],
+        [{"who": "mate", "lines": ["DAD'S BEEN QUIET ALL MORNING."]}, {"who": "captain", "lines": ["I'M SAVING MY JOKES FOR THE", "SECOND GAME. STRATEGY, SPORT."]}, {"who": "mate", "lines": ["HE ONLY JOKES WHEN HE'S NERVOUS.", "SO HE'S VERY NERVOUS."]}],
+        [{"who": "captain", "lines": ["I KEEP A SCRAPBOOK OF EVERY", "MATCH KIDDO EVER PLAYED."]}, {"who": "mate", "lines": ["DAD. THEY DON'T NEED TO KNOW."]}, {"who": "captain", "lines": ["PAGE ONE: SHE HIT THE BALL.", "ONCE. IT WAS BEAUTIFUL."]}],
+        [{"who": "mate", "lines": ["CAN I TELL YOU SOMETHING?", "HIS JOKES ARE TERRIBLE."]}, {"who": "mate", "lines": ["BUT HE TELLS ONE EVERY TIME I", "MISS. SO I NEVER FEEL BAD."]}, {"who": "captain", "lines": ["WHAT ARE YOU TWO WHISPERING", "ABOUT OVER THERE?"]}, {"who": "mate", "lines": ["NOTHING, DAD. TELL US A JOKE."]}]
+      ],
+      [
+        [{"who": "mate", "lines": ["DID WE TELL YOU HOW WE MET?"]}, {"who": "captain", "lines": ["WALT LOST TO ME IN 1962.", "SIX GAMES IN A ROW."]}, {"who": "mate", "lines": ["I KEPT COMING BACK.", "I WASN'T THERE FOR THE GAMES."]}],
+        [{"who": "captain", "lines": ["DON'T LET THE CARDIGAN FOOL YOU.", "I PLAY TO WIN, DEAR."]}, {"who": "mate", "lines": ["SHE ONCE MADE A LINE JUDGE CRY."]}, {"who": "captain", "lines": ["HE WAS WRONG ABOUT THE LINE.", "I BAKED HIM A CAKE AFTER."]}],
+        [{"who": "mate", "lines": ["I SAY THINGS TWICE ON PURPOSE,", "YOU KNOW. SHE LIKES HEARING THEM."]}, {"who": "captain", "lines": ["HE SAYS I LOOK NICE IN MY VISOR.", "EVERY MORNING. TWICE."]}, {"who": "mate", "lines": ["SIXTY YEARS. SIXTY YEARS."]}],
+        [{"who": "captain", "lines": ["WE HAVE ONE RULE ON THE ROAD:", "NEVER GO TO BED ANGRY."]}, {"who": "mate", "lines": ["AND ALWAYS LET THE SERVE BOUNCE."]}, {"who": "captain", "lines": ["THAT'S TWO RULES, WALT."]}, {"who": "mate", "lines": ["SAME RULE, DEAR. BE PATIENT.", "IT ALL COMES BACK TO YOU."]}]
+      ],
+      [
+        [{"who": "mate", "lines": ["BRO, READ THEM THE POEM."]}, {"who": "captain", "lines": ["IT'S NOT DONE, BRO."]}, {"who": "mate", "lines": ["BRAD WRITES POEMS BETWEEN SETS.", "THEY'RE ABOUT PROTEIN. AND THE SEA."]}],
+        [{"who": "captain", "lines": ["REAL TALK, BRO? WE WERE THE", "SMALLEST KIDS IN GYM CLASS."]}, {"who": "mate", "lines": ["PICKED LAST. EVERY TIME."]}, {"who": "captain", "lines": ["SO WE STARTED LIFTING.", "NOW WE PICK EACH OTHER FIRST."]}],
+        [{"who": "captain", "lines": ["CHAD CRIED AT THE DOG MOVIE", "IN THE MOTEL LAST NIGHT, BRO."]}, {"who": "mate", "lines": ["THE DOG CAME HOME, BRO!", "HE CAME ALL THE WAY HOME!"]}, {"who": "captain", "lines": ["...YEAH. I CRIED TOO."]}],
+        [{"who": "captain", "lines": ["BRO. WE'VE BEEN THINKING."]}, {"who": "mate", "lines": ["YOU'RE ALWAYS NICE TO US. EVEN", "WHEN WE SERVE INTO THE NET."]}, {"who": "captain", "lines": ["SO YOU'RE OUR BROS NOW.", "NO TAKE-BACKS. BRO HUG AFTER."]}]
+      ],
+      [
+        [{"who": "mate", "lines": ["CAP'N, TELL 'EM ABOUT THE SHIP."]}, {"who": "captain", "lines": ["SHE BE A PONTOON BOAT.", "RENTED. BY THE HOUR."]}, {"who": "mate", "lines": ["WE'VE HAD HER SINCE MAY.", "THE BILL IS... PIRATE-SIZED."]}],
+        [{"who": "captain", "lines": ["BEFORE THE SEA, I KEPT BOOKS.", "AN ACCOUNTANT, I WAS."]}, {"who": "mate", "lines": ["HE STILL DOES OUR TAXES.", "IN THE EYEPATCH."]}, {"who": "captain", "lines": ["A PIRATE KNOWS HIS", "DEDUCTIONS, BILGE."]}],
+        [{"who": "mate", "lines": ["DON'T TELL ANYONE, BUT THE", "CAP'N GETS SEASICK."]}, {"who": "captain", "lines": ["ARR. THAT BE WHY WE PLAY ON", "LAND. A FIRMER DECK."]}, {"who": "mate", "lines": ["HE'S HAPPIEST ON A COURT.", "THAT'S HIS REAL SHIP."]}],
+        [{"who": "captain", "lines": ["WE BURIED REAL TREASURE ONCE.", "GOLD COINS. BY A PARK BENCH."]}, {"who": "mate", "lines": ["WE DREW A MAP.", "THEN WE LOST THE MAP."]}, {"who": "captain", "lines": ["THE TREASURE BE THE FRIENDS WE", "MADE LOOKING. ALSO THE COINS."]}]
+      ],
+      [
+        [{"who": "mate", "lines": ["I SAW A SUNSET ON THE DRIVE.", "IT WAS... FINE."]}, {"who": "captain", "lines": ["HE TOOK FOURTEEN PHOTOS."]}, {"who": "mate", "lines": ["FOR IRONY."]}],
+        [{"who": "captain", "lines": ["I WRITE POETRY. DARK POETRY."]}, {"who": "mate", "lines": ["READ THE ONE ABOUT THE KITCHEN."]}, {"who": "captain", "lines": ["THE NET IS LOW. MY HOPES, LOWER.", "THE BALL BOUNCES ONCE.", "LIKE MY HEART."]}],
+        [{"who": "mate", "lines": ["WE FOUND A KITTEN AT A REST STOP."]}, {"who": "captain", "lines": ["WE ARE NOT DISCUSSING THE KITTEN."]}, {"who": "mate", "lines": ["HER NAME IS MIDNIGHT. SHE HAS", "A LITTLE BLACK BOW."]}],
+        [{"who": "captain", "lines": ["CAN I ADMIT SOMETHING?", "THIS SUMMER HAS BEEN... GOOD."]}, {"who": "mate", "lines": ["SHE MEANS FUN. SHE'S HAD FUN."]}, {"who": "captain", "lines": ["TELL ANYONE AND I'LL HAUNT YOU."]}]
+      ],
+      [
+        [{"who": "mate", "lines": ["THE UNDERSEA COURT WAS MY IDEA.", "I STUDY SEA TURTLES, ACTUALLY."]}, {"who": "captain", "lines": ["SHE'S, LIKE, A SCIENTIST, DUDE."]}, {"who": "mate", "lines": ["KAI CARRIES THE BUCKETS."]}],
+        [{"who": "captain", "lines": ["OKAY, REAL TALK.", "I CAN'T SWIM, DUDE."]}, {"who": "you", "lines": ["BUT YOU'RE A SURFER."]}, {"who": "captain", "lines": ["I'M MORE OF A BEACH STANDER.", "IT'S A WHOLE VIBE."]}],
+        [{"who": "mate", "lines": ["KAI SAYS WE'RE CHASING COURTS", "BECAUSE THE WAVES ARE FLAT."]}, {"who": "mate", "lines": ["HE JUST LIKES ROAD TRIPS WITH", "FRIENDS. HE'D NEVER SAY IT."]}, {"who": "captain", "lines": ["GNARLY ACCUSATION, LANI.", "...ACCURATE, THOUGH."]}],
+        [{"who": "mate", "lines": ["I NAME EVERY TURTLE I FIND."]}, {"who": "captain", "lines": ["NUMBER 212 IS NAMED AFTER YOU."]}, {"who": "mate", "lines": ["SHE'S SLOW TO START, BUT SHE", "NEVER, EVER GIVES UP."]}]
+      ],
+      [
+        [{"who": "captain", "lines": ["I'M OLDER. BY FOUR MINUTES."]}, {"who": "mate", "lines": ["THREE MINUTES. MOM SAYS THREE."]}, {"who": "captain", "lines": ["MOM ROUNDS DOWN."]}],
+        [{"who": "mate", "lines": ["EVERYONE THINKS UNCLE GRIMSBY", "IS A MEANIE."]}, {"who": "captain", "lines": ["HE IS. BUT HE TAUGHT US TO PLAY.", "IN HIS PARKING LOT."]}, {"who": "mate", "lines": ["HE SENDS US A POSTCARD FROM", "EVERY GARAGE HE BUILDS. SO MANY."]}],
+        [{"who": "mate", "lines": ["CAN I PLAY SINGLES ONE DAY?", "JUST ONCE? ON MY OWN?"]}, {"who": "captain", "lines": ["WE'RE THE TWINS, MIA. A SET."]}, {"who": "mate", "lines": ["I KNOW. I'D JUST LIKE TO KNOW", "WHAT I'M LIKE ON MY OWN."]}],
+        [{"who": "captain", "lines": ["WE TALKED ABOUT IT. MIA'S GOING", "TO PLAY SINGLES THIS FALL."]}, {"who": "mate", "lines": ["AND MAX IS GOING TO CHEER.", "LOUDLY. WITH A SIGN."]}, {"who": "captain", "lines": ["IT SAYS TWIN WINS. SINGULAR.", "I MADE IT MYSELF."]}]
+      ],
+      [
+        [{"who": "mate", "lines": ["ACE WEARS THE SAME SOCKS TO", "EVERY TOURNAMENT."]}, {"who": "captain", "lines": ["THEY'RE LUCKY SOCKS."]}, {"who": "mate", "lines": ["THEY'RE A HAZARD."]}],
+        [{"who": "mate", "lines": ["I DO OUR PAPERWORK. SCHEDULES,", "ENTRIES, THE HOTEL."]}, {"who": "captain", "lines": ["I DO THE WINNING."]}, {"who": "mate", "lines": ["WE DO THE WINNING, ACE."]}],
+        [{"who": "captain", "lines": ["WANT TO KNOW A SECRET? I", "PRACTISE AT FIVE A.M. ALONE."]}, {"who": "captain", "lines": ["NOT BECAUSE I LOVE IT.", "BECAUSE I'M SCARED OF LOSING."]}, {"who": "mate", "lines": ["HE'S NEVER SAID THAT OUT LOUD."]}],
+        [{"who": "mate", "lines": ["I ALMOST QUIT LAST SPRING.", "WINNING STOPPED BEING FUN."]}, {"who": "captain", "lines": ["THEN YOU TWO SHOWED UP."]}, {"who": "mate", "lines": ["NOW IT'S FUN AGAIN.", "SO DON'T GO EASY ON US."]}]
+      ],
+      [
+        [{"who": "captain", "lines": ["YOU KNOW WHO I AM?"]}, {"who": "you", "lines": ["THE GUY FROM THE BOX?"]}, {"who": "captain", "lines": ["THE GUY FROM THE BOX.", "NOBODY EVER KNOWS THE NAME."]}],
+        [{"who": "captain", "lines": ["THAT PHOTO ON THE BOX?", "THEY MADE ME SMILE FOR AN HOUR."]}, {"who": "captain", "lines": ["I DON'T SMILE ON A COURT.", "I SMILE AFTER. IF I'VE EARNED IT."]}],
+        [{"who": "captain", "lines": ["MY CAR HAS ONE CASSETTE IN IT.", "IT'S BEEN STUCK SINCE 1979."]}, {"who": "partner", "lines": ["WHAT'S ON IT?"]}, {"who": "captain", "lines": ["A SONG I KNOW EVERY WORD OF.", "I DON'T SING THEM. NOT ANY MORE."]}],
+        [{"who": "captain", "lines": ["I HAD A PARTNER ONCE. BEST", "BACKHAND ON THE WHOLE COAST."]}, {"who": "captain", "lines": ["NEVER FOUND ANOTHER ONE.", "SO I COVER BOTH SIDES MYSELF."]}, {"who": "you", "lines": ["YOU MISS THEM."]}, {"who": "captain", "lines": ["EVERY SERVE. NOW SERVE."]}]
+      ]
+    ],
+    "start": {
+      "-1": [
+        [{"who": "partner", "lines": ["FUN FACT: I FAILED MY DRIVING", "TEST THREE TIMES."]}, {"who": "you", "lines": ["YOU'RE DRIVING RIGHT NOW."]}, {"who": "partner", "lines": ["FOURTH TIME'S THE CHARM.", "SEATBELT ON, PLEASE."]}],
+        [{"who": "partner", "lines": ["CAN I TELL YOU WHY I PLAY?"]}, {"who": "partner", "lines": ["WHEN I WAS LITTLE, NOBODY PICKED", "ME FOR ANYTHING. TOO SMALL."]}, {"who": "partner", "lines": ["PICKLEBALL DIDN'T CARE HOW BIG", "I WAS. IT JUST WANTED A PARTNER."]}],
+        [{"who": "partner", "lines": ["I GET SCARED BEFORE BIG MATCHES.", "LIKE, HANDS-SHAKING SCARED."]}, {"who": "you", "lines": ["YOU NEVER LOOK SCARED."]}, {"who": "partner", "lines": ["THAT'S BECAUSE YOU'RE THERE.", "THAT'S KIND OF THE WHOLE THING."]}],
+        [{"who": "partner", "lines": ["AFTER THE PARK, I THOUGHT THAT", "WAS THE BIG ADVENTURE."]}, {"who": "partner", "lines": ["TURNS OUT THE BIG ADVENTURE IS", "JUST... THIS. THE VAN. YOU."]}, {"who": "you", "lines": ["DON'T GET MUSHY."]}, {"who": "partner", "lines": ["TOO LATE. MAP'S IN THE GLOVEBOX."]}]
+      ],
+      "0": [
+        [{"who": "partner", "lines": ["KIDDO GAVE ME A LIST OF JOKES", "I CAN'T TELL ON THIS TRIP."]}, {"who": "you", "lines": ["HOW LONG IS THE LIST?"]}, {"who": "partner", "lines": ["IT'S DOUBLE-SIDED, SPORT."]}],
+        [{"who": "partner", "lines": ["KIDDO'S AT CAMP THIS WEEK.", "FIRST TIME AWAY FROM HOME."]}, {"who": "partner", "lines": ["I PACKED HER A JOKE FOR EVERY", "DAY. AND ONE FOR EMERGENCIES."]}],
+        [{"who": "partner", "lines": ["I WAS A PRETTY GOOD PLAYER", "ONCE, YOU KNOW. COLLEGE TEAM."]}, {"who": "you", "lines": ["WHAT HAPPENED?"]}, {"who": "partner", "lines": ["KIDDO HAPPENED. BEST TRADE", "I EVER MADE. DON'T TELL HER."]}],
+        [{"who": "partner", "lines": ["SPORT, I'VE GOT A SERIOUS ONE."]}, {"who": "you", "lines": ["A SERIOUS JOKE?"]}, {"who": "partner", "lines": ["NO. THANKS FOR ASKING ME ALONG.", "A DAD DOESN'T GET ASKED MUCH."]}, {"who": "partner", "lines": ["NOW. WHAT DO YOU CALL A VAN", "FULL OF FRIENDS? A GOOD SUMMER."]}]
+      ],
+      "1": [
+        [{"who": "partner", "lines": ["WALT'S HOME WITH HIS KNEE, DEAR.", "HE SAID TO WIN ONE FOR HIM."]}, {"who": "you", "lines": ["WE WILL."]}, {"who": "partner", "lines": ["HE SAID IT TWICE. SO WIN TWO."]}],
+        [{"who": "partner", "lines": ["I DROVE A SCHOOL BUS FOR", "THIRTY YEARS, DEAR. ROUTE NINE."]}, {"who": "partner", "lines": ["SO DON'T TELL ME HOW TO MERGE.", "I'VE MERGED WITH FORTY KIDS", "SINGING IN THE BACK."]}],
+        [{"who": "partner", "lines": ["I CALL WALT FROM EVERY PAY", "PHONE. HE PICKS UP FIRST RING."]}, {"who": "you", "lines": ["EVERY TIME?"]}, {"who": "partner", "lines": ["SIXTY YEARS, DEAR. HE'S NEVER", "ONCE LET IT RING TWICE."]}],
+        [{"who": "partner", "lines": ["PEOPLE THINK OLD MEANS SLOW."]}, {"who": "partner", "lines": ["I'M NOT SLOW, DEAR. I'M", "PATIENT. THERE'S A DIFFERENCE."]}, {"who": "partner", "lines": ["SLOW LOSES. PATIENT WAITS FOR", "THE HIGH BALL. NOW DRIVE."]}]
+      ],
+      "2": [
+        [{"who": "partner", "lines": ["BRO, I LEFT CHAD A NOTE."]}, {"who": "you", "lines": ["WHAT DID IT SAY?"]}, {"who": "partner", "lines": ["GONE TO THE BEACH. FEED THE", "GOLDFISH. LEG DAY IS SACRED."]}],
+        [{"who": "partner", "lines": ["CAN I READ YOU A POEM, BRO?"]}, {"who": "partner", "lines": ["THE WAVE CURLS. THE PADDLE FLEXES.", "A DINK IS JUST A SMALL HELLO."]}, {"who": "you", "lines": ["THAT'S... ACTUALLY NICE."]}],
+        [{"who": "partner", "lines": ["MY MOM DRIVES ALL NIGHT TO SEE", "MY MATCHES. EVERY ONE, BRO."]}, {"who": "partner", "lines": ["SO I GO HARD. FOR HER.", "THE SHAKES ARE JUST FOR ME."]}],
+        [{"who": "partner", "lines": ["BRO. I USED TO THINK STRONG", "MEANT HITTING HARD."]}, {"who": "partner", "lines": ["YOU TAUGHT ME THE DINK, BRO.", "STRONG IS KNOWING WHEN NOT TO."]}, {"who": "you", "lines": ["THAT'S A POEM, BRAD."]}, {"who": "partner", "lines": ["NO WAY. ...WRITE IT DOWN."]}]
+      ],
+      "3": [
+        [{"who": "partner", "lines": ["THE SEA CALLS TO ME, MATEY."]}, {"who": "you", "lines": ["THAT'S THE RADIO."]}, {"who": "partner", "lines": ["AYE. AND THE RADIO SAYS WE'RE", "LOW ON GAS. ARR."]}],
+        [{"who": "partner", "lines": ["BILGE IS MINDING THE BOAT.", "HE SENDS HIS REGARDS. AND A BILL."]}, {"who": "partner", "lines": ["A PIRATE ALWAYS SPLITS THE", "GAS MONEY, MATEY. IT'S THE CODE."]}],
+        [{"who": "partner", "lines": ["I WAS AN ACCOUNTANT FOR", "TWENTY YEARS, YOU KNOW."]}, {"who": "partner", "lines": ["ONE DAY I BOUGHT A HAT WITH", "THREE CORNERS. NEVER LOOKED BACK."]}, {"who": "you", "lines": ["JUST THE HAT?"]}, {"who": "partner", "lines": ["THE HAT WAS ENOUGH, MATEY."]}],
+        [{"who": "partner", "lines": ["I GET SEASICK. THERE. I SAID IT."]}, {"who": "partner", "lines": ["BUT A PIRATE ISN'T THE BOAT.", "IT'S THE CREW. YE'RE CREW NOW."]}, {"who": "you", "lines": ["AYE AYE, CAP'N."]}, {"who": "partner", "lines": ["...NICEST THING A LANDLUBBER", "EVER SAID TO ME."]}]
+      ],
+      "4": [
+        [{"who": "partner", "lines": ["I MADE A ROAD TRIP TAPE.", "IT'S RAIN SOUNDS. NINETY MINUTES."]}, {"who": "you", "lines": ["ANY SONGS?"]}, {"who": "partner", "lines": ["THE RAIN IS THE SONG."]}],
+        [{"who": "partner", "lines": ["VLAD STAYED HOME WITH MIDNIGHT.", "OUR CAT. SHE'S VERY DARK."]}, {"who": "partner", "lines": ["SHE'S ALSO VERY SOFT.", "IGNORE THAT PART."]}],
+        [{"who": "partner", "lines": ["I WEAR BLACK BECAUSE IT HIDES", "COURT DUST. LAUNDRY IS EASY."]}, {"who": "you", "lines": ["NOT BECAUSE OF THE VOID?"]}, {"who": "partner", "lines": ["...ALSO THE VOID. FINE."]}],
+        [{"who": "partner", "lines": ["I WROTE A POEM ABOUT US."]}, {"who": "partner", "lines": ["TWO SHADOWS IN A SUNNY VAN.", "ONE OF THEM IS SMILING."]}, {"who": "you", "lines": ["WHICH ONE?"]}, {"who": "partner", "lines": ["NEVER YOU MIND. DRIVE."]}]
+      ],
+      "5": [
+        [{"who": "partner", "lines": ["DUDE, I PACKED THE ESSENTIALS.", "SUNSCREEN, FLIP-FLOPS, PADDLE."]}, {"who": "you", "lines": ["CLOTHES?"]}, {"who": "partner", "lines": ["...THE ESSENTIALS, DUDE."]}],
+        [{"who": "partner", "lines": ["LANI SAYS HI. SHE'S COUNTING", "TURTLES ALL SUMMER."]}, {"who": "partner", "lines": ["SHE'S THE SMART ONE. I'M THE", "ONE WHO CARRIES THE COOLER."]}, {"who": "partner", "lines": ["IT'S A GOOD SYSTEM, BRAH."]}],
+        [{"who": "partner", "lines": ["SECRET? I CAN'T REALLY SURF."]}, {"who": "you", "lines": ["KAI!"]}, {"who": "partner", "lines": ["I JUST LIKE BEING WHERE PEOPLE", "ARE HAVING FUN. THE BEACH. HERE."]}],
+        [{"who": "partner", "lines": ["MY DAD SAID I'D NEVER FINISH", "ANYTHING, DUDE."]}, {"who": "partner", "lines": ["SO THIS TIME I'M GOING ALL THE", "WAY TO THE OCEAN. WITH YOU."]}, {"who": "you", "lines": ["WE'LL GET THERE."]}, {"who": "partner", "lines": ["TOTALLY. COWABUNGA, BUT QUIET."]}]
+      ],
+      "6": [
+        [{"who": "partner", "lines": ["MIA CALLED. SHE SAYS I'M", "DOING THIS WRONG."]}, {"who": "you", "lines": ["DOING WHAT WRONG?"]}, {"who": "partner", "lines": ["SHE DIDN'T SAY. SHE NEVER SAYS.", "IT'S A TWIN THING."]}],
+        [{"who": "partner", "lines": ["UNCLE GRIMSBY GAVE US GAS MONEY."]}, {"who": "you", "lines": ["GRIMSBY? REALLY?"]}, {"who": "partner", "lines": ["HE SAID FOR A GOOD CAUSE. HE", "THINKS WE'RE BUYING ASPHALT."]}],
+        [{"who": "partner", "lines": ["THIS IS MY FIRST TRIP WITHOUT", "MIA. EVER. IT'S WEIRD."]}, {"who": "partner", "lines": ["I KEEP TURNING TO SAY SOMETHING", "AND IT'S JUST... YOU."]}, {"who": "you", "lines": ["IS THAT BAD?"]}, {"who": "partner", "lines": ["NO. IT'S JUST NEW. NEW IS OKAY."]}],
+        [{"who": "partner", "lines": ["I'VE BEEN THE TWINS MY WHOLE", "LIFE. THIS SUMMER I'M MAX."]}, {"who": "partner", "lines": ["JUST MAX. IT'S A GOOD NAME.", "I DIDN'T KNOW THAT BEFORE."]}, {"who": "you", "lines": ["IT'S A GREAT NAME."]}, {"who": "partner", "lines": ["DON'T TELL MIA. SHE'LL WANT ONE."]}]
+      ],
+      "7": [
+        [{"who": "partner", "lines": ["I PACKED MY LUCKY SOCKS."]}, {"who": "you", "lines": ["ONE PAIR?"]}, {"who": "partner", "lines": ["ONE PAIR. FOR THE WHOLE TRIP.", "DON'T SIT DOWNWIND."]}],
+        [{"who": "partner", "lines": ["JADE THINKS I'M ON VACATION."]}, {"who": "you", "lines": ["YOU DIDN'T TELL HER?"]}, {"who": "partner", "lines": ["I LEFT A NOTE. IT SAYS", "SCOUTING. THAT'S HALF TRUE."]}],
+        [{"who": "partner", "lines": ["I'VE NEVER BEEN THE UNDERDOG.", "IT'S SCARY. AND KIND OF GREAT."]}, {"who": "partner", "lines": ["NOBODY EXPECTS ANYTHING.", "I CAN JUST PLAY."]}],
+        [{"who": "partner", "lines": ["I USED TO PRACTISE ALONE AT", "FIVE IN THE MORNING. EVERY DAY."]}, {"who": "partner", "lines": ["THIS SUMMER I SLEPT IN.", "WE STILL WON. WHO KNEW?"]}, {"who": "you", "lines": ["JADE KNEW."]}, {"who": "partner", "lines": ["JADE ALWAYS KNOWS. IT'S ANNOYING."]}]
+      ]
+    },
+    "motel": {
+      "-1": [
+        [{"who": "partner", "lines": ["YOU TAKE THE BED BY THE WINDOW.", "I'LL TAKE THE ONE BY THE ICE", "MACHINE. I LIKE A BIT OF HUM."]}],
+        [{"who": "partner", "lines": ["I CAN'T SLEEP BEFORE BIG", "MATCHES. SO I COUNT DINKS."]}, {"who": "you", "lines": ["HOW MANY?"]}, {"who": "partner", "lines": ["LAST NIGHT? FOUR HUNDRED AND TWO."]}],
+        [{"who": "partner", "lines": ["I CALLED HOME. THE PARK'S FINE.", "THE KIDS PAINTED THE NET POSTS."]}, {"who": "partner", "lines": ["SOMETIMES I MISS IT. THEN I SEE", "A NEW COURT OUT THE WINDOW."]}],
+        [{"who": "partner", "lines": ["THANKS FOR SAYING YES TO ALL", "THIS. THE VAN. THE ROAD. ME."]}, {"who": "you", "lines": ["THANKS FOR ASKING."]}, {"who": "partner", "lines": ["OKAY. LIGHTS OUT. BIG DAY."]}]
+      ],
+      "0": [
+        [{"who": "partner", "lines": ["THIS MOTEL HAS A POOL, SPORT."]}, {"who": "partner", "lines": ["IT ALSO HAS A NET IN IT.", "THAT'S NOT A POOL. THAT'S A SIGN."]}],
+        [{"who": "partner", "lines": ["I SNORE. FAIR WARNING.", "KIDDO SAYS I SOUND LIKE A VAN."]}, {"who": "you", "lines": ["OUR VAN?"]}, {"who": "partner", "lines": ["SHE SAYS OUR VAN IS QUIETER."]}],
+        [{"who": "partner", "lines": ["I'M WRITING KIDDO A POSTCARD.", "HOW DO YOU SPELL DILL-ICIOUS?"]}, {"who": "you", "lines": ["DON'T."]}, {"who": "partner", "lines": ["TOO LATE. IT'S IN INK."]}],
+        [{"who": "partner", "lines": ["CAN I TELL YOU SOMETHING? I", "DON'T KNOW WHAT I'M DOING. AS A", "DAD, I MEAN."]}, {"who": "partner", "lines": ["I JUST KEEP SHOWING UP. THAT", "SEEMS TO BE MOST OF IT, SPORT."]}]
+      ],
+      "1": [
+        [{"who": "partner", "lines": ["I BROUGHT MY OWN PILLOW, DEAR.", "MY OWN TEA. MY OWN KETTLE."]}, {"who": "partner", "lines": ["A LADY TRAVELS PREPARED."]}],
+        [{"who": "partner", "lines": ["WALT AND I STAYED HERE IN 1966.", "THE SAME ROOM. THE SAME CURTAINS."]}, {"who": "you", "lines": ["THE SAME CURTAINS?"]}, {"who": "partner", "lines": ["NOBODY HAS EVER WASHED THEM."]}],
+        [{"who": "partner", "lines": ["I WRITE WALT A LETTER EVERY", "NIGHT WE'RE APART."]}, {"who": "partner", "lines": ["HE WRITES BACK. THE SAME", "LETTER, TWICE."]}],
+        [{"who": "partner", "lines": ["DO YOU KNOW THE SECRET TO", "SIXTY YEARS, DEAR?"]}, {"who": "partner", "lines": ["FIND SOMEONE WHO'LL CARRY YOUR", "LAWN CHAIR. THEN CARRY THEIRS."]}]
+      ],
+      "2": [
+        [{"who": "partner", "lines": ["BRO, THIS MOTEL HAS NO GYM."]}, {"who": "partner", "lines": ["I'LL DO PUSH-UPS BY THE ICE", "MACHINE. THAT'S BASICALLY A GYM."]}],
+        [{"who": "partner", "lines": ["CAN I LEAVE THE LIGHT ON, BRO?"]}, {"who": "you", "lines": ["SURE."]}, {"who": "partner", "lines": ["COOL. NOT SCARED. JUST... LIGHT", "IS GOOD. FOR GAINS."]}],
+        [{"who": "partner", "lines": ["CHAD CALLS EVERY NIGHT TO", "SAY GOOD NIGHT, BRO."]}, {"who": "partner", "lines": ["HE PUTS THE GOLDFISH ON TOO.", "HIS NAME IS DEADLIFT."]}],
+        [{"who": "partner", "lines": ["YOU KNOW WHAT I LIKE ABOUT", "YOU, BRO?"]}, {"who": "partner", "lines": ["YOU NEVER ASK HOW MUCH I", "BENCH. YOU ASK HOW I'M DOING."]}]
+      ],
+      "3": [
+        [{"who": "partner", "lines": ["A BED THAT DOESN'T ROCK.", "ARR. BLISS."]}],
+        [{"who": "partner", "lines": ["I DREAM OF THE SEA EVERY NIGHT."]}, {"who": "you", "lines": ["THAT'S NICE."]}, {"who": "partner", "lines": ["IN THE DREAM I'M ALSO SEASICK."]}],
+        [{"who": "partner", "lines": ["I'M DOING BILGE'S TAXES.", "PIRATES STILL FILE, MATEY."]}, {"who": "partner", "lines": ["HE CLAIMED A PARROT AS A", "DEPENDENT. HE HAS NO PARROT."]}],
+        [{"who": "partner", "lines": ["WHEN I KEPT BOOKS, EVERY DAY", "WAS THE SAME."]}, {"who": "partner", "lines": ["NOW EVERY DAY'S A NEW COURT.", "I'M RICHER NOW, MATEY. AND I", "HAVE LESS MONEY."]}]
+      ],
+      "4": [
+        [{"who": "partner", "lines": ["I ASKED FOR THE ROOM WITH THE", "SADDEST VIEW."]}, {"who": "partner", "lines": ["IT'S THE ICE MACHINE. PERFECT."]}],
+        [{"who": "partner", "lines": ["I DON'T SLEEP. I BROOD."]}, {"who": "you", "lines": ["ALL NIGHT?"]}, {"who": "partner", "lines": ["UNTIL ABOUT TEN. THEN I SLEEP."]}],
+        [{"who": "partner", "lines": ["VLAD SENT A PHOTO OF MIDNIGHT.", "SHE'S IN A LITTLE CAPE."]}, {"who": "partner", "lines": ["I'M NOT SMILING. IT'S THE LAMP."]}],
+        [{"who": "partner", "lines": ["I HAD A NICE DAY TODAY.", "THAT'S NEW FOR ME."]}, {"who": "partner", "lines": ["I'M WRITING IT DOWN. IN BLACK", "INK, SO IT STILL COUNTS."]}]
+      ],
+      "5": [
+        [{"who": "partner", "lines": ["DUDE. FREE ICE."]}, {"who": "partner", "lines": ["THIS IS THE BEST MOTEL IN THE", "HISTORY OF MOTELS."]}],
+        [{"who": "partner", "lines": ["I SLEEP ON THE FLOOR, BRAH.", "BEDS ARE TOO SOFT."]}, {"who": "partner", "lines": ["THE FLOOR IS HONEST, DUDE.", "YOU ALWAYS KNOW WHERE IT IS."]}],
+        [{"who": "partner", "lines": ["LANI CALLED. TURTLE 212 MADE", "IT TO THE OCEAN TODAY."]}, {"who": "you", "lines": ["THAT'S AMAZING."]}, {"who": "partner", "lines": ["RIGHT? I CRIED BY THE VENDING", "MACHINE. A LITTLE. GNARLY."]}],
+        [{"who": "partner", "lines": ["I THINK I'M GOOD AT SOMETHING,", "DUDE. FOR REAL."]}, {"who": "partner", "lines": ["NOT SURFING. BEING A PARTNER.", "IS THAT A THING? CAN YOU BE", "GOOD AT THAT?"]}, {"who": "you", "lines": ["YOU'RE THE BEST AT IT."]}]
+      ],
+      "6": [
+        [{"who": "partner", "lines": ["TWO BEDS. I'LL TAKE THE LEFT.", "MIA ALWAYS TAKES THE LEFT."]}, {"who": "partner", "lines": ["...I'VE NEVER HAD THE LEFT."]}],
+        [{"who": "partner", "lines": ["I CALLED MIA. WE SAID GOOD", "NIGHT AT THE SAME TIME."]}, {"who": "partner", "lines": ["TWO STATES APART. STILL A TIE."]}],
+        [{"who": "partner", "lines": ["UNCLE GRIMSBY OWNS THIS", "MOTEL'S PARKING LOT."]}, {"who": "partner", "lines": ["HE SAYS HI. HE ALSO CHARGED", "US FOR THE SPACE."]}],
+        [{"who": "partner", "lines": ["WHEN WE GET HOME, I'M GOING", "TO TELL MIA ALL OF THIS."]}, {"who": "partner", "lines": ["THE WHOLE THING. IT'LL BE THE", "FIRST STORY SHE WASN'T IN."]}]
+      ],
+      "7": [
+        [{"who": "partner", "lines": ["I ASKED FOR THE CHAMPION'S", "SUITE."]}, {"who": "partner", "lines": ["THIS IS IT. IT HAS A WAFFLE IRON."]}],
+        [{"who": "partner", "lines": ["I CAN'T SLEEP WITHOUT A", "TROPHY ON THE NIGHTSTAND."]}, {"who": "you", "lines": ["WE DON'T HAVE ONE."]}, {"who": "partner", "lines": ["THEN WE'D BETTER WIN ONE."]}],
+        [{"who": "partner", "lines": ["JADE CALLED. SHE FOUND MY NOTE."]}, {"who": "partner", "lines": ["SHE SAID GOOD LUCK, AND THAT", "I'M AN IDIOT. BOTH WITH LOVE."]}],
+        [{"who": "partner", "lines": ["I'VE STAYED IN FANCY HOTELS.", "REALLY FANCY ONES."]}, {"who": "partner", "lines": ["NEVER HAD A BETTER NIGHT THAN", "HERE. A NET IN THE POOL. FUNNY."]}]
+      ]
+    },
+    "diner": {
+      "-1": [
+        [{"who": "partner", "lines": ["I ALWAYS GET THE GRILLED", "CHEESE. IT'S A TRADITION."]}, {"who": "you", "lines": ["SINCE WHEN?"]}, {"who": "partner", "lines": ["SINCE TODAY."]}],
+        [{"who": "partner", "lines": ["MY MOM WAITED TABLES AT A", "PLACE LIKE THIS."]}, {"who": "partner", "lines": ["I DID MY HOMEWORK IN THE CORNER", "BOOTH. THIS FEELS LIKE HOME."]}],
+        [{"who": "partner", "lines": ["SPLIT A PIE? I'LL TAKE THE", "CRUST. NOBODY LIKES THE CRUST."]}, {"who": "partner", "lines": ["SO I DECIDED I LOVE IT.", "MORE PIE FOR US."]}],
+        [{"who": "partner", "lines": ["WE SHOULD GET OUR PICTURE ON", "THE WALL. BY THE PIE CASE."]}, {"who": "partner", "lines": ["THE TWO WHO DROVE TO THE SUMMER", "OPEN. AND ATE ALL THE PIE."]}]
+      ],
+      "0": [
+        [{"who": "partner", "lines": ["WHAT DO YOU CALL A FAKE NOODLE?"]}, {"who": "you", "lines": ["DON'T."]}, {"who": "partner", "lines": ["AN IMPASTA. ORDER THE PASTA."]}],
+        [{"who": "partner", "lines": ["KIDDO LOVES THIS KIND OF PLACE.", "I'M TAKING HER A NAPKIN."]}, {"who": "you", "lines": ["JUST A NAPKIN?"]}, {"who": "partner", "lines": ["SIGNED BY THE COOK. SHE'LL FLIP."]}],
+        [{"who": "partner", "lines": ["I'M ON A DIET, SPORT."]}, {"who": "partner", "lines": ["THE DIET IS: WHATEVER YOU", "ORDER, BUT ALSO FRIES."]}],
+        [{"who": "partner", "lines": ["I WORKED A GRILL LIKE THAT", "ALL THROUGH COLLEGE."]}, {"who": "partner", "lines": ["BURNED EVERY PANCAKE. NOW I", "MAKE KIDDO PANCAKES ON SUNDAYS."]}, {"who": "partner", "lines": ["STILL BURNED. SHE EATS THEM", "ANYWAY. EVERY SUNDAY."]}]
+      ],
+      "1": [
+        [{"who": "partner", "lines": ["THE COFFEE HERE IS TERRIBLE.", "I'LL HAVE THREE CUPS, DEAR."]}],
+        [{"who": "partner", "lines": ["I BROUGHT MY OWN SPOON, DEAR."]}, {"who": "partner", "lines": ["AND A PIE FROM HOME, IN CASE", "THEIRS ISN'T UP TO SCRATCH."]}],
+        [{"who": "partner", "lines": ["WALT PROPOSED IN A DINER.", "BOOTH FOUR. HE ASKED TWICE."]}, {"who": "you", "lines": ["TWICE?"]}, {"who": "partner", "lines": ["I SAID YES THE FIRST TIME. HE", "WAS TOO NERVOUS TO HEAR IT."]}],
+        [{"who": "partner", "lines": ["EAT YOUR GREENS, DEAR."]}, {"who": "partner", "lines": ["I'VE PLAYED SINCE 1962 BECAUSE", "I EAT MY GREENS. AND I NEVER", "SKIP DESSERT. BALANCE."]}]
+      ],
+      "2": [
+        [{"who": "partner", "lines": ["BRO, DO THEY HAVE A PROTEIN", "PANCAKE?"]}, {"who": "you", "lines": ["THEY HAVE A REGULAR PANCAKE."]}, {"who": "partner", "lines": ["I'LL MAKE IT PROTEIN. WITH BELIEF."]}],
+        [{"who": "partner", "lines": ["CHAD AND I SPLIT EVERYTHING.", "HALF A BURGER, HALF A SHAKE."]}, {"who": "partner", "lines": ["I DON'T KNOW HOW TO EAT A WHOLE", "BURGER, BRO. IT FEELS WRONG."]}],
+        [{"who": "partner", "lines": ["THE WAITRESS CALLED ME HONEY."]}, {"who": "partner", "lines": ["BRO. I'M COMING BACK HERE", "FOREVER."]}],
+        [{"who": "partner", "lines": ["I'M GETTING THE PIE, BRO.", "NO SHAME."]}, {"who": "partner", "lines": ["STRONG PEOPLE EAT PIE.", "THAT'S IN A POEM I'M WRITING."]}]
+      ],
+      "3": [
+        [{"who": "partner", "lines": ["A FISH SANDWICH, AND A SIDE OF", "FISH FOR BILGE'S PARROT."]}, {"who": "you", "lines": ["BILGE HAS NO PARROT."]}, {"who": "partner", "lines": ["AND YET HE ASKS FOR THE FISH."]}],
+        [{"who": "partner", "lines": ["I'LL PAY, MATEY. I KEEP A", "LEDGER."]}, {"who": "partner", "lines": ["YE OWE ME FOUR PIES AND ONE", "DOUBLOON. CALL IT FIVE DOLLARS."]}],
+        [{"who": "partner", "lines": ["THE COOK SAYS HIS GRANDPA WAS", "A REAL SAILOR."]}, {"who": "partner", "lines": ["I TOLD HIM I WAS A REAL", "ACCOUNTANT. WE SHOOK HANDS."]}],
+        [{"who": "partner", "lines": ["A CREW THAT EATS TOGETHER", "SAILS TOGETHER."]}, {"who": "partner", "lines": ["OR DRIVES. WHATEVER WE DO.", "PASS THE KETCHUP, MATEY."]}]
+      ],
+      "4": [
+        [{"who": "partner", "lines": ["BLACK COFFEE. BLACK TOAST."]}, {"who": "you", "lines": ["BLACK TOAST?"]}, {"who": "partner", "lines": ["THEY BURN IT FOR ME. THEY KNOW."]}],
+        [{"who": "partner", "lines": ["THE JUKEBOX HAS ONE SAD SONG.", "I'VE PLAYED IT SIX TIMES."]}, {"who": "partner", "lines": ["NOBODY HAS ASKED ME TO STOP.", "I RESPECT THIS PLACE."]}],
+        [{"who": "partner", "lines": ["THE CHERRY PIE, PLEASE.", "IT'S RED. LIKE MY HEART."]}, {"who": "you", "lines": ["THAT'S SWEET, RAVEN."]}, {"who": "partner", "lines": ["MY HEART IS FULL OF CHERRIES.", "AND SORROW. MOSTLY CHERRIES."]}],
+        [{"who": "partner", "lines": ["VLAD AND I MET IN A DINER.", "WE WERE THE ONLY TWO IN BLACK."]}, {"who": "partner", "lines": ["WE'VE BEEN THE GOTH CLUB EVER", "SINCE. A CLUB OF TWO. THREE NOW."]}]
+      ],
+      "5": [
+        [{"who": "partner", "lines": ["DUDE. BREAKFAST ALL DAY?"]}, {"who": "partner", "lines": ["THIS IS THE GREATEST DAY OF", "MY LIFE. AGAIN."]}],
+        [{"who": "partner", "lines": ["FISH TACOS, PLEASE. NO FISH.", "LANI WOULDN'T LIKE IT."]}],
+        [{"who": "partner", "lines": ["MY BIG BRO RAN A TACO STAND.", "HE TAUGHT ME TO SURF. KIND OF."]}, {"who": "partner", "lines": ["HE SAID THE WAVE DOESN'T CARE", "IF YOU'RE GOOD. JUST THAT YOU", "SHOW UP."]}],
+        [{"who": "partner", "lines": ["LET'S GET ONE OF EVERY PIE AND", "RATE THEM, DUDE."]}, {"who": "you", "lines": ["THAT'S EIGHT PIES."]}, {"who": "partner", "lines": ["THAT'S EIGHT ADVENTURES."]}]
+      ],
+      "6": [
+        [{"who": "partner", "lines": ["MIA AND I ALWAYS ORDER THE", "SAME THING. AT THE SAME TIME."]}, {"who": "partner", "lines": ["I DON'T KNOW WHAT I LIKE.", "I'LL HAVE WHAT YOU'RE HAVING."]}],
+        [{"who": "partner", "lines": ["I TRIED ORDERING ON MY OWN."]}, {"who": "partner", "lines": ["I GOT A SALAD. I DON'T LIKE", "SALAD. BUT I PICKED IT. ME."]}],
+        [{"who": "partner", "lines": ["UNCLE GRIMSBY TAKES US TO A", "DINER EVERY BIRTHDAY."]}, {"who": "partner", "lines": ["HE ALWAYS TIPS BIG. DON'T TELL", "ANYONE. HE'D HATE THAT."]}],
+        [{"who": "partner", "lines": ["FOUND IT. MY ORDER. PANCAKES,", "NO SYRUP, PEANUT BUTTER."]}, {"who": "you", "lines": ["THAT'S STRANGE."]}, {"who": "partner", "lines": ["IT'S MINE, THOUGH."]}]
+      ],
+      "7": [
+        [{"who": "partner", "lines": ["A CHAMPION'S BREAKFAST: EGGS,", "TOAST AND A SMALL TROPHY."]}, {"who": "you", "lines": ["THEY DON'T SERVE TROPHIES."]}, {"who": "partner", "lines": ["THEN I'LL HAVE THE PANCAKES."]}],
+        [{"who": "partner", "lines": ["I'VE NEVER EATEN AT A COUNTER.", "JADE ALWAYS BOOKS A TABLE."]}, {"who": "partner", "lines": ["THIS IS GREAT. I CAN SEE THE", "PIES FROM HERE."]}],
+        [{"who": "partner", "lines": ["THE COOK RECOGNIZED ME. THEN HE", "ASKED FOR YOUR AUTOGRAPH."]}, {"who": "partner", "lines": ["I'M FINE WITH THAT. MOSTLY."]}],
+        [{"who": "partner", "lines": ["EVERYONE THINKS I WIN BECAUSE", "I'M SERIOUS."]}, {"who": "partner", "lines": ["I WIN BECAUSE I EAT A GOOD", "BREAKFAST. WRITE THAT DOWN."]}]
+      ]
+    },
+    "rival_again": [
+      [{"who": "captain", "lines": ["DOREEN DRIVES. I NAVIGATE."]}, {"who": "mate", "lines": ["HE'S GOT US LOST IN NINE STATES."]}, {"who": "captain", "lines": ["EIGHT. ONE OF THEM WAS A MALL."]}],
+      [{"who": "mate", "lines": ["THE RV ISN'T A HOBBY, HON.", "IT'S OUR HOUSE. THIRTY YEARS."]}, {"who": "captain", "lines": ["EVERY HIGHWAY'S OUR STREET.", "THAT'S WHY WE'RE TOUCHY ABOUT IT."]}],
+      [{"who": "captain", "lines": ["YOU LOOKING AT MY SCARF?"]}, {"who": "mate", "lines": ["BUCK KNITS. HE MADE IT AT A", "RED LIGHT. A VERY LONG RED LIGHT."]}, {"who": "captain", "lines": ["IT'S IN ROAD HOG COLORS.", "YOU WANT ONE? ...I MEAN, NO."]}],
+      [{"who": "mate", "lines": ["WE NEVER HAD KIDS. WE HAD", "THE ROAD. AND EACH OTHER."]}, {"who": "captain", "lines": ["AND NOW A COUPLE OF PESTS IN", "A VAN. DON'T LET IT GO TO YOUR HEAD."]}]
+    ],
+    "rival_friendly": [
+      [{"who": "mate", "lines": ["COOKOUT AT THE RV TONIGHT.", "YOU'RE COMING. NOT A QUESTION."]}, {"who": "captain", "lines": ["DOREEN'S CHILI. BRING A SPOON", "AND A FIRE EXTINGUISHER."]}],
+      [{"who": "captain", "lines": ["WANT TO KNOW ABOUT THE HORN SONG?"]}, {"who": "mate", "lines": ["ON OUR FIRST DATE THE RADIO", "BROKE. HE HONKED THE WHOLE SONG."]}, {"who": "captain", "lines": ["SHE MARRIED ME ANYWAY."]}],
+      [{"who": "captain", "lines": ["WE TOLD EVERY TRUCK STOP ON THE", "COAST ABOUT YOU TWO."]}, {"who": "mate", "lines": ["GOOD THINGS, HON. MOSTLY."]}, {"who": "captain", "lines": ["WE SAID YOU'RE PESTS.", "OUR PESTS."]}],
+      [{"who": "mate", "lines": ["BUCK'S BEEN PRACTISING A", "SPEECH. GO ON, BUCK."]}, {"who": "captain", "lines": ["THE ROAD IS LONG, AND...", "AND YOU'RE ALL RIGHT. THAT'S IT."]}, {"who": "mate", "lines": ["HE CRIED WRITING IT."]}]
+    ]
   },
   "rival": {"name": "ROAD HOGS", "members": [
     {"name": "ROAD HOGS", "who": "BUCK", "variant": "male", "paddle": "red", "hat": "bandana", "head": "fullbeard", "skin": "tan",

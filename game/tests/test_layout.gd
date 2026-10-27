@@ -1475,6 +1475,17 @@ func test_trip_scenes() -> void:
 			all.append(["team %d" % team, scenes["teams"][team], team])
 		for p in scenes["partner_start"].size():
 			all.append(["partner start %d" % p, scenes["partner_start"][p], -1])
+		# the talks after the first (port ADR-104)
+		for team in scenes["teams"].size():
+			for i in RoadTrip.talks("teams", team).size():
+				all.append(["team %d talk %d" % [team, i], RoadTrip.talks("teams", team)[i], team])
+		for kind in ["start", "motel", "diner"]:
+			for p in range(RoadTrip.PEPPER, scenes["partner_start"].size()):
+				for i in RoadTrip.talks(kind, p).size():
+					all.append(["%s %d talk %d" % [kind, p, i], RoadTrip.talks(kind, p)[i], -1])
+		for kind in ["rival_again", "rival_friendly"]:
+			for i in RoadTrip.talks(kind, -1).size():
+				all.append(["%s talk %d" % [kind, i], RoadTrip.talks(kind, -1)[i], -1, RoadTrip.rival_members()])
 		for b in RoadTrip.data()["beats"]:
 			var sc := RoadTrip.beat_scene(b)
 			all.append(["beat " + String(b["id"]), sc["pages"], int(sc["opts"].get("team", -1)),

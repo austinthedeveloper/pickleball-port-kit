@@ -136,6 +136,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-108 | Rollback in the online session: START's netcode, PROTOCOL 3, the delay from the line, ONLINE NETCODE saved (port ADR-103) | `feature/cld-rollback-session` | Done |
 | PORT-109 | Rollback in the match: the prediction drawn, the confirmed sim counted; ROLLBACK the default, NETCODE in OPTIONS (port ADR-103) | `feature/cld-rollback-view` | Ready to test |
 | PORT-110 | Rollback: correction smoothing (port ADR-103) | | Planned |
+| PORT-111 | ROAD TRIP talks: five conversations each for every team, partner (start, motel, diner) and the ROAD HOGS, revealing more of them each time (port ADR-104) | `feature/cld-trip-talks` | Ready to test |
 
 ## Releases
 
@@ -858,6 +859,22 @@ the same request). Open: 36 and 40.
     a guess is corrected, and compare with NETCODE LOCKSTEP.
 - [ ] `PORT-110` Correction smoothing (ADR-103), once a playtest shows
   how much the jumps show.
+
+### 111. `feature/cld-trip-talks`: ROAD TRIP talks (asked for 2026-10-26)
+
+- [x] `PORT-111` (port ADR-104), chained from `feature/cld-release-0.41.0`.
+  Every recurring ROAD TRIP conversation now has five scenes instead of
+  one, heard in order one per meeting and then round again: the nine
+  teams' scenes, each partner's (Pepper and the eight captains) GARAGE
+  start, motel and diner words, and the ROAD HOGS' taunts and friendly
+  words. The later ones show more of each character. 152 new scenes in
+  `trip.json`'s `talks`; counted in the trip meta's `talks` (a new key,
+  no save version). TRIP OF THE DAY always hears the first.
+  - Verified: the full suite (`test_road_trip.test_talks`, the data
+    check, `test_layout.test_trip_scenes` on every new page);
+    screenshots of a fifth team talk and a fourth motel talk.
+  - Status: **Ready to test**: take a few trips (or meet the same team
+    twice) and read along; say if any character's voice is off.
 
 ## For you
 
