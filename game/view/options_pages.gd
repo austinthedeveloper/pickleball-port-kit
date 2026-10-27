@@ -11,7 +11,7 @@ extends RefCounted
 
 static func build(host: Node) -> void:
 	var help := [["hit", "SELECT"], ["back", "BACK"]]
-	host._add_page("options", "OPTIONS", [
+	var rows := [
 		{"id": "camera", "label": "CAMERA",
 			"value": func(): return "OFF" if Settings.camera_i == 0 else "%d%%" % Settings.CAMERAS[Settings.camera_i],
 			"change": func(d): Settings.camera_i = clampi(Settings.camera_i + d, 0, Settings.CAMERAS.size() - 1)},
@@ -38,7 +38,14 @@ static func build(host: Node) -> void:
 			"press": func():
 				if Updater.instance:
 					Updater.instance.press()},
-	], [], Rect2(300, 60, 360, 0))     # ADR-076 made it 14 rows: over the logo, hidden
+	]
+	# ADR-103: ONLINE's netcode, the host's choice (not in the Web build:
+	# no online there), once a match plays rollback (PORT-109)
+	if OnlineSession.VIEW_PLAYS_ROLLBACK and not Settings.lite:
+		rows.insert(rows.size() - 1, {"id": "netcode", "label": "ONLINE NETCODE",
+			"value": func(): return Settings.NETCODES[Settings.netcode_i],
+			"change": func(d): Settings.netcode_i = (Settings.netcode_i + d + 2) % 2})
+	host._add_page("options", "OPTIONS", rows, [], Rect2(300, 60, 360, 0))     # ADR-076 made it 14 rows: over the logo, hidden
 	var onoff := func(on: bool) -> String: return "ON" if on else "OFF"
 	host._add_page("access", "ACCESSIBILITY", [
 		{"id": "shake", "label": "SCREEN SHAKE",

@@ -169,9 +169,24 @@ much it's needed.
    - nothing waits inside the window;
    - wrong guesses happen and are corrected;
    - there's no desync, and the time sync keeps the two within 2 frames.
-3. `PORT-108`: the session. PROTOCOL 3, the time-sync field, D from the
-   round trip, the lockstep fallback in START and OPTIONS. The ENet test
-   on this machine is rerun under rollback.
+3. `PORT-108` `feature/cld-rollback-session` (in): the session.
+   - START names the netcode (`"rollback"` or `"lockstep"`), and a START
+     without one is lockstep. Under rollback the session owns the two
+     sims (`OnlineSession.rollback`), and MatchView will call
+     `tick(intent)`, which keeps presses from frames that couldn't step.
+   - The delay comes from the round trip (`Rollback.for_rtt`), and a
+     desync closes both sides. `waited()` serves either netcode.
+     `PROTOCOL` is 3.
+   - OPTIONS > ONLINE NETCODE (ROLLBACK or LOCKSTEP) is saved
+     (`"netcode"`, a default that fills a missing key: the save stays
+     v6).
+   - Until the view plays rollback, `OnlineSession.VIEW_PLAYS_ROLLBACK`
+     is off: the host starts lockstep and the OPTIONS row is hidden, so
+     every build plays. PORT-109 turns both on.
+   - Tests (`test_rollback_session`): two sessions over a jittery line
+     count the same events step for step and end in the same whole
+     state, over ENet on this machine too (a delay of 1); a desync
+     closes them; and the fallback.
 4. `PORT-109`: MatchView under rollback: `truth` and `sim` as separate
    sims, counting from `truth`'s events, playing through the ledger.
    Tests run two online views over a jittery line:

@@ -3,12 +3,24 @@
 ## HELLO (the game's version and its player's look); the host checks the
 ## versions, and START sends the match (the config, venue, time and court
 ## colours) so both build the same Sim. The host plays slot 0 (left), the
-## guest slot 2 (right). In the match, MatchView asks `intents` each frame
-## (null: wait) and calls `after_step`. QUIT leaves; a lost line closes it.
+## guest slot 2 (right). QUIT leaves; a lost line closes it.
+##
+## START also names the netcode, the host's choice (port ADR-103):
+## - "rollback": the session owns the sims (`rollback`: the confirmed one
+##   and the prediction); MatchView calls `tick` each frame and draws what
+##   comes back.
+## - "lockstep" (ADR-056, kept a release as the fallback): MatchView asks
+##   `intents` each frame (null: wait), steps its own sim, and calls
+##   `after_step`.
 class_name OnlineSession
 extends RefCounted
 
-const PROTOCOL := 2                ## 2: commands ride on the inputs (port ADR-102)
+const PROTOCOL := 3                ## 3: START names the netcode, rollback's inputs (port ADR-103)
+const ROLLBACK := "rollback"
+const LOCKSTEP := "lockstep"
+## MatchView plays a rollback match (PORT-109). Until it does, the host
+## starts lockstep whatever OPTIONS says, so every build plays.
+const VIEW_PLAYS_ROLLBACK := false
 const IDLE := 0
 const WAITING := 1               ## the host listening, or the guest connecting
 const CONNECTED := 2             ## both said HELLO
@@ -21,11 +33,13 @@ var state := IDLE
 var reason := ""                 ## why it closed, for the screen
 var peer_hello := {}             ## the other side's {version, protocol, look, name}
 var start := {}                  ## the match, from START
-var lockstep: Lockstep
+var lockstep: Lockstep            ## the netcode's: one of these two
+var rollback: Rollback
 var _pending := SimTypes.Intent.new()   ## this side's presses since the last step
 var _pending_cmds := []          ## this side's commands since the last step (the host's NEW MATCH)
 var commands := []               ## this frame's, both sides' (MatchView steps them)
 var _hello_sent := false
+var _waited := 0                 ## rollback: ticks in a row that couldn't step
 
 
 func _init(l: NetLink = null, is_host := false) -> void:
@@ -73,12 +87,14 @@ func _on(m: Array) -> void:
 				state = CONNECTED
 		"START":
 			start = m[1]
-			lockstep = Lockstep.new(2, 0, int(start.get("delay", Lockstep.DELAY)))
+			_build(2, 0)
 			state = PLAYING
 		"QUIT":
 			_close("VERSIONS DIFFER" if m.size() > 1 and m[1] == "VERSION" else "YOUR FRIEND LEFT")
 		"I", "H":
-			if lockstep:
+			if rollback:
+				rollback.on_message(m)
+			elif lockstep:
 				lockstep.on_message(m)
 
 
@@ -87,11 +103,59 @@ func _on(m: Array) -> void:
 ## unless `info` names one.
 func begin(info: Dictionary) -> void:
 	start = info.duplicate()
+	if not start.has("netcode"):
+		start["netcode"] = Settings.netcode_name() if VIEW_PLAYS_ROLLBACK else LOCKSTEP
 	if not start.has("delay"):
-		start["delay"] = Lockstep.for_rtt(link.rtt_ms())
+		start["delay"] = Rollback.for_rtt(link.rtt_ms()) if start["netcode"] == ROLLBACK \
+			else Lockstep.for_rtt(link.rtt_ms())
 	link.send(["START", start])
-	lockstep = Lockstep.new(0, 2, int(start["delay"]))
+	_build(0, 2)
 	state = PLAYING
+
+
+## This side's netcode for START's match: the host plays slot 0, the guest
+## slot 2. A START from before PROTOCOL 3 had no netcode: lockstep.
+func _build(local: int, remote: int) -> void:
+	if netcode() == ROLLBACK:
+		rollback = Rollback.new(config_from_dict(start["cfg"]), local, remote,
+			int(start.get("delay", Rollback.DELAY)))
+	else:
+		lockstep = Lockstep.new(local, remote, int(start.get("delay", Lockstep.DELAY)))
+
+
+func netcode() -> String:
+	return String(start.get("netcode", LOCKSTEP))
+
+
+## Rollback's frame (ADR-103): the local player's intent goes in, kept
+## with any presses from frames that couldn't step, and what the frame
+## did comes out (Rollback.tick's: stepped, played, counted). A desync
+## closes the session.
+func tick(local: SimTypes.Intent) -> Dictionary:
+	_merge(local)
+	if rollback == null or state != PLAYING:
+		return {"stepped": false, "send": [], "played": [], "counted": []}
+	var out := rollback.tick(_pending, _pending_cmds)
+	for m in out["send"]:
+		link.send(m)
+	if out["stepped"]:
+		_pending = SimTypes.Intent.new()
+		_pending_cmds = []
+		_waited = 0
+	else:
+		_waited += 1
+	if rollback.desync >= 0:
+		link.send(["QUIT"])
+		_close("OUT OF SYNC AT FRAME %d" % rollback.desync)
+	return out
+
+
+## Frames in a row this side has waited for the other (either netcode):
+## past 20 the match says WAITING FOR YOUR FRIEND.
+func waited() -> int:
+	if rollback:
+		return _waited
+	return lockstep.waited if lockstep else 0
 
 
 ## This frame: the local player's intent goes in; the four slots' intents
@@ -159,6 +223,8 @@ func _close(why: String) -> void:
 	if state == CLOSED:
 		return
 	state = CLOSED
+	if rollback:
+		rollback.dispose()               # its two sims (ADR-100's cycle)
 	reason = why
 	if link:
 		link.close()

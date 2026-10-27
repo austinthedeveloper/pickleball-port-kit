@@ -133,7 +133,8 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-105 | Commands: NEW MATCH and TUNE go to the sim with the inputs; online, the host's rematch travels in the lockstep stream (port ADR-102) | `feature/cld-sim-commands` | Done |
 | PORT-106 | The confirmed sim: what's counted and what can't be taken back reads `MatchView.truth` (rollback stage 1; port ADR-103) | `feature/cld-confirmed-sim` | Done |
 | PORT-107 | Rollback's core: two sims, guesses, corrections, time sync (port ADR-103) | `feature/cld-rollback-core` | Done |
-| PORT-108..110 | Rollback: the session, the view, correction smoothing (port ADR-103) | | Planned |
+| PORT-108 | Rollback in the online session: START's netcode, PROTOCOL 3, the delay from the line, ONLINE NETCODE saved (port ADR-103) | `feature/cld-rollback-session` | Done |
+| PORT-109..110 | Rollback: the view, correction smoothing (port ADR-103) | | Planned |
 
 ## Releases
 
@@ -817,8 +818,23 @@ the same request). Open: 36 and 40.
     about 950 corrections in a run, time sync holding the faster side).
     A correction costs about 1 ms at worst.
   - Status: **Done**: nothing to play yet.
-- [ ] `PORT-108..110` Rollback: the session, the view, correction
-  smoothing (ADR-103).
+### 108. `feature/cld-rollback-session`: rollback in the session (asked for 2026-10-26)
+
+- [x] `PORT-108` (port ADR-103), chained from `feature/cld-rollback-core`.
+  START names the netcode, and both sides build it: under rollback the
+  session owns the sims, and `tick()` takes the local intent and gives
+  back what the frame did. The delay comes from the round trip (1 on a
+  LAN, 2 otherwise), a desync closes both sides, and `PROTOCOL` is 3.
+  ONLINE NETCODE (ROLLBACK or LOCKSTEP) is saved. The view can't play
+  rollback yet, so `OnlineSession.VIEW_PLAYS_ROLLBACK` is off: the host
+  starts lockstep and the OPTIONS row is hidden. Online play is as
+  before, and PORT-109 turns both on.
+  - Verified: the full suite plus the e2e (`test_rollback_session`: two
+    sessions over a jittery line, and over ENet on this machine; a
+    desync; the fallback; the setting saved).
+  - Status: **Done**: nothing to play yet.
+- [ ] `PORT-109..110` Rollback: the view (then VIEW_PLAYS_ROLLBACK on),
+  correction smoothing (ADR-103).
 
 ## For you
 

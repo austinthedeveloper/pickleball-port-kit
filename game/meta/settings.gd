@@ -110,6 +110,10 @@ static var flashes := true
 static var replays_in_demo := true
 static var hud_large := false
 static var serve_assist := false
+## ONLINE's netcode, the host's choice (port ADR-103): rollback, or lockstep,
+## kept a release as the fallback.
+const NETCODES := ["ROLLBACK", "LOCKSTEP"]
+static var netcode_i := 0
 ## Controller rumble on hits (PORT-15).
 static var vibration := true
 ## BUTTON ICONS (PORT-28): 0 AUTO (from the pad's name), then the rest
@@ -183,6 +187,7 @@ static func load_from(save: SaveGame) -> void:
 	replays_in_demo = int(st.get("replay_demo", 1)) != 0
 	hud_large = int(st.get("hud_large", 0)) != 0
 	serve_assist = int(st.get("serve_assist", 0)) != 0
+	netcode_i = clampi(int(st.get("netcode", 0)), 0, NETCODES.size() - 1)
 	vibration = int(st.get("vibration", 1)) != 0
 	pad_glyphs = clampi(int(st.get("pad_glyphs", 0)), 0, Prompts.FAMILIES.size() - 1)
 	pad_notice = int(st.get("pad_notice", 1)) != 0
@@ -207,7 +212,7 @@ static func store_to(save: SaveGame) -> void:
 		"player": [p1_choice["palette"], p1_choice["variant"], p1_choice["paddle"]],
 		"court": court.duplicate(), "time": time_i,
 		"shake": 1 if shake_i else 0, "shake_level": shake_i, "flash": 1 if flashes else 0, "replay_demo": 1 if replays_in_demo else 0,
-		"hud_large": 1 if hud_large else 0, "serve_assist": 1 if serve_assist else 0,
+		"hud_large": 1 if hud_large else 0, "serve_assist": 1 if serve_assist else 0, "netcode": netcode_i,
 		"vibration": 1 if vibration else 0, "pad_glyphs": pad_glyphs,
 		"bindings": Bindings.to_save(), "pad_maps": PadMaps.to_save(),
 		"pad_notice": 1 if pad_notice else 0, "touch_pad": touch_pad}, true)
@@ -391,3 +396,8 @@ static func smarts_for(cfg: SimTypes.MatchConfig) -> Array:
 static func nudge_smart(name: String, knob: int, d: int) -> void:
 	var p: Array = smart_table()[name]
 	p[knob] = clampi(int(p[knob]) + 5 * d, 0, 100)
+
+
+## START's netcode for Settings.netcode_i (OnlineSession.ROLLBACK or LOCKSTEP).
+static func netcode_name() -> String:
+	return OnlineSession.ROLLBACK if netcode_i == 0 else OnlineSession.LOCKSTEP

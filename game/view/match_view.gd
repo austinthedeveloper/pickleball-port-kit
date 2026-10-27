@@ -835,7 +835,7 @@ func _net_refresh(waiting: bool) -> void:
 		pass                             # the stats card is up; one press leaves there
 	elif leave_frames > 0:
 		text = "PRESS AGAIN TO LEAVE"
-	elif waiting and net.lockstep and net.lockstep.waited > 20:
+	elif waiting and net.waited() > 20:
 		text = "WAITING FOR YOUR FRIEND..."
 	_net_text.text = text
 

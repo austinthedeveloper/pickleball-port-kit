@@ -46,7 +46,7 @@ static func defaults() -> Dictionary:
 			"court": [0, 0, 0, 0],  # COURT: surface, kitchen, surround, lines presets
 			"time": 0,  # COURT TIME: DAY, DUSK, NIGHT (ADR-045)
 			# PORT-12: accessibility, and remapped controls ({} = defaults)
-			"shake": 1, "flash": 1, "hud_large": 0, "serve_assist": 0, "bindings": {},
+			"shake": 1, "flash": 1, "hud_large": 0, "serve_assist": 0, "netcode": 0, "bindings": {},
 			"shake_level": Settings.SHAKE_DEFAULT,  # SCREEN SHAKE strength (SHAKES)
 			"vibration": 1,  # PORT-15: controller rumble
 			"pad_glyphs": 0,  # PORT-28: BUTTON ICONS, AUTO
