@@ -1,7 +1,9 @@
 # ADR-103 — Rollback for Online Play
 
-Status: **Proposed 2026-10-26** (stage 1 is in: `PORT-106`; the rest is
-for review before any code)
+Status: **Accepted 2026-10-26** (the user approved the defaults: W = 8,
+D = 1 or 2, lockstep kept a release as the fallback, the HUD's score
+following the drawn sim). Stage 1 is in (`PORT-106`); the core is
+`PORT-107`.
 Milestone: `PORT-106` onward (the user: "plan rollback itself — give PLAY
 OF THE MATCH, the lesson and the match end the confirmed sim, then the
 rollback ADR"). Builds on ADR-056 (lockstep online play), ADR-100 (the
@@ -56,7 +58,7 @@ will, and shows:
 - a counted point reads the confirmed score;
 - only the confirmed sim's rematch is asked for.
 
-### Stage 2 onward, proposed
+### Stage 2 onward
 
 **Two sims, not a ring of saved states.** `truth` steps exactly once per
 confirmed frame. `sim`, the prediction, runs ahead of it to the present.
@@ -131,7 +133,16 @@ the host's choice (`START`'s `"netcode"`, set in OPTIONS), so the two
 can be compared on real lines, and then it goes. Still singles only:
 doubles online is its own step. The measured costs below allow for it.
 
-**Cost** (one machine, doubles, from ADR-100's measurements):
+**Cost** (one machine, measured with the core in, `PORT-107`):
+
+- a correction at its worst (save `truth`, load it into the prediction,
+  re-run a full window of 8 frames) is about 1.0 ms in doubles and 0.96
+  ms in singles. The save, about 0.45 ms, wasn't in the first estimate;
+- `truth`'s own step is about 0.03 ms;
+- a hash every 120 frames is about 0.45 ms.
+
+The worst case is well inside a 16.6 ms frame. If it ever isn't,
+`SimState` can cache each class's getters (ADR-100).
 
 - a correction is a load (about 0.4 ms) plus up to W re-run steps (about
   0.03 ms each), so about 0.65 ms at worst;
@@ -150,7 +161,8 @@ much it's needed.
 ## Stages (branches, chained)
 
 1. `PORT-106` `feature/cld-confirmed-sim`: `MatchView.truth` (in).
-2. `PORT-107`: `net/rollback.gd`, the core. Tests run two cores over the
+2. `PORT-107` `feature/cld-rollback-core` (in): `net/rollback.gd`, the
+   core, with `catch_up()` for waits and a match's end. Tests run two cores over the
    loopback link with 0, 3 and 7 frames of latency and jitter:
    - the confirmed sims match frame by frame;
    - the predictions match the confirmed sims once they catch up;
@@ -171,12 +183,12 @@ much it's needed.
 5. `PORT-110`: correction smoothing (display-only, with a
    display-only proof per CLAUDE.md), then a playtest on a real line.
 
-## Questions for review
+## Answered in review (2026-10-26)
 
-- W = 8 and D = 1 or 2: start there, and tune from playtests?
-- Keep lockstep for a release as a fallback, or go straight to rollback?
-- Should the HUD's score follow the drawn sim (instant, can be taken
-  back) or the confirmed one (W frames late, never wrong)?
+- W = 8 and D = 1 or 2 to start, then tuned from playtests.
+- Lockstep stays for one release as the host's fallback, then goes.
+- The HUD's score follows the drawn sim: instant, and taken back on the
+  rare correction.
 
 ## Not in this ADR
 

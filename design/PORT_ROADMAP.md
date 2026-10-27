@@ -132,7 +132,8 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-104 | Sim events stamped by step: played once, counted when the step is confirmed (rollback groundwork; port ADR-101) | `feature/cld-sim-events` | Done |
 | PORT-105 | Commands: NEW MATCH and TUNE go to the sim with the inputs; online, the host's rematch travels in the lockstep stream (port ADR-102) | `feature/cld-sim-commands` | Done |
 | PORT-106 | The confirmed sim: what's counted and what can't be taken back reads `MatchView.truth` (rollback stage 1; port ADR-103) | `feature/cld-confirmed-sim` | Done |
-| PORT-107..110 | Rollback: the core, the session, the view, correction smoothing (port ADR-103, proposed) | | Planned |
+| PORT-107 | Rollback's core: two sims, guesses, corrections, time sync (port ADR-103) | `feature/cld-rollback-core` | Done |
+| PORT-108..110 | Rollback: the session, the view, correction smoothing (port ADR-103) | | Planned |
 
 ## Releases
 
@@ -800,16 +801,26 @@ the same request). Open: 36 and 40.
   - Verified: the full suite plus the e2e (`test_confirmed_sim`, with a
     second sim for `truth`).
   - Status: **Done**: nothing to play.
-- [ ] `PORT-107..110` Rollback itself, in four branches: the core, the
-  session, the view, and correction smoothing (ADR-103, **proposed**:
-  waiting for your review).
+### 107. `feature/cld-rollback-core`: rollback's core (asked for 2026-10-26)
+
+- [x] `PORT-107` ADR-103 accepted with the defaults (W = 8, D = 1 or 2,
+  lockstep kept a release, the HUD's score on the drawn sim).
+  `net/rollback.gd` is pure: the confirmed sim and the prediction, inputs
+  scheduled D ahead, guesses that repeat held state and never presses,
+  a correction (load `truth`, re-run the guessed frames) when a guess was
+  wrong, the window, time sync, and the desync hash on `truth`. Nothing
+  uses it yet: the session (`PORT-108`) and the view (`PORT-109`) come next.
+  - Verified: the full suite plus the e2e (`test_rollback`: two cores
+    over 0, 4, and 6 frames with jitter, and a slow clock. The confirmed
+    sims match a straight run of the real inputs, predictions equal it
+    at the end, events are counted exactly and played once a step,
+    about 950 corrections in a run, time sync holding the faster side).
+    A correction costs about 1 ms at worst.
+  - Status: **Done**: nothing to play yet.
+- [ ] `PORT-108..110` Rollback: the session, the view, correction
+  smoothing (ADR-103).
 
 ## For you
-
-- **ADR-103 rollback (review before code):** W = 8 frames of prediction
-  and D = 1 or 2 of delay to start? Keep lockstep for a release as a
-  fallback? Should the HUD's score follow the drawn sim (instant, can be
-  taken back) or the confirmed one (never wrong, W frames late)?
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
