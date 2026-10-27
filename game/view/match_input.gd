@@ -19,7 +19,9 @@ func _init(view: MatchView) -> void:
 var script_intent: Callable
 
 
-func net_read() -> Variant:
+## Online: this machine's own player's intent this frame (the Menu press
+## is the leave, never a pause), for either netcode.
+func net_intent() -> SimTypes.Intent:
 	var it: SimTypes.Intent = script_intent.call() if script_intent.is_valid() \
 		else GameControls.read_intent(v.my_team())
 	if v.input_lock > 0:
@@ -29,7 +31,12 @@ func net_read() -> Variant:
 	if it.pause_pressed:
 		v.net_leave_press()
 	it.pause_pressed = 0
-	return v.net.intents(it)
+	return it
+
+
+## Lockstep's: the four slots' intents, or null (wait).
+func net_read() -> Variant:
+	return v.net.intents(net_intent())
 
 
 ## This frame's human intents for Sim.step (P1 on the input map, 2P on

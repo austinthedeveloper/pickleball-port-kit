@@ -42,7 +42,7 @@ static func build(host: Node) -> void:
 	# ADR-103: ONLINE's netcode, the host's choice (not in the Web build:
 	# no online there), once a match plays rollback (PORT-109)
 	if OnlineSession.VIEW_PLAYS_ROLLBACK and not Settings.lite:
-		rows.insert(rows.size() - 1, {"id": "netcode", "label": "ONLINE NETCODE",
+		rows.insert(rows.size() - 1, {"id": "netcode", "label": "NETCODE",
 			"value": func(): return Settings.NETCODES[Settings.netcode_i],
 			"change": func(d): Settings.netcode_i = (Settings.netcode_i + d + 2) % 2})
 	host._add_page("options", "OPTIONS", rows, [], Rect2(300, 60, 360, 0))     # ADR-076 made it 14 rows: over the logo, hidden

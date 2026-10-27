@@ -119,7 +119,7 @@ func guessing() -> int:
 ## One drawn frame: the local intent and commands go in (when it steps;
 ## otherwise the caller keeps them for the next tick). Returns
 ## {stepped, send: [messages], played: [[step, events]] from `pred` (for
-## EventLedger.run), counted: [[step, events]] from `truth`}.
+## EventLedger.run), counted: [[step, events, commands]] from `truth`}.
 func tick(local_intent: SimTypes.Intent, cmds: Array = []) -> Dictionary:
 	var out := {"stepped": false, "send": [], "played": [], "counted": []}
 	if predicted > 0 and predicted % SYNC_EVERY == 0 and predicted != _last_sync:
@@ -161,8 +161,14 @@ func _confirm(out: Dictionary) -> void:
 		var f := confirmed
 		if _guessed.has(f) and (_guessed[f] != _remote[f] or _remote_cmds.has(f)):
 			wrong = true
-		truth.step(_humans(_local[f], _remote[f]), _commands(f))
-		out["counted"].append([truth.step_count, truth.drain_events()])
+		var cmds := _commands(f)
+		truth.step(_humans(_local[f], _remote[f]), cmds)
+		var events := truth.drain_events()
+		out["counted"].append([truth.step_count, events, cmds])
+		# and offered to play: a frame `pred` guessed wrong played the guess's
+		# events, and isn't run again (it's confirmed now); EventLedger.run
+		# plays only what wasn't played for it, so a right guess plays nothing
+		out["played"].append([truth.step_count, events])
 		for d in [_local, _remote, _local_cmds, _remote_cmds, _guessed]:
 			d.erase(f)
 		confirmed += 1

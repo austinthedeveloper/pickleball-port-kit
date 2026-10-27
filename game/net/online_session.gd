@@ -18,9 +18,9 @@ extends RefCounted
 const PROTOCOL := 3                ## 3: START names the netcode, rollback's inputs (port ADR-103)
 const ROLLBACK := "rollback"
 const LOCKSTEP := "lockstep"
-## MatchView plays a rollback match (PORT-109). Until it does, the host
-## starts lockstep whatever OPTIONS says, so every build plays.
-const VIEW_PLAYS_ROLLBACK := false
+## MatchView plays a rollback match (PORT-109): the host starts what
+## OPTIONS says. Off, it starts lockstep and OPTIONS hides the row.
+const VIEW_PLAYS_ROLLBACK := true
 const IDLE := 0
 const WAITING := 1               ## the host listening, or the guest connecting
 const CONNECTED := 2             ## both said HELLO

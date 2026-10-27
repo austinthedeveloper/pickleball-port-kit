@@ -172,8 +172,12 @@ func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void
 		court = court.duplicate()
 		court[3] = GLOW_LINES
 	manifest = levels_manifest()
-	sim = Sim.new(cfg)
-	truth = sim                           # one sim until rollback (ADR-103)
+	if net and net.rollback:
+		sim = net.rollback.pred           # ADR-103: the prediction is drawn,
+		truth = net.rollback.truth        # the confirmed sim counted
+	else:
+		sim = Sim.new(cfg)
+		truth = sim
 	ledger = EventLedger.new(sim.step_count)
 	if tuning == null and not demo:
 		tuning = TuningPanel.new().setup(self)     # before the HUD: the pause menu's TUNE
@@ -197,6 +201,8 @@ func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE and sim:
 		sim.dispose()
+		if truth and truth != sim:
+			truth.dispose()              # rollback's confirmed sim (the session's too)
 		# freed mid-replay (the title's demo moving on): the other sim too
 		if highlight:
 			for other in [highlight.replay, highlight._live]:
@@ -578,38 +584,56 @@ func _physics_process(_delta: float) -> void:
 			return
 	if commentary:
 		commentary.tick(1.0 / 60.0)
-	var human: Variant = input.read()
-	if net:
-		_net_refresh(human == null)
-	if human == null:
-		if net and net.closed():
+	var played: Array                    # [[step, events]]: the drawn sim's steps
+	var counted: Array                   # [[step, events, commands]]: the confirmed sim's
+	if net and net.rollback:
+		# ADR-103: the session steps both sims; a held or waiting frame may
+		# still confirm what came in
+		var out := net.tick(input.net_intent())
+		_net_refresh(not out["stepped"])
+		if net.closed():
 			finished.emit(true)
-		return                           # the pause menu took the frame, or online, the wait
-	var cmds: Array = net.commands if net else _take_commands()
-	if highlight:
-		for c: Array in cmds:
-			highlight.op(c)
-		highlight.record(human)
-	sim.step(human, cmds)
-	for c: Array in cmds:
-		if c[0] == "new_match":
-			_new_match_queued = false
-			if _on_new_match.is_valid():
-				_on_new_match.call()         # before the step's events are counted
-			_on_new_match = Callable()
-	if net:
-		net.after_step(truth)            # the desync check hashes what's confirmed
-	var events := sim.drain_events()
-	for e in ledger.run(sim.step_count, events):
-		_on_event(e)
-		if commentary:
-			commentary.on_event(e)
-	# offline and in lockstep a step is confirmed as it runs (ADR-101)
-	var counted := ledger.confirm(sim.step_count)
+			return
+		if not out["stepped"] and out["counted"].is_empty():
+			return                       # the wait (or a time-sync hold)
+		played = out["played"]
+		counted = out["counted"]
+	else:
+		var human: Variant = input.read()
+		if net:
+			_net_refresh(human == null)
+		if human == null:
+			if net and net.closed():
+				finished.emit(true)
+			return                       # the pause menu took the frame, or lockstep's wait
+		var cmds: Array = net.commands if net else _take_commands()
+		if highlight:
+			for c: Array in cmds:
+				highlight.op(c)
+			highlight.record(human)
+		sim.step(human, cmds)
+		if net:
+			net.after_step(truth)        # the desync check hashes what's confirmed
+		var events := sim.drain_events()
+		played = [[sim.step_count, events]]
+		counted = [[sim.step_count, events, cmds]]   # one sim: confirmed as it runs
+	for p: Array in played:
+		for e in ledger.run(p[0], p[1]):
+			_on_event(e)
+			if commentary:
+				commentary.on_event(e)
+	ledger.confirm(truth.step_count)     # what's played for a confirmed step is done with
 	var final := []
 	for c: Array in counted:
-		_count_event(c[0])
-		final.append(c[0])
+		for cmd: Array in c[2]:
+			if cmd[0] == "new_match":    # the screen starts over with the match (ADR-102)
+				_new_match_queued = false
+				if _on_new_match.is_valid():
+					_on_new_match.call()     # before its events are counted
+				_on_new_match = Callable()
+		for e in c[1]:
+			_count_event(e)
+			final.append(e)
 	if highlight:
 		highlight.after_step(final)
 	if lesson:

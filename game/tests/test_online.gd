@@ -46,7 +46,8 @@ func _play(latency: int, jitter: Array, frames: int) -> Array:
 	var cfg := PlayerSelect.config_select(K.MODE_SINGLES, host.my_hello["look"], guest.peer_hello.get("look", {}))
 	# the delay the host would pick for this line's round trip
 	var rtt: int = (latency + (jitter.max() if not jitter.is_empty() else 0)) * 2 * 1000 / 60
-	host.begin({"cfg": OnlineSession.config_to_dict(cfg), "venue": "park", "delay": Lockstep.for_rtt(rtt)})
+	host.begin({"cfg": OnlineSession.config_to_dict(cfg), "venue": "park", "delay": Lockstep.for_rtt(rtt),
+		"netcode": OnlineSession.LOCKSTEP})
 	var sims := [Sim.new(cfg), null]
 	var stalls := 0
 	var steps := [0, 0]
@@ -233,7 +234,7 @@ func test_enet_on_this_machine() -> void:
 		gl.close()
 		return
 	var cfg := PlayerSelect.config_select(K.MODE_SINGLES, host.my_hello["look"], host.peer_hello["look"])
-	host.begin({"cfg": OnlineSession.config_to_dict(cfg), "venue": "park"})
+	host.begin({"cfg": OnlineSession.config_to_dict(cfg), "venue": "park", "netcode": OnlineSession.LOCKSTEP})
 	check(int(host.start["delay"]) >= Lockstep.MIN_DELAY, "a delay from the measured line (%d)" % host.start["delay"])
 	var sims := [Sim.new(cfg), null]
 	var steps := [0, 0]
@@ -288,6 +289,16 @@ func _view(session: OnlineSession, f: Array, seed: int) -> MatchView:
 ## through the views stays the same on both; the HUD says YOU and the
 ## friend's name; the guest leaving ends the host's match with the reason.
 func test_two_views_play_online() -> void:
+	for netcode: String in [OnlineSession.ROLLBACK, OnlineSession.LOCKSTEP]:
+		_two_views(netcode)
+
+
+## The frame each view's session has confirmed (either netcode).
+static func _confirmed(v: MatchView) -> int:
+	return v.net.rollback.confirmed if v.net.rollback else v.net.lockstep.frame
+
+
+func _two_views(netcode: String) -> void:
 	var links := LoopbackLink.pair(3)
 	var host := OnlineSession.new(links[0], true)
 	var guest := OnlineSession.new(links[1], false)
@@ -298,7 +309,8 @@ func test_two_views_play_online() -> void:
 		guest.poll()
 	var cfg := PlayerSelect.config_select(K.MODE_SINGLES, host.my_hello["look"], host.peer_hello["look"])
 	cfg.points_to_win = 3
-	host.begin({"cfg": OnlineSession.config_to_dict(cfg), "venue": "park", "delay": 6})
+	host.begin({"cfg": OnlineSession.config_to_dict(cfg), "venue": "park", "delay": 6 if netcode == OnlineSession.LOCKSTEP else 2,
+		"netcode": netcode})
 	for i in 4:
 		guest.poll()
 	var f := [0]
@@ -309,25 +321,25 @@ func test_two_views_play_online() -> void:
 	eq([gv._hud._team_label(0), gv._hud._team_label(1)], ["ANN", "YOU"], "the guest's HUD")
 	var ended := []
 	hv.finished.connect(func(t): ended.append(t))
-	while f[0] < 4000 and hv.sim.phase != K.PHASE_MATCH_RESULT:
+	while f[0] < 4000 and hv.truth.phase != K.PHASE_MATCH_RESULT:
 		hv._physics_process(DT)
 		gv._physics_process(DT)
 		f[0] += 1
 	# let the one behind catch up
 	for i in 20:
-		if hv.net.lockstep.frame == gv.net.lockstep.frame:
+		if _confirmed(hv) == _confirmed(gv):
 			break
-		(hv if hv.net.lockstep.frame < gv.net.lockstep.frame else gv)._physics_process(DT)
-	eq(hv.sim.phase, K.PHASE_MATCH_RESULT, "a match to 3, played through (%d frames)" % f[0])
-	eq(hv.net.lockstep.frame, gv.net.lockstep.frame)
-	eq(hv.sim.snapshot(), gv.sim.snapshot(), "the same match on both machines")
-	check(hv.net.lockstep.desync < 0)
+		(hv if _confirmed(hv) < _confirmed(gv) else gv)._physics_process(DT)
+	eq(hv.truth.phase, K.PHASE_MATCH_RESULT, "%s: a match to 3, played through (%d frames)" % [netcode, f[0]])
+	eq(_confirmed(hv), _confirmed(gv))
+	eq(hv.truth.snapshot(), gv.truth.snapshot(), "%s: the same match on both machines" % netcode)
+	check((hv.net.rollback.desync if hv.net.rollback else hv.net.lockstep.desync) < 0)
 	gv.net_leave_press()                 # on the result, one press leaves
 	for i in 10:
 		hv._physics_process(DT)
 		if not ended.is_empty():
 			break
-	eq(ended, [true], "the host's match ends too")
+	eq(ended, [true], "%s: the host's match ends too" % netcode)
 	eq(host.reason, "YOUR FRIEND LEFT")
 	hv.free()
 	gv.free()
@@ -471,6 +483,11 @@ func test_the_addresses_offered() -> void:
 ## on the same frame (the guest never starts it on its own). TUNE's commands
 ## can't reach an online sim.
 func test_an_online_rematch_comes_through_the_stream() -> void:
+	for netcode: String in [OnlineSession.ROLLBACK, OnlineSession.LOCKSTEP]:
+		_rematch(netcode)
+
+
+func _rematch(netcode: String) -> void:
 	var links := LoopbackLink.pair(3)
 	var host := OnlineSession.new(links[0], true)
 	var guest := OnlineSession.new(links[1], false)
@@ -481,7 +498,8 @@ func test_an_online_rematch_comes_through_the_stream() -> void:
 		guest.poll()
 	var cfg := PlayerSelect.config_select(K.MODE_SINGLES, host.my_hello["look"], host.peer_hello["look"])
 	cfg.points_to_win = 2
-	host.begin({"cfg": OnlineSession.config_to_dict(cfg), "venue": "park", "delay": 6})
+	host.begin({"cfg": OnlineSession.config_to_dict(cfg), "venue": "park", "delay": 6 if netcode == OnlineSession.LOCKSTEP else 2,
+		"netcode": netcode})
 	for i in 4:
 		guest.poll()
 	var f := [0]
@@ -496,17 +514,21 @@ func test_an_online_rematch_comes_through_the_stream() -> void:
 		hv._physics_process(DT)
 		gv._physics_process(DT)
 		f[0] += 1
-		if hv.net.lockstep.frame == gv.net.lockstep.frame:
-			same = same and hv.sim.save_state() == gv.sim.save_state()
-		ended = ended or hv.sim.phase == K.PHASE_MATCH_RESULT
-		if ended and hv.sim.team_score == [0, 0] and gv.sim.team_score == [0, 0] \
-				and hv.sim.phase != K.PHASE_MATCH_RESULT:
+		if _confirmed(hv) == _confirmed(gv):
+			same = same and hv.truth.save_state() == gv.truth.save_state()
+		ended = ended or hv.truth.phase == K.PHASE_MATCH_RESULT
+		if ended and hv.truth.team_score == [0, 0] and gv.truth.team_score == [0, 0] \
+				and hv.truth.phase != K.PHASE_MATCH_RESULT and gv.truth.phase != K.PHASE_MATCH_RESULT:
 			rematched = f[0]
 			break
-	check(ended, "a match to 2 ended")
-	check(rematched > 0, "and the rematch began on both (frame %d)" % rematched)
-	check(same, "the two sims the same at every shared frame, through the rematch")
-	check(hv.net.lockstep.desync < 0 and gv.net.lockstep.desync < 0, "no desync")
-	eq(gv.sim.config.ball_speed, speed, "TUNE's command never reached the online sim")
+	check(ended, "%s: a match to 2 ended" % netcode)
+	check(rematched > 0, "%s: and the rematch began on both (frame %d)" % [netcode, rematched])
+	check(same, "%s: the two confirmed sims the same at every shared frame, through the rematch" % netcode)
+	var desync: Array = [hv.net.rollback.desync, gv.net.rollback.desync] if hv.net.rollback \
+		else [hv.net.lockstep.desync, gv.net.lockstep.desync]
+	check(desync[0] < 0 and desync[1] < 0, "%s: no desync" % netcode)
+	eq(gv.truth.config.ball_speed, speed, "%s: TUNE's command never reached the online sim" % netcode)
+	eq(gv.sim.config.ball_speed, speed, "%s: nor the drawn one" % netcode)
+	check(not gv._new_match_queued and not hv._new_match_queued, "%s: the rematch stepped on both screens" % netcode)
 	hv.free()
 	gv.free()

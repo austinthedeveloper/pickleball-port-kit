@@ -134,7 +134,8 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-106 | The confirmed sim: what's counted and what can't be taken back reads `MatchView.truth` (rollback stage 1; port ADR-103) | `feature/cld-confirmed-sim` | Done |
 | PORT-107 | Rollback's core: two sims, guesses, corrections, time sync (port ADR-103) | `feature/cld-rollback-core` | Done |
 | PORT-108 | Rollback in the online session: START's netcode, PROTOCOL 3, the delay from the line, ONLINE NETCODE saved (port ADR-103) | `feature/cld-rollback-session` | Done |
-| PORT-109..110 | Rollback: the view, correction smoothing (port ADR-103) | | Planned |
+| PORT-109 | Rollback in the match: the prediction drawn, the confirmed sim counted; ROLLBACK the default, NETCODE in OPTIONS (port ADR-103) | `feature/cld-rollback-view` | Ready to test |
+| PORT-110 | Rollback: correction smoothing (port ADR-103) | | Planned |
 
 ## Releases
 
@@ -833,10 +834,33 @@ the same request). Open: 36 and 40.
     sessions over a jittery line, and over ENet on this machine; a
     desync; the fallback; the setting saved).
   - Status: **Done**: nothing to play yet.
-- [ ] `PORT-109..110` Rollback: the view (then VIEW_PLAYS_ROLLBACK on),
-  correction smoothing (ADR-103).
+### 109. `feature/cld-rollback-view`: rollback in the match (asked for 2026-10-26)
+
+- [x] `PORT-109` (port ADR-103), chained from `feature/cld-rollback-session`.
+  Online with rollback, MatchView draws the session's prediction and
+  counts its confirmed sim. Each frame is `OnlineSession.tick`, effects
+  play through the ledger, and stats count the confirmed steps. Offline
+  and lockstep take the same path with one sim. `VIEW_PLAYS_ROLLBACK`
+  is on: online matches start with ROLLBACK, and OPTIONS > NETCODE can
+  pick LOCKSTEP (the host's choice). A core fix: real events of a frame
+  that was guessed wrong, and confirmed in a batch, are now played (late)
+  rather than lost.
+  - Verified: the full suite plus the e2e (`test_rollback_view`: two
+    recording views over a jittery line; `test_online`'s view tests under
+    both netcodes; `test_layout` with the NETCODE row); screenshot of
+    OPTIONS.
+  - Status: **Ready to test**: play online over a real line (Tailscale or
+    a forwarded port). Presses should feel immediate; watch for jumps when
+    a guess is corrected, and compare with NETCODE LOCKSTEP.
+- [ ] `PORT-110` Correction smoothing (ADR-103), once a playtest shows
+  how much the jumps show.
 
 ## For you
+
+- **PORT-109 rollback:** play an online match over a real line (the
+  default is now ROLLBACK). Does it feel immediate? Do corrections
+  (a ball or player jumping a little) show? OPTIONS > NETCODE > LOCKSTEP
+  compares. That decides how much PORT-110's smoothing needs to do.
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.

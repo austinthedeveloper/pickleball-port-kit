@@ -187,14 +187,32 @@ much it's needed.
      count the same events step for step and end in the same whole
      state, over ENet on this machine too (a delay of 1); a desync
      closes them; and the fallback.
-4. `PORT-109`: MatchView under rollback: `truth` and `sim` as separate
-   sims, counting from `truth`'s events, playing through the ledger.
-   Tests run two online views over a jittery line:
-   - each event plays at most once per step and is counted exactly once;
-   - the match ends once on each side;
-   - the rematch works;
-   - the two `truth`s match;
-   - a timing check for the worst case (doubles, a full window).
+4. `PORT-109` `feature/cld-rollback-view` (in): MatchView under rollback.
+   - Online with rollback, `sim` is the session's prediction and `truth`
+     its confirmed sim. Each frame is `OnlineSession.tick` on the local
+     intent. The drawn sim's steps play through `EventLedger.run`, and the
+     confirmed sim's steps are counted.
+   - A counted step's commands start the screen over on NEW MATCH, so
+     each machine does it as its confirmed sim steps it.
+   - Offline and lockstep take the same path, with one sim: its step is
+     played and counted at once. The ledger's `confirm` now only drops
+     the play records of confirmed steps.
+   - `VIEW_PLAYS_ROLLBACK` is on: the host starts what OPTIONS > NETCODE
+     says, ROLLBACK by default.
+   - **A core fix it found:** when `truth` confirms several frames in one
+     tick and one of them was guessed wrong, the prediction re-runs only
+     from the new confirmed frame. So the real events of the wrongly
+     guessed frames were never played. The core now also offers each
+     confirmed frame's events to play, and the ledger plays only what
+     wasn't played for that frame. A right guess plays nothing more; a
+     wrong one plays the real events a few frames late.
+   - Tests (`test_rollback_view`): two recording views over a jittery
+     line play a match to 7. Every counted event was played, none twice
+     for a step, and both count the same events. The match ends once on
+     each side, and the stats are the confirmed match's. A worst-case
+     correction (doubles, a full window) fits in a frame. `test_online`'s
+     view tests (a match through the views, the rematch) run under both
+     netcodes.
 5. `PORT-110`: correction smoothing (display-only, with a
    display-only proof per CLAUDE.md), then a playtest on a real line.
 
