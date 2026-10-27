@@ -464,3 +464,49 @@ func test_the_addresses_offered() -> void:
 		"wired first, by name")
 	eq(OnlineScreen.adapter_label("eth0", "eth0"), "NETWORK", "a Linux id")
 	eq(OnlineScreen.adapter_label("Ethernet", "{F6}"), "ETHERNET")
+
+
+## The rematch online (port ADR-102): the host's B asks for it on both sims,
+## and the NEW MATCH goes in the lockstep stream, so both machines step it
+## on the same frame (the guest never starts it on its own). TUNE's commands
+## can't reach an online sim.
+func test_an_online_rematch_comes_through_the_stream() -> void:
+	var links := LoopbackLink.pair(3)
+	var host := OnlineSession.new(links[0], true)
+	var guest := OnlineSession.new(links[1], false)
+	host.my_hello = OnlineSession.hello(PlayerSelect.new_choice(0, 0, 1), "ANN")
+	guest.my_hello = OnlineSession.hello(PlayerSelect.new_choice(1, 1, 2), "BO")
+	for i in 8:
+		host.poll()
+		guest.poll()
+	var cfg := PlayerSelect.config_select(K.MODE_SINGLES, host.my_hello["look"], host.peer_hello["look"])
+	cfg.points_to_win = 2
+	host.begin({"cfg": OnlineSession.config_to_dict(cfg), "venue": "park", "delay": 6})
+	for i in 4:
+		guest.poll()
+	var f := [0]
+	var hv := _view(host, f, 1)
+	var gv := _view(guest, f, 2)
+	var speed := gv.sim.config.ball_speed
+	gv.command(["retune", speed + 10, 50])
+	var ended := false
+	var rematched := -1
+	var same := true
+	while f[0] < 6000:
+		hv._physics_process(DT)
+		gv._physics_process(DT)
+		f[0] += 1
+		if hv.net.lockstep.frame == gv.net.lockstep.frame:
+			same = same and hv.sim.save_state() == gv.sim.save_state()
+		ended = ended or hv.sim.phase == K.PHASE_MATCH_RESULT
+		if ended and hv.sim.team_score == [0, 0] and gv.sim.team_score == [0, 0] \
+				and hv.sim.phase != K.PHASE_MATCH_RESULT:
+			rematched = f[0]
+			break
+	check(ended, "a match to 2 ended")
+	check(rematched > 0, "and the rematch began on both (frame %d)" % rematched)
+	check(same, "the two sims the same at every shared frame, through the rematch")
+	check(hv.net.lockstep.desync < 0 and gv.net.lockstep.desync < 0, "no desync")
+	eq(gv.sim.config.ball_speed, speed, "TUNE's command never reached the online sim")
+	hv.free()
+	gv.free()

@@ -130,6 +130,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-102 | New heads: 18 generated faces for the ladder, the story, ROAD TRIP and career players, fitting every hat (port ADR-099) | `feature/cld-faces-r1` | Ready to test |
 | PORT-103 | The sim's whole state saved and loaded (rollback and rejoin groundwork); online's desync check hashes all of it (port ADR-100) | `feature/cld-sim-state` | Done |
 | PORT-104 | Sim events stamped by step: played once, counted when the step is confirmed (rollback groundwork; port ADR-101) | `feature/cld-sim-events` | Done |
+| PORT-105 | Commands: NEW MATCH and TUNE go to the sim with the inputs; online, the host's rematch travels in the lockstep stream (port ADR-102) | `feature/cld-sim-commands` | Done |
 
 ## Releases
 
@@ -767,6 +768,23 @@ the same request). Open: 36 and 40.
   - Status: **Done**: nothing to play. Still to do before rollback (ADR-101):
     PLAY OF THE MATCH, the lesson and the match end read the live sim,
     and `retune`/`new_match` need to go through the inputs.
+
+### 105. `feature/cld-sim-commands`: commands with the inputs (asked for 2026-10-26)
+
+- [x] `PORT-105` Rollback groundwork (port ADR-102), chained from
+  `feature/cld-sim-events`. `Sim.step(human, commands)` applies NEW
+  MATCH, TUNE's sliders and SMART PLAY as the step begins. The views
+  only queue them (`MatchView.command`): the rematch, RESTART, a
+  lesson's next match and the tuning panel. PLAY OF THE MATCH records
+  and replays them the same way. Online, the host's rematch rides its
+  input message and both sims step it on the same frame; any other
+  command is refused there, and APPLY refuses outright.
+  `OnlineSession.PROTOCOL` is now 2. The golden traces are the same.
+  - Verified: the full suite plus the e2e (`test_commands`;
+    `test_online.test_an_online_rematch_comes_through_the_stream`, whole
+    states equal through an online rematch; `test_tuning.test_live`).
+  - Status: **Ready to test**: play an online match to its end and
+    rematch with the host's B; offline, TUNE's sliders and RESTART.
 
 ## For you
 

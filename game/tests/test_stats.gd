@@ -118,6 +118,7 @@ func test_card_and_totals() -> void:
 	eq(int(save.data["records"]["points_won"]), 1, "the point rolled into the records")
 	eq(int(save.data["records"]["points_lost"]), 0)
 	v.sim.rematch_requested = true
+	v._physics_process(1.0 / 60.0)          # asked for: the next step's (ADR-102)
 	v._physics_process(1.0 / 60.0)
 	check(v._hud.cards.stats_card == null, "a rematch clears the card")
 	eq(v.stats.rallies, [], "and the stats")

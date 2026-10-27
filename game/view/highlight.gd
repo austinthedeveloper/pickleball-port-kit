@@ -107,7 +107,7 @@ func _intent(f: int, i: int) -> SimTypes.Intent:
 	return it
 
 
-## A call the view made into the sim before the next step.
+## A command the live step took (Sim.apply, port ADR-102), kept by frame.
 func op(o: Array) -> void:
 	if not _ops.has(frames()):
 		_ops[frames()] = []
@@ -248,17 +248,10 @@ func start(done: Callable) -> bool:
 
 
 func _step_replay() -> Array:
-	for o in _ops.get(_frame, []):
-		if o[0] == "new_match":
-			replay.new_match()
-		elif o[0] == "retune":
-			replay.retune(int(o[1]), int(o[2]))
-		elif o[0] == "smarts":
-			replay.retune_smarts(o[1].map(func(v): return int(v)))
 	var human := []
 	for i in K.MAX_PLAYERS:
 		human.append(_intent(_frame, i))
-	replay.step(human)
+	replay.step(human, _ops.get(_frame, []))         # the commands as they came (ADR-102)
 	_frame += 1
 	return replay.drain_events()
 

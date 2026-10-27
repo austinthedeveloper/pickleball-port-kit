@@ -76,17 +76,13 @@ func test_live() -> void:
 	eq(v.sim.frame_count, frame, "the match waits")
 	var page := v.tuning.page
 	page.select("ball_speed")
+	var before := v.sim.config.ball_speed
 	Settings.ball_speed = 90
 	page.change(-1)
-	eq(v.sim.config.ball_speed, 89, "BALL SPEED, live")
-	var n := 0
-	for i in Sim.BALL_CYCLE:
-		n += int(v.sim.ball_pace[i])
-	eq(n, Sim.ball_per_cycle(K.DIFFICULTY_MEDIUM, 89), "its pace")
+	eq(v.sim.config.ball_speed, before, "a command: the next step's (ADR-102), and the match waits")
 	page.select("cpu_errors")
 	Settings.cpu_errors = 50
 	page.change(-1)
-	eq(v.sim.config.cpu_errors, 45, "CPU ERRORS, 5% a step")
 	page.select("ball_size")
 	Settings.ball_size = 110
 	page.change(1)
@@ -97,6 +93,12 @@ func test_live() -> void:
 	check(not v.tuning.open and v.input_lock == MatchView.INPUT_LOCK_FRAMES, "closed, the press swallowed")
 	v._physics_process(1.0 / 60.0)
 	check(v.sim.frame_count > frame, "the match goes on")
+	eq(v.sim.config.ball_speed, 89, "BALL SPEED, from the first step on")
+	var n := 0
+	for i in Sim.BALL_CYCLE:
+		n += int(v.sim.ball_pace[i])
+	eq(n, Sim.ball_per_cycle(K.DIFFICULTY_MEDIUM, 89), "its pace")
+	eq(v.sim.config.cpu_errors, 45, "CPU ERRORS, 5% a step")
 	v.free()
 	_restore(k)
 

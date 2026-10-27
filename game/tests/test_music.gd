@@ -167,6 +167,7 @@ func test_a_real_match_stings_and_the_demo_doesnt() -> void:
 			check(v.sim.phase == K.PHASE_MATCH_RESULT, "the match ended")
 			eq(m.sting_name, "won" if v.sim.match_winner == 0 else "lost", "its stinger")
 			v.sim.rematch_requested = true
+			v._physics_process(DT)          # asked for: the next step's (ADR-102)
 			v._physics_process(DT)
 			eq(m.track, "match_park", "a rematch: the loop again")
 		v.free()

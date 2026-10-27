@@ -113,6 +113,13 @@ var focus: RallyHeat.FocusDim    ## ... and its focus
 var stats := MatchStats.new()
 ## The sim's events by step: played once, counted when confirmed (ADR-101).
 var ledger: EventLedger
+## Commands for the next step (Sim.apply, ADR-102), and a NEW MATCH asked
+## for but not stepped yet (online it comes back delay frames later).
+var _commands := []
+var _new_match_queued := false
+## What the screen does when that NEW MATCH is stepped (a rematch's or
+## RESTART's fresh HUD and stats), not before: until then it's the result.
+var _on_new_match := Callable()
 ## The parts (PORT-27): the people and ball, the input, the match's end.
 var actors := MatchActors.new(self)
 var input := MatchInput.new(self)
@@ -334,6 +341,12 @@ func _build() -> void:
 ## config, from 0-0, as RESTART does (its new records dropped). The owner's
 ## fields (save, ladder, story, the venue, time and court) stay.
 func rebuild(cfg: SimTypes.MatchConfig) -> void:
+	if net:
+		push_error("MatchView: no APPLY online")   # a new sim; TUNE isn't offered there
+		return
+	_commands = []
+	_new_match_queued = false
+	_on_new_match = Callable()
 	if tuning:
 		remove_child(tuning)
 	if options:
@@ -563,9 +576,18 @@ func _physics_process(_delta: float) -> void:
 		if net and net.closed():
 			finished.emit(true)
 		return                           # the pause menu took the frame, or online, the wait
+	var cmds: Array = net.commands if net else _take_commands()
 	if highlight:
+		for c: Array in cmds:
+			highlight.op(c)
 		highlight.record(human)
-	sim.step(human)
+	sim.step(human, cmds)
+	for c: Array in cmds:
+		if c[0] == "new_match":
+			_new_match_queued = false
+			if _on_new_match.is_valid():
+				_on_new_match.call()         # before the step's events are counted
+			_on_new_match = Callable()
 	if net:
 		net.after_step(sim)
 	var events := sim.drain_events()
@@ -584,8 +606,8 @@ func _physics_process(_delta: float) -> void:
 	if lesson:
 		lesson.observe(sim, final)
 		lesson_view.refresh()
-		if sim.phase == K.PHASE_MATCH_RESULT:
-			sim.new_match()                  # a lesson's match goes on
+		if sim.phase == K.PHASE_MATCH_RESULT and not _new_match_queued:
+			command(["new_match"])           # a lesson's match goes on
 	if sim.phase != _prev_phase:
 		if commentary:
 			commentary.on_phase(sim.phase)
@@ -602,30 +624,60 @@ func _physics_process(_delta: float) -> void:
 				_match_over()
 		_prev_phase = sim.phase
 	flair.tick()
-	if sim.rematch_requested:
+	if sim.rematch_requested and not _new_match_queued:
 		if park or tournament or story_mode or trip:
 			finished.emit(false)             # ADR-034: back to the park; PORT-25: the bracket
 			return
 		if ladder and sim.match_winner == 0:
 			next_rung.emit()
 			return
-		if highlight:
-			highlight.op(["new_match"])
-		sim.new_match()
-		if commentary:
-			commentary.on_rematch()
-		flair.begin()
-		Music.cue(music_track())             # the loop again after the stinger
+		command(["new_match"], _rematch_stepped)
 		if save:
 			save.career.new_unlocks = 0      # game_new_match clears them
 		input_lock = INPUT_LOCK_FRAMES
-		stats = MatchStats.new()
-		_hud.on_rematch()
-		_hud.on_new_match()
 	elif sim.title_requested:
 		finished.emit(true)
 		return
 	_update_visuals()
+
+
+## A change to the running match (Sim.apply, port ADR-102), for the next
+## step: the sim's only door besides the pads. Online only NEW MATCH is
+## played, and only the host's: it goes in the lockstep stream and both
+## sides step it on the same frame. TUNE and RESTART aren't offered there.
+func command(c: Array, on_stepped := Callable()) -> void:
+	if c[0] == "new_match":
+		_new_match_queued = true
+		_on_new_match = on_stepped
+	if net:
+		if c[0] != "new_match":
+			push_error("MatchView: no %s online" % c[0])
+		elif net.host:
+			net.command(c)
+		return
+	_commands.append(c)
+
+
+## A rematch's NEW MATCH, stepped: the screen starts over with it.
+func _rematch_stepped() -> void:
+	if commentary:
+		commentary.on_rematch()
+	flair.begin()
+	Music.cue(music_track())             # the loop again after the stinger
+	new_match_display()
+
+
+## A fresh match's HUD and stats (a rematch, RESTART).
+func new_match_display() -> void:
+	stats = MatchStats.new()
+	_hud.on_rematch()
+	_hud.on_new_match()
+
+
+func _take_commands() -> Array:
+	var c := _commands
+	_commands = []
+	return c
 
 
 ## SAVE LAST RALLY (PORT-69): the rally that ended last, to SavedReplays.

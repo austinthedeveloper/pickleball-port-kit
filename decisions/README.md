@@ -92,3 +92,4 @@ first decisions, are rows in `design/07_DECISIONS_AND_RISKS.md`.
 | 099 | [New Heads: Eighteen Faces for Opponents and Career Players](ADR-099-generated-heads.md) | Accepted 2026-10-26 |
 | 100 | [The Sim's Whole State, Saved and Loaded](ADR-100-sim-save-state.md) | Accepted 2026-10-26 |
 | 101 | [Sim Events by Step: Played Once, Counted When Confirmed](ADR-101-events-by-step.md) | Accepted 2026-10-26 |
+| 102 | [Commands: a Match's Changes Travel With Its Inputs](ADR-102-sim-commands.md) | Accepted 2026-10-26 |

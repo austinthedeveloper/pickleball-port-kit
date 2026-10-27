@@ -8,7 +8,7 @@
 class_name OnlineSession
 extends RefCounted
 
-const PROTOCOL := 1
+const PROTOCOL := 2                ## 2: commands ride on the inputs (port ADR-102)
 const IDLE := 0
 const WAITING := 1               ## the host listening, or the guest connecting
 const CONNECTED := 2             ## both said HELLO
@@ -23,6 +23,8 @@ var peer_hello := {}             ## the other side's {version, protocol, look, n
 var start := {}                  ## the match, from START
 var lockstep: Lockstep
 var _pending := SimTypes.Intent.new()   ## this side's presses since the last step
+var _pending_cmds := []          ## this side's commands since the last step (the host's NEW MATCH)
+var commands := []               ## this frame's, both sides' (MatchView steps them)
 var _hello_sent := false
 
 
@@ -96,16 +98,25 @@ func begin(info: Dictionary) -> void:
 ## come out when both sides' are here, or null (wait). Presses made while
 ## waiting are kept for the next step.
 func intents(local: SimTypes.Intent) -> Variant:
+	commands = []
 	_merge(local)
 	if lockstep == null or state != PLAYING:
 		return null
 	if not lockstep.ready():
 		lockstep.waited += 1
 		return null
-	var out := lockstep.advance(_pending)
+	var out := lockstep.advance(_pending, _pending_cmds)
 	link.send(out[0])
 	_pending = SimTypes.Intent.new()
+	_pending_cmds = []
+	commands = out[2]
 	return out[1]
+
+
+## A command for the match (Sim.apply, port ADR-102): sent with this side's
+## next input, and stepped on both sides delay frames on.
+func command(c: Array) -> void:
+	_pending_cmds.append(c)
 
 
 func _merge(it: SimTypes.Intent) -> void:

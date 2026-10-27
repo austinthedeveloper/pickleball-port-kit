@@ -176,14 +176,9 @@ func pause_input(it: SimTypes.Intent) -> bool:
 			if v.save:
 				v.save.drop_new_records()          # only a finished match asks
 				v.save.career.new_unlocks = 0
-			if v.highlight:
-				v.highlight.op(["new_match"])
-			v.sim.new_match()
+			v.command(["new_match"], v.new_match_display)   # stepped next frame (ADR-102)
 			v._prev_phase = -1
 			v.input_lock = MatchView.INPUT_LOCK_FRAMES   # the closing press doesn't serve
-			v.stats = MatchStats.new()
-			v._hud.on_rematch()
-			v._hud.on_new_match()
 			v._update_visuals()
 			return true
 		"menu":

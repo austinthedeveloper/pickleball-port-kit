@@ -1069,6 +1069,22 @@ func _activate_players() -> void:
 			ai.slots[i].late_period = late_period(style.late_period, config.cpu_errors)
 			ai.slots[i].reaction_frames = style.reaction
 
+## A command: a change to the match that isn't a pad's (port ADR-102). The
+## view never calls new_match, retune or retune_smarts on a running match:
+## it passes them to step(), which applies them as the step begins, so they
+## travel with the inputs (online, PLAY OF THE MATCH's replay, a rollback):
+## ["new_match"], ["retune", speed, errors], ["smarts", [12 ints]].
+func apply(c: Array) -> void:
+	match c[0]:
+		"new_match":
+			new_match()
+		"retune":
+			retune(int(c[1]), int(c[2]))
+		"smarts":
+			retune_smarts(c[1].map(func(v): return int(v)))
+		_:
+			push_error("Sim: no command %s" % str(c))
+
 ## The tuning panel (port ADR-074), between frames: BALL SPEED and CPU
 ## ERRORS on the live match, as if it had started with them. An input to
 ## the sim, like a pad's; the view never calls it on its own.
@@ -1389,7 +1405,9 @@ func _serving(slot: int) -> bool:
 ## (singles CPU every frame; a doubles lane cover every 4th, staggered by
 ## slot; the demo P1 every other frame), then the game updates.
 ## `human` holds an Intent per slot (only human-owned slots are read).
-func step(human: Array = []) -> void:
+func step(human: Array = [], commands: Array = []) -> void:
+	for c: Array in commands:
+		apply(c)
 	step_count += 1
 	for i in K.MAX_PLAYERS:
 		var it: Intent = intents[i]

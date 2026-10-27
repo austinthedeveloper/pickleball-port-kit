@@ -83,10 +83,7 @@ func _profile(who: String) -> String:
 
 ## SMART PLAY's knobs on the live match (and its replay).
 func _retune_smarts() -> void:
-	var smarts := Settings.smarts_for(view.sim.config)
-	if view.highlight:
-		view.highlight.op(["smarts", smarts])
-	view.sim.retune_smarts(smarts)
+	view.command(["smarts", Settings.smarts_for(view.sim.config)])   # the next step's (ADR-102)
 
 
 
@@ -165,9 +162,7 @@ func _show(id: String) -> void:
 
 
 func _retune() -> void:
-	if view.highlight:
-		view.highlight.op(["retune", Settings.ball_speed, Settings.cpu_errors])   # replayed too
-	view.sim.retune(Settings.ball_speed, Settings.cpu_errors)
+	view.command(["retune", Settings.ball_speed, Settings.cpu_errors])   # the next step's (ADR-102)
 
 
 ## The match again, from 0-0, with the modifiers set here (and the

@@ -24,6 +24,8 @@ var waited := 0                  ## frames in a row spent waiting for the other 
 var desync := -1                 ## the frame whose hashes differed, or -1
 var _local := {}                 ## frame -> packed intent
 var _remote := {}
+var _local_cmds := {}            ## frame -> commands (Sim.apply, port ADR-102), when any
+var _remote_cmds := {}
 var _hashes := {}                ## frame -> [mine, theirs] (null until known)
 
 
@@ -72,25 +74,35 @@ func ready() -> bool:
 	return _local.has(frame) and _remote.has(frame)
 
 
-## Steps the bookkeeping: this side's input for frame + DELAY (the message
-## to send), and the four slots' intents for this frame.
-func advance(local_intent: SimTypes.Intent) -> Array:
+## Steps the bookkeeping: this side's input and commands for frame + DELAY
+## (the message to send), and this frame's: the four slots' intents and
+## both sides' commands, the lower slot's first (port ADR-102).
+func advance(local_intent: SimTypes.Intent, cmds: Array = []) -> Array:
 	var ahead := frame + delay
 	_local[ahead] = pack(local_intent)
+	var msg := ["I", ahead, _local[ahead]]
+	if not cmds.is_empty():
+		_local_cmds[ahead] = cmds.duplicate(true)
+		msg.append(cmds.duplicate(true))
 	var human: Array = [null, null, null, null]
 	human[local_slot] = unpack(_local[frame])
 	human[remote_slot] = unpack(_remote[frame])
-	_local.erase(frame)
-	_remote.erase(frame)
+	var mine: Array = _local_cmds.get(frame, [])
+	var theirs: Array = _remote_cmds.get(frame, [])
+	var both: Array = mine + theirs if local_slot < remote_slot else theirs + mine
+	for d in [_local, _remote, _local_cmds, _remote_cmds]:
+		d.erase(frame)
 	frame += 1
 	waited = 0
-	return [["I", ahead, _local[ahead]], human]
+	return [msg, human, both]
 
 
 func on_message(m: Array) -> void:
 	match m[0]:
 		"I":
 			_remote[int(m[1])] = int(m[2])
+			if m.size() > 3:
+				_remote_cmds[int(m[1])] = m[3]
 		"H":
 			_hash(int(m[1]), 1, int(m[2]))
 

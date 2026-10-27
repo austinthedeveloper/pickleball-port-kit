@@ -388,9 +388,11 @@ func test_pause_menu_actions() -> void:
 	view.sim.team_score = [3, 2]
 	view.sim.paused = 1
 	check(_pick(view, "restart"), "RESTART ends the frame")
+	eq(view.sim.team_score, [3, 2], "a command: the next step's (ADR-102)")
+	check(view.input_lock > 0, "and swallows the press (no serve)")
+	view._physics_process(1.0 / 60.0)
 	eq(view.sim.team_score, [0, 0], "RESTART starts over")
 	eq(view.sim.paused, 0)
-	check(view.input_lock > 0, "and swallows the press (no serve)")
 	var left := [false]
 	view.finished.connect(func(to_title: bool): left[0] = to_title)
 	view.sim.paused = 1
