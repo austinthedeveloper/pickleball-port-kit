@@ -12,6 +12,7 @@ const TEAMS := ["blue", "red", "green", "gold"]
 var variant := "male"
 var hat := "cap"                 ## "cap", a manifest roles hat, or "hair" (none)
 var pattern := ""                ## a manifest roles pattern (ADR-095), "" plain
+var head := ""                   ## a manifest roles head (ADR-099), "" the classic
 var palette := PackedColorArray()
 
 
@@ -109,6 +110,7 @@ static func for_career(player: Career.Player, shirt: int, body_variant: int, pad
 	var hat: String = String(Career.hat_names[player.hat]).to_lower()
 	look.hat = "hair" if hat == "none" else hat
 	look.set_pattern(String(Career.pattern_sheets[player.pattern % Career.patterns()]), [], manifest)
+	look.set_head(Career.head_sheet(player), manifest)
 	return look
 
 
@@ -120,7 +122,15 @@ static func from_member(m: Dictionary, manifest: Dictionary) -> PlayerLook:
 	var pals := palettes(roles)
 	look.palette = palette_for(m, String(roles["order"]), pals)
 	look.set_pattern(String(m.get("pattern", "")), m.get("pattern_color", []), manifest)
+	look.set_head(String(m.get("head", "")), manifest)
 	return look
+
+
+## A generated head (ADR-099) for this body, or "" (the classic head) when
+## the manifest has none by that name.
+func set_head(name: String, manifest: Dictionary) -> void:
+	var files: Dictionary = manifest["sprites"]["players"]["roles"]["files"][variant]
+	head = name if name != "" and files.has("head_" + name) else ""
 
 
 ## A shirt pattern (ADR-095) and its design ramp (y shadow, Y base): 5-bit
@@ -229,6 +239,8 @@ func glow(manifest: Dictionary) -> void:
 
 
 ## The role sheets (hat "" for bareheaded) and one material for both.
+## body_sheet is the classic head's; draw body_texture, which is a new
+## head's when the look has one.
 func body_sheet(manifest: Dictionary) -> String:
 	return manifest["sprites"]["players"]["roles"]["files"][variant]["body_" + pattern if pattern else "body"]
 
@@ -236,6 +248,34 @@ func body_sheet(manifest: Dictionary) -> String:
 func hat_sheet(manifest: Dictionary) -> String:
 	var files: Dictionary = manifest["sprites"]["players"]["roles"]["files"][variant]
 	return files.get(hat, "")
+
+
+## Composed bodies (ADR-099), by headless sheet and head: a session's few.
+static var _composed := {}
+
+
+## The body to draw: the body sheet, or for a generated head the headless
+## body (plain or patterned) with the head laid on it.
+func body_texture(manifest: Dictionary) -> Texture2D:
+	if head == "":
+		return load(MatchView.LEVELS + body_sheet(manifest))
+	var files: Dictionary = manifest["sprites"]["players"]["roles"]["files"][variant]
+	var base: String = files["nohead_" + pattern if pattern else "nohead"]
+	var key := base + "+" + head
+	if not _composed.has(key):
+		var img := (load(MatchView.LEVELS + base) as Texture2D).get_image()
+		var top := (load(MatchView.LEVELS + String(files["head_" + head])) as Texture2D).get_image()
+		img.convert(Image.FORMAT_RGBA8)
+		top.convert(Image.FORMAT_RGBA8)
+		img.blit_rect_mask(top, top, Rect2i(Vector2i.ZERO, top.get_size()), Vector2i.ZERO)
+		_composed[key] = ImageTexture.create_from_image(img)
+	return _composed[key]
+
+
+## The hat to draw over body_texture, or null for bareheaded.
+func hat_texture(manifest: Dictionary) -> Texture2D:
+	var file := hat_sheet(manifest)
+	return load(MatchView.LEVELS + file) if file != "" else null
 
 
 func material() -> ShaderMaterial:

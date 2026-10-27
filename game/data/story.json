@@ -3,7 +3,7 @@
   "villain": "MR. GRIMSBY",
   "company": "GRIMSBY PARKING CO.",
   "partner": {
-    "name": "PEPPER", "variant": "female", "paddle": "gold", "hat": "backcap", "celebrate": "cheer", "skin": "light",
+    "name": "PEPPER", "variant": "female", "paddle": "gold", "hat": "backcap", "head": "grin", "celebrate": "cheer", "skin": "light",
     "hair": [28, 12, 4],
     "shirt": [[6, 16, 2], [12, 24, 4], [20, 30, 10]],
     "shorts": [[4, 6, 14], [8, 10, 20]],

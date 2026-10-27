@@ -44,6 +44,33 @@
     ["SASH", "sash", "SASH"],
     ["FLAMES", "flames", "FLAMES"]
   ],
+  "heads_comment": "Heads (port ADR-099, remaster only): per body, [name, the manifest's head sheet]; CLASSIC is every player's head before them. All are free and looks only. Changing BODY puts the head back to CLASSIC.",
+  "heads": {
+    "male": [
+      ["CLASSIC", ""],
+      ["CREW CUT", "crew"],
+      ["BEARD", "beard"],
+      ["ATHLETE", "athlete"],
+      ["MOUSTACHE", "moustache"],
+      ["SHAGGY", "shaggy"],
+      ["GLASSES", "glasses"],
+      ["GOATEE", "goatee"],
+      ["BALD", "bald"],
+      ["STUBBLE", "stubble"],
+      ["FULL BEARD", "fullbeard"]
+    ],
+    "female": [
+      ["CLASSIC", ""],
+      ["BANGS", "bangs"],
+      ["FOCUSED", "focused"],
+      ["GLASSES", "glasses"],
+      ["LAUGH LINES", "laughlines"],
+      ["LAUGHING", "laughing"],
+      ["SMILE", "smile"],
+      ["ROUND SPECS", "roundspecs"],
+      ["GRIN", "grin"]
+    ]
+  },
   "gear": {
     "comment": "Stage 4 (ADR-047): a career player's hat moves one paddle stat point to another (power, control, speed), so the paddle budget holds and every pairing stays within ADR-015's 15% (checked). A stat can't pass 5: on a paddle that already maxes the stat a hat raises, the hat changes nothing. A hat not listed (CAP, NONE) changes nothing. CPUs' hats are looks only.",
     "VISOR": {"control": 1, "power": -1},

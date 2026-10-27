@@ -34,13 +34,14 @@ const SLOT_ROWS := Career.SLOTS + 2
 ## EDIT rows.
 const EDIT_NAME := 0
 const EDIT_BODY := 1
-const EDIT_SKIN := 2
-const EDIT_HAIR := 3
-const EDIT_SHIRT := 4
-const EDIT_PATTERN := 5          ## the remaster's (ADR-095)
-const EDIT_HAT := 6
-const EDIT_PADDLE := 7
-const EDIT_ROWS := 8
+const EDIT_HEAD := 2             ## the remaster's (ADR-099)
+const EDIT_SKIN := 3
+const EDIT_HAIR := 4
+const EDIT_SHIRT := 5
+const EDIT_PATTERN := 6          ## the remaster's (ADR-095)
+const EDIT_HAT := 7
+const EDIT_PADDLE := 8
+const EDIT_ROWS := 9
 
 ## input() results.
 const STAY := 0
@@ -88,6 +89,8 @@ static func look_value(player: Career.Player, look_row: int) -> int:
 	match look_row:
 		EDIT_BODY:
 			return player.variant
+		EDIT_HEAD:
+			return player.head
 		EDIT_SKIN:
 			return player.skin
 		EDIT_HAIR:
@@ -309,6 +312,9 @@ func _change(player: Career.Player, look_row: int, pressed: int) -> void:
 	match look_row:
 		EDIT_BODY:
 			player.variant = _page_step(player.variant, 2, pressed)
+			player.head = 0      # the heads are the body's (ADR-099)
+		EDIT_HEAD:
+			player.head = _page_step(player.head, Career.heads(player.variant), pressed)
 		EDIT_SKIN:
 			player.skin = _page_step(player.skin, Career.skins(), pressed)
 		EDIT_HAIR:

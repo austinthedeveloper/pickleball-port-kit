@@ -8,7 +8,7 @@
 ## The data (skins, hair colours, hats, unlocks, gear) is data/career.json,
 ## the SNES asset build's source; career_data.h's tables are read from it.
 ## Shirt patterns and their unlocks (after the ROM's sixteen) are the
-## remaster's (port ADR-095).
+## remaster's (port ADR-095), and so are the heads (port ADR-099).
 class_name Career
 extends RefCounted
 
@@ -56,6 +56,10 @@ static var hat_gear: Array = []
 static var pattern_names: Array = []     ## 0 PLAIN, the ROM's shirt (ADR-095)
 static var pattern_sheets: Array = []    ## the manifest's pattern ("" none)
 static var pattern_unlock: Array = []
+## Heads (ADR-099) per body (K.VARIANT_*): names, and the manifest's head
+## ("" the classic head).
+static var head_names: Array = [[], []]
+static var head_sheets: Array = [[], []]
 
 
 static func _load() -> void:
@@ -81,6 +85,10 @@ static func _load() -> void:
 		pattern_names.append(String(pt[0]))
 		pattern_sheets.append(String(pt[1]))
 		pattern_unlock.append(names.find(String(pt[2])) if pt.size() > 2 else FREE)
+	for v in [K.VARIANT_MALE, K.VARIANT_FEMALE]:
+		for hd in d["heads"]["female" if v == K.VARIANT_FEMALE else "male"]:
+			head_names[v].append(String(hd[0]))
+			head_sheets[v].append(String(hd[1]))
 	for u in d["unlocks"]:
 		unlock_names.append(String(u["name"]))
 		var rule := RULE_NAMES.find(String(u["rule"]))
@@ -128,6 +136,17 @@ static func patterns() -> int:
 	return pattern_names.size()
 
 
+## The heads a body can wear (ADR-099), CLASSIC first.
+static func heads(body_variant: int) -> int:
+	_load()
+	return head_names[body_variant].size()
+
+
+## The player's head as the manifest names it ("" the classic head).
+static func head_sheet(player: Player) -> String:
+	return String(head_sheets[player.variant][player.head % heads(player.variant)])
+
+
 ## A career player (save.h's CareerPlayer): counters, then the look.
 ## Counters saturate at COUNTER_MAX, beaten[] at 255.
 class Player:
@@ -151,6 +170,7 @@ class Player:
 	var shirt := 0               ## a PlayerSelect.PAL_* team colour
 	var hat := 0                 ## HAT id, 0 the cap
 	var pattern := 0             ## a shirt pattern (ADR-095), 0 PLAIN
+	var head := 0                ## a head for the body (ADR-099), 0 CLASSIC
 	var paddle := Paddles.STANDARD
 	var beaten := [0, 0, 0, 0, 0, 0, 0, 0]   ## wins over each ladder team
 	var park := 0                ## the park rating and court (PARK_*), 0 a new player
@@ -161,7 +181,7 @@ class Player:
 	const KEYS := ["wins", "losses", "points_won", "points_lost", "aces", "shutouts",
 		"streak", "best_streak", "longest_rally", "ladder_clears", "open_play", "unlocked",
 		"used", "name", "variant", "skin", "hair", "shirt", "hat", "paddle", "beaten", "park",
-		"pattern"]
+		"pattern", "head"]
 
 	func copy() -> Player:
 		var p := Player.new()
@@ -206,6 +226,7 @@ class Player:
 		p.shirt = clampi(int(d.get("shirt", 0)), 0, PlayerSelect.PAL_COUNT - 1)
 		p.hat = clampi(int(d.get("hat", 0)), 0, Career.hats() - 1)
 		p.pattern = clampi(int(d.get("pattern", 0)), 0, Career.patterns() - 1)
+		p.head = clampi(int(d.get("head", 0)), 0, Career.heads(p.variant) - 1)
 		p.paddle = clampi(int(d.get("paddle", Paddles.STANDARD)), 0, Paddles.NAMES.size() - 1)
 		return p
 

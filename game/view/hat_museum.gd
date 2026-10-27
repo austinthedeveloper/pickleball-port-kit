@@ -93,7 +93,7 @@ func case_rect(i: int) -> Rect2:
 func refresh() -> void:
 	var p := museum.player()
 	var look := PlayerLook.for_career(p, p.shirt, p.variant, p.paddle, manifest)
-	var body: Texture2D = load(MatchView.LEVELS + look.body_sheet(manifest))
+	var body := look.body_texture(manifest)
 	var files: Dictionary = manifest["sprites"]["players"]["roles"]["files"][look.variant]
 	var lit := look.material()
 	var dark := look.material()

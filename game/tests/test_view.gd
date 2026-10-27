@@ -167,8 +167,10 @@ func test_ladder_opponents_wear_their_looks() -> void:
 		var m: Dictionary = members[slot - 2]
 		var e: Dictionary = view._players[slot]
 		var body: Sprite2D = e["body"]
-		check(body.texture.resource_path.ends_with("roles/player_%s_body_%s.png" % [m["variant"], m["pattern"]]),
-			"slot %d body, in the team's pattern" % slot)
+		var look: PlayerLook = e["look"]
+		check(look.pattern == m["pattern"] and look.head == m["head"], "slot %d pattern and head" % slot)
+		check(body.texture == look.body_texture(view.manifest),
+			"slot %d body: the team's pattern under their head (ADR-099)" % slot)
 		eq(body.material.get_shader_parameter("palette")[String(view.manifest["sprites"]["players"]["roles"]["order"]).find("Y")],
 			PlayerLook.rgb5(m["pattern_color"][1]), "slot %d pattern colour" % slot)
 		check(e["cap"].texture.resource_path.ends_with("_%s.png" % m["hat"]), "slot %d wears the %s" % [slot, m["hat"]])

@@ -380,6 +380,13 @@ func test_career_screens() -> void:
 			edit.change(1)
 			edit.settle()
 			check_layout(t, "career edit %s = %s" % [row["id"], edit.value_of(row["id"])])
+	for v in [K.VARIANT_MALE, K.VARIANT_FEMALE]:     # every head of each body (ADR-099)
+		p0.variant = v
+		edit.select("head")
+		for k in Career.heads(v):
+			edit.change(1)
+			edit.settle()
+			check_layout(t, "career edit head %d = %s" % [v, edit.value_of("head")])
 	edit.select("name")
 	edit.press()
 	eq(t.page, "career_name", "typing")

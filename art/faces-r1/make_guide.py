@@ -64,6 +64,24 @@ def main():
     out.save(os.path.join(HERE, "guide_head_cell.png"))
     # the bare cell alone, unmarked: the exact layout to copy
     cell("player_male_blue.png").save(os.path.join(HERE, "guide_cell_plain.png"))
+    female_no_tail().save(os.path.join(HERE, "guide_female_no_tail.png"))
+
+
+def female_no_tail():
+    """Round 2: the woman's head without the ponytail the game adds."""
+    import build as B
+    orig = P.head_parts
+    P.head_parts = lambda neck, female=False, pony="hang": orig(neck, True, pony)[:2] + (None,)
+    try:
+        g, _ = P.render(P.POSES["idle0"], True, hat=None)
+    finally:
+        P.head_parts = orig
+    im = Image.fromarray(B.rows_rgba(g, B.team_colors("red")))
+    c = Image.new("RGBA", (CELL, CELL), BG)
+    c.alpha_composite(im.crop((OX, OY, OX + CELL, OY + CELL)))
+    c = c.resize((CELL * Z, CELL * Z), Image.NEAREST)
+    marks(c)
+    return c
 
 
 if __name__ == "__main__":

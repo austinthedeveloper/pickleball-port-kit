@@ -10,7 +10,9 @@ Pixels are palette roles; palettes.json colours them per team.
 """
 from __future__ import annotations
 
+import json
 import math
+import os
 
 S = 2                                  # scale over the 48 px rig
 W = H = 128
@@ -100,22 +102,30 @@ class Part:
 class Canvas:
     def __init__(self):
         self.g = [["."] * W for _ in range(H)]
+        self.owner = [[None] * W for _ in range(H)]    # the tag that drew it
         self.clipped = 0
 
-    def put(self, x, y, ch):
+    def put(self, x, y, ch, tag=None):
         if 0 <= x < W and 0 <= y < H:
             self.g[y][x] = ch
+            self.owner[y][x] = tag
         else:
             self.clipped += 1
 
-    def draw(self, part):
+    def draw(self, part, tag=None):
         for (x, y) in part.outline():
-            self.put(x, y, "o")
+            self.put(x, y, "o", tag)
         for (x, y), ch in part.px.items():
-            self.put(x, y, ch)
+            self.put(x, y, ch, tag)
 
-    def rows(self):
-        return ["".join(r) for r in self.g]
+    def rows(self, only=None):
+        """The frame, or with only set just the pixels that tag still owns
+        (an overlay: what a hat or head shows, under whatever is drawn
+        after it)."""
+        if only is None:
+            return ["".join(r) for r in self.g]
+        return ["".join(ch if o == only else "." for ch, o in zip(r, ro))
+                for r, ro in zip(self.g, self.owner)]
 
 
 def lerp(a, b, t):
@@ -555,6 +565,23 @@ def head_parts(neck, female=False, pony="hang"):
     return head, cap, tail
 
 
+# The generated heads (port ADR-099, art/faces-r1): per body, id -> 48 rows
+# of roles on a cell with the neck at (22, 44).
+with open(os.path.join(os.path.dirname(__file__), "heads.json")) as _f:
+    HEADS = {k: v for k, v in json.load(_f).items() if k in ("male", "female")}
+
+
+def stamped_head(neck, rows):
+    """A generated head at the neck: drawn as it is (it has its outline)."""
+    nx, ny = round(neck[0]), round(neck[1])
+    p = Part(outlined=False)
+    for y, r in enumerate(rows):
+        for x, ch in enumerate(r):
+            if ch != ".":
+                p.px[(x + nx - 22, y + ny - 44)] = ch
+    return p
+
+
 HATS = ("visor", "headband", "tricorn", "bandana",
         # SNES ADR-060 (port PORT-38): looks only, the owner's palette
         "beanie", "backcap", "bucket", "crown", "whirly", "chef", "viking")
@@ -927,26 +954,32 @@ def scaled(pose):
     return P
 
 
-def render(pose, female=False, hat="cap", pattern=None):
-    """hat: None (bare), "cap", or one of HATS; pattern None or one of PATTERNS."""
+def render(pose, female=False, hat="cap", pattern=None, head="classic", only=None):
+    """hat: None (bare), "cap", or one of HATS; pattern None or one of
+    PATTERNS; head "classic" (head_parts'), None (no head: the body the
+    heads and hats of ADR-099 are drawn over), or a HEADS id. only "hat"
+    or "head" returns just that part's visible pixels, an overlay."""
     c = Canvas()
     P = scaled(pose)
     if P["paddle"][1] == "back":
         c.draw(paddle(P["ha_n"], P["paddle"][0]))
     c.draw(arm(P["sh_f"], P["el_f"], P["ha_f"], far=True, pattern=pattern))
     c.draw(leg(P["hip"], P["kn_f"], P["an_f"], P["toe_f"], far=True))
-    head, cap, tail = head_parts(P["neck"], female, P.get("pony", "hang"))
+    head_part, cap, tail = head_parts(P["neck"], female, P.get("pony", "hang"))
     if tail is not None:
         c.draw(tail)
     c.draw(leg(add(P["hip"], (2 * S, 0)), P["kn_n"], P["an_n"], P["toe_n"]))
     c.draw(shorts(P["hip"], P["kn_n"], P["kn_f"]))
     c.draw(torso(P["neck"], P["hip"], pattern))
     c.draw(neck_part(P["neck"]))
-    c.draw(head)
+    if head == "classic":
+        c.draw(head_part, "head")
+    elif head is not None:
+        c.draw(stamped_head(P["neck"], HEADS["female" if female else "male"][head]), "head")
     if hat == "cap":
-        c.draw(cap)
+        c.draw(cap, "hat")
     elif hat is not None:
-        c.draw(hat_part(P["neck"], hat))
+        c.draw(hat_part(P["neck"], hat), "hat")
     c.draw(collar(P["neck"], pattern))
     ang, layer = P["paddle"]
     pad = paddle(P["ha_n"], ang)
@@ -960,10 +993,5 @@ def render(pose, female=False, hat="cap", pattern=None):
         hx, hy = round(P["ha_n"][0] - 0.5), round(P["ha_n"][1] - 0.5)
         fist.px[(hx - 1, hy - 1)] = "4"
         c.draw(fist)
-    return c.rows(), c.clipped
+    return c.rows(only), c.clipped
 
-
-def cap_overlay(bare, capped):
-    """Hat layer = pixels where the hatted frame differs from the bare one."""
-    return ["".join(c if c != b else "." for b, c in zip(rb, rc))
-            for rb, rc in zip(bare, capped)]

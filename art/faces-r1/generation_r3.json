@@ -1,0 +1,50 @@
+{
+  "faces_m.png": {
+    "size": [
+      2172,
+      724
+    ],
+    "opaque_colours": 672,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "status": "raw draft; grid/palette snapping and fit review pending"
+  },
+  "faces_n.png": {
+    "size": [
+      2172,
+      724
+    ],
+    "opaque_colours": 493,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "status": "raw draft; grid/palette snapping and fit review pending"
+  },
+  "faces_o.png": {
+    "size": [
+      2172,
+      724
+    ],
+    "opaque_colours": 636,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "status": "raw draft; grid/palette snapping and fit review pending"
+  },
+  "faces_p.png": {
+    "size": [
+      1983,
+      793
+    ],
+    "opaque_colours": 750,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "status": "raw draft; grid/palette snapping and fit review pending"
+  }
+}

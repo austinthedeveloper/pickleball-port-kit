@@ -232,6 +232,74 @@ func test_patterns() -> void:
 	check(look.body_sheet(manifest).ends_with("_body.png"), "PLAIN: the plain body")
 
 
+## ADR-099: the heads. Each body's list starts with CLASSIC and matches the
+## manifest, every head has its sheet and every pattern a headless body;
+## a head composes over the headless body; BODY puts it back to CLASSIC;
+## the save keeps it, an older player is CLASSIC, and the look wears it.
+func test_heads() -> void:
+	var manifest := MatchView.levels_manifest()
+	var roles: Dictionary = manifest["sprites"]["players"]["roles"]
+	for v in [K.VARIANT_MALE, K.VARIANT_FEMALE]:
+		var body := PlayerLook.variant_name(v)
+		var files: Dictionary = roles["files"][body]
+		eq(Career.head_names[v][0], "CLASSIC", "%s: CLASSIC first" % body)
+		eq(Career.head_sheets[v][0], "", "%s: the classic head" % body)
+		eq(Career.head_sheets[v].slice(1), roles["heads"][body], "%s: the manifest's heads" % body)
+		for name in ["nohead"] + Array(roles["patterns"]).map(func(pt): return "nohead_" + pt):
+			check(ResourceLoader.exists(MatchView.LEVELS + files[name]), "%s %s" % [body, name])
+		for i in range(1, Career.heads(v)):
+			var sheet: String = Career.head_sheets[v][i]
+			check(ResourceLoader.exists(MatchView.LEVELS + files["head_" + sheet]), "%s %s" % [body, sheet])
+	# a composed body: the head where it has pixels, the headless body elsewhere
+	var c := Career.new()
+	c.create(0, "TESS")
+	var p := c.active_player()
+	p.variant = K.VARIANT_FEMALE
+	p.head = Career.head_sheets[K.VARIANT_FEMALE].find("glasses")
+	p.pattern = Career.pattern_sheets.find("dots")
+	var look := PlayerLook.for_career(p, p.shirt, p.variant, p.paddle, manifest)
+	eq(look.head, "glasses", "the look wears the head")
+	var files: Dictionary = roles["files"]["female"]
+	var got := look.body_texture(manifest).get_image()
+	var base := (load(MatchView.LEVELS + files["nohead_dots"]) as Texture2D).get_image()
+	var top := (load(MatchView.LEVELS + files["head_glasses"]) as Texture2D).get_image()
+	var wrong := 0
+	var heads := 0
+	for y in got.get_height():
+		for x in range(0, got.get_width(), 3):
+			var want := top.get_pixel(x, y) if top.get_pixel(x, y).a > 0 else base.get_pixel(x, y)
+			heads += 1 if top.get_pixel(x, y).a > 0 else 0
+			wrong += 0 if got.get_pixel(x, y).is_equal_approx(want) else 1
+	eq(wrong, 0, "head over the patterned, headless body")
+	check(heads > 1000, "the head has pixels")
+	check(look.body_texture(manifest) == look.body_texture(manifest), "composed once")
+	# CLASSIC loads the body sheet as before
+	p.head = 0
+	look = PlayerLook.for_career(p, p.shirt, p.variant, p.paddle, manifest)
+	check(look.head == "" and look.body_texture(manifest).resource_path.ends_with("_body_dots.png"),
+		"CLASSIC: the body sheet")
+	# BODY resets the head; the save keeps it; an older player is CLASSIC
+	p.head = 3
+	page = CareerPage.new()
+	page.begin(c)
+	page.row = 0
+	_press(CareerPage.PAD_B)                     # the card
+	_press(CareerPage.PAD_B)                     # edit
+	page.row = CareerPage.EDIT_BODY
+	_press(CareerPage.PAD_RIGHT)
+	check(p.variant == K.VARIANT_MALE and p.head == 0, "a new body: CLASSIC")
+	p.head = Career.heads(K.VARIANT_MALE) - 1
+	var back := Career.from_dict(c.to_dict()).players[0] as Career.Player
+	eq(back.head, p.head, "the head kept")
+	var old := c.to_dict()
+	old["players"][0].erase("head")
+	eq((Career.from_dict(old).players[0] as Career.Player).head, 0, "an older player: CLASSIC")
+	old["players"][0]["head"] = 99
+	old["players"][0]["variant"] = K.VARIANT_FEMALE
+	eq((Career.from_dict(old).players[0] as Career.Player).head, Career.heads(K.VARIANT_FEMALE) - 1,
+		"clamped to the body's")
+
+
 ## Stage 4: hats shift paddle stats. Every pairing keeps the budget; a
 ## stat a paddle maxes leaves that hat with nothing to do on it; the
 ## career player's match uses the pairing, everyone else the paddle.
@@ -408,6 +476,9 @@ func test_page_edit_look() -> void:
 	_press(CareerPage.PAD_DOWN)                  # BODY
 	_press(CareerPage.PAD_RIGHT)
 	check(p.variant == K.VARIANT_FEMALE and page.look_changed, "body")
+	_press(CareerPage.PAD_DOWN)                  # HEAD: the body's (ADR-099)
+	_press(CareerPage.PAD_LEFT)
+	eq(p.head, Career.heads(K.VARIANT_FEMALE) - 1, "head wraps")
 	_press(CareerPage.PAD_DOWN)                  # SKIN
 	_press(CareerPage.PAD_LEFT)
 	eq(p.skin, Career.skins() - 1, "skin wraps")
@@ -430,7 +501,7 @@ func test_page_edit_look() -> void:
 	# Y puts it all back.
 	_press(CareerPage.PAD_Y)
 	eq(page.view, CareerPage.VIEW_CARD, "the card")
-	check(p.variant == K.VARIANT_MALE and p.skin == 0 and p.hair == 0, "the look back")
+	check(p.variant == K.VARIANT_MALE and p.skin == 0 and p.hair == 0 and p.head == 0, "the look back")
 	eq(p.shirt, PlayerSelect.PAL_BLUE, "the shirt back")
 	# An unlocked hat can be worn.
 	p.unlocked = 1                               # VISOR
