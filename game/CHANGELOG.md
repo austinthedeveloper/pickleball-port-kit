@@ -4,6 +4,18 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.42.0] - 2026-10-26
+
+ROAD TRIP's people have more to say.
+
+### Added
+- **Five conversations where there was one**: every team you meet on the
+  road, your partner's word in the GARAGE, at the motel and at the diner,
+  and the ROAD HOGS now have five scenes each, heard one per meeting.
+  The more you meet someone, the more you learn about them: why Dad tells
+  jokes, how Marge and Walt met, what Raven won't admit, what keeps Ace up
+  at five in the morning. TRIP OF THE DAY keeps the first ones.
+
 ## [0.41.0] - 2026-10-26
 
 Online play without the lag: rollback netcode.
