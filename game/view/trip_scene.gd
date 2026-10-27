@@ -129,9 +129,9 @@ func _person(look: PlayerLook, x: float, flip: bool) -> Dictionary:
 	add_child(node)
 	var sprites := []
 	var mat := look.material()
-	for sheet in [look.body_sheet(manifest), look.hat_sheet(manifest)]:
+	for tex in [look.body_texture(manifest), look.hat_texture(manifest)]:
 		var s := Sprite2D.new()
-		s.texture = load(MatchView.LEVELS + sheet) if sheet != "" else null
+		s.texture = tex
 		s.material = mat
 		s.centered = false
 		s.region_enabled = true

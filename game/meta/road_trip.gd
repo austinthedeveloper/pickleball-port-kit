@@ -543,7 +543,7 @@ const LOCAL_HATS := ["cap", "visor", "headband", "bandana", "beanie", "backcap",
 
 ## The two locals' looks at a stop (opponents.json's member shape), the
 ## same every time: a shirt colour for the pair, each their own skin,
-## hair, hat and body. Display only.
+## hair, hat, body and head (port ADR-099). Display only.
 func local_members(n: Dictionary) -> Array:
 	if String(n.get("type", "")) == "rival":
 		return rival_members()
@@ -556,8 +556,12 @@ func local_members(n: Dictionary) -> Array:
 	var out := []
 	for i in 2:
 		var hair: Array = Career.hair_rgb5[roll(seed, k + i, 53, mini(5, Career.hair_rgb5.size()))]
+		var female := roll(seed, k + i, 55, 2) == 0
+		var body := K.VARIANT_FEMALE if female else K.VARIANT_MALE
+		var pick := roll(seed, k + i, 65, Career.heads(body))
+		var head: String = Career.head_sheets[body][pick]
 		out.append({"name": String(data()["locals"][int(n.get("local", 0))]),
-			"variant": "female" if roll(seed, k + i, 55, 2) == 0 else "male",
+			"variant": "female" if female else "male", "head": head,
 			"paddle": ["wood", "blue", "red", "gold"][roll(seed, k + i, 57, 4)],
 			"hat": String(LOCAL_HATS[roll(seed, k + i, 59, LOCAL_HATS.size())]),
 			"skin": String(skins[roll(seed, k + i, 61, skins.size())]),

@@ -21,7 +21,7 @@
 ## "park_pick" one who has beaten the ladder, picking a partner at the
 ## ROOKIE rack (SNES ADR-070, 072).
 ## "career" (ADR-047) plays as a scratch career player (ACE: green rugby
-## shirt, pink hair, a visor) in a match, the park, or on title_career,
+## shirt, pink hair, a visor, the GRIN head) in a match, the park, or on title_career,
 ## title_career_card, title_career_edit and title_career_name (and
 ## title_career_museum: the HAT MUSEUM, half the hats won); "unlock"
 ## shows the UNLOCKED! card at the end of a match.
@@ -58,6 +58,7 @@ static func _career_save() -> SaveGame:
 	p.skin = 1
 	p.shirt = PlayerSelect.PAL_GREEN
 	p.variant = K.VARIANT_FEMALE
+	p.head = Career.head_names[K.VARIANT_FEMALE].find("GRIN")   # ADR-099
 	p.paddle = Paddles.RED
 	p.wins = [23, 9]
 	p.losses = [11, 6]

@@ -60,9 +60,8 @@ func show_player(p: Career.Player) -> void:
 	_name.text = p.shown_name() if p.shown_name() != "" else "NEW PLAYER"
 	_line.text = "UNLOCKS %d/%d" % [Career.unlock_count(p), Career.unlocks()]
 	var look := PlayerLook.for_career(p, p.shirt, p.variant, p.paddle, manifest)
-	_sprites[0].texture = load(MatchView.LEVELS + look.body_sheet(manifest))
-	var hat := look.hat_sheet(manifest)
-	_sprites[1].texture = load(MatchView.LEVELS + hat) if hat != "" else null
+	_sprites[0].texture = look.body_texture(manifest)
+	_sprites[1].texture = look.hat_texture(manifest)
 	var mat := look.material()
 	for s in _sprites:
 		s.material = mat

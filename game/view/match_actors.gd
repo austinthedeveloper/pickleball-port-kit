@@ -47,7 +47,7 @@ func build_players() -> void:
 			look.glow(v.manifest)
 		if look:
 			# a ladder opponent: role sheets in their colours, their hat
-			body.texture = v._tex(look.body_sheet(v.manifest))
+			body.texture = look.body_texture(v.manifest)
 			var hat := look.hat_sheet(v.manifest)
 			cap.texture = v._tex(hat) if hat != "" else null
 			body.material = look.material()

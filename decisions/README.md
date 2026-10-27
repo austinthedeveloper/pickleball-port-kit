@@ -89,3 +89,4 @@ first decisions, are rows in `design/07_DECISIONS_AND_RISKS.md`.
 | 096 | [ROAD TRIP Plays Every Modifier; SHORT Held Slows Your Feet](ADR-096-trip-every-modifier-short-held.md) | Accepted 2026-10-26 |
 | 097 | [ROAD TRIP: FROM THE GARAGE, Before a Trip](ADR-097-trip-garage-card.md) | Accepted 2026-10-26 |
 | 098 | [ROAD TRIP: the Map Previews Where a Choice Leads](ADR-098-trip-path-preview.md) | Accepted 2026-10-26 |
+| 099 | [New Heads: Eighteen Faces for Opponents and Career Players](ADR-099-generated-heads.md) | Accepted 2026-10-26 |

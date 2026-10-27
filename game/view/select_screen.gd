@@ -138,8 +138,7 @@ func _set_sheet(spr: Sprite2D, team: int, variant: int, cap: bool, paddle := -1)
 ## sheet, or the hat's; bareheaded, the hat sprite is empty).
 func _set_career(spr: Sprite2D, team: int, variant: int, cap: bool, paddle: int) -> void:
 	var look := PlayerLook.for_career(career, team, variant, paddle, manifest)
-	var file := look.hat_sheet(manifest) if cap else look.body_sheet(manifest)
-	spr.texture = load(MatchView.LEVELS + file) if file != "" else null
+	spr.texture = look.hat_texture(manifest) if cap else look.body_texture(manifest)
 	spr.material = look.material()
 
 

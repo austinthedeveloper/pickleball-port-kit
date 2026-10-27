@@ -81,27 +81,43 @@ def build_players():
         bare, capped = [], []
         hats = {h: [] for h in PL.HATS}
         patterned = {f"body_{pt}": [] for pt in PL.PATTERNS}
+        # port ADR-099: every body without its head (plain and patterned),
+        # each generated head as an overlay on it, and each hat as the
+        # pixels it shows (not a diff, which drops a hat pixel that matches
+        # what's under it), so a hat covers any head the same way
+        headless = {"nohead": [], **{f"nohead_{pt}": [] for pt in PL.PATTERNS}}
+        heads = {f"head_{h}": [] for h in PL.HEADS[variant]}
         for name in PL.SLOTS:
-            b, clip_b = PL.render(PL.POSES[name], fem, hat=None)
-            c, clip_c = PL.render(PL.POSES[name], fem, hat="cap")
-            assert not (clip_b or clip_c), f"{variant} {name} clipped"
+            pose = PL.POSES[name]
+            b, clip_b = PL.render(pose, fem, hat=None)
+            nh, clip_n = PL.render(pose, fem, hat=None, head=None)
+            assert not (clip_b or clip_n), f"{variant} {name} clipped"
             bare.append(b)
+            headless["nohead"].append(nh)
+            c, clip = PL.render(pose, fem, hat="cap", only="hat")
+            assert not clip, f"{variant} {name} cap clipped"
             capped.append(c)
             for h in PL.HATS:
-                r, clip = PL.render(PL.POSES[name], fem, hat=h)
+                r, clip = PL.render(pose, fem, hat=h, only="hat")
                 assert not clip, f"{variant} {name} {h} clipped"
-                hats[h].append(PL.cap_overlay(b, r))
+                hats[h].append(r)
             for pt in PL.PATTERNS:
-                r, clip = PL.render(PL.POSES[name], fem, hat=None, pattern=pt)
+                r, clip = PL.render(pose, fem, hat=None, pattern=pt)
                 assert not clip, f"{variant} {name} {pt} clipped"
                 patterned[f"body_{pt}"].append(r)
+                r, clip = PL.render(pose, fem, hat=None, pattern=pt, head=None)
+                assert not clip, f"{variant} {name} {pt} clipped"
+                headless[f"nohead_{pt}"].append(r)
+            for h in PL.HEADS[variant]:
+                r, clip = PL.render(pose, fem, hat=None, head=h, only="head")
+                assert not clip, f"{variant} {name} head {h} clipped"
+                heads[f"head_{h}"].append(r)
+        pattern_rows[variant] = {**patterned, **headless, **heads}
         frames[variant] = (bare, capped)
         hat_rows[variant] = hats
-        pattern_rows[variant] = patterned
     sheets = {}
     n = len(PL.SLOTS)
-    for variant, (bare, capped) in frames.items():
-        caps = [PL.cap_overlay(b, c) for b, c in zip(bare, capped)]
+    for variant, (bare, caps) in frames.items():
         # indexed role sheets (palette swap in a shader) ...
         for kind, rows_list in (("body", bare), ("cap", caps),
                                 *hat_rows[variant].items(),
@@ -141,8 +157,16 @@ def build_players():
                    "or swap in another hat.",
         "roles": {"files": {v: {k: f"sprites/players/roles/player_{v}_{k}.png"
                                 for k in ("body", "cap", *PL.HATS,
-                                          *(f"body_{pt}" for pt in PL.PATTERNS))}
+                                          *(f"body_{pt}" for pt in PL.PATTERNS),
+                                          "nohead", *(f"nohead_{pt}" for pt in PL.PATTERNS),
+                                          *(f"head_{h}" for h in PL.HEADS[v]))}
                             for v in ("male", "female")},
+                  "heads": {v: list(PL.HEADS[v]) for v in ("male", "female")},
+                  "heads_doc": "Generated heads (port ADR-099): head_<id> is an "
+                               "overlay for nohead (or nohead_<pattern>), the body "
+                               "sheet without its head; compose the two in place "
+                               "of body (or body_<pattern>), then the hat over it. "
+                               "The hats fit every head.",
                   "hats": ["cap", *PL.HATS],
                   "hats_doc": "Hat overlays (role sheets only), drawn like the "
                               "cap: visor and headband in the shoe accent "

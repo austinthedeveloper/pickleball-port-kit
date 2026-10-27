@@ -29,9 +29,9 @@ func setup(cfg: SimTypes.MatchConfig, manifest: Dictionary, venue: String, tint:
 	sitting = s["pose"] == "sit"
 	var look := PlayerLook.from_member(Opponents.team(cfg.opponent)["players"][1], manifest)
 	var mat := look.material()
-	for sheet in [look.body_sheet(manifest), look.hat_sheet(manifest)]:
+	for tex in [look.body_texture(manifest), look.hat_texture(manifest)]:
 		var spr := Sprite2D.new()
-		spr.texture = load(MatchView.LEVELS + sheet) if sheet != "" else null
+		spr.texture = tex
 		spr.material = mat
 		spr.centered = false
 		spr.region_enabled = true

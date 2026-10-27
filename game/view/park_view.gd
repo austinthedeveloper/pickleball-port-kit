@@ -291,9 +291,8 @@ func _dress(p: Dictionary, look: PlayerLook) -> void:
 	var body: Sprite2D = p["body"]
 	var cap: Sprite2D = p["cap"]
 	if look:
-		body.texture = load(MatchView.LEVELS + look.body_sheet(manifest))
-		var hat := look.hat_sheet(manifest)
-		cap.texture = load(MatchView.LEVELS + hat) if hat != "" else null
+		body.texture = look.body_texture(manifest)
+		cap.texture = look.hat_texture(manifest)
 		body.material = look.material()
 		cap.material = body.material
 		return
@@ -301,9 +300,8 @@ func _dress(p: Dictionary, look: PlayerLook) -> void:
 	var me: Career.Player = save.career.active_player() if save else null
 	if me:
 		var mine := PlayerLook.for_career(me, me.shirt, me.variant, me.paddle, manifest)
-		body.texture = load(MatchView.LEVELS + mine.body_sheet(manifest))
-		var file := mine.hat_sheet(manifest)
-		cap.texture = load(MatchView.LEVELS + file) if file != "" else null
+		body.texture = mine.body_texture(manifest)
+		cap.texture = mine.hat_texture(manifest)
 		body.material = mine.material()
 		cap.material = body.material
 		return
