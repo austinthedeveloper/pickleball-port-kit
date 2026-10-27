@@ -129,6 +129,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-101 | PLAYERS 2P with one pad no longer locks the menus: every menu hears every pad; the pad is 2P's only on the court (known issue #93) | `feature/cld-2p-menu-pad` | Ready to test |
 | PORT-102 | New heads: 18 generated faces for the ladder, the story, ROAD TRIP and career players, fitting every hat (port ADR-099) | `feature/cld-faces-r1` | Ready to test |
 | PORT-103 | The sim's whole state saved and loaded (rollback and rejoin groundwork); online's desync check hashes all of it (port ADR-100) | `feature/cld-sim-state` | Done |
+| PORT-104 | Sim events stamped by step: played once, counted when the step is confirmed (rollback groundwork; port ADR-101) | `feature/cld-sim-events` | Done |
 
 ## Releases
 
@@ -746,6 +747,26 @@ the same request). Open: 36 and 40.
   - Status: **Done**: nothing to play. Next for online: tag events by
     frame, and route `retune`/`new_match` through the inputs (ADR-100),
     then rollback.
+
+### 104. `feature/cld-sim-events`: events by step (asked for 2026-10-26)
+
+- [x] `PORT-104` Rollback groundwork (port ADR-101), chained from
+  `feature/cld-sim-state`. Every sim event carries its step
+  (`Sim.step_count`, never reset, part of the state). `EventLedger`
+  (`view/event_ledger.gd`) plays a step's events once, however often the
+  step runs, and counts them only when the step is confirmed, with the
+  context recorded at that step. MatchView's handler is split in two:
+  `_on_event` plays (sound, sparks, crowd, quips) and `_count_event`
+  counts (stats, rally record, career points). Offline and in lockstep,
+  a step is confirmed as it runs, so nothing changes in play. The golden
+  traces are the same.
+  - Verified: the full suite plus the e2e (`test_event_ledger`: a
+    naive rollback over a real 2P match with bad guesses counts exactly
+    the straight run's events and plays each once; offline stats match
+    a bare sim's).
+  - Status: **Done**: nothing to play. Still to do before rollback (ADR-101):
+    PLAY OF THE MATCH, the lesson and the match end read the live sim,
+    and `retune`/`new_match` need to go through the inputs.
 
 ## For you
 

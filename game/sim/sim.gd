@@ -94,7 +94,11 @@ var ball_pace: Array = []
 var ball_tick := 0
 var rally_start := 0
 var last_rally_length := 0
-var events: Array = []          ## [kind, x, y, detail] since last drain
+var events: Array = []          ## [kind, x, y, detail, step] since last drain
+## Steps this sim has run, never reset (a new match goes on counting): an
+## event's `step` (port ADR-101), so a step run again (a rollback) gives its
+## events the same stamp. Part of the state, so a load puts it back.
+var step_count := 0
 
 ## Set false to run a slot-0 human through serve meter rules; the bot
 ## harness and attract use the classic serve.
@@ -919,7 +923,7 @@ func rules_process_ball_events(ev: int) -> void:
 # --- Game (game.c) --------------------------------------------------------------------------
 
 func emit(kind: int, x: int, y: int, detail: int) -> void:
-	events.append([kind, x, y, detail])
+	events.append([kind, x, y, detail, step_count])
 
 func drain_events() -> Array:
 	var e := events
@@ -1386,6 +1390,7 @@ func _serving(slot: int) -> bool:
 ## slot; the demo P1 every other frame), then the game updates.
 ## `human` holds an Intent per slot (only human-owned slots are read).
 func step(human: Array = []) -> void:
+	step_count += 1
 	for i in K.MAX_PLAYERS:
 		var it: Intent = intents[i]
 		if owners[i] == K.OWNER_HUMAN and not (i == 0 and attract) \

@@ -111,6 +111,8 @@ var heat: RallyHeat              ## PORT-43: a long rally's fire
 var focus: RallyHeat.FocusDim    ## ... and its focus
 ## This match's stats (PORT-13), from the events; display only.
 var stats := MatchStats.new()
+## The sim's events by step: played once, counted when confirmed (ADR-101).
+var ledger: EventLedger
 ## The parts (PORT-27): the people and ball, the input, the match's end.
 var actors := MatchActors.new(self)
 var input := MatchInput.new(self)
@@ -157,6 +159,7 @@ func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void
 		court[3] = GLOW_LINES
 	manifest = levels_manifest()
 	sim = Sim.new(cfg)
+	ledger = EventLedger.new(sim.step_count)
 	if tuning == null and not demo:
 		tuning = TuningPanel.new().setup(self)     # before the HUD: the pause menu's TUNE
 	if options == null and not demo:
@@ -566,14 +569,20 @@ func _physics_process(_delta: float) -> void:
 	if net:
 		net.after_step(sim)
 	var events := sim.drain_events()
-	for e in events:
+	for e in ledger.run(sim.step_count, events, _count_context() if events else null):
 		_on_event(e)
 		if commentary:
 			commentary.on_event(e)
+	# offline and in lockstep a step is confirmed as it runs (ADR-101)
+	var counted := ledger.confirm(sim.step_count)
+	var final := []
+	for c: Array in counted:
+		_count_event(c[0], c[1])
+		final.append(c[0])
 	if highlight:
-		highlight.after_step(events)
+		highlight.after_step(final)
 	if lesson:
-		lesson.observe(sim, events)
+		lesson.observe(sim, final)
 		lesson_view.refresh()
 		if sim.phase == K.PHASE_MATCH_RESULT:
 			sim.new_match()                  # a lesson's match goes on
@@ -646,13 +655,34 @@ func _match_over() -> void:
 			sim.config.human[2] or sim.config.human[3]))
 
 
+## A step's view of the sim for counting its events later (ADR-101): the
+## score, the rally's shots, and the server (still the rally's at its point).
+func _count_context() -> Array:
+	return [sim.team_score.duplicate(), (sim.shot_serial - sim.rally_start) & 0xff, sim.server_index]
+
+
+## An event counted (its step confirmed, ADR-101): the stats and records.
+## It reads the context of its step, never the sim, which may be further on.
+func _count_event(e: Array, ctx: Array) -> void:
+	stats.on_event(e)
+	if e[0] != K.EVENT_POINT:
+		return
+	var rally: int = ctx[1]
+	stats.note_score(ctx[0])
+	if save and not demo and not trip:
+		if not multiplayer():
+			save.record_rally(rally)
+	# ADR-047: the active career player's point (against the CPU)
+	if end.career_counts():
+		save.career.record_point(rally, e[3] == 0, ctx[2] == 0)
+
+
+## An event played (once, as its step runs; ADR-101): the sounds and the
+## show. Nothing counted: that's _count_event.
 func _on_event(e: Array) -> void:
 	feel.on_event(e)
 	flair.on_event(e)
 	effects.on_event(e)
-	stats.on_event(e)
-	if e[0] == K.EVENT_POINT:
-		stats.note_score(sim.team_score)
 	var kind: int = e[0]
 	var at := CourtView.ground(K.to_fp(e[1]), K.to_fp(e[2]))
 	var rally: int = (sim.shot_serial - sim.rally_start) & 0xff
@@ -682,13 +712,6 @@ func _on_event(e: Array) -> void:
 			if line != "":
 				_hud.show_quip(line, _hud.team_tint(loser))
 				flair.quip(loser)
-			if save and not demo and not trip:
-				if not multiplayer():
-					save.record_rally(rally)
-			# ADR-047: the active career player's point (against the CPU);
-			# the server is still the rally's (the next serve isn't set up).
-			if end.career_counts():
-				save.career.record_point(rally, e[3] == 0, sim.server_index == 0)
 
 ## A hit or serve's spark at the paddle, and a smash's pop (the match and
 ## PLAY OF THE MATCH's replay alike).

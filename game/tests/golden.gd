@@ -43,7 +43,9 @@ static func run(scenario: String, frames: int = 9000) -> PackedStringArray:
 				sim.new_match()
 		sim.step(human)
 		var snap := sim.snapshot()
-		var events := sim.drain_events()
+		var events := []
+		for e: Array in sim.drain_events():
+			events.append(e.slice(0, 4))     # the play, without its step (port ADR-101)
 		out.append("%d %08x %s" % [f, str(snap).hash(), str(events) if events.size() else ""])
 	out.append(str(sim.snapshot()))
 	return out
