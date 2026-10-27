@@ -273,6 +273,10 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.40.0** (2026-10-26): PORT-102 new heads: eighteen faces for the
   ladder, the story, ROAD TRIP and career players (ADR-099) (tag
   `v0.40.0`, on `feature/cld-release-0.40.0`).
+- **v0.41.0** (2026-10-26): PORT-103..109 rollback netcode for online
+  play: ROLLBACK the default, NETCODE in OPTIONS, on new groundwork (the
+  whole sim state saved, events by step, commands with the inputs, the
+  confirmed sim) (tag `v0.41.0`, on `feature/cld-release-0.41.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 

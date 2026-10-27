@@ -4,6 +4,27 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.41.0] - 2026-10-26
+
+Online play without the lag: rollback netcode.
+
+### Added
+- **Rollback for ONLINE**: your presses now show at once. Inputs wait 1
+  frame on the same network and 2 over the internet, down from 3 to 12.
+  The game guesses your friend's next moves and quietly corrects itself
+  when it guessed wrong. A correction can show as a small jump of the
+  ball or a player.
+- **OPTIONS > NETCODE**: ROLLBACK (the default) or LOCKSTEP, the old way,
+  kept for this release to compare. The host's choice is the one played.
+
+### Changed
+- **An online rematch starts on the same frame for both players**: the
+  host's B travels with the inputs.
+- **OUT OF SYNC is caught sooner**: the check covers the whole match, not
+  just the score and the players.
+- Online play needs both players on 0.41.0: different versions still
+  won't connect.
+
 ## [0.40.0] - 2026-10-26
 
 New faces: eighteen heads for the ladder, the story, ROAD TRIP and your
