@@ -178,6 +178,7 @@ func pause_input(it: SimTypes.Intent) -> bool:
 				v.save.career.new_unlocks = 0
 			v.command(["new_match"], v.new_match_display)   # stepped next frame (ADR-102)
 			v._prev_phase = -1
+			v._truth_phase = -1
 			v.input_lock = MatchView.INPUT_LOCK_FRAMES   # the closing press doesn't serve
 			v._update_visuals()
 			return true

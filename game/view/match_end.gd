@@ -56,8 +56,8 @@ func update_unlock() -> void:
 ## active career player against the CPU, outside the demo, practice and
 ## multiplayer (as the records).
 func career_counts() -> bool:
-	return v.save != null and not v.demo and not v.trip and not v.multiplayer() and not v.sim.config.human[2] \
-		and not v.sim.config.practice
+	return v.save != null and not v.demo and not v.trip and not v.multiplayer() and not v.truth.config.human[2] \
+		and not v.truth.config.practice
 
 
 ## Records at the match's end (a safe point to write, playbook §6), and the
@@ -66,23 +66,23 @@ func career_counts() -> bool:
 func on_match_over() -> void:
 	if v.demo or v.save == null or v.net or v.trip:
 		return                             # online matches aren't recorded either, nor a trip's
-	var won := v.sim.match_winner == 0
+	var won := v.truth.match_winner == 0
 	if v.multiplayer():
 		if v.tournament:
 			record_tournament(won)         # PORT-29: the couch cup's bracket
 		v.save.drop_new_records()          # friends' matches don't touch the records
 		v.save.save_game()
 		return
-	if not v.sim.config.human[2]:
+	if not v.truth.config.human[2]:
 		# ADR-047: before record_match, whose write keeps both.
 		if career_counts():
-			v.save.career.record_match(v.sim.config.mode, won, v.sim.team_score[1],
-				v.sim.config.opponent, v.sim.config.open_play,
-				v.sim.config.difficulty == K.DIFFICULTY_KID)
-		v.save.record_match(v.sim.config.mode == K.MODE_DOUBLES, won, v.sim.config.opponent,
-			v.sim.team_score[1] if won else -1)
+			v.save.career.record_match(v.truth.config.mode, won, v.truth.team_score[1],
+				v.truth.config.opponent, v.truth.config.open_play,
+				v.truth.config.difficulty == K.DIFFICULTY_KID)
+		v.save.record_match(v.truth.config.mode == K.MODE_DOUBLES, won, v.truth.config.opponent,
+			v.truth.team_score[1] if won else -1)
 		if v.ladder and won:
-			v.cleared = v.save.advance_ladder(Opponents.count(), v.sim.config.mode == K.MODE_DOUBLES)
+			v.cleared = v.save.advance_ladder(Opponents.count(), v.truth.config.mode == K.MODE_DOUBLES)
 		if v.tournament:
 			record_tournament(won)
 		v.save.record_stats(v.stats)
@@ -96,7 +96,7 @@ func on_match_over() -> void:
 
 ## ADR-077: this match's achievements, for P1's side.
 func check_achievements(won: bool) -> Array:
-	var s := v.sim
+	var s := v.truth
 	return Achievements.check_match(v.save, {"won": won, "scores": [s.team_score[0], s.team_score[1]],
 		"aces": int(v.stats.teams[0]["aces"]), "longest": v.stats.longest_rally(),
 		"behind": v.stats.behind[0], "mods": s.config.modifiers, "opponent": s.config.opponent,
@@ -109,7 +109,7 @@ func record_tournament(won: bool) -> void:
 	var t := v.save.tournament(v.cup_key)
 	if t == null or t.next_match().is_empty():
 		return
-	t.record_left(won, v.sim.team_score[0], v.sim.team_score[1])
+	t.record_left(won, v.truth.team_score[0], v.truth.team_score[1])
 	v.save.store_tournament(t, v.cup_key)
 	if t.couch():
 		return                             # friends' cups don't go in the records

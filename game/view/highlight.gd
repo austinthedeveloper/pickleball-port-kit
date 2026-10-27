@@ -77,7 +77,7 @@ func frames() -> int:
 
 ## The frame's human intents, just before the live sim steps on them.
 func record(human: Array) -> void:
-	_bot = view.sim.p1_bot
+	_bot = view.truth.p1_bot             # what's confirmed is what's kept (ADR-103)
 	for i in K.MAX_PLAYERS:
 		var it: SimTypes.Intent = human[i] if i < human.size() else null
 		if it == null:
@@ -121,7 +121,7 @@ func op(o: Array) -> void:
 ## of the match is the one to show; a tie goes to the later). Every rally
 ## that was served is the last one, for SAVE LAST RALLY.
 func after_step(events: Array) -> void:
-	var s := view.sim
+	var s := view.truth
 	if s.phase == K.PHASE_SERVE_SETUP and _serve_at != frames() - 1 and _serve_snap.is_empty():
 		_serve_at = frames() - 1
 		_serve_snap = s.snapshot()
@@ -161,7 +161,7 @@ func export(rally: Dictionary) -> Dictionary:
 		"saved": int(Time.get_unix_time_from_system()),
 		"venue": view.venue, "time": view._base_time, "court": view._base_court.duplicate(),
 		"teams": [view._hud._team_label(0), view._hud._team_label(1)],
-		"doubles": view.sim.config.mode == K.MODE_DOUBLES,
+		"doubles": view.truth.config.mode == K.MODE_DOUBLES,
 		"cfg": _cfg.duplicate(true), "career": _career.to_dict() if _career else {},
 		"bot": _bot, "ops": ops, "inputs": _inputs.slice(0, end * 8),
 		"rally": rally.duplicate(true)}

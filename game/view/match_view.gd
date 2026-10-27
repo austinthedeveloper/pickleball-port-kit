@@ -27,6 +27,12 @@ var commentary: Commentary         ## the announcer's lines (ADR-076); null in t
 var _base_time := CourtStyle.DAY    ## the owner's time and court, before GLOW's
 var _base_court: Array = []
 var sim: Sim
+## The confirmed sim (port ADR-103): stepped only on inputs both sides
+## know. What's counted and what can't be taken back reads it: stats and
+## records, PLAY OF THE MATCH, the lesson, the match end, close calls, the
+## rematch. `sim` is the one drawn and heard. Offline and in lockstep
+## they're the same sim; under rollback `sim` is the prediction.
+var truth: Sim
 var venue := "park"
 var manifest: Dictionary
 var demo := false
@@ -71,7 +77,8 @@ var story := Story.new()
 var card_frames := -1
 const CARD_MIN_FRAMES := 30
 const CARD_MAX_FRAMES := 300
-var _prev_phase := -1
+var _prev_phase := -1             ## the drawn sim's phase last frame (commentary)
+var _truth_phase := -1            ## the confirmed sim's (the moments, ADR-103)
 var cleared := false            ## this match cleared the ladder
 ## Camera (ADR-050/051): the lean toward the ball (CameraLean).
 var camera := CameraLean.new()
@@ -166,6 +173,7 @@ func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void
 		court[3] = GLOW_LINES
 	manifest = levels_manifest()
 	sim = Sim.new(cfg)
+	truth = sim                           # one sim until rollback (ADR-103)
 	ledger = EventLedger.new(sim.step_count)
 	if tuning == null and not demo:
 		tuning = TuningPanel.new().setup(self)     # before the HUD: the pause menu's TUNE
@@ -368,6 +376,7 @@ func rebuild(cfg: SimTypes.MatchConfig) -> void:
 	end = MatchEnd.new(self)
 	card_frames = -1
 	_prev_phase = -1
+	_truth_phase = -1
 	cleared = false
 	time = _base_time
 	court = _base_court.duplicate()
@@ -400,10 +409,10 @@ var close_call: CloseCall
 
 ## On the point result's first frame (game.c calls replay_check there).
 func _check_close_call() -> void:
-	if sim.config.practice:
+	if truth.config.practice:
 		return
-	var c := Replay.check(sim.ball.x_fp, sim.ball.y_fp, (sim.shot_serial - sim.rally_start) & 0xff,
-		sim.last_fault)
+	var c := Replay.check(truth.ball.x_fp, truth.ball.y_fp, (truth.shot_serial - truth.rally_start) & 0xff,
+		truth.last_fault)
 	if c.is_empty():
 		return
 	close_call = CloseCall.new().setup(self, c)
@@ -589,9 +598,9 @@ func _physics_process(_delta: float) -> void:
 				_on_new_match.call()         # before the step's events are counted
 			_on_new_match = Callable()
 	if net:
-		net.after_step(sim)
+		net.after_step(truth)            # the desync check hashes what's confirmed
 	var events := sim.drain_events()
-	for e in ledger.run(sim.step_count, events, _count_context() if events else null):
+	for e in ledger.run(sim.step_count, events):
 		_on_event(e)
 		if commentary:
 			commentary.on_event(e)
@@ -599,43 +608,44 @@ func _physics_process(_delta: float) -> void:
 	var counted := ledger.confirm(sim.step_count)
 	var final := []
 	for c: Array in counted:
-		_count_event(c[0], c[1])
+		_count_event(c[0])
 		final.append(c[0])
 	if highlight:
 		highlight.after_step(final)
 	if lesson:
-		lesson.observe(sim, final)
+		lesson.observe(truth, final)
 		lesson_view.refresh()
-		if sim.phase == K.PHASE_MATCH_RESULT and not _new_match_queued:
+		if truth.phase == K.PHASE_MATCH_RESULT and not _new_match_queued:
 			command(["new_match"])           # a lesson's match goes on
-	if sim.phase != _prev_phase:
+	if sim.phase != _prev_phase:             # the drawn match: what's heard
 		if commentary:
 			commentary.on_phase(sim.phase)
-		if _prev_phase == K.PHASE_POINT_RESULT:
+		_prev_phase = sim.phase
+	if truth.phase != _truth_phase:          # the confirmed match: what can't be taken back
+		if _truth_phase == K.PHASE_POINT_RESULT:
 			_end_close_call()
-		if sim.phase == K.PHASE_POINT_RESULT:
+		if truth.phase == K.PHASE_POINT_RESULT:
 			_check_close_call()
-		if sim.phase == K.PHASE_MATCH_RESULT:
-			_prev_phase = sim.phase
-			if highlight and highlight.start(_match_over):
+		_truth_phase = truth.phase
+		if truth.phase == K.PHASE_MATCH_RESULT:
+			if highlight and highlight.start(_match_over):   # it draws the replay as `sim`
 				if commentary:
 					commentary.on_highlight()
 			else:
 				_match_over()
-		_prev_phase = sim.phase
 	flair.tick()
-	if sim.rematch_requested and not _new_match_queued:
+	if truth.rematch_requested and not _new_match_queued:
 		if park or tournament or story_mode or trip:
 			finished.emit(false)             # ADR-034: back to the park; PORT-25: the bracket
 			return
-		if ladder and sim.match_winner == 0:
+		if ladder and truth.match_winner == 0:
 			next_rung.emit()
 			return
 		command(["new_match"], _rematch_stepped)
 		if save:
 			save.career.new_unlocks = 0      # game_new_match clears them
 		input_lock = INPUT_LOCK_FRAMES
-	elif sim.title_requested:
+	elif truth.title_requested:
 		finished.emit(true)
 		return
 	_update_visuals()
@@ -703,30 +713,26 @@ func _match_over() -> void:
 		commentary.on_match_over()
 	end.on_match_over()
 	if not demo:
-		Music.sting(Music.result_sting(sim.match_winner == my_team(), cleared,
-			sim.config.human[2] or sim.config.human[3]))
+		Music.sting(Music.result_sting(truth.match_winner == my_team(), cleared,
+			truth.config.human[2] or truth.config.human[3]))
 
 
-## A step's view of the sim for counting its events later (ADR-101): the
-## score, the rally's shots, and the server (still the rally's at its point).
-func _count_context() -> Array:
-	return [sim.team_score.duplicate(), (sim.shot_serial - sim.rally_start) & 0xff, sim.server_index]
-
-
-## An event counted (its step confirmed, ADR-101): the stats and records.
-## It reads the context of its step, never the sim, which may be further on.
-func _count_event(e: Array, ctx: Array) -> void:
+## An event counted (its step confirmed, ADR-101): the stats and records,
+## from the confirmed sim just after that step (ADR-103), never the drawn
+## one, which may be further on.
+func _count_event(e: Array) -> void:
 	stats.on_event(e)
 	if e[0] != K.EVENT_POINT:
 		return
-	var rally: int = ctx[1]
-	stats.note_score(ctx[0])
+	var rally: int = (truth.shot_serial - truth.rally_start) & 0xff
+	stats.note_score(truth.team_score)
 	if save and not demo and not trip:
 		if not multiplayer():
 			save.record_rally(rally)
-	# ADR-047: the active career player's point (against the CPU)
+	# ADR-047: the active career player's point (against the CPU); the
+	# server is still the rally's (the next serve isn't set up)
 	if end.career_counts():
-		save.career.record_point(rally, e[3] == 0, ctx[2] == 0)
+		save.career.record_point(rally, e[3] == 0, truth.server_index == 0)
 
 
 ## An event played (once, as its step runs; ADR-101): the sounds and the

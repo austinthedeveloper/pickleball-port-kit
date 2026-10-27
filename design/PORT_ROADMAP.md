@@ -131,6 +131,8 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-103 | The sim's whole state saved and loaded (rollback and rejoin groundwork); online's desync check hashes all of it (port ADR-100) | `feature/cld-sim-state` | Done |
 | PORT-104 | Sim events stamped by step: played once, counted when the step is confirmed (rollback groundwork; port ADR-101) | `feature/cld-sim-events` | Done |
 | PORT-105 | Commands: NEW MATCH and TUNE go to the sim with the inputs; online, the host's rematch travels in the lockstep stream (port ADR-102) | `feature/cld-sim-commands` | Done |
+| PORT-106 | The confirmed sim: what's counted and what can't be taken back reads `MatchView.truth` (rollback stage 1; port ADR-103) | `feature/cld-confirmed-sim` | Done |
+| PORT-107..110 | Rollback: the core, the session, the view, correction smoothing (port ADR-103, proposed) | | Planned |
 
 ## Releases
 
@@ -786,7 +788,28 @@ the same request). Open: 36 and 40.
   - Status: **Ready to test**: play an online match to its end and
     rematch with the host's B; offline, TUNE's sliders and RESTART.
 
+### 106. `feature/cld-confirmed-sim`: the confirmed sim; rollback planned (asked for 2026-10-26)
+
+- [x] `PORT-106` Rollback stage 1 (port ADR-103), chained from
+  `feature/cld-sim-commands`. `MatchView.truth` is the confirmed sim
+  and `sim` is the one drawn. Offline and in lockstep they're the same
+  object. The things that are counted or can't be taken back read
+  `truth`: stats and records, PLAY OF THE MATCH's recording, the lesson,
+  the match end and close calls (on `truth`'s phase changes), the
+  rematch, and online's desync hash.
+  - Verified: the full suite plus the e2e (`test_confirmed_sim`, with a
+    second sim for `truth`).
+  - Status: **Done**: nothing to play.
+- [ ] `PORT-107..110` Rollback itself, in four branches: the core, the
+  session, the view, and correction smoothing (ADR-103, **proposed**:
+  waiting for your review).
+
 ## For you
+
+- **ADR-103 rollback (review before code):** W = 8 frames of prediction
+  and D = 1 or 2 of delay to start? Keep lockstep for a release as a
+  fallback? Should the HUD's score follow the drawn sim (instant, can be
+  taken back) or the confirmed one (never wrong, W frames late)?
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.

@@ -42,7 +42,7 @@ project lead's; the remaster is one of its artifacts and may not
 contradict it). `design/BIBLE_PLAN.md` lists what it asks of the port and
 the gaps (phase 5 in the roadmap). The SNES repo's decisions are cited as
 "SNES ADR-n": its numbers from 052 on are not this repo's. This repo keeps
-its own numbering (next: ADR-103; `decisions/README.md` indexes them).
+its own numbering (next: ADR-104; `decisions/README.md` indexes them).
 
 ## Rules of the code (game/)
 
@@ -62,6 +62,8 @@ its own numbering (next: ADR-103; `decisions/README.md` indexes them).
   command: `MatchView.command` → `Sim.step(human, commands)` (ADR-102),
   never a direct call, so it travels online and replays. Sim events are
   played once and counted when confirmed (`EventLedger`, ADR-101).
+  What's counted or can't be taken back (records, the match end, PLAY
+  OF THE MATCH) reads `MatchView.truth`, the confirmed sim (ADR-103).
 - **CPU schedule = shipped schedule.** `Sim.step()` runs the CPUs as
   main.c does (doubles lane covers every 4th frame); tests use `step()`,
   not ad hoc AI calls, unless porting a C test that did otherwise.

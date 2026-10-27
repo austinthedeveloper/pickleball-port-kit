@@ -93,3 +93,4 @@ first decisions, are rows in `design/07_DECISIONS_AND_RISKS.md`.
 | 100 | [The Sim's Whole State, Saved and Loaded](ADR-100-sim-save-state.md) | Accepted 2026-10-26 |
 | 101 | [Sim Events by Step: Played Once, Counted When Confirmed](ADR-101-events-by-step.md) | Accepted 2026-10-26 |
 | 102 | [Commands: a Match's Changes Travel With Its Inputs](ADR-102-sim-commands.md) | Accepted 2026-10-26 |
+| 103 | [Rollback for Online Play](ADR-103-rollback.md) | Proposed 2026-10-26 (stage 1 accepted) |
