@@ -9,8 +9,10 @@
 - **Measured from the lead's Mac:** a guest's message to the host and
   back takes 89 ms (each leg goes through the relay, so that's two round
   trips to East US).
-- **Next:** RelayLink and ROOM / JOIN in this port, then ANYWHERE in the
-  VR game's COACH page.
+- **The VR game uses it** (2026-10-29): COACH FROM ANYWHERE (VR ADR-026,
+  on its `feature/cld-vr-relay-live`). The relay's front page (`/`) asks
+  for the room and opens `/c/ROOM`.
+- **Next:** RelayLink and ROOM / JOIN in this port.
 
 One small server on Azure for both games:
 - this port's ONLINE play (PORT-31, port ADR-056);
