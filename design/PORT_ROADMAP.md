@@ -137,6 +137,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-109 | Rollback in the match: the prediction drawn, the confirmed sim counted; ROLLBACK the default, NETCODE in OPTIONS (port ADR-103) | `feature/cld-rollback-view` | Ready to test |
 | PORT-110 | Rollback: correction smoothing (port ADR-103) | | Planned |
 | PORT-111 | ROAD TRIP talks: five conversations each for every team, partner (start, motel, diner) and the ROAD HOGS, revealing more of them each time (port ADR-104) | `feature/cld-trip-talks` | Ready to test |
+| PORT-112 | The relay: ONLINE by room code over the internet and in the Web build, one Azure server shared with the VR game (design/RELAY.md) | `feature/cld-relay-plan` | Planned: waiting on the lead's Azure sign-in |
 
 ## Releases
 
