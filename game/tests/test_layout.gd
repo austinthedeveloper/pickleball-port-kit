@@ -754,6 +754,29 @@ func test_online() -> void:
 	runner.root.add_child(o)
 	if not o.is_node_ready():
 		o._ready()
+	# port ADR-105: by room (idle, typing, an error, opening, a room open, joining)
+	o.way = OnlineScreen.BY_ROOM
+	o.room = "WWWW"
+	o.refresh()
+	check_layout(o, "online by room, idle")
+	o.editing = true
+	o.refresh()
+	check_layout(o, "online typing a room")
+	o.editing = false
+	o.last_reason = "THE ROOM CLOSED: TIME UP"
+	o.refresh()
+	check_layout(o, "online by room, an error")
+	o.last_reason = ""
+	for host in [true, false]:
+		var rl := RelayLink.new()
+		o.session = OnlineSession.new(rl, host)
+		o.refresh()
+		check_layout(o, "online by room, opening (host %s)" % host)
+		rl.room = "WWWW"
+		o.refresh()
+		check_layout(o, "online by room, waiting (host %s)" % host)
+	o.session = null
+	o.way = OnlineScreen.BY_ADDRESS
 	o.address = "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
 	o.refresh()
 	check_layout(o, "online idle, the longest address")

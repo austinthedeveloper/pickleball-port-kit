@@ -53,6 +53,7 @@ static func defaults() -> Dictionary:
 			"pad_maps": {}, "pad_notice": 1,  # port ADR-082: generic pads' maps, the pad card
 			"touch_pad": 0,  # PORT-81: TOUCH PAD, AUTO
 			"net_address": "",  # PORT-31: the last address joined
+			"net_way": "room",  # port ADR-105: ONLINE's CONNECT BY (room or address)
 			"music": Music.DEFAULT_VOLUME},  # PORT-22: MUSIC, 0 (OFF) .. 10
 		"records": {"singles_wins": 0, "singles_losses": 0, "doubles_wins": 0,
 			"doubles_losses": 0, "ladder_rung": 0, "ladder_clears": 0,

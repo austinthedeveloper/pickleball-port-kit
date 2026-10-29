@@ -4,6 +4,14 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [Unreleased]
+
+### Added
+- **ONLINE by room code**: HOST A MATCH gets a four-letter room (like
+  ROOM BXKM), and your friend types it and joins, from anywhere with the
+  internet. No router settings, no VPN, and it works in the Web build
+  too. CONNECT BY ADDRESS keeps the old way for the same Wi-Fi.
+
 ## [0.42.0] - 2026-10-26
 
 ROAD TRIP's people have more to say.

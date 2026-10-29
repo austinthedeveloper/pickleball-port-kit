@@ -62,16 +62,29 @@ Godot itself sends you to the releases page instead (ADR-057).
 ## Playing online
 
 MAIN > MULTIPLAYER > **ONLINE**: 1 vs 1 singles with a friend (ADR-056).
-You both need the same version of the game (the desktop build; the Web
-build can't).
+You both need the same version of the game. CONNECT BY picks how
+(ADR-105).
 
-1. **The host** picks HOST A MATCH. The screen shows their address and
-   waits. The match uses the host's COURT, POINTS and MODIFIERS.
-2. **The friend** picks ADDRESS, types the host's address (Enter when
-   done; paste works), then JOIN.
+**By ROOM CODE** (the default; anywhere with the internet, the Web build
+too): both games dial the relay, a small server (design/RELAY.md), so
+nobody changes their router.
+
+1. **The host** picks HOST A MATCH and gets a room, like ROOM BXKM. The
+   first room after a quiet spell can take about 20 seconds while the
+   server wakes. The match uses the host's COURT, POINTS and MODIFIERS.
+2. **The friend** picks ROOM, types the four letters (Enter when done;
+   paste works), then JOIN.
 3. Once you're connected, the host picks START MATCH.
 
-How the friend reaches the host:
+**By ADDRESS** (the desktop build; same Wi-Fi, or a VPN): straight from
+one computer to the other, with no server in between.
+
+1. **The host** picks HOST A MATCH. The screen shows their address and
+   waits.
+2. **The friend** picks ADDRESS, types the host's address, then JOIN.
+3. Once you're connected, the host picks START MATCH.
+
+How the friend reaches the host by address:
 
 - **Same Wi-Fi or router:** use an address the host's screen shows. A
   computer on both Ethernet and Wi-Fi shows both, the wired one first;
@@ -159,7 +172,7 @@ title shows; from a checkout the title says `BUILD DEV <describe>`.
 | `view/` match | `match_view.gd` (one match: the scene, the frame, events) with `event_ledger.gd` (events played once, counted when confirmed, ADR-101), `match_actors.gd` (people, ball, sparks), `match_input.gd` (intents, pause menu) and `match_end.gd` (records, the initials and UNLOCKED! cards), `court_view.gd` (world → screen), `court_style.gd` (+ shader: court colours, time of day), `hud.gd` (with `hud_cards.gd`: the intro, initials, UNLOCKED! and stats cards), `crowd.gd`, `watcher.gd`, `camera_lean.gd`, `close_call.gd`, `feel.gd`, `flair.gd` (point reactions, emotes, the net's shiver), `rally_heat.gd` (a long rally's fire and focus), `critter.gd` (each venue's critter), `dino_walkers.gd` (the Carnotaurus and friends at DINOSAUR and DINO PARK, and the Carnotaurus at the LAB), `wind_view.gd`, `player_look.gd` (+ palette shader), the `glow_outline`, `invert` and `shadow_tint` shaders, `practice_view.gd`, `ball_glide.gd` (a paced ball drawn gliding), `court_effects.gd` (bounce marks and the small touches), `special_meters.gd` (SPECIALS' meters under the players), `highlight.gd` (PLAY OF THE MATCH: the recording and the replay), `tuning_panel.gd` (F2: the tuning flyout), `debug_overlay.gd` (F3). |
 | `view/` menus | `title_screen.gd` (the title), `title_pages.gd` (its pages' rows), `title_career.gd` (the CAREER pages), `menu_page.gd` (every menu page, and `drive()`: one frame of the menu keys), `bracket_screen.gd` (the tournament), `select_screen.gd` (Player Select), `lobby_screen.gd` (multiplayer), `practice_page.gd`, `tutorial_view.gd` (a lesson's card and banner), `story_scene.gd` (STORY's scenes: the cast, the dialog, the cards), `trip_home.gd`, `trip_map.gd`, `trip_pick.gd`, `trip_shop.gd`, `trip_scene.gd`, `trip_van.gd` and `trip_art.gd` (ROAD TRIP's home, GARAGE and SCRAPBOOK, its map, PICK ONE, the PRO SHOP, its scenes, THE VAN, and its art with the placeholders' stand-ins), `course_screen.gd` and `court_diagram.gd` (PICKLEBALL 101), `career_keyboard.gd`, `online_screen.gd` (host and join), `career_preview.gd`, `hat_museum.gd`, `update_screen.gd` (the update at launch), `park_view.gd` (open play) with `park_message.gd` (its panel's text), `prompts.gd`/`prompt_bar.gd` (device-aware button prompts), `touch_pad.gd` (the on-screen pad, PORT-81), `ui_kit.gd` (panels and text), `setting_rows.gd` (rows shared by the title and the tuning panel), `options_pages.gd` and `options_panel.gd` (OPTIONS on the title and in the pause menu), `pad_map_screen.gd` (MAP BUTTONS), `bitmap_text.gd`. |
 | `view/` sound | `audio_map.gd`/`sfx.gd` (effects and ambience), `music.gd` (the soundtrack: crossfades, stingers, ducking), `announcer.gd` (the announcer's voice) and `commentary.gd` (what it says in a match). |
-| `net/` | Online play (ADR-056): `lockstep.gd` (inputs and the desync check), `rollback.gd` (ADR-103: the confirmed sim and the prediction, corrections, time sync), `online_session.gd` (the handshake, START's netcode, and the match's inputs: rollback's `tick` or lockstep's `intents`), `net_link.gd` with `enet_link.gd` (UDP) and `loopback_link.gd` (tests). |
+| `net/` | Online play (ADR-056): `lockstep.gd` (inputs and the desync check), `rollback.gd` (ADR-103: the confirmed sim and the prediction, corrections, time sync), `online_session.gd` (the handshake, START's netcode, and the match's inputs: rollback's `tick` or lockstep's `intents`), `net_link.gd` with `enet_link.gd` (UDP), `relay_link.gd` (ADR-105: rooms through the relay, WebSockets) and `loopback_link.gd` (tests). |
 | `scenes/` | `boot.gd` (the first scene: loads a downloaded update's pack, then starts the game; ADR-057), `main.gd` (title, park, matches and the screens between). |
 | `meta/` | `save.gd` (two-copy save with migration, layout v6), `settings.gd` (every setting, load/store, match config), `story.gd` (cards, results, quips), `initials.gd` (the record initials card), `career_page.gd` (CAREER's input logic), `lobby.gd` (the multiplayer lobby's logic), `match_stats.gd` (post-match stats), `tournament.gd` (the bracket's logic), `tutorial.gd` (HOW TO PLAY's lessons), `story_mode.gd` (STORY's chapters, matches and progress), `road_trip.gd` (ROAD TRIP: the seeded map, a trip, its gear and the GARAGE), `course.gd` (PICKLEBALL 101's lessons and progress), `achievements.gd` (the achievements, their checks), `museum.gd` (the HAT MUSEUM's input logic), `saved_replays.gd` (REPLAYS' files, ADR-081), `updater.gd` (the in-game updater), `build_info.gd`. |
 | `game_ui/` | `controls.gd` (the input map, added by boot as the Controls node; P1..P4 intents, tap latch, SNES pad bits for menus), `bindings.gd` (remapping). |

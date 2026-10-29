@@ -1,6 +1,8 @@
 # The relay: online play by room code, for both games (plan)
 
-**Status:** The relay is live (2026-10-29); the games don't use it yet.
+**Status:** Built (2026-10-29). The relay is live, the VR game coaches
+through it, and this port plays ONLINE by room through it (port ADR-105,
+`feature/cld-relay-join`).
 - **Address:** `https://pb94-relay.wonderfulground-3bc64e4e.eastus.azurecontainerapps.io`
   (`wss://` for the games), in East US.
 - **Code:** its own repo, `../pickleball-relay`
@@ -10,9 +12,12 @@
   back takes 89 ms (each leg goes through the relay, so that's two round
   trips to East US).
 - **The VR game uses it** (2026-10-29): COACH FROM ANYWHERE (VR ADR-026,
-  on its `feature/cld-vr-relay-live`). The relay's front page (`/`) asks
-  for the room and opens `/c/ROOM`.
-- **Next:** RelayLink and ROOM / JOIN in this port.
+  merged). The relay's front page (`/`) asks for the room and opens
+  `/c/ROOM`.
+- **This port uses it** (2026-10-29): ONLINE's CONNECT BY ROOM CODE
+  (port ADR-105). Between two games on the lead's Mac through East US:
+  the room in 0.2 s, connected in 1.5 s, an 88 ms round trip, rollback at
+  2 frames of delay.
 
 One small server on Azure for both games:
 - this port's ONLINE play (PORT-31, port ADR-056);
@@ -120,9 +125,9 @@ GET https://<relay>/c/BXKM                           -> the VR coach page that r
   be about $15.
 - **Rooms live in memory**, so it's held at one replica (`max-replicas 1`).
   One small replica handles hundreds of rooms: it only copies bytes.
-- **Waking up takes a few seconds:** the first connection after idle
-  waits for a replica to start. The games say CONNECTING TO THE SERVER...
-  and wait up to 20 s.
+- **Waking up takes about 20 seconds:** the first connection after idle
+  waits for a replica to start (18.6 s, measured 2026-10-29). The port
+  says OPENING A ROOM ON THE SERVER... and waits up to 45 s.
 - **Image:** a public image on GitHub's registry (ghcr.io, free), so no
   Azure Container Registry ($5 a month) is needed.
 - **Logs:** the environment's logs go nowhere (`logs-destination none`),
@@ -242,7 +247,7 @@ setup script.
 
 ## Known risks
 
-- **Cold start:** the first connection after idle takes a few seconds.
+- **Cold start:** the first connection after idle takes about 20 s.
   If it annoys, `min-replicas 1` keeps one warm for about $15 a month.
 - **One region for everyone:** friends far from it get more delay.
   Rollback hides some of that; lockstep shows it.

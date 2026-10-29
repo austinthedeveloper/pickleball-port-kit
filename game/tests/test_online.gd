@@ -353,6 +353,7 @@ func test_the_online_screens() -> void:
 	var b := OnlineScreen.new().setup(null)
 	for s in [a, b]:
 		s.port = port
+		s.way = OnlineScreen.BY_ADDRESS
 		runner.root.add_child(s)
 		if not s.is_node_ready():
 			s._ready()
@@ -378,7 +379,7 @@ func test_the_online_screens() -> void:
 		OS.delay_msec(2)
 		tries += 1
 	eq([a._state(), b._state()], [OnlineSession.CONNECTED, OnlineSession.CONNECTED], "connected")
-	eq(a.page.rows[0]["label"].call(), "START MATCH", "the host can start")
+	eq(a.page.rows[a.page.index_of("host")]["label"].call(), "START MATCH", "the host can start")
 	check(b.info()[1].begins_with("WAITING FOR THE HOST"), "the guest waits")
 	a.page.select("host")
 	a.page.press()
@@ -424,6 +425,10 @@ func test_main_opens_online() -> void:
 	var o: OnlineScreen = main._screen
 	if not o.is_node_ready():
 		o._ready()
+	eq(o.way, OnlineScreen.BY_ROOM, "by room, at first")
+	o.page.select("way")
+	o.page.change(1)
+	eq(main.save.data["settings"]["net_way"], "address", "the way is kept")
 	o.address = "10.0.0.5"
 	o._store_address()
 	eq(main.save.data["settings"]["net_address"], "10.0.0.5", "the address is kept")

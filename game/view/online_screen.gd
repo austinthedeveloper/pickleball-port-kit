@@ -1,9 +1,14 @@
 ## ONLINE (PORT-31, ADR-056): 1v1 with a friend over the internet or the
-## same Wi-Fi, by address. One of you HOSTS (the screen shows your
-## addresses and waits); the other types the host's ADDRESS and JOINS.
+## same Wi-Fi. CONNECT BY picks the way (port ADR-105):
+## - ROOM CODE (the default): through the relay (RelayLink). One of you
+##   HOSTS and gets a room ("BXKM"); the other types the ROOM and JOINS.
+##   Works anywhere with the internet, the Web build included.
+## - ADDRESS: straight to the host (ENetLink). The host's screen shows its
+##   addresses; the other types one and JOINS. Same Wi-Fi, or a VPN.
 ## Once you've both said hello, the host starts: singles on the host's
 ## COURT, POINTS and MODIFIERS, each of you in your Player Select look.
-## The address is typed on a keyboard (or pasted); it's kept in the save.
+## The room and the address are typed on a keyboard (or pasted); the
+## address and the way are kept in the save.
 class_name OnlineScreen
 extends Node2D
 
@@ -16,12 +21,17 @@ const GOLD := Color("fbe46a")
 const RED := Color("ff7060")
 const ALLOWED := "0123456789.:-ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const MAX_ADDRESS := 32
+const BY_ROOM := "room"
+const BY_ADDRESS := "address"
 
 var save: SaveGame
 var session: OnlineSession
 var page: MenuPage
 var address := ""
+var room := ""                   ## the room typed, to join
+var way := BY_ROOM
 var port := ENetLink.PORT        ## tests use another
+var relay_url := ""              ## tests' local relay ("": RelayLink.address())
 var editing := false
 var last_reason := ""
 var _lock := LOCK
@@ -35,6 +45,9 @@ func setup(game_save: SaveGame) -> OnlineScreen:
 	save = game_save
 	if save:
 		address = String(save.data["settings"].get("net_address", ""))
+		way = String(save.data["settings"].get("net_way", BY_ROOM))
+	if not available(BY_ADDRESS):
+		way = BY_ROOM
 	return self
 
 
@@ -55,13 +68,15 @@ func _ready() -> void:
 	UiKit.text("big_gold", "ONLINE", Vector2(480, 22), 0.5, Color.WHITE, _ui)
 	UiKit.text("small", "1 VS 1, SINGLES", Vector2(480, 76), 0.5, DIM, _ui)
 	page = MenuPage.new().setup("online", "", [
+		{"id": "way", "label": "CONNECT BY", "value": func(): return "ROOM CODE" if way == BY_ROOM else "ADDRESS",
+			"change": _change_way},
 		{"id": "host", "label": func(): return _host_label(), "value": func(): return _host_value(),
 			"press": _press_host},
-		{"id": "address", "label": "ADDRESS", "value": func(): return _address_value(),
-			"press": _press_address},
+		{"id": "address", "label": func(): return "ROOM" if way == BY_ROOM else "ADDRESS",
+			"value": func(): return _address_value(), "press": _press_address},
 		{"id": "join", "label": "JOIN", "value": func(): return _join_value(), "press": _press_join},
 		{"id": "back", "label": "BACK", "press": func(): _leave()},
-	], Rect2(110, 104, 740, 190), [["hit", "SELECT"], ["back", "BACK"]])
+	], Rect2(110, 96, 740, 204), [["hit", "SELECT"], ["back", "BACK"]])
 	page.pressed.connect(func(_id): page.refresh())
 	page.back_requested.connect(_leave)
 	_ui.add_child(page)
@@ -89,14 +104,42 @@ func _host_label() -> String:
 
 func _host_value() -> String:
 	if session and session.host and _state() == OnlineSession.WAITING:
+		var r := _room()
+		if session.link is RelayLink:
+			return "ROOM " + r if r != "" else "OPENING..."
 		return "WAITING..."
 	return ""
 
 
+## The room the relay gave this host ("" until it has, or by address).
+func _room() -> String:
+	return (session.link as RelayLink).room if session and session.link is RelayLink else ""
+
+
+## The row being typed in: the room or the address.
+func _typed() -> String:
+	return room if way == BY_ROOM else address
+
+
 func _address_value() -> String:
 	if editing:
-		return address + ("/" if (_frame / 20) % 2 == 0 else " ")   # the cursor (the font has no _)
-	return address if address != "" else "TYPE IT"
+		return _typed() + ("/" if (_frame / 20) % 2 == 0 else " ")   # the cursor (the font has no _)
+	return _typed() if _typed() != "" else "TYPE IT"
+
+
+## ROOM CODE or ADDRESS; the Web build has only the room (no UDP). A
+## session open the other way closes.
+func _change_way(_dir: int) -> void:
+	if not available(BY_ADDRESS):
+		last_reason = "BY ADDRESS NEEDS THE DESKTOP GAME"
+		return
+	way = BY_ADDRESS if way == BY_ROOM else BY_ROOM
+	editing = false
+	last_reason = ""
+	_close_session()
+	if save:
+		save.data["settings"]["net_way"] = way
+		save.save_game()
 
 
 func _join_value() -> String:
@@ -105,21 +148,30 @@ func _join_value() -> String:
 	return ""
 
 
-## The Web build has no UDP (ENet): online needs the desktop game.
-static func available() -> bool:
-	return not OS.has_feature("web")
+## The Web build has no UDP (ENet): only the room, through the relay.
+static func available(by := BY_ROOM) -> bool:
+	return by == BY_ROOM or not OS.has_feature("web")
+
+
+func _relay() -> String:
+	return relay_url if relay_url != "" else RelayLink.address()
 
 
 func _press_host() -> void:
-	if not available():
-		last_reason = "ONLINE NEEDS THE DESKTOP GAME"
-		return
 	if session and session.host and _state() == OnlineSession.CONNECTED:
 		_start_match()
 		return
 	_close_session()
-	var link := ENetLink.new()
-	if not link.host(port):
+	editing = false
+	var link: NetLink
+	var ok := false
+	if way == BY_ROOM:
+		link = RelayLink.new()
+		ok = (link as RelayLink).host(_relay())
+	else:
+		link = ENetLink.new()
+		ok = (link as ENetLink).host(port)
+	if not ok:
 		last_reason = link.error
 		_sfx.play("back")
 		return
@@ -133,17 +185,23 @@ func _press_address() -> void:
 
 
 func _press_join() -> void:
-	if not available():
-		last_reason = "ONLINE NEEDS THE DESKTOP GAME"
-		return
-	if address.strip_edges() == "":
+	var need := RelayLink.ROOM_LEN if way == BY_ROOM else 1
+	if _typed().strip_edges().length() < need:
 		page.select("address")
 		editing = true
 		return
 	_close_session()
-	_store_address()
-	var link := ENetLink.new()
-	if not link.join(address.to_lower(), port):
+	editing = false
+	var link: NetLink
+	var ok := false
+	if way == BY_ROOM:
+		link = RelayLink.new()
+		ok = (link as RelayLink).join(room, _relay())
+	else:
+		_store_address()
+		link = ENetLink.new()
+		ok = (link as ENetLink).join(address.to_lower(), port)
+	if not ok:
 		last_reason = link.error
 		_sfx.play("back")
 		return
@@ -185,7 +243,7 @@ func _start_match() -> void:
 
 
 func _store_address() -> void:
-	if save:
+	if save and way == BY_ADDRESS:
 		save.data["settings"]["net_address"] = address
 		save.save_game()
 
@@ -312,9 +370,19 @@ func info() -> Array:
 	if st == OnlineSession.IDLE:
 		if last_reason != "":
 			return [last_reason, "", ""]
+		if way == BY_ROOM:
+			return ["ONE OF YOU HOSTS AND GETS A ROOM.", "THE OTHER TYPES THAT ROOM AND JOINS.",
+				"WORKS ANYWHERE WITH THE INTERNET."]
 		return ["ONE OF YOU HOSTS. THE OTHER TYPES THE", "HOST'S ADDRESS AND JOINS.",
 			"SAME WI-FI JUST WORKS. FAR AWAY: SEE THE README."]
 	if st == OnlineSession.WAITING:
+		if session.link is RelayLink:
+			var r := _room()
+			if session.host and r == "":
+				return ["OPENING A ROOM ON THE SERVER...", "IT CAN TAKE 20 SECONDS TO WAKE UP.", ""]
+			if session.host:
+				return ["YOUR ROOM: " + r, "YOUR FRIEND PICKS ONLINE, TYPES " + r, "AND JOINS. WAITING FOR THEM..."]
+			return ["JOINING ROOM " + r + "...", "", ""]
 		if session.host:
 			# the adapters, read once per hosting (info() runs every frame)
 			if _mine_for != session:
@@ -356,7 +424,10 @@ func _input(event: InputEvent) -> void:
 		return
 	var k: InputEventKey = event
 	if k.keycode == KEY_BACKSPACE:
-		address = address.left(maxi(0, address.length() - 1))
+		if way == BY_ROOM:
+			room = room.left(maxi(0, room.length() - 1))
+		else:
+			address = address.left(maxi(0, address.length() - 1))
 	elif k.keycode in [KEY_ENTER, KEY_KP_ENTER, KEY_ESCAPE]:
 		editing = false
 		_store_address()
@@ -371,6 +442,9 @@ func _input(event: InputEvent) -> void:
 
 
 func _type(s: String) -> void:
+	if way == BY_ROOM:
+		room = RelayLink.clean_room(room + s)
+		return
 	for c in s.to_upper():
 		if c in ALLOWED and address.length() < MAX_ADDRESS:
 			address += c

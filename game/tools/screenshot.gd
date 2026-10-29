@@ -151,14 +151,20 @@ func _initialize() -> void:
 		_view = us
 	elif mode.begins_with("online"):
 		# PORT-31: online (idle, an address typed), online_host (waiting),
-		# online_connected (as host, a friend in)
+		# online_connected (as host, a friend in); port ADR-105: online_room
+		# (idle, by room), online_room_host (a room open, not dialled)
 		var o := OnlineScreen.new().setup(null)
 		o.port = ENetLink.PORT + 11
 		o.address = "100.101.12.7"
+		o.way = OnlineScreen.BY_ROOM if mode.begins_with("online_room") else OnlineScreen.BY_ADDRESS
 		root.add_child(o)
 		if not o.is_node_ready():
 			o._ready()
-		if mode != "online":
+		if mode == "online_room_host":
+			var rl := RelayLink.new()
+			rl.room = "BXKM"
+			o.session = OnlineSession.new(rl, true)
+		elif mode != "online" and mode != "online_room":
 			o.page.select("host")
 			o.page.press()
 		if mode == "online_connected":
