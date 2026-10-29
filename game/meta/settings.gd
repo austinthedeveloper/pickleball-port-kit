@@ -23,6 +23,10 @@ const INDOOR := ["gym", "lab", "station", "mall", "drivein"]
 ## Tests set `lite` to play the Web build's game.
 const PAINTED := ["western", "rooftop", "pirate", "motel", "fair", "drivein", "mall"]
 static var lite := OS.has_feature("lite")
+## In a browser (port ADR-106): SCALE starts on FILL (a phone's screen is
+## rarely a whole multiple of 540 high, so PIXEL left most of it black),
+## and FULLSCREEN is the page's, asked for from a tap. Tests set it.
+static var web := OS.has_feature("web")
 const DIFFICULTIES := ["KID", "EASY", "MEDIUM", "HARD"]
 const POINTS := [3, 5, 7, 9, 11, 15, 21]
 const CAMERAS := [0, 50, 75, 100]
@@ -89,8 +93,13 @@ const SMARTS_PATH := "res://data/ai_smarts.json"
 const SMART_PROFILES := ["kid", "easy", "medium", "hard"]   ## by K.DIFFICULTY_*
 static var ball_size := BALL_SIZE_DEFAULT     ## MODIFIERS > BALL SIZE, percent, display only (ADR-072)
 ## Window options: fullscreen, and integer scaling (crisp) or fit (fills).
+## The Web build keeps its SCALE under its own key, FILL by default.
 static var fullscreen := false
 static var integer_scale := true
+
+
+static func scale_key() -> String:
+	return "integer_scale_web" if web else "integer_scale"
 ## Court colours: [surface, kitchen, surround, lines] presets (CourtStyle).
 static var court: Array = CourtStyle.DEFAULTS.duplicate()
 static var time_i := CourtStyle.DAY
@@ -173,7 +182,7 @@ static func load_from(save: SaveGame) -> void:
 	Announcer.volume = clampi(voice, 1, Announcer.VOLUMES)
 	Announcer.chatter = clampi(int(st.get("commentary", Announcer.NORMAL)), Announcer.LIGHT, Announcer.LOTS)
 	fullscreen = int(st.get("fullscreen", 0)) != 0
-	integer_scale = int(st.get("integer_scale", 1)) != 0
+	integer_scale = int(st.get(scale_key(), 0 if web else 1)) != 0
 	var ct: Array = st.get("court", CourtStyle.DEFAULTS)
 	court = CourtStyle.DEFAULTS.duplicate()
 	for i in mini(ct.size(), 4):
@@ -208,7 +217,7 @@ static func store_to(save: SaveGame) -> void:
 		"points": points_i, "players": 2 if two_players else 1, "quick_doubles": 1 if quick_doubles else 0, "opponent": opponent_i,
 		"camera": camera_i, "mod_bits": mod_bits, "ball_speed": ball_speed, "park_location": park_i, "ball_speed_v": BALL_DEFAULTS_V, "ball_size": ball_size, "cpu_errors": cpu_errors, "ai_smarts": smart_table().duplicate(true), "sound": Sfx.setting,
 		"music": Music.volume, "announcer": Announcer.volume, "announcer_on": 1 if Announcer.enabled else 0, "commentary": Announcer.chatter,
-		"fullscreen": 1 if fullscreen else 0, "integer_scale": 1 if integer_scale else 0,
+		"fullscreen": 1 if fullscreen else 0, scale_key(): 1 if integer_scale else 0,
 		"player": [p1_choice["palette"], p1_choice["variant"], p1_choice["paddle"]],
 		"court": court.duplicate(), "time": time_i,
 		"shake": 1 if shake_i else 0, "shake_level": shake_i, "flash": 1 if flashes else 0, "replay_demo": 1 if replays_in_demo else 0,
@@ -219,14 +228,37 @@ static func store_to(save: SaveGame) -> void:
 
 
 ## Applies the window options (a no-op headless, where there's no window).
+## In a browser the page is full screen or not by the player's taps
+## (web_full), so only the scale applies.
 static func apply_window(win: Window) -> void:
 	if win == null or DisplayServer.get_name() == "headless":
 		return
 	win.content_scale_stretch = Window.CONTENT_SCALE_STRETCH_INTEGER if integer_scale \
 		else Window.CONTENT_SCALE_STRETCH_FRACTIONAL
+	if web:
+		return
 	var want := DisplayServer.WINDOW_MODE_FULLSCREEN if fullscreen else DisplayServer.WINDOW_MODE_WINDOWED
 	if DisplayServer.window_get_mode() != want:
 		DisplayServer.window_set_mode(want)
+
+
+## FULLSCREEN in a browser: the page's own state, since it can leave full
+## screen without the game (the browser's back, a swipe). Not every browser
+## has it (an iPhone's Safari doesn't: there, a home-screen app is).
+static func web_full_offered() -> bool:
+	return web and JavaScriptBridge.eval(
+		"!!(document.fullscreenEnabled || document.webkitFullscreenEnabled)", true) == true
+
+
+static func web_full() -> bool:
+	return DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
+
+
+## Asked from the row's tap or press: a page may only go full screen just
+## after one.
+static func set_web_full(on: bool) -> void:
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if on
+		else DisplayServer.WINDOW_MODE_WINDOWED)
 
 
 static func venue() -> String:

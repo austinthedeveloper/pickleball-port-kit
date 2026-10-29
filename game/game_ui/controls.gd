@@ -214,6 +214,9 @@ const KEYBOARD := 0
 const PAD := 1
 const TOUCH := 2
 static var last_device := KEYBOARD
+## A finger has touched the screen (port ADR-106): the touch pad's AUTO
+## believes that over a browser that says it has no touch screen.
+static var touch_seen := false
 static var last_pad := 0
 static var device_serial := 0
 ## Counts input-map changes (a remap), so prompts redraw.
@@ -225,6 +228,7 @@ static func note_device(event: InputEvent) -> void:
 	if event is InputEventScreenTouch or event is InputEventScreenDrag \
 			or (event is InputEventMouseButton and event.device == InputEvent.DEVICE_ID_EMULATION):
 		dev = TOUCH
+		touch_seen = true
 	elif event is InputEventKey or event is InputEventMouseButton:
 		dev = KEYBOARD
 	elif event is InputEventJoypadButton:

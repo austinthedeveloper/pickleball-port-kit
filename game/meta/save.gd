@@ -42,6 +42,7 @@ static func defaults() -> Dictionary:
 			# preset), window options. New keys fill from these defaults on
 			# load, so no layout change.
 			"mod_bits": -1, "fullscreen": 0, "integer_scale": 1,
+			"integer_scale_web": 0,  # port ADR-106: the Web build's SCALE, FILL
 			"player": [0, 0, Paddles.STANDARD],  # Player Select: 1P colour, body, paddle
 			"court": [0, 0, 0, 0],  # COURT: surface, kitchen, surround, lines presets
 			"time": 0,  # COURT TIME: DAY, DUSK, NIGHT (ADR-045)

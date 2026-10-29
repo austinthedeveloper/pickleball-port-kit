@@ -139,6 +139,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-111 | ROAD TRIP talks: five conversations each for every team, partner (start, motel, diner) and the ROAD HOGS, revealing more of them each time (port ADR-104) | `feature/cld-trip-talks` | Ready to test |
 | PORT-112 | The relay: ONLINE by room code over the internet and in the Web build, one Azure server shared with the VR game (design/RELAY.md) | `feature/cld-relay-plan`, `feature/cld-relay-live`, `feature/cld-relay-join` | Done: ONLINE by ROOM CODE through the live relay (ADR-105), released in v0.43.0; the lead confirmed it between machines 2026-10-29 |
 | PORT-113 | Cleanup round 7: finished tasks to the history, the READMEs, merged branches | `feature/cld-cleanup-7` | Done |
+| PORT-114 | The Web build on phones: FILL scale, full screen and landscape, a TURN YOUR PHONE SIDEWAYS card, an installable app, the touch pad on any touch (port ADR-106) | `feature/cld-web-mobile` | Ready to test |
 
 ## Releases
 
@@ -444,6 +445,14 @@ the chain: each has a default I've gone with.
   few trips and say what to change: the difficulty, the length, prices
   and cash, the gear (which items are dull or too strong), the GARAGE's
   pace. The numbers are a first guess (KNOWN_ISSUES #82).
+
+- **PORT-114 the Web build on phones:** open it on your phone, held
+  sideways: it should fill the height, go full screen on the first tap
+  (Android; on an iPhone, Share > Add to Home Screen does it), and show
+  the on-screen pad. Held upright it asks you to turn the phone. If you
+  still get no pad: which phone and browser, and where the build came
+  from (a v0.43.0 zip, or one you served). And say if the buttons are
+  too small under your thumbs.
 
 - **PORT-81 touch:** the pad is a SNES pad (B A Y X, L R up top). Say if
   you'd rather have big labelled buttons (HIT, DRIVE...) or fewer of them

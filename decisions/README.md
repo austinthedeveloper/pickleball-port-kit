@@ -96,3 +96,4 @@ first decisions, are rows in `design/07_DECISIONS_AND_RISKS.md`.
 | 103 | [Rollback for Online Play](ADR-103-rollback.md) | Accepted 2026-10-26 |
 | 104 | [ROAD TRIP Talks: Conversations That Go Deeper](ADR-104-trip-talks.md) | Accepted 2026-10-26 |
 | 105 | [Online by Room Code, Through the Relay](ADR-105-online-rooms.md) | Accepted 2026-10-29 |
+| 106 | [The Web Build on Phones: the Whole Screen, and the Pad](ADR-106-web-on-phones.md) | Accepted 2026-10-29 |

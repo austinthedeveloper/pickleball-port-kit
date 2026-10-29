@@ -45,6 +45,14 @@ static func build(host: Node) -> void:
 		rows.insert(rows.size() - 1, {"id": "netcode", "label": "NETCODE",
 			"value": func(): return Settings.NETCODES[Settings.netcode_i],
 			"change": func(d): Settings.netcode_i = (Settings.netcode_i + d + 2) % 2})
+	# port ADR-106: in a browser, FULLSCREEN is the page's (where it has one)
+	if Settings.web:
+		var at := rows.find_custom(func(r): return r["id"] == "fullscreen")
+		if Settings.web_full_offered():
+			rows[at] = {"id": "fullscreen", "label": "FULLSCREEN", "value": func(): return "ON" if Settings.web_full() else "OFF",
+				"change": func(_d): Settings.set_web_full(not Settings.web_full())}
+		else:
+			rows.remove_at(at)
 	host._add_page("options", "OPTIONS", rows, [], Rect2(300, 60, 360, 0))     # ADR-076 made it 14 rows: over the logo, hidden
 	var onoff := func(on: bool) -> String: return "ON" if on else "OFF"
 	host._add_page("access", "ACCESSIBILITY", [

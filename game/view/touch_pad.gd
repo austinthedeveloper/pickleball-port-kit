@@ -5,8 +5,9 @@
 ## through Input as an InputEventAction, so the latch, the menus and the
 ## sim read it like a key; the pad never touches the sim. A finger that
 ## starts on the D-pad steers until it lifts; one on a button can slide to
-## the next. Shown (TOUCH PAD) on AUTO with a touch screen, no pad
-## connected and touch the last device used, or always (ON), or never.
+## the next. Shown (TOUCH PAD) on AUTO with a touch screen (or a touch
+## seen, port ADR-106), no pad connected and touch the last device used,
+## or always (ON), or never.
 ## A part with a panel under it (a menu's, a card's) steps aside, so the
 ## pad never covers a screen's text: menus work by tap (a tap on a value
 ## cycles it), and the parts left still drive them.
@@ -57,7 +58,8 @@ static func wanted() -> bool:
 			return true
 		OFF:
 			return false
-	return DisplayServer.is_touchscreen_available() and GameControls.connected_pads().is_empty() \
+	return (DisplayServer.is_touchscreen_available() or GameControls.touch_seen) \
+		and GameControls.connected_pads().is_empty() \
 		and GameControls.last_device == GameControls.TOUCH
 
 
