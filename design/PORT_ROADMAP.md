@@ -283,6 +283,8 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.42.0** (2026-10-26): PORT-111 ROAD TRIP talks: five conversations
   for every team, partner and the ROAD HOGS (tag `v0.42.0`, on
   `feature/cld-release-0.42.0`).
+- **v0.43.0** (2026-10-29): ONLINE by room code through the relay
+  (PORT-112) (tag `v0.43.0`, on `feature/cld-release-0.43.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 
