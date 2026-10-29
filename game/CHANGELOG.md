@@ -4,7 +4,9 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
-## [Unreleased]
+## [0.43.0] - 2026-10-29
+
+Play online with a friend anywhere, by room code.
 
 ### Added
 - **ONLINE by room code**: HOST A MATCH gets a four-letter room (like
