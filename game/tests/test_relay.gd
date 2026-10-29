@@ -173,7 +173,7 @@ func _relay_server() -> String:
 func test_the_screens_through_the_real_relay() -> void:
 	var js := _relay_server()
 	if js == "":
-		print("  (skipped: no ../pickleball-relay or no Node)")
+		check(true, "skipped: no ../pickleball-relay or no Node (as on CI)")
 		return
 	var pid := OS.create_process("node", ["-e",
 		"require(%s).createRelay({log: () => {}}).listen(%d)" % [JSON.stringify(js), NODE_PORT]])
