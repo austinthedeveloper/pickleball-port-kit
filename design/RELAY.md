@@ -100,6 +100,9 @@ GET https://<relay>/c/BXKM                           -> the VR coach page that r
 - **Rate:** 200 messages a second per connection. Lockstep sends about
   60.
 - **Opening rooms:** 10 a minute per IP.
+- **Wrong rooms:** 20 a minute per IP, pages and joins together; past
+  it, `TOO MANY TRIES` for a minute. A VR coach room needs nothing but
+  its room, so this is what stops a sweep of the 160,000 rooms.
 - **In total:** 500 connections.
 - **Nothing is stored**, and no accounts exist. Logs keep counts, never
   payloads.
@@ -201,8 +204,9 @@ Rejected:
   ANYWHERE is chosen.
 - **It sends the relay its own coach page**, so the page always matches
   the game's version, with no second copy to deploy.
-- **The coach** opens `https://<relay>/c/BXKM` from anywhere and types
-  the 4-digit code as now.
+- **The coach** opens `https://<relay>/c/BXKM` from anywhere. The room is
+  the key, with no 4-digit code (the lead's call, 2026-10-29); the relay
+  allows 20 wrong rooms a minute per address, so rooms can't be swept.
 - **The page knows where it came from:** served by the relay, it talks
   to the relay; served by the headset, it talks to the headset.
 - **The desk is unchanged:** messages are the same JSON, so CoachDesk
