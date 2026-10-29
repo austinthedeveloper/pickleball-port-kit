@@ -3,7 +3,7 @@
 The finished tasks of the port, in full, moved out of
 `design/PORT_ROADMAP.md` (PORT-00 to 22 in PORT-23; 23 to 39 and 41 in the
 2026-10-19 cleanup; 42 to 58, but 55, in the 2026-10-21 one; 55, 59 to 77, but 62, in the
-2026-10-23 one) so the sheet stays short. Each block
+2026-10-23 one; 79 to 111 in the 2026-10-28 one) so the sheet stays short. Each block
 is as it was when its branch landed. `game/tools/release_notes.py` reads
 this file and the sheet together.
 
@@ -1699,3 +1699,513 @@ the 2026-10-21 cleanup.
   - Status: **Ready to test**: COURT > VENUE, play a game at each and
     listen to the ambience and track; try TIME at RUINS and GLACIER (LAB
     and STATION stay lit).
+
+## The asks of 2026-10-23 to 26 (moved 2026-10-28)
+
+### 79. `feature/cld-text-centring`: text centred in the bars and keys (asked for 2026-10-23)
+
+- [x] `PORT-79` Known issue 77: the menus' highlight bar, MAP BUTTONS'
+  bar and the prompts' keys had their text about 3 px low (the offsets
+  didn't allow for the small font's outline and shadow). The bars start
+  2 px above the letters (the change arrows and the mouse's row bands
+  follow), keys and pills are 24 px tall with a 2 px lip, and the key
+  letters and their labels share one height (`PromptBar.TEXT_Y`). Display
+  only, no ADR.
+  - Verified: 470/470 plus the e2e, golden traces unchanged; before and
+    after screenshots of the title and a practice match.
+  - Status: **Ready to test**: look at any menu and the prompts, and at
+    a pad's prompts (the round buttons' letters moved up 3 px; not
+    screenshotted).
+
+### 80. `feature/cld-cleanup-6`: cleanup round 6 (asked for 2026-10-23)
+
+- [x] `PORT-80` The local branches merged into `origin/main` deleted (33;
+  `feature/cld-release-0.26.0` kept: it has commits its remote branch
+  lacks, though `main` has them; the two in agent worktrees stay). The
+  code: a hit's spark and smash pop in one place (`MatchView.contact_fx`,
+  the match's and PLAY OF THE MATCH's replay); SAVE LAST RALLY's rules in
+  `Highlight` next to PLAY OF THE MATCH's SAVE; one `TitleScreen.back_to`
+  for the seven ways back to a page; the dinosaurs' looks once
+  (`DinoWalkers.LOOKS`, merged into DINOSAUR's and DINO PARK's casts,
+  checked equal to the old tables); `PadMaps.short_name` for CONTROLLER
+  and MAP BUTTONS; QUICK MATCH and MODE share their row; "PRESS AGAIN" for
+  "B AGAIN" (prompts, not button names); stale comments (the announcer's
+  recorded lines, the SNES icons). The tests: `TestSuite.title_screen` for
+  25 copies of the title's setup. New: a rally saved once by SAVE LAST
+  RALLY and PLAY OF THE MATCH, whichever first, and a new match forgetting
+  the best; replay files that aren't replays, another format, two in one
+  second; practice's view against a bare sim; QUICK MATCH's DOUBLES and
+  SPECIALS surviving a restart (and an old save without the key);
+  `test_layout` for the park's YOU STAY ON COURT and 2 TEAMS AHEAD, the
+  CONTROLLER page at its longest name and every status, and the mouse
+  picking a row anywhere on its bar; pad names cut to fit. The docs:
+  PORT-55, 59 to 77 (but 62) moved to `PORT_HISTORY.md`.
+  Then, at your call: replays show the match's light effects too (the
+  bounce marks, and the camera flashes when a saved one is watched from
+  REPLAYS; none behind the title's menu, as in the demo).
+  And known issue 78: SMASH! pop-ups one at a time (two could overlap).
+  - Verified: 477/477 plus the e2e, golden traces unchanged; the release
+    notes regenerate the same; the title's menu and prompts pixel for
+    pixel the same.
+  - Status: **Done**.
+
+### 81. `feature/cld-touch-controls`: touch controls on the web (asked for 2026-10-23)
+
+- [x] `PORT-81` The web build had no touch input (a tap on a menu row
+  worked, through Godot's mouse emulation; a match couldn't be played).
+  Godot has touch events and `TouchScreenButton`, but no D-pad node, so
+  one `TouchPad` node (`view/touch_pad.gd`, port ADR-086) tracks the
+  fingers and presses the input map's actions through `Input`: a SNES
+  pad with the D-pad bottom left, B A Y X bottom right (hit, drive, soft,
+  slice), START, L (SHORT) and R (SPECIAL) up top. The prompts follow it
+  (B HIT, A DRIVE...). TOUCH PAD on CONTROLLER: AUTO (a touch screen, no
+  pad), ON, OFF. Taps off the pad still drive the menus; a tap on a
+  button doesn't click the row under it; a part with a menu's panel under
+  it steps aside. No controller card on a phone.
+  - Verified: 487/487 plus the e2e. `test_touch` (synthetic touches:
+    every action, the D-pad's eight ways, two thumbs, a slide, a tap
+    shorter than a tick), a
+    `test_layout` case, the e2e with real touches through the event
+    queue; screenshots of the title, COURT, a match, pause, the result
+    and practice with the pad up. Golden traces unchanged.
+  - Status: **Ready to test** on a phone: export the web build
+    (`game/tools/export.sh`), serve it and open it on a phone in
+    landscape. Try a match (move and hit with two thumbs, hold L while
+    hitting), the menus by tap, and whether the buttons sit right under
+    your thumbs. Known issue 79 lists what couldn't be checked here.
+
+### 82. `feature/cld-trip-run`: ROAD TRIP, a roguelike mode (asked for 2026-10-23)
+
+- [x] `PORT-82` ROAD TRIP (port ADR-087; the plan with your answers and the
+  art: `design/ROAD_TRIP.md`; the art in `art/roadtrip-v3` and
+  `art/roadtrip-r4-fixes`, imported to `game/assets/trip`). A mode on MAIN
+  beside STORY: you and a partner drive to the SUMMER OPEN on a road map
+  of three legs (three columns of stops in three lanes, then a big match;
+  the last leg's is the final against the Champs). Stops: PICKUP GAME,
+  GRUDGE MATCH, YARD SALE, PRO SHOP, MOTEL, DETOUR. You start weak (a
+  plain paddle and cap, four stats at 1 of 20); gear picked one of three
+  (the game's paddles and hats, stacking items, partner training,
+  one-sided rules) makes a trip strong. Three hearts; the trip can end.
+  The miles fill the GARAGE's fixed ladder of lasting rewards (starting
+  stats, a heart, gear, van paints and ornaments); beaten captains become
+  partners; a trip won opens the next HEAT. Nothing counts outside the
+  trip. Seeded: the map, picks, shop and detours are the same wherever
+  played. The sim: `MatchConfig.trip` (a slot's stats, a CPU's style, the
+  left side's perks), off everywhere else.
+  - Verified: 500+ tests plus the e2e, golden and conformance traces
+    unchanged; `test_road_trip` (the data, 300 seeds' maps, trips won and
+    lost, the save, the sim's stats and perks), `test_trip_screens` (the
+    real main scene from the title to a trip's end, three seeds),
+    `test_layout` on every trip screen and text. Screenshots of every
+    screen (`tools/trip_shot.gd`).
+  - Status: **Ready to test**: play a trip or three. Say how it feels:
+    too easy or hard (the bot wins leg 1 from the start and needs about
+    12 in every stat for the final), the length, the prices, the gear.
+    Not built: the cassettes and the map's pen colour (KNOWN_ISSUES #82,
+    #83).
+
+### 83. `feature/cld-venue-art-r1`: the painted venues (asked for 2026-10-24)
+
+- [x] `PORT-83` Seven venues from generated paintings (port ADR-088), after
+  STATION on COURT > VENUE: WESTERN, ROOFTOP, PIRATES, MOTEL (the drained
+  pool from ROAD TRIP's motel), FAIR, DRIVE-IN, MALL. The loop was ROAD
+  TRIP's: I wrote the prompts and reviewed each round, you generated
+  (`art/venues-r1`: prompts, references, concepts, plates, cutouts,
+  locals, both reviews; MOTEL's re-layout in `art/venues-r2-fixes`).
+  `art/levels/tools/painted.py` cuts the layers and paints the court on
+  each floor; every venue has its own locals (`Crowd` takes a venue's
+  sheet), its court presets, its own ambience and match track. MALL and the DRIVE-IN
+  ignore TIME (indoors; already night). ROAD TRIP's legs visit them.
+  - Verified: the full suite plus the e2e, golden traces unchanged; the
+    existing venues' art and sounds byte-identical; `test_court` (their
+    presets, their locals), `test_night`, `test_layout` (the COURT page's
+    new names). Screenshots of each in a match.
+  - Status: **Ready to test**: play a match at each. Say if a scene, its
+    crowd or its sound should change. Not done: the announcer's lines
+    (KNOWN_ISSUES #85); no parallax (#86).
+
+### 84. `feature/cld-web-lite`: the lite Web build (asked for 2026-10-24)
+
+- [x] `PORT-84` The Web build thinned, the desktop builds untouched (port
+  ADR-089). Its preset carries the `lite` feature and leaves out the
+  announcer, ROAD TRIP's art and the seven painted venues; the game,
+  with `Settings.lite` on, hides ROAD TRIP and the announcer's rows and
+  goes round the first eleven venues. `export.sh` exports it from a copy
+  with its music and ambience re-encoded smaller (q1, the ambience mono).
+  The Web pack is 12 MB (was 41), the zip 21 MB (was 51).
+  - Verified: the full suite plus the e2e (`test_lite`, a lite case in
+    `test_layout`); a full export, the Web pack booted headless with
+    `lite` on and the left-out files absent; the Web build served
+    locally and played in a browser (title, setup, a match), no console
+    errors.
+  - Status: **Ready to test**: open the Web build and listen to the
+    music and the crowd. If q1 sounds rough, the setting is
+    `WEB_QUALITY` in `game/tools/encode_ogg.py`.
+
+### 85. `feature/cld-pause-options`: OPTIONS in the pause menu (asked for 2026-10-24)
+
+- [x] `PORT-85` Pause > OPTIONS (port ADR-090): the title's OPTIONS,
+  ACCESSIBILITY, CONTROLS and CONTROLLER pages over a paused match, from
+  one builder (`view/options_pages.gd`) both screens use. Closing saves
+  them and applies CAMERA and HUD TEXT to the match.
+  - Verified: the full suite plus the e2e (`test_menus.test_pause_options`:
+    the same rows as the title's, the match waits, saved and applied;
+    `test_layout.test_pause_options`: every page, every value);
+    screenshots of the pause menu, OPTIONS and ACCESSIBILITY over a match.
+  - Status: **Ready to test**: pause a match and change the sound.
+
+### 86. `feature/cld-trip-tune`: ROAD TRIP tuning (asked for 2026-10-24)
+
+- [x] `PORT-86` After your first trip (port ADR-091): leg 1's grudge and
+  big matches are MEDIUM and its CPU errors 60% of the rest's, so its
+  rallies are about twice as long. The partner is late on every 12th ball
+  (was 7th), further apart with each CONTROL point from the MOTEL. Legs 2
+  and 3 and the final are unchanged.
+  - Verified: the full suite plus the e2e (`test_road_trip.test_the_tuning`);
+    the bot's runs before and after (`tools/trip_balance.gd`, and counts of
+    how each point ended).
+  - Status: **Ready to test**: play a trip. Say if leg 1 is now right, and
+    whether Pepper still lets balls go by.
+
+### 87. `feature/cld-trip-roads`: ROAD TRIP round two (asked for 2026-10-24)
+
+- [x] `PORT-87` ROAD TRIP grows (port ADR-092, no sim change): THE VAN
+  over the map (Y / I) shows your stats as bars by where each point comes
+  from, your partner's, and your gear; replaced paddles and hats go in
+  the van's locker to swap back in; TRADE IN at the PRO SHOP; eight item
+  sets. 19 new items, 4 hazards, 13 detours (7 at painted venues), the
+  DINER (a meal for the next match). The story now grows across trips:
+  20 beats in four arcs (THE VAN, THE ROAD HOGS, THE CHAMPS, THE MIXTAPE)
+  with lasting rewards (three story paddles, cassettes for the map's
+  music), the ROAD HOGS as recurring rivals from the second trip, a
+  captain partner's own start, and the SCRAPBOOK on ROAD TRIP's page.
+  - Art: eight images from `art/roadtrip-r5/PROMPTS.md`, all accepted
+    and imported (`REVIEW.md`).
+  - Verified: the full suite plus the e2e (new: `test_road_trip`'s
+    second-round tests, `test_trip_screens.test_the_story_across_trips`,
+    `test_layout`'s VAN, SCRAPBOOK and story cases); screenshots of THE
+    VAN, the map with the ROAD HOGS, their scene, the SCRAPBOOK, the
+    diner, a venue detour, the shop and the GARAGE.
+  - Status: **Ready to test**: take two or three trips.
+
+### 88. `feature/cld-trip-more`: the announcer's ROAD TRIP lines (asked for 2026-10-24)
+
+- [x] `PORT-88` 29 ROAD TRIP lines added to the announcer's second batch
+  (`design/announcer/ADDITIONS.md`, now 105 lines) and wired in: a
+  stop's kind opens its match, your last heart, hazards, the meal, the
+  one-sided rules' saves, the SUMMER OPEN and the encore won. Each is
+  used once recorded.
+  - Status: **Ready to test** once you've recorded them.
+
+### 89. `feature/cld-trip-more`: TODAY'S TRIP (asked for 2026-10-24)
+
+- [x] `PORT-89` A row on ROAD TRIP's page: today's map (from the date),
+  HEAT 0, Pepper, no GARAGE or story, so it's the same for everyone; the
+  best result kept for the day, days won on the records.
+  - Status: **Ready to test**.
+
+### 90. `feature/cld-trip-more`: partner bonds (asked for 2026-10-24)
+
+- [x] `PORT-90` Every partner earns bond points with you (a win each,
+  three for a title). Level 1: +1 to their stats; 2: their own item and a
+  scene; 3: +2 and a line from the announcer at the big matches.
+  - Status: **Ready to test**.
+
+### 91. `feature/cld-trip-more`: the islands (asked for 2026-10-24)
+
+- [x] `PORT-91` A secret fourth leg past the SUMMER OPEN, open once a
+  story is finished or HEAT 5 is won: THE ISLANDS, ending in THE ENCORE
+  against Dale Dawson, with its own three-chapter story.
+  - Art: the islands' map paper (`art/roadtrip-r6/PROMPTS.md`;
+    placeholder meanwhile).
+  - Status: **Ready to test** (to see it now: finish a story, or ask me
+    for a save that has one).
+
+### 92. `feature/cld-trip-more`: postcards (asked for 2026-10-24)
+
+- [x] `PORT-92` A postcard for every venue played and detour taken (38),
+  on the SCRAPBOOK; 8, 16 and 24 earn new map pens.
+  - Status: **Ready to test**.
+
+### 93. `feature/cld-trip-more`: the map pen and NOW PLAYING (asked for 2026-10-24)
+
+- [x] `PORT-93` MAP PEN in the GARAGE colours the road driven; the
+  cassette chosen shows on a NOW PLAYING card as the map opens.
+  - Status: **Ready to test**.
+
+### 94. `feature/cld-trip-more`: a ROAD TRIP balance pass (asked for 2026-10-24)
+
+- [x] `PORT-94` `tools/trip_gear_stats.gd` measures how far gear takes
+  the stats: no runaway POWER (7 at the final on a new GARAGE), but sets
+  were rarely finished, so one card in two is now a missing piece of a
+  set you've started (0.2 sets a trip to 0.5).
+  - Verified (88 to 94): the full suite plus the e2e; screenshots of the
+    islands map, POSTCARDS, the results, the home and the GARAGE.
+  - Status: **Ready to test**: say how the sets feel.
+
+### 96. `feature/cld-trip-tests`: more ROAD TRIP tests (asked for 2026-10-25)
+
+- [x] `PORT-96` `test_trip_fuzz`: 120 random trips checked after every
+  step (hearts, cash, stats, the locker, save round trips, picks, always
+  a way on, an end), 50 trips on one save (beats in order and once, the
+  scrapbook and postcards only growing, the islands once open), every
+  story map, the islands end to end, the day's trip the same for a full
+  and a new save, bonds across finishes, a pre-round-two save played to
+  its end, and the data's references. It found a bug, fixed: when 400
+  draws of a leg all broke the leg rules, the generator kept the last
+  (1 leg in 7,000); generator 3 keeps drawing.
+  - Verified: the full suite plus the e2e (about 9 s added).
+
+### 95. `feature/cld-smart-ai`: smart play (asked for 2026-10-25)
+
+- [x] `PORT-95` A remaster-only layer over the ROM's AI (port ADR-094),
+  three knobs a CPU: KITCHEN (wait just behind the kitchen line once the
+  rules allow), TOGETHER (a CPU pair level; your partner follows you up,
+  and half way back), AIM (third-shot drops, dinks cross-court, the ball
+  to whoever's back, drives down the middle). Profiles by difficulty and
+  for your partner in `data/ai_smarts.json`; F2 > SMART PLAY tunes them
+  live and saves them.
+  - Verified: the full suite plus the e2e (`test_smart_ai`, the tuning
+    page in `test_layout`; the conformance and golden traces unchanged);
+    `tools/smart_stats.gd`: the SNOWBIRDS wait at 58 px from the net
+    instead of 89; MEDIUM a touch harder (42% of points to the CPUs, was
+    39%), HARD clearly (54%).
+  - Status: **Ready to test**: play a doubles match at HARD, and press
+    F2 > SMART PLAY to change any knob mid-match.
+
+### 97. `feature/cld-shirts`: shirt patterns (asked for 2026-10-25)
+
+- [x] `PORT-97` Twelve shirt patterns (port ADR-095), generated on the
+  player rig in `players.py` so they follow every pose: RUGBY, CHEST
+  BAND, SASH, RAGLAN, RINGER, PINSTRIPE, POLKA DOTS, TIE-DYE, FLAMES,
+  HAWAIIAN, CHEVRON, SPLIT, each a body sheet in a new design colour
+  (two palette roles). Every ladder team wears one in its own colours,
+  and so do Dale Dawson (FLAMES) and the ROAD HOGS (CHEVRON). A career
+  player picks one on EDIT's PATTERN row: PLAIN and RINGER free, a
+  team's pattern for beating them, and POLKA DOTS, CHEVRON and FLAMES
+  from wins, aces and ladder clears (eleven unlocks after the ROM's
+  sixteen; the mask widened, the save still v6). Player Select is
+  unchanged.
+  - Verified: the full suite plus the e2e (`test_career.test_patterns`,
+    `test_view`, every pattern on EDIT in `test_layout`); screenshots of
+    a doubles match against every team and the EDIT page; a lineup of
+    every opponent.
+  - Status: **Ready to test**: play the ladder and say which patterns or
+    colours miss.
+
+### 98. `feature/cld-trip-mods-dink`: every modifier on a trip, SHORT held (asked for 2026-10-26)
+
+- [x] `PORT-98` A grudge's twist draws from every modifier and rule
+  (FAST BALL, GLOW, INVERSE, WIN BY 2, SIDE-OUT, MOMENTUM, SUDDEN DEATH
+  and MULTI BALL added); the map's panel gives TODAY its own line.
+  Holding SHORT slows a human to 7/8 top speed, remaster only (port
+  ADR-096).
+  - Verified: the full suite plus the e2e (`test_shots`
+    `test_short_held_slows_the_feet`, `test_road_trip.test_the_data`
+    checks every toggle is reachable, `test_layout` every twist with a
+    hazard and SPECIALS on the map); golden and conformance traces
+    unchanged; screenshots of the map panel and an INVERSE match.
+  - Status: **Ready to test**: hold SHORT and feel the drag; play a few
+    grudges for the new twists.
+
+### 99. `feature/cld-trip-mods-dink`: FROM THE GARAGE (asked for 2026-10-26)
+
+- [x] `PORT-99` A new trip opens on a FROM THE GARAGE card: the stats
+  you start with, what the GARAGE adds (stats, hearts, cash, paddle), and
+  in gold what's NEW since the last trip began (meta `garage_steps`, save
+  still v6). None before the first step, none on TODAY'S TRIP (port
+  ADR-097).
+  - Verified: the full suite plus the e2e
+    (`test_road_trip.test_the_garage_card`, the card at the ladder's top
+    in `test_layout`); a screenshot (`trip_shot.gd start_garage`).
+  - Status: **Ready to test**: start a trip once you have some MILES.
+
+### 100. `feature/cld-trip-path-preview`: where a choice leads (asked for 2026-10-26)
+
+- [x] `PORT-100` On ROAD TRIP's map, the stop under the cursor shows
+  where it leads: a gold highlighter from the van to it and along every
+  road on to the big match, and the leg's stops those roads miss faded.
+  Display only (port ADR-098).
+  - Verified: the full suite plus the e2e
+    (`test_road_trip.test_where_a_choice_leads`, `test_trip_screens`);
+    screenshots of each first choice and a leg-2 stop
+    (`trip_shot.gd map cursor=N`).
+  - Status: **Ready to test**: move the cursor over the first column's
+    stops on a new trip.
+
+### 101. `feature/cld-2p-menu-pad`: one pad and PLAYERS 2P (a tester's report, 2026-10-26)
+
+- [x] `PORT-101` With one pad, PLAYERS 2P gave the pad to 2P and put P1
+  on the keyboard by re-pointing the input map's pad events at no pad, so
+  MATCH SETUP (and every menu after it) stopped hearing the pad: the
+  menu looked frozen until a key set PLAYERS back. The split now holds
+  only while 2P is on the court (`GameControls.split`, set by main for a
+  match with 2P in it and the park); everywhere else the input map hears
+  every pad. Player Select's 2P turn still reads 2P's pad as before.
+  - Verified: the full suite plus the e2e
+    (`test_controller.test_menus_hear_every_pad`).
+  - Status: **Ready to test**: one pad, MATCH SETUP > PLAYERS 2P, then
+    move on the pad; start a 2P match (keyboard is P1, the pad 2P).
+
+### 102. `feature/cld-faces-r1`: new heads and faces (asked for 2026-10-26)
+
+- [ ] `PORT-102` New heads for the players that fit the bodies and all
+  twelve hats and recolour to every skin and hair. Round 1: 20 heads from
+  `art/faces-r1/PROMPTS.md`, generated off the grid, recovered by
+  `snap.py` (it finds the art-pixel grid and the nine head colours) and
+  tried on the bodies by `review.py`. All twenty fit every hat and
+  palette; 10 kept, 5 to retry, 5 dropped (`REVIEW.md`). Round 2
+  (`PROMPTS_R2.md`): 18 of 20 kept, so with the current man and woman
+  there are 20 heads, 6 of them women (`lineup_r2.png`). Nothing in the
+  game uses them yet. Those read as plain ugly, so round 3
+  (`PROMPTS_R3.md`) asks for conventional faces: natural proportions,
+  character from age, hair, facial hair and expression. Round 3: 18 of
+  20 kept, 10 men and 8 women (`lineup_r3.png`); `snap.py` now resizes
+  a sheet drawn bigger than the guide so its skulls fit the hats.
+- [x] `PORT-102` The round 3 heads in the game (port ADR-099): the build
+  adds headless bodies and a sheet per head, `PlayerLook` composes them,
+  and hats are now the pixels they show, so they fit every head (over the
+  classic head they're pixel-identical to before). The ladder teams,
+  Pepper and the ROAD HOGS wear heads (the TWINS and Dawson keep the
+  classic one), ROAD TRIP's locals roll one, and a career player picks
+  one on EDIT's new HEAD row (free; the save stays v6).
+  - Verified: the full suite (`test_career.test_heads`, the EDIT row in
+    `test_page_edit_look`, `test_view`'s ladder opponents, every head on
+    EDIT in `test_layout`); screenshots of a ladder match and EDIT.
+  - Status: **Ready to test**: play the ladder, and CAREER > EDIT > HEAD.
+
+### 103. `feature/cld-sim-state`: the sim's whole state (asked for 2026-10-26)
+
+- [x] `PORT-103` Groundwork for online play over the internet (port
+  ADR-100). `Sim.save_state()` and `load_state()` save and load
+  everything the sim carries (`sim/sim_state.gd`, by reflection, so a new
+  variable can't be left out). Loading keeps object identity (MULTI
+  BALL's ball) and works in place. A state is plain data, so it can go
+  over a line as bytes. Online's desync check now hashes the whole state
+  (`Sim.state_hash`), not the traced snapshot, so it sees the AI's caches
+  and the untraced rules too. Play is unchanged: the golden traces are
+  the same.
+  - Verified: the full suite plus the e2e (`test_sim_state`: 26 matches
+    saved at five points, loaded back and into a new sim, stepped 300
+    frames against the sim that never stopped; `test_online`'s desync
+    test catches untraced fields).
+  - Status: **Done**: nothing to play. Next for online: tag events by
+    frame, and route `retune`/`new_match` through the inputs (ADR-100),
+    then rollback.
+
+### 104. `feature/cld-sim-events`: events by step (asked for 2026-10-26)
+
+- [x] `PORT-104` Rollback groundwork (port ADR-101), chained from
+  `feature/cld-sim-state`. Every sim event carries its step
+  (`Sim.step_count`, never reset, part of the state). `EventLedger`
+  (`view/event_ledger.gd`) plays a step's events once, however often the
+  step runs, and counts them only when the step is confirmed, with the
+  context recorded at that step. MatchView's handler is split in two:
+  `_on_event` plays (sound, sparks, crowd, quips) and `_count_event`
+  counts (stats, rally record, career points). Offline and in lockstep,
+  a step is confirmed as it runs, so nothing changes in play. The golden
+  traces are the same.
+  - Verified: the full suite plus the e2e (`test_event_ledger`: a
+    naive rollback over a real 2P match with bad guesses counts exactly
+    the straight run's events and plays each once; offline stats match
+    a bare sim's).
+  - Status: **Done**: nothing to play. Still to do before rollback (ADR-101):
+    PLAY OF THE MATCH, the lesson and the match end read the live sim,
+    and `retune`/`new_match` need to go through the inputs.
+
+### 105. `feature/cld-sim-commands`: commands with the inputs (asked for 2026-10-26)
+
+- [x] `PORT-105` Rollback groundwork (port ADR-102), chained from
+  `feature/cld-sim-events`. `Sim.step(human, commands)` applies NEW
+  MATCH, TUNE's sliders and SMART PLAY as the step begins. The views
+  only queue them (`MatchView.command`): the rematch, RESTART, a
+  lesson's next match and the tuning panel. PLAY OF THE MATCH records
+  and replays them the same way. Online, the host's rematch rides its
+  input message and both sims step it on the same frame; any other
+  command is refused there, and APPLY refuses outright.
+  `OnlineSession.PROTOCOL` is now 2. The golden traces are the same.
+  - Verified: the full suite plus the e2e (`test_commands`;
+    `test_online.test_an_online_rematch_comes_through_the_stream`, whole
+    states equal through an online rematch; `test_tuning.test_live`).
+  - Status: **Ready to test**: play an online match to its end and
+    rematch with the host's B; offline, TUNE's sliders and RESTART.
+
+### 106. `feature/cld-confirmed-sim`: the confirmed sim; rollback planned (asked for 2026-10-26)
+
+- [x] `PORT-106` Rollback stage 1 (port ADR-103), chained from
+  `feature/cld-sim-commands`. `MatchView.truth` is the confirmed sim
+  and `sim` is the one drawn. Offline and in lockstep they're the same
+  object. The things that are counted or can't be taken back read
+  `truth`: stats and records, PLAY OF THE MATCH's recording, the lesson,
+  the match end and close calls (on `truth`'s phase changes), the
+  rematch, and online's desync hash.
+  - Verified: the full suite plus the e2e (`test_confirmed_sim`, with a
+    second sim for `truth`).
+  - Status: **Done**: nothing to play.
+### 107. `feature/cld-rollback-core`: rollback's core (asked for 2026-10-26)
+
+- [x] `PORT-107` ADR-103 accepted with the defaults (W = 8, D = 1 or 2,
+  lockstep kept a release, the HUD's score on the drawn sim).
+  `net/rollback.gd` is pure: the confirmed sim and the prediction, inputs
+  scheduled D ahead, guesses that repeat held state and never presses,
+  a correction (load `truth`, re-run the guessed frames) when a guess was
+  wrong, the window, time sync, and the desync hash on `truth`. Nothing
+  uses it yet: the session (`PORT-108`) and the view (`PORT-109`) come next.
+  - Verified: the full suite plus the e2e (`test_rollback`: two cores
+    over 0, 4, and 6 frames with jitter, and a slow clock. The confirmed
+    sims match a straight run of the real inputs, predictions equal it
+    at the end, events are counted exactly and played once a step,
+    about 950 corrections in a run, time sync holding the faster side).
+    A correction costs about 1 ms at worst.
+  - Status: **Done**: nothing to play yet.
+### 108. `feature/cld-rollback-session`: rollback in the session (asked for 2026-10-26)
+
+- [x] `PORT-108` (port ADR-103), chained from `feature/cld-rollback-core`.
+  START names the netcode, and both sides build it: under rollback the
+  session owns the sims, and `tick()` takes the local intent and gives
+  back what the frame did. The delay comes from the round trip (1 on a
+  LAN, 2 otherwise), a desync closes both sides, and `PROTOCOL` is 3.
+  ONLINE NETCODE (ROLLBACK or LOCKSTEP) is saved. The view can't play
+  rollback yet, so `OnlineSession.VIEW_PLAYS_ROLLBACK` is off: the host
+  starts lockstep and the OPTIONS row is hidden. Online play is as
+  before, and PORT-109 turns both on.
+  - Verified: the full suite plus the e2e (`test_rollback_session`: two
+    sessions over a jittery line, and over ENet on this machine; a
+    desync; the fallback; the setting saved).
+  - Status: **Done**: nothing to play yet.
+### 109. `feature/cld-rollback-view`: rollback in the match (asked for 2026-10-26)
+
+- [x] `PORT-109` (port ADR-103), chained from `feature/cld-rollback-session`.
+  Online with rollback, MatchView draws the session's prediction and
+  counts its confirmed sim. Each frame is `OnlineSession.tick`, effects
+  play through the ledger, and stats count the confirmed steps. Offline
+  and lockstep take the same path with one sim. `VIEW_PLAYS_ROLLBACK`
+  is on: online matches start with ROLLBACK, and OPTIONS > NETCODE can
+  pick LOCKSTEP (the host's choice). A core fix: real events of a frame
+  that was guessed wrong, and confirmed in a batch, are now played (late)
+  rather than lost.
+  - Verified: the full suite plus the e2e (`test_rollback_view`: two
+    recording views over a jittery line; `test_online`'s view tests under
+    both netcodes; `test_layout` with the NETCODE row); screenshot of
+    OPTIONS.
+  - Status: **Ready to test**: play online over a real line (Tailscale or
+    a forwarded port). Presses should feel immediate; watch for jumps when
+    a guess is corrected, and compare with NETCODE LOCKSTEP.
+- [ ] `PORT-110` Correction smoothing (ADR-103), once a playtest shows
+  how much the jumps show.
+
+### 111. `feature/cld-trip-talks`: ROAD TRIP talks (asked for 2026-10-26)
+
+- [x] `PORT-111` (port ADR-104), chained from `feature/cld-release-0.41.0`.
+  Every recurring ROAD TRIP conversation now has five scenes instead of
+  one, heard in order one per meeting and then round again: the nine
+  teams' scenes, each partner's (Pepper and the eight captains) GARAGE
+  start, motel and diner words, and the ROAD HOGS' taunts and friendly
+  words. The later ones show more of each character. 152 new scenes in
+  `trip.json`'s `talks`; counted in the trip meta's `talks` (a new key,
+  no save version). TRIP OF THE DAY always hears the first.
+  - Verified: the full suite (`test_road_trip.test_talks`, the data
+    check, `test_layout.test_trip_scenes` on every new page);
+    screenshots of a fifth team talk and a fourth motel talk.
+  - Status: **Ready to test**: take a few trips (or meet the same team
+    twice) and read along; say if any character's voice is off.
