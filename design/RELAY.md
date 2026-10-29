@@ -1,7 +1,18 @@
 # The relay: online play by room code, for both games (plan)
 
-**Status:** Planned (2026-10-28), not started. One small server on Azure
-for both games:
+**Status:** The relay is live (2026-10-29); the games don't use it yet.
+- **Address:** `https://pb94-relay.wonderfulground-3bc64e4e.eastus.azurecontainerapps.io`
+  (`wss://` for the games), in East US.
+- **Code:** its own repo, `../pickleball-relay`
+  (github.com/austinthedeveloper/pickleball-relay), whose README has the
+  protocol as built.
+- **Measured from the lead's Mac:** a guest's message to the host and
+  back takes 89 ms (each leg goes through the relay, so that's two round
+  trips to East US).
+- **Next:** RelayLink and ROOM / JOIN in this port, then ANYWHERE in the
+  VR game's COACH page.
+
+One small server on Azure for both games:
 - this port's ONLINE play (PORT-31, port ADR-056);
 - the VR game's remote coaching (`../pickleball-vr`, design/COACHING.md
   C-20);
@@ -35,7 +46,8 @@ connections in rooms and passes their messages on.
 ### Rooms
 
 - **A host opens a room**, and the relay answers with a code:
-  - four letters from an alphabet without look-alikes (no I, O, 0 or 1);
+  - four letters from 20 consonants (`BCDFGHJKLMNPQRSTVWXZ`): no I or O
+    to misread, and no vowels, so no words;
   - 160,000 codes, plenty for the rooms open at any one time.
 - **Guests join with the code.** Each game has its own namespace (`game=`
   on the URL), so a VR code never lands in a port room. Each kind of
@@ -50,8 +62,9 @@ connections in rooms and passes their messages on.
 - **Messages:**
   - A guest's go to the host.
   - The host's go to one guest, or to all of them.
-  - Binary frames carry a one-byte header: the guest's number, or 255
-    for "all".
+  - The host's binary frames carry a one-byte header both ways: the
+    guest's number, or 255 for "all". Guests send and receive bare
+    payloads; the relay adds and strips the header.
 - **Control messages** are short JSON text frames:
   `room`, `welcome`, `joined`, `left`, `error` (with a reason the game
   shows in capitals: NO SUCH ROOM, ROOM FULL, OLD VERSION).
@@ -65,8 +78,9 @@ connections in rooms and passes their messages on.
 ```
 wss://<relay>/v1/host?game=pb94-port&ver=0.43.0      -> {"op":"room","code":"BXKM"}
 wss://<relay>/v1/join?game=pb94-port&code=BXKM       -> {"op":"welcome","you":0} (or error)
-host gets {"op":"joined","guest":0} / {"op":"left","guest":0}
-binary: [guest or 255][payload...]                   both ways, in order, nothing lost
+host gets {"op":"joined","guest":0,"ver":...} / {"op":"left","guest":0}
+binary, host: [guest or 255][payload...]             both ways, in order, nothing lost
+binary, guest: [payload...]
 GET https://<relay>/healthz                          -> 200 "ok"
 GET https://<relay>/c/BXKM                           -> the VR coach page that room's headset sent (below)
 ```
@@ -134,14 +148,23 @@ Rejected:
   the image, pushes it to ghcr.io, and runs `az containerapp update` with
   the new image.
 - **Signing in to Azure:** GitHub's OIDC, through a federated credential
-  on an Azure app registration. No Azure password or secret is stored in
-  GitHub.
-- **Infrastructure as code:** one Bicep file (`infra/main.bicep`) holds
-  the resource group's contents: the Container Apps environment (no logs)
-  and the app (ingress on, WebSockets, port 8080, 0 to 1 replicas,
-  0.25 vCPU and 0.5 GiB).
-- **Cost alarm:** a budget of $5 a month on the resource group, with an
-  email alert at 80%.
+  on an Azure app registration (`pickleball-relay-deploy`, Contributor on
+  the resource group only). No Azure password or secret is stored in
+  GitHub. GitHub's tokens name the owner and repo with their numeric IDs
+  (`repo:owner@id/name@id:ref:...`); `infra/setup.sh` builds the subject
+  from the API.
+- **Infrastructure as code:** `infra/main.bicep` holds the Container
+  Apps environment (no logs) and the app (ingress on, WebSockets, port
+  8080, 0 to 1 replicas, 0.25 vCPU and 0.5 GiB). The workflow deploys it
+  with each new image.
+- **Cost alarm:** a budget of $5 a month on the resource group
+  (`infra/budget.bicep`), emailing the lead at 80% spent and at 100%
+  forecast. `infra/setup.sh` deploys it once, so the address never goes
+  through GitHub, whose logs are public on this repo.
+- **The one-time setup** (`infra/setup.sh`, run 2026-10-29): Container
+  Apps turned on for the subscription, the resource group
+  `pickleball-relay` in East US, the app registration, the budget, and
+  the IDs as GitHub repo variables.
 
 ## In the games
 
@@ -195,20 +218,15 @@ plan.
 
 ## Who does what
 
-**You (once; accounts and payment are yours):**
-1. An Azure subscription (pay-as-you-go; the free grant applies), and the
-   region to use.
-2. Sign in to the Azure CLI on this Mac (`az login`), so I can create
-   the resource group, the app registration for GitHub's OIDC and the
-   budget alert, each shown to you before I run it.
-3. Create the `pickleball-relay` repo on GitHub (public, so its image on
-   ghcr.io is free), or tell me to create it with `gh`.
+**You (done 2026-10-29):** the pay-as-you-go subscription, East US,
+`az login` on this Mac, and the go-ahead for the public repo and the
+setup script.
 
 **Me:**
-1. The server, its tests, the Dockerfile, the Bicep file, and the deploy
-   workflow in `pickleball-relay`.
-2. The first deploy, then `/healthz` and a test room checked from this
-   Mac.
+1. Done: the server, its tests, the Dockerfile, the Bicep files, the
+   setup script and the deploy workflow in `pickleball-relay`.
+2. Done: the first deploy, then `/healthz` and a test room checked from
+   this Mac.
 3. **This port:** RelayLink, ONLINE's ROOM / JOIN / BY ADDRESS, the Web
    build's ONLINE, tests, and port ADR-105.
 4. **VR:** ANYWHERE on the COACH page, the page sent to the relay, the
