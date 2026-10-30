@@ -1,7 +1,10 @@
-## The on-screen pad for touch screens (PORT-81, port ADR-086), drawn as
-## a SNES pad: the D-pad on the left, B A Y X on the right (B hit, A
-## drive, Y soft, X slice), START, L (SHORT, held) and R (SPECIAL) in the
-## top corners, where a SNES pad's shoulders are. A finger presses the input-map action under it, sent
+## The on-screen pad for touch screens (PORT-81, port ADR-086): the D-pad
+## on the left; on the right the face buttons weighted as a GameCube pad's
+## (port ADR-106): a big B (HIT, the shot most played) with the others
+## round it, X (SLICE) and A (DRIVE) as kidneys over and right of it, Y
+## (SOFT) small below left; START, L (SHORT, held) and R (SPECIAL) in the
+## top corners, where a SNES pad's shoulders are. The letters and colours
+## stay the SNES pad's, as the prompts name them. A finger presses the input-map action under it, sent
 ## through Input as an InputEventAction, so the latch, the menus and the
 ## sim read it like a key; the pad never touches the sim. A finger that
 ## starts on the D-pad steers until it lifts; one on a button can slide to
@@ -23,24 +26,26 @@ const ON := 1
 const OFF := 2
 const MODES := ["AUTO", "ON", "OFF"]
 
-const DPAD := Vector2(108, 448)
+const DPAD := Vector2(108, 438)
 const DPAD_ARM := 56.0            ## the cross's half length
 const DPAD_W := 38.0              ## an arm's width
 const DPAD_DISC := 68.0           ## the faint disc it sits on
 const DPAD_REACH := 90.0          ## a touch this near the centre starts on the D-pad
 const DEAD := 12.0                ## this near the centre, no direction
-const FACE := Vector2(870, 450)
-const FACE_GAP := 44.0            ## the diamond's centre to each button's
-const FACE_R := 23.0
-const FACE_REACH := 32.0          ## a touch this near a button presses it
-## The face buttons by position, as on a SNES pad: B south, A east, Y west,
-## X north.
-const FACES := {"hit": Vector2(0, 1), "drive": Vector2(1, 0), "soft": Vector2(-1, 0),
-	"slice": Vector2(0, -1)}
+const FACE := Vector2(846, 424)   ## HIT's centre, the cluster's heart
+const RING := 70.0                ## a kidney's arc, round HIT's centre
+const KIDNEY_W := 17.0            ## a kidney's half thickness
+const FACE_REACH := 12.0          ## a touch this far outside a button still presses it
+## The face buttons: round ones by centre (from FACE) and radius, kidneys
+## by their arc's ends, in degrees round FACE (0 right, -90 up).
+const FACES := {"hit": {"at": Vector2.ZERO, "r": 40.0},
+	"soft": {"at": Vector2(-56, 48), "r": 24.0},
+	"drive": {"arc": [-60.0, 10.0]},
+	"slice": {"arc": [-165.0, -105.0]}}
 ## START top left, the shoulders under the top corners (the title's
 ## version line is in the top right).
-const PILLS := {"start": Rect2(16, 14, 96, 30), "short": Rect2(16, 54, 96, 30),
-	"special": Rect2(848, 54, 96, 30)}
+const PILLS := {"start": Rect2(14, 12, 104, 36), "short": Rect2(14, 58, 104, 36),
+	"special": Rect2(842, 58, 104, 36)}
 const PILL_REACH := 10.0          ## px around a pill that still press it
 const ALPHA := 0.72
 
@@ -87,14 +92,37 @@ func _letter(font: String, at: Vector2) -> BitmapText:
 	return t
 
 
+## A face button's middle: a round one's centre, a kidney's arc's middle.
 static func face_centre(action: String) -> Vector2:
-	return FACE + FACES[action] * FACE_GAP
+	var f: Dictionary = FACES[action]
+	if f.has("arc"):
+		return FACE + Vector2.from_angle(deg_to_rad((f["arc"][0] + f["arc"][1]) / 2.0)) * RING
+	return FACE + f["at"]
+
+
+## How far `p` is outside a face button's edge (negative inside).
+static func face_edge(action: String, p: Vector2) -> float:
+	var f: Dictionary = FACES[action]
+	if not f.has("arc"):
+		return p.distance_to(FACE + f["at"]) - f["r"]
+	var ang := clampf(rad_to_deg((p - FACE).angle()), f["arc"][0], f["arc"][1])
+	return p.distance_to(FACE + Vector2.from_angle(deg_to_rad(ang)) * RING) - KIDNEY_W
 
 
 ## Each part's box on the screen: the D-pad, the faces, each pill.
 static func part_rects() -> Dictionary:
+	var faces := Rect2(FACE, Vector2.ZERO)
+	for a in FACES:
+		var f: Dictionary = FACES[a]
+		if f.has("arc"):
+			for i in 9:                   # the arc's ends and the points between
+				var deg: float = lerpf(f["arc"][0], f["arc"][1], i / 8.0)
+				var c := FACE + Vector2.from_angle(deg_to_rad(deg)) * RING
+				faces = faces.merge(Rect2(c, Vector2.ZERO).grow(KIDNEY_W))
+		else:
+			faces = faces.merge(Rect2(FACE + f["at"], Vector2.ZERO).grow(f["r"]))
 	var out := {"dpad": Rect2(DPAD - Vector2.ONE * DPAD_DISC, Vector2.ONE * DPAD_DISC * 2),
-		"faces": Rect2(FACE - Vector2.ONE * (FACE_GAP + FACE_R + 2), Vector2.ONE * (FACE_GAP + FACE_R + 2) * 2)}
+		"faces": faces.grow(2)}
 	for a in PILLS:
 		out[a] = PILLS[a]
 	return out
@@ -137,20 +165,23 @@ static func _part_of(target: String) -> String:
 
 ## What a touch at `p` lands on: "dpad", an action, or "" (nothing, or a
 ## part stepped aside: it's the mouse's, for the screen under the pad).
-func target_at(p: Vector2) -> String:
-	if not "dpad" in _away and p.distance_to(DPAD) <= DPAD_REACH:
+## `reach`: how far outside a part still counts (a test asks for none: what
+## the part covers).
+func target_at(p: Vector2, reach := -1.0) -> String:
+	var exact := reach >= 0.0
+	if not "dpad" in _away and p.distance_to(DPAD) <= (DPAD_DISC + reach if exact else DPAD_REACH):
 		return "dpad"
 	var best := ""
-	var near := FACE_REACH
+	var near := reach if exact else FACE_REACH   # the nearest edge wins: no dead gaps
 	for a in FACES if not "faces" in _away else []:
-		var d := p.distance_to(face_centre(a))
+		var d := face_edge(a, p)
 		if d <= near:
 			best = a
 			near = d
 	if best != "":
 		return best
 	for a in PILLS:
-		if not a in _away and PILLS[a].grow(PILL_REACH).has_point(p):
+		if not a in _away and PILLS[a].grow(reach if exact else PILL_REACH).has_point(p):
 			return a
 	return ""
 
@@ -275,14 +306,13 @@ func _draw_pad() -> void:
 	var face := Color(0.62, 0.65, 0.76)
 	if not "dpad" in _away:
 		_draw_dpad(dark, face)
-	# B A Y X, each in its SNES colour
+	# B Y A X, each in its SNES colour: a frame, a rim, the fill lit when held
 	for act in FACES if not "faces" in _away else []:
-		var c := face_centre(act)
 		var col: Color = Prompts.touch_glyph(act).get("color", face)
 		var down := _down.has(act)
-		_art.draw_circle(c, FACE_R + 2.0, dark)
-		_art.draw_circle(c, FACE_R, col if down else col.darkened(0.45))
-		_art.draw_arc(c, FACE_R - 1.0, 0, TAU, 28, col.lightened(0.3) if down else col, 3.0)
+		_draw_face(act, 2.0, dark)
+		_draw_face(act, 0.0, col.lightened(0.3) if down else col)
+		_draw_face(act, -3.0, col if down else col.darkened(0.45))
 	# START, L and R: pills
 	for act in PILLS:
 		if act in _away:
@@ -290,6 +320,19 @@ func _draw_pad() -> void:
 		var r: Rect2 = PILLS[act]
 		_art.draw_rect(r, Color(0.92, 0.93, 0.98))
 		_art.draw_rect(r.grow(-2), Color(0.42, 0.45, 0.6) if _down.has(act) else Color(0.16, 0.18, 0.3))
+
+
+## A face button's shape, grown by `grow` px.
+func _draw_face(action: String, grow: float, col: Color) -> void:
+	var f: Dictionary = FACES[action]
+	if not f.has("arc"):
+		_art.draw_circle(FACE + f["at"], f["r"] + grow, col)
+		return
+	var w := KIDNEY_W + grow
+	var ends: Array = f["arc"].map(func(d): return deg_to_rad(d))
+	_art.draw_arc(FACE, RING, ends[0], ends[1], 24, col, w * 2.0)
+	for e in ends:                      # round ends
+		_art.draw_circle(FACE + Vector2.from_angle(e) * RING, w, col)
 
 
 ## The cross on a faint disc, a held arm lit.

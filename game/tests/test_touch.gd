@@ -82,6 +82,26 @@ func test_each_button_fires_its_action() -> void:
 	_done(pad)
 
 
+## Port ADR-106: the faces weighted as a GameCube pad's: HIT the big one,
+## no two buttons overlapping, and no dead gap between them (a touch
+## anywhere in the cluster presses the button whose edge is nearest).
+func test_the_faces_round_hit() -> void:
+	var pad := _new_pad()
+	var big: float = TouchPad.FACES["hit"]["r"]
+	check(big >= 2.0 * TouchPad.KIDNEY_W and big > TouchPad.FACES["soft"]["r"], "HIT is the big button")
+	for a in TouchPad.FACES:
+		for b in TouchPad.FACES:
+			if a != b:
+				check(TouchPad.face_edge(b, TouchPad.face_centre(a)) > 0.0, "%s's middle is clear of %s" % [a, b])
+	var between := TouchPad.face_centre("hit").lerp(TouchPad.face_centre("drive"), 0.5)
+	check(pad.target_at(between) != "", "the gap between HIT and DRIVE presses one of them")
+	eq(pad.target_at(TouchPad.FACE + Vector2(30, 0)), "hit", "inside HIT is HIT")
+	eq(pad.target_at(TouchPad.FACE + Vector2(0, 120)), "", "well below the cluster is nobody's")
+	var box: Rect2 = TouchPad.part_rects()["faces"]
+	check(Rect2(0, 0, 960, 540).encloses(box), "the cluster is on the screen")
+	_done(pad)
+
+
 func test_a_tap_reaches_the_intent() -> void:
 	var pad := _new_pad()
 	GameControls.clear_latch()

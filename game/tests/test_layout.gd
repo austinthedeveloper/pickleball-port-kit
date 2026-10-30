@@ -627,6 +627,7 @@ func test_touch_pad() -> void:
 				boxes.append(Rect2(c.get_global_transform().origin, c.size))
 			stack.append_array(c.get_children())
 		pad.avoid(boxes)
+		check_pad_clear(n, pad)
 	var t := _title()
 	var tp: TouchPad = with_pad.call(t)
 	for id in t.pages:
@@ -654,6 +655,26 @@ func test_touch_pad() -> void:
 	GameControls.last_device = kept[0]
 	Settings.touch_pad = kept[1]
 	GameControls.device_serial += 1
+
+
+## No screen text under a shown part of the pad (its buttons are drawn,
+## not text, so check_layout can't see them): sampled every 3 px of each
+## text's box.
+func check_pad_clear(root: Node, pad: TouchPad) -> void:
+	var where := root.name
+	for t in texts(root):
+		if pad.is_ancestor_of(t):
+			continue
+		var r := text_rect(t).grow(-SLACK)
+		for y in range(int(r.position.y), int(r.end.y) + 1, 3):
+			for x in range(int(r.position.x), int(r.end.x) + 1, 3):
+				var hit := pad.target_at(Vector2(x, y), 0.0)
+				if hit != "":
+					_fail("%s: \"%s\" is under the pad's %s" % [where, t.text, hit], t.text + "|pad")
+					break
+			if r.position.y < 0:
+				break
+	asserts += 1
 
 
 ## PORT-29: the lobby in both cup modes with four players, and the couch

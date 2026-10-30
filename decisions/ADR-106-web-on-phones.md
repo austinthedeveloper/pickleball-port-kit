@@ -53,13 +53,28 @@ phone; which phone, browser and build is an open question (For you).
    the pad's AUTO, so a browser that says it has no touch screen still
    gets the pad once a finger lands.
 
+6. **The face buttons weighted round HIT.** On a phone the SNES diamond's
+   buttons came out about 30 pt across, too small (the lead, 2026-10-29).
+   They are now laid out as a GameCube pad's: B (HIT, the shot most
+   played) a big round button (80 px across), X (SLICE) and A (DRIVE)
+   kidneys on an arc over and right of it, Y (SOFT) a small round button
+   below left. Letters and colours stay the SNES pad's, so the prompts
+   still name them. A touch anywhere in the cluster presses the button
+   whose edge is nearest (within 12 px), so there are no dead gaps; a
+   finger still slides from one to the next. The pills grew a little
+   (104x36). The cluster and the D-pad sit high enough to clear the
+   screens' help line; `test_layout` now fails on screen text under any
+   shown part of the pad.
+
 ## Consequences
 
 - In the emulated 740x360 phone the game fills the height (a 1280x720
   draw in a 1480x720 canvas, 87% of the screen, the rest the 16:9 bars).
 - Not done: the pad's buttons in the side bars (Godot's `keep` aspect
   draws nothing outside the 16:9 view; the bars are about 75 CSS px wide
-  on a 19.5:9 phone, less than a thumb's D-pad), and a bigger pad on small
-  screens. Both wait for a real phone (KNOWN_ISSUES #79).
+  on a 19.5:9 phone, less than a thumb's D-pad). It waits for a real phone
+  (KNOWN_ISSUES #79).
 - Tests: `test_web` (the scale default and its key, the FULLSCREEN row,
-  a touch bringing the pad, the preset's page and app settings).
+  a touch bringing the pad, the preset's page and app settings);
+  `test_touch.test_the_faces_round_hit` (HIT the big one, no overlaps, no
+  gaps); `test_layout`'s pad-over-text check.
