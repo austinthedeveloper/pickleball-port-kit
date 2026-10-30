@@ -62,7 +62,17 @@ phone; which phone, browser and build is an open question (For you).
    still name them. A touch anywhere in the cluster presses the button
    whose edge is nearest (within 12 px), so there are no dead gaps; a
    finger still slides from one to the next. The pills grew a little
-   (104x36). The cluster and the D-pad sit high enough to clear the
+   (104x36).
+7. **L and R within a thumb's reach.** At the top corners they were out
+   of reach (the lead, 2026-10-29). R (SPECIAL) is a shot, so it sits over
+   the face cluster, for the right thumb. L (SHORT) is held while a shot
+   is played, which on glass would take the left thumb off the D-pad: on
+   the touch pad it is a toggle over the D-pad instead, a tap on (lit
+   yellow), a tap off; every shot goes short while it is on, and it lets
+   go when the pad hides. The pad still only sends the `short` action (a
+   press, held, then a release), so the sim and the pads are unchanged.
+   The tutorial's HOLD SHORT reads a little wrong on touch (TAP), left as
+   it is for now. START stays top left. The cluster and the D-pad sit high enough to clear the
    screens' help line; `test_layout` now fails on screen text under any
    shown part of the pad.
 

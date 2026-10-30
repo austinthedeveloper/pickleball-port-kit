@@ -2,9 +2,10 @@
 ## on the left; on the right the face buttons weighted as a GameCube pad's
 ## (port ADR-106): a big B (HIT, the shot most played) with the others
 ## round it, X (SLICE) and A (DRIVE) as kidneys over and right of it, Y
-## (SOFT) small below left; START, L (SHORT, held) and R (SPECIAL) in the
-## top corners, where a SNES pad's shoulders are. The letters and colours
-## stay the SNES pad's, as the prompts name them. A finger presses the input-map action under it, sent
+## (SOFT) small below left; R (SPECIAL, a shot) over the cluster; L
+## (SHORT) over the D-pad, a toggle here (a tap turns it on, lit, a tap
+## off: holding it would take the thumb off the D-pad); START top left.
+## The letters and colours stay the SNES pad's, as the prompts name them. A finger presses the input-map action under it, sent
 ## through Input as an InputEventAction, so the latch, the menus and the
 ## sim read it like a key; the pad never touches the sim. A finger that
 ## starts on the D-pad steers until it lifts; one on a button can slide to
@@ -42,10 +43,10 @@ const FACES := {"hit": {"at": Vector2.ZERO, "r": 40.0},
 	"soft": {"at": Vector2(-56, 48), "r": 24.0},
 	"drive": {"arc": [-60.0, 10.0]},
 	"slice": {"arc": [-165.0, -105.0]}}
-## START top left, the shoulders under the top corners (the title's
-## version line is in the top right).
-const PILLS := {"start": Rect2(14, 12, 104, 36), "short": Rect2(14, 58, 104, 36),
-	"special": Rect2(842, 58, 104, 36)}
+## START top left (the title's version line is in the top right), L and
+## R within a thumb's reach over the D-pad and the faces.
+const PILLS := {"start": Rect2(14, 12, 104, 36), "short": Rect2(14, 318, 104, 36),
+	"special": Rect2(842, 288, 104, 36)}
 const PILL_REACH := 10.0          ## px around a pill that still press it
 const ALPHA := 0.72
 
@@ -54,6 +55,7 @@ var _letters := {}                ## action -> BitmapText
 var _fingers := {}                ## touch index -> [target ("dpad" or an action), position]
 var _down := {}                   ## actions this pad holds pressed
 var _away := {}                   ## parts ("dpad", "faces", a pill's action) stepped aside
+var _short_on := false            ## L's toggle
 
 
 ## Shown now: TOUCH PAD's setting, the screen and the device in hand.
@@ -238,6 +240,8 @@ func take_touch(event: InputEvent) -> bool:
 			if t == "":
 				return false
 			_fingers[i] = [t, event.position]
+			if t == "short":
+				_short_on = not _short_on
 		elif not _fingers.erase(i):
 			return false
 	else:
@@ -245,24 +249,30 @@ func take_touch(event: InputEvent) -> bool:
 			return false
 		var f: Array = _fingers[i]
 		f[1] = event.position
-		if f[0] != "dpad":
+		if f[0] != "dpad" and f[0] != "short":
 			var t := target_at(event.position)
-			if t != "" and t != "dpad":
+			if t != "" and t != "dpad" and t != "short":
 				f[0] = t                 # slid onto the next button
 	_apply()
 	return true
 
 
-## Lifts every finger (the pad hid, or a screen changed under it).
+## Lifts every finger and L's toggle (the pad hid, or a screen changed
+## under it).
 func release_all() -> void:
 	_fingers.clear()
+	_short_on = false
 	_apply()
 
 
 ## Presses what the fingers are on and releases what they left.
 func _apply() -> void:
 	var want := {}
+	if _short_on and not "short" in _away:
+		want["short"] = true
 	for f in _fingers.values():
+		if f[0] == "short":
+			continue                    # L is its toggle, not the finger
 		if f[0] == "dpad":
 			for a in dpad_actions(f[1] - DPAD):
 				want[a] = true
@@ -318,8 +328,9 @@ func _draw_pad() -> void:
 		if act in _away:
 			continue
 		var r: Rect2 = PILLS[act]
+		var lit := Color("fbe46a").darkened(0.35) if act == "short" else Color(0.42, 0.45, 0.6)
 		_art.draw_rect(r, Color(0.92, 0.93, 0.98))
-		_art.draw_rect(r.grow(-2), Color(0.42, 0.45, 0.6) if _down.has(act) else Color(0.16, 0.18, 0.3))
+		_art.draw_rect(r.grow(-2), lit if _down.has(act) else Color(0.16, 0.18, 0.3))
 
 
 ## A face button's shape, grown by `grow` px.

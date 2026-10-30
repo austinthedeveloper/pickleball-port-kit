@@ -70,7 +70,7 @@ func test_hidden_on_a_desktop() -> void:
 
 func test_each_button_fires_its_action() -> void:
 	var pad := _new_pad()
-	for a in ["hit", "drive", "soft", "slice", "special", "start", "short"]:
+	for a in ["hit", "drive", "soft", "slice", "special", "start"]:
 		var at: Vector2 = TouchPad.face_centre(a) if TouchPad.FACES.has(a) else TouchPad.PILLS[a].get_center()
 		eq(pad.target_at(at), a, "%s is under its button" % a)
 		_touch(0, at)
@@ -99,6 +99,34 @@ func test_the_faces_round_hit() -> void:
 	eq(pad.target_at(TouchPad.FACE + Vector2(0, 120)), "", "well below the cluster is nobody's")
 	var box: Rect2 = TouchPad.part_rects()["faces"]
 	check(Rect2(0, 0, 960, 540).encloses(box), "the cluster is on the screen")
+	_done(pad)
+
+
+## Port ADR-106: L (SHORT) is a toggle on the pad: a tap holds it, the
+## next lets go, so the left thumb goes back to the D-pad while every shot
+## goes short; it never slides onto a face, and it lets go when the pad hides.
+func test_short_is_a_toggle() -> void:
+	var pad := _new_pad()
+	var at: Vector2 = TouchPad.PILLS["short"].get_center()
+	eq(pad.target_at(at), "short", "L is under its pill")
+	_touch(0, at)
+	_touch(0, at, false)
+	eq(pad.held(), ["short"], "a tap turns SHORT on")
+	_touch(1, TouchPad.DPAD + Vector2(40, 0))
+	_touch(2, TouchPad.face_centre("hit"))
+	eq(pad.held(), ["hit", "move_right", "short"], "on while moving and hitting")
+	_touch(2, TouchPad.face_centre("hit"), false)
+	_touch(1, TouchPad.DPAD, false)
+	eq(pad.held(), ["short"], "still on after the shot")
+	_touch(0, at)
+	_drag(0, TouchPad.face_centre("slice"))
+	_touch(0, at, false)
+	eq(pad.held(), [], "a second tap turns it off (and it never slides)")
+	check(not _on("short"), "sent as a release")
+	_touch(0, at)
+	_touch(0, at, false)
+	pad.release_all()
+	eq(pad.held(), [], "the pad hiding lets go of it")
 	_done(pad)
 
 
