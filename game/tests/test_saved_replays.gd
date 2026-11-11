@@ -400,3 +400,141 @@ func test_replays_show_the_effects() -> void:
 		d.free()
 	wipe_replays()
 	Settings.flashes = kept
+
+
+## PORT-156 (port ADR-112): EXPORT writes a small file; IMPORT reads it
+## back into REPLAYS and it plays the rally exactly as the original; a
+## replay from another sim, a damaged file and a stranger's file are
+## refused with a line the screen can say.
+func test_export_and_import() -> void:
+	wipe_replays()
+	var v := _view()
+	check(_to_a_rally(v))
+	check(v.save_rally())
+	v.free()
+	var name: String = SavedReplays.list()[0]["name"]
+	var original := SavedReplays.load_replay(name)
+	SavedReplays.export_dir = ProjectSettings.globalize_path("user://test_exports/")
+	eq(SavedReplays.export_replay(name), "IN EXPORTS")
+	var path := SavedReplays.last_export
+	check(FileAccess.file_exists(path), "a file: " + path)
+	var size := FileAccess.get_file_as_bytes(path).size()
+	check(size > 100 and size < 16 * 1024, "a few KB (%d bytes)" % size)
+	wipe_replays()
+	var r := SavedReplays.import_file(path)
+	eq(r[1], "", "imported")
+	var back := SavedReplays.load_replay(String(r[0]))
+	eq(JSON.stringify(back, "", true), JSON.stringify(original, "", true), "the same replay")
+	var played := _play_saved(back)
+	eq(played[0], original["rally"]["snap_to"], "and it plays the rally frame for frame")
+	# the refusals
+	var older := original.duplicate(true)
+	older["tuning"] = K.TUNING_VERSION - 1
+	eq(SavedReplays.from_bytes(SavedReplays.to_bytes(older))[1], "FROM AN OLDER GAME")
+	var newer := original.duplicate(true)
+	newer["tuning"] = K.TUNING_VERSION + 1
+	eq(SavedReplays.from_bytes(SavedReplays.to_bytes(newer))[1], "UPDATE TO WATCH IT")
+	eq(SavedReplays.from_bytes("hello".to_ascii_buffer())[1], "NOT A REPLAY")
+	var cut := SavedReplays.to_bytes(original).slice(0, 40)
+	eq(SavedReplays.from_bytes(cut)[1], "DAMAGED")
+	var obj := SavedReplays.MAGIC.to_ascii_buffer()
+	obj.append_array(var_to_bytes([1, 2]).compress(FileAccess.COMPRESSION_GZIP))
+	eq(SavedReplays.from_bytes(obj)[1], "DAMAGED", "not a replay's dictionary")
+	# REPLAYS full: the import says so
+	for i in SavedReplays.MAX:
+		var d := original.duplicate(true)
+		d["saved"] = 2000 + i
+		SavedReplays.save(d)
+	eq(SavedReplays.import_file(path)[1], "FULL: DELETE ONE")
+	SavedReplays.export_dir = ""
+	wipe_replays()
+
+
+## PORT-156/157 on the title: ON PRESS EXPORT marks the row; an import
+## plays at once; WATCH A CODE takes letters a press at a time (and from a
+## keyboard), six of them.
+func test_title_export_and_codes() -> void:
+	wipe_replays()
+	var v := _view()
+	check(_to_a_rally(v))
+	check(v.save_rally())
+	v.free()
+	SavedReplays.export_dir = ProjectSettings.globalize_path("user://test_exports/")
+	var t := _title()
+	t.open_page("replays")
+	var page: MenuPage = t.pages["replays"]
+	page.settle()
+	page.select("on_press")
+	for i in 2:
+		page.change(1)
+	eq(page.value_of("on_press"), "EXPORT")
+	t.replay_press(0)
+	eq(t.replay_value(0), "IN EXPORTS", "the row says where it went")
+	var path := SavedReplays.last_export
+	wipe_replays()
+	t.imported(SavedReplays.import_file(path))
+	eq(t.import_note, "IMPORTED")
+	check(t.watching, "an import plays at once")
+	t._demo.highlight = null
+	t.watching = false
+	t._ui.visible = true
+	# a code, a press at a time
+	page.select("code")
+	eq(page.value_of("code"), "B-----")
+	page.change(1)
+	eq(page.value_of("code"), "C-----", "left and right pick the letter")
+	page.press()
+	eq(t.code_typed, "C")
+	var key := InputEventKey.new()
+	key.pressed = true
+	for ch in "xkmq":
+		key.unicode = ch.unicode_at(0)
+		check(t._code_key(key), "a key types " + ch)
+	eq(t.code_typed, "CXKMQ", "keys type, in capitals")
+	key.unicode = "a".unicode_at(0)
+	check(not t._code_key(key), "a vowel isn't a code's")
+	key.unicode = 0
+	key.keycode = KEY_BACKSPACE
+	t._code_key(key)
+	eq(t.code_typed, "CXKM")
+	eq(ReplayCodes.clean("bx-km q!zz"), "BXKMQZ")
+	SavedReplays.export_dir = ""
+	t.free()
+	wipe_replays()
+
+
+## PORT-157: a replay shared through the real relay comes back by its code
+## and plays as the original (PB94_RELAY_JS, else skipped as on CI).
+func test_codes_through_the_relay() -> void:
+	var js := OS.get_environment("PB94_RELAY_JS")
+	if js == "" or not FileAccess.file_exists(js.path_join("replays.js")):
+		check(true, "skipped: no relay with replay codes here (as on CI)")
+		return
+	wipe_replays()
+	var v := _view()
+	check(_to_a_rally(v))
+	check(v.save_rally())
+	v.free()
+	var name: String = SavedReplays.list()[0]["name"]
+	var original := SavedReplays.load_replay(name)
+	var pid := OS.create_process("node", ["-e",
+		"require(%s).createRelay({log: () => {}}).listen(24994 + 21)" % JSON.stringify(js.path_join("server.js"))])
+	OS.delay_msec(700)
+	Boards.base = "http://127.0.0.1:%d" % (24994 + 21)
+	var body := JSON.stringify({"data": Marshalls.raw_to_base64(SavedReplays.bytes_of(name))})
+	var sent := Boards.request_blocking(ReplayCodes.url(), HTTPClient.METHOD_POST, body)
+	eq(sent[0], 200, "shared")
+	var code := String(sent[1].get("code", ""))
+	eq(code.length(), 6, "a six-letter code: " + code)
+	var got := Boards.request_blocking(ReplayCodes.url(code), HTTPClient.METHOD_GET)
+	eq(got[0], 200, "fetched by its code")
+	wipe_replays()
+	var r := SavedReplays.import_bytes(Marshalls.base64_to_raw(String(got[1].get("data", ""))))
+	eq(r[1], "", "and imported")
+	eq(JSON.stringify(SavedReplays.load_replay(String(r[0])), "", true), JSON.stringify(original, "", true),
+		"the same replay")
+	var none := Boards.request_blocking(ReplayCodes.url("BBBBBB"), HTTPClient.METHOD_GET)
+	eq([none[0], ReplayCodes.words(String(none[1].get("error", "")))], [404, "NO SUCH CODE"])
+	Boards.base = Boards.BASE
+	OS.kill(pid)
+	wipe_replays()

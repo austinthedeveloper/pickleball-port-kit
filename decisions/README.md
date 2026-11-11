@@ -102,3 +102,4 @@ first decisions, are rows in `design/07_DECISIONS_AND_RISKS.md`.
 | 109 | [CRT, the Lit Apron, the WEEKLY CHALLENGE and Score Boards](ADR-109-crt-apron-weekly-boards.md) | Accepted 2026-11-11 |
 | 110 | [Online, Finished: the Guest's Side, Career Looks, the Letter Grid, the Relay's Reasons](ADR-110-online-finished.md) | Accepted 2026-11-11 |
 | 111 | [Doubles Online: Rooms of Seats, Drops and Rejoins, Watchers, Quick Chat](ADR-111-rooms-of-seats.md) | Accepted 2026-11-11 |
+| 112 | [Replays You Can Share, Replay Codes, 2P in the Park, Winter Crowds](ADR-112-replays-park-crowds.md) | Accepted 2026-11-11 |

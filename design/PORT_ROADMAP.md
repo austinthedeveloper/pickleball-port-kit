@@ -181,16 +181,16 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-153 | Handheld PCs ([#43](https://github.com/austinthedeveloper/pickleball-port-kit/issues/43)) | `feature/cld-handhelds` | Ready to test |
 | PORT-154 | A faster web load ([#44](https://github.com/austinthedeveloper/pickleball-port-kit/issues/44)) | `feature/cld-handhelds` | Done |
 | PORT-155 | Cleanup round 10 ([#45](https://github.com/austinthedeveloper/pickleball-port-kit/issues/45)) | `feature/cld-handhelds` | Done |
-| PORT-156 | Replays you can share ([#46](https://github.com/austinthedeveloper/pickleball-port-kit/issues/46)) | | Planned |
-| PORT-157 | Replay codes through the relay ([#47](https://github.com/austinthedeveloper/pickleball-port-kit/issues/47)) | | Planned |
+| PORT-156 | Replays you can share ([#46](https://github.com/austinthedeveloper/pickleball-port-kit/issues/46)) | `feature/cld-replays-polish` | Ready to test |
+| PORT-157 | Replay codes through the relay ([#47](https://github.com/austinthedeveloper/pickleball-port-kit/issues/47)) | `feature/cld-replays-polish` | Ready to test |
 | PORT-158 | TODAY'S TRIP board ([#48](https://github.com/austinthedeveloper/pickleball-port-kit/issues/48)) | `feature/cld-crt-board` | Blocked: the relay's PR (boards.js) to merge and deploy |
 | PORT-159 | Weekly challenge ([#49](https://github.com/austinthedeveloper/pickleball-port-kit/issues/49)) | `feature/cld-crt-board` | Ready to test |
 | PORT-160 | The art debts ([#50](https://github.com/austinthedeveloper/pickleball-port-kit/issues/50)) | | Planned |
 | PORT-161 | A lit apron at night ([#51](https://github.com/austinthedeveloper/pickleball-port-kit/issues/51)) | `feature/cld-crt-board` | Done |
-| PORT-162 | The right team holds the paddle in the right hand ([#52](https://github.com/austinthedeveloper/pickleball-port-kit/issues/52)) | | Planned |
-| PORT-163 | 2P walks the park ([#53](https://github.com/austinthedeveloper/pickleball-port-kit/issues/53)) | | Planned |
-| PORT-164 | Winter crowds and per-venue crowds ([#54](https://github.com/austinthedeveloper/pickleball-port-kit/issues/54)) | | Planned |
-| PORT-165 | ROAD TRIP: a new region ([#55](https://github.com/austinthedeveloper/pickleball-port-kit/issues/55)) | | Planned |
+| PORT-162 | The right team holds the paddle in the right hand ([#52](https://github.com/austinthedeveloper/pickleball-port-kit/issues/52)) | | Waits: the lead's eye on redrawn swing art |
+| PORT-163 | 2P walks the park ([#53](https://github.com/austinthedeveloper/pickleball-port-kit/issues/53)) | `feature/cld-replays-polish` | Ready to test |
+| PORT-164 | Winter crowds and per-venue crowds ([#54](https://github.com/austinthedeveloper/pickleball-port-kit/issues/54)) | `feature/cld-replays-polish` | Ready to test |
+| PORT-165 | ROAD TRIP: a new region ([#55](https://github.com/austinthedeveloper/pickleball-port-kit/issues/55)) | | Waits: new teams are the bible's canon |
 | PORT-166 | Feature freeze and the 1.0 checklist ([#56](https://github.com/austinthedeveloper/pickleball-port-kit/issues/56)) | | Planned |
 | PORT-167 | The full playtest pass ([#57](https://github.com/austinthedeveloper/pickleball-port-kit/issues/57)) | | Planned |
 | PORT-168 | Store pages and a trailer capture ([#58](https://github.com/austinthedeveloper/pickleball-port-kit/issues/58)) | | Planned |
@@ -570,6 +570,23 @@ the same request), and every task since but the open ones. Open: 36, 40,
   - Status: **Ready to test**; rooms of seats wait on the relay's PR
     (merging it deploys it).
 
+### 156, 157, 163, 164. `feature/cld-replays-polish`: replays to share, 2P in the park, winter crowds (asked for 2026-11-11)
+- [x] `PORT-156` Replays you can share, replay codes, 2P in the park and
+  winter crowds (port ADR-112; GitHub #46, #47, #53, #54), chained from
+  `feature/cld-doubles-online`.
+  - Done: EXPORT and IMPORT on REPLAYS, version-checked (156); SHARE gives
+    a six-letter code through the relay's `/v1/replay`, and WATCH CODE plays
+    one (157; pickleball-relay `feature/cld-replay-codes`); 2P's follower
+    in the park (163); GLACIER's crowd in coats, scarves and beanies from
+    the crowd generator's winter season (164).
+  - Verified: `test_saved_replays` (export, import, frame for frame; a
+    code through the real relay), `test_park_locations`, `test_layout`;
+    `test.sh` passes; screenshots of GLACIER, the park with 2P and the
+    winter crowd sheet.
+  - Try: EXPORT a rally and IMPORT it on another machine; SHARE one once
+    the relay's PR is merged; open play with 2P; a match at GLACIER.
+  - Status: **Ready to test**. PORT-162 and PORT-165 wait (For you).
+
 ## Phase 6: the year to 1.0 (planned 2026-11-10)
 
 A year of stories, December 2026 to November 2027, one GitHub milestone
@@ -710,6 +727,17 @@ Feature freeze, a full playtest, store pages, v1.0.0; cleanup round 11.
   PR deploys the room size (rooms of seats need it). Then: a doubles room
   across four homes, a Wi-Fi drop mid-rally, a watcher. Does the 60 s wait
   feel right, and is a CPU in the seat a good way on?
+
+- **PORT-162 the right team's paddle hand:** a right-hander facing left
+  holds the paddle in the far arm, so every swing pose would be redrawn
+  with the paddle behind the body (art/levels/tools/players.py). Want a
+  mock-up of a few poses first, as with the faces?
+- **PORT-165 a new ROAD TRIP region:** three stops, a rival and new
+  teams with five talks each. New characters are the bible's canon: who
+  are they, and where? (I can draft them for you to cut.)
+- **PORT-157 replay codes:** merging pickleball-relay's replay-codes PR
+  deploys them. Like the boards, they're kept in memory, so a sleeping
+  relay forgets them unless `REPLAY_FILE` is on a mounted volume.
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
