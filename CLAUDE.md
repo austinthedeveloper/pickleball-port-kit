@@ -34,7 +34,8 @@ builds all four platforms and publishes them to the GitHub release
 
 `design/PORT_ROADMAP.md` is the milestone sheet (an index of every PORT
 task, releases, the current phase's tasks, open "For you" questions);
-keep it current with each branch. Finished tasks, in full, live in
+keep it current with each branch. Phase 6's stories are GitHub issues (label `story`,
+one milestone a month); close the issue with its branch. Finished tasks, in full, live in
 `design/PORT_HISTORY.md`. `game/README.md` has the file layout.
 
 **The canon bible** is `../pickleball/docs/PICKLEBALL_94_BIBLE.md` (the
