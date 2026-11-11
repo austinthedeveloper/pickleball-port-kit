@@ -143,11 +143,11 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-115 | Online: your career look and shirt pattern travel ([#4](https://github.com/austinthedeveloper/pickleball-port-kit/issues/4)) | `feature/cld-online-finish` | Ready to test |
 | PORT-116 | Online: type a room code with the pad ([#5](https://github.com/austinthedeveloper/pickleball-port-kit/issues/5)) | `feature/cld-online-finish` | Ready to test |
 | PORT-117 | Relay: say why a room didn't open ([#6](https://github.com/austinthedeveloper/pickleball-port-kit/issues/6)) | `feature/cld-online-finish` | Ready to test |
-| PORT-118 | Doubles online: the plan ([#7](https://github.com/austinthedeveloper/pickleball-port-kit/issues/7)) | | Planned |
-| PORT-119 | Doubles online: four seats over the relay ([#8](https://github.com/austinthedeveloper/pickleball-port-kit/issues/8)) | | Planned |
-| PORT-120 | Online: rejoin after a drop ([#9](https://github.com/austinthedeveloper/pickleball-port-kit/issues/9)) | | Planned |
-| PORT-121 | Online: spectators ([#10](https://github.com/austinthedeveloper/pickleball-port-kit/issues/10)) | | Planned |
-| PORT-122 | Online: quick chat ([#11](https://github.com/austinthedeveloper/pickleball-port-kit/issues/11)) | | Planned |
+| PORT-118 | Doubles online: the plan ([#7](https://github.com/austinthedeveloper/pickleball-port-kit/issues/7)) | `feature/cld-doubles-online` | Ready to test |
+| PORT-119 | Doubles online: four seats over the relay ([#8](https://github.com/austinthedeveloper/pickleball-port-kit/issues/8)) | `feature/cld-doubles-online` | Ready to test |
+| PORT-120 | Online: rejoin after a drop ([#9](https://github.com/austinthedeveloper/pickleball-port-kit/issues/9)) | `feature/cld-doubles-online` | Ready to test |
+| PORT-121 | Online: spectators ([#10](https://github.com/austinthedeveloper/pickleball-port-kit/issues/10)) | `feature/cld-doubles-online` | Ready to test |
+| PORT-122 | Online: quick chat ([#11](https://github.com/austinthedeveloper/pickleball-port-kit/issues/11)) | `feature/cld-doubles-online` | Ready to test |
 | PORT-123 | Colour-safe player rings and ball ([#13](https://github.com/austinthedeveloper/pickleball-port-kit/issues/13)) | `feature/cld-access` | Ready to test |
 | PORT-124 | Captions for the announcer and the quips ([#14](https://github.com/austinthedeveloper/pickleball-port-kit/issues/14)) | `feature/cld-access` | Done |
 | PORT-125 | Assists: hold to swing and slower serves ([#15](https://github.com/austinthedeveloper/pickleball-port-kit/issues/15)) | `feature/cld-access` | Ready to test |
@@ -547,6 +547,29 @@ the same request), and every task since but the open ones. Open: 36, 40,
     with a pad.
   - Status: **Ready to test**.
 
+### 118-122. `feature/cld-doubles-online`: doubles online (asked for 2026-11-11)
+- [x] `PORT-118` Doubles online: rooms of seats, drops and rejoins,
+  watchers, quick chat (port ADR-111; GitHub #7 to #11), chained from
+  `feature/cld-online-finish`.
+  - Done: the plan, ADR-111 (118); the host as the room's hub, seats
+    0, 2, 1, 3, a couch's pair, rollback over every seat, the relay's room
+    size and batching (119); a dropped seat paused and counted down,
+    rejoined from the confirmed state, or a CPU's from a frame every
+    machine agrees (120); JOIN TO WATCH, the confirmed match a beat behind
+    (121); eight lines between points, a bubble each, QUICK CHAT MUTED
+    (122). pickleball-relay `feature/cld-room-seats` sizes the room.
+  - Verified: `test_doubles_online` (four machines over jittery lines
+    matching one machine, a couch, drop and rejoin three ways, a CPU taking
+    a seat, watchers, chat, the views in a room), `test_relay` (four
+    machines through the real relay at the game's pace), `test_layout`;
+    `test.sh` passes; screenshots of a room, a doubles room's match with
+    chat, the picker and a drop.
+  - Try: once the relay's PR is merged, a DOUBLES room with three friends
+    (or two of you on a couch); pull a Wi-Fi plug mid-rally and plug it
+    back in; JOIN TO WATCH from a fifth machine.
+  - Status: **Ready to test**; rooms of seats wait on the relay's PR
+    (merging it deploys it).
+
 ## Phase 6: the year to 1.0 (planned 2026-11-10)
 
 A year of stories, December 2026 to November 2027, one GitHub milestone
@@ -682,6 +705,11 @@ Feature freeze, a full playtest, store pages, v1.0.0; cleanup round 11.
   default is now ROLLBACK). Does it feel immediate? Do corrections
   (a ball or player jumping a little) show? OPTIONS > NETCODE > LOCKSTEP
   compares. That decides how much PORT-110's smoothing needs to do.
+
+- **PORT-118..122 doubles online:** merging pickleball-relay's room-seats
+  PR deploys the room size (rooms of seats need it). Then: a doubles room
+  across four homes, a Wi-Fi drop mid-rally, a watcher. Does the 60 s wait
+  feel right, and is a CPU in the seat a good way on?
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.

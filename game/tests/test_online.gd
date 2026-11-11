@@ -198,7 +198,8 @@ func test_versions_must_match() -> void:
 	for i in 8:
 		host.poll()
 		guest.poll()
-	eq(host.reason, "YOUR FRIEND HAS 0.0.1: THEY NEED TO UPDATE", "the host refuses, and says who updates")
+	eq([host.state, host.notice], [OnlineSession.WAITING, "YOUR FRIEND HAS 0.0.1: THEY NEED TO UPDATE"],
+		"the host refuses, says who updates, and keeps the room open (ADR-111)")
 	check(guest.closed(), "and the guest hears it")
 	eq(guest.reason, "THEY HAVE %s: UPDATE THIS GAME TO PLAY" % BuildInfo.version(), "the guest is told to update")
 	# an older game (PROTOCOL 3, before the career look) is told to update,
@@ -211,7 +212,7 @@ func test_versions_must_match() -> void:
 	for i in 8:
 		host.poll()
 		guest.poll()
-	eq([host.state, host.reason], [OnlineSession.CLOSED, "YOUR FRIEND HAS 0.40.0: THEY NEED TO UPDATE"])
+	eq([host.state, host.notice], [OnlineSession.WAITING, "YOUR FRIEND HAS 0.40.0: THEY NEED TO UPDATE"])
 	check(guest.closed() and guest.reason != "", "the older side closes too: %s" % guest.reason)
 
 

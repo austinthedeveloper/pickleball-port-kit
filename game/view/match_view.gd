@@ -52,13 +52,16 @@ var lesson_view: TutorialView
 ## slot 0, the guest slot 2. Nothing is recorded (save is null); Menu never
 ## pauses: pressed twice in play (once on the result) it leaves.
 var net: OnlineSession
+var chat: QuickChat              ## online's quick chat (PORT-122): the picker and the bubbles
 var leave_frames := 0            ## counting down after a first Menu press online
 var _net_text: BitmapText
 
 
 ## The team this machine plays (online, the guest's is 1).
 func my_team() -> int:
-	return 1 if net and not net.host else 0
+	if net and not net.my_slots.is_empty():
+		return int(net.my_slots[0]) >> 1     # a room's seats (port ADR-111): 0-1 left, 2-3 right
+	return 1 if net and not net.host and not net.watcher else 0
 
 
 ## The guest's view is mirrored (port ADR-110, PORT-114): their side on the
@@ -70,7 +73,7 @@ static var _mirror_owner := 0       ## the view whose mirror is on (a freed demo
 
 
 func mirrored() -> bool:
-	return watch_mirrored or (net != null and not net.host)
+	return watch_mirrored or (net != null and not net.watcher and my_team() == 1)
 
 
 ## Online (PORT-115): a slot's career look from START, or null.
@@ -204,6 +207,8 @@ func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void
 	if net and net.rollback:
 		sim = net.rollback.pred           # ADR-103: the prediction is drawn,
 		truth = net.rollback.truth        # the confirmed sim counted
+		if net.rollback.watching:
+			sim = truth                   # a watcher (ADR-111): the confirmed match, a beat behind
 	else:
 		sim = Sim.new(cfg)
 		truth = sim
@@ -363,6 +368,8 @@ func _build() -> void:
 		_hud.add_child(lesson_view)
 	if net:
 		_net_text = UiKit.text("small", "", Vector2(480, 452), 0.5, Color("fbe46a"), _hud)
+		chat = QuickChat.new().setup(self)       # PORT-122
+		_hud.add_child(chat)
 	_sfx = Sfx.new()
 	add_child(_sfx)
 	_sfx.setup(venue, demo, CourtStyle.time_ambience(time))
@@ -406,7 +413,7 @@ func rebuild(cfg: SimTypes.MatchConfig) -> void:
 	_players = []
 	_multi_balls = []
 	for f in ["crowd", "watcher", "critter", "dinos", "wind_view", "focus", "heat", "close_call",
-			"lesson_view", "_ground", "_net_text", "effects", "_net_layer"]:
+			"lesson_view", "_ground", "_net_text", "effects", "_net_layer", "chat", "_decide"]:
 		set(f, null)
 	glide = BallGlide.new()
 	stats = MatchStats.new()
@@ -525,9 +532,12 @@ func _rumble_hit(slot: int, shot: int) -> void:
 		K.SHOT_OVERHEAD: [0.5, 1.0, 0.18], K.SHOT_SPECIAL: [0.7, 1.0, 0.25],
 		K.SHOT_SLICE: [0.15, 0.1, 0.06]}.get(
 		shot, [0.35, 0.25, 0.08])
-	if net:                              # online: this machine's own player only, on P1's pad
-		if slot == my_team() * 2:
+	if net:                              # online: this machine's own players, on their pads
+		var k := net.my_slots.find(slot) if not net.my_slots.is_empty() else (0 if slot == my_team() * 2 else -1)
+		if k == 0:
 			GameControls.rumble(0, strength[0], strength[1], strength[2])
+		elif k == 1:
+			GameControls.rumble_device(GameControls.p2_pad, strength[0], strength[1], strength[2])
 		return
 	if multiplayer():
 		GameControls.rumble_device(slot_pads[slot], strength[0], strength[1], strength[2])
@@ -622,7 +632,7 @@ func _physics_process(_delta: float) -> void:
 	if net and net.rollback:
 		# ADR-103: the session steps both sims; a held or waiting frame may
 		# still confirm what came in
-		var out := net.tick(input.net_intent())
+		var out := net.tick(input.net_intents())
 		_net_refresh(not out["stepped"])
 		if net.closed():
 			finished.emit(true)
@@ -888,13 +898,47 @@ func _net_refresh(waiting: bool) -> void:
 	if leave_frames > 0:
 		leave_frames -= 1
 	var text := ""
-	if sim.phase == K.PHASE_MATCH_RESULT:
+	var decide := false
+	if net.state == OnlineSession.REJOINING:
+		text = "YOUR LINE DROPPED: REJOINING %d" % net.drop_seconds()
+	elif not net.drop.is_empty():
+		# a seat dropped (ADR-111): everyone waits; past the wait the host decides
+		var who := String(net.drop.get("name", "YOUR FRIEND"))
+		if bool(net.drop.get("expired", false)) or net.drop_seconds() == 0:
+			decide = net.host
+			text = "%s DIDN'T COME BACK" % who if net.host else "%s DIDN'T COME BACK. THE HOST DECIDES" % who
+		else:
+			text = "%s DROPPED: WAITING %d" % [who, net.drop_seconds()]
+	elif sim.phase == K.PHASE_MATCH_RESULT:
 		pass                             # the stats card is up; one press leaves there
 	elif leave_frames > 0:
 		text = "PRESS AGAIN TO LEAVE"
 	elif waiting and net.waited() > 20:
-		text = "WAITING FOR YOUR FRIEND..."
+		text = "WAITING FOR YOUR FRIEND..." if net.mode == K.MODE_SINGLES else "WAITING FOR THE OTHERS..."
 	_net_text.text = text
+	_show_decide(decide)
+	if chat:
+		chat.update()
+
+
+## The host's choice when a dropped seat didn't come back (ADR-111): a CPU
+## plays it on, or the match ends (no record either way).
+var _decide: PromptBar
+
+func _show_decide(on: bool) -> void:
+	if on and _decide == null:
+		_decide = PromptBar.new().setup([["hit", "A CPU PLAYS ON"], ["back", "END THE MATCH"]], Vector2(480, 482))
+		_hud.add_child(_decide)
+	if _decide:
+		_decide.visible = on
+	if not on:
+		return
+	if Input.is_action_just_pressed("hit"):
+		net.seat_to_cpu()
+		GameControls.clear_latch()
+	elif Input.is_action_just_pressed("soft") or Input.is_action_just_pressed("drive"):
+		net.end_match()
+		GameControls.clear_latch()
 
 
 func _update_card() -> void:

@@ -143,7 +143,7 @@ func test_two_games_through_a_relay() -> void:
 	# The relay's words for a guest leaving, then for the host going.
 	relay.say(0, {"op": "left", "guest": 0})
 	_until([host], func(): return host.closed(), 100, relay)
-	eq(host.reason, "THE OTHER PLAYER LEFT", "the host hears the guest left")
+	eq(host.reason, "YOUR FRIEND LEFT", "the host hears the guest left (lockstep: no rejoin)")
 	relay.say(1, {"op": "error", "reason": "HOST LEFT"})
 	_until([guest], func(): return guest.closed(), 100, relay)
 	eq(guest.reason, "THE OTHER PLAYER LEFT", "and the guest, the host")
@@ -252,7 +252,72 @@ func test_the_screens_through_the_real_relay() -> void:
 	a.free()
 	b.free()
 	_real_refusals(url)
+	_real_doubles(url)
 	OS.kill(pid)
+
+
+## Four machines in a doubles room through the real relay (port ADR-111):
+## the host sizes the room, three guests take seats 2, 1, 3, and the frames
+## of rollback (360 frames, at the game's pace) agree on all four. The host's forwarding goes as one batch
+## a guest a poll, inside the relay's rate (no TOO FAST).
+func _real_doubles(url: String) -> void:
+	var hl := RelayLink.new()
+	hl.host(url, OnlineSession.room_guests(K.MODE_DOUBLES))
+	var host := OnlineSession.new(hl, true)
+	host.mode = K.MODE_DOUBLES
+	host.my_hello = OnlineSession.hello(PlayerSelect.new_choice(0, 0, 1), "ANN")
+	var all := [host]
+	for i in 300:
+		host.poll()
+		if hl.room != "":
+			break
+		OS.delay_msec(2)
+	for k in 3:
+		var gl := RelayLink.new()
+		gl.join(hl.room, url)
+		var g := OnlineSession.new(gl, false)
+		g.my_hello = OnlineSession.hello(PlayerSelect.new_choice(k + 1, 0, 1), ["BO", "CY", "DEE"][k])
+		all.append(g)
+		for i in 600:
+			for s: OnlineSession in all:
+				s.poll()
+			if g.state == OnlineSession.CONNECTED:
+				break
+			OS.delay_msec(2)
+	eq(all.slice(1).map(func(g): return g.my_slots), [[2], [1], [3]], "three guests seated through the relay")
+	var cfg := SimTypes.MatchConfig.doubles()
+	cfg.palette = [0, 1, 2, 3]
+	cfg.human = [1, 1, 1, 1]
+	Rollback.log_all = true
+	host.begin({"cfg": OnlineSession.config_to_dict(cfg), "venue": "park", "delay": 2})
+	var loops := 0
+	var start_ms := Time.get_ticks_msec()
+	while loops < 3000 and not all.all(func(s): return s.rollback and s.rollback.confirmed > 360):
+		loops += 1
+		for s: OnlineSession in all:
+			s.poll()
+			if s.state == OnlineSession.PLAYING and s.rollback:
+				var ins := []
+				for slot in s.my_slots:
+					ins.append(_script(s.rollback.predicted, 11 + int(slot)))
+				s.tick(ins)
+		# the game's pace: a frame every 1/60 s (the relay's rate is per second)
+		var due := start_ms + loops * 1000 / 60
+		OS.delay_msec(maxi(0, due - Time.get_ticks_msec()))
+	check(all.all(func(s): return s.rollback and s.rollback.confirmed > 360), "360 frames on all four (%d loops; %s)" %
+		[loops, ", ".join(all.map(func(s): return s.reason))])
+	var first: Dictionary = host.rollback.hash_log
+	var n := 0
+	for s: OnlineSession in all.slice(1):
+		for f in s.rollback.hash_log:
+			if first.has(f):
+				n += 1
+				eq(s.rollback.hash_log[f], first[f], "frame %d the same on %s" % [f, str(s.my_slots)])
+	check(n >= 6, "the four agree (%d hashes)" % n)
+	check(all.all(func(s): return s.state == OnlineSession.PLAYING), "nobody was cut off (no TOO FAST)")
+	Rollback.log_all = false
+	for s in all:
+		s.quit()
 
 
 ## PORT-117: the real relay's refusals, each in the game's words: a full

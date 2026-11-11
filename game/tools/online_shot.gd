@@ -1,13 +1,15 @@
-## Renders the online screens of port ADR-110 (needs a display; nothing
-## is sent): the guest's mirrored match in two career looks, the host's
-## plain one, or ONLINE's letter grid.
-##   godot --path game --resolution 960x540 -s res://tools/online_shot.gd -- <guest|host|grid> <frames> <out.png>
+## Renders the online screens of port ADR-110 and ADR-111 (needs a
+## display; nothing is sent): the guest's mirrored match in two career
+## looks, the host's plain one, ONLINE's letter grid, a doubles room's
+## lobby, a doubles room's match with quick chat, its picker, or a drop.
+##   godot --path game --resolution 960x540 -s res://tools/online_shot.gd -- <guest|host|grid|room|doubles|picker|drop> <frames> <out.png>
 extends SceneTree
 
 var _frames := 0
 var _target := 60
 var _out := "user://online_shot.png"
 var _view: Node
+var _what := ""
 
 
 func _initialize() -> void:
@@ -27,6 +29,41 @@ func _initialize() -> void:
 		o.grid.select("g1")
 		o.grid_cols[1] = 2
 		_view = o
+		return
+	if what == "room":
+		var o := OnlineScreen.new().setup(null)
+		root.add_child(o)
+		if not o.is_node_ready():
+			o._ready()
+		o.play_i = 1
+		var pr := LoopbackLink.pair(0)
+		o.session = OnlineSession.new(pr[0], true)
+		o.session.mode = K.MODE_DOUBLES
+		o.session.state = OnlineSession.CONNECTED
+		o.session.seat_names = {0: "ANN", 2: "BO", 1: "CY"}
+		o.refresh()
+		o.page.select("host")
+		_view = o
+		return
+	if what in ["doubles", "picker", "drop"]:
+		var rs := OnlineSession.new(LoopbackLink.pair(0)[0], false)
+		rs.mode = K.MODE_DOUBLES
+		rs.my_slots = [2, 3]
+		rs.seat_names = {0: "ANN", 1: "CY", 2: "BO", 3: ""}
+		rs.state = OnlineSession.PLAYING
+		var dc := SimTypes.MatchConfig.doubles()
+		dc.palette = [0, 1, 2, 3]
+		dc.human = [1, 1, 1, 1]
+		var dv := MatchView.new()
+		dv.net = rs
+		dv.input.script_intent = func() -> SimTypes.Intent: return SimTypes.Intent.new()
+		root.add_child(dv)
+		dv.setup(dc, "park", false)
+		dv.sim.team_score = [4, 6]
+		if what == "drop":
+			rs.drop = {"slots": [1], "name": "CY", "left": 2700, "expired": false}
+		_view = dv
+		_what = what
 		return
 	var ann := Career.Player.new()
 	ann.used = 1
@@ -59,9 +96,25 @@ func _process(_delta: float) -> bool:
 	_frames += 1
 	if _view is MatchView:
 		var v: MatchView = _view
-		v.sim.step([SimTypes.Intent.new(), null, SimTypes.Intent.new(), null])
+		var hum: Array = [SimTypes.Intent.new(), null, SimTypes.Intent.new(), null]
+		if v.sim.config.mode == K.MODE_DOUBLES:
+			hum = [SimTypes.Intent.new(), SimTypes.Intent.new(), SimTypes.Intent.new(), SimTypes.Intent.new()]
+		v.sim.step(hum)
 		v._update_visuals()
 		v._hud.refresh()
+		if _what != "":
+			if _frames == 20 and _what == "doubles":
+				v.chat.show_line(0, 0)
+				v.chat.show_line(2, 4)
+			if _what == "picker":
+				v.sim.phase = K.PHASE_POINT_RESULT
+				v.chat.page.visible = true
+				if _frames == 3:
+					v.chat.page.appear()
+				v.chat.page.select("c2")
+			v._net_refresh(_what == "drop")
+			if _what == "picker":
+				v.chat.page.visible = true
 	if _frames >= _target:
 		root.get_texture().get_image().save_png(_out)
 		print("saved ", _out)

@@ -565,10 +565,25 @@ func _team_label(team: int) -> String:
 	var cfg := view.sim.config
 	if team == 1 and cfg.opponent >= 0 and not cfg.human[2]:
 		return Story.card_name(cfg.opponent, cfg.mode == K.MODE_DOUBLES)
+	if view.net and cfg.mode == K.MODE_DOUBLES:
+		# a room's side (port ADR-111): its seats by name, YOU for yours, CPU for an empty one
+		var names := []
+		for slot in [team * 2, team * 2 + 1]:
+			if slot in view.net.my_slots:
+				names.append("YOU")
+			elif not cfg.human[slot]:
+				names.append("CPU")
+			else:
+				var n := view.net.seat_name(slot)
+				names.append(n if n != "" else "P%d" % (slot + 1))
+		return " + ".join(names)
 	if view.net:
 		# PORT-31: YOU, and the friend by their name
-		if team == view.my_team():
+		if team == view.my_team() and not view.net.watcher:
 			return "YOU"
+		if view.net.watcher:
+			var w := view.net.seat_name(team * 2)
+			return w if w != "" else ("HOST" if team == 0 else "GUEST")
 		var n := String(view.net.peer_hello.get("name", ""))
 		return n if n != "" else "FRIEND"
 	if view.multiplayer():

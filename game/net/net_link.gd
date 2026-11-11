@@ -35,5 +35,11 @@ func receive() -> Array:
 	return []
 
 
+## Sends what's waiting (a link that batches: RelayLink). The session
+## calls it after each poll and each frame's sends.
+func flush() -> void:
+	pass
+
+
 func close() -> void:
 	pass
