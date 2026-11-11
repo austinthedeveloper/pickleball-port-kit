@@ -135,10 +135,67 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-107 | Rollback's core: two sims, guesses, corrections, time sync (port ADR-103) | `feature/cld-rollback-core` | Done |
 | PORT-108 | Rollback in the online session: START's netcode, PROTOCOL 3, the delay from the line, ONLINE NETCODE saved (port ADR-103) | `feature/cld-rollback-session` | Done |
 | PORT-109 | Rollback in the match: the prediction drawn, the confirmed sim counted; ROLLBACK the default, NETCODE in OPTIONS (port ADR-103) | `feature/cld-rollback-view` | Ready to test |
-| PORT-110 | Rollback: correction smoothing (port ADR-103) | | Planned |
+| PORT-110 | Rollback: correction smoothing (port ADR-103) ([#2](https://github.com/austinthedeveloper/pickleball-port-kit/issues/2)) | | Planned |
 | PORT-111 | ROAD TRIP talks: five conversations each for every team, partner (start, motel, diner) and the ROAD HOGS, revealing more of them each time (port ADR-104) | `feature/cld-trip-talks` | Ready to test |
 | PORT-112 | The relay: ONLINE by room code over the internet and in the Web build, one Azure server shared with the VR game (design/RELAY.md) | `feature/cld-relay-plan`, `feature/cld-relay-live`, `feature/cld-relay-join` | Done: ONLINE by ROOM CODE through the live relay (ADR-105), released in v0.43.0; the lead confirmed it between machines 2026-10-29 |
 | PORT-113 | Cleanup round 7: finished tasks to the history, the READMEs, merged branches | `feature/cld-cleanup-7` | Done |
+| PORT-114 | Online: the guest sees themselves on the left ([#3](https://github.com/austinthedeveloper/pickleball-port-kit/issues/3)) | | Planned |
+| PORT-115 | Online: your career look and shirt pattern travel ([#4](https://github.com/austinthedeveloper/pickleball-port-kit/issues/4)) | | Planned |
+| PORT-116 | Online: type a room code with the pad ([#5](https://github.com/austinthedeveloper/pickleball-port-kit/issues/5)) | | Planned |
+| PORT-117 | Relay: say why a room didn't open ([#6](https://github.com/austinthedeveloper/pickleball-port-kit/issues/6)) | | Planned |
+| PORT-118 | Doubles online: the plan ([#7](https://github.com/austinthedeveloper/pickleball-port-kit/issues/7)) | | Planned |
+| PORT-119 | Doubles online: four seats over the relay ([#8](https://github.com/austinthedeveloper/pickleball-port-kit/issues/8)) | | Planned |
+| PORT-120 | Online: rejoin after a drop ([#9](https://github.com/austinthedeveloper/pickleball-port-kit/issues/9)) | | Planned |
+| PORT-121 | Online: spectators ([#10](https://github.com/austinthedeveloper/pickleball-port-kit/issues/10)) | | Planned |
+| PORT-122 | Online: quick chat ([#11](https://github.com/austinthedeveloper/pickleball-port-kit/issues/11)) | | Planned |
+| PORT-123 | Colour-safe player rings and ball ([#13](https://github.com/austinthedeveloper/pickleball-port-kit/issues/13)) | | Planned |
+| PORT-124 | Captions for the announcer and the quips ([#14](https://github.com/austinthedeveloper/pickleball-port-kit/issues/14)) | | Planned |
+| PORT-125 | Assists: hold to swing and slower serves ([#15](https://github.com/austinthedeveloper/pickleball-port-kit/issues/15)) | | Planned |
+| PORT-126 | Couch cup: pads rebind on PLAY ([#16](https://github.com/austinthedeveloper/pickleball-port-kit/issues/16)) | | Planned |
+| PORT-127 | Cleanup round 8 ([#17](https://github.com/austinthedeveloper/pickleball-port-kit/issues/17)) | | Planned |
+| PORT-128 | The sim caught up to the ROM's latest tuning ([#18](https://github.com/austinthedeveloper/pickleball-port-kit/issues/18)) | | Planned |
+| PORT-129 | 1994 MODE: the plan ([#19](https://github.com/austinthedeveloper/pickleball-port-kit/issues/19)) | | Planned |
+| PORT-130 | 1994 MODE: the toggles ([#20](https://github.com/austinthedeveloper/pickleball-port-kit/issues/20)) | | Planned |
+| PORT-131 | A CRT look ([#21](https://github.com/austinthedeveloper/pickleball-port-kit/issues/21)) | | Planned |
+| PORT-132 | The ROM's title menu order, as an option ([#22](https://github.com/austinthedeveloper/pickleball-port-kit/issues/22)) | | Planned |
+| PORT-133 | Powerups: settle the four questions ([#23](https://github.com/austinthedeveloper/pickleball-port-kit/issues/23)) | | Planned |
+| PORT-134 | Powerups on the court ([#24](https://github.com/austinthedeveloper/pickleball-port-kit/issues/24)) | | Planned |
+| PORT-135 | Specials for every paddle ([#25](https://github.com/austinthedeveloper/pickleball-port-kit/issues/25)) | | Planned |
+| PORT-136 | Powerups in ROAD TRIP and the achievements ([#26](https://github.com/austinthedeveloper/pickleball-port-kit/issues/26)) | | Planned |
+| PORT-137 | The line judge: the plan ([#27](https://github.com/austinthedeveloper/pickleball-port-kit/issues/27)) | | Planned |
+| PORT-138 | The line judge: a fifth seat ([#28](https://github.com/austinthedeveloper/pickleball-port-kit/issues/28)) | | Planned |
+| PORT-139 | The line judge: the whistle and the crowd ([#29](https://github.com/austinthedeveloper/pickleball-port-kit/issues/29)) | | Planned |
+| PORT-140 | The line judge online ([#30](https://github.com/austinthedeveloper/pickleball-port-kit/issues/30)) | | Planned |
+| PORT-141 | Cleanup round 9 ([#31](https://github.com/austinthedeveloper/pickleball-port-kit/issues/31)) | | Planned |
+| PORT-142 | Club manager: the plan ([#32](https://github.com/austinthedeveloper/pickleball-port-kit/issues/32)) | | Planned |
+| PORT-143 | Club manager: the day and the ledger ([#33](https://github.com/austinthedeveloper/pickleball-port-kit/issues/33)) | | Planned |
+| PORT-144 | Club manager: upgrades ([#34](https://github.com/austinthedeveloper/pickleball-port-kit/issues/34)) | | Planned |
+| PORT-145 | Club manager: you still play ([#35](https://github.com/austinthedeveloper/pickleball-port-kit/issues/35)) | | Planned |
+| PORT-146 | Club manager: members who come and go ([#36](https://github.com/austinthedeveloper/pickleball-port-kit/issues/36)) | | Planned |
+| PORT-147 | Club manager: hire a coach ([#37](https://github.com/austinthedeveloper/pickleball-port-kit/issues/37)) | | Planned |
+| PORT-148 | Club manager: weekend tournaments ([#38](https://github.com/austinthedeveloper/pickleball-port-kit/issues/38)) | | Planned |
+| PORT-149 | Club manager: weather ([#39](https://github.com/austinthedeveloper/pickleball-port-kit/issues/39)) | | Planned |
+| PORT-150 | Club manager: balance pass ([#40](https://github.com/austinthedeveloper/pickleball-port-kit/issues/40)) | | Planned |
+| PORT-151 | Touch on real phones ([#41](https://github.com/austinthedeveloper/pickleball-port-kit/issues/41)) | | Planned |
+| PORT-152 | Portrait on phones ([#42](https://github.com/austinthedeveloper/pickleball-port-kit/issues/42)) | | Planned |
+| PORT-153 | Handheld PCs ([#43](https://github.com/austinthedeveloper/pickleball-port-kit/issues/43)) | | Planned |
+| PORT-154 | A faster web load ([#44](https://github.com/austinthedeveloper/pickleball-port-kit/issues/44)) | | Planned |
+| PORT-155 | Cleanup round 10 ([#45](https://github.com/austinthedeveloper/pickleball-port-kit/issues/45)) | | Planned |
+| PORT-156 | Replays you can share ([#46](https://github.com/austinthedeveloper/pickleball-port-kit/issues/46)) | | Planned |
+| PORT-157 | Replay codes through the relay ([#47](https://github.com/austinthedeveloper/pickleball-port-kit/issues/47)) | | Planned |
+| PORT-158 | TODAY'S TRIP board ([#48](https://github.com/austinthedeveloper/pickleball-port-kit/issues/48)) | | Planned |
+| PORT-159 | Weekly challenge ([#49](https://github.com/austinthedeveloper/pickleball-port-kit/issues/49)) | | Planned |
+| PORT-160 | The art debts ([#50](https://github.com/austinthedeveloper/pickleball-port-kit/issues/50)) | | Planned |
+| PORT-161 | A lit apron at night ([#51](https://github.com/austinthedeveloper/pickleball-port-kit/issues/51)) | | Planned |
+| PORT-162 | The right team holds the paddle in the right hand ([#52](https://github.com/austinthedeveloper/pickleball-port-kit/issues/52)) | | Planned |
+| PORT-163 | 2P walks the park ([#53](https://github.com/austinthedeveloper/pickleball-port-kit/issues/53)) | | Planned |
+| PORT-164 | Winter crowds and per-venue crowds ([#54](https://github.com/austinthedeveloper/pickleball-port-kit/issues/54)) | | Planned |
+| PORT-165 | ROAD TRIP: a new region ([#55](https://github.com/austinthedeveloper/pickleball-port-kit/issues/55)) | | Planned |
+| PORT-166 | Feature freeze and the 1.0 checklist ([#56](https://github.com/austinthedeveloper/pickleball-port-kit/issues/56)) | | Planned |
+| PORT-167 | The full playtest pass ([#57](https://github.com/austinthedeveloper/pickleball-port-kit/issues/57)) | | Planned |
+| PORT-168 | Store pages and a trailer capture ([#58](https://github.com/austinthedeveloper/pickleball-port-kit/issues/58)) | | Planned |
+| PORT-169 | Release 1.0.0 ([#60](https://github.com/austinthedeveloper/pickleball-port-kit/issues/60)) | | Planned |
+| PORT-170 | Cleanup round 11 ([#61](https://github.com/austinthedeveloper/pickleball-port-kit/issues/61)) | | Planned |
 
 ## Releases
 
@@ -393,6 +450,135 @@ the same request), and every task since but the open ones. Open: 36, 40,
   - Verified: `test.sh` passes; the release notes are the same.
   - Status: **Done**.
 
+## Phase 6: the year to 1.0 (planned 2026-11-10)
+
+A year of stories, December 2026 to November 2027, one GitHub milestone
+a month. Every story is a GitHub issue (label `story`) with its
+acceptance criteria; the issue and this sheet's row move together. Labels
+`for-you` (needs your decision, playtest or recording), `needs-adr` and
+`blocked` say what a story waits on. The months are an order, not a
+promise: a month's stories chain like every branch, and a month that
+finishes early pulls the next one in.
+
+### 2026-12 Online, finished
+
+Rollback smoothed and the guest's view flipped: online singles ready for strangers.
+
+- `PORT-110` Rollback: correction smoothing ([#2](https://github.com/austinthedeveloper/pickleball-port-kit/issues/2))
+- `PORT-114` Online: the guest sees themselves on the left ([#3](https://github.com/austinthedeveloper/pickleball-port-kit/issues/3))
+- `PORT-115` Online: your career look and shirt pattern travel ([#4](https://github.com/austinthedeveloper/pickleball-port-kit/issues/4))
+- `PORT-116` Online: type a room code with the pad ([#5](https://github.com/austinthedeveloper/pickleball-port-kit/issues/5))
+- `PORT-117` Relay: say why a room didn't open ([#6](https://github.com/austinthedeveloper/pickleball-port-kit/issues/6))
+
+### 2027-01 Doubles online
+
+Four players across two to four machines, rejoin after a drop, spectators.
+
+- `PORT-118` Doubles online: the plan ([#7](https://github.com/austinthedeveloper/pickleball-port-kit/issues/7))
+- `PORT-119` Doubles online: four seats over the relay ([#8](https://github.com/austinthedeveloper/pickleball-port-kit/issues/8))
+- `PORT-120` Online: rejoin after a drop ([#9](https://github.com/austinthedeveloper/pickleball-port-kit/issues/9))
+- `PORT-121` Online: spectators ([#10](https://github.com/austinthedeveloper/pickleball-port-kit/issues/10))
+- `PORT-122` Online: quick chat ([#11](https://github.com/austinthedeveloper/pickleball-port-kit/issues/11))
+
+### 2027-02 Controls and access
+
+Keyboard presets, colour-safe palettes, captions, assists; cleanup round 8.
+
+- `PORT-78` Keyboard presets you can guess ([#12](https://github.com/austinthedeveloper/pickleball-port-kit/issues/12))
+- `PORT-123` Colour-safe player rings and ball ([#13](https://github.com/austinthedeveloper/pickleball-port-kit/issues/13))
+- `PORT-124` Captions for the announcer and the quips ([#14](https://github.com/austinthedeveloper/pickleball-port-kit/issues/14))
+- `PORT-125` Assists: hold to swing and slower serves ([#15](https://github.com/austinthedeveloper/pickleball-port-kit/issues/15))
+- `PORT-126` Couch cup: pads rebind on PLAY ([#16](https://github.com/austinthedeveloper/pickleball-port-kit/issues/16))
+- `PORT-127` Cleanup round 8 ([#17](https://github.com/austinthedeveloper/pickleball-port-kit/issues/17))
+
+### 2027-03 1994 MODE
+
+The bible's A-10: the ROM's original bugs as toggles, a CRT look, the ROM's menus; the sim caught up to the ROM again.
+
+- `PORT-128` The sim caught up to the ROM's latest tuning ([#18](https://github.com/austinthedeveloper/pickleball-port-kit/issues/18))
+- `PORT-129` 1994 MODE: the plan ([#19](https://github.com/austinthedeveloper/pickleball-port-kit/issues/19))
+- `PORT-130` 1994 MODE: the toggles ([#20](https://github.com/austinthedeveloper/pickleball-port-kit/issues/20))
+- `PORT-131` A CRT look ([#21](https://github.com/austinthedeveloper/pickleball-port-kit/issues/21))
+- `PORT-132` The ROM's title menu order, as an option ([#22](https://github.com/austinthedeveloper/pickleball-port-kit/issues/22))
+
+### 2027-04 Powerups
+
+PORT-62 route C: powerups on the court as a party modifier, specials by paddle.
+
+- `PORT-133` Powerups: settle the four questions ([#23](https://github.com/austinthedeveloper/pickleball-port-kit/issues/23))
+- `PORT-134` Powerups on the court ([#24](https://github.com/austinthedeveloper/pickleball-port-kit/issues/24))
+- `PORT-135` Specials for every paddle ([#25](https://github.com/austinthedeveloper/pickleball-port-kit/issues/25))
+- `PORT-136` Powerups in ROAD TRIP and the achievements ([#26](https://github.com/austinthedeveloper/pickleball-port-kit/issues/26))
+
+### 2027-05 The line judge
+
+The '95 promise: a fifth player calls the lines; cleanup round 9.
+
+- `PORT-137` The line judge: the plan ([#27](https://github.com/austinthedeveloper/pickleball-port-kit/issues/27))
+- `PORT-138` The line judge: a fifth seat ([#28](https://github.com/austinthedeveloper/pickleball-port-kit/issues/28))
+- `PORT-139` The line judge: the whistle and the crowd ([#29](https://github.com/austinthedeveloper/pickleball-port-kit/issues/29))
+- `PORT-140` The line judge online ([#30](https://github.com/austinthedeveloper/pickleball-port-kit/issues/30))
+- `PORT-141` Cleanup round 9 ([#31](https://github.com/austinthedeveloper/pickleball-port-kit/issues/31))
+
+### 2027-06 Club manager I
+
+The '95 promise: run the park. The day, the ledger, upgrades.
+
+- `PORT-142` Club manager: the plan ([#32](https://github.com/austinthedeveloper/pickleball-port-kit/issues/32))
+- `PORT-143` Club manager: the day and the ledger ([#33](https://github.com/austinthedeveloper/pickleball-port-kit/issues/33))
+- `PORT-144` Club manager: upgrades ([#34](https://github.com/austinthedeveloper/pickleball-port-kit/issues/34))
+- `PORT-145` Club manager: you still play ([#35](https://github.com/austinthedeveloper/pickleball-port-kit/issues/35))
+
+### 2027-07 Club manager II
+
+Members, a coach, weekend tournaments, weather.
+
+- `PORT-146` Club manager: members who come and go ([#36](https://github.com/austinthedeveloper/pickleball-port-kit/issues/36))
+- `PORT-147` Club manager: hire a coach ([#37](https://github.com/austinthedeveloper/pickleball-port-kit/issues/37))
+- `PORT-148` Club manager: weekend tournaments ([#38](https://github.com/austinthedeveloper/pickleball-port-kit/issues/38))
+- `PORT-149` Club manager: weather ([#39](https://github.com/austinthedeveloper/pickleball-port-kit/issues/39))
+- `PORT-150` Club manager: balance pass ([#40](https://github.com/austinthedeveloper/pickleball-port-kit/issues/40))
+
+### 2027-08 Phones and handhelds
+
+Touch tried on real phones, portrait, handheld PCs, a faster web load; cleanup round 10.
+
+- `PORT-151` Touch on real phones ([#41](https://github.com/austinthedeveloper/pickleball-port-kit/issues/41))
+- `PORT-152` Portrait on phones ([#42](https://github.com/austinthedeveloper/pickleball-port-kit/issues/42))
+- `PORT-153` Handheld PCs ([#43](https://github.com/austinthedeveloper/pickleball-port-kit/issues/43))
+- `PORT-154` A faster web load ([#44](https://github.com/austinthedeveloper/pickleball-port-kit/issues/44))
+- `PORT-155` Cleanup round 10 ([#45](https://github.com/austinthedeveloper/pickleball-port-kit/issues/45))
+
+### 2027-09 Replays and community
+
+Replays you can share, daily and weekly boards through the relay.
+
+- `PORT-156` Replays you can share ([#46](https://github.com/austinthedeveloper/pickleball-port-kit/issues/46))
+- `PORT-157` Replay codes through the relay ([#47](https://github.com/austinthedeveloper/pickleball-port-kit/issues/47))
+- `PORT-158` TODAY'S TRIP board ([#48](https://github.com/austinthedeveloper/pickleball-port-kit/issues/48))
+- `PORT-159` Weekly challenge ([#49](https://github.com/austinthedeveloper/pickleball-port-kit/issues/49))
+
+### 2027-10 Polish and content
+
+The art debts paid, winter crowds, a new ROAD TRIP region.
+
+- `PORT-160` The art debts ([#50](https://github.com/austinthedeveloper/pickleball-port-kit/issues/50))
+- `PORT-161` A lit apron at night ([#51](https://github.com/austinthedeveloper/pickleball-port-kit/issues/51))
+- `PORT-162` The right team holds the paddle in the right hand ([#52](https://github.com/austinthedeveloper/pickleball-port-kit/issues/52))
+- `PORT-163` 2P walks the park ([#53](https://github.com/austinthedeveloper/pickleball-port-kit/issues/53))
+- `PORT-164` Winter crowds and per-venue crowds ([#54](https://github.com/austinthedeveloper/pickleball-port-kit/issues/54))
+- `PORT-165` ROAD TRIP: a new region ([#55](https://github.com/austinthedeveloper/pickleball-port-kit/issues/55))
+
+### 2027-11 Version 1.0
+
+Feature freeze, a full playtest, store pages, v1.0.0; cleanup round 11.
+
+- `PORT-166` Feature freeze and the 1.0 checklist ([#56](https://github.com/austinthedeveloper/pickleball-port-kit/issues/56))
+- `PORT-167` The full playtest pass ([#57](https://github.com/austinthedeveloper/pickleball-port-kit/issues/57))
+- `PORT-168` Store pages and a trailer capture ([#58](https://github.com/austinthedeveloper/pickleball-port-kit/issues/58))
+- `PORT-36` The Tiny Chair splash ([#59](https://github.com/austinthedeveloper/pickleball-port-kit/issues/59))
+- `PORT-169` Release 1.0.0 ([#60](https://github.com/austinthedeveloper/pickleball-port-kit/issues/60))
+- `PORT-170` Cleanup round 11 ([#61](https://github.com/austinthedeveloper/pickleball-port-kit/issues/61))
 ## For you
 
 - **PORT-109 rollback:** play an online match over a real line (the
