@@ -685,8 +685,10 @@ Feature freeze, a full playtest, store pages, v1.0.0; cleanup round 11.
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
-- **PORT-158 the boards:** the relay's boards are merged and deployed
-  (2026-11-11). They live in memory, so the relay's sleep (no replicas
+- **PORT-158 the boards:** the relay's boards are merged (2026-11-11), but
+  that revision failed to start (its image left out `boards.js`); the old
+  one still serves rooms. pickleball-relay PR #3 fixes the image, and
+  merging it deploys the boards. They live in memory, so the relay's sleep (no replicas
   when idle) wipes them; to keep them it needs a small Azure storage mount
   (`BOARD_FILE`), or `min-replicas 1` (about $15 a month, which also ends
   the 20 s wake-up, KNOWN_ISSUES #94). And a score is the game's own claim
