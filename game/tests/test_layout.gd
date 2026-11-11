@@ -1750,3 +1750,110 @@ func test_trip_islands_map() -> void:
 		v._ready()
 	check_layout(v, "THE VAN on the day's trip")
 	v.free()
+
+
+## CLUB (port ADR-106): its home with every row selected, each subpage
+## with every row (the member cards too), the widest ledger, the bank's
+## call; and the park in club mode: the clock, the annexes, closing time,
+## the ball machine's empty spot.
+func test_club() -> void:
+	var kept := [GameControls.last_device, Settings.pad_glyphs]
+	var sv := _save()
+	ClubHome.seed_override = 4242
+	var c := Club.begin(sv, 4242)
+	c.cash = -88888
+	c.red_days = 13
+	c.day = 188
+	c.minute = Club.CLOSE_LIGHTS - 1
+	c.upgrades = {"lights": 1, "snack": 1, "annex1": 1, "annex2": 1}
+	c.coach = true
+	while c.members.size() < Club.MAX_MEMBERS:
+		c.members.append(c._new_member())
+	for m: Dictionary in c.members:
+		m["s"] = 88
+		m["p"] = 88
+		m["d"] = 188
+		m["c"] = 188
+	c.members[0]["m"] = Club.MOOD_LEAVE + 1
+	for k in 12:
+		c.trophies.append(k)
+	c.today["cup"] = "QUARTERFINALIST"
+	var widest := {"day": 188, "weekday": 2, "weather": Club.SHOWERS, "net": -8888, "cash": -88888,
+		"members": 80, "joined": 2, "left": ["HOPE W.", "JUNE W.", "HOPE M.", "KIT W."], "wait": 888,
+		"played": 88, "capacity": 88, "players": 88, "wins": 88, "losses": 88, "cup": "QUARTERFINALIST",
+		"cup_won": false, "bust": false, "red_days": 13,
+		"lines": [["DUES", 240], ["COURT FEES", 888], ["SNACK BAR", 888], ["CUP ENTRIES", 888],
+			["CUP PURSE", -100], ["UPKEEP", -888], ["COACH", -160]]}
+	c.ledger = widest
+	c.store(sv)
+	for dev in _devices():
+		_device(dev)
+		var h := ClubHome.new().setup(sv)
+		runner.root.add_child(h)
+		if not h.is_node_ready():
+			h._ready()
+		for w in Club.WEATHER.size():
+			for d in range(1, 400):
+				if h.club.weather(d) == w:
+					h.club.day = d
+					break
+			for row in h.page.rows:
+				h.page.select(String(row["id"]))
+				h.refresh()
+				check_layout(h, "CLUB home, %s, row %s (device %d)" % [Club.weather_name(w), row["id"], dev])
+		for which in ["upgrades", "staff", "members"]:
+			h._open_sub(which)
+			h.sub.settle()
+			for row in h.sub.rows:
+				h.sub.select(String(row["id"]))
+				h.refresh()
+				check_layout(h, "CLUB %s, row %s" % [which, row["id"]])
+			if which == "members":
+				for pg in h.member_pages():
+					h._turn(1)
+					check_layout(h, "CLUB members page %d" % pg)
+			if which == "staff":
+				h.fire_armed = true
+				h.refresh()
+				check_layout(h, "CLUB staff, letting the coach go")
+			h._close_sub()
+		h._show_ledger(widest)
+		check_layout(h, "CLUB ledger, the widest")
+		h._close_ledger()
+		var bust := widest.duplicate(true)
+		bust["bust"] = true
+		h._show_ledger(bust)
+		check_layout(h, "CLUB ledger, the bank calls")
+		h.free()
+	# a fresh club, its first morning
+	var fresh := ClubHome.new().setup(_save())
+	runner.root.add_child(fresh)
+	if not fresh.is_node_ready():
+		fresh._ready()
+	for row in fresh.page.rows:
+		fresh.page.select(String(row["id"]))
+		fresh.refresh()
+		check_layout(fresh, "CLUB fresh, row %s" % row["id"])
+	fresh.free()
+	# the park in club mode
+	c.minute = Club.CLOSE_LIGHTS - 30
+	c.upgrades = {"annex1": 1, "annex2": 1, "lights": 1}
+	var park := OpenPlay.new()
+	park.begin(1234, false)
+	var v := ParkView.new()
+	runner.root.add_child(v)
+	v.setup(park, sv, false, c)
+	v.refresh()
+	check_layout(v, "CLUB park, evening, two annexes")
+	park.x_fp = K.to_fp(OpenPlay.MACHINE_X)
+	park.y_fp = K.to_fp(OpenPlay.MACHINE_Y)
+	v.refresh()
+	check_layout(v, "CLUB park, the machine's empty spot")
+	v.closing_timer = ParkView.CLOSING_FRAMES
+	v.refresh()
+	check_layout(v, "CLUB park, closing time")
+	v.free()
+	ClubHome.seed_override = 0
+	GameControls.last_device = kept[0]
+	Settings.pad_glyphs = kept[1]
+	GameControls.device_serial += 1

@@ -44,11 +44,13 @@ var _champ_name: BitmapText
 var _champ_title: BitmapText
 var _champ_box: NinePatchRect
 var couch := false                     ## the couch cup's bracket (PORT-29)
+var club := false                      ## CLUB's WEEKEND CUP (port ADR-106): set up by main, DONE when over
 
 
-func setup(game_save: SaveGame, reveal := false, is_couch := false) -> BracketScreen:
+func setup(game_save: SaveGame, reveal := false, is_couch := false, is_club := false) -> BracketScreen:
 	save = game_save
 	couch = is_couch
+	club = is_club
 	var saved := save.tournament(key()) if save else null
 	if saved:
 		t = saved
@@ -64,6 +66,8 @@ func music_track() -> String:
 
 
 func key() -> String:
+	if club:
+		return "club"
 	return "couch" if couch else "bracket"
 
 
@@ -77,7 +81,8 @@ func _ready() -> void:
 	_ui = CanvasLayer.new()
 	add_child(_ui)
 	UiKit.panel(Rect2(290, 6, 380, 80), _ui)
-	UiKit.text("big_gold", "COUCH CUP" if couch else "TOURNAMENT", Vector2(480, 16), 0.5, Color.WHITE, _ui)
+	UiKit.text("big_gold", "WEEKEND CUP" if club else ("COUCH CUP" if couch else "TOURNAMENT"), Vector2(480, 16),
+		0.5, Color.WHITE, _ui)
 	_sub = UiKit.text("small", "", Vector2(480, 56), 0.5, DIM, _ui)
 	UiKit.panel(Rect2(20, 92, 920, 282), _ui)
 	_lines = Node2D.new()
@@ -141,8 +146,8 @@ func _in_play() -> bool:
 func _play_label() -> String:
 	if _in_play():
 		return "PLAY"
-	if couch:
-		return "DONE"                    # a new cup starts in the lobby
+	if couch or club:
+		return "DONE"                    # a new cup starts in the lobby (or next Saturday)
 	return "NEW TOURNAMENT" if started else "START"
 
 
@@ -163,8 +168,8 @@ func _mode_value() -> String:
 
 
 func _change_mode(_dir: int) -> void:
-	if _in_play() or couch:
-		return                           # the cup's mode came from the lobby
+	if _in_play() or couch or club:
+		return                           # the cup's mode came from the lobby (or the club)
 	t = _fresh(not t.doubles)
 	started = false
 	shown = 0
@@ -187,7 +192,7 @@ func _press_mode() -> void:
 
 
 func _press_play() -> void:
-	if couch and not _in_play():
+	if (couch or club) and not _in_play():
 		_leave()                         # DONE
 		return
 	if started and not _in_play():

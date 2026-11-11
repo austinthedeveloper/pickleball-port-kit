@@ -15,6 +15,8 @@ func _init(view: ParkView) -> void:
 ## The panel (render_park.c park_message): [text, prompts, yellow].
 func panel() -> Array:
 	var rack := v.op.rack_near()
+	if v.club and v.closing_timer > 0:
+		return ["CLOSING TIME: THE MEMBERS HEAD HOME", [], true]   # port ADR-106
 	if v._2p_shown != v.op.two_players:
 		v._2p_shown = v.op.two_players
 		v._2p_timer = ParkView.TWO_P_FRAMES
@@ -51,6 +53,8 @@ func panel() -> Array:
 			return ["THE RECORDS BOARD", [["hit", "READ"]], false]
 		return [board_page(v.op.board_page), [["hit", "NEXT"]], false]
 	if v.op.machine_near():
+		if not v.machine_shown:
+			return ["ROOM FOR A BALL MACHINE: SEE UPGRADES", [], false]
 		return ["BALL MACHINE", [["hit", "PRACTICE"]], false]
 	if v.op.bench_near() and v.op.waiting_team(0) != OpenPlay.NONE:
 		var s := v._team_name(v.op.waiting_team(0))
@@ -92,7 +96,13 @@ func panel() -> Array:
 		return ["%d TEAM%s AHEAD OF YOU ON COURT %d" % [ahead, "" if ahead == 1 else "S",
 			v.op.your_court + 1], [], false]
 	if v.op.in_house():
-		return ["THE CLUBHOUSE", [["start", "EXIT"]], false]
+		if v.club and not v.club.trophies.is_empty():
+			return ["THE TROPHY SHELF: %d WEEKEND CUP%s" % [v.club.trophies.size(),
+				"" if v.club.trophies.size() == 1 else "S"], [["start", "HOME"]], false]
+		return ["THE CLUBHOUSE", [["start", "HOME" if v.club else "EXIT"]], false]
+	if v.club:
+		# port ADR-106: your club's day, and when it closes
+		return ["YOUR CLUB: OPEN TILL " + Club.clock_label(v.club.closing()), [["start", "HOME"]], false]
 	# "OPEN PLAY 14 PTS": your points, when rated.
 	if v.op.rating == OpenPlay.RATING_NONE:
 		return ["YOU AND 2P" if v.op.two_players else "OPEN PLAY", [["start", "EXIT"]], false]

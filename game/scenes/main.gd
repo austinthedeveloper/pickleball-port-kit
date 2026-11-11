@@ -142,6 +142,7 @@ func show_title() -> void:
 	t.open_story.connect(func(): show_story(StoryMode.current(save), "intro"))
 	t.open_trip.connect(func(): show_trip_home())
 	t.open_course.connect(show_course)
+	t.open_club.connect(func(): show_club_home())
 	_swap(t)
 	park = null
 
@@ -504,6 +505,150 @@ func _end_trip(t: RoadTrip) -> void:
 		"islands": t.leg() == RoadTrip.ISLANDS, "encore": t.encore_won(),
 		"daily": t.daily, "partner": t.partner, "bond": bond_now if bond_now > bond_before else -1})
 
+
+
+# --- CLUB (port ADR-106) -------------------------------------------------------------
+
+var _club_park_day := -1              ## the day `park` was opened for (a club day keeps its park)
+
+
+## CLUB's home; `night`: the ledger of the day just ended.
+func show_club_home(night: Dictionary = {}) -> void:
+	save.save_game()
+	var h := ClubHome.new().setup(save, night)
+	h.leave.connect(show_title)
+	h.open_day.connect(_club_open_park)
+	h.drill.connect(_club_drill)
+	h.cup.connect(_club_cup)
+	h.day_over.connect(_end_club_day)
+	_swap(h)
+
+
+## OPEN THE PARK: today's park (the same one all day, back from a match
+## or from the home), seeded by the club and the day.
+func _club_open_park(c: Club) -> void:
+	if park == null or _club_park_day != c.day:
+		park = OpenPlay.new()
+		park.begin(((c.seed ^ (c.day * 40503)) & 0xffff) | 1, false)
+		_club_park_day = c.day
+	show_club_park(c, false)
+
+
+func show_club_park(c: Club, back: bool) -> void:
+	var v := ParkView.new().setup(park, save, back, c)
+	v.leave.connect(func():
+		c.store(save)
+		show_club_home())
+	v.closed.connect(func(): _end_club_day(c))
+	v.play.connect(func(cfg: SimTypes.MatchConfig): _on_club_match(c, cfg, false))
+	v.practice.connect(func(cfg: SimTypes.MatchConfig): _on_club_match(c, cfg, true))
+	_swap(v)
+
+
+## Your match on a club court (an open play match: it counts as one), or
+## the ball machine. WIND on a windy day; dusk and night under the LIGHTS.
+func _on_club_match(c: Club, cfg: SimTypes.MatchConfig, is_practice: bool) -> void:
+	c.store(save)
+	save.save_game()
+	if not is_practice:
+		cfg.modifiers |= c.match_mods()
+	var level := park.called
+	var m := MatchView.new()
+	m.save = save
+	m.park = true
+	m.finished.connect(func(to_title: bool):
+		if to_title:
+			c.store(save)
+			show_club_home()
+			return
+		if not is_practice:
+			var won := m.sim.match_winner == 0
+			park.return_from_match(won, m.sim.team_score[0], m.sim.team_score[1])
+			c.add_match(won, level)
+		c.store(save)
+		show_club_park(c, not is_practice))
+	_swap(m)
+	m.camera.percent = Settings.CAMERAS[Settings.camera_i]
+	m.court = Settings.court.duplicate()
+	m.time = CourtStyle.DAY if c.indoors() else Club.time_of_day(c.minute)
+	m.setup(cfg, String(Settings.PARKS[c.park_index()][3]), false)
+
+
+## The night: the day's ledger (a WEEKEND CUP left unfinished counts as
+## out), then the home with it.
+func _end_club_day(c: Club) -> void:
+	var cup := save.tournament("club")
+	if cup != null and String(c.today["cup"]) == "":
+		c.cup_result(cup.finish(), cup.champion() == Tournament.YOU)
+	var night := c.end_day()
+	save.store_tournament(null, "club")
+	c.store(save)
+	park = null
+	save.save_game()
+	show_club_home(night)
+
+
+## STAFF > TODAY'S DRILL: a HOW TO PLAY lesson with the coach; finished,
+## it counts for today's members.
+func _club_drill(c: Club, lesson: int) -> void:
+	c.store(save)
+	save.save_game()
+	var m := MatchView.new()
+	m.lesson = Tutorial.new(lesson)
+	m.finished.connect(func(to_title: bool):
+		if not to_title:
+			save.finish_lesson(lesson)
+			c.finish_drill()
+		c.store(save)
+		save.save_game()
+		show_club_home())
+	_swap(m)
+	m.camera.percent = Settings.CAMERAS[Settings.camera_i]
+	m.court = Settings.court.duplicate()
+	m.time = CourtStyle.DAY
+	m.setup(m.lesson.config(Settings.p1_choice), "park", false)
+
+
+## The WEEKEND CUP: today's bracket (made once), the club's own.
+func _club_cup(c: Club) -> void:
+	if save.tournament("club") == null:
+		var t := Tournament.create(c.seed ^ (c.day * 7919), false, Settings.difficulty_i,
+			Settings.POINTS[Settings.points_i])
+		save.store_tournament(t, "club")
+	show_club_bracket(c, false)
+
+
+## The cup's bracket; DONE (or leaving once it's over for you) ends the
+## day: the cup was Saturday's.
+func show_club_bracket(c: Club, reveal: bool) -> void:
+	save.save_game()
+	var b := BracketScreen.new().setup(save, reveal, false, true)
+	b.leave.connect(func():
+		var t := save.tournament("club")
+		if t != null and t.finish() != "":
+			c.cup_result(t.finish(), t.champion() == Tournament.YOU)
+			_end_club_day(c)
+		else:
+			c.store(save)
+			show_club_home())
+	b.play.connect(func(cfg: SimTypes.MatchConfig, venue: String):
+		save.save_game()
+		var m := MatchView.new()
+		m.save = save
+		m.tournament = true
+		m.cup_key = "club"
+		m.finished.connect(func(to_title: bool):
+			if to_title:
+				c.store(save)
+				show_club_home()
+			else:
+				show_club_bracket(c, true))
+		_swap(m)
+		m.camera.percent = Settings.CAMERAS[Settings.camera_i]
+		m.court = Settings.court.duplicate()
+		m.time = Settings.time_i
+		m.setup(cfg, venue, false))
+	_swap(b)
 
 
 # --- STORY: SAVE THE PARK (ADR-069) ------------------------------------------------
