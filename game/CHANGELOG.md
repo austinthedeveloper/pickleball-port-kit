@@ -4,6 +4,68 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.44.0] - 2026-11-11
+
+Doubles online with three friends, a club of your own, replays you can
+share, and the game on phones and handhelds.
+
+### Added
+- **Doubles online**: a DOUBLES room has four seats. Friends join from
+  anywhere by room code, or two of you share one machine
+  (DOUBLES, 2 HERE). If someone's line drops, the match waits for them
+  to come back, or a CPU takes their seat. JOIN TO WATCH lets more
+  friends watch the match.
+- **Quick chat online**: between points, hold SHORT and pick one of
+  eight friendly lines. CHAT MUTED on ONLINE hides everyone else's.
+- **Online, finished**: the guest now sees themselves on the left, the
+  way the host does. Your career look and shirt travel with you. A room
+  code can be typed with the pad on a letter grid, and when a room won't
+  open the screen says why and what to try.
+- **CLUB** (PLAY > CLUB): run a pickleball club.
+  - Open the park and play your members.
+  - Read the night's ledger.
+  - Buy upgrades and hire a coach.
+  - Host a weekend cup and watch the weather.
+  - Keep the members happy enough to stay. Fourteen nights in the red
+    and the club closes.
+- **Replays you can share**: on REPLAYS, EXPORT saves a replay as a
+  small file and IMPORT plays one from a friend. SHARE gives a
+  six-letter code, and WATCH CODE plays a friend's.
+- **WEEKLY** (PLAY > WEEKLY): one challenge a week, the same match for
+  everyone, with a score board. ROAD TRIP has TODAY'S BOARD for the
+  day's trip. Boards show three letters and a score, and SCORE BOARDS
+  turns posting off.
+- **The push**: hold toward the net longer as you swing and a standard
+  shot or drive lands deeper. Hold it about a second and it sails out,
+  as on the cart. HOW TO PLAY tells you when you held it too long.
+- **Accessibility** (OPTIONS > ACCESSIBILITY):
+  - COLOURS: colour-blind-safe player colours, or HIGH CONTRAST.
+    Each player's ring also has its own shape.
+  - CAPTIONS: the announcer's lines and the big sounds on screen.
+  - ASSIST: auto-swing, or a slower serve meter. Assisted matches
+    aren't recorded.
+- **CRT** (OPTIONS): a soft or strong CRT look, with scanlines and a
+  shadow mask.
+- **Phones and handhelds**:
+  - An upright phone puts the game on top and a bigger touch pad
+    below.
+  - TOUCH BUTTONS WORDS labels the buttons HIT, DRIVE, SOFT and so on.
+  - SCALE AUTO picks sharp or full-screen scaling for your display.
+  - Leaving the app pauses the match.
+- **2P walks the park**: with 2P in open play, your friend follows you
+  around the park.
+
+### Changed
+- At dusk and night the ground around the court is lit too, so a
+  player behind the baseline is never in the dark.
+- GLACIER's crowd now wears coats, scarves, mittens and bobble hats.
+- The Web build starts sooner: its music arrives a moment after the
+  game opens.
+- The couch cup asks each player to press Start on their pad when you
+  play, so a replugged pad still finds its player.
+- Replays saved before this version can't be watched (the push changes
+  how they'd play), and REPLAYS says FROM AN OLDER GAME.
+
 ## [0.43.0] - 2026-10-29
 
 Play online with a friend anywhere, by room code.

@@ -1,9 +1,9 @@
 # Pickleball '94 (Godot port) release notes
 
-Build `v0.43.0`. Generated from `design/PORT_ROADMAP.md` by
+Build `v0.44.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-111 of 115 roadmap tasks are in.
+116 of 120 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -671,17 +671,41 @@ Docs and files only, no code:
 
 Status: **Done**.
 
+## PORT-114: 114-117. `feature/cld-online-finish`: online, finished (asked for 2026-11-11)
+
+Online, finished: the guest's side, career looks, the letter grid, the relay's reasons (port ADR-110; GitHub #3, #4, #5, #6), from `main` after the PR chain merged.
+
+Status: **Ready to test**.
+
+## PORT-118: 118-122. `feature/cld-doubles-online`: doubles online (asked for 2026-11-11)
+
+Doubles online: rooms of seats, drops and rejoins, watchers, quick chat (port ADR-111; GitHub #7 to #11), chained from `feature/cld-online-finish`.
+
+Status: **Ready to test**; rooms of seats wait on the relay's PR (merging it deploys it).
+
 ## PORT-123: 123-127. `feature/cld-access`: controls and access (asked for 2026-11-11)
 
 Controls and access (port ADR-108; GitHub #13 to #17), chained from `feature/cld-handhelds`. PORT-78 (the keyboard presets) is left for your layout.
 
 Status: **Ready to test**.
 
+## PORT-128: the sim at the ROM's tuning 5 (asked for 2026-11-11)
+
+The sim caught up to the ROM's latest tuning (port ADR-113; GitHub #18), chained from `feature/cld-replays-polish`.
+
+Status: **Ready to test**. Replays saved before it say FROM AN OLDER GAME (KNOWN_ISSUES #100).
+
 ## PORT-131: 131, 158, 159, 161. `feature/cld-crt-board`: CRT, the lit apron, WEEKLY, the boards (asked for 2026-11-11)
 
 CRT, the lit apron, the WEEKLY CHALLENGE and score boards (port ADR-109; GitHub #21, #51, #49, #48), chained from `feature/cld-access`.
 
 Status: **Ready to test**; the boards wait on the relay's PR (merging it deploys it) and on whether boards should survive the relay's sleep (a storage mount; For you).
+
+## PORT-141: cleanup round 9 (asked for 2026-11-11)
+
+Cleanup round 9 (GitHub #31), chained from `feature/cld-tuning-5`.
+
+Status: **Ready to test**.
 
 ## PORT-142: 142-150. `feature/cld-club`: CLUB, the club manager (asked for 2026-11-11)
 
@@ -694,3 +718,9 @@ Status: **Ready to test**.
 Phones and handhelds (port ADR-107; GitHub #41 to #45), chained from `feature/cld-club`.
 
 Status: **Ready to test** on a real phone (KNOWN_ISSUES #79).
+
+## PORT-156: 156, 157, 163, 164. `feature/cld-replays-polish`: replays to share, 2P in the park, winter crowds (asked for 2026-11-11)
+
+Replays you can share, replay codes, 2P in the park and winter crowds (port ADR-112; GitHub #46, #47, #53, #54), chained from `feature/cld-doubles-online`.
+
+Status: **Ready to test**. PORT-162 and PORT-165 wait (For you).

@@ -342,6 +342,10 @@ status in the same commit. The finished tasks, in full, are in
   `feature/cld-release-0.42.0`).
 - **v0.43.0** (2026-10-29): ONLINE by room code through the relay
   (PORT-112) (tag `v0.43.0`, on `feature/cld-release-0.43.0`).
+- **v0.44.0** (2026-11-11): PORT-113..128, 131, 141..159, 161, 163, 164:
+  doubles online, CLUB, shared replays, WEEKLY and the boards, the push
+  (tuning 5), accessibility, CRT, phones and handhelds (tag `v0.44.0`, on
+  `feature/cld-release-0.44.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 
