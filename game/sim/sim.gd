@@ -708,6 +708,12 @@ func serve_setup(team: int) -> void:
 	required_bounce = K.REQUIRED_BOUNCE_NONE
 	_serve_hold_ball()
 
+## ASSIST SERVE (port ADR-108): a human server's meter moves on every
+## other frame; otherwise (and always in the ROM's play) on every frame.
+func _charge_moves() -> bool:
+	return config.assist != K.ASSIST_SERVE or owners[server_index] != K.OWNER_HUMAN \
+		or (phase_timer & 1) == 0
+
 func serve_update() -> void:
 	var server: Player = players[server_index]
 	var intent: Intent = intents[server.logical_input_slot]
@@ -720,6 +726,8 @@ func serve_update() -> void:
 		if serve_charged() and intent.hit_held:
 			if not charge_charging:
 				charge_charging = 1
+			elif not _charge_moves():
+				pass                         # ASSIST SERVE: the meter at half speed (port ADR-108)
 			elif charge_rising:
 				charge_level += 1
 				if charge_level >= K.SERVE_CHARGE_MAX:
@@ -1430,7 +1438,8 @@ func step(human: Array = [], commands: Array = []) -> void:
 			_ai_update(0)
 		else:
 			ai.hold_intent(0, intents[0])
-	elif config.difficulty == K.DIFFICULTY_KID:
+	elif config.difficulty == K.DIFFICULTY_KID or config.assist == K.ASSIST_SWING:
+		# ASSIST SWING (port ADR-108) is KID's for any difficulty.
 		# main.c assists slots 0-2 (2P sat on slot 2); multiplayer (PORT-16)
 		# can put a human on slot 3 too
 		for slot in [0, 1, 2, 3]:

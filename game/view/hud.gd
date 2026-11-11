@@ -329,7 +329,11 @@ func refresh() -> void:
 					else [["start", "LEAVE, OR WAIT FOR A REMATCH"]]
 			if ready and _result_prompts.items != items:
 				_result_prompts.set_items(items)
-			if vs_ladder:
+			if cfg.assist != K.ASSIST_OFF and view.save and not view.demo:
+				# port ADR-108: an assisted match isn't counted, and says so
+				_result_line.text = "ASSIST %s: NOT RECORDED" % K.ASSIST_NAMES[cfg.assist]
+				_result_line.tint = Color("fbe46a")
+			elif vs_ladder:
 				_result_line.text = Story.result_line(cfg.opponent, you)
 				_result_line.tint = Story.team_color(cfg.opponent)
 				if view.cleared:
@@ -418,7 +422,7 @@ const TAG_INK := Color(0.05, 0.06, 0.12)
 
 
 func _draw_tag(n: Node2D, player: int) -> void:
-	var col: Color = LobbyScreen.PLAYER_TINTS[player]
+	var col: Color = Access.player_tint(player)
 	var fill := col.darkened(0.35)
 	var r := TAG_BOX
 	var tip := r.end.y + 7

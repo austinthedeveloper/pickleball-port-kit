@@ -157,6 +157,12 @@ func test_the_bracket_screen() -> void:
 	b.play_couch.connect(func(cfg, venue, pads, players): got.append([cfg, venue, pads, players]))
 	b.page.select("play")
 	b.page.press()
+	# PORT-126: a saved cup asks for each player's pad first; they press
+	# Start on the same pads as before
+	check(b.claiming, "PLAY asks whose pad is whose")
+	for e in b.t.humans:
+		for c in e["cards"]:
+			b.claim(int(c["device"]))
 	eq(got.size(), 1, "PLAY: the cup's match")
 	eq(got[0][2], [10, 11, -1, -1], "with the pads")
 	b.page.select("mode")

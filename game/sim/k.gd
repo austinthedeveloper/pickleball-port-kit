@@ -357,3 +357,11 @@ static func fault_word(fault: int) -> String:
 		FAULT_MOMENTUM: return "MOMENTUM!"
 		FAULT_DRIVE: return "DRIVE!"
 	return "POINT!"
+
+## ASSIST (port ADR-108): a human's help, the remaster's only (the
+## conformance traces run OFF). SWING: KID's auto-swing for every human;
+## SERVE: a human's serve meter moves at half speed.
+const ASSIST_OFF := 0
+const ASSIST_SWING := 1
+const ASSIST_SERVE := 2
+const ASSIST_NAMES := ["OFF", "SWING", "SERVE"]

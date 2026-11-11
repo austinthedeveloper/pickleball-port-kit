@@ -9,6 +9,7 @@
 ## "meterfull" keeps P1's SPECIALS meter full (with mods=131072), "picklesmash" shoots a PICKLE SMASH;
 ## "camflash" a burst of the crowd's camera flashes (PORT-66);
 ## "pad" shows the controller prompts; "touch" the touch pad and its prompts (PORT-81); "save" a save with records (title); "pause" pauses the match at the end; "tune" opens the tuning panel; "debug" the F3 overlay (hit volumes); "location=N" OPEN PLAY's location; "potm" a bot match to its PLAY OF THE MATCH ("potmsave" presses its SAVE); "nearreach" a near-side reach mid-step;
+## "colours=N" COLOURS (port ADR-108); "caption" the CAPTIONS bar with a line;
 ## "closecall" shows a forced close-up; "initials" the initials card;
 ## "result" plays a bot match and ends it (the stats card); "mp4" four
 ## humans on fake pads (doubles); title_lobby a lobby with three players.
@@ -97,6 +98,13 @@ func _initialize() -> void:
 			Settings.park_i = int(arg.substr(9))
 		if arg.begins_with("time="):
 			Settings.time_i = int(arg.substr(5))
+		if arg.begins_with("colours="):         # port ADR-108: COLOURS (Access.SETS)
+			Settings.colours_i = int(arg.substr(8))
+		if arg == "caption":                    # port ADR-108: the caption bar with a line
+			Settings.captions = true
+			var bar := Captions.new()
+			root.add_child.call_deferred(bar)
+			Access.say.call_deferred("GOOD AFTERNOON, AND WELCOME TO RIVERDALE PARK!", 60.0, true)
 		if arg.begins_with("court="):
 			Settings.court = Array(arg.substr(6).split(",")).map(func(x): return int(x))
 	var controls = load("res://game_ui/controls.gd").new()

@@ -3,7 +3,7 @@
 Build `v0.43.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-109 of 113 roadmap tasks are in.
+110 of 114 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -670,6 +670,12 @@ Status: **Ready to test**: take a few trips (or meet the same team twice) and re
 Docs and files only, no code:
 
 Status: **Done**.
+
+## PORT-123: 123-127. `feature/cld-access`: controls and access (asked for 2026-11-11)
+
+Controls and access (port ADR-108; GitHub #13 to #17), chained from `feature/cld-handhelds`. PORT-78 (the keyboard presets) is left for your layout.
+
+Status: **Ready to test**.
 
 ## PORT-142: 142-150. `feature/cld-club`: CLUB, the club manager (asked for 2026-11-11)
 

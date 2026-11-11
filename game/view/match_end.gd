@@ -67,6 +67,14 @@ func on_match_over() -> void:
 	if v.demo or v.save == null or v.net or v.trip:
 		return                             # online matches aren't recorded either, nor a trip's
 	var won := v.truth.match_winner == 0
+	if v.truth.config.assist != K.ASSIST_OFF:
+		# port ADR-108: an assisted match counts for nothing (records, the
+		# career, the ladder, achievements); a bracket still moves on
+		if v.tournament:
+			record_tournament(won)
+		v.save.drop_new_records()
+		v.save.save_game()
+		return
 	if v.multiplayer():
 		if v.tournament:
 			record_tournament(won)         # PORT-29: the couch cup's bracket

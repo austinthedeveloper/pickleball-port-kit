@@ -139,6 +139,13 @@ func say_ids(ids: Array, priority := MID, wait := 0.0) -> bool:
 func _start(ids: Array, priority: int) -> void:
 	_queue = ids.duplicate()
 	_priority = priority
+	# the line's caption, all of it at once (a score call's pieces too)
+	var words := []
+	var secs := 0.0
+	for id: String in ids:
+		words.append(Access.caption_for(id))
+		secs += float(clips[id]) + GAP
+	Access.say(" ".join(words).strip_edges(), secs + 0.6, true)     # port ADR-108
 	_next()
 
 

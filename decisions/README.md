@@ -98,3 +98,4 @@ first decisions, are rows in `design/07_DECISIONS_AND_RISKS.md`.
 | 105 | [Online by Room Code, Through the Relay](ADR-105-online-rooms.md) | Accepted 2026-10-29 |
 | 106 | [CLUB: the Club Manager](ADR-106-club-manager.md) | Accepted 2026-11-11 |
 | 107 | [Phones and Handhelds](ADR-107-phones-and-handhelds.md) | Accepted 2026-11-11 |
+| 108 | [Controls and Access: COLOURS, CAPTIONS, ASSIST, the Cup's Pads](ADR-108-controls-and-access.md) | Accepted 2026-11-11 |

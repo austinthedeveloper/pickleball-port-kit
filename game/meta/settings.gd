@@ -100,6 +100,10 @@ const SCALE_NAMES := ["AUTO", "PIXEL", "FILL"]
 const AUTO_COVER := 0.85
 ## PORT-151: the touch pad's buttons as the SNES pad's letters, or words.
 static var touch_words := false
+## ACCESSIBILITY (port ADR-108): COLOURS (Access.SETS), CAPTIONS, ASSIST.
+static var colours_i := 0
+static var captions := false
+static var assist_i := 0                ## K.ASSIST_OFF, _SWING, _SERVE
 ## Court colours: [surface, kitchen, surround, lines] presets (CourtStyle).
 static var court: Array = CourtStyle.DEFAULTS.duplicate()
 static var time_i := CourtStyle.DAY
@@ -186,6 +190,9 @@ static func load_from(save: SaveGame) -> void:
 	# a save before SCALE AUTO: FILL chosen stays FILL; the default goes AUTO
 	scale_auto = int(st.get("scale_auto", 1 if integer_scale else 0)) != 0
 	touch_words = int(st.get("touch_words", 0)) != 0
+	colours_i = clampi(int(st.get("colours", 0)), 0, Access.SETS.size() - 1)
+	captions = int(st.get("captions", 0)) != 0
+	assist_i = clampi(int(st.get("assist", 0)), 0, K.ASSIST_NAMES.size() - 1)
 	var ct: Array = st.get("court", CourtStyle.DEFAULTS)
 	court = CourtStyle.DEFAULTS.duplicate()
 	for i in mini(ct.size(), 4):
@@ -222,6 +229,7 @@ static func store_to(save: SaveGame) -> void:
 		"music": Music.volume, "announcer": Announcer.volume, "announcer_on": 1 if Announcer.enabled else 0, "commentary": Announcer.chatter,
 		"fullscreen": 1 if fullscreen else 0, "integer_scale": 1 if integer_scale else 0,
 		"scale_auto": 1 if scale_auto else 0, "touch_words": 1 if touch_words else 0,
+		"colours": colours_i, "captions": 1 if captions else 0, "assist": assist_i,
 		"player": [p1_choice["palette"], p1_choice["variant"], p1_choice["paddle"]],
 		"court": court.duplicate(), "time": time_i,
 		"shake": 1 if shake_i else 0, "shake_level": shake_i, "flash": 1 if flashes else 0, "replay_demo": 1 if replays_in_demo else 0,
@@ -340,6 +348,7 @@ static func config_for(doubles: bool, opponent: int, difficulty: int, points: in
 			K.VARIANT_MALE, Paddles.STANDARD), p2)
 	cfg.difficulty = difficulty
 	cfg.points_to_win = points
+	cfg.assist = assist_i                   # port ADR-108 (online, the host's travels with its config)
 	cfg.ball_speed = ball_speed
 	cfg.cpu_errors = cpu_errors
 	cfg.smarts = smarts_for(cfg)
