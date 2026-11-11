@@ -44,6 +44,30 @@ static func mirror_intent(it: SimTypes.Intent, team: int) -> void:
 	it.aim_x = (1 if team else -1) if it.short_held else it.move_x
 
 
+## Rollback's: this machine's seats' intents (ADR-111): P1's for the first,
+## 2P's pad for a couch partner's; a watcher has none. The quick chat's
+## picker, open, takes the pads (its seats stand still).
+var script_intent2: Callable     ## tests: the couch partner's
+
+func net_intents() -> Array:
+	if v.net.watcher or (v.net.rollback and v.net.rollback.watching):
+		return []
+	var first := net_intent()
+	var out := [first]
+	if v.net.my_slots.size() > 1:
+		var team := int(v.net.my_slots[1]) >> 1
+		var it: SimTypes.Intent = script_intent2.call() if script_intent2.is_valid() \
+			else GameControls.read_pad_intent(GameControls.p2_pad, team)
+		if v.mirrored():
+			mirror_intent(it, team)
+		it.pause_pressed = 0
+		out.append(it)
+	if v.chat and v.chat.picking():
+		for k in out.size():
+			out[k] = SimTypes.Intent.new()
+	return out
+
+
 ## Lockstep's: the four slots' intents, or null (wait).
 func net_read() -> Variant:
 	return v.net.intents(net_intent())

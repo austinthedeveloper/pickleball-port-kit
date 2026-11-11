@@ -62,7 +62,7 @@ connections in rooms and passes their messages on.
 
   | Game | Guests |
   |------|--------|
-  | `pb94-port` (ONLINE) | 1 |
+  | `pb94-port` (ONLINE) | 1, or what the host asks up to 7 (`&guests=`, port ADR-111: three more seats and four watchers) |
   | `pb94-vr-coach` (coach phones) | 8 |
   | `pb94-vr` (future VR online) | 3 |
 
@@ -75,6 +75,11 @@ connections in rooms and passes their messages on.
 - **Control messages** are short JSON text frames:
   `room`, `welcome`, `joined`, `left`, `error` (with a reason the game
   shows in capitals: NO SUCH ROOM, ROOM FULL, OLD VERSION).
+- **A big room's host** speaks for its guests (port ADR-111: it forwards
+  each machine's inputs to the others), so its connection's rate is the
+  usual 200 a second times 1 + its guests (at most 4x). The port batches a
+  poll's messages to a guest into one frame (`RelayLink.flush`), so a
+  doubles host sends at most two frames a guest a frame.
 - **When rooms end:**
   - when the host leaves, its guests are told and closed;
   - after 10 minutes with no messages;
@@ -83,7 +88,7 @@ connections in rooms and passes their messages on.
 ### The protocol (v1)
 
 ```
-wss://<relay>/v1/host?game=pb94-port&ver=0.43.0      -> {"op":"room","code":"BXKM"}
+wss://<relay>/v1/host?game=pb94-port&ver=0.43.0&guests=7  -> {"op":"room","code":"BXKM"}
 wss://<relay>/v1/join?game=pb94-port&code=BXKM       -> {"op":"welcome","you":0} (or error)
 host gets {"op":"joined","guest":0,"ver":...} / {"op":"left","guest":0}
 binary, host: [guest or 255][payload...]             both ways, in order, nothing lost

@@ -31,10 +31,53 @@ const REASONS := {"HOST LEFT": "THE OTHER PLAYER LEFT", "IDLE": "THE ROOM CLOSED
 	"TOO FAST": "THE LINE SENT TOO MUCH: TRY AGAIN",
 	"NO SUCH GAME": "THE SERVER DOESN'T KNOW THIS GAME"}
 
+## A host's line to one guest (port ADR-111): the relay numbers each guest
+## and tags their frames; a Port is that guest as a NetLink of its own, so
+## the session holds one per machine in the room.
+class Port extends NetLink:
+	var relay: RelayLink
+	var id := 0
+	var gone := false
+	var inbox: Array = []
+	var rtt := 0
+	var ping_ms := 0
+
+	func status() -> int:
+		if gone or error != "" or relay == null or relay.error != "":
+			return CLOSED
+		return CONNECTED
+
+	func rtt_ms() -> int:
+		return rtt
+
+	func send(msg: Array) -> void:
+		if status() == CONNECTED:
+			relay._send_to(id, msg)
+
+	func poll() -> void:
+		pass                              # the host's RelayLink pumps every port
+
+	func receive() -> Array:
+		var out := inbox
+		inbox = []
+		return out
+
+	func close() -> void:
+		gone = true
+
+
 var ws := WebSocketPeer.new()
 var room := ""                   ## the room's name, once the relay gives it
+var guests := 1                  ## the host's: machines the room takes (seats and watchers)
+var ports := {}                  ## the host's: relay guest number -> Port
+var _new_ports: Array = []       ## joined since take_ports()
+## Messages waiting for flush(), by guest (the guest's own: key -1): a
+## poll's go as one frame ([BATCH, [...]]), so a doubles host's forwarding
+## stays inside the relay's rate (ADR-111).
+var _out := {}
+const BATCH := "~B"
 var _hosting := false
-var _guest := -1                 ## the host's: the relay's number for the guest who's in
+var _guest := -1                 ## the host's first guest (the singles room's one)
 var _welcomed := false           ## the guest's: in the room
 var _inbox: Array = []
 var _started_ms := 0
@@ -61,9 +104,19 @@ static func clean_room(s: String) -> String:
 	return out
 
 
-func host(url := address()) -> bool:
+## Opens a room for `room_guests` machines (ADR-111: the other seats and
+## the watchers; a relay from before it takes one).
+func host(url := address(), room_guests := 1) -> bool:
 	_hosting = true
-	return _dial("%s/v1/host?game=%s&ver=%s" % [url, GAME, BuildInfo.version().uri_encode()])
+	guests = room_guests
+	return _dial("%s/v1/host?game=%s&ver=%s&guests=%d" % [url, GAME, BuildInfo.version().uri_encode(), guests])
+
+
+## The guests who joined since the last call: [Port, ...].
+func take_ports() -> Array:
+	var out := _new_ports
+	_new_ports = []
+	return out
 
 
 func join(code: String, url := address()) -> bool:
@@ -90,7 +143,7 @@ func status() -> int:
 	if ws.get_ready_state() == WebSocketPeer.STATE_CLOSED:
 		return CLOSED
 	if _hosting:
-		return CONNECTED if _guest >= 0 else OPEN
+		return CONNECTED if _guest >= 0 and not (ports.has(_guest) and (ports[_guest] as Port).gone) else OPEN
 	return CONNECTED if _welcomed else OPEN
 
 
@@ -108,6 +161,8 @@ func seconds_left() -> int:
 	return maxi(0, (TIMEOUT_MS - (Time.get_ticks_msec() - _started_ms) + 999) / 1000)
 
 
+## The host's send goes to its first guest (the singles room's); a room's
+## other guests are reached through their Ports.
 func send(msg: Array) -> void:
 	if status() != CONNECTED:
 		return
@@ -115,9 +170,28 @@ func send(msg: Array) -> void:
 
 
 func _send(msg: Array) -> void:
-	var out := PackedByteArray([_guest]) if _hosting else PackedByteArray()
-	out.append_array(var_to_bytes(msg))
-	ws.send(out)
+	_send_to(_guest, msg)
+
+
+func _send_to(guest: int, msg: Array) -> void:
+	var key := guest if _hosting else -1
+	if not _out.has(key):
+		_out[key] = []
+	(_out[key] as Array).append(msg)
+
+
+func flush() -> void:
+	if _started_ms == 0 or ws.get_ready_state() != WebSocketPeer.STATE_OPEN:
+		_out.clear()
+		return
+	for key in _out:
+		var msgs: Array = _out[key]
+		if msgs.is_empty():
+			continue
+		var out := PackedByteArray([key]) if _hosting else PackedByteArray()
+		out.append_array(var_to_bytes(msgs[0] if msgs.size() == 1 else [BATCH, msgs]))
+		ws.send(out)
+	_out.clear()
 
 
 func poll() -> void:
@@ -130,8 +204,8 @@ func poll() -> void:
 		if ws.was_string_packet():
 			_control(JSON.parse_string(bytes.get_string_from_utf8()))
 		elif _hosting:
-			if bytes.size() > 1 and bytes[0] == _guest:
-				_message(bytes_to_var(bytes.slice(1)), now)
+			if bytes.size() > 1 and ports.has(int(bytes[0])):
+				_port_message(ports[int(bytes[0])], bytes_to_var(bytes.slice(1)), now)
 		else:
 			_message(bytes_to_var(bytes), now)
 		if error != "":
@@ -154,6 +228,11 @@ func poll() -> void:
 	if status() == OPEN and room == "" and now - _started_ms > TIMEOUT_MS:
 		error = "NO ANSWER FROM THE SERVER"
 		close()
+	elif _hosting and now - _ping_ms >= PING_MS and not ports.is_empty():
+		_ping_ms = now
+		for p: Port in ports.values():
+			if not p.gone:
+				_send_to(p.id, [PING, now])
 	elif status() == CONNECTED and now - _ping_ms >= PING_MS:
 		_ping_ms = now
 		_send([PING, now])
@@ -180,14 +259,42 @@ func _control(msg: Variant) -> void:
 				return
 			_welcomed = true
 		"joined":
-			if _guest < 0:
-				_guest = int(msg.get("guest", 0))
+			var g := int(msg.get("guest", 0))
+			var p := Port.new()
+			p.relay = self
+			p.id = g
+			ports[g] = p
+			_new_ports.append(p)
+			if _guest < 0 or (ports.has(_guest) and (ports[_guest] as Port).gone):
+				_guest = g
 		"left":
-			if int(msg.get("guest", -1)) == _guest:
-				error = "THE OTHER PLAYER LEFT"
+			var g := int(msg.get("guest", -1))
+			if ports.has(g):
+				(ports[g] as Port).gone = true
+				(ports[g] as Port).error = "THE OTHER PLAYER LEFT"
 		"error":
 			var r := String(msg.get("reason", ""))
 			error = String(REASONS.get(r, r)) if r != "" else "CONNECTION LOST"
+
+
+## A guest's message to the host: its port's, or the line's PING / PONG.
+func _port_message(p: Port, v: Variant, now: int) -> void:
+	if not v is Array or (v as Array).is_empty():
+		return
+	var m: Array = v
+	if m[0] == BATCH and m.size() > 1 and m[1] is Array:
+		for each in m[1]:
+			_port_message(p, each, now)
+		return
+	if m[0] == PING:
+		_send_to(p.id, [PONG, m[1]])
+	elif m[0] == PONG:
+		var took := maxi(1, now - int(m[1]))      # 0 would read as "not measured"
+		p.rtt = took if p.rtt == 0 else (p.rtt * 3 + took) / 4
+		if p.id == _guest:
+			_rtt = p.rtt
+	else:
+		p.inbox.append(m)
 
 
 ## A game message, or the line's own PING / PONG.
@@ -195,16 +302,22 @@ func _message(v: Variant, now: int) -> void:
 	if not v is Array or (v as Array).is_empty():
 		return
 	var m: Array = v
+	if m[0] == BATCH and m.size() > 1 and m[1] is Array:
+		for each in m[1]:
+			_message(each, now)
+		return
 	if m[0] == PING:
 		_send([PONG, m[1]])
 	elif m[0] == PONG:
-		var took := now - int(m[1])
+		var took := maxi(1, now - int(m[1]))
 		_rtt = took if _rtt == 0 else (_rtt * 3 + took) / 4
 	else:
 		_inbox.append(m)
 
 
 func receive() -> Array:
+	if _hosting:
+		return ports[_guest].receive() if ports.has(_guest) else []
 	var out := _inbox
 	_inbox = []
 	return out
@@ -214,6 +327,7 @@ func receive() -> Array:
 func close() -> void:
 	if ws.get_ready_state() == WebSocketPeer.STATE_CLOSED:
 		return
+	flush()
 	ws.poll()
 	ws.close()
 	for i in 3:

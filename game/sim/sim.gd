@@ -1081,7 +1081,8 @@ func _activate_players() -> void:
 ## view never calls new_match, retune or retune_smarts on a running match:
 ## it passes them to step(), which applies them as the step begins, so they
 ## travel with the inputs (online, PLAY OF THE MATCH's replay, a rollback):
-## ["new_match"], ["retune", speed, errors], ["smarts", [12 ints]].
+## ["new_match"], ["retune", speed, errors], ["smarts", [12 ints]],
+## ["seat_cpu", slot] (online: a CPU takes a dropped player's seat).
 func apply(c: Array) -> void:
 	match c[0]:
 		"new_match":
@@ -1090,8 +1091,28 @@ func apply(c: Array) -> void:
 			retune(int(c[1]), int(c[2]))
 		"smarts":
 			retune_smarts(c[1].map(func(v): return int(v)))
+		"seat_cpu":
+			seat_cpu(int(c[1]))
 		_:
 			push_error("Sim: no command %s" % str(c))
+
+## Online (port ADR-111): a seat whose player dropped and didn't come back
+## is played by a CPU from this frame on, as a CPU in that seat would have
+## been from the start (its style from Opponents.slot_style). Slot 0 is the
+## host's and never changes hands (the host leaving ends the match).
+func seat_cpu(i: int) -> void:
+	if i <= 0 or i >= K.MAX_PLAYERS or not players[i].active or owners[i] == K.OWNER_CPU:
+		return
+	config.human[i] = 0
+	owners[i] = K.OWNER_CPU
+	var p: Player = players[i]
+	p.cpu_controlled = 1
+	var style: SimTypes.AiStyle = Opponents.slot_style(config, i).copy()
+	p.max_speed_fp = style.speed
+	ai.styles[i] = style
+	ai.slots[i].late_period = late_period(style.late_period, config.cpu_errors)
+	ai.slots[i].reaction_frames = style.reaction
+
 
 ## The tuning panel (port ADR-074), between frames: BALL SPEED and CPU
 ## ERRORS on the live match, as if it had started with them. An input to

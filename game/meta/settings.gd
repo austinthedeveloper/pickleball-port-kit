@@ -106,6 +106,7 @@ static var captions := false
 static var assist_i := 0                ## K.ASSIST_OFF, _SWING, _SERVE
 static var crt_i := 0                   ## OPTIONS > CRT (Crt.NAMES), port ADR-109
 static var board_post := true           ## OPTIONS > SCORE BOARDS: post your scores (port ADR-109)
+static var mute_chat := false           ## ONLINE > CHAT MUTED: others' quick chat hidden (port ADR-111)
 ## Court colours: [surface, kitchen, surround, lines] presets (CourtStyle).
 static var court: Array = CourtStyle.DEFAULTS.duplicate()
 static var time_i := CourtStyle.DAY
@@ -197,6 +198,7 @@ static func load_from(save: SaveGame) -> void:
 	assist_i = clampi(int(st.get("assist", 0)), 0, K.ASSIST_NAMES.size() - 1)
 	crt_i = clampi(int(st.get("crt", 0)), 0, Crt.NAMES.size() - 1)
 	board_post = int(st.get("board_post", 1)) != 0
+	mute_chat = int(st.get("mute_chat", 0)) != 0
 	var ct: Array = st.get("court", CourtStyle.DEFAULTS)
 	court = CourtStyle.DEFAULTS.duplicate()
 	for i in mini(ct.size(), 4):
@@ -235,6 +237,7 @@ static func store_to(save: SaveGame) -> void:
 		"scale_auto": 1 if scale_auto else 0, "touch_words": 1 if touch_words else 0,
 		"colours": colours_i, "captions": 1 if captions else 0, "assist": assist_i,
 		"crt": crt_i, "board_post": 1 if board_post else 0,
+		"mute_chat": 1 if mute_chat else 0,
 		"player": [p1_choice["palette"], p1_choice["variant"], p1_choice["paddle"]],
 		"court": court.duplicate(), "time": time_i,
 		"shake": 1 if shake_i else 0, "shake_level": shake_i, "flash": 1 if flashes else 0, "replay_demo": 1 if replays_in_demo else 0,

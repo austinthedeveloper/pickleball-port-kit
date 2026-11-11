@@ -35,6 +35,11 @@ var port := ENetLink.PORT        ## tests use another
 var relay_url := ""              ## tests' local relay ("": RelayLink.address())
 var editing := false
 var last_reason := ""
+## PLAY (port ADR-111): the room you host or join. SINGLES, DOUBLES (four
+## homes, empty seats a CPU's) or DOUBLES with two of you on this couch.
+const PLAY_NAMES := ["SINGLES", "DOUBLES", "DOUBLES, 2 HERE"]
+var play_i := 0
+var _subtitle: BitmapText
 var _lock := LOCK
 var _sfx: Sfx
 var _ui: CanvasLayer
@@ -56,6 +61,7 @@ func setup(game_save: SaveGame) -> OnlineScreen:
 	if save:
 		address = String(save.data["settings"].get("net_address", ""))
 		way = String(save.data["settings"].get("net_way", BY_ROOM))
+		play_i = clampi(int(save.data["settings"].get("net_play", 0)), 0, PLAY_NAMES.size() - 1)
 	if not available(BY_ADDRESS):
 		way = BY_ROOM
 	return self
@@ -76,24 +82,28 @@ func _ready() -> void:
 	add_child(_ui)
 	UiKit.panel(Rect2(300, 10, 360, 58), _ui)
 	UiKit.text("big_gold", "ONLINE", Vector2(480, 22), 0.5, Color.WHITE, _ui)
-	UiKit.text("small", "1 VS 1, SINGLES", Vector2(480, 76), 0.5, DIM, _ui)
+	_subtitle = UiKit.text("small", "", Vector2(480, 76), 0.5, DIM, _ui)
 	page = MenuPage.new().setup("online", "", [
 		{"id": "way", "label": "CONNECT BY", "value": func(): return "ROOM CODE" if way == BY_ROOM else "ADDRESS",
 			"change": _change_way},
+		{"id": "play", "label": "PLAY", "value": func(): return PLAY_NAMES[play_i], "change": _change_play},
 		{"id": "host", "label": func(): return _host_label(), "value": func(): return _host_value(),
 			"press": _press_host},
 		{"id": "address", "label": func(): return "ROOM" if way == BY_ROOM else "ADDRESS",
 			"value": func(): return _address_value(), "press": _press_address},
 		{"id": "join", "label": "JOIN", "value": func(): return _join_value(), "press": _press_join},
+		{"id": "watch", "label": "JOIN TO WATCH", "value": func(): return _watch_value(), "press": _press_watch},
+		{"id": "chat", "label": "QUICK CHAT", "value": func(): return "MUTED" if Settings.mute_chat else "ON",
+			"change": func(_d): Settings.mute_chat = not Settings.mute_chat; Settings.store_to(save)},
 		{"id": "back", "label": "BACK", "press": func(): _leave()},
-	], Rect2(110, 96, 740, 204), [["hit", "SELECT"], ["back", "BACK"]])
+	], Rect2(110, 96, 740, 18 + 8 * MenuPage.ROW_H + 46), [["hit", "SELECT"], ["back", "BACK"]])
 	page.pressed.connect(func(_id): page.refresh())
 	page.back_requested.connect(_leave)
 	_ui.add_child(page)
 	_build_grid()
-	UiKit.panel(Rect2(60, 312, 840, 120), _ui)
+	UiKit.panel(Rect2(60, 394, 840, 120), _ui)
 	for i in 3:
-		_lines.append(UiKit.text("small", "", Vector2(480, 330 + i * 30), 0.5, Color.WHITE, _ui))
+		_lines.append(UiKit.text("small", "", Vector2(480, 412 + i * 30), 0.5, Color.WHITE, _ui))
 	_sfx = Sfx.new()
 	add_child(_sfx)
 	_sfx.setup("", false)
@@ -159,6 +169,45 @@ func _join_value() -> String:
 	return ""
 
 
+func _watch_value() -> String:
+	if session and session.watcher and _state() != OnlineSession.IDLE:
+		return "WATCHING" if _state() == OnlineSession.CONNECTED else "CALLING..."
+	return "BY ROOM" if way == BY_ROOM else ""
+
+
+## The room's mode and the players here, from PLAY.
+func play_mode() -> int:
+	return K.MODE_SINGLES if play_i == 0 else K.MODE_DOUBLES
+
+
+func players_here() -> int:
+	return 2 if play_i == 2 else 1
+
+
+## PLAY: SINGLES, DOUBLES, DOUBLES WITH 2 HERE. By ADDRESS is singles only
+## (ENet's line is one guest); a hosted room changes with it if it can.
+func _change_play(d: int) -> void:
+	if way == BY_ADDRESS:
+		last_reason = "DOUBLES IS BY ROOM CODE"
+		play_i = 0
+		return
+	var was := play_i
+	play_i = (play_i + d + PLAY_NAMES.size()) % PLAY_NAMES.size()
+	if session and session.host and session.state != OnlineSession.PLAYING:
+		session.players_here = players_here()
+		if not session.set_mode(play_mode()):
+			play_i = was
+			last_reason = "THE ROOM HAS TOO MANY FOR SINGLES"
+			return
+		session.my_hello["players"] = players_here()
+	elif session and not session.host and _state() != OnlineSession.IDLE:
+		_close_session()                 # a guest's ask changes: join again
+	last_reason = ""
+	if save:
+		save.data["settings"]["net_play"] = play_i
+		save.save_game()
+
+
 ## The Web build has no UDP (ENet): only the room, through the relay.
 static func available(by := BY_ROOM) -> bool:
 	return by == BY_ROOM or not OS.has_feature("web")
@@ -178,7 +227,7 @@ func _press_host() -> void:
 	var ok := false
 	if way == BY_ROOM:
 		link = RelayLink.new()
-		ok = (link as RelayLink).host(_relay())
+		ok = (link as RelayLink).host(_relay(), OnlineSession.room_guests(K.MODE_DOUBLES))
 	else:
 		link = ENetLink.new()
 		ok = (link as ENetLink).host(port)
@@ -196,7 +245,14 @@ func _press_address() -> void:
 	_show_grid(editing and way == BY_ROOM)
 
 
-func _press_join() -> void:
+func _press_watch() -> void:
+	if way != BY_ROOM:
+		last_reason = "WATCHING IS BY ROOM CODE"
+		return
+	_press_join(true)
+
+
+func _press_join(watch := false) -> void:
 	var need := RelayLink.ROOM_LEN if way == BY_ROOM else 1
 	if _typed().strip_edges().length() < need:
 		page.select("address")
@@ -217,15 +273,32 @@ func _press_join() -> void:
 		last_reason = link.error
 		_sfx.play("back")
 		return
-	_open(link, false)
+	_open(link, false, watch)
 
 
-func _open(link: NetLink, is_host: bool) -> void:
+func _open(link: NetLink, is_host: bool, watch := false) -> void:
 	last_reason = ""
 	session = OnlineSession.new(link, is_host)
+	session.mode = play_mode()
+	session.players_here = players_here()
 	var me: Career.Player = save.career.active_player() if save else null
-	session.my_hello = OnlineSession.hello(Settings.p1_choice, _my_name(), me)
+	session.my_hello = OnlineSession.hello(Settings.p1_choice, _my_name(), me, players_here(), watch)
+	if not is_host:
+		session.redial = _redial         # a dropped line dials the room again (PORT-120)
 	_sfx.play("confirm")
+
+
+## A guest's line back to the room it was in (a rejoin).
+func _redial() -> Variant:
+	var link: NetLink
+	var ok := false
+	if way == BY_ROOM:
+		link = RelayLink.new()
+		ok = (link as RelayLink).join(room, _relay())
+	else:
+		link = ENetLink.new()
+		ok = (link as ENetLink).join(address.to_lower(), port)
+	return link if ok else null
 
 
 func _my_name() -> String:
@@ -233,30 +306,53 @@ func _my_name() -> String:
 	return me.shown_name() if me else ""
 
 
-## The host's match: singles on the COURT, POINTS and MODIFIERS settings;
-## the guest in their look, in another shirt if both picked the same.
+## The host's match: the room's seats on the COURT, POINTS and MODIFIERS
+## settings; each player in their look, in another shirt if theirs is
+## taken (ADR-010: no two share a colour); an empty seat a CPU's.
 func _start_match() -> void:
-	var mine: Dictionary = Dictionary(session.my_hello.get("look", Settings.p1_choice)).duplicate()
-	if mine.is_empty():
-		mine = Settings.p1_choice
-	var theirs: Dictionary = session.peer_hello.get("look", {})
-	if theirs.is_empty():
-		theirs = PlayerSelect.new_choice(PlayerSelect.PAL_RED, K.VARIANT_MALE, Paddles.STANDARD)
-	theirs = theirs.duplicate()
-	for k in theirs:
-		theirs[k] = int(theirs[k])
-	if theirs["palette"] == mine["palette"]:
-		theirs["palette"] = (int(mine["palette"]) + 1) % PlayerSelect.PAL_COUNT
-	var cfg := PlayerSelect.config_select(K.MODE_SINGLES, mine, theirs)
+	var cfg := room_config(session)
 	cfg.points_to_win = Settings.POINTS[Settings.points_i]
 	cfg.modifiers = Settings.mod_bits
-	cfg.ball_speed = Settings.ball_speed       # the host's: the guest plays the config it's sent
+	cfg.ball_speed = Settings.ball_speed       # the host's: the guests play the config they're sent
 	session.begin({"cfg": OnlineSession.config_to_dict(cfg), "venue": Settings.venue(),
-		"time": Settings.time_i, "court": Settings.court.duplicate(),
-		# the career looks (PORT-115), by slot: drawn, never in the config
-		"looks": {"0": session.my_hello.get("career", {}), "2": session.peer_hello.get("career", {})}})
+		"time": Settings.time_i, "court": Settings.court.duplicate()})
 	_sfx.play("confirm")
 	play.emit(session)
+
+
+## The room's config: each seat's look from HELLO (the host's from its
+## own), a couch partner in the next team colour, a CPU in any empty seat.
+static func room_config(s: OnlineSession) -> SimTypes.MatchConfig:
+	var doubles := s.mode == K.MODE_DOUBLES
+	var cfg := SimTypes.MatchConfig.doubles() if doubles else SimTypes.MatchConfig.singles()
+	cfg.palette = [-1, -1, -1, -1]
+	cfg.human = [0, 0, 0, 0]
+	var looks := {}
+	var mine: Dictionary = Dictionary(s.my_hello.get("look", Settings.p1_choice)).duplicate()
+	looks[0] = mine if not mine.is_empty() else Settings.p1_choice
+	var taken := s.seats()
+	for slot in taken:
+		if taken[slot] == null and slot != 0:
+			looks[slot] = {}                 # the host's couch partner
+		elif taken[slot] != null:
+			var p: OnlineSession.Peer = taken[slot]
+			looks[slot] = Dictionary(p.hello.get("look", {})).duplicate() if slot == p.slots[0] else {}
+	var used := []
+	for slot in K.MAX_PLAYERS:
+		if not doubles and slot % 2 == 1:
+			continue
+		var l: Dictionary = looks.get(slot, {})
+		var pal := int(l.get("palette", -1))
+		if pal < 0 or pal in used:
+			pal = 0
+			while pal in used:
+				pal += 1
+		used.append(pal)
+		cfg.palette[slot] = pal
+		cfg.variant[slot] = int(l.get("variant", K.VARIANT_MALE))
+		cfg.paddle[slot] = int(l.get("paddle", Paddles.STANDARD))
+		cfg.human[slot] = 1 if taken.has(slot) else 0
+	return cfg
 
 
 func _store_address() -> void:
@@ -540,6 +636,14 @@ func info() -> Array:
 				lines[1] = "NO NETWORK FOUND: IS WI-FI ON?"
 			return lines
 		return ["CALLING " + address + "...", "", ""]
+	if st == OnlineSession.CONNECTED and (session.mode == K.MODE_DOUBLES or session.watcher):
+		var line2 := "SEATS: " + seats_line()
+		if session.watcher:
+			return ["WATCHING. THE MATCH SHOWS WHEN IT STARTS.", line2, ""]
+		if session.host:
+			return ["YOUR ROOM: " + _room() if _room() != "" else "YOUR ROOM IS OPEN", line2,
+				"START WHEN YOU'RE READY: EMPTY SEATS ARE CPUS."]
+		return ["IN THE ROOM!", line2, "WAITING FOR THE HOST TO START."]
 	if st == OnlineSession.CONNECTED:
 		var them := String(session.peer_hello.get("name", ""))
 		var line := "CONNECTED TO " + (them if them != "" else "YOUR FRIEND") + "!"
@@ -550,7 +654,24 @@ func info() -> Array:
 	return ["", "", ""]
 
 
+## Who sits where, in the seat order: names, YOU, a dash for empty.
+func seats_line() -> String:
+	var out := []
+	for slot in session.seat_order():
+		if slot in session.my_slots or (session.host and slot in session.host_slots()):
+			out.append("YOU")
+		elif session.seated(slot):
+			var n := session.seat_name(slot)
+			out.append(n if n != "" else "P%d" % (int(slot) + 1))
+		else:
+			out.append("-")
+	return ", ".join(out)
+
+
 func refresh() -> void:
+	if _subtitle:
+		_subtitle.text = "1 VS 1, SINGLES" if play_i == 0 else ("DOUBLES, 2 OF YOU HERE" if play_i == 2
+			else "DOUBLES: UP TO FOUR HOMES")
 	var lines := info()
 	for i in 3:
 		_lines[i].text = lines[i]

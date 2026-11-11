@@ -819,6 +819,23 @@ func test_online() -> void:
 		o.session.peer_hello = {"name": "WWWWWWWW"}
 		o.refresh()
 		check_layout(o, "online connected (host %s)" % host)
+	# a room of seats (port ADR-111): every PLAY, the seats at their longest,
+	# a watcher's, the guest's
+	for i in OnlineScreen.PLAY_NAMES.size():
+		o.play_i = i
+		o.session = null
+		o.refresh()
+		check_layout(o, "online PLAY %s" % OnlineScreen.PLAY_NAMES[i])
+	for who in ["host", "guest", "watcher"]:
+		o.session = OnlineSession.new(links[0], who == "host")
+		o.session.mode = K.MODE_DOUBLES
+		o.session.state = OnlineSession.CONNECTED
+		o.session.seat_names = {0: "WWWWWWWW", 2: "WWWWWWWW", 1: "WWWWWWWW", 3: "WWWWWWWW"}
+		o.session.watcher = who == "watcher"
+		o.session.my_slots = [] if who != "guest" else [3]
+		o.refresh()
+		check_layout(o, "online doubles room (%s)" % who)
+	o.session = OnlineSession.new(links[0], false)
 	o.session.reason = "VERSIONS DIFFER: 10.10.10 AND 10.10.11"
 	o.session.state = OnlineSession.CLOSED
 	o.refresh()
@@ -852,6 +869,50 @@ func test_online() -> void:
 		v._net_refresh(false)
 		v._hud.refresh()
 		check_layout(v, "online, press again to leave (host %s)" % host)
+		v.free()
+	# a doubles room's match (port ADR-111): the sides by name, a drop's
+	# lines at their longest, the host's choice, the chat picker and bubbles
+	for host in [true, false]:
+		var pair := LoopbackLink.pair(0)
+		var s := OnlineSession.new(pair[0], host)
+		s.mode = K.MODE_DOUBLES
+		s.my_slots = [0] if host else [3]
+		s.seat_names = {0: "WWWWWWWW", 1: "WWWWWWWW", 2: "WWWWWWWW", 3: "WWWWWWWW"}
+		s.state = OnlineSession.PLAYING
+		var cfg := SimTypes.MatchConfig.doubles()
+		cfg.palette = [0, 1, 2, 3]
+		cfg.human = [1, 1, 1, 1]
+		var v := MatchView.new()
+		v.net = s
+		runner.root.add_child(v)
+		v.setup(cfg, "park", false)
+		v.sim.team_score = [10, 10]
+		v._hud.refresh()
+		check_layout(v, "doubles room match (host %s)" % host)
+		for d in [{"slots": [1], "name": "WWWWWWWW", "left": 3600, "expired": false},
+				{"slots": [1], "name": "WWWWWWWW", "left": 0, "expired": true}]:
+			s.drop = d
+			v._net_refresh(true)
+			check_layout(v, "doubles room, a drop (host %s, %s)" % [host, d["expired"]])
+		s.drop = {}
+		v._net_refresh(false)
+		v.sim.phase = K.PHASE_POINT_RESULT
+		v.chat.page.visible = true
+		v.chat.page.settle()
+		for i in OnlineSession.CHAT.size():
+			v.chat.page.select("c%d" % i)
+			check_layout(v, "the quick chat picker (row %d)" % i)
+		v.chat.page.visible = false
+		for slot in 4:
+			var line := 0
+			for k in OnlineSession.CHAT.size():
+				if BitmapText.measure("small", OnlineSession.CHAT[k]) > BitmapText.measure("small", OnlineSession.CHAT[line]):
+					line = k
+			v.chat.show_line(slot, line)
+		v._update_visuals()
+		for slot in 4:
+			v.chat._place(slot, v.chat.bubbles[slot])
+		check_layout(v, "quick chat bubbles over all four (host %s)" % host)
 		v.free()
 
 
