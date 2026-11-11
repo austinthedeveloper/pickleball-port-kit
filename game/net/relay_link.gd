@@ -21,10 +21,15 @@ const PING_MS := 2000
 const KEEP_MS := 60000           ## a host waiting tells the relay it's still there
 const PING := "~PING"
 const PONG := "~PONG"
-## The relay's reasons, as the screen says them; others pass as they are.
+## The relay's reasons (its close reasons and error words), as the screen
+## says them, with what to do next (PORT-117); others pass as they are.
 const REASONS := {"HOST LEFT": "THE OTHER PLAYER LEFT", "IDLE": "THE ROOM CLOSED: IDLE",
-	"TIME UP": "THE ROOM CLOSED: TIME UP", "NO SUCH ROOM": "NO SUCH ROOM",
-	"ROOM FULL": "THAT ROOM IS FULL", "SERVER FULL": "THE SERVER IS FULL"}
+	"TIME UP": "THE ROOM CLOSED: TIME UP", "NO SUCH ROOM": "NO SUCH ROOM: CHECK THE LETTERS",
+	"ROOM FULL": "THAT ROOM IS FULL: HOST YOUR OWN", "SERVER FULL": "THE SERVER IS FULL: TRY SOON",
+	"TOO MANY TRIES": "TOO MANY WRONG ROOMS: WAIT A MINUTE",
+	"TOO MANY ROOMS": "TOO MANY ROOMS OPENED: WAIT A MINUTE",
+	"TOO FAST": "THE LINE SENT TOO MUCH: TRY AGAIN",
+	"NO SUCH GAME": "THE SERVER DOESN'T KNOW THIS GAME"}
 
 var ws := WebSocketPeer.new()
 var room := ""                   ## the room's name, once the relay gives it
@@ -93,6 +98,16 @@ func rtt_ms() -> int:
 	return _rtt
 
 
+## Seconds before a dial gives up (the relay may be asleep, KNOWN_ISSUES
+## #94: the screen counts it down), or 0 once the room is open or joined.
+func seconds_left() -> int:
+	if _started_ms == 0 or error != "" or status() == CONNECTED or (_hosting and room != ""):
+		return 0
+	if ws.get_ready_state() == WebSocketPeer.STATE_OPEN and not _hosting:
+		return 0                         # in, waiting for the welcome
+	return maxi(0, (TIMEOUT_MS - (Time.get_ticks_msec() - _started_ms) + 999) / 1000)
+
+
 func send(msg: Array) -> void:
 	if status() != CONNECTED:
 		return
@@ -156,6 +171,13 @@ func _control(msg: Variant) -> void:
 			room = String(msg.get("code", ""))
 			_keep_ms = Time.get_ticks_msec()
 		"welcome":
+			# the host's version, from the relay (PORT-117): told now, before
+			# the handshake, who has to update
+			var theirs := String(msg.get("ver", ""))
+			if theirs != "" and theirs != BuildInfo.version():
+				error = OnlineSession.version_line(BuildInfo.version(), theirs)
+				close()
+				return
 			_welcomed = true
 		"joined":
 			if _guest < 0:

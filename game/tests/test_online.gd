@@ -198,8 +198,21 @@ func test_versions_must_match() -> void:
 	for i in 8:
 		host.poll()
 		guest.poll()
-	check(host.closed() and host.reason.begins_with("VERSIONS DIFFER"), "the host refuses: %s" % host.reason)
+	eq(host.reason, "YOUR FRIEND HAS 0.0.1: THEY NEED TO UPDATE", "the host refuses, and says who updates")
 	check(guest.closed(), "and the guest hears it")
+	eq(guest.reason, "THEY HAVE %s: UPDATE THIS GAME TO PLAY" % BuildInfo.version(), "the guest is told to update")
+	# an older game (PROTOCOL 3, before the career look) is told to update,
+	# not shown a broken match
+	links = LoopbackLink.pair(1)
+	host = OnlineSession.new(links[0], true)
+	guest = OnlineSession.new(links[1], false)
+	host.my_hello = OnlineSession.hello({})
+	guest.my_hello = {"version": "0.40.0", "protocol": 3, "look": {}, "name": ""}
+	for i in 8:
+		host.poll()
+		guest.poll()
+	eq([host.state, host.reason], [OnlineSession.CLOSED, "YOUR FRIEND HAS 0.40.0: THEY NEED TO UPDATE"])
+	check(guest.closed() and guest.reason != "", "the older side closes too: %s" % guest.reason)
 
 
 func test_the_delay_fits_the_line() -> void:
@@ -537,3 +550,174 @@ func _rematch(netcode: String) -> void:
 	check(not gv._new_match_queued and not hv._new_match_queued, "%s: the rematch stepped on both screens" % netcode)
 	hv.free()
 	gv.free()
+
+
+## PORT-114 (port ADR-110): the guest's view is mirrored, their side on the
+## left; the pad goes through the mirror, so left on the screen is left;
+## the HUD's panels swap; the sim isn't touched (the two views above stay
+## the same match with the guest mirrored), and the next screen is plain.
+func test_the_guest_sees_themselves_on_the_left() -> void:
+	# the pad: left on screen is the world's right for a mirrored guest;
+	# SHORT's aim is the world's already
+	var it := SimTypes.Intent.new()
+	it.move_x = -1
+	it.aim_x = -1
+	MatchInput.mirror_intent(it, 1)
+	eq([it.move_x, it.aim_x], [1, 1], "screen left is world right")
+	var sh := SimTypes.Intent.new()
+	sh.move_x = -1
+	sh.short_held = 1
+	sh.aim_x = 1
+	MatchInput.mirror_intent(sh, 1)
+	eq([sh.move_x, sh.aim_x], [1, 1], "SHORT still aims away from the guest's net")
+	for host in [true, false]:
+		var pair := LoopbackLink.pair(0)
+		var s := OnlineSession.new(pair[0], host)
+		s.peer_hello = {"name": "BO"}
+		var cfg := PlayerSelect.config_select(K.MODE_SINGLES, PlayerSelect.new_choice(0, 0, 1),
+			PlayerSelect.new_choice(1, 0, 1))
+		var v := MatchView.new()
+		v.net = s
+		var held := [0]
+		v.input.script_intent = func() -> SimTypes.Intent:
+			var i := SimTypes.Intent.new()
+			i.move_x = held[0]
+			return i
+		runner.root.add_child(v)
+		v.setup(cfg, "park", false)
+		eq([v.mirrored(), CourtView.mirror, v.left_team()], [not host, not host, 0 if host else 1],
+			"host %s: mirrored only for the guest" % host)
+		v._update_visuals()
+		var mine: int = v.my_team() * 2
+		var feet: Vector2 = v._players[mine]["root"].position
+		check(feet.x < 480, "host %s: my player is on the left (%d)" % [host, feet.x])
+		check(v._players[2 - mine]["root"].position.x > 480, "host %s: the other on the right" % host)
+		eq(v._players[mine]["body"].flip_h, false, "host %s: my player faces right, to the net" % host)
+		v.sim.team_score = [7, 2]
+		v._hud.refresh()
+		eq([v._hud._left_score.text, v._hud._right_score.text], ["7", "2"] if host else ["2", "7"],
+			"host %s: my score on the left" % host)
+		# the pad: left held is the world's left for the host, its right for
+		# the guest, and either way the player's feet go left on the screen
+		held[0] = -1
+		v.input_lock = 0
+		var w: SimTypes.Intent = v.input.net_intent()
+		eq(w.move_x, -1 if host else 1, "host %s: left held, through the mirror" % host)
+		var x := CourtView.ground(v.sim.players[mine].x_fp + K.to_fp(w.move_x * 4), v.sim.players[mine].y_fp).x
+		check(x < feet.x, "host %s: and that is left on the screen" % host)
+		v.free()
+		check(not CourtView.mirror, "host %s: the next screen draws plainly" % host)
+
+
+## PORT-115 (port ADR-110): two career players online: HELLO carries each
+## look, START hands both to both machines, and each view draws them. The
+## looks are never in the config, so the match (and its hash) is the
+## same as without them.
+func test_career_looks_travel() -> void:
+	var trails := []
+	for with_looks in [true, false]:
+		var links := LoopbackLink.pair(1)
+		var host := OnlineSession.new(links[0], true)
+		var guest := OnlineSession.new(links[1], false)
+		var ann := Career.Player.new()
+		ann.used = 1
+		ann.name = "ANN     "
+		ann.hat = 2
+		ann.hair = 3
+		ann.pattern = 1
+		ann.head = 1
+		var bo := Career.Player.new()
+		bo.used = 1
+		bo.name = "BO      "
+		bo.shirt = 1                     # their Player Select choice's: the same config
+		bo.hat = 1
+		bo.skin = 2
+		var choice := PlayerSelect.new_choice(0, 0, Paddles.STANDARD)
+		host.my_hello = OnlineSession.hello(choice, "ANN", ann if with_looks else null)
+		guest.my_hello = OnlineSession.hello(PlayerSelect.new_choice(1, 0, Paddles.STANDARD), "BO",
+			bo if with_looks else null)
+		if with_looks:
+			eq(host.my_hello["career"]["hat"], 2, "HELLO carries the look")
+			eq(guest.my_hello["look"]["palette"], 1, "and the career's shirt")
+		for i in 8:
+			host.poll()
+			guest.poll()
+		eq(host.state, OnlineSession.CONNECTED)
+		var o := OnlineScreen.new().setup(null)
+		o.session = host
+		o._sfx = Sfx.new()
+		o.add_child(o._sfx)
+		o._start_match()
+		for i in 4:
+			guest.poll()
+		eq(guest.state, OnlineSession.PLAYING)
+		var cfgd: Dictionary = host.start["cfg"]
+		check(not cfgd.has("career") and not cfgd.has("looks"), "the looks aren't in the config")
+		var f := [0]
+		var hv := _view(host, f, 1)
+		var gv := _view(guest, f, 2)
+		for v in [hv, gv]:
+			var a: Career.Player = v.net_look(0)
+			var b: Career.Player = v.net_look(2)
+			if with_looks:
+				eq([a.hat, a.hair, a.pattern, a.head], [2, 3, 1, 1], "host %s: the host's look" % v.net.host)
+				eq([b.hat, b.skin], [1, 2], "host %s: the guest's look" % v.net.host)
+				var drawn: PlayerLook = v._players[0]["look"]
+				check(drawn != null and drawn.hat == String(Career.hat_names[2]).to_lower(),
+					"host %s: drawn in the host's hat" % v.net.host)
+			else:
+				check(a == null and b == null, "no career: the Player Select look")
+		var trail := []
+		while f[0] < 300:
+			hv._physics_process(DT)
+			gv._physics_process(DT)
+			f[0] += 1
+			if f[0] % 50 == 0:
+				trail.append(str(hv.truth.snapshot()).hash())
+		trails.append(trail)
+		hv.free()
+		gv.free()
+		o.free()
+	eq(trails[0], trails[1], "the same match with the looks as without")
+
+
+## PORT-116: the room on the letter grid, as a pad does it (rows by id):
+## letters, DELETE, keys still typing, the box under the letter, the
+## mouse picking a letter, back closing the grid.
+func test_the_room_on_a_letter_grid() -> void:
+	var o := OnlineScreen.new().setup(null)
+	runner.root.add_child(o)
+	if not o.is_node_ready():
+		o._ready()
+	eq(o.way, OnlineScreen.BY_ROOM)
+	var letters := ""
+	for r in OnlineScreen.grid_rows() - 1:
+		letters += "".join(OnlineScreen.grid_items(r))
+	eq(letters, RelayLink.ALPHABET, "the grid is the code's alphabet, nothing else")
+	eq(OnlineScreen.grid_items(OnlineScreen.grid_rows() - 1), ["DELETE", "JOIN"])
+	o.page.select("address")
+	o.page.press()
+	check(o.grid.visible and o.editing, "ROOM opens the grid")
+	o.grid_type("BXK")
+	eq(o.room, "BXK")
+	eq(o.info()[0], "ROOM: BXK-", "the code so far")
+	var last := OnlineScreen.grid_rows() - 1
+	o.grid.select("g%d" % last)
+	o.grid_cols[last] = 0
+	o.grid.press()
+	eq(o.room, "BX", "DELETE")
+	o._type("km")                        # a keyboard still types
+	eq(o.room, "BXKM")
+	# the box sits on the letter under the cursor
+	o.grid.select("g1")
+	o.grid_cols[1] = 2
+	var box := o.grid_item_rect(1, 2)
+	var x0 := o.grid_item_rect(1, 0)
+	check(box.position.x > x0.end.x, "the third letter's box is right of the first's")
+	# the mouse over a letter picks it
+	o._grid_mouse(Vector2(x0.get_center().x, box.get_center().y))
+	eq(o.grid_cols[1], 0, "the mouse picks the letter under it")
+	o._leave()                           # back: out of the grid, not the screen
+	check(not o.grid.visible and o.page.visible and not o.editing, "back closes the grid")
+	eq(o.page.current_id(), "join", "a full code: the cursor on JOIN")
+	o.free()

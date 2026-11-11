@@ -159,6 +159,9 @@ func test_two_games_through_a_relay() -> void:
 ## or Node isn't installed).
 func _relay_server() -> String:
 	var js := ProjectSettings.globalize_path("res://").path_join("../../pickleball-relay/server.js").simplify_path()
+	var env := OS.get_environment("PB94_RELAY_JS")    # another checkout's (a worktree's)
+	if env != "":
+		js = env.path_join("server.js") if not env.ends_with(".js") else env
 	if not FileAccess.file_exists(js):
 		return ""
 	var out := []
@@ -215,11 +218,19 @@ func test_the_screens_through_the_real_relay() -> void:
 		b._process(DT)
 		OS.delay_msec(2)
 		tries += 1
-	eq(b.info()[0], "NO SUCH ROOM", "a wrong room is refused")
+	eq(b.info()[0], "NO SUCH ROOM: CHECK THE LETTERS", "a wrong room is refused, and says what to do")
+	# The right room on the letter grid (PORT-116), as a pad picks it:
+	# rows by id, a letter at a time, then JOIN.
 	b.room = ""
-	b._type(room.to_lower())
-	b.page.select("join")
+	b.page.select("address")
 	b.page.press()
+	check(b.grid.visible and not b.page.visible, "ROOM: the letter grid")
+	b.grid_type(room)
+	eq(b.room, room, "typed on the grid")
+	eq([b.grid.current_id(), b.grid_cols[OnlineScreen.grid_rows() - 1]], ["g%d" % (OnlineScreen.grid_rows() - 1), 1],
+		"four letters: the cursor on JOIN")
+	b.grid.press()
+	check(not b.grid.visible and b.session != null, "JOIN on the grid joins")
 	tries = 0
 	while (a._state() != OnlineSession.CONNECTED or b._state() != OnlineSession.CONNECTED) and tries < 800:
 		a._process(DT)
@@ -240,4 +251,72 @@ func test_the_screens_through_the_real_relay() -> void:
 	b.session.quit()
 	a.free()
 	b.free()
+	_real_refusals(url)
 	OS.kill(pid)
+
+
+## PORT-117: the real relay's refusals, each in the game's words: a full
+## room, and a host on another version (the welcome says it, before the
+## handshake).
+func _real_refusals(url: String) -> void:
+	var h := RelayLink.new()
+	h.host(url)
+	_poll_links([h], func(): return h.room != "")
+	var g1 := RelayLink.new()
+	g1.join(h.room, url)
+	_poll_links([h, g1], func(): return g1.status() == NetLink.CONNECTED)
+	var g2 := RelayLink.new()
+	g2.join(h.room, url)
+	_poll_links([h, g1, g2], func(): return g2.error != "")
+	eq(g2.error, "THAT ROOM IS FULL: HOST YOUR OWN", "a full room")
+	for l in [h, g1, g2]:
+		l.close()
+	var old := RelayLink.new()
+	old._dial("%s/v1/host?game=%s&ver=0.1.0" % [url, RelayLink.GAME])
+	old._hosting = true
+	_poll_links([old], func(): return old.room != "")
+	var g := RelayLink.new()
+	g.join(old.room, url)
+	_poll_links([old, g], func(): return g.error != "")
+	eq(g.error, "YOUR FRIEND HAS 0.1.0: THEY NEED TO UPDATE", "a host on an older version")
+	old.close()
+	g.close()
+
+
+func _poll_links(links: Array, done: Callable) -> void:
+	for i in 600:
+		for l in links:
+			l.poll()
+		if done.call():
+			return
+		OS.delay_msec(2)
+
+
+## PORT-117: every refusal the relay sends (pickleball-relay server.js's
+## refuse() words) has a line on the screen, short enough for it, in the
+## font's characters; a welcome from a host on another version is told
+## who updates; a dial asleep counts down.
+func test_each_refusal_has_a_line() -> void:
+	for r in ["NO SUCH ROOM", "ROOM FULL", "SERVER FULL", "TOO MANY TRIES", "TOO MANY ROOMS",
+			"TOO FAST", "NO SUCH GAME", "HOST LEFT", "IDLE", "TIME UP"]:
+		var l := RelayLink.new()
+		l._control({"op": "error", "reason": r})
+		check(l.error != r or r == "NO SUCH ROOM", "%s: said as %s" % [r, l.error])
+		check(BitmapText.measure("small", l.error) < 820, "%s: fits the panel" % r)
+	var mine := BuildInfo.version()
+	var newer := RelayLink.new()
+	newer._control({"op": "welcome", "you": 0, "ver": "99.0.0"})
+	eq(newer.error, "THEY HAVE 99.0.0: UPDATE THIS GAME TO PLAY", "a newer host: update this one")
+	var same := RelayLink.new()
+	same._control({"op": "welcome", "you": 0, "ver": mine})
+	eq(same.error, "", "the same version: in")
+	var any := RelayLink.new()
+	any._control({"op": "welcome", "you": 0, "ver": ""})
+	eq(any.error, "", "a relay that doesn't say: the handshake checks")
+	# asleep: the countdown runs from TIMEOUT_MS
+	var slow := RelayLink.new()
+	slow._started_ms = Time.get_ticks_msec() - 5000
+	slow._hosting = true
+	var left := slow.seconds_left()
+	check(left <= RelayLink.TIMEOUT_MS / 1000 - 5 + 1 and left >= RelayLink.TIMEOUT_MS / 1000 - 6,
+		"the wait counts down (%d s left)" % left)

@@ -28,10 +28,20 @@ func net_intent() -> SimTypes.Intent:
 		v.input_lock -= 1
 		it = SimTypes.Intent.new()
 		GameControls.clear_latch()
+	if v.mirrored():
+		mirror_intent(it, v.my_team())
 	if it.pause_pressed:
 		v.net_leave_press()
 	it.pause_pressed = 0
 	return it
+
+
+## The guest's pad through the mirror (PORT-114): left on the screen is
+## the world's right. SHORT's aim is already the world's (away from the
+## guest's own net), so it stays.
+static func mirror_intent(it: SimTypes.Intent, team: int) -> void:
+	it.move_x = -it.move_x
+	it.aim_x = (1 if team else -1) if it.short_held else it.move_x
 
 
 ## Lockstep's: the four slots' intents, or null (wait).

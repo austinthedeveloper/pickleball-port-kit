@@ -20,9 +20,16 @@ const WORLD_TOP := float(K.COURT_SIDELINE_TOP)
 const WORLD_DEPTH := float(K.COURT_SIDELINE_BOTTOM - K.COURT_SIDELINE_TOP)
 
 
+## The online guest's view (port ADR-110, PORT-114): the court drawn
+## left for right, so the guest's side is on the left as the host's is.
+## Only the picture: the sim, its world and the text never mirror. The
+## MatchView that set it clears it when it goes.
+static var mirror := false
+
+
 static func uv(x_fp: int, y_fp: int) -> Vector2:
-	return Vector2((x_fp / 16.0 - WORLD_LEFT) / WORLD_LEN,
-		(y_fp / 16.0 - WORLD_TOP) / WORLD_DEPTH)
+	var u := (x_fp / 16.0 - WORLD_LEFT) / WORLD_LEN
+	return Vector2(1.0 - u if mirror else u, (y_fp / 16.0 - WORLD_TOP) / WORLD_DEPTH)
 
 
 static func ground(x_fp: int, y_fp: int) -> Vector2:

@@ -162,6 +162,7 @@ func export(rally: Dictionary) -> Dictionary:
 		"venue": view.venue, "time": view._base_time, "court": view._base_court.duplicate(),
 		"teams": [view._hud._team_label(0), view._hud._team_label(1)],
 		"doubles": view.truth.config.mode == K.MODE_DOUBLES,
+		"mirrored": view.mirrored(),          # the guest's side (PORT-114)
 		"cfg": _cfg.duplicate(true), "career": _career.to_dict() if _career else {},
 		"bot": _bot, "ops": ops, "inputs": _inputs.slice(0, end * 8),
 		"rally": rally.duplicate(true)}

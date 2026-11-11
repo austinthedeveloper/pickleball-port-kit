@@ -32,6 +32,10 @@ func build_players() -> void:
 		var body := Sprite2D.new()
 		var cap := Sprite2D.new()
 		var look := PlayerLook.for_slot(v.sim.config, i, v.manifest)
+		# online (PORT-115): a career player's look, from START (display only)
+		var net_look := v.net_look(i)
+		if net_look and pal >= 0:
+			look = PlayerLook.for_career(net_look, pal, v.sim.config.variant[i], v.sim.config.paddle[i], v.manifest)
 		# ROAD TRIP (port ADR-087): the locals' own looks, your PLAIN PADDLE
 		if v.trip and i >= 2 and i - 2 < v.trip_members.size():
 			look = PlayerLook.from_member(v.trip_members[i - 2], v.manifest)

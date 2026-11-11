@@ -15,7 +15,10 @@
 class_name OnlineSession
 extends RefCounted
 
-const PROTOCOL := 3                ## 3: START names the netcode, rollback's inputs (port ADR-103)
+const PROTOCOL := 4                ## 4: HELLO's career look, START's looks (port ADR-110); 3: the netcode
+## The career look HELLO carries (PORT-115): Career.Player's look fields,
+## a few small ints. Display only: never in the config, so never the sim.
+const LOOK_KEYS := ["variant", "skin", "hair", "hat", "pattern", "head"]
 const ROLLBACK := "rollback"
 const LOCKSTEP := "lockstep"
 ## MatchView plays a rollback match (PORT-109): the host starts what
@@ -49,9 +52,45 @@ func _init(l: NetLink = null, is_host := false) -> void:
 		state = WAITING
 
 
-## {version, protocol, look, name} for HELLO: this game and its player.
-static func hello(look: Dictionary, name := "") -> Dictionary:
-	return {"version": BuildInfo.version(), "protocol": PROTOCOL, "look": look.duplicate(), "name": name}
+## {version, protocol, look, name, career} for HELLO: this game and its
+## player. A career player (PORT-115) plays in their shirt, body and
+## paddle, as every career match does, and `career` carries the rest of
+## their look; {} without one.
+static func hello(look: Dictionary, name := "", me: Career.Player = null) -> Dictionary:
+	var l := look.duplicate()
+	if me:
+		l = PlayerSelect.new_choice(me.shirt, me.variant, me.paddle)
+	return {"version": BuildInfo.version(), "protocol": PROTOCOL, "look": l, "name": name,
+		"career": career_look(me)}
+
+
+static func career_look(me: Career.Player) -> Dictionary:
+	var d := {}
+	if me:
+		for k in LOOK_KEYS:
+			d[k] = int(me.get(k))
+	return d
+
+
+## A career look from HELLO or START as a Player to draw (its values made
+## valid: a peer's bytes can't crash the view), or null for none.
+static func look_player(d: Variant) -> Career.Player:
+	if not d is Dictionary or (d as Dictionary).is_empty():
+		return null
+	var src := {}
+	for k in LOOK_KEYS:
+		src[k] = int((d as Dictionary).get(k, 0))
+	src["used"] = 1
+	return Career.Player.from_dict(src)
+
+
+## What a version mismatch says (PORT-115, PORT-117): who has to update.
+static func version_line(mine: String, theirs: String) -> String:
+	if theirs == "" or theirs == mine:
+		return "VERSIONS DIFFER"
+	if Updater.compare(theirs, mine) < 0:
+		return "YOUR FRIEND HAS %s: THEY NEED TO UPDATE" % theirs
+	return "THEY HAVE %s: UPDATE THIS GAME TO PLAY" % theirs
 
 
 var my_hello := {}
@@ -79,9 +118,8 @@ func _on(m: Array) -> void:
 			peer_hello = m[1]
 			if int(peer_hello.get("protocol", 0)) != PROTOCOL \
 					or String(peer_hello.get("version", "")) != String(my_hello.get("version", "")):
-				link.send(["QUIT", "VERSION"])
-				_close("VERSIONS DIFFER: %s AND %s" % [my_hello.get("version", "?"),
-					peer_hello.get("version", "?")])
+				link.send(["QUIT", "VERSION", String(my_hello.get("version", ""))])
+				_close(version_line(String(my_hello.get("version", "")), String(peer_hello.get("version", ""))))
 				return
 			if state == WAITING:
 				state = CONNECTED
@@ -90,7 +128,11 @@ func _on(m: Array) -> void:
 			_build(2, 0)
 			state = PLAYING
 		"QUIT":
-			_close("VERSIONS DIFFER" if m.size() > 1 and m[1] == "VERSION" else "YOUR FRIEND LEFT")
+			if m.size() > 1 and m[1] == "VERSION":
+				var theirs := String(m[2]) if m.size() > 2 else String(peer_hello.get("version", ""))
+				_close(version_line(String(my_hello.get("version", "")), theirs))
+			else:
+				_close("YOUR FRIEND LEFT")
 		"I", "H":
 			if rollback:
 				rollback.on_message(m)
