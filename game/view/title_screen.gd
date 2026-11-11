@@ -26,6 +26,7 @@ signal open_story               ## ADR-069: STORY, the chapter you're on
 signal open_trip                ## port ADR-087: ROAD TRIP's home
 signal open_course              ## ADR-070: PICKLEBALL 101, the real game's rules
 signal open_club                ## port ADR-106: CLUB, the club manager
+signal open_weekly              ## port ADR-109: the WEEKLY CHALLENGE
 
 const SWITCH_LOCK := MenuPage.TRANSITION   ## no menu input while a page slides in
 ## Rows the lite (Web) build has no content for (port ADR-089).
@@ -587,6 +588,15 @@ func _open_tournament() -> void:
 	main_cursor = pages["main"].cursor
 	return_to = "play"
 	open_tournament.emit()
+
+
+func _open_weekly() -> void:
+	if _sfx:
+		_sfx.play("confirm")
+	_store_settings()
+	main_cursor = pages["main"].cursor
+	return_to = "play"
+	open_weekly.emit()
 
 
 func _open_club() -> void:

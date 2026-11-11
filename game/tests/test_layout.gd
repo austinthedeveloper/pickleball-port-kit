@@ -1902,3 +1902,39 @@ func test_captions() -> void:
 	b.begin_claims()
 	check_layout(b, "couch cup: whose pad")
 	b.free()
+
+
+## The WEEKLY CHALLENGE (port ADR-109): every challenge's screen, with a
+## try's result; the boards at their widest and in every state; ROAD
+## TRIP's TODAY'S BOARD.
+func test_weekly_and_boards() -> void:
+	var sv := _save()
+	var widest := []
+	for k in Boards.SHOWN:
+		widest.append({"initials": "WWW", "score": 999999, "detail": "WWWWWWWWWWWWWWWWWWWWWWWW"})
+	for i in Weekly.challenges().size():
+		Weekly.date_override = 20260105 + i * 7          # week 2 on: each challenge once
+		var w := WeeklyScreen.new().setup(sv, {"met": true, "score": 88888, "detail": "88-88  MISSED"}, false)
+		runner.root.add_child(w)
+		if not w.is_node_ready():
+			w._ready()
+		for row in w.page.rows:
+			w.page.select(String(row["id"]))
+			check_layout(w, "WEEKLY %s, row %s" % [Weekly.current()["name"], row["id"]])
+		for state in [[widest, ""], [[], "LOADING"], [[], "OFFLINE"], [[], ""], [widest.slice(0, 3), "TOO MANY TRIES"]]:
+			w.board.show_board(state[0], state[1])
+			check_layout(w, "WEEKLY board: %d rows, %s" % [state[0].size(), state[1]])
+		w.free()
+	Weekly.date_override = 0
+	var t := _full_trip(7)
+	t.store(sv)
+	var h := TripHome.new().setup(sv)
+	runner.root.add_child(h)
+	if not h.is_node_ready():
+		h._ready()
+	h._open_board()
+	h.board.show_board(widest, "")
+	check_layout(h, "ROAD TRIP: TODAY'S BOARD")
+	h._close_board()
+	check_layout(h, "ROAD TRIP home after the board")
+	h.free()

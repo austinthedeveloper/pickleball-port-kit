@@ -46,6 +46,7 @@ func _ready() -> void:
 	if not Settings.lite:                  # ADR-089: the Web build has no voice
 		add_child(Announcer.new())         # ADR-076: the voice, for the session
 	add_child(Captions.new())              # port ADR-108: CAPTIONS (shown when on)
+	add_child(Crt.new())                   # port ADR-109: CRT (shown when on)
 	if SoundPack.needed():                 # PORT-154: the Web build's music comes after the title
 		var sp := SoundPack.new()
 		sp.loaded.connect(func(): music.retry())
@@ -148,6 +149,7 @@ func show_title() -> void:
 	t.open_trip.connect(func(): show_trip_home())
 	t.open_course.connect(show_course)
 	t.open_club.connect(func(): show_club_home())
+	t.open_weekly.connect(func(): show_weekly())
 	_swap(t)
 	park = null
 
@@ -502,6 +504,7 @@ func _end_trip(t: RoadTrip) -> void:
 	var bond_before := RoadTrip.bond_level(m, t.partner)
 	var steps := t.finish(save)
 	save.save_game()
+	_post_trip(t)
 	var heat_now := int(m["heat"])
 	var bond_now := RoadTrip.bond_level(m, t.partner)
 	show_trip_home({"won": t.won_title(), "leg": t.leg() + 1, "wins": t.wins, "losses": t.losses,
@@ -510,6 +513,54 @@ func _end_trip(t: RoadTrip) -> void:
 		"islands": t.leg() == RoadTrip.ISLANDS, "encore": t.encore_won(),
 		"daily": t.daily, "partner": t.partner, "bond": bond_now if bond_now > bond_before else -1})
 
+
+
+# --- The WEEKLY CHALLENGE (port ADR-109) ---------------------------------------------
+
+## Its screen; `last`: the try just played (and whether it's a new best,
+## which goes to the week's board).
+func show_weekly(last: Dictionary = {}, best := false) -> void:
+	save.save_game()
+	var w := WeeklyScreen.new().setup(save, last, best)
+	w.leave.connect(show_title)
+	w.play.connect(_on_weekly_match)
+	_swap(w)
+
+
+## The week's match (it counts as any match does); its end is judged
+## against the goal, then back to the screen. MENU leaves for the title.
+func _on_weekly_match(cfg: SimTypes.MatchConfig, venue: String, time: int) -> void:
+	save.save_game()
+	var c := Weekly.current()
+	var m := MatchView.new()
+	m.save = save
+	m.finished.connect(func(to_title: bool):
+		if to_title:
+			show_title()
+			return
+		var r := Weekly.judge(c, m.truth.match_winner == 0, m.truth.team_score[0], m.truth.team_score[1],
+			int(m.stats.teams[0]["aces"]), m.stats.longest_rally())
+		var best := Weekly.record(save, r)
+		save.save_game()
+		show_weekly(r, best))
+	_swap(m)
+	m.camera.percent = Settings.CAMERAS[Settings.camera_i]
+	m.court = Settings.court.duplicate()
+	m.time = time
+	m.setup(cfg, venue, false)
+
+
+## TODAY'S TRIP's result to the day's board (port ADR-109), in the
+## background: nothing waits on it.
+func _post_trip(t: RoadTrip) -> void:
+	if t.daily <= 0 or not Settings.board_post:
+		return
+	var b := Boards.new()
+	add_child(b)
+	b.done.connect(func(_board, _error): b.queue_free())
+	var won := t.won_title()
+	b.post(Boards.trip_board(t.daily), Boards.initials(save), Boards.trip_score(won, t.leg() + 1, t.wins, t.losses),
+		Boards.trip_detail(won, t.leg() + 1, t.wins, t.losses))
 
 
 # --- CLUB (port ADR-106) -------------------------------------------------------------

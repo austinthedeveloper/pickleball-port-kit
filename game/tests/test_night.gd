@@ -179,3 +179,32 @@ func test_indoors_is_always_lit() -> void:
 			check(view.crowd.people.all(func(c): return c[0].modulate == Color.WHITE), "the crowd in the light")
 			eq(view._sfx.ambience_name, venue, "its own ambience")
 			view.free()
+
+
+## PORT-161 (port ADR-109): the lit apron. Behind the baseline a player's
+## shadow stays visible at NIGHT on every surround, the dark ones too
+## (KNOWN_ISSUES #38); the light fades out past the apron; every venue's
+## court has a box in its mask.
+func test_lit_apron() -> void:
+	var m := _m()
+	for venue in Settings.VENUES:
+		var path := String(m["venues"][venue]["court_mask"])
+		var box := CourtStyle.court_box(path)
+		check(box.has_area(), "%s: the court's box in its mask" % venue)
+		var mat := CourtStyle.material([0, 0, 0, 0], venue, m, CourtStyle.NIGHT)
+		check(float(mat.get_shader_parameter("apron_px")) > 0.0, venue + ": the apron at night")
+	check(CourtStyle.material([0, 0, 0, 0], "park", m, CourtStyle.DAY) == null, "by day, nothing to do")
+	var surround := CourtStyle.PARTS.find("surround")
+	for gi in CourtStyle.count("surround"):
+		var choice := [0, 0, 0, 0]
+		choice[surround] = gi
+		var painted := CourtStyle.shown(choice, "surround", "park", m)
+		# a shadow just behind the baseline: 20 px off the court
+		var sc := CourtStyle.apron_scale(CourtStyle.NIGHT, 20.0)
+		var g := Color(painted.r * sc.r, painted.g * sc.g, painted.b * sc.b)
+		var c := CourtStyle.contrast(CourtStyle.over(g, CourtStyle.SHADOW), g)
+		check(c >= MIN_SHADOW, "NIGHT, %s behind the baseline: shadow %.2f" % [CourtStyle.names("surround")[gi], c])
+	check(CourtStyle.apron_scale(CourtStyle.NIGHT, 0.0).is_equal_approx(CourtStyle.time_scales(CourtStyle.NIGHT)[1]),
+		"lit at the edge")
+	check(CourtStyle.apron_scale(CourtStyle.NIGHT, 999.0).is_equal_approx(CourtStyle.time_scales(CourtStyle.NIGHT)[0]),
+		"dark past it")

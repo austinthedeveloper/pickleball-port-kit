@@ -32,7 +32,8 @@ var save: SaveGame
 var page: MenuPage
 var garage_page: MenuPage
 var scrap_page: MenuPage
-var view := "home"               ## "home", "garage", "scrapbook", "postcards", "results"
+var view := "home"               ## "home", "garage", "scrapbook", "postcards", "results", "board"
+var board: BoardPanel            ## TODAY'S BOARD (port ADR-109), while open
 var chapter := {}                ## the SCRAPBOOK's chapter chosen per arc
 var heat := 0
 var partner := RoadTrip.PEPPER
@@ -88,7 +89,7 @@ func _ready() -> void:
 	_logo = Sprite2D.new()
 	_logo.texture = load(DIR + "trip_title_card.png")
 	_logo.centered = false
-	_logo.scale = Vector2(0.6, 0.6)
+	_logo.scale = Vector2(0.52, 0.52)      # 104 px: room for TODAY'S BOARD's row
 	_logo.position = Vector2(540, 8)
 	add_child(_logo)
 	_sfx = Sfx.new()
@@ -117,6 +118,8 @@ func _build_home() -> void:
 		"press": func(): _new()})
 	rows.append({"id": "daily", "label": "TODAY'S TRIP", "value": func(): return _daily_value(),
 		"press": func(): _daily()})
+	rows.append({"id": "board", "label": "TODAY'S BOARD", "value": func(): return RoadTrip.date_label(RoadTrip.today()),
+		"press": func(): _open_board()})
 	rows.append({"id": "partner", "label": "PARTNER", "value": func(): return _partner_value(),
 		"change": func(d): _change_partner(d)})
 	rows.append({"id": "heat", "label": "HEAT", "value": func(): return str(heat),
@@ -127,7 +130,7 @@ func _build_home() -> void:
 		meta()["beats"].size(), RoadTrip.data()["beats"].size()], "press": func(): _open_scrapbook()})
 	rows.append({"id": "back", "label": "BACK", "press": func(): _leave()})
 	page = MenuPage.new().setup("trip", "", rows,
-		Rect2(540, 130, 400, 18 + rows.size() * MenuPage.ROW_H + 50), [["hit", "SELECT"], ["back", "BACK"]])
+		Rect2(540, 114, 400, 18 + rows.size() * MenuPage.ROW_H + 50), [["hit", "SELECT"], ["back", "BACK"]])
 	add_child(page)
 	page.pressed.connect(func(_id): page.refresh())
 	page.back_requested.connect(_on_back)
@@ -211,6 +214,32 @@ func _leave() -> void:
 	leave.emit()
 
 
+## TODAY'S BOARD (port ADR-109, PORT-158): the day's trip's top ten from
+## the relay, over the home; any back closes it.
+func _open_board() -> void:
+	_beep("confirm")
+	view = "board"
+	page.visible = false
+	_show_records(false)
+	board = BoardPanel.new().setup(Rect2(250, 110, 460, 300), "TODAY'S TRIP, " + RoadTrip.date_label(RoadTrip.today()),
+		Boards.initials(save))
+	add_child(board)
+	board.load_board(Boards.trip_board(RoadTrip.today()))
+	_lock = LOCK
+
+
+func _close_board() -> void:
+	_beep("back")
+	view = "home"
+	if board:
+		remove_child(board)
+		board.queue_free()
+		board = null
+	page.visible = true
+	_show_records(true)
+	_lock = LOCK
+
+
 func _on_back() -> void:
 	match view:
 		"garage":
@@ -221,15 +250,17 @@ func _on_back() -> void:
 			_close_postcards()
 		"results":
 			_close_results()
+		"board":
+			_close_board()
 		_:
 			_leave()
 
 
 func _build_records() -> void:
-	var p := UiKit.panel(Rect2(540, 428, 400, 98), self)
+	var p := UiKit.panel(Rect2(540, 436, 400, 98), self)
 	p.name = "records"
 	for k in 3:
-		_records.append(UiKit.text("small", "", Vector2(560, 440 + k * 24), 0.0, DIM, self))
+		_records.append(UiKit.text("small", "", Vector2(560, 448 + k * 24), 0.0, DIM, self))
 	_refresh_records()
 
 
@@ -610,6 +641,10 @@ func _process(_delta: float) -> void:
 		"results":
 			if Input.is_action_just_pressed("hit") or Input.is_action_just_pressed("start"):
 				_close_results()
+		"board":
+			if Input.is_action_just_pressed("hit") or Input.is_action_just_pressed("start") \
+					or Input.is_action_just_pressed("soft") or Input.is_action_just_pressed("drive"):
+				_close_board()
 		"garage":
 			var nav := garage_page.drive()
 			if nav & (MenuPage.NAV_MOVED | MenuPage.NAV_CHANGED):

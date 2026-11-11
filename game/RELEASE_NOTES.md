@@ -3,7 +3,7 @@
 Build `v0.43.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-110 of 114 roadmap tasks are in.
+111 of 115 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -676,6 +676,12 @@ Status: **Done**.
 Controls and access (port ADR-108; GitHub #13 to #17), chained from `feature/cld-handhelds`. PORT-78 (the keyboard presets) is left for your layout.
 
 Status: **Ready to test**.
+
+## PORT-131: 131, 158, 159, 161. `feature/cld-crt-board`: CRT, the lit apron, WEEKLY, the boards (asked for 2026-11-11)
+
+CRT, the lit apron, the WEEKLY CHALLENGE and score boards (port ADR-109; GitHub #21, #51, #49, #48), chained from `feature/cld-access`.
+
+Status: **Ready to test**; the boards wait on the relay's PR (merging it deploys it) and on whether boards should survive the relay's sleep (a storage mount; For you).
 
 ## PORT-142: 142-150. `feature/cld-club`: CLUB, the club manager (asked for 2026-11-11)
 
