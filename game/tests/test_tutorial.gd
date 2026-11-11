@@ -114,6 +114,17 @@ func test_match_lessons() -> void:
 	eq(bounces.progress, 1, "past the two bounces: once per rally")
 	bounces.observe(sim, [[K.EVENT_FAULT, 0, 0, K.FAULT_EARLY_VOLLEY]])
 	check(bounces.message.begins_with("LET THE SERVE"), "VOLLEY! gets advice")
+	# the push (SNES ADR-076): P1's shot out past the baseline is held too long
+	# (a fresh lesson: the serve below would finish TWO BOUNCES)
+	bounces = _lesson("kitchen")
+	bounces.observe(sim, [[K.EVENT_SERVE, 60, 130, 0], [K.EVENT_FAULT, 244, 100, K.FAULT_OUT]])
+	eq(bounces.message, "", "a long serve isn't the push")
+	bounces.observe(sim, [[K.EVENT_HIT, 60, 130, 2], [K.EVENT_FAULT, 8, 100, K.FAULT_OUT]])
+	eq(bounces.message, "", "the CPU's long shot isn't yours")
+	bounces.observe(sim, [[K.EVENT_HIT, 200, 130, 0], [K.EVENT_FAULT, 160, 2, K.FAULT_OUT]])
+	eq(bounces.message, "", "wide isn't long")
+	bounces.observe(sim, [[K.EVENT_HIT, 60, 130, 0], [K.EVENT_FAULT, 246, 100, K.FAULT_OUT]])
+	check(bounces.message.begins_with("OUT LONG"), "out long gets advice")
 	sim.dispose()
 
 

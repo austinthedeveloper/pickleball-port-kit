@@ -4,6 +4,7 @@ extends TestSuite
 var sim: Sim
 var paddle := Paddles.STANDARD
 var offset_y := 0
+var push := K.HIT_PUSH_DEEP      ## the CPU's push (SNES ADR-076)
 
 
 func _reset() -> void:
@@ -119,6 +120,7 @@ func test_directional_target_lanes() -> void:
 		sim.players[0].state = K.STATE_ACTIVE
 		sim.intents[0].aim_x = c[0]
 		sim.intents[0].aim_y = c[1]
+		sim.intents[0].push = K.HIT_PUSH_DEEP
 		eq(sim.resolve_player_hits(), 1)
 		_lands_near(c[2], c[3])
 
@@ -134,6 +136,7 @@ func _fly_shot(team: int, shot: int, aim_x: int) -> Array:
 	p.shot_type = shot
 	p.state = K.STATE_ACTIVE
 	sim.intents[0].aim_x = aim_x
+	sim.intents[0].push = push
 	eq(sim.resolve_player_hits(), 1)
 	var apex := 0
 	var frames := 0
@@ -161,6 +164,72 @@ func test_shot_types() -> void:   # ADR-019
 	_fly_shot(1, K.SHOT_SOFT, 1)
 	check(sim.ball.x_fp < K.to_fp(K.COURT_NET_X) and sim.ball.x_fp > K.to_fp(K.COURT_KITCHEN_LEFT_X),
 		"right team's dink lands in the left kitchen")
+
+
+## SNES ADR-076: aimed toward the net, a standard shot or drive lands
+## deeper the longer the push, the old deep target at HIT_PUSH_DEEP, past
+## the baseline from HIT_PUSH_OUT_FRAMES, never past HIT_PUSH_MAX_X; the
+## right team mirrors. A lob ignores it.
+func test_push_depth() -> void:
+	eq(K.HIT_PUSH_START_X + (K.HIT_PUSH_DEEP >> K.HIT_PUSH_SHIFT), K.HIT_TARGET_DEEP_RIGHT)
+	eq([K.HIT_PUSH_START_X, K.HIT_PUSH_MAX_X, K.HIT_PUSH_DEEP, K.HIT_PUSH_OUT_FRAMES],
+		[212, 252, 32, 58], "tuning.json v5")
+	for shot in [K.SHOT_STANDARD, K.SHOT_DRIVE]:
+		var last := 0
+		for n in [1, 20, K.HIT_PUSH_DEEP, K.HIT_PUSH_OUT_FRAMES - 1, K.HIT_PUSH_OUT_FRAMES, 200, 255]:
+			push = n
+			_fly_shot(0, shot, 1)
+			var x := K.from_fp(sim.ball.x_fp)
+			check(sim.ball.x_fp >= last, "push %d deeper" % n)
+			last = sim.ball.x_fp
+			check(x <= K.HIT_PUSH_MAX_X + 2, "push %d capped (%d)" % [n, x])
+			if n < K.HIT_PUSH_OUT_FRAMES:
+				check(x <= K.COURT_BASELINE_RIGHT, "push %d in (%d)" % [n, x])
+			else:
+				check(x > K.COURT_BASELINE_RIGHT, "push %d out (%d)" % [n, x])
+			if n == K.HIT_PUSH_DEEP:
+				check(absi(sim.ball.x_fp - K.to_fp(K.HIT_TARGET_DEEP_RIGHT)) < K.to_fp(3), "old deep")
+	push = 255                       # the right team: out past its own baseline
+	_fly_shot(1, K.SHOT_STANDARD, -1)
+	check(sim.ball.x_fp < K.to_fp(K.COURT_BASELINE_LEFT), "right team pushes out")
+	_fly_shot(0, K.SHOT_SOFT, 1)     # a lob stays deep and in
+	check(absi(sim.ball.x_fp - K.to_fp(K.HIT_TARGET_DEEP_RIGHT)) < K.to_fp(3), "lob ignores it")
+	push = K.HIT_PUSH_DEEP
+
+
+static func _aim(x: int, y: int = 0) -> SimTypes.Intent:
+	var it := SimTypes.Intent.new()
+	it.aim_x = x
+	it.aim_y = y
+	it.move_x = x
+	return it
+
+
+## SNES ADR-076 (test_input.c's test_push): the push counts frames aimed
+## toward the player's net (right on the left team, left on the right),
+## and anything else resets it: away, nothing, or SHORT's aim. It caps.
+## The port counts it in Sim.step, so it is state that rolls back.
+func test_push_counts() -> void:
+	var cfg := SimTypes.MatchConfig.singles()
+	cfg.human = [1, 0, 1, 0]
+	var s := Sim.new(cfg)
+	eq([s.intents[0].push, s.intents[2].push], [0, 0])
+	for f in 10:
+		s.step([_aim(1), null, _aim(1), null])   # P1 toward the net, slot 2 away
+	eq([s.intents[0].push, s.intents[2].push], [10, 0])
+	s.step([_aim(1, -1), null, _aim(-1), null])  # a sideline aim still counts
+	eq([s.intents[0].push, s.intents[2].push], [11, 1])
+	s.step([_aim(-1), null, _aim(-1), null])     # SHORT aims away
+	eq(s.intents[0].push, 0)
+	s.step([_aim(1), null, _aim(-1), null])
+	var kept := SimState.save(s)
+	s.step([_aim(0), null, _aim(-1), null])
+	eq(s.intents[0].push, 0, "nothing held resets")
+	SimState.load_into(s, kept)
+	eq(s.intents[0].push, 1, "the push is state")
+	for f in 300:
+		s.step([_aim(1), null, _aim(-1), null])
+	eq(s.intents[0].push, K.INPUT_PUSH_MAX)
 
 
 func test_paddle_stats() -> void:   # ADR-020
