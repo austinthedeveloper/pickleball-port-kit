@@ -28,8 +28,8 @@ static func build(host: Node) -> void:
 			"change": func(d): Announcer.chatter = clampi(Announcer.chatter + d, Announcer.LIGHT, Announcer.LOTS)},
 		{"id": "fullscreen", "label": "FULLSCREEN", "value": func(): return "ON" if Settings.fullscreen else "OFF",
 			"change": func(_d): Settings.fullscreen = not Settings.fullscreen; Settings.apply_window(host.get_window())},
-		{"id": "scale", "label": "SCALE", "value": func(): return "PIXEL" if Settings.integer_scale else "FILL",
-			"change": func(_d): Settings.integer_scale = not Settings.integer_scale; Settings.apply_window(host.get_window())},
+		{"id": "scale", "label": "SCALE", "value": func(): return Settings.scale_name(),
+			"change": func(d): Settings.change_scale(d); Settings.apply_window(host.get_window())},
 		{"id": "controls", "label": "CONTROLS", "press": func(): host.open_page("controls")},
 		{"id": "access", "label": "ACCESSIBILITY", "press": func(): host.open_page("access")},
 		# PORT-32: the in-game updater
@@ -99,6 +99,10 @@ static func build(host: Node) -> void:
 		{"id": "touch", "label": "TOUCH PAD", "value": func(): return TouchPad.MODES[Settings.touch_pad],
 			"change": func(d):
 				Settings.touch_pad = (Settings.touch_pad + d + TouchPad.MODES.size()) % TouchPad.MODES.size()},
+		{"id": "touch_words", "label": "TOUCH BUTTONS", "value": func(): return "WORDS" if Settings.touch_words else "SNES",
+			"change": func(_d):
+				Settings.touch_words = not Settings.touch_words
+				GameControls.device_serial += 1},        # the touch prompts redraw (PORT-151)
 	], help, Rect2(250, 150, 460, 0))
 
 

@@ -152,7 +152,14 @@ static func touch_glyph(action: String) -> Dictionary:
 		return {"kind": "dpad", "text": "", "dir": -1}
 	if action == "back":
 		action = "drive"
+	if Settings.touch_words and TOUCH_WORDS.has(action):
+		return {"kind": "pill", "text": TOUCH_WORDS[action]}     # PORT-151: TOUCH BUTTONS WORDS
 	return button_glyph(TOUCH.get(action, -1), SNES)
+
+
+## TOUCH BUTTONS WORDS: each touch button by what it does.
+const TOUCH_WORDS := {"hit": "HIT", "drive": "DRIVE", "soft": "SOFT", "slice": "SLICE",
+	"short": "SHORT", "special": "SPECIAL", "start": "START"}
 
 
 ## A trigger (SHORT's left, SPECIAL's right, port ADR-082), as each family

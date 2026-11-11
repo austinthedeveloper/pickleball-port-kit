@@ -91,6 +91,15 @@ static var ball_size := BALL_SIZE_DEFAULT     ## MODIFIERS > BALL SIZE, percent,
 ## Window options: fullscreen, and integer scaling (crisp) or fit (fills).
 static var fullscreen := false
 static var integer_scale := true
+## SCALE AUTO (PORT-153): crisp whole-number scaling where it fills the
+## screen, else fit (a handheld's 1280x800 would get a 960x540 island).
+## Off, `integer_scale` picks PIXEL or FILL as before.
+static var scale_auto := true
+const SCALE_NAMES := ["AUTO", "PIXEL", "FILL"]
+## A whole-number scale must cover this much of the screen each way.
+const AUTO_COVER := 0.85
+## PORT-151: the touch pad's buttons as the SNES pad's letters, or words.
+static var touch_words := false
 ## Court colours: [surface, kitchen, surround, lines] presets (CourtStyle).
 static var court: Array = CourtStyle.DEFAULTS.duplicate()
 static var time_i := CourtStyle.DAY
@@ -174,6 +183,9 @@ static func load_from(save: SaveGame) -> void:
 	Announcer.chatter = clampi(int(st.get("commentary", Announcer.NORMAL)), Announcer.LIGHT, Announcer.LOTS)
 	fullscreen = int(st.get("fullscreen", 0)) != 0
 	integer_scale = int(st.get("integer_scale", 1)) != 0
+	# a save before SCALE AUTO: FILL chosen stays FILL; the default goes AUTO
+	scale_auto = int(st.get("scale_auto", 1 if integer_scale else 0)) != 0
+	touch_words = int(st.get("touch_words", 0)) != 0
 	var ct: Array = st.get("court", CourtStyle.DEFAULTS)
 	court = CourtStyle.DEFAULTS.duplicate()
 	for i in mini(ct.size(), 4):
@@ -209,6 +221,7 @@ static func store_to(save: SaveGame) -> void:
 		"camera": camera_i, "mod_bits": mod_bits, "ball_speed": ball_speed, "park_location": park_i, "ball_speed_v": BALL_DEFAULTS_V, "ball_size": ball_size, "cpu_errors": cpu_errors, "ai_smarts": smart_table().duplicate(true), "sound": Sfx.setting,
 		"music": Music.volume, "announcer": Announcer.volume, "announcer_on": 1 if Announcer.enabled else 0, "commentary": Announcer.chatter,
 		"fullscreen": 1 if fullscreen else 0, "integer_scale": 1 if integer_scale else 0,
+		"scale_auto": 1 if scale_auto else 0, "touch_words": 1 if touch_words else 0,
 		"player": [p1_choice["palette"], p1_choice["variant"], p1_choice["paddle"]],
 		"court": court.duplicate(), "time": time_i,
 		"shake": 1 if shake_i else 0, "shake_level": shake_i, "flash": 1 if flashes else 0, "replay_demo": 1 if replays_in_demo else 0,
@@ -218,12 +231,52 @@ static func store_to(save: SaveGame) -> void:
 		"pad_notice": 1 if pad_notice else 0, "touch_pad": touch_pad}, true)
 
 
+## SCALE's value: AUTO, PIXEL or FILL.
+static func scale_name() -> String:
+	return SCALE_NAMES[0 if scale_auto else (1 if integer_scale else 2)]
+
+
+## SCALE's Left/Right: AUTO, PIXEL, FILL, round.
+static func change_scale(d: int) -> void:
+	var i := (SCALE_NAMES.find(scale_name()) + d + SCALE_NAMES.size()) % SCALE_NAMES.size()
+	scale_auto = i == 0
+	if i > 0:
+		integer_scale = i == 1
+
+
+## Whole-number scaling for a window of `size`: always for PIXEL, never
+## for FILL; on AUTO when the biggest whole scale covers AUTO_COVER of the
+## window each way (1920x1080 yes; 1280x800, 1366x768, 2560x1440 no).
+static func integer_for(size: Vector2i) -> bool:
+	if not scale_auto:
+		return integer_scale
+	if portrait(size):
+		return false
+	var s := mini(size.x / 960, size.y / 540)
+	return s >= 1 and 960.0 * s / size.x >= AUTO_COVER and 540.0 * s / size.y >= AUTO_COVER
+
+
+## A window taller than wide (a phone held upright, PORT-152).
+static func portrait(size: Vector2i) -> bool:
+	return size.y > size.x
+
+
+static var _watched: Window
+
 ## Applies the window options (a no-op headless, where there's no window).
+## Upright, the picture keeps its width and the space below it is the
+## touch pad's (PORT-152); the window's size is watched so a turned phone
+## or a resized window chooses again.
 static func apply_window(win: Window) -> void:
 	if win == null or DisplayServer.get_name() == "headless":
 		return
-	win.content_scale_stretch = Window.CONTENT_SCALE_STRETCH_INTEGER if integer_scale \
+	if _watched != win:
+		_watched = win
+		win.size_changed.connect(func(): Settings.apply_window(win))
+	win.content_scale_stretch = Window.CONTENT_SCALE_STRETCH_INTEGER if integer_for(win.size) \
 		else Window.CONTENT_SCALE_STRETCH_FRACTIONAL
+	win.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_KEEP_WIDTH if portrait(win.size) \
+		else Window.CONTENT_SCALE_ASPECT_KEEP
 	var want := DisplayServer.WINDOW_MODE_FULLSCREEN if fullscreen else DisplayServer.WINDOW_MODE_WINDOWED
 	if DisplayServer.window_get_mode() != want:
 		DisplayServer.window_set_mode(want)

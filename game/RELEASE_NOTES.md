@@ -3,7 +3,7 @@
 Build `v0.43.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-108 of 112 roadmap tasks are in.
+109 of 113 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -676,3 +676,9 @@ Status: **Done**.
 CLUB: the Pickleball '95 club manager (port ADR-106; GitHub #32 to #40): PLAY > CLUB. A day at the park you own, playing on its courts while the members play around you; the night's ledger; upgrades that change the park; members who come and go; a coach; the WEEKEND CUP; weather.
 
 Status: **Ready to test**.
+
+## PORT-151: 151-155. `feature/cld-handhelds`: phones and handhelds (asked for 2026-11-11)
+
+Phones and handhelds (port ADR-107; GitHub #41 to #45), chained from `feature/cld-club`.
+
+Status: **Ready to test** on a real phone (KNOWN_ISSUES #79).

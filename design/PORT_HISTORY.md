@@ -2209,3 +2209,22 @@ the 2026-10-21 cleanup.
     screenshots of a fifth team talk and a fourth motel talk.
   - Status: **Ready to test**: take a few trips (or meet the same team
     twice) and read along; say if any character's voice is off.
+
+## The asks of 2026-10-28 (moved 2026-11-11)
+
+### 113. `feature/cld-cleanup-7`: cleanup round 7 (asked for 2026-10-28)
+
+- [x] `PORT-113` Docs and files only, no code:
+  - **The history:** PORT-79 to 111 moved to `PORT_HISTORY.md`. The
+    sheet keeps the index, the releases and the open tasks (36, 40, 62,
+    78). `release_notes.py` gives the same notes.
+  - **The READMEs:**
+    - the ADR range is now 018 to 104;
+    - the design folder lists ROAD TRIP, specials, the relay plan and the
+      announcer's scripts;
+    - `game/README.md` names the five view files it had missed.
+  - **Branches:** the 36 local branches merged into `main` deleted.
+    `feature/cld-release-0.26.0` stays, as in round 6, and so do the
+    branches checked out in old agent worktrees.
+  - Verified: `test.sh` passes; the release notes are the same.
+  - Status: **Done**.
