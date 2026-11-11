@@ -57,11 +57,18 @@ static func build(host: Node) -> void:
 			"change": func(_d): Settings.hud_large = not Settings.hud_large},
 		{"id": "assist", "label": "SERVE ASSIST", "value": func(): return onoff.call(Settings.serve_assist),
 			"change": func(_d): Settings.serve_assist = not Settings.serve_assist},
+		# port ADR-108: COLOURS for the rings and tags, CAPTIONS, ASSIST
+		{"id": "colours", "label": "COLOURS", "value": func(): return Access.SETS[Settings.colours_i],
+			"change": func(d): Settings.colours_i = (Settings.colours_i + d + Access.SETS.size()) % Access.SETS.size()},
+		{"id": "captions", "label": "CAPTIONS", "value": func(): return onoff.call(Settings.captions),
+			"change": func(_d): Settings.captions = not Settings.captions},
+		{"id": "help", "label": "ASSIST", "value": func(): return K.ASSIST_NAMES[Settings.assist_i],
+			"change": func(d): Settings.assist_i = (Settings.assist_i + d + K.ASSIST_NAMES.size()) % K.ASSIST_NAMES.size()},
 		{"id": "vibration", "label": "VIBRATION", "value": func(): return onoff.call(Settings.vibration),
 			"change": func(_d):
 				Settings.vibration = not Settings.vibration
 				GameControls.rumble(0, 0.4, 0.4, 0.15)},       # a taste of it
-	], help, Rect2(280, 172, 400, 0))
+	], help, Rect2(280, 60, 400, 0))      # up: eight rows, clear of the key legend
 	var control_rows := []
 	for a in Bindings.ACTIONS:
 		var action: String = a

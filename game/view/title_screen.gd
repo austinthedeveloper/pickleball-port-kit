@@ -335,7 +335,7 @@ func _show(id: String) -> void:
 	if pad_map_screen:
 		pad_map_screen.visible = id == "padmap"
 	for n in _header:
-		n.visible = not id in ["select", "setup", "records", "achievements", "replays", "controls", "options", "modifiers", "rules", "lobby", "museum", "career_card", "career_edit",
+		n.visible = not id in ["select", "setup", "records", "achievements", "replays", "controls", "options", "access", "modifiers", "rules", "lobby", "museum", "career_card", "career_edit",
 			"career_name", "pad", "padmap"]
 	if lobby_screen:
 		lobby_screen.visible = id == "lobby"

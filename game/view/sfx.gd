@@ -101,6 +101,8 @@ func event(e: Array, rally: int, match_won: bool) -> void:
 
 
 func _play(name: String, pitch: float, volume: int, pan: float, ui: bool) -> void:
+	if not ui:
+		Access.cue(name)                 # port ADR-108: CAPTIONS' sound-only cues
 	if not _players.has(name) or setting == AudioMap.SOUND_OFF:
 		return
 	last = [name, pitch, volume, pan]

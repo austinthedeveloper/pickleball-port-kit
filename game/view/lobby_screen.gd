@@ -83,7 +83,7 @@ func _build_card(i: int) -> Dictionary:
 	p.reparent(root)
 	var c := {"root": root}
 	var cx := x + CARD_W / 2.0
-	c["number"] = _text("big", "P%d" % (i + 1), Vector2(cx, CARD_Y + 12), 0.5, PLAYER_TINTS[i], root)
+	c["number"] = _text("big", "P%d" % (i + 1), Vector2(cx, CARD_Y + 12), 0.5, Access.player_tint(i), root)
 	var empty := Control.new()
 	root.add_child(empty)
 	_text("small", "PRESS", Vector2(cx, CARD_Y + 130), 0.5, DIM, empty)

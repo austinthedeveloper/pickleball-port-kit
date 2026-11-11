@@ -45,6 +45,14 @@ var _champ_title: BitmapText
 var _champ_box: NinePatchRect
 var couch := false                     ## the couch cup's bracket (PORT-29)
 var club := false                      ## CLUB's WEEKEND CUP (port ADR-106): set up by main, DONE when over
+## PORT-126: a saved couch cup opened afresh asks each player to press
+## Start on their pad before its next match (a pad's id can change with a
+## restart or a replug), in the cup's order: `claims` the [entry, card]
+## still to claim, `claimed` the pads taken.
+var claim_needed := false
+var claiming := false
+var claims: Array = []
+var claimed: Array = []
 
 
 func setup(game_save: SaveGame, reveal := false, is_couch := false, is_club := false) -> BracketScreen:
@@ -56,6 +64,7 @@ func setup(game_save: SaveGame, reveal := false, is_couch := false, is_club := f
 		t = saved
 		started = true
 		shown = saved.seen if reveal else decided()
+		claim_needed = couch and not reveal and not t.humans.is_empty()
 	else:
 		t = _fresh(false)
 	return self
@@ -152,6 +161,8 @@ func _play_label() -> String:
 
 
 func _play_value() -> String:
+	if claiming and not claims.is_empty():
+		return "%s: PRESS START" % claim_name()
 	var nm := t.next_match()
 	if nm.is_empty():
 		return ""
@@ -205,6 +216,9 @@ func _press_play() -> void:
 		started = true
 		_store()
 	_sfx.play("confirm")
+	if couch and claim_needed:
+		begin_claims()
+		return
 	if couch:
 		var cm := t.couch_match(Settings.mod_bits, Settings.venue())
 		play_couch.emit(cm["cfg"], cm["venue"], cm["pads"], cm["players"])
@@ -381,6 +395,14 @@ func _process(_delta: float) -> void:
 	if _lock > 0:
 		_lock -= 1
 		return
+	if claiming:
+		for dev in GameControls.connected_pads():
+			if GameControls.read_pad_intent(dev).pause_pressed:
+				claim(dev)
+		if Input.is_action_just_pressed("soft") or Input.is_action_just_pressed("drive"):
+			claiming = false                 # back: ask again next PLAY
+			_refresh()
+		return
 	var nav := page.drive()
 	if nav & MenuPage.NAV_MOVED:
 		_moved()
@@ -392,6 +414,44 @@ func _process(_delta: float) -> void:
 	elif nav & MenuPage.NAV_PRESSED:
 		_sfx.play("blip")
 		_refresh()
+
+
+# --- Whose pad is whose (PORT-126) -------------------------------------------------
+
+func begin_claims() -> void:
+	claims = []
+	claimed = []
+	for e in t.humans.size():
+		for k in (t.humans[e]["cards"] as Array).size():
+			claims.append([e, k])
+	claiming = not claims.is_empty()
+	_sfx.play("confirm")
+	_refresh()
+
+
+## The player whose pad is asked for now ("P2").
+func claim_name() -> String:
+	var c: Array = claims[0]
+	return "P%d" % (int(t.humans[c[0]]["cards"][c[1]]["number"]) + 1)
+
+
+## Start on pad `dev`: it's the asked player's (a pad already taken is
+## ignored). The last one claimed, the cup is stored and the match starts.
+func claim(dev: int) -> bool:
+	if not claiming or dev in claimed or claims.is_empty():
+		return false
+	var c: Array = claims.pop_front()
+	t.humans[c[0]]["cards"][c[1]]["device"] = dev
+	claimed.append(dev)
+	_sfx.play("blip")
+	if claims.is_empty():
+		claiming = false
+		claim_needed = false
+		_store()
+		_press_play()
+	else:
+		_refresh()
+	return true
 
 
 func _moved() -> void:

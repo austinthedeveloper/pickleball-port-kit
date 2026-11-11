@@ -202,6 +202,7 @@ class MatchConfig:
 	var modifiers := 0                 # MOD_* bits (ADR-033)
 	var ball_speed := 100              # percent: a shot's flight frames, times 100 / this (ADR-071)
 	var cpu_errors := 100              # percent of the ROM's late swings a CPU makes (ADR-073)
+	var assist := 0                    # K.ASSIST_* (port ADR-108): OFF in the ROM's play
 	## The remaster's overhead smash (ADR-053; the ROM has none). Off, the
 	## sim is the ROM's: the SNES conformance traces run with it off.
 	var overhead := 1

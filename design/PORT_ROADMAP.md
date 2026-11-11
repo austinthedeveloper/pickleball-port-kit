@@ -148,11 +148,11 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-120 | Online: rejoin after a drop ([#9](https://github.com/austinthedeveloper/pickleball-port-kit/issues/9)) | | Planned |
 | PORT-121 | Online: spectators ([#10](https://github.com/austinthedeveloper/pickleball-port-kit/issues/10)) | | Planned |
 | PORT-122 | Online: quick chat ([#11](https://github.com/austinthedeveloper/pickleball-port-kit/issues/11)) | | Planned |
-| PORT-123 | Colour-safe player rings and ball ([#13](https://github.com/austinthedeveloper/pickleball-port-kit/issues/13)) | | Planned |
-| PORT-124 | Captions for the announcer and the quips ([#14](https://github.com/austinthedeveloper/pickleball-port-kit/issues/14)) | | Planned |
-| PORT-125 | Assists: hold to swing and slower serves ([#15](https://github.com/austinthedeveloper/pickleball-port-kit/issues/15)) | | Planned |
-| PORT-126 | Couch cup: pads rebind on PLAY ([#16](https://github.com/austinthedeveloper/pickleball-port-kit/issues/16)) | | Planned |
-| PORT-127 | Cleanup round 8 ([#17](https://github.com/austinthedeveloper/pickleball-port-kit/issues/17)) | | Planned |
+| PORT-123 | Colour-safe player rings and ball ([#13](https://github.com/austinthedeveloper/pickleball-port-kit/issues/13)) | `feature/cld-access` | Ready to test |
+| PORT-124 | Captions for the announcer and the quips ([#14](https://github.com/austinthedeveloper/pickleball-port-kit/issues/14)) | `feature/cld-access` | Done |
+| PORT-125 | Assists: hold to swing and slower serves ([#15](https://github.com/austinthedeveloper/pickleball-port-kit/issues/15)) | `feature/cld-access` | Ready to test |
+| PORT-126 | Couch cup: pads rebind on PLAY ([#16](https://github.com/austinthedeveloper/pickleball-port-kit/issues/16)) | `feature/cld-access` | Ready to test |
+| PORT-127 | Cleanup round 8 ([#17](https://github.com/austinthedeveloper/pickleball-port-kit/issues/17)) | `feature/cld-access` | Done |
 | PORT-128 | The sim caught up to the ROM's latest tuning ([#18](https://github.com/austinthedeveloper/pickleball-port-kit/issues/18)) | | Planned |
 | PORT-129 | 1994 MODE: the plan ([#19](https://github.com/austinthedeveloper/pickleball-port-kit/issues/19)) | | Planned |
 | PORT-130 | 1994 MODE: the toggles ([#20](https://github.com/austinthedeveloper/pickleball-port-kit/issues/20)) | | Planned |
@@ -490,6 +490,26 @@ the same request), and every task since but the open ones. Open: 36, 40,
     should fill the screen.
   - Status: **Ready to test** on a real phone (KNOWN_ISSUES #79).
 
+### 123-127. `feature/cld-access`: controls and access (asked for 2026-11-11)
+- [x] `PORT-123` Controls and access (port ADR-108; GitHub #13 to #17),
+  chained from `feature/cld-handhelds`. PORT-78 (the keyboard presets)
+  is left for your layout.
+  - Done: ACCESSIBILITY > COLOURS (123: five sets for the rings, tags and
+    lobby numbers; a shape on every ring; HIGH CONTRAST's dark edges and
+    the ball's white rim); CAPTIONS (124: the announcer's lines and the
+    sound-only cues in a bar under the court); ASSIST (125: SWING and
+    SERVE, in the sim, OFF the ROM's; an assisted match isn't recorded);
+    the couch cup asking for each player's pad on PLAY (126, KNOWN_ISSUES
+    #52); cleanup round 8 (127).
+  - Verified: `test_access.gd`, `test_layout` (ACCESSIBILITY, the caption
+    bar, the cup's question); golden traces and conformance unchanged;
+    `test.sh` passes; screenshots of TRITAN and HIGH CONTRAST rings and
+    the caption bar.
+  - Try: OPTIONS > ACCESSIBILITY: each COLOURS set in a doubles match;
+    CAPTIONS ON with the announcer; ASSIST SWING with a child. A saved
+    couch cup after swapping two pads' ports.
+  - Status: **Ready to test**.
+
 ## Phase 6: the year to 1.0 (planned 2026-11-10)
 
 A year of stories, December 2026 to November 2027, one GitHub milestone
@@ -628,6 +648,9 @@ Feature freeze, a full playtest, store pages, v1.0.0; cleanup round 11.
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
+- **PORT-123 COLOURS:** the colour-blind sets were checked by simulation;
+  if you know someone colour-blind, ask them to try theirs in doubles.
+  The shapes on the rings (dot, bar, triangle, square) are on in every set.
 - **PORT-151..154 phones:** open the Web build on your phone, upright and
   on its side. Do the buttons sit under your thumbs? SNES or WORDS (TOUCH
   BUTTONS)? Does a turn of the phone switch cleanly? The roadmap's PORT-81

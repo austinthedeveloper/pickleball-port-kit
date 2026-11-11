@@ -1857,3 +1857,48 @@ func test_club() -> void:
 	GameControls.last_device = kept[0]
 	Settings.pad_glyphs = kept[1]
 	GameControls.device_serial += 1
+
+
+## CAPTIONS (port ADR-108): the bar with the longest caption over a
+## match's states and the title's MAIN, and a cue; the couch cup asking
+## for each player's pad (PORT-126).
+func test_captions() -> void:
+	var kept := Settings.captions
+	Settings.captions = true
+	var longest := ""
+	for id: String in Access.captions():
+		if Access.caption_for(id).length() > longest.length():
+			longest = Access.caption_for(id)
+	for screen in ["match", "title"]:
+		var holder := Node.new()
+		runner.root.add_child(holder)
+		if screen == "match":
+			var v := _view(SimTypes.MatchConfig.singles())
+			v.get_parent().remove_child(v)
+			holder.add_child(v)
+		else:
+			var t := _title()
+			t.get_parent().remove_child(t)
+			holder.add_child(t)
+		var bar := Captions.new()
+		holder.add_child(bar)
+		if not bar.is_node_ready():
+			bar._ready()
+		for text in [longest, "THE NET", "UNDER THE LIGHTS TONIGHT!"]:
+			Access.say(text, 3.0, true)
+			bar.tick(0.016)
+			check_layout(holder, "captions over the %s: %s" % [screen, text])
+		holder.free()
+	Settings.captions = kept
+	var sv := _save()
+	var humans := []
+	for k in 4:
+		humans.append({"name": "P%d" % (k + 1), "cards": [{"device": k, "palette": k, "variant": 0, "paddle": 0, "number": k}]})
+	sv.store_tournament(Tournament.create(5, false, K.DIFFICULTY_EASY, 5, humans), "couch")
+	var b := BracketScreen.new().setup(sv, false, true)
+	runner.root.add_child(b)
+	if not b.is_node_ready():
+		b._ready()
+	b.begin_claims()
+	check_layout(b, "couch cup: whose pad")
+	b.free()

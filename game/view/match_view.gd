@@ -536,7 +536,7 @@ func marker_color(slot: int) -> Color:
 	var p := marker_player(slot)
 	if p == -2:
 		return Color(0, 0, 0, 0)
-	var col: Color = Color(0.62, 0.64, 0.7) if p < 0 else LobbyScreen.PLAYER_TINTS[p]
+	var col: Color = Color(0.62, 0.64, 0.7) if p < 0 else Access.player_tint(p)     # COLOURS, port ADR-108
 	if sim.config.modifiers & K.MOD_INVERSE:
 		col = Color.WHITE - col              # the inversion puts it back
 	return Color(col, MARKER_ALPHA)

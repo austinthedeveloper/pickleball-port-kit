@@ -67,7 +67,7 @@ func build_players() -> void:
 		v._shadows.add_child(shadow)
 		# over the shadow, which shows through as its darker middle
 		var marker := Node2D.new()
-		marker.draw.connect(draw_marker.bind(marker, v.marker_color(i)))
+		marker.draw.connect(draw_marker.bind(marker, v.marker_color(i), v.marker_player(i)))
 		marker.visible = false
 		v._shadows.add_child(marker)
 		v._actors.add_child(root)
@@ -83,7 +83,7 @@ func build_players() -> void:
 
 ## A player's marker: a filled ellipse round the shadow, lighter at the
 ## rim (nothing for a slot without one).
-static func draw_marker(n: Node2D, col: Color) -> void:
+static func draw_marker(n: Node2D, col: Color, player := -1) -> void:
 	if col.a == 0.0:
 		return
 	var rim := PackedVector2Array()
@@ -92,8 +92,18 @@ static func draw_marker(n: Node2D, col: Color) -> void:
 		var a := TAU * k / 32.0
 		rim.append(Vector2(cos(a) * MARKER_RX, sin(a) * MARKER_RY))
 		fill.append(Vector2(cos(a) * (MARKER_RX - 3), sin(a) * (MARKER_RY - 2)))
+	if Access.high_contrast():
+		var edge := PackedVector2Array()
+		for k in 32:
+			var a := TAU * k / 32.0
+			edge.append(Vector2(cos(a) * (MARKER_RX + 3), sin(a) * (MARKER_RY + 2)))
+		n.draw_colored_polygon(edge, Access.EDGE)      # port ADR-108: the dark edge
+		col = Color(col, 1.0)
 	n.draw_colored_polygon(rim, Color(col.lightened(0.35), col.a))
 	n.draw_colored_polygon(fill, col)
+	# port ADR-108: each player's shape at the ring's front, in every COLOURS set
+	if player >= 0:
+		Access.draw_shape(n, player, Vector2(0, MARKER_RY + 6.0), 5.0, Color(col, 1.0))
 
 
 func build_ball() -> void:
@@ -108,6 +118,11 @@ func build_ball() -> void:
 	if v.sim.config.modifiers & K.MOD_GLOW:
 		v._ball_sprite.material = ShaderMaterial.new()
 		v._ball_sprite.material.shader = preload("res://view/glow_outline.gdshader")
+	elif Access.high_contrast():
+		# port ADR-108: HIGH CONTRAST rims the ball in white, on any court
+		v._ball_sprite.material = ShaderMaterial.new()
+		v._ball_sprite.material.shader = preload("res://view/glow_outline.gdshader")
+		v._ball_sprite.material.set_shader_parameter("neon", Color.WHITE)
 	v._actors.add_child(v._ball_root)
 	v._ball_shadow = Sprite2D.new()
 	v._ball_shadow.texture = v._tex(v.manifest["sprites"]["ball_shadow"]["file"])
