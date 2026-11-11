@@ -74,8 +74,8 @@ func setup(venue: String, quiet: bool, ambience := "") -> void:
 		_players[k] = list
 		_next[k] = 0
 	var loop := ambience if AMBIENCE.has(ambience) else venue
-	if AMBIENCE.has(loop):
-		ambience_name = loop
+	if AMBIENCE.has(loop) and ResourceLoader.exists(DIR + AMBIENCE[loop] + AMBIENCE_EXT):
+		ambience_name = loop                 # (the Web build: once its sound pack is in, PORT-154)
 		_amb = AudioStreamPlayer.new()
 		var stream: AudioStreamOggVorbis = load(DIR + AMBIENCE[loop] + AMBIENCE_EXT)
 		stream.loop = true

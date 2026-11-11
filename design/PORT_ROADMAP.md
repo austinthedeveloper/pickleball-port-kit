@@ -176,11 +176,11 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-148 | Club manager: weekend tournaments ([#38](https://github.com/austinthedeveloper/pickleball-port-kit/issues/38)) | `feature/cld-club` | Ready to test |
 | PORT-149 | Club manager: weather ([#39](https://github.com/austinthedeveloper/pickleball-port-kit/issues/39)) | `feature/cld-club` | Ready to test |
 | PORT-150 | Club manager: balance pass ([#40](https://github.com/austinthedeveloper/pickleball-port-kit/issues/40)) | `feature/cld-club` | Ready to test |
-| PORT-151 | Touch on real phones ([#41](https://github.com/austinthedeveloper/pickleball-port-kit/issues/41)) | | Planned |
-| PORT-152 | Portrait on phones ([#42](https://github.com/austinthedeveloper/pickleball-port-kit/issues/42)) | | Planned |
-| PORT-153 | Handheld PCs ([#43](https://github.com/austinthedeveloper/pickleball-port-kit/issues/43)) | | Planned |
-| PORT-154 | A faster web load ([#44](https://github.com/austinthedeveloper/pickleball-port-kit/issues/44)) | | Planned |
-| PORT-155 | Cleanup round 10 ([#45](https://github.com/austinthedeveloper/pickleball-port-kit/issues/45)) | | Planned |
+| PORT-151 | Touch on real phones ([#41](https://github.com/austinthedeveloper/pickleball-port-kit/issues/41)) | `feature/cld-handhelds` | Ready to test |
+| PORT-152 | Portrait on phones ([#42](https://github.com/austinthedeveloper/pickleball-port-kit/issues/42)) | `feature/cld-handhelds` | Ready to test |
+| PORT-153 | Handheld PCs ([#43](https://github.com/austinthedeveloper/pickleball-port-kit/issues/43)) | `feature/cld-handhelds` | Ready to test |
+| PORT-154 | A faster web load ([#44](https://github.com/austinthedeveloper/pickleball-port-kit/issues/44)) | `feature/cld-handhelds` | Done |
+| PORT-155 | Cleanup round 10 ([#45](https://github.com/austinthedeveloper/pickleball-port-kit/issues/45)) | `feature/cld-handhelds` | Done |
 | PORT-156 | Replays you can share ([#46](https://github.com/austinthedeveloper/pickleball-port-kit/issues/46)) | | Planned |
 | PORT-157 | Replay codes through the relay ([#47](https://github.com/austinthedeveloper/pickleball-port-kit/issues/47)) | | Planned |
 | PORT-158 | TODAY'S TRIP board ([#48](https://github.com/austinthedeveloper/pickleball-port-kit/issues/48)) | | Planned |
@@ -365,7 +365,7 @@ feature/cld-release-0.9.2   (v0.9.2)
 
 Done and moved to `design/PORT_HISTORY.md`: 35, 37, 38, 39 (and 41, from
 the same request), and every task since but the open ones. Open: 36, 40,
-62, 78, 110 (rollback smoothing), 112 (the relay) and 113 (this cleanup).
+62, 78, 110 (rollback smoothing).
 
 ### 36. `feature/cld-about`: about this project, and Tiny Chair
 
@@ -433,23 +433,6 @@ the same request), and every task since but the open ones. Open: 36, 40,
     the card and the preset row.
   - Status: **Planned**, parked until you've decided the layout.
 
-### 113. `feature/cld-cleanup-7`: cleanup round 7 (asked for 2026-10-28)
-
-- [x] `PORT-113` Docs and files only, no code:
-  - **The history:** PORT-79 to 111 moved to `PORT_HISTORY.md`. The
-    sheet keeps the index, the releases and the open tasks (36, 40, 62,
-    78). `release_notes.py` gives the same notes.
-  - **The READMEs:**
-    - the ADR range is now 018 to 104;
-    - the design folder lists ROAD TRIP, specials, the relay plan and the
-      announcer's scripts;
-    - `game/README.md` names the five view files it had missed.
-  - **Branches:** the 36 local branches merged into `main` deleted.
-    `feature/cld-release-0.26.0` stays, as in round 6, and so do the
-    branches checked out in old agent worktrees.
-  - Verified: `test.sh` passes; the release notes are the same.
-  - Status: **Done**.
-
 ### 142-150. `feature/cld-club`: CLUB, the club manager (asked for 2026-11-11)
 - [x] `PORT-142` CLUB: the Pickleball '95 club manager (port ADR-106; GitHub
   #32 to #40): PLAY > CLUB. A day at the park you own, playing on its
@@ -486,6 +469,26 @@ the same request), and every task since but the open ones. Open: 36, 40,
     the money comes too fast or too slow, if the day is too short, and
     which upgrade you'd add next.
   - Status: **Ready to test**.
+
+### 151-155. `feature/cld-handhelds`: phones and handhelds (asked for 2026-11-11)
+- [x] `PORT-151` Phones and handhelds (port ADR-107; GitHub #41 to #45),
+  chained from `feature/cld-club`.
+  - Done: upright phones (152: the picture at the top, the touch pad
+    under it and bigger); TOUCH BUTTONS SNES or WORDS and a Web page that
+    keeps the browser's gestures off the game (151); SCALE AUTO, the new
+    default (153: whole-number scaling only where it fills the screen, so
+    a 1280x800 handheld fills), a match pausing when the app is left, the
+    handhelds' pads; the Web build's sound pack (154: the first download
+    13 MB compressed, from about 22; the music after the title; a budget
+    in export.sh); cleanup round 10 (155: task 113 to the history, five
+    merged branches deleted).
+  - Verified: `test_handhelds.gd`; `test.sh` passes; the real Web export
+    in the browser pane (the sound pack loads; upright 375x812 and 844x390
+    with touches).
+  - Try: open the Web build on a phone, upright and on its side; try
+    TOUCH BUTTONS WORDS. On a handheld (or a 1280x800 window), SCALE AUTO
+    should fill the screen.
+  - Status: **Ready to test** on a real phone (KNOWN_ISSUES #79).
 
 ## Phase 6: the year to 1.0 (planned 2026-11-10)
 
@@ -625,6 +628,10 @@ Feature freeze, a full playtest, store pages, v1.0.0; cleanup round 11.
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
+- **PORT-151..154 phones:** open the Web build on your phone, upright and
+  on its side. Do the buttons sit under your thumbs? SNES or WORDS (TOUCH
+  BUTTONS)? Does a turn of the phone switch cleanly? The roadmap's PORT-81
+  question (TOUCH PAD ON by default on the web) still stands.
 - **PORT-142..150 CLUB:** play a club for a week or two (PLAY > CLUB).
   The numbers are a bot's (ADR-106's table): say if the cash comes too
   fast, if members leave too easily, or if a day's 72 seconds of walking

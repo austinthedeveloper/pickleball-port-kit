@@ -191,9 +191,15 @@ func test_options_rows_change_their_settings() -> void:
 	o.press()
 	eq(o.value_of("fullscreen"), "ON")
 	Settings.integer_scale = true
+	Settings.scale_auto = true
 	o.select("scale")
+	eq(o.value_of("scale"), "AUTO", "SCALE starts on AUTO (PORT-153)")
 	o.change(-1)
 	eq(o.value_of("scale"), "FILL")
+	o.change(-1)
+	eq(o.value_of("scale"), "PIXEL")
+	o.change(-1)
+	eq(o.value_of("scale"), "AUTO")
 	t.free()
 	_restore()
 

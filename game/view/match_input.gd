@@ -105,11 +105,18 @@ func multiplayer_intents() -> Array:
 
 
 ## A controller dropping out mid-match pauses it (the pause menu waits
-## for the player to come back), as most games do.
+## for the player to come back), as most games do; so does the app losing
+## focus or being suspended (PORT-153). Never online: there's no pause.
 var _lost_seen := GameControls.lost_serial
 
 
+var _away_seen := GameControls.away_serial
+
+
 func pause_on_lost_pad() -> bool:
+	if GameControls.away_serial != _away_seen:
+		_away_seen = GameControls.away_serial      # PORT-153: the app was left (focus, suspend)
+		return not v.sim.paused and v.sim.phase != K.PHASE_MATCH_RESULT and not v.end.initials.open
 	if GameControls.lost_serial == _lost_seen:
 		return false
 	_lost_seen = GameControls.lost_serial

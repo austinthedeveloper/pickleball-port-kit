@@ -45,6 +45,10 @@ func _ready() -> void:
 	add_child(music)
 	if not Settings.lite:                  # ADR-089: the Web build has no voice
 		add_child(Announcer.new())         # ADR-076: the voice, for the session
+	if SoundPack.needed():                 # PORT-154: the Web build's music comes after the title
+		var sp := SoundPack.new()
+		sp.loaded.connect(func(): music.retry())
+		add_child(sp)
 	Achievements.on_unlock = _on_achievement
 	_chime = AudioStreamPlayer.new()
 	_chime.stream = load(Sfx.DIR + "8_achievement.wav")

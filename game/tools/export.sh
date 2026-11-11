@@ -14,6 +14,7 @@
 # announcer, ROAD TRIP and the painted venues. Its pack is booted too.
 cd "$(dirname "$0")/.." || exit 2
 KIT="$(cd .. && pwd)"
+WEB_BUDGET_MB=16      # PORT-154: the Web build's first download, compressed (engine + pack)
 check=0
 dev=0
 for a in "$@"; do
@@ -50,6 +51,8 @@ if [ ! -d "$templates" ]; then
   exit 3
 fi
 py="$KIT/.venv/bin/python"
+# a worktree has no .venv of its own: the main checkout's
+[ -x "$py" ] || py="$(git -C "$KIT" worktree list --porcelain | awk '/^worktree /{print $2; exit}')/.venv/bin/python"
 [ -x "$py" ] || py=python3
 web_src() {
   src="$KIT/build/web-src"
@@ -74,6 +77,25 @@ for p in macOS Windows Linux Web; do
     echo "FAIL $p"; status=1
   fi
 done
+# PORT-154: the Web build's music and ambience go in sound.pck beside it,
+# fetched once the game runs; the first download (the engine and the
+# pack, compressed as a server sends them) stays under a budget
+if [ -s "$KIT/build/web/index.pck" ]; then
+  if godot --headless --path "$KIT/build/web-src" -s res://tools/sound_pack.gd -- "$KIT/build/web/sound.pck" >/dev/null 2>&1 \
+      && [ -s "$KIT/build/web/sound.pck" ]; then
+    echo "ok   the Web sound pack ($(du -h "$KIT/build/web/sound.pck" | cut -f1))"
+  else
+    echo "FAIL: the Web sound pack"; status=1
+  fi
+  first=$(( $(gzip -9 -c "$KIT/build/web/index.pck" | wc -c) + $(gzip -9 -c "$KIT/build/web/index.wasm" | wc -c) \
+    + $(gzip -9 -c "$KIT/build/web/index.js" | wc -c) ))
+  budget=$((WEB_BUDGET_MB * 1024 * 1024))
+  if [ "$first" -gt "$budget" ]; then
+    echo "FAIL: the Web build's first download is $((first / 1048576)) MB compressed, over its $WEB_BUDGET_MB MB budget"; status=1
+  else
+    echo "ok   the Web build's first download: $((first / 1048576)) MB compressed (budget $WEB_BUDGET_MB MB)"
+  fi
+fi
 # the Web build's pack boots on the desktop engine too: it has "lite" on
 # and none of what it leaves out is asked for at the title or in a demo
 if [ -s "$KIT/build/web/index.pck" ]; then

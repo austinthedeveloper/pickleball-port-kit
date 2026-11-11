@@ -52,6 +52,9 @@ static var split := false
 static var pad_news: Array = []
 static var news_serial := 0
 static var lost_serial := 0
+## PORT-153: the app lost focus or was suspended (a handheld asleep, a
+## phone's home button, another window): a match pauses, as for a lost pad.
+static var away_serial := 0
 
 
 ## Who plays on which pad, from the connected pads (sorted by id).
@@ -445,3 +448,8 @@ static func pad_menu_bits(device: int) -> Array:
 	var pressed := held & ~int(_menu_prev.get(device, 0))
 	_menu_prev[device] = held
 	return [pressed, held]
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
+		away_serial += 1

@@ -128,6 +128,8 @@ func play_loop(name: String) -> void:
 		_sting_fading = true             # a new screen cuts a stinger short
 	if track == "":
 		return
+	if not ResourceLoader.exists(DIR + LOOPS[track] + EXT):
+		return                           # the Web build's sound pack isn't in yet (PORT-154): retry()
 	_active = 1 - _active
 	var stream: AudioStreamOggVorbis = load(DIR + LOOPS[track] + EXT)
 	stream.loop = true
@@ -138,10 +140,22 @@ func play_loop(name: String) -> void:
 	_start(_decks[_active])
 
 
+## The loop wanted, again: the Web build's sound pack has arrived
+## (PORT-154), so a loop asked for before it can start now.
+func retry() -> void:
+	var want := track
+	if want == "" or _deck_track[_active] == want:
+		return
+	track = ""
+	play_loop(want)
+
+
 ## A stinger over the loop's quick fade; the music stays quiet after it.
 func play_sting(name: String) -> void:
 	if not STINGERS.has(name):
 		return
+	if not ResourceLoader.exists(DIR + STINGERS[name] + EXT):
+		return                           # not in yet (PORT-154)
 	sting_name = name
 	track = ""
 	for i in 2:
