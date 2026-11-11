@@ -14,6 +14,11 @@ uniform float base_lum[9];
 // lit, the surround by dark; DAY is 1.
 uniform vec3 dark = vec3(1.0);
 uniform vec3 lit = vec3(1.0);
+// The lit apron (port ADR-109, PORT-161): the surround round the court,
+// in px of the ground: the court's box (x0, y0, x1, y1) and how far past
+// it the floodlights reach; the light fades out over that margin.
+uniform vec4 apron = vec4(0.0);
+uniform float apron_px = 0.0;
 
 void fragment() {
 	vec4 t = texture(TEXTURE, UV);
@@ -24,6 +29,12 @@ void fragment() {
 		c = clamp(target[role].rgb * (lum / max(base_lum[role], 0.001)), 0.0, 1.0);
 	}
 	// the lines (7-8) catch the lights: half the dimming (ADR-052, PORT-06)
-	c *= role >= 7 ? (lit + 1.0) * 0.5 : (role >= 3 ? lit : dark);
+	vec3 surround = dark;
+	if (apron_px > 0.0) {
+		vec2 p = UV / TEXTURE_PIXEL_SIZE;
+		vec2 out_by = max(max(apron.xy - p, p - apron.zw), vec2(0.0));
+		surround = mix(lit, dark, clamp(length(out_by) / apron_px, 0.0, 1.0));
+	}
+	c *= role >= 7 ? (lit + 1.0) * 0.5 : (role >= 3 ? lit : surround);
 	COLOR = vec4(c, t.a);
 }

@@ -156,7 +156,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-128 | The sim caught up to the ROM's latest tuning ([#18](https://github.com/austinthedeveloper/pickleball-port-kit/issues/18)) | | Planned |
 | PORT-129 | 1994 MODE: the plan ([#19](https://github.com/austinthedeveloper/pickleball-port-kit/issues/19)) | | Planned |
 | PORT-130 | 1994 MODE: the toggles ([#20](https://github.com/austinthedeveloper/pickleball-port-kit/issues/20)) | | Planned |
-| PORT-131 | A CRT look ([#21](https://github.com/austinthedeveloper/pickleball-port-kit/issues/21)) | | Planned |
+| PORT-131 | A CRT look ([#21](https://github.com/austinthedeveloper/pickleball-port-kit/issues/21)) | `feature/cld-crt-board` | Ready to test |
 | PORT-132 | The ROM's title menu order, as an option ([#22](https://github.com/austinthedeveloper/pickleball-port-kit/issues/22)) | | Planned |
 | PORT-133 | Powerups: settle the four questions ([#23](https://github.com/austinthedeveloper/pickleball-port-kit/issues/23)) | | Planned |
 | PORT-134 | Powerups on the court ([#24](https://github.com/austinthedeveloper/pickleball-port-kit/issues/24)) | | Planned |
@@ -183,10 +183,10 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-155 | Cleanup round 10 ([#45](https://github.com/austinthedeveloper/pickleball-port-kit/issues/45)) | `feature/cld-handhelds` | Done |
 | PORT-156 | Replays you can share ([#46](https://github.com/austinthedeveloper/pickleball-port-kit/issues/46)) | | Planned |
 | PORT-157 | Replay codes through the relay ([#47](https://github.com/austinthedeveloper/pickleball-port-kit/issues/47)) | | Planned |
-| PORT-158 | TODAY'S TRIP board ([#48](https://github.com/austinthedeveloper/pickleball-port-kit/issues/48)) | | Planned |
-| PORT-159 | Weekly challenge ([#49](https://github.com/austinthedeveloper/pickleball-port-kit/issues/49)) | | Planned |
+| PORT-158 | TODAY'S TRIP board ([#48](https://github.com/austinthedeveloper/pickleball-port-kit/issues/48)) | `feature/cld-crt-board` | Blocked: the relay's PR (boards.js) to merge and deploy |
+| PORT-159 | Weekly challenge ([#49](https://github.com/austinthedeveloper/pickleball-port-kit/issues/49)) | `feature/cld-crt-board` | Ready to test |
 | PORT-160 | The art debts ([#50](https://github.com/austinthedeveloper/pickleball-port-kit/issues/50)) | | Planned |
-| PORT-161 | A lit apron at night ([#51](https://github.com/austinthedeveloper/pickleball-port-kit/issues/51)) | | Planned |
+| PORT-161 | A lit apron at night ([#51](https://github.com/austinthedeveloper/pickleball-port-kit/issues/51)) | `feature/cld-crt-board` | Done |
 | PORT-162 | The right team holds the paddle in the right hand ([#52](https://github.com/austinthedeveloper/pickleball-port-kit/issues/52)) | | Planned |
 | PORT-163 | 2P walks the park ([#53](https://github.com/austinthedeveloper/pickleball-port-kit/issues/53)) | | Planned |
 | PORT-164 | Winter crowds and per-venue crowds ([#54](https://github.com/austinthedeveloper/pickleball-port-kit/issues/54)) | | Planned |
@@ -510,6 +510,25 @@ the same request), and every task since but the open ones. Open: 36, 40,
     couch cup after swapping two pads' ports.
   - Status: **Ready to test**.
 
+### 131, 158, 159, 161. `feature/cld-crt-board`: CRT, the lit apron, WEEKLY, the boards (asked for 2026-11-11)
+- [x] `PORT-131` CRT, the lit apron, the WEEKLY CHALLENGE and score boards
+  (port ADR-109; GitHub #21, #51, #49, #48), chained from
+  `feature/cld-access`.
+  - Done: OPTIONS > CRT OFF, SOFT, STRONG (131); the lit apron at dusk and
+    night (161, KNOWN_ISSUES #38); PLAY > WEEKLY, a challenge a week from
+    `data/challenges.json` with its best kept (159); the boards: TODAY'S
+    TRIP's day board and the week's, through the relay's new `/v1/board`
+    (158; pickleball-relay `feature/cld-daily-board`).
+  - Verified: `test_weekly.gd` (a score through the real relay code too),
+    `test_night.test_lit_apron`, `test_layout`'s WEEKLY and boards cases;
+    `test.sh` passes; screenshots of CRT STRONG, a night court's apron and
+    WEEKLY with a board.
+  - Try: OPTIONS > CRT SOFT and STRONG at full screen; a NIGHT match on
+    ASPHALT; PLAY > WEEKLY.
+  - Status: **Ready to test**; the boards wait on the relay's PR (merging
+    it deploys it) and on whether boards should survive the relay's sleep
+    (a storage mount; For you).
+
 ## Phase 6: the year to 1.0 (planned 2026-11-10)
 
 A year of stories, December 2026 to November 2027, one GitHub milestone
@@ -648,6 +667,11 @@ Feature freeze, a full playtest, store pages, v1.0.0; cleanup round 11.
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
+- **PORT-158 the boards:** merging pickleball-relay's boards PR deploys
+  them. They live in memory, so the relay's sleep (no replicas when idle)
+  wipes them; to keep them it needs a small Azure storage mount
+  (`BOARD_FILE`), or `min-replicas 1` (about $15 a month). And a score is
+  the game's own claim (the relay can't replay a match). Your call on both.
 - **PORT-123 COLOURS:** the colour-blind sets were checked by simulation;
   if you know someone colour-blind, ask them to try theirs in doubles.
   The shapes on the rings (dot, bar, triangle, square) are on in every set.

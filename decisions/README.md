@@ -99,3 +99,4 @@ first decisions, are rows in `design/07_DECISIONS_AND_RISKS.md`.
 | 106 | [CLUB: the Club Manager](ADR-106-club-manager.md) | Accepted 2026-11-11 |
 | 107 | [Phones and Handhelds](ADR-107-phones-and-handhelds.md) | Accepted 2026-11-11 |
 | 108 | [Controls and Access: COLOURS, CAPTIONS, ASSIST, the Cup's Pads](ADR-108-controls-and-access.md) | Accepted 2026-11-11 |
+| 109 | [CRT, the Lit Apron, the WEEKLY CHALLENGE and Score Boards](ADR-109-crt-apron-weekly-boards.md) | Accepted 2026-11-11 |

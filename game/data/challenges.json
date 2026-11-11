@@ -1,0 +1,21 @@
+{
+ "comment": "The WEEKLY CHALLENGE (port ADR-109, PORT-159): one a week, the Nth for ISO week N (round the list). goal: WIN (win the match), MARGIN (win by n or more), SHUTOUT (win, they score at most n), ACES (n aces and the win), RALLY (a rally of n hits and the win). The score: the margin times 100, plus 50 an ace and 10 a hit of the longest rally; 0 unless the goal is met.",
+ "list": [
+  {"name": "MOON BALL MONDAY", "opponent": 3, "doubles": false, "points": 7, "modifiers": ["moon"],
+   "venue": "space", "time": 0, "goal": "MARGIN", "n": 3, "text": ["LOW GRAVITY AT SPACE.", "BEAT THE PIRATES BY 3 OR MORE."]},
+  {"name": "GHOST STORY", "opponent": 4, "doubles": true, "points": 7, "modifiers": ["ghost"],
+   "venue": "park", "time": 2, "goal": "WIN", "n": 0, "text": ["A GHOST BALL AT NIGHT.", "BEAT THE GOTH CLUB IN DOUBLES."]},
+  {"name": "ACE IT", "opponent": 2, "doubles": false, "points": 7, "modifiers": [],
+   "venue": "lakeside", "time": 1, "goal": "ACES", "n": 2, "text": ["AT LAKESIDE AT DUSK.", "WIN WITH 2 ACES OR MORE."]},
+  {"name": "DINK OR DIE", "opponent": 5, "doubles": false, "points": 5, "modifiers": ["dink_or_die"],
+   "venue": "park", "time": 0, "goal": "WIN", "n": 0, "text": ["A DRIVE LOSES THE POINT.", "BEAT THE SURF CREW."]},
+  {"name": "ICE TIME", "opponent": 1, "doubles": true, "points": 7, "modifiers": ["ice"],
+   "venue": "glacier", "time": 0, "goal": "MARGIN", "n": 2, "text": ["SLIPPERY FOOTING AT GLACIER.", "BEAT THE SNOWBIRDS BY 2 OR MORE."]},
+  {"name": "THE LONG RALLY", "opponent": 6, "doubles": false, "points": 7, "modifiers": ["popcorn"],
+   "venue": "sunset", "time": 1, "goal": "RALLY", "n": 12, "text": ["POPCORN: EVERY HIT ADDS PACE.", "WIN WITH A RALLY OF 12 HITS."]},
+  {"name": "WINDY CITY", "opponent": 3, "doubles": false, "points": 7, "modifiers": ["wind"],
+   "venue": "park", "time": 0, "goal": "WIN", "n": 0, "text": ["A NEW CROSSWIND EACH SERVE.", "BEAT THE PIRATES."]},
+  {"name": "CLEAN SHEET", "opponent": 0, "doubles": false, "points": 5, "modifiers": ["big_ball"],
+   "venue": "park", "time": 0, "goal": "SHUTOUT", "n": 1, "text": ["A BIG BALL, AND HENDERSON.", "WIN, LETTING IN 1 POINT AT MOST."]}
+ ]
+}

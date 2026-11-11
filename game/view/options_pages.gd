@@ -30,6 +30,8 @@ static func build(host: Node) -> void:
 			"change": func(_d): Settings.fullscreen = not Settings.fullscreen; Settings.apply_window(host.get_window())},
 		{"id": "scale", "label": "SCALE", "value": func(): return Settings.scale_name(),
 			"change": func(d): Settings.change_scale(d); Settings.apply_window(host.get_window())},
+		{"id": "crt", "label": "CRT", "value": func(): return Crt.NAMES[mini(Settings.crt_i, Crt.levels() - 1)],
+			"change": func(d): Settings.crt_i = (mini(Settings.crt_i, Crt.levels() - 1) + d + Crt.levels()) % Crt.levels()},
 		{"id": "controls", "label": "CONTROLS", "press": func(): host.open_page("controls")},
 		{"id": "access", "label": "ACCESSIBILITY", "press": func(): host.open_page("access")},
 		# PORT-32: the in-game updater

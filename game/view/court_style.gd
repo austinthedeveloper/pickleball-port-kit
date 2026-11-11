@@ -119,7 +119,46 @@ static func material(choice: Array, venue: String, manifest: Dictionary, time :=
 	var sc := time_scales(time)
 	mat.set_shader_parameter("dark", Vector3(sc[0].r, sc[0].g, sc[0].b))
 	mat.set_shader_parameter("lit", Vector3(sc[1].r, sc[1].g, sc[1].b))
+	if time != 0:
+		var box := court_box(String(manifest["venues"][venue]["court_mask"]))
+		if box.has_area():
+			mat.set_shader_parameter("apron", Vector4(box.position.x, box.position.y, box.end.x, box.end.y))
+			mat.set_shader_parameter("apron_px", APRON_PX)
 	return mat
+
+
+## The lit apron (port ADR-109, PORT-161): how far past the court's box
+## the floodlights reach, in ground px (the light fades over it).
+const APRON_PX := 70.0
+static var _boxes := {}
+
+## The court's box in a venue's court mask (the pixels with a court role,
+## 3 and up), found once per mask, every 4th pixel.
+static func court_box(mask_path: String) -> Rect2:
+	if _boxes.has(mask_path):
+		return _boxes[mask_path]
+	var box := Rect2()
+	var tex: Texture2D = load("res://assets/levels/" + mask_path)
+	var img := tex.get_image() if tex else null
+	if img:
+		var lo := Vector2(INF, INF)
+		var hi := Vector2(-INF, -INF)
+		for y in range(0, img.get_height(), 4):
+			for x in range(0, img.get_width(), 4):
+				if roundi(img.get_pixel(x, y).r * 255.0) >= 3:
+					lo = lo.min(Vector2(x, y))
+					hi = hi.max(Vector2(x, y))
+		if hi.x >= lo.x:
+			box = Rect2(lo, hi - lo + Vector2(4, 4))
+	_boxes[mask_path] = box
+	return box
+
+
+## The surround's scale `px` ground px off the court at `time`: lit at
+## the court's edge, the night's dark past the apron.
+static func apron_scale(time: int, px: float) -> Color:
+	var sc := time_scales(time)
+	return sc[1].lerp(sc[0], clampf(px / APRON_PX, 0.0, 1.0))
 
 
 # --- Time of day (ADR-045) ---------------------------------------------------------

@@ -39,6 +39,8 @@ static func build(t: TitleScreen) -> void:
 			"change": func(d): Settings.park_i = (Settings.park_i + d + Settings.PARKS.size()) \
 				% Settings.PARKS.size(),
 			"press": t._open_park},
+		{"id": "weekly", "label": "WEEKLY", "value": func(): return Weekly.title_label(t.save),
+			"press": t._open_weekly},                # port ADR-109: the WEEKLY CHALLENGE
 		{"id": "club", "label": "CLUB", "value": func(): return Club.title_label(t.save),
 			"press": t._open_club},                  # port ADR-106: the club manager
 		{"id": "multiplayer", "label": "MULTIPLAYER",
