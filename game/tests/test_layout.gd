@@ -1172,6 +1172,33 @@ func test_replays() -> void:
 	t.replay_delete = true
 	p.refresh()
 	check_layout(t, "REPLAYS, DELETE")
+	# PORT-156/157: every ON PRESS, every word a row can show, a code typed
+	for a in TitleScreen.REPLAY_ACTIONS.size():
+		t.replay_action = a
+		p.refresh()
+		check_layout(t, "REPLAYS, ON PRESS %s" % TitleScreen.REPLAY_ACTIONS[a])
+	var words := ["IN DOWNLOADS", "IN EXPORTS", "DOWNLOADED", "SHARING...", "CODE WWWWWW", "NOTHING THERE",
+		"COULDN'T WRITE IT", "ANOTHER VERSION'S", "AN OLD VERSION'S"]
+	for w in ["NOT A REPLAY", "DAMAGED", "FROM AN OLDER GAME", "UPDATE TO WATCH IT", "FULL: DELETE ONE",
+			"COULDN'T SAVE IT", "COULDN'T OPEN IT", "NO CODES HERE YET", "NO CODE CAME BACK", "NO SUCH CODE",
+			"TOO LONG TO SHARE", "TRY IN AN HOUR", "SERVER FULL", "OFFLINE", "USE A CODE HERE", "IMPORTED",
+			"FETCHING..."]:
+		words.append(w)
+	var list := SavedReplays.list()
+	for w in words:
+		for r in list:
+			t.replay_notes[r["name"]] = w
+		t.import_note = w
+		t.code_typed = "WWWWWW"
+		p.refresh()
+		check_layout(t, "REPLAYS, the rows saying %s" % w)
+	t.replay_notes = {}
+	t.import_note = ""
+	for typed in ["", "WW", "WWWWW", "WWWWWW"]:
+		t.code_typed = typed
+		t.code_letter = RelayLink.ALPHABET.find("W")
+		p.refresh()
+		check_layout(t, "REPLAYS, a code typed: %s" % typed)
 	t.free()
 	wipe_replays()
 

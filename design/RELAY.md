@@ -93,6 +93,8 @@ wss://<relay>/v1/join?game=pb94-port&code=BXKM       -> {"op":"welcome","you":0}
 host gets {"op":"joined","guest":0,"ver":...} / {"op":"left","guest":0}
 binary, host: [guest or 255][payload...]             both ways, in order, nothing lost
 binary, guest: [payload...]
+POST https://<relay>/v1/replay?game=pb94-port {"data":"<base64>"} -> {"code":"BXKMQT","days":7}
+GET  https://<relay>/v1/replay?game=pb94-port&code=BXKMQT        -> {"data":"<base64>"} (404 NO SUCH REPLAY)
 GET https://<relay>/healthz                          -> 200 "ok"
 GET https://<relay>/c/BXKM                           -> the VR coach page that room's headset sent (below)
 ```
@@ -261,3 +263,16 @@ setup script.
   too), with this relay as their signalling server.
 - **Abuse of an open relay:** the limits above. Nothing is stored, so the
   worst case is bandwidth, capped by the budget alert.
+
+### Replay codes (port ADR-112, PORT-157)
+
+SHARE on REPLAYS sends one saved rally's bytes (the match's settings and
+that rally's inputs) and gets a six-letter code; WATCH CODE fetches it.
+
+- **Kept:** the replay's bytes and when it came, for 7 days, under a
+  random code. Then it's swept.
+- **Not kept:** names, accounts, or the sender's address. The address
+  rate-limits shares (20 an hour) and is never stored with a replay.
+- **Limits:** 48 KB a replay (base64), 5000 at most.
+- **Where:** memory, and `REPLAY_FILE` if set. A sleeping relay forgets,
+  as with the boards.

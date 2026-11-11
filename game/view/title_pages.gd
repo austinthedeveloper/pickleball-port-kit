@@ -81,13 +81,18 @@ static func build(t: TitleScreen) -> void:
 	for i in SavedReplays.MAX:
 		replay_rows.append({"id": "replay%d" % i, "label": func(): return t.replay_label(i),
 			"value": func(): return t.replay_value(i), "press": func(): t.replay_press(i)})
+	# PORT-156/157 (port ADR-112): a press can also EXPORT a file or SHARE a code
 	replay_rows.append({"id": "on_press", "label": "ON PRESS",
-		"value": func(): return "DELETE" if t.replay_delete else "WATCH",
-		"change": func(_d): t.replay_delete = not t.replay_delete})
+		"value": func(): return t.REPLAY_ACTIONS[t.replay_action],
+		"change": func(d): t.replay_action = (t.replay_action + d + t.REPLAY_ACTIONS.size()) % t.REPLAY_ACTIONS.size()})
+	replay_rows.append({"id": "import", "label": "IMPORT", "value": func(): return t.import_note,
+		"press": func(): t.replay_import()})
+	replay_rows.append({"id": "code", "label": "WATCH CODE", "value": func(): return t.code_value(),
+		"change": func(d): t.code_change(d), "press": func(): t.code_press()})
 	replay_rows.append({"id": "demo", "label": "IN THE DEMO",
 		"value": func(): return "ON" if Settings.replays_in_demo else "OFF",
 		"change": func(_d): Settings.replays_in_demo = not Settings.replays_in_demo})
-	t._add_page("replays", "REPLAYS", replay_rows, help, Rect2(260, 60, 440, 0))
+	t._add_page("replays", "REPLAYS", replay_rows, help, Rect2(220, 60, 520, 0))
 	var court_rows := [{"id": "venue", "label": "VENUE", "value": func(): return Settings.VENUE_NAMES[Settings.venue_i],
 		"change": func(d): Settings.venue_i = (Settings.venue_i + d + Settings.venue_count()) % Settings.venue_count(); t._start_demo()},
 		{"id": "time", "label": "TIME", "value": func(): return CourtStyle.time_names()[Settings.time_i],

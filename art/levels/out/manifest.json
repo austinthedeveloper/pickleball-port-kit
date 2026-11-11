@@ -2966,6 +2966,92 @@
    }
   },
   "glacier": {
+   "crowd": {
+    "file": "venues/glacier/crowd.png",
+    "frame_size": [
+     32,
+     64
+    ],
+    "frames": [
+     "idle",
+     "cheer"
+    ],
+    "people": [
+     {
+      "row": 0,
+      "pose": "sit"
+     },
+     {
+      "row": 1,
+      "pose": "sit"
+     },
+     {
+      "row": 2,
+      "pose": "sit"
+     },
+     {
+      "row": 3,
+      "pose": "sit"
+     },
+     {
+      "row": 4,
+      "pose": "sit"
+     },
+     {
+      "row": 5,
+      "pose": "sit"
+     },
+     {
+      "row": 6,
+      "pose": "sit"
+     },
+     {
+      "row": 7,
+      "pose": "sit"
+     },
+     {
+      "row": 8,
+      "pose": "sit"
+     },
+     {
+      "row": 9,
+      "pose": "sit"
+     },
+     {
+      "row": 10,
+      "pose": "sit"
+     },
+     {
+      "row": 11,
+      "pose": "sit"
+     },
+     {
+      "row": 12,
+      "pose": "stand"
+     },
+     {
+      "row": 13,
+      "pose": "stand"
+     },
+     {
+      "row": 14,
+      "pose": "stand"
+     },
+     {
+      "row": 15,
+      "pose": "stand"
+     }
+    ],
+    "sit_anchor": [
+     16,
+     40
+    ],
+    "stand_anchor": [
+     16,
+     62
+    ],
+    "doc": "Row = person, column 0 idle, 1 cheer. Sitting people anchor at the seat, standing people at the feet."
+   },
    "layers": [
     {
      "name": "sky",

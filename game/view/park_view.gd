@@ -59,6 +59,13 @@ var manifest: Dictionary
 var _actors: Node2D
 var _overlay: Node2D
 var _you: Dictionary
+## 2P in the park (port ADR-112, PORT-163; KNOWN_ISSUES #41): with 2P in
+## open play, a follower in 2P's look walks your trail TRAIL frames behind
+## and stands beside you when you stop. Display only.
+const TRAIL := 18
+const BESIDE := Vector2(-14, 6)      ## park px from you, standing still (behind you as you face)
+var _two: Dictionary
+var _trail: Array = []               ## your last positions: [x, y, walking, facing_left]
 var _court_people: Array = []        ## per court: 4 people (side * 2 + p)
 var _bench_people: Array = []
 var _scores: Array = []
@@ -196,6 +203,9 @@ func _build() -> void:
 		_bench_people.append(_person())
 	_you = _person()
 	_dress(_you, null)
+	_two = _person()
+	_dress_choice(_two, two_p_choice())
+	_two["root"].visible = false
 	_build_hud()
 	_build_courts_panel()
 	if club:
@@ -349,7 +359,13 @@ func _dress(p: Dictionary, look: PlayerLook) -> void:
 		body.material = mine.material()
 		cap.material = body.material
 		return
-	var ch: Dictionary = Settings.p1_choice
+	_dress_choice(p, Settings.p1_choice)
+
+
+## A Player Select choice's look on a person (1P's, or 2P's for the follower).
+func _dress_choice(p: Dictionary, ch: Dictionary) -> void:
+	var body: Sprite2D = p["body"]
+	var cap: Sprite2D = p["cap"]
 	var team: String = PlayerLook.TEAMS[ch["palette"]]
 	var variant := PlayerLook.variant_name(ch["variant"])
 	var mine := PlayerLook.for_team(ch["palette"], ch["variant"], ch["paddle"], manifest) \
@@ -389,6 +405,55 @@ func _place(p: Dictionary, x: int, y: int, frame: String, flip: bool) -> void:
 		s.region_rect = Rect2(idx * FRAME, 0, FRAME, FRAME)
 		s.flip_h = flip
 		s.offset = -Vector2((FRAME - 1 - ANCHOR.x) if flip else ANCHOR.x, ANCHOR.y)
+
+
+## 2P's look: their Player Select choice, in another shirt if it's yours.
+func two_p_choice() -> Dictionary:
+	var ch: Dictionary = Settings.p2_choice.duplicate()
+	var mine := int(Settings.p1_choice["palette"])
+	var me: Career.Player = save.career.active_player() if save else null
+	if me:
+		mine = me.shirt
+	if int(ch["palette"]) == mine:
+		ch["palette"] = (mine + 1) % PlayerSelect.PAL_COUNT
+	return ch
+
+
+## Where 2P is drawn (null while they're not with you): your position
+## TRAIL frames ago while you walk; beside you once you've stopped.
+func two_p_at() -> Variant:
+	if op.two_players == 0 or _trail.is_empty():
+		return null
+	var x := K.from_fp(op.x_fp)
+	var y := K.from_fp(op.y_fp)
+	var old: Array = _trail[0]
+	var side := BESIDE * Vector2(-1 if op.facing_left else 1, 1)
+	var rest := Vector2(x, y) + side
+	if not op.walking and _trail.all(func(t): return not t[2]):
+		return rest
+	var trail := Vector2(int(old[0]), int(old[1]))
+	# never on top of you: a step back along the way you came
+	if trail.distance_to(Vector2(x, y)) < 8:
+		return rest
+	return trail
+
+
+func _place_two(x: int, y: int) -> void:
+	_trail.append([x, y, op.walking, op.facing_left != 0])
+	while _trail.size() > TRAIL:
+		_trail.pop_front()
+	var at: Variant = two_p_at()
+	_two["root"].visible = at != null
+	if at == null:
+		return
+	if _two.get("dressed_for", {}) != two_p_choice():
+		_two["dressed_for"] = two_p_choice()
+		_dress_choice(_two, two_p_choice())
+	var p: Vector2 = at
+	var moving: bool = (_trail[0] as Array)[2] and p != Vector2(x, y) + BESIDE * Vector2(-1 if op.facing_left else 1, 1)
+	var frame := "run%d" % (((op.step >> 3) + 2) & 3) if moving else "idle%d" % (((anim >> 5) + 1) & 1)
+	var facing: bool = (_trail[0] as Array)[3] if moving else op.facing_left != 0
+	_place(_two, int(p.x), int(p.y), frame, facing)
 
 
 ## Park px to world px (art/park/build_park.py's projection).
@@ -591,6 +656,7 @@ func refresh() -> void:
 	var y := K.from_fp(op.y_fp)
 	var frame := "run%d" % ((op.step >> 3) & 3) if op.walking else "idle%d" % ((anim >> 5) & 1)
 	_place(_you, x, y, frame, op.facing_left != 0)
+	_place_two(x, y)
 	for c in OpenPlay.COURTS:
 		_draw_court(c)
 		_draw_score(c)

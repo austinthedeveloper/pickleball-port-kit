@@ -173,9 +173,14 @@ func test_painted_venues_have_their_locals() -> void:
 	var m := _manifest()
 	var painted := []
 	for venue in Settings.VENUES:
-		if m["venues"][venue].has("crowd"):
+		# a painted venue's backdrop is a photograph (far.webp, ADR-088)
+		if m["venues"][venue]["layers"].any(func(l): return String(l["file"]).ends_with(".webp")):
 			painted.append(venue)
 	eq(painted, ["western", "rooftop", "pirate", "motel", "fair", "drivein", "mall"], "the painted seven")
+	# a procedural venue can dress the shared crowd for its season (port ADR-112)
+	eq(String(m["venues"]["glacier"]["crowd"]["file"]), "venues/glacier/crowd.png", "GLACIER's winter crowd")
+	eq(m["venues"]["glacier"]["crowd"]["people"].size(), m["sprites"]["crowd"]["people"].size(),
+		"on the shared sheet's rows")
 	for venue in painted:
 		var view := MatchView.new()
 		runner.root.add_child(view)

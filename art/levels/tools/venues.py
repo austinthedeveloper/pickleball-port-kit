@@ -871,6 +871,7 @@ def glacier() -> Venue:
     pines, the crowd in the drifts."""
     v = Venue("glacier")
     v.stands_behind_fence = True
+    v.crowd_season = "winter"           # port ADR-112: coats, scarves and beanies
     S = Layer()
     sky_gradient(S, [(0, "141a44"), (0.3, "2a2e6a"), (0.55, "5a4a8a"), (0.75, "b0607a"),
                      (0.9, "e88a70"), (1, "f8b080")], y0=-24, y1=128)

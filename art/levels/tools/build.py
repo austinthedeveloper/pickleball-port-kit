@@ -195,7 +195,12 @@ def build_players():
 def build_crowd():
     img, rows = crowd.sheet()
     save(img, "sprites/crowd.png")
-    return {"file": "sprites/crowd.png", "frame_size": [crowd.FW, crowd.FH],
+    return build_crowd_meta("sprites/crowd.png")
+
+
+def build_crowd_meta(rel):
+    rows = crowd.rows()
+    return {"file": rel, "frame_size": [crowd.FW, crowd.FH],
             "frames": ["idle", "cheer"],
             "people": [{"row": i, "pose": pose} for i, (pose, _) in enumerate(rows)],
             "sit_anchor": list(crowd.SEAT), "stand_anchor": list(crowd.FEET),
@@ -341,6 +346,13 @@ def build_venue(name, crowd_rows):
     if hasattr(v, "crowd_meta"):
         save(v.crowd_sheet, v.crowd_meta["file"])
         extra["crowd"] = v.crowd_meta
+    elif getattr(v, "crowd_season", "summer") != "summer":
+        # port ADR-112 (PORT-164): the shared crowd's people, dressed for the
+        # venue's season, on the same rows (so the seats above still index it)
+        img, _ = crowd.sheet(season=v.crowd_season)
+        rel = save(img, f"venues/{name}/crowd.png")
+        cmeta, _ = build_crowd_meta(rel)
+        extra["crowd"] = cmeta
     return v, {
         **extra,
         "layers": layers,

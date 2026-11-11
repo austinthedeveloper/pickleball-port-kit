@@ -261,6 +261,10 @@ func test_the_screens_through_the_real_relay() -> void:
 ## of rollback (360 frames, at the game's pace) agree on all four. The host's forwarding goes as one batch
 ## a guest a poll, inside the relay's rate (no TOO FAST).
 func _real_doubles(url: String) -> void:
+	var js := _relay_server()
+	if not FileAccess.get_file_as_string(js).contains("ROOM_DEFAULT"):
+		check(true, "skipped: this relay's rooms take one guest (before rooms of seats)")
+		return
 	var hl := RelayLink.new()
 	hl.host(url, OnlineSession.room_guests(K.MODE_DOUBLES))
 	var host := OnlineSession.new(hl, true)

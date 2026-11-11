@@ -686,7 +686,20 @@ func _start_demo(cycle := false) -> void:
 
 # --- REPLAYS (PORT-69, ADR-081) ---------------------------------------------------------
 
-var replay_delete := false       ## ON PRESS: DELETE
+## ON PRESS (PORT-69; PORT-156/157): what a press on a replay does.
+const REPLAY_ACTIONS := ["WATCH", "DELETE", "EXPORT", "SHARE"]
+var replay_action := 0
+var replay_delete: bool:          ## ON PRESS: DELETE (as before)
+	get:
+		return replay_action == 1
+	set(v):
+		replay_action = 1 if v else 0
+var replay_notes := {}           ## a replay's name -> what its last EXPORT or SHARE said
+var import_note := ""            ## IMPORT A FILE's, or WATCH A CODE's, last word
+var code_typed := ""             ## WATCH A CODE: the letters so far
+var code_letter := 0             ## ... and the one under the cursor (RelayLink.ALPHABET)
+var _codes: ReplayCodes
+var _code_keyed := false          ## a key typed a code letter this frame
 var watching := false            ## a replay from REPLAYS fills the screen
 var _demo_count := 0
 
@@ -698,7 +711,9 @@ func replay_label(i: int) -> String:
 
 func replay_value(i: int) -> String:
 	var list := SavedReplays.list()
-	return SavedReplays.row_value(list[i]) if i < list.size() else ""
+	if i >= list.size():
+		return ""
+	return String(replay_notes.get(list[i]["name"], SavedReplays.row_value(list[i])))
 
 
 func replay_press(i: int) -> void:
@@ -706,10 +721,18 @@ func replay_press(i: int) -> void:
 	if i >= list.size():
 		_sfx.play("blip")
 		return
-	if replay_delete:
+	if replay_action == 1:
 		SavedReplays.remove(list[i]["name"])
 		_sfx.play("back")
 		pages["replays"].refresh()
+		return
+	if replay_action == 2:
+		replay_notes[list[i]["name"]] = SavedReplays.export_replay(list[i]["name"])
+		_sfx.play("confirm")
+		pages["replays"].refresh()
+		return
+	if replay_action == 3:
+		_share(list[i]["name"])
 		return
 	var data := SavedReplays.load_replay(list[i]["name"]) if list[i]["playable"] else {}
 	if data.is_empty() or not _start_replay(data, false):
@@ -718,6 +741,134 @@ func replay_press(i: int) -> void:
 	_sfx.play("confirm")
 	watching = true
 	_ui.visible = false
+
+
+## SHARE: the replay's bytes to the relay; its row shows the code (a
+## friend types it in WATCH A CODE) or why not.
+func _share(name: String) -> void:
+	var b := SavedReplays.bytes_of(name)
+	if b.is_empty() or not SavedReplays.list().filter(func(r): return r["name"] == name)[0]["playable"]:
+		replay_notes[name] = "AN OLD VERSION'S"
+		pages["replays"].refresh()
+		return
+	replay_notes[name] = "SHARING..."
+	pages["replays"].refresh()
+	_sfx.play("confirm")
+	var c := _replay_codes()
+	c.shared.connect(func(code: String, err: String):
+		replay_notes[name] = ("CODE " + code) if err == "" else err
+		if pages.has("replays"):
+			pages["replays"].refresh(), CONNECT_ONE_SHOT)
+	c.share(b)
+
+
+func _replay_codes() -> ReplayCodes:
+	if _codes:
+		_codes.queue_free()
+	_codes = ReplayCodes.new()
+	add_child(_codes)
+	return _codes
+
+
+## IMPORT A FILE: a friend's replay from disk (the desktop's file dialog;
+## the Web build watches codes instead), into REPLAYS, then played.
+func replay_import() -> void:
+	if OS.has_feature("web") or not DisplayServer.has_feature(DisplayServer.FEATURE_NATIVE_DIALOG_FILE):
+		import_note = "USE A CODE HERE"
+		pages["replays"].refresh()
+		return
+	var from := SavedReplays.last_export.get_base_dir() if SavedReplays.last_export != "" \
+		else OS.get_system_dir(OS.SYSTEM_DIR_DOWNLOADS)
+	DisplayServer.file_dialog_show("IMPORT A REPLAY", from, "", false, DisplayServer.FILE_DIALOG_MODE_OPEN_FILE,
+		PackedStringArray(["*" + SavedReplays.EXT + " ; Pickleball '94 replays"]),
+		func(ok: bool, paths: PackedStringArray, _filter: int):
+			if ok and not paths.is_empty():
+				imported(SavedReplays.import_file(paths[0])))
+
+
+## An import's result ([name, error]): played at once, or the reason.
+func imported(r: Array) -> void:
+	import_note = r[1] if r[1] != "" else "IMPORTED"
+	if pages.has("replays"):
+		pages["replays"].refresh()
+	if r[1] != "":
+		_sfx.play("back")
+		return
+	var data := SavedReplays.load_replay(String(r[0]))
+	if not data.is_empty() and _start_replay(data, false):
+		_sfx.play("confirm")
+		watching = true
+		_ui.visible = false
+
+
+## WATCH A CODE: the letters so far, the one under the cursor, dashes for
+## the rest ("BXK/--" while typing; the code once it's whole).
+func code_value() -> String:
+	if import_note != "" and code_typed.length() == ReplayCodes.LEN:
+		return import_note
+	if code_typed.length() >= ReplayCodes.LEN:
+		return code_typed
+	var out := code_typed + RelayLink.ALPHABET[code_letter]
+	while out.length() < ReplayCodes.LEN:
+		out += "-"
+	return out
+
+
+## Left and right: the letter under the cursor.
+func code_change(d: int) -> void:
+	if code_typed.length() >= ReplayCodes.LEN:
+		code_typed = ""                  # a new code
+	import_note = ""
+	code_letter = (code_letter + d + RelayLink.ALPHABET.length()) % RelayLink.ALPHABET.length()
+
+
+## A press: the letter is kept and the cursor moves on; with all six, the
+## code is fetched and played.
+func code_press() -> void:
+	if code_typed.length() < ReplayCodes.LEN:
+		code_typed += RelayLink.ALPHABET[code_letter]
+		import_note = ""
+		_sfx.play("blip")
+		if code_typed.length() < ReplayCodes.LEN:
+			return
+	watch_code(code_typed)
+
+
+## Fetches a code's replay and plays it (it's kept in REPLAYS too).
+func watch_code(code: String) -> void:
+	code_typed = ReplayCodes.clean(code)
+	import_note = "FETCHING..."
+	pages["replays"].refresh()
+	var c := _replay_codes()
+	c.fetched.connect(func(b: PackedByteArray, err: String):
+		if err != "":
+			imported(["", err])
+		else:
+			imported(SavedReplays.import_bytes(b)), CONNECT_ONE_SHOT)
+	c.fetch(code_typed)
+
+
+## WATCH A CODE on a keyboard: letters type, Backspace takes one back.
+func _code_key(event: InputEvent) -> bool:
+	if page != "replays" or pages["replays"].current_id() != "code" or not event is InputEventKey \
+			or not event.pressed:
+		return false
+	var k: InputEventKey = event
+	if k.keycode == KEY_BACKSPACE:
+		code_typed = code_typed.left(maxi(0, code_typed.length() - 1))
+		import_note = ""
+	elif k.keycode == KEY_V and (k.ctrl_pressed or k.meta_pressed):
+		code_typed = ReplayCodes.clean(DisplayServer.clipboard_get())
+	elif k.unicode > 0 and char(k.unicode).to_upper() in RelayLink.ALPHABET:
+		if code_typed.length() >= ReplayCodes.LEN:
+			code_typed = ""
+		code_typed = ReplayCodes.clean(code_typed + char(k.unicode))
+		import_note = ""
+		_code_keyed = true
+	else:
+		return false
+	pages["replays"].refresh()
+	return true
 
 
 ## A saved replay in the demo's place: on its own court, with the card and
@@ -824,6 +975,8 @@ func listen(action: String) -> void:
 func _input(event: InputEvent) -> void:
 	if OptionsPages.input(self, event) and is_inside_tree():
 		get_viewport().set_input_as_handled()
+	elif _code_key(event) and is_inside_tree():
+		get_viewport().set_input_as_handled()       # WATCH A CODE's letters (PORT-157)
 
 
 ## ADR-077: under ACHIEVEMENTS, how to earn the one selected (and the day
@@ -888,7 +1041,9 @@ func _process(_delta: float) -> void:
 		return
 	var p: MenuPage = pages[page]
 	var on_edit_start := page == "career_edit" and Input.is_action_just_pressed("start")
-	var nav := p.drive(true, page != "main", not on_edit_start)
+	var keyed := _code_keyed
+	_code_keyed = false                  # a letter typed in WATCH A CODE is only a letter
+	var nav := p.drive(true, page != "main" and not keyed, not on_edit_start and not keyed)
 	if nav & (MenuPage.NAV_MOVED | MenuPage.NAV_CHANGED):
 		_sfx.play("blip")
 	if nav & MenuPage.NAV_CHANGED:
