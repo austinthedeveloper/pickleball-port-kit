@@ -92,6 +92,10 @@ class Intent:
 	var pause_pressed := 0
 	var hit_held := 0
 	var short_held := 0              ## SHORT held (port ADR-096): a human's feet slow
+	## Frames the D-pad has been held toward the net, to K.INPUT_PUSH_MAX
+	## (SNES ADR-076): the longer, the deeper a standard shot or drive goes.
+	## The sim counts a human's (Sim.count_push); a CPU's is its plan's.
+	var push := 0
 
 	func clear() -> void:
 		move_x = 0
@@ -103,6 +107,7 @@ class Intent:
 		pause_pressed = 0
 		hit_held = 0
 		short_held = 0
+		push = 0
 
 	func copy_from(o: Intent) -> void:
 		move_x = o.move_x
@@ -114,6 +119,7 @@ class Intent:
 		pause_pressed = o.pause_pressed
 		hit_held = o.hit_held
 		short_held = o.short_held
+		push = o.push
 
 
 ## CPU play style (ADR-023); the defaults are data/opponents.json

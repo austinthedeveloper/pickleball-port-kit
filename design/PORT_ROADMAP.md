@@ -153,7 +153,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-125 | Assists: hold to swing and slower serves ([#15](https://github.com/austinthedeveloper/pickleball-port-kit/issues/15)) | `feature/cld-access` | Ready to test |
 | PORT-126 | Couch cup: pads rebind on PLAY ([#16](https://github.com/austinthedeveloper/pickleball-port-kit/issues/16)) | `feature/cld-access` | Ready to test |
 | PORT-127 | Cleanup round 8 ([#17](https://github.com/austinthedeveloper/pickleball-port-kit/issues/17)) | `feature/cld-access` | Done |
-| PORT-128 | The sim caught up to the ROM's latest tuning ([#18](https://github.com/austinthedeveloper/pickleball-port-kit/issues/18)) | | Planned |
+| PORT-128 | The sim caught up to the ROM's latest tuning ([#18](https://github.com/austinthedeveloper/pickleball-port-kit/issues/18)) | `feature/cld-tuning-5` | Ready to test |
 | PORT-129 | 1994 MODE: the plan ([#19](https://github.com/austinthedeveloper/pickleball-port-kit/issues/19)) | | Planned |
 | PORT-130 | 1994 MODE: the toggles ([#20](https://github.com/austinthedeveloper/pickleball-port-kit/issues/20)) | | Planned |
 | PORT-131 | A CRT look ([#21](https://github.com/austinthedeveloper/pickleball-port-kit/issues/21)) | `feature/cld-crt-board` | Ready to test |
@@ -586,6 +586,28 @@ the same request), and every task since but the open ones. Open: 36, 40,
   - Try: EXPORT a rally and IMPORT it on another machine; SHARE one once
     the relay's PR is merged; open play with 2P; a match at GLACIER.
   - Status: **Ready to test**. PORT-162 and PORT-165 wait (For you).
+
+### 128. `feature/cld-tuning-5`: the sim at the ROM's tuning 5 (asked for 2026-11-11)
+- [x] `PORT-128` The sim caught up to the ROM's latest tuning (port
+  ADR-113; GitHub #18), chained from `feature/cld-replays-polish`.
+  - Done:
+    - SNES ADR-076, the push: hold toward the net longer and a standard
+      shot or drive lands deeper, 212 to 252, out from 58 frames.
+    - `Sim.step` counts it, so it rolls back and travels online.
+    - The CPU and PICKLE SMASH push to the old deep spot.
+    - TUNING_VERSION 5; the conformance traces re-imported at SNES
+      `41f12f5`.
+    - HOW TO PLAY's OUT LONG tip.
+    - SNES ADR-075 (the tutorial) and 077 (story mode) already have port
+      counterparts (PORT-30, PORT-44).
+  - Verified: `test_conformance` (four traces frame for frame, the push
+    in each line), `test_collision` (`test_push_depth`, `test_push_counts`),
+    `test_tutorial`; `test.sh` passes; golden traces unchanged (the CPUs
+    push to the old spot).
+  - Try: a rally where you tap toward the net, then hold it: the ball goes
+    deeper, then out.
+  - Status: **Ready to test**. Replays saved before it say FROM AN OLDER
+    GAME (KNOWN_ISSUES #100).
 
 ## Phase 6: the year to 1.0 (planned 2026-11-10)
 

@@ -57,6 +57,7 @@ var _last_shot := -1              ## P1's last swing's shot (practice lessons)
 var _shots_landed := {}           ## SHOTS: the shot types landed
 var _serving := false             ## SERVE: P1's serve in the air
 var _rally_counted := false       ## TWO BOUNCES: this rally already counted
+var _mine := false                ## P1 hit the ball last, a rally shot (not a serve)
 var _legal_volley := false        ## THE KITCHEN: P1's last hit was a volley from behind the line
 
 
@@ -119,6 +120,7 @@ func observe(sim: Sim, events: Array) -> void:
 		var slot: int = e[3] & 15
 		match e[0]:
 			K.EVENT_HIT:
+				_mine = slot == 0
 				if slot != 0:
 					continue
 				_last_shot = e[3] >> 4
@@ -130,6 +132,7 @@ func observe(sim: Sim, events: Array) -> void:
 						_say("NO VOLLEYS FROM THE KITCHEN: STEP BACK.")
 			K.EVENT_SERVE:
 				_serving = slot == 0
+				_mine = false
 				_rally_counted = false
 			K.EVENT_BOUNCE:
 				if id == "serve" and _serving and sim.phase == K.PHASE_LIVE:
@@ -148,6 +151,11 @@ func observe(sim: Sim, events: Array) -> void:
 					K.FAULT_NET:
 						if id == "serve":
 							_say("INTO THE NET: AIM A LITTLE DEEPER.")
+					K.FAULT_OUT:
+						# past a baseline: the push (SNES ADR-076) held too long
+						if _mine and (e[1] > K.COURT_BASELINE_RIGHT \
+								or e[1] < K.COURT_BASELINE_LEFT):
+							_say("OUT LONG: HOLD TOWARD THE NET LESS.")
 	if id == "bounces" and sim.phase == K.PHASE_LIVE and not _rally_counted \
 			and sim.required_bounce == K.REQUIRED_BOUNCE_NONE:
 		_rally_counted = true

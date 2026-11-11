@@ -142,6 +142,16 @@ static func x_on_side(x_fp: int, team: int) -> bool:
 		return x_fp < K.to_fp(K.COURT_NET_X)
 	return x_fp > K.to_fp(K.COURT_NET_X)
 
+## The push (SNES ADR-076, input_state.c's build_intent): a frame aimed
+## toward the net adds one (to K.INPUT_PUSH_MAX); any other resets it.
+## Counted here, on every step (paused and hit-stop frames too), so it is
+## the sim's state: it rolls back, replays and travels online by aim_x.
+static func count_push(team: int, aim_x: int, push: int) -> int:
+	if aim_depth(team, aim_x) <= 0:
+		return 0
+	return mini(push + 1, K.INPUT_PUSH_MAX)
+
+
 static func aim_depth(team: int, aim_x: int) -> int:
 	var toward := -aim_x if team else aim_x
 	if toward > 0:
@@ -306,7 +316,8 @@ static func apply_targeted_shot(b: Ball, p: Player, intent: Intent, grow: int = 
 		longer = K.HIT_SLICE_STRETCH_LONG
 	else:
 		if depth > 0:
-			tx = K.HIT_TARGET_DEEP_RIGHT
+			# The push (SNES ADR-076): held longer, deeper, then out.
+			tx = mini(K.HIT_PUSH_START_X + (intent.push >> K.HIT_PUSH_SHIFT), K.HIT_PUSH_MAX_X)
 			pace = K.HIT_PACE_DEEP_FP
 		elif depth < 0:
 			tx = K.HIT_TARGET_SHORT_RIGHT
@@ -1442,7 +1453,9 @@ func step(human: Array = [], commands: Array = []) -> void:
 		var it: Intent = intents[i]
 		if owners[i] == K.OWNER_HUMAN and not (i == 0 and attract) \
 				and i < human.size() and human[i] != null:
+			var push := it.push
 			it.copy_from(human[i])
+			it.push = count_push(players[i].team, it.aim_x, push)
 			if i != 0:
 				it.pause_pressed = 0
 		else:
@@ -1522,6 +1535,7 @@ func special_aim(slot: int) -> Intent:
 	var team: int = players[slot].team
 	var it := Intent.new()
 	it.aim_x = -1 if team else 1
+	it.push = K.HIT_PUSH_DEEP                # the old deep target (ADR-076)
 	var sum := 0
 	var n := 0
 	for p in players:

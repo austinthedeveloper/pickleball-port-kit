@@ -50,8 +50,8 @@ static func line(frame: int, sim: Sim) -> String:
 		var i: SimTypes.Intent = sim.intents[slot]
 		if not p.active:
 			continue
-		out += " I%d %d %d %d %d %d %d %d P%d %d %d %d %d %d %d %d" % [slot,
-			i.move_x, i.move_y, i.aim_x, i.aim_y, i.hit_pressed, i.shot, i.hit_held,
+		out += " I%d %d %d %d %d %d %d %d %d P%d %d %d %d %d %d %d %d" % [slot,
+			i.move_x, i.move_y, i.aim_x, i.aim_y, i.hit_pressed, i.shot, i.hit_held, i.push,
 			slot, p.x_fp, p.y_fp, p.vx_fp, p.vy_fp, p.state, p.state_frames_remaining, p.shot_type]
 	return out
 

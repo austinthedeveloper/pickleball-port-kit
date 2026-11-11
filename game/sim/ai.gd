@@ -270,6 +270,9 @@ func _choose_aim(p: Player, intent: Intent) -> void:
 		if style.aim == K.AIM_BODY:
 			intent.aim_y = -intent.aim_y
 	intent.aim_x = -g.planned_depth if p.team else g.planned_depth
+	# A deep shot pushes just long enough for the old deep target
+	# (SNES ADR-076): the CPU never pushes it out.
+	intent.push = K.HIT_PUSH_DEEP if g.planned_depth > 0 else 0
 	intent.shot = g.planned_shot
 
 
@@ -707,6 +710,7 @@ func _think(i: int, intent: Intent) -> void:
 	intent.aim_y = 0
 	intent.hit_pressed = 0
 	intent.pause_pressed = 0
+	intent.push = 0
 	if not p.active or sim.paused:
 		return
 	if sim.phase == K.PHASE_SERVE_SETUP or sim.phase == K.PHASE_SERVE_TOSS:

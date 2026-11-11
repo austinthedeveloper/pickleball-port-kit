@@ -71,6 +71,18 @@ const HIT_TARGET_LANE_BOTTOM := COURT_SIDELINE_BOTTOM - 14
 const HIT_TARGET_SHORT_RIGHT := COURT_KITCHEN_RIGHT_X + 12
 const HIT_TARGET_NEUTRAL_RIGHT := COURT_KITCHEN_RIGHT_X + 40
 const HIT_TARGET_DEEP_RIGHT := COURT_BASELINE_RIGHT - 12
+## The push (SNES ADR-076, tuning v5): a standard shot or drive aimed toward
+## the net lands HIT_PUSH_START_X plus a pixel per HIT_PUSH_FRAMES_PER_PX
+## frames the D-pad was held there (Intent.push), to HIT_PUSH_MAX_X.
+## HIT_PUSH_DEEP frames reach the old deep target (the CPU's push); held
+## more than HIT_PUSH_OUT_FRAMES, it lands past the baseline: out.
+const HIT_PUSH_START_X := HIT_TARGET_NEUTRAL_RIGHT + 8
+const HIT_PUSH_SHIFT := 1                ## two frames a pixel
+const HIT_PUSH_FRAMES_PER_PX := 1 << HIT_PUSH_SHIFT
+const HIT_PUSH_MAX_X := COURT_BASELINE_RIGHT + 12
+const HIT_PUSH_DEEP := (HIT_TARGET_DEEP_RIGHT - HIT_PUSH_START_X) * HIT_PUSH_FRAMES_PER_PX
+const HIT_PUSH_OUT_FRAMES := (COURT_BASELINE_RIGHT - HIT_PUSH_START_X) * HIT_PUSH_FRAMES_PER_PX \
+	+ HIT_PUSH_FRAMES_PER_PX
 const HIT_PACE_DEEP_FP := 48
 const HIT_PACE_NEUTRAL_FP := 44
 const HIT_PACE_SHORT_FP := 40
@@ -105,7 +117,8 @@ const HIT_OVERHEAD_NET_CLEAR := 3   ## px over the tape a smash keeps, if its fl
 # --- Shots and intents (input.h) ---------------------------------------------
 ## The SNES repo's TUNING_VERSION (include/tuning.h) this sim matches,
 ## proven by the conformance traces (PORT-35; docs/TUNING.md there).
-const TUNING_VERSION := 4
+const TUNING_VERSION := 5
+const INPUT_PUSH_MAX := 255             ## Intent.push's cap (input.h)
 
 const SHOT_STANDARD := 0
 const SHOT_DRIVE := 1

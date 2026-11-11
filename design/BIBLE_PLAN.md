@@ -45,6 +45,11 @@ this: `docs/TUNING.md` (the port's catch-up steps), `docs/tuning/tuning.json`
 traces an integer-exact port must match), proven against the ROM itself
 (`make lockstep`, SNES ADR-069).
 
+**Caught up again (PORT-128, 2026-11-11):** the sim is at **TUNING_VERSION 5**
+(SNES `41f12f5`, the push of SNES ADR-076), proven by the re-imported
+conformance traces. SNES ADR-075 (the tutorial) and 077 (story mode) are
+screens the port already has its own of.
+
 **Numbering:** the SNES repo's ADR-052 to 057 are not ours. The port's own
 records ADR-052 to 057 (the Godot port, overhead, tournament, kitchen
 volleys, online, updater) clash with SNES ADR-052 to 057 (kitchen fault,
@@ -67,6 +72,7 @@ Status: **have** (the port does it), **done** (a PORT task added it),
 | Slice on **X**; **hold L or R** to hit short (L+A fast drop, L+Y dink) | 056 | **have** | PORT-41 (ADR-058): SLICE on the pad's north button, SHORT on LB/RB. |
 | CPUs slice (Goth Club, Champs) | 057 | **have** | PORT-41. |
 | Ladder rebalance, every rung measurably harder | 062 + tuning v2-4 | **have** | PORT-35: frame for frame (the conformance traces). |
+| **The push:** hold toward the net longer and a standard shot or drive goes deeper, about a second and it sails out; lobs always land deep | 076 + tuning v5 | **have** | PORT-128 (port ADR-113): frame for frame (the conformance traces at SNES `41f12f5`). |
 | Singles and doubles keep **separate ladder places**; quitting a ladder match resets it | 055 | **have** | PORT-35, save v6. |
 | Modifiers **GHOST ball, POPCORN rally, ICE footing** | 053 | **have** | PORT-35. |
 | Modifiers **GLOW lights, INVERSE colours** | 054 | **have** | PORT-39: GLOW (night, lime, neon) and INVERSE (a negative under the HUD). |
