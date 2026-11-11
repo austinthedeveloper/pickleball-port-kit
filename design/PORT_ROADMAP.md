@@ -166,7 +166,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-138 | The line judge: a fifth seat ([#28](https://github.com/austinthedeveloper/pickleball-port-kit/issues/28)) | | Planned |
 | PORT-139 | The line judge: the whistle and the crowd ([#29](https://github.com/austinthedeveloper/pickleball-port-kit/issues/29)) | | Planned |
 | PORT-140 | The line judge online ([#30](https://github.com/austinthedeveloper/pickleball-port-kit/issues/30)) | | Planned |
-| PORT-141 | Cleanup round 9 ([#31](https://github.com/austinthedeveloper/pickleball-port-kit/issues/31)) | | Planned |
+| PORT-141 | Cleanup round 9 ([#31](https://github.com/austinthedeveloper/pickleball-port-kit/issues/31)) | `feature/cld-cleanup-9` | Ready to test |
 | PORT-142 | Club manager: the plan ([#32](https://github.com/austinthedeveloper/pickleball-port-kit/issues/32)) | `feature/cld-club` | Ready to test |
 | PORT-143 | Club manager: the day and the ledger ([#33](https://github.com/austinthedeveloper/pickleball-port-kit/issues/33)) | `feature/cld-club` | Ready to test |
 | PORT-144 | Club manager: upgrades ([#34](https://github.com/austinthedeveloper/pickleball-port-kit/issues/34)) | `feature/cld-club` | Ready to test |
@@ -433,102 +433,6 @@ the same request), and every task since but the open ones. Open: 36, 40,
     the card and the preset row.
   - Status: **Planned**, parked until you've decided the layout.
 
-### 142-150. `feature/cld-club`: CLUB, the club manager (asked for 2026-11-11)
-- [x] `PORT-142` CLUB: the Pickleball '95 club manager (port ADR-106; GitHub
-  #32 to #40): PLAY > CLUB. A day at the park you own, playing on its
-  courts while the members play around you; the night's ledger; upgrades
-  that change the park; members who come and go; a coach; the WEEKEND
-  CUP; weather.
-  - Done: the plan (ADR-106) and `meta/club.gd` (PORT-142); the day, the
-    clock and the ledger (143: 9 AM to 6 PM, a minute every 8 frames,
-    a match 40 minutes; END THE DAY; the ledger card); upgrades (144:
-    LIGHTS lights the lamps and the evening, SNACK BAR's cart, the BALL
-    MACHINE, two ANNEX courts on the COURTS panel, INDOOR COURTS moves a
-    wet day to THE GYM); you still play (145: your matches are open play
-    matches, counted as ever; your wins bring members); members (146: a
-    skill, a patience and a mood each, sampled waits, leaving by name);
-    the coach (147: skill and patience a day, TODAY'S DRILL a HOW TO PLAY
-    lesson, a card per member); the WEEKEND CUP (148: Saturday's bracket,
-    entries and gate, the purse, the trophy shelf in the clubhouse);
-    weather (149: six kinds from the seed and the day; rain and heat haze
-    in the view only; WIND on a windy day is the existing modifier); the
-    balance pass (150: `tools/club_stats.gd`, four strategies, none bust
-    by day 30 or rich by day 60). The save stays v6: `club` is a new key
-    with a harmless default (CLAUDE.md's rule), not the v7 the story
-    asked for (ADR-106 says why). Also: `release_notes.py` now reads task
-    numbers past 99 (PORT-100 on were missing from the notes).
-  - Verified: `test_club.gd` (23 tests: the ledger adds up, upgrades,
-    waits and members, the coach, the cup, weather days, the bank, a
-    100-day soak of each strategy, the balance, the save, the park in
-    club mode and the same park as open play's, main's day, drill and
-    cup); `test_layout.test_club`; screenshots (`tools/club_shot.gd`);
-    `test.sh` passes, golden traces unchanged.
-  - Try: PLAY > CLUB. Play a week: OPEN THE PARK, a few games, END THE
-    DAY, read the ledger. Buy LIGHTS and play into the evening; hire the
-    coach and do TODAY'S DRILL; host the WEEKEND CUP on Saturday. Say if
-    the money comes too fast or too slow, if the day is too short, and
-    which upgrade you'd add next.
-  - Status: **Ready to test**.
-
-### 151-155. `feature/cld-handhelds`: phones and handhelds (asked for 2026-11-11)
-- [x] `PORT-151` Phones and handhelds (port ADR-107; GitHub #41 to #45),
-  chained from `feature/cld-club`.
-  - Done: upright phones (152: the picture at the top, the touch pad
-    under it and bigger); TOUCH BUTTONS SNES or WORDS and a Web page that
-    keeps the browser's gestures off the game (151); SCALE AUTO, the new
-    default (153: whole-number scaling only where it fills the screen, so
-    a 1280x800 handheld fills), a match pausing when the app is left, the
-    handhelds' pads; the Web build's sound pack (154: the first download
-    13 MB compressed, from about 22; the music after the title; a budget
-    in export.sh); cleanup round 10 (155: task 113 to the history, five
-    merged branches deleted).
-  - Verified: `test_handhelds.gd`; `test.sh` passes; the real Web export
-    in the browser pane (the sound pack loads; upright 375x812 and 844x390
-    with touches).
-  - Try: open the Web build on a phone, upright and on its side; try
-    TOUCH BUTTONS WORDS. On a handheld (or a 1280x800 window), SCALE AUTO
-    should fill the screen.
-  - Status: **Ready to test** on a real phone (KNOWN_ISSUES #79).
-
-### 123-127. `feature/cld-access`: controls and access (asked for 2026-11-11)
-- [x] `PORT-123` Controls and access (port ADR-108; GitHub #13 to #17),
-  chained from `feature/cld-handhelds`. PORT-78 (the keyboard presets)
-  is left for your layout.
-  - Done: ACCESSIBILITY > COLOURS (123: five sets for the rings, tags and
-    lobby numbers; a shape on every ring; HIGH CONTRAST's dark edges and
-    the ball's white rim); CAPTIONS (124: the announcer's lines and the
-    sound-only cues in a bar under the court); ASSIST (125: SWING and
-    SERVE, in the sim, OFF the ROM's; an assisted match isn't recorded);
-    the couch cup asking for each player's pad on PLAY (126, KNOWN_ISSUES
-    #52); cleanup round 8 (127).
-  - Verified: `test_access.gd`, `test_layout` (ACCESSIBILITY, the caption
-    bar, the cup's question); golden traces and conformance unchanged;
-    `test.sh` passes; screenshots of TRITAN and HIGH CONTRAST rings and
-    the caption bar.
-  - Try: OPTIONS > ACCESSIBILITY: each COLOURS set in a doubles match;
-    CAPTIONS ON with the announcer; ASSIST SWING with a child. A saved
-    couch cup after swapping two pads' ports.
-  - Status: **Ready to test**.
-
-### 131, 158, 159, 161. `feature/cld-crt-board`: CRT, the lit apron, WEEKLY, the boards (asked for 2026-11-11)
-- [x] `PORT-131` CRT, the lit apron, the WEEKLY CHALLENGE and score boards
-  (port ADR-109; GitHub #21, #51, #49, #48), chained from
-  `feature/cld-access`.
-  - Done: OPTIONS > CRT OFF, SOFT, STRONG (131); the lit apron at dusk and
-    night (161, KNOWN_ISSUES #38); PLAY > WEEKLY, a challenge a week from
-    `data/challenges.json` with its best kept (159); the boards: TODAY'S
-    TRIP's day board and the week's, through the relay's new `/v1/board`
-    (158; pickleball-relay `feature/cld-daily-board`).
-  - Verified: `test_weekly.gd` (a score through the real relay code too),
-    `test_night.test_lit_apron`, `test_layout`'s WEEKLY and boards cases;
-    `test.sh` passes; screenshots of CRT STRONG, a night court's apron and
-    WEEKLY with a board.
-  - Try: OPTIONS > CRT SOFT and STRONG at full screen; a NIGHT match on
-    ASPHALT; PLAY > WEEKLY.
-  - Status: **Ready to test**; the boards wait on the relay's PR (merging
-    it deploys it) and on whether boards should survive the relay's sleep
-    (a storage mount; For you).
-
 ### 114-117. `feature/cld-online-finish`: online, finished (asked for 2026-11-11)
 - [x] `PORT-114` Online, finished: the guest's side, career looks, the
   letter grid, the relay's reasons (port ADR-110; GitHub #3, #4, #5, #6),
@@ -608,6 +512,22 @@ the same request), and every task since but the open ones. Open: 36, 40,
     deeper, then out.
   - Status: **Ready to test**. Replays saved before it say FROM AN OLDER
     GAME (KNOWN_ISSUES #100).
+
+### 141. `feature/cld-cleanup-9`: cleanup round 9 (asked for 2026-11-11)
+- [x] `PORT-141` Cleanup round 9 (GitHub #31), chained from
+  `feature/cld-tuning-5`.
+  - Done:
+    - The merged tasks (123 to 127, 131, 142 to 155, 158, 159, 161; PRs
+      #63 to #66) moved to `PORT_HISTORY.md`.
+    - KNOWN_ISSUES: the five resolved rows left in the open table
+      (#34, 83, 87, 92, 93) moved to Resolved; #98 says the boards are
+      deployed.
+    - `game/README.md` lists every script (the pad mapper, quick chat and
+      five tools were missing).
+  - Verified: `release_notes.py` gives the same notes; `test.sh` passes.
+  - Not done: the 136 remote branches merged into `main` weren't deleted,
+    since this session can't delete remote branches (For you).
+  - Status: **Ready to test**.
 
 ## Phase 6: the year to 1.0 (planned 2026-11-10)
 
@@ -739,6 +659,10 @@ Feature freeze, a full playtest, store pages, v1.0.0; cleanup round 11.
 - `PORT-169` Release 1.0.0 ([#60](https://github.com/austinthedeveloper/pickleball-port-kit/issues/60))
 - `PORT-170` Cleanup round 11 ([#61](https://github.com/austinthedeveloper/pickleball-port-kit/issues/61))
 ## For you
+
+- **Merged branches (PORT-141):** 136 remote branches are merged into
+  `main`. `git branch -r --merged origin/main` lists them; delete the ones
+  no worktree uses with `git push origin --delete <branch>`.
 
 - **PORT-109 rollback:** play an online match over a real line (the
   default is now ROLLBACK). Does it feel immediate? Do corrections
