@@ -14,10 +14,10 @@ OUT = KIT / "game/RELEASE_NOTES.md"
 
 
 def tasks(text):
-    """(id, title, status, try) for each `PORT-NN` row of the sheet."""
+    """(id, title, status, try) for each `PORT-NN` row of the sheet (two digits or more)."""
     out = []
     for block in re.split(r"\n(?=### )", text):
-        m = re.search(r"- \[(x| )\] `(PORT-\d\d)` (.+?)(?=\n  - )", block, re.S)
+        m = re.search(r"- \[(x| )\] `(PORT-\d+)` (.+?)(?=\n  - )", block, re.S)
         if not m:
             continue
         title = " ".join(m.group(3).split())
@@ -33,7 +33,8 @@ def main():
     build = sys.argv[1] if len(sys.argv) > 1 else subprocess.run(
         ["git", "-C", str(KIT), "describe", "--tags", "--always", "--dirty"],
         capture_output=True, text=True).stdout.strip()
-    rows = sorted(tasks(HISTORY.read_text()) + tasks(SHEET.read_text()))
+    rows = sorted(tasks(HISTORY.read_text()) + tasks(SHEET.read_text()),
+                  key=lambda r: (int(r[0].split("-")[1]), r))
     done = [r for r in rows if r[3]]
     lines = [f"# Pickleball '94 (Godot port) release notes", "",
              f"Build `{build}`. Generated from `design/PORT_ROADMAP.md` by",

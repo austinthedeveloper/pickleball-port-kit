@@ -16,7 +16,8 @@ extends Node2D
 
 signal play(cfg: SimTypes.MatchConfig)      ## your game is up
 signal practice(cfg: SimTypes.MatchConfig)  ## B at the ball machine
-signal leave                                ## Start: back to the title
+signal leave                                ## Start: back to the title (CLUB: its home)
+signal closed                               ## CLUB: closing time, the day is over
 
 const ART := "res://assets/park/"
 const VIEW := Vector2(960, 540)
@@ -71,6 +72,23 @@ var _looks := {}                     ## "team:member" -> PlayerLook
 var dinos: Array = []                ## DINO PARK's dinosaurs (ADR-084): [DinoWalkers.Dino]
 var dino_frame := 0                  ## their clock: frames since the park opened
 var _prompt_key := ""
+## CLUB (port ADR-106): the club whose day this is, or null for open play.
+## Its clock runs while you walk (Club.CLOCK_FRAMES a minute), the stacks
+## are sampled for the night's wait, and at closing time the park says so
+## and closes. The upgrades show: the lamps lit (LIGHTS), the snack cart
+## (SNACK BAR), the ball machine (BALL MACHINE), the annex courts on the
+## COURTS panel; rain and heat in the air; the trophies in the clubhouse.
+var club: Club
+var closing_timer := 0
+const CLOSING_FRAMES := 150
+const SAMPLE_FRAMES := 60
+var _club_frames := 0
+var _clock: BitmapText
+var _night: CanvasModulate
+var _air: Node2D
+var lamps: Array = []                ## the lamps' heads, in the world
+var snack_props: Array = []          ## the SNACK BAR's cart and cooler, when bought
+var machine_shown := true
 
 
 ## `back`: returning from your game (its result shows for a while).
@@ -83,9 +101,10 @@ func music_track() -> String:
 	return "park"
 
 
-func setup(park: OpenPlay, s: SaveGame, back: bool) -> ParkView:
+func setup(park: OpenPlay, s: SaveGame, back: bool, the_club: Club = null) -> ParkView:
 	op = park
 	save = s
+	club = the_club
 	result_timer = RESULT_FRAMES if back and op.last_won != OpenPlay.NONE else 0
 	_2p_shown = op.two_players
 	rate_park()
@@ -114,6 +133,8 @@ func rate_park() -> void:
 
 func _build() -> void:
 	art = Settings.park_art()                 # ADR-078: THE PARK, DINO PARK or THE GYM
+	if club:
+		art = String(Settings.PARKS[club.park_index()][2])   # the club's: the park, or the gym in the rain
 	layout = JSON.parse_string(FileAccess.get_file_as_string(art + "park.json"))
 	var bg := ColorRect.new()
 	bg.color = Color(String(layout.get("bg", "356b2a")))
@@ -129,7 +150,26 @@ func _build() -> void:
 	_actors.y_sort_enabled = true
 	_world.add_child(_actors)
 	for spr in layout["sprites"]:
+		if club and String(spr["file"]) == "machine.png" and not club.owns("machine"):
+			machine_shown = false
+			continue                          # the club hasn't bought one yet
 		_add_prop(spr)
+		if String(spr["file"]).begins_with("lamp_"):
+			var tex: Texture2D = load(art + String(spr["file"]))
+			lamps.append(Vector2(float(spr["x"]) + tex.get_width() / 2.0, float(spr["y"]) + 8.0))
+	if club and club.owns("snack") and art == ART:
+		# the SNACK BAR: the gym's cart and cooler, by the path at the clubhouse
+		for prop in [{"file": "cart_0.png", "x": 1150, "y": 640}, {"file": "cooler_0.png", "x": 1236, "y": 690}]:
+			var tex: Texture2D = load(ART + "gym/" + String(prop["file"]))
+			var holder := Node2D.new()
+			holder.position = Vector2(prop["x"], prop["y"] + tex.get_height())
+			var sp := Sprite2D.new()
+			sp.texture = tex
+			sp.centered = false
+			sp.position = Vector2(0, -tex.get_height())
+			holder.add_child(sp)
+			_actors.add_child(holder)
+			snack_props.append(holder)
 	if layout.get("theme", "") == "dino":
 		for c: Dictionary in DinoWalkers.PARK_CAST:
 			var d := DinoWalkers.Dino.new(c)
@@ -158,6 +198,8 @@ func _build() -> void:
 	_dress(_you, null)
 	_build_hud()
 	_build_courts_panel()
+	if club:
+		_build_club()
 	_sfx = Sfx.new()
 	add_child(_sfx)
 	_sfx.setup("", false)
@@ -235,14 +277,16 @@ func _build_hud() -> void:
 	ui.layer = 10
 	add_child(ui)
 	# top left: where you are, and the way out
-	var chip := UiKit.panel(Rect2(Vector2(12, 10), Vector2(320, 44)), ui)
+	var chip := UiKit.panel(Rect2(Vector2(12, 10), Vector2(590 if club else 320, 44)), ui)
 	var title := BitmapText.new()
 	title.font = "small"
-	title.text = "OPEN PLAY"
+	title.text = "CLUB" if club else "OPEN PLAY"
 	title.tint = SCORE_TINT
 	title.position = Vector2(28, 22)
 	ui.add_child(title)
-	ui.add_child(PromptBar.new().setup([["start", "EXIT"]], Vector2(236, 32)))
+	ui.add_child(PromptBar.new().setup([["start", "HOME" if club else "EXIT"]], Vector2(500 if club else 236, 32)))
+	if club:
+		_clock = UiKit.text("small", "", Vector2(96, 22), 0.0, Color.WHITE, ui)
 	# bottom: what's here and what you can do
 	_panel = UiKit.panel(Rect2(220, 474, 520, 56), ui)
 	_panel_text = BitmapText.new()
@@ -414,6 +458,8 @@ func step_frame(it: SimTypes.Intent = null, pad2_start := false) -> void:
 		_sfx.play("back")
 		leave.emit()
 		return
+	if club and _club_frame():
+		return
 	# Y (SLICE) at your rack picks your partner (SNES ADR-072).
 	if it.hit_pressed != 0 and it.shot == K.SHOT_SLICE and op.pick_next():
 		_sfx.play("blip")
@@ -429,6 +475,9 @@ func step_frame(it: SimTypes.Intent = null, pad2_start := false) -> void:
 	if event == OpenPlay.EVENT_PLAY:
 		play.emit(Settings.open_play_config(op, save.career.active_player() if save else null))
 		return
+	if event == OpenPlay.EVENT_PRACTICE and not machine_shown:
+		event = OpenPlay.EVENT_NONE           # the club has no ball machine yet
+		_sfx.play("back")
 	if event == OpenPlay.EVENT_PRACTICE:
 		_sfx.play("confirm")
 		var cfg: SimTypes.MatchConfig = save.practice_config(Settings.difficulty_i) if save \
@@ -453,7 +502,90 @@ func _pad2_start() -> bool:
 	return GameControls.read_pad_intent(dev).pause_pressed != 0
 
 
+# --- CLUB (port ADR-106) ---------------------------------------------------------------
+
+func _build_club() -> void:
+	_night = CanvasModulate.new()
+	add_child(_night)
+	var air_layer := CanvasLayer.new()
+	air_layer.layer = 5
+	add_child(air_layer)
+	_air = ParkAir.new()
+	_air.view = self
+	air_layer.add_child(_air)
+	# the annex courts under the park's three on the COURTS panel
+	var annexes := club.courts_today() - OpenPlay.COURTS   # none at the gym: they're outdoors
+	if annexes > 0:
+		var ui := CanvasLayer.new()
+		ui.layer = 10
+		add_child(ui)
+		var top := 10 + 30 + OpenPlay.COURTS * 24 + 6
+		var plate := UiKit.panel(Rect2(Vector2(668, top), Vector2(280, 18 + annexes * 24)), ui)
+		plate.modulate.a = 0.92
+		for a in annexes:
+			var y := top + 10 + a * 24
+			var stripe := ColorRect.new()
+			stripe.color = Color("8a93a6")
+			stripe.position = Vector2(682, y + 2)
+			stripe.size = Vector2(6, 16)
+			ui.add_child(stripe)
+			UiKit.text("small", "ANNEX %d" % (a + 1), Vector2(696, y), 0.0, Color.WHITE, ui)
+			UiKit.text("small", "MEMBERS", Vector2(934, y), 1.0, SCORE_TINT, ui)
+
+
+## The club's frame: the clock, the stacks sampled, closing time. True
+## when the park has closed (the signal is sent).
+func _club_frame() -> bool:
+	if op.called != OpenPlay.NONE:
+		return false                          # the call banner: your game is up
+	if closing_timer > 0:
+		closing_timer -= 1
+		if closing_timer == 0:
+			closed.emit()
+			return true
+		refresh()
+		return true
+	_club_frames += 1
+	if _club_frames % Club.CLOCK_FRAMES == 0:
+		club.advance(1)
+	if _club_frames % SAMPLE_FRAMES == 0:
+		var waiting := 0
+		for ct: OpenPlay.OpenCourt in op.court:
+			waiting += ct.stack_count
+		club.sample_wait(waiting)
+	if club.closed_for_today():
+		closing_timer = CLOSING_FRAMES
+		_sfx.play("confirm")
+		refresh()
+		return true
+	return false
+
+
+## How dark the park is at the club's hour: day, dusk, night (display only).
+func club_light() -> Color:
+	var m := club.minute
+	if m < Club.DUSK_AT:
+		return Color(1.0, 0.95, 0.84) if club.weather() == Club.HOT else Color.WHITE
+	var dusk := Color(1.0, 0.82, 0.68)
+	var night := Color(0.42, 0.46, 0.66)
+	if m < Club.CLOSE:
+		return Color.WHITE.lerp(dusk, float(m - Club.DUSK_AT) / (Club.CLOSE - Club.DUSK_AT))
+	return dusk.lerp(night, clampf(float(m - Club.CLOSE) / 60.0, 0.0, 1.0))
+
+
+func lamps_lit() -> bool:
+	return club != null and club.owns("lights") and club.minute >= Club.DUSK_AT and art != ART + "gym/"
+
+
+func _refresh_club() -> void:
+	_night.color = Color.WHITE if art == ART + "gym/" else club_light()
+	_clock.text = club.day_label() + "  " + Club.clock_label(club.minute)
+	_air.queue_redraw()
+
+
 func refresh() -> void:
+	if club:
+		_refresh_club()
 	_follow()
 	var x := K.from_fp(op.x_fp)
 	var y := K.from_fp(op.y_fp)
@@ -609,6 +741,13 @@ class ParkOverlay:
 	var view: ParkView
 
 	func _draw() -> void:
+		if view.lamps_lit():
+			for head: Vector2 in view.lamps:
+				draw_circle(head, 46.0, Color(1.0, 0.92, 0.6, 0.12))
+				draw_circle(head, 22.0, Color(1.0, 0.95, 0.7, 0.25))
+				draw_circle(head, 7.0, Color(1.0, 0.98, 0.85, 0.9))
+		if view.club and view.op.in_house():
+			_draw_trophies()
 		for c in OpenPlay.COURTS:
 			var at: Variant = view.ball_at(c)
 			if at != null:
@@ -629,3 +768,43 @@ class ParkOverlay:
 					draw_rect(Rect2(top, Vector2(7, 17)), col if k == 0 else col.darkened(0.12))
 					draw_rect(Rect2(top, Vector2(7, 17)), Color(0.1, 0.12, 0.16), false, 1.0)
 					draw_rect(Rect2(top + Vector2(2, 17), Vector2(3, 11)), Color("4a3a2a"))
+
+
+	## The WEEKEND CUPs won, on the clubhouse's back wall by the board.
+	func _draw_trophies() -> void:
+		var shelf := view.to_world(Vector2(OpenPlay.BOARD_X + 34, OpenPlay.BOARD_Y - 6))
+		var n := mini(view.club.trophies.size(), 12)
+		if n == 0:
+			return
+		draw_rect(Rect2(shelf + Vector2(-6, 30), Vector2(n * 26 + 8, 6)), Color("6b4a2e"))
+		for i in n:
+			var at := shelf + Vector2(i * 26, 0)
+			var gold := Color("f2c84b")
+			draw_rect(Rect2(at + Vector2(6, 22), Vector2(10, 8)), gold.darkened(0.25))
+			draw_rect(Rect2(at + Vector2(9, 14), Vector2(4, 8)), gold.darkened(0.1))
+			draw_colored_polygon(PackedVector2Array([at, at + Vector2(22, 0), at + Vector2(17, 14),
+				at + Vector2(5, 14)]), gold)
+			draw_polyline(PackedVector2Array([at, at + Vector2(22, 0), at + Vector2(17, 14),
+				at + Vector2(5, 14), at]), Color(0.3, 0.2, 0.05), 1.0)
+
+
+## CLUB's air over the park (display only): rain on a wet day, the heat's
+## shimmer on a hot one; never at the gym.
+class ParkAir:
+	extends Node2D
+
+	var view: ParkView
+
+	func _draw() -> void:
+		if view.club == null or view.art == ParkView.ART + "gym/":
+			return
+		var w := view.club.weather()
+		if w == Club.SHOWERS or w == Club.RAIN:
+			ClubHome.ClubWeather.draw_rain(self, view.anim + view._club_frames, 70)
+		elif w == Club.HOT:
+			for i in 6:
+				var y := 120.0 + i * 64.0 + sin((view._club_frames + i * 20) * 0.05) * 6.0
+				var pts := PackedVector2Array()
+				for k in 25:
+					pts.append(Vector2(k * 40.0, y + sin(k * 0.9 + view._club_frames * 0.08 + i) * 3.0))
+				draw_polyline(pts, Color(1.0, 0.92, 0.75, 0.2), 8.0)

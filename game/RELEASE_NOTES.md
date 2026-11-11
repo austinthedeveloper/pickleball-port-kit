@@ -3,7 +3,7 @@
 Build `v0.43.0`. Generated from `design/PORT_ROADMAP.md` by
 `game/tools/release_notes.py`; edit the sheet, not this file.
 
-96 of 99 roadmap tasks are in.
+108 of 112 roadmap tasks are in.
 
 ## PORT-00: Merge the two running sessions
 
@@ -598,3 +598,81 @@ Status: **Ready to test**: hold SHORT and feel the drag; play a few grudges for 
 A new trip opens on a FROM THE GARAGE card: the stats you start with, what the GARAGE adds (stats, hearts, cash, paddle), and in gold what's NEW since the last trip began (meta `garage_steps`, save still v6). None before the first step, none on TODAY'S TRIP (port ADR-097).
 
 Status: **Ready to test**: start a trip once you have some MILES.
+
+## PORT-100: where a choice leads (asked for 2026-10-26)
+
+On ROAD TRIP's map, the stop under the cursor shows where it leads: a gold highlighter from the van to it and along every road on to the big match, and the leg's stops those roads miss faded. Display only (port ADR-098).
+
+Status: **Ready to test**: move the cursor over the first column's stops on a new trip.
+
+## PORT-101: one pad and PLAYERS 2P (a tester's report, 2026-10-26)
+
+With one pad, PLAYERS 2P gave the pad to 2P and put P1 on the keyboard by re-pointing the input map's pad events at no pad, so MATCH SETUP (and every menu after it) stopped hearing the pad: the menu looked frozen until a key set PLAYERS back. The split now holds only while 2P is on the court (`GameControls.split`, set by main for a match with 2P in it and the park); everywhere else the input map hears every pad. Player Select's 2P turn still reads 2P's pad as before.
+
+Status: **Ready to test**: one pad, MATCH SETUP > PLAYERS 2P, then move on the pad; start a 2P match (keyboard is P1, the pad 2P).
+
+## PORT-102: new heads and faces (asked for 2026-10-26) (not in this build)
+
+New heads for the players that fit the bodies and all twelve hats and recolour to every skin and hair. Round 1: 20 heads from `art/faces-r1/PROMPTS.md`, generated off the grid, recovered by `snap.py` (it finds the art-pixel grid and the nine head colours) and tried on the bodies by `review.py`. All twenty fit every hat and palette; 10 kept, 5 to retry, 5 dropped (`REVIEW.md`). Round 2 (`PROMPTS_R2.md`): 18 of 20 kept, so with the current man and woman there are 20 heads, 6 of them women (`lineup_r2.png`). Nothing in the game uses them yet. Those read as plain ugly, so round 3 (`PROMPTS_R3.md`) asks for conventional faces: natural proportions, character from age, hair, facial hair and expression. Round 3: 18 of 20 kept, 10 men and 8 women (`lineup_r3.png`); `snap.py` now resizes a sheet drawn bigger than the guide so its skulls fit the hats. - [x] `PORT-102` The round 3 heads in the game (port ADR-099): the build adds headless bodies and a sheet per head, `PlayerLook` composes them, and hats are now the pixels they show, so they fit every head (over the classic head they're pixel-identical to before). The ladder teams, Pepper and the ROAD HOGS wear heads (the TWINS and Dawson keep the classic one), ROAD TRIP's locals roll one, and a career player picks one on EDIT's new HEAD row (free; the save stays v6).
+
+Status: **Ready to test**: play the ladder, and CAREER > EDIT > HEAD.
+
+## PORT-103: the sim's whole state (asked for 2026-10-26)
+
+Groundwork for online play over the internet (port ADR-100). `Sim.save_state()` and `load_state()` save and load everything the sim carries (`sim/sim_state.gd`, by reflection, so a new variable can't be left out). Loading keeps object identity (MULTI BALL's ball) and works in place. A state is plain data, so it can go over a line as bytes. Online's desync check now hashes the whole state (`Sim.state_hash`), not the traced snapshot, so it sees the AI's caches and the untraced rules too. Play is unchanged: the golden traces are the same.
+
+Status: **Done**: nothing to play. Next for online: tag events by frame, and route `retune`/`new_match` through the inputs (ADR-100), then rollback.
+
+## PORT-104: events by step (asked for 2026-10-26)
+
+Rollback groundwork (port ADR-101), chained from `feature/cld-sim-state`. Every sim event carries its step (`Sim.step_count`, never reset, part of the state). `EventLedger` (`view/event_ledger.gd`) plays a step's events once, however often the step runs, and counts them only when the step is confirmed, with the context recorded at that step. MatchView's handler is split in two: `_on_event` plays (sound, sparks, crowd, quips) and `_count_event` counts (stats, rally record, career points). Offline and in lockstep, a step is confirmed as it runs, so nothing changes in play. The golden traces are the same.
+
+Status: **Done**: nothing to play. Still to do before rollback (ADR-101): PLAY OF THE MATCH, the lesson and the match end read the live sim, and `retune`/`new_match` need to go through the inputs.
+
+## PORT-105: commands with the inputs (asked for 2026-10-26)
+
+Rollback groundwork (port ADR-102), chained from `feature/cld-sim-events`. `Sim.step(human, commands)` applies NEW MATCH, TUNE's sliders and SMART PLAY as the step begins. The views only queue them (`MatchView.command`): the rematch, RESTART, a lesson's next match and the tuning panel. PLAY OF THE MATCH records and replays them the same way. Online, the host's rematch rides its input message and both sims step it on the same frame; any other command is refused there, and APPLY refuses outright. `OnlineSession.PROTOCOL` is now 2. The golden traces are the same.
+
+Status: **Ready to test**: play an online match to its end and rematch with the host's B; offline, TUNE's sliders and RESTART.
+
+## PORT-106: the confirmed sim; rollback planned (asked for 2026-10-26)
+
+Rollback stage 1 (port ADR-103), chained from `feature/cld-sim-commands`. `MatchView.truth` is the confirmed sim and `sim` is the one drawn. Offline and in lockstep they're the same object. The things that are counted or can't be taken back read `truth`: stats and records, PLAY OF THE MATCH's recording, the lesson, the match end and close calls (on `truth`'s phase changes), the rematch, and online's desync hash.
+
+Status: **Done**: nothing to play.
+
+## PORT-107: rollback's core (asked for 2026-10-26)
+
+ADR-103 accepted with the defaults (W = 8, D = 1 or 2, lockstep kept a release, the HUD's score on the drawn sim). `net/rollback.gd` is pure: the confirmed sim and the prediction, inputs scheduled D ahead, guesses that repeat held state and never presses, a correction (load `truth`, re-run the guessed frames) when a guess was wrong, the window, time sync, and the desync hash on `truth`. Nothing uses it yet: the session (`PORT-108`) and the view (`PORT-109`) come next.
+
+Status: **Done**: nothing to play yet.
+
+## PORT-108: rollback in the session (asked for 2026-10-26)
+
+(port ADR-103), chained from `feature/cld-rollback-core`. START names the netcode, and both sides build it: under rollback the session owns the sims, and `tick()` takes the local intent and gives back what the frame did. The delay comes from the round trip (1 on a LAN, 2 otherwise), a desync closes both sides, and `PROTOCOL` is 3. ONLINE NETCODE (ROLLBACK or LOCKSTEP) is saved. The view can't play rollback yet, so `OnlineSession.VIEW_PLAYS_ROLLBACK` is off: the host starts lockstep and the OPTIONS row is hidden. Online play is as before, and PORT-109 turns both on.
+
+Status: **Done**: nothing to play yet.
+
+## PORT-109: rollback in the match (asked for 2026-10-26)
+
+(port ADR-103), chained from `feature/cld-rollback-session`. Online with rollback, MatchView draws the session's prediction and counts its confirmed sim. Each frame is `OnlineSession.tick`, effects play through the ledger, and stats count the confirmed steps. Offline and lockstep take the same path with one sim. `VIEW_PLAYS_ROLLBACK` is on: online matches start with ROLLBACK, and OPTIONS > NETCODE can pick LOCKSTEP (the host's choice). A core fix: real events of a frame that was guessed wrong, and confirmed in a batch, are now played (late) rather than lost.
+
+Status: **Ready to test**: play online over a real line (Tailscale or a forwarded port). Presses should feel immediate; watch for jumps when a guess is corrected, and compare with NETCODE LOCKSTEP.
+
+## PORT-111: ROAD TRIP talks (asked for 2026-10-26)
+
+(port ADR-104), chained from `feature/cld-release-0.41.0`. Every recurring ROAD TRIP conversation now has five scenes instead of one, heard in order one per meeting and then round again: the nine teams' scenes, each partner's (Pepper and the eight captains) GARAGE start, motel and diner words, and the ROAD HOGS' taunts and friendly words. The later ones show more of each character. 152 new scenes in `trip.json`'s `talks`; counted in the trip meta's `talks` (a new key, no save version). TRIP OF THE DAY always hears the first.
+
+Status: **Ready to test**: take a few trips (or meet the same team twice) and read along; say if any character's voice is off.
+
+## PORT-113: cleanup round 7 (asked for 2026-10-28)
+
+Docs and files only, no code:
+
+Status: **Done**.
+
+## PORT-142: 142-150. `feature/cld-club`: CLUB, the club manager (asked for 2026-11-11)
+
+CLUB: the Pickleball '95 club manager (port ADR-106; GitHub #32 to #40): PLAY > CLUB. A day at the park you own, playing on its courts while the members play around you; the night's ledger; upgrades that change the park; members who come and go; a coach; the WEEKEND CUP; weather.
+
+Status: **Ready to test**.

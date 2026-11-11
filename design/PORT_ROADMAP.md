@@ -167,15 +167,15 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-139 | The line judge: the whistle and the crowd ([#29](https://github.com/austinthedeveloper/pickleball-port-kit/issues/29)) | | Planned |
 | PORT-140 | The line judge online ([#30](https://github.com/austinthedeveloper/pickleball-port-kit/issues/30)) | | Planned |
 | PORT-141 | Cleanup round 9 ([#31](https://github.com/austinthedeveloper/pickleball-port-kit/issues/31)) | | Planned |
-| PORT-142 | Club manager: the plan ([#32](https://github.com/austinthedeveloper/pickleball-port-kit/issues/32)) | | Planned |
-| PORT-143 | Club manager: the day and the ledger ([#33](https://github.com/austinthedeveloper/pickleball-port-kit/issues/33)) | | Planned |
-| PORT-144 | Club manager: upgrades ([#34](https://github.com/austinthedeveloper/pickleball-port-kit/issues/34)) | | Planned |
-| PORT-145 | Club manager: you still play ([#35](https://github.com/austinthedeveloper/pickleball-port-kit/issues/35)) | | Planned |
-| PORT-146 | Club manager: members who come and go ([#36](https://github.com/austinthedeveloper/pickleball-port-kit/issues/36)) | | Planned |
-| PORT-147 | Club manager: hire a coach ([#37](https://github.com/austinthedeveloper/pickleball-port-kit/issues/37)) | | Planned |
-| PORT-148 | Club manager: weekend tournaments ([#38](https://github.com/austinthedeveloper/pickleball-port-kit/issues/38)) | | Planned |
-| PORT-149 | Club manager: weather ([#39](https://github.com/austinthedeveloper/pickleball-port-kit/issues/39)) | | Planned |
-| PORT-150 | Club manager: balance pass ([#40](https://github.com/austinthedeveloper/pickleball-port-kit/issues/40)) | | Planned |
+| PORT-142 | Club manager: the plan ([#32](https://github.com/austinthedeveloper/pickleball-port-kit/issues/32)) | `feature/cld-club` | Ready to test |
+| PORT-143 | Club manager: the day and the ledger ([#33](https://github.com/austinthedeveloper/pickleball-port-kit/issues/33)) | `feature/cld-club` | Ready to test |
+| PORT-144 | Club manager: upgrades ([#34](https://github.com/austinthedeveloper/pickleball-port-kit/issues/34)) | `feature/cld-club` | Ready to test |
+| PORT-145 | Club manager: you still play ([#35](https://github.com/austinthedeveloper/pickleball-port-kit/issues/35)) | `feature/cld-club` | Ready to test |
+| PORT-146 | Club manager: members who come and go ([#36](https://github.com/austinthedeveloper/pickleball-port-kit/issues/36)) | `feature/cld-club` | Ready to test |
+| PORT-147 | Club manager: hire a coach ([#37](https://github.com/austinthedeveloper/pickleball-port-kit/issues/37)) | `feature/cld-club` | Ready to test |
+| PORT-148 | Club manager: weekend tournaments ([#38](https://github.com/austinthedeveloper/pickleball-port-kit/issues/38)) | `feature/cld-club` | Ready to test |
+| PORT-149 | Club manager: weather ([#39](https://github.com/austinthedeveloper/pickleball-port-kit/issues/39)) | `feature/cld-club` | Ready to test |
+| PORT-150 | Club manager: balance pass ([#40](https://github.com/austinthedeveloper/pickleball-port-kit/issues/40)) | `feature/cld-club` | Ready to test |
 | PORT-151 | Touch on real phones ([#41](https://github.com/austinthedeveloper/pickleball-port-kit/issues/41)) | | Planned |
 | PORT-152 | Portrait on phones ([#42](https://github.com/austinthedeveloper/pickleball-port-kit/issues/42)) | | Planned |
 | PORT-153 | Handheld PCs ([#43](https://github.com/austinthedeveloper/pickleball-port-kit/issues/43)) | | Planned |
@@ -450,6 +450,43 @@ the same request), and every task since but the open ones. Open: 36, 40,
   - Verified: `test.sh` passes; the release notes are the same.
   - Status: **Done**.
 
+### 142-150. `feature/cld-club`: CLUB, the club manager (asked for 2026-11-11)
+- [x] `PORT-142` CLUB: the Pickleball '95 club manager (port ADR-106; GitHub
+  #32 to #40): PLAY > CLUB. A day at the park you own, playing on its
+  courts while the members play around you; the night's ledger; upgrades
+  that change the park; members who come and go; a coach; the WEEKEND
+  CUP; weather.
+  - Done: the plan (ADR-106) and `meta/club.gd` (PORT-142); the day, the
+    clock and the ledger (143: 9 AM to 6 PM, a minute every 8 frames,
+    a match 40 minutes; END THE DAY; the ledger card); upgrades (144:
+    LIGHTS lights the lamps and the evening, SNACK BAR's cart, the BALL
+    MACHINE, two ANNEX courts on the COURTS panel, INDOOR COURTS moves a
+    wet day to THE GYM); you still play (145: your matches are open play
+    matches, counted as ever; your wins bring members); members (146: a
+    skill, a patience and a mood each, sampled waits, leaving by name);
+    the coach (147: skill and patience a day, TODAY'S DRILL a HOW TO PLAY
+    lesson, a card per member); the WEEKEND CUP (148: Saturday's bracket,
+    entries and gate, the purse, the trophy shelf in the clubhouse);
+    weather (149: six kinds from the seed and the day; rain and heat haze
+    in the view only; WIND on a windy day is the existing modifier); the
+    balance pass (150: `tools/club_stats.gd`, four strategies, none bust
+    by day 30 or rich by day 60). The save stays v6: `club` is a new key
+    with a harmless default (CLAUDE.md's rule), not the v7 the story
+    asked for (ADR-106 says why). Also: `release_notes.py` now reads task
+    numbers past 99 (PORT-100 on were missing from the notes).
+  - Verified: `test_club.gd` (23 tests: the ledger adds up, upgrades,
+    waits and members, the coach, the cup, weather days, the bank, a
+    100-day soak of each strategy, the balance, the save, the park in
+    club mode and the same park as open play's, main's day, drill and
+    cup); `test_layout.test_club`; screenshots (`tools/club_shot.gd`);
+    `test.sh` passes, golden traces unchanged.
+  - Try: PLAY > CLUB. Play a week: OPEN THE PARK, a few games, END THE
+    DAY, read the ledger. Buy LIGHTS and play into the evening; hire the
+    coach and do TODAY'S DRILL; host the WEEKEND CUP on Saturday. Say if
+    the money comes too fast or too slow, if the day is too short, and
+    which upgrade you'd add next.
+  - Status: **Ready to test**.
+
 ## Phase 6: the year to 1.0 (planned 2026-11-10)
 
 A year of stories, December 2026 to November 2027, one GitHub milestone
@@ -588,6 +625,12 @@ Feature freeze, a full playtest, store pages, v1.0.0; cleanup round 11.
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
+- **PORT-142..150 CLUB:** play a club for a week or two (PLAY > CLUB).
+  The numbers are a bot's (ADR-106's table): say if the cash comes too
+  fast, if members leave too easily, or if a day's 72 seconds of walking
+  is too short. A year in, a growing club has nothing left to buy
+  (KNOWN_ISSUES #95): a second tier of upgrades is the next step if you
+  want one. The annexes aren't drawn (the park's art has three courts).
 
 - **PORT-102 new heads:** play a few ladder teams and try CAREER > EDIT >
   HEAD. Say if any team's head doesn't suit them (`head` in
