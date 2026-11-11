@@ -17,6 +17,8 @@ func update(ball: SimTypes.Ball) -> Vector2:
 	var target := Vector2.ZERO
 	if percent > 0 and ball.rally_state == K.BALL_RALLY_LIVE:
 		var dx := (ball.x_fp / 16.0 - K.COURT_NET_X) / 16.0
+		if CourtView.mirror:
+			dx = -dx                           # the guest's view (PORT-114)
 		var dy := (ball.y_fp / 16.0 - K.COURT_CENTERLINE_Y) / 8.0
 		target = Vector2(clampf(dx, -8, 8) / 8.0 * MAX.x,
 			clampf(dy, -4, 4) / 4.0 * MAX.y) * percent / 100.0

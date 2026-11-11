@@ -16,6 +16,8 @@ const HIT_EFFECTS := {K.SHOT_STANDARD: "hit", K.SHOT_DRIVE: "hit_drive", K.SHOT_
 
 
 static func pan_for_x(x: int) -> float:
+	if CourtView.mirror:
+		return -clampf(float(x - K.COURT_NET_X) / float(K.COURT_BASELINE_RIGHT - K.COURT_NET_X), -1.0, 1.0)
 	return clampf(float(x - K.COURT_NET_X) / float(K.COURT_BASELINE_RIGHT - K.COURT_NET_X), -1.0, 1.0)
 
 

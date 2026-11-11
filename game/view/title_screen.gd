@@ -731,6 +731,7 @@ func _start_replay(data: Dictionary, quiet: bool) -> bool:
 	var cfg := OnlineSession.config_from_dict(data["cfg"])
 	_demo.court = Array(data.get("court", Settings.court)).duplicate()
 	_demo.time = int(data.get("time", Settings.time_i))
+	_demo.watch_mirrored = bool(data.get("mirrored", false))    # as the guest saw it
 	_demo.setup(cfg, str(data.get("venue", Settings.venue())), true)
 	_demo._hud.visible = false
 	var h := Highlight.from_saved(_demo, data)

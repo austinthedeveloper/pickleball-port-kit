@@ -775,7 +775,28 @@ func test_online() -> void:
 		rl.room = "WWWW"
 		o.refresh()
 		check_layout(o, "online by room, waiting (host %s)" % host)
+		rl._started_ms = Time.get_ticks_msec()       # dialling: the countdown (PORT-117)
+		rl.room = "" if host else "WWWW"
+		o.refresh()
+		check_layout(o, "online by room, counting down (host %s)" % host)
 	o.session = null
+	# the letter grid (PORT-116), on every row, with the longest code
+	o.page.select("address")
+	o._press_address()
+	o.grid.settle()
+	for dev in [GameControls.KEYBOARD, GameControls.PAD]:
+		GameControls.last_device = dev
+		o._grid_prompts()
+		for r in OnlineScreen.grid_rows():
+			o.grid.select("g%d" % r)
+			for c in OnlineScreen.grid_items(r).size():
+				o.grid_cols[r] = c
+				o.room = ["", "WW", "WWWW"][c % 3]
+				o.refresh()
+				check_layout(o, "online letter grid (device %d, row %d, item %d)" % [dev, r, c])
+	GameControls.last_device = GameControls.KEYBOARD
+	o._close_grid()
+	o.room = ""
 	o.way = OnlineScreen.BY_ADDRESS
 	o.address = "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
 	o.refresh()

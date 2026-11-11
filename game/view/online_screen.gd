@@ -7,8 +7,9 @@
 ##   addresses; the other types one and JOINS. Same Wi-Fi, or a VPN.
 ## Once you've both said hello, the host starts: singles on the host's
 ## COURT, POINTS and MODIFIERS, each of you in your Player Select look.
-## The room and the address are typed on a keyboard (or pasted); the
-## address and the way are kept in the save.
+## The room is typed on a keyboard, pasted, or picked on a letter grid
+## with a pad (PORT-116); the address is typed. The address and the way
+## are kept in the save.
 class_name OnlineScreen
 extends Node2D
 
@@ -39,6 +40,15 @@ var _sfx: Sfx
 var _ui: CanvasLayer
 var _lines: Array = []           ## the info panel's three lines
 var _frame := 0
+## The letter grid (PORT-116): a room code with the D-pad, the stick or the
+## touch pad. Rows of the code's alphabet, then DELETE and JOIN; up/down
+## picks the row, left/right the letter, HIT types it. Keys still type.
+var grid: MenuPage
+var grid_cols: Array = []        ## each grid row's letter under the cursor
+var _grid_box: Node2D
+var _key_typed := false          ## a key typed this frame: HIT doesn't type too
+const GRID_W := 5                ## letters a row
+const GRID_GAP := "   "
 
 
 func setup(game_save: SaveGame) -> OnlineScreen:
@@ -80,6 +90,7 @@ func _ready() -> void:
 	page.pressed.connect(func(_id): page.refresh())
 	page.back_requested.connect(_leave)
 	_ui.add_child(page)
+	_build_grid()
 	UiKit.panel(Rect2(60, 312, 840, 120), _ui)
 	for i in 3:
 		_lines.append(UiKit.text("small", "", Vector2(480, 330 + i * 30), 0.5, Color.WHITE, _ui))
@@ -182,6 +193,7 @@ func _press_address() -> void:
 	editing = not editing
 	if not editing:
 		_store_address()
+	_show_grid(editing and way == BY_ROOM)
 
 
 func _press_join() -> void:
@@ -211,7 +223,8 @@ func _press_join() -> void:
 func _open(link: NetLink, is_host: bool) -> void:
 	last_reason = ""
 	session = OnlineSession.new(link, is_host)
-	session.my_hello = OnlineSession.hello(Settings.p1_choice, _my_name())
+	var me: Career.Player = save.career.active_player() if save else null
+	session.my_hello = OnlineSession.hello(Settings.p1_choice, _my_name(), me)
 	_sfx.play("confirm")
 
 
@@ -223,7 +236,9 @@ func _my_name() -> String:
 ## The host's match: singles on the COURT, POINTS and MODIFIERS settings;
 ## the guest in their look, in another shirt if both picked the same.
 func _start_match() -> void:
-	var mine: Dictionary = Settings.p1_choice
+	var mine: Dictionary = Dictionary(session.my_hello.get("look", Settings.p1_choice)).duplicate()
+	if mine.is_empty():
+		mine = Settings.p1_choice
 	var theirs: Dictionary = session.peer_hello.get("look", {})
 	if theirs.is_empty():
 		theirs = PlayerSelect.new_choice(PlayerSelect.PAL_RED, K.VARIANT_MALE, Paddles.STANDARD)
@@ -237,7 +252,9 @@ func _start_match() -> void:
 	cfg.modifiers = Settings.mod_bits
 	cfg.ball_speed = Settings.ball_speed       # the host's: the guest plays the config it's sent
 	session.begin({"cfg": OnlineSession.config_to_dict(cfg), "venue": Settings.venue(),
-		"time": Settings.time_i, "court": Settings.court.duplicate()})
+		"time": Settings.time_i, "court": Settings.court.duplicate(),
+		# the career looks (PORT-115), by slot: drawn, never in the config
+		"looks": {"0": session.my_hello.get("career", {}), "2": session.peer_hello.get("career", {})}})
 	_sfx.play("confirm")
 	play.emit(session)
 
@@ -255,6 +272,9 @@ func _close_session() -> void:
 
 
 func _leave() -> void:
+	if grid and grid.visible:
+		_close_grid()
+		return
 	if editing:
 		editing = false
 		_store_address()
@@ -263,6 +283,120 @@ func _leave() -> void:
 	if _sfx:
 		_sfx.play("back")
 	leave.emit()
+
+
+# --- The letter grid (PORT-116) -------------------------------------------------
+
+## A grid row's items: letters, or DELETE and JOIN.
+static func grid_items(row: int) -> Array:
+	var letters := RelayLink.ALPHABET.length()
+	var rows := (letters + GRID_W - 1) / GRID_W
+	if row == rows:
+		return ["DELETE", "JOIN"]
+	var out := []
+	for i in range(row * GRID_W, mini(letters, (row + 1) * GRID_W)):
+		out.append(RelayLink.ALPHABET[i])
+	return out
+
+
+static func grid_rows() -> int:
+	return (RelayLink.ALPHABET.length() + GRID_W - 1) / GRID_W + 1
+
+
+func _build_grid() -> void:
+	var rows := []
+	for r in grid_rows():
+		grid_cols.append(0)
+		rows.append({"id": "g%d" % r, "label": GRID_GAP.join(grid_items(r)),
+			"change": func(d): grid_cols[r] = (grid_cols[r] + d + grid_items(r).size()) % grid_items(r).size(); _grid_box.queue_redraw(),
+			"press": func(): _grid_press(r)})
+	grid = MenuPage.new().setup("room_grid", "", rows, Rect2(300, 96, 360, 18 + grid_rows() * MenuPage.ROW_H + 50),
+		[["hit", "TYPE"], ["back", "DONE"]])
+	grid.back_requested.connect(func(): _close_grid())
+	grid.pressed.connect(func(_id): grid.refresh())
+	_ui.add_child(grid)
+	_grid_box = Node2D.new()
+	_grid_box.draw.connect(_draw_grid_box)
+	grid.add_child(_grid_box)
+	grid.visible = false
+
+
+## Where an item of a grid row starts and how wide it is, on screen.
+func grid_item_rect(row: int, col: int) -> Rect2:
+	var items := grid_items(row)
+	var x := grid.area.position.x + 36
+	for i in col:
+		x += BitmapText.measure("small", String(items[i]) + GRID_GAP)
+	var w := BitmapText.measure("small", String(items[col]))
+	return Rect2(x - 5, grid._row_y(row) - 3, w + 10, MenuPage.ROW_H - 4)
+
+
+func _draw_grid_box() -> void:
+	if not grid.visible:
+		return
+	var r := grid_item_rect(grid.cursor, grid_cols[grid.cursor])
+	_grid_box.draw_rect(r, MenuPage.BAR_EDGE, false, 2.0)
+
+
+## HIT on a grid row: type its letter, or DELETE, or JOIN.
+func _grid_press(row: int) -> void:
+	var item := String(grid_items(row)[grid_cols[row]])
+	if item == "DELETE":
+		room = room.left(maxi(0, room.length() - 1))
+	elif item == "JOIN":
+		_close_grid()
+		_press_join()
+		return
+	else:
+		room = RelayLink.clean_room(room + item)
+		if room.length() == RelayLink.ROOM_LEN:
+			grid.select("g%d" % (grid_rows() - 1))      # full: the cursor on JOIN
+			grid_cols[grid_rows() - 1] = 1
+	_sfx.play("blip")
+	_grid_box.queue_redraw()
+	page.refresh()
+
+
+## Types a whole code through the grid, letter by letter as a pad would
+## (tests: rows selected by id).
+func grid_type(code: String) -> void:
+	for c in code:
+		for r in grid_rows() - 1:
+			var i := grid_items(r).find(c)
+			if i >= 0:
+				grid.select("g%d" % r)
+				grid_cols[r] = i
+				grid.press()
+
+
+## The grid's help: on a keyboard, type and ENTER (its HIT and back keys
+## are letters of the code); else the pad's or the touch pad's buttons.
+func _grid_prompts() -> void:
+	var want: Array = [["esc", "DONE"]] if GameControls.last_device == GameControls.KEYBOARD \
+		else [["hit", "TYPE"], ["back", "DONE"]]
+	if grid.prompts and str(grid.prompts.items) != str(want):
+		grid.prompts.set_items(want)
+
+
+func _show_grid(on: bool) -> void:
+	grid.visible = on
+	page.visible = not on
+	if on:
+		grid.select("g0")
+		grid.appear()
+		_lock = LOCK
+		GameControls.clear_latch()
+	_grid_box.queue_redraw()
+
+
+func _close_grid() -> void:
+	if not grid.visible:
+		return
+	editing = false
+	_show_grid(false)
+	page.select("join" if room.length() == RelayLink.ROOM_LEN else "address")
+	_lock = LOCK
+	GameControls.clear_latch()
 
 
 # --- The info panel -----------------------------------------------------------
@@ -367,6 +501,13 @@ func info() -> Array:
 	var st := _state()
 	if session and session.closed():
 		return [session.reason if session.reason != "" else "DISCONNECTED", "", ""]
+	if st == OnlineSession.IDLE and grid and grid.visible:
+		var shown := room
+		while shown.length() < RelayLink.ROOM_LEN:
+			shown += "-"
+		if GameControls.last_device == GameControls.KEYBOARD:
+			return ["ROOM: " + shown, "TYPE THE LETTERS, OR PICK THEM", "WITH THE ARROWS AND SPACE."]
+		return ["ROOM: " + shown, "PICK EACH LETTER, THEN JOIN.", "OR TYPE IT ON A KEYBOARD."]
 	if st == OnlineSession.IDLE:
 		if last_reason != "":
 			return [last_reason, "", ""]
@@ -378,11 +519,14 @@ func info() -> Array:
 	if st == OnlineSession.WAITING:
 		if session.link is RelayLink:
 			var r := _room()
+			var left := (session.link as RelayLink).seconds_left()
 			if session.host and r == "":
-				return ["OPENING A ROOM ON THE SERVER...", "IT CAN TAKE 20 SECONDS TO WAKE UP.", ""]
+				return ["OPENING A ROOM ON THE SERVER...", "IT CAN TAKE 20 SECONDS TO WAKE UP.",
+					"GIVING UP IN %d" % left if left > 0 else ""]
 			if session.host:
 				return ["YOUR ROOM: " + r, "YOUR FRIEND PICKS ONLINE, TYPES " + r, "AND JOINS. WAITING FOR THEM..."]
-			return ["JOINING ROOM " + r + "...", "", ""]
+			return ["JOINING ROOM " + r + "...", "THE SERVER MAY BE WAKING UP." if left > 0 else "",
+				"GIVING UP IN %d" % left if left > 0 else ""]
 		if session.host:
 			# the adapters, read once per hosting (info() runs every frame)
 			if _mine_for != session:
@@ -420,6 +564,8 @@ func refresh() -> void:
 ## Typing the address: a key press is a character (or Backspace, or a
 ## paste); Enter or Esc ends it. The keys don't reach the menu.
 func _input(event: InputEvent) -> void:
+	if grid and grid.visible and event is InputEventMouse:
+		_grid_mouse((event as InputEventMouse).position)
 	if not editing or not (event is InputEventKey) or not event.pressed:
 		return
 	var k: InputEventKey = event
@@ -431,14 +577,33 @@ func _input(event: InputEvent) -> void:
 	elif k.keycode in [KEY_ENTER, KEY_KP_ENTER, KEY_ESCAPE]:
 		editing = false
 		_store_address()
+		if grid.visible:
+			_close_grid()
 		_lock = LOCK
 	elif k.keycode == KEY_V and (k.ctrl_pressed or k.meta_pressed):
 		_type(DisplayServer.clipboard_get())
+		_key_typed = true
 	elif k.unicode > 0:
+		var was := _typed()
 		_type(char(k.unicode))
+		_key_typed = _typed() != was     # a letter typed; SPACE (HIT) still picks on the grid
 	if is_inside_tree():
 		get_viewport().set_input_as_handled()
 	page.refresh()
+
+
+## The mouse over the grid: the letter under it (MenuPage picks the row
+## and presses it on a click).
+func _grid_mouse(at: Vector2) -> void:
+	var row := grid.row_at(at)
+	if row < 0:
+		return
+	var best := 0
+	for c in grid_items(row).size():
+		if absf(grid_item_rect(row, c).get_center().x - at.x) < absf(grid_item_rect(row, best).get_center().x - at.x):
+			best = c
+	grid_cols[row] = best
+	_grid_box.queue_redraw()
 
 
 func _type(s: String) -> void:
@@ -461,6 +626,23 @@ func _process(_delta: float) -> void:
 			play.emit(session)               # the host started
 			return
 	refresh()
+	if grid.visible:
+		_grid_box.queue_redraw()
+		var typed := _key_typed
+		_key_typed = false
+		if _lock > 0:
+			_lock -= 1
+			return
+		# the keyboard's HIT and back keys (J, K, L) are letters too: a
+		# letter typed is only a letter
+		_grid_prompts()
+		var gnav := grid.drive(true, not typed, not typed)
+		if gnav & MenuPage.NAV_MOVED:
+			_sfx.play("blip")
+		if gnav & MenuPage.NAV_BACK:
+			_sfx.play("back")
+			_close_grid()
+		return
 	if editing:
 		return
 	if _lock > 0:

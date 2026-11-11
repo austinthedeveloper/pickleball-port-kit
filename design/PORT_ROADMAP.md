@@ -139,10 +139,10 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-111 | ROAD TRIP talks: five conversations each for every team, partner (start, motel, diner) and the ROAD HOGS, revealing more of them each time (port ADR-104) | `feature/cld-trip-talks` | Ready to test |
 | PORT-112 | The relay: ONLINE by room code over the internet and in the Web build, one Azure server shared with the VR game (design/RELAY.md) | `feature/cld-relay-plan`, `feature/cld-relay-live`, `feature/cld-relay-join` | Done: ONLINE by ROOM CODE through the live relay (ADR-105), released in v0.43.0; the lead confirmed it between machines 2026-10-29 |
 | PORT-113 | Cleanup round 7: finished tasks to the history, the READMEs, merged branches | `feature/cld-cleanup-7` | Done |
-| PORT-114 | Online: the guest sees themselves on the left ([#3](https://github.com/austinthedeveloper/pickleball-port-kit/issues/3)) | | Planned |
-| PORT-115 | Online: your career look and shirt pattern travel ([#4](https://github.com/austinthedeveloper/pickleball-port-kit/issues/4)) | | Planned |
-| PORT-116 | Online: type a room code with the pad ([#5](https://github.com/austinthedeveloper/pickleball-port-kit/issues/5)) | | Planned |
-| PORT-117 | Relay: say why a room didn't open ([#6](https://github.com/austinthedeveloper/pickleball-port-kit/issues/6)) | | Planned |
+| PORT-114 | Online: the guest sees themselves on the left ([#3](https://github.com/austinthedeveloper/pickleball-port-kit/issues/3)) | `feature/cld-online-finish` | Ready to test |
+| PORT-115 | Online: your career look and shirt pattern travel ([#4](https://github.com/austinthedeveloper/pickleball-port-kit/issues/4)) | `feature/cld-online-finish` | Ready to test |
+| PORT-116 | Online: type a room code with the pad ([#5](https://github.com/austinthedeveloper/pickleball-port-kit/issues/5)) | `feature/cld-online-finish` | Ready to test |
+| PORT-117 | Relay: say why a room didn't open ([#6](https://github.com/austinthedeveloper/pickleball-port-kit/issues/6)) | `feature/cld-online-finish` | Ready to test |
 | PORT-118 | Doubles online: the plan ([#7](https://github.com/austinthedeveloper/pickleball-port-kit/issues/7)) | | Planned |
 | PORT-119 | Doubles online: four seats over the relay ([#8](https://github.com/austinthedeveloper/pickleball-port-kit/issues/8)) | | Planned |
 | PORT-120 | Online: rejoin after a drop ([#9](https://github.com/austinthedeveloper/pickleball-port-kit/issues/9)) | | Planned |
@@ -529,6 +529,24 @@ the same request), and every task since but the open ones. Open: 36, 40,
     it deploys it) and on whether boards should survive the relay's sleep
     (a storage mount; For you).
 
+### 114-117. `feature/cld-online-finish`: online, finished (asked for 2026-11-11)
+- [x] `PORT-114` Online, finished: the guest's side, career looks, the
+  letter grid, the relay's reasons (port ADR-110; GitHub #3, #4, #5, #6),
+  from `main` after the PR chain merged.
+  - Done: the guest's match drawn left for right, their pad through the
+    mirror, the HUD swapped, a saved replay keeping the side (114); HELLO's
+    career look, PROTOCOL 4, each side told who updates (115); ONLINE's
+    letter grid for the room (116); a line for each of the relay's
+    refusals, the host's version from the welcome, the wake-up counted
+    down (117). PORT-110 waits on the For you playtest.
+  - Verified: `test_online` (the mirror, the looks, the versions, the
+    grid), `test_relay` (each refusal, the countdown; the grid joining the
+    real relay, and its full room and old host), `test_layout`; `test.sh`
+    passes; screenshots of the guest's view and the grid.
+  - Try: an online match by room, with a career player on each side; JOIN
+    with a pad.
+  - Status: **Ready to test**.
+
 ## Phase 6: the year to 1.0 (planned 2026-11-10)
 
 A year of stories, December 2026 to November 2027, one GitHub milestone
@@ -667,11 +685,14 @@ Feature freeze, a full playtest, store pages, v1.0.0; cleanup round 11.
 
 Questions and things to try, added as the run goes. Nothing here blocks
 the chain: each has a default I've gone with.
-- **PORT-158 the boards:** merging pickleball-relay's boards PR deploys
-  them. They live in memory, so the relay's sleep (no replicas when idle)
-  wipes them; to keep them it needs a small Azure storage mount
-  (`BOARD_FILE`), or `min-replicas 1` (about $15 a month). And a score is
-  the game's own claim (the relay can't replay a match). Your call on both.
+- **PORT-158 the boards:** the relay's boards are merged (2026-11-11), but
+  that revision failed to start (its image left out `boards.js`); the old
+  one still serves rooms. pickleball-relay PR #3 fixes the image, and
+  merging it deploys the boards. They live in memory, so the relay's sleep (no replicas
+  when idle) wipes them; to keep them it needs a small Azure storage mount
+  (`BOARD_FILE`), or `min-replicas 1` (about $15 a month, which also ends
+  the 20 s wake-up, KNOWN_ISSUES #94). And a score is the game's own claim
+  (the relay can't replay a match). Your call on both.
 - **PORT-123 COLOURS:** the colour-blind sets were checked by simulation;
   if you know someone colour-blind, ask them to try theirs in doubles.
   The shapes on the rings (dot, bar, triangle, square) are on in every set.

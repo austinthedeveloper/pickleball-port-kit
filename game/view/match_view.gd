@@ -59,6 +59,33 @@ var _net_text: BitmapText
 ## The team this machine plays (online, the guest's is 1).
 func my_team() -> int:
 	return 1 if net and not net.host else 0
+
+
+## The guest's view is mirrored (port ADR-110, PORT-114): their side on the
+## left, as the host's is. The sim and the inputs it gets are not; the
+## guest's pad goes through the mirror (MatchInput.net_intent). A saved
+## replay keeps the side it was watched from (`watch_mirrored`).
+var watch_mirrored := false
+static var _mirror_owner := 0       ## the view whose mirror is on (a freed demo's is not)
+
+
+func mirrored() -> bool:
+	return watch_mirrored or (net != null and not net.host)
+
+
+## Online (PORT-115): a slot's career look from START, or null.
+func net_look(slot: int) -> Career.Player:
+	if net == null:
+		return null
+	var looks: Variant = net.start.get("looks", {})
+	if not looks is Dictionary:
+		return null
+	return OnlineSession.look_player((looks as Dictionary).get(str(slot), {}))
+
+
+## The team drawn on the left.
+func left_team() -> int:
+	return 1 if mirrored() else 0
 ## From the park (ADR-034): B on the result, or PARK on practice's pause
 ## menu, goes back there (finished(false)).
 var park := false
@@ -172,6 +199,8 @@ func setup(cfg: SimTypes.MatchConfig, venue_name: String, is_demo: bool) -> void
 		court = court.duplicate()
 		court[3] = GLOW_LINES
 	manifest = levels_manifest()
+	CourtView.mirror = mirrored()
+	_mirror_owner = get_instance_id()
 	if net and net.rollback:
 		sim = net.rollback.pred           # ADR-103: the prediction is drawn,
 		truth = net.rollback.truth        # the confirmed sim counted
@@ -208,6 +237,10 @@ func _notification(what: int) -> void:
 			for other in [highlight.replay, highlight._live]:
 				if other and other != sim:
 					other.dispose()
+	if (what == NOTIFICATION_EXIT_TREE or what == NOTIFICATION_PREDELETE) \
+			and _mirror_owner == get_instance_id():
+		CourtView.mirror = false             # the next screen draws plainly
+		_mirror_owner = 0
 	if what == NOTIFICATION_EXIT_TREE and commentary and Announcer.current \
 			and Announcer.current._priority < Announcer.TOP:
 		Announcer.current.hush()           # leaving mid-line (a match's end line plays on)
@@ -922,7 +955,7 @@ func _update_visuals() -> void:
 		e["shadow"].position = feet
 		e["marker"].position = feet
 		var idx := SLOTS.find(actors.frame_for(i))
-		var flip := p.team == 1
+		var flip := (p.team == 1) != CourtView.mirror
 		for s in [e["body"], e["cap"]]:
 			s.region_rect = Rect2(idx * FRAME, 0, FRAME, FRAME)
 			s.flip_h = flip

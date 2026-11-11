@@ -37,6 +37,7 @@ var _prev_scores := [0, 0]
 var _score_pop := [0, 0]
 var _score_y := 0.0
 var _serve_icons: Array = []     ## [left, right] ball icons
+var _flip := false               ## the guest's view: team 1 on the left (PORT-114)
 var _server_mark: Node2D
 var _rally: Control
 var _rally_text: BitmapText
@@ -97,6 +98,20 @@ func setup(v: MatchView) -> void:
 	if practice:
 		right_name = "BEST"
 		right_tint = Color("fbe46a")
+	var pan_l: String = ["blue", "red", "green", "gold"][cfg.palette[0]]
+	var pan_r: String = "gold" if practice else ["blue", "red", "green", "gold"][cfg.palette[2]]
+	_flip = view.mirrored()
+	if _flip:
+		# the guest's view (PORT-114): their side's panel on the left
+		var n := left_name
+		left_name = right_name
+		right_name = n
+		var c := left_tint
+		left_tint = right_tint
+		right_tint = c
+		var pn := pan_l
+		pan_l = pan_r
+		pan_r = pn
 	# a score panel: the name, then a box wide enough for two digits (and
 	# their pop) so a score of 10+ never reaches the name
 	var dig := BitmapText.measure("big", "00") + 8
@@ -109,8 +124,6 @@ func setup(v: MatchView) -> void:
 	var tw := 40 + BitmapText.measure("big_gold", title)
 	var y := 14
 	var h := 40
-	var pan_l: String = ["blue", "red", "green", "gold"][cfg.palette[0]]
-	var pan_r: String = "gold" if practice else ["blue", "red", "green", "gold"][cfg.palette[2]]
 	_panel(pan_l, Rect2(480 - tw / 2 - 18 - lw, y, lw, h))
 	_left_label = _text("big", left_name, Vector2(480 - tw / 2 - 18 - lw + 12, y + 8), 0, left_tint)
 	_left_score = _text("big", "0", Vector2(480 - tw / 2 - 18 - 10 - dig / 2.0, y + 8), 0.5)
@@ -118,8 +131,9 @@ func setup(v: MatchView) -> void:
 	_right_label = _text("big", right_name, Vector2(480 + tw / 2 + 18 + 12, y + 8), 0, right_tint)
 	_right_score = _text("big", "0", Vector2(480 + tw / 2 + 18 + rw - 10 - dig / 2.0, y + 8), 0.5)
 	if view.sim.specials_on():
-		specials = SpecialMeters.new().setup(view, Rect2(480 - tw / 2 - 18 - lw, y, lw, h),
-			Rect2(480 + tw / 2 + 18, y, rw, h))
+		var l_rect := Rect2(480 - tw / 2 - 18 - lw, y, lw, h)
+		var r_rect := Rect2(480 + tw / 2 + 18, y, rw, h)
+		specials = SpecialMeters.new().setup(view, r_rect if _flip else l_rect, l_rect if _flip else r_rect)
 		add_child(specials)
 	_panel("doubles" if doubles else "title", Rect2(480 - tw / 2, y, tw, h))
 	_text("big_gold", title, Vector2(480, y + 8), 0.5)
@@ -265,10 +279,15 @@ func on_new_match() -> void:
 	_point_banner_frames = 0
 
 
+## The team whose panel is on this side (0 left, 1 right).
+func _team_on(side: int) -> int:
+	return 1 - side if _flip else side
+
+
 func refresh() -> void:
 	var s := view.sim
-	_left_score.text = str(s.team_score[0])
-	_right_score.text = str(s.team_score[1])
+	_left_score.text = str(s.team_score[_team_on(0)])
+	_right_score.text = str(s.team_score[_team_on(1)])
 	var mp := s.phase <= K.PHASE_LIVE and (s.match_point(0) or s.match_point(1)) \
 		and not s.config.practice
 	_subtitle.visible = mp and not view.demo
@@ -460,7 +479,7 @@ func _refresh_live() -> void:
 			if s.team_score[t] > _prev_scores[t]:
 				_score_pop[t] = POP_FRAMES
 			_prev_scores[t] = s.team_score[t]
-		var label: BitmapText = _left_score if t == 0 else _right_score
+		var label: BitmapText = _left_score if _team_on(0) == t else _right_score
 		if _score_pop[t] > 0:
 			_score_pop[t] -= 1
 		var k := float(_score_pop[t]) / POP_FRAMES
@@ -471,7 +490,7 @@ func _refresh_live() -> void:
 	# the serving side, and the server in doubles while they set up
 	var serving := s.phase <= K.PHASE_LIVE and not s.config.practice and not s.multi_on
 	for t in 2:
-		_serve_icons[t].visible = serving and s.serving_team == t
+		_serve_icons[t].visible = serving and s.serving_team == _team_on(t)
 	var mark := not view.demo and s.config.mode == K.MODE_DOUBLES \
 		and (s.phase == K.PHASE_SERVE_SETUP or s.phase == K.PHASE_SERVE_TOSS)
 	_server_mark.visible = mark
