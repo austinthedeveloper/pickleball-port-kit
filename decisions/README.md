@@ -105,3 +105,4 @@ first decisions, are rows in `design/07_DECISIONS_AND_RISKS.md`.
 | 112 | [Replays You Can Share, Replay Codes, 2P in the Park, Winter Crowds](ADR-112-replays-park-crowds.md) | Accepted 2026-11-11 |
 | 113 | [Tuning 5: the Push](ADR-113-tuning-5-the-push.md) | Accepted 2026-11-11 |
 | 114 | [Player Arms and Swings](ADR-114-player-arms-and-swings.md) | Accepted 2026-11-11 |
+| 115 | [The Push's Slack](ADR-115-push-slack.md) | Accepted 2026-11-12 |
