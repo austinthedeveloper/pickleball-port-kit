@@ -800,8 +800,8 @@ def shift(pose, dx=0, dy=0, **override):
 
 IDLE = dict(
     neck=(31, 24), hip=(26, 38.5),
-    sh_n=(31, 28), el_n=(33, 34), ha_n=(39, 35),
-    sh_f=(28, 28), el_f=(30, 34), ha_f=(37, 36),
+    sh_n=(31, 28), el_n=(33, 34), ha_n=(41, 33.5),
+    sh_f=(28, 28), el_f=(30, 34), ha_f=(38.5, 35),
     kn_n=(36.5, 46), an_n=(34, 54.5), toe_n=(1, 0),
     kn_f=(19, 46), an_f=(16, 54.5), toe_f=(1, 0),
     paddle=(-62, "front"),
@@ -830,53 +830,64 @@ POSES = {
                   kn_f=(29, 46), an_f=(27.5, 54.5)),
     # Forehand (art/sprites/hd/v2): the body hits, not just the arm. Windup:
     # shoulders coil (near shoulder behind the neck), weight on the bent back
-    # leg, the free hand points at the ball. Contact: hips and shoulders open,
-    # weight onto the front knee, back heel up. Follow: the paddle wraps up
-    # past the face, the back foot drags on its toe. Necks are unchanged, so
-    # the heads sit exactly where they did.
+    # leg, the paddle arm long behind, the free hand pointing at the ball.
+    # Contact: hips and shoulders open, the arm at full reach in front,
+    # weight onto the front knee, back heel up. Follow: the arm carries on
+    # up and forward, clear of the face, the back foot drags on its toe.
+    # Necks are unchanged, so the heads sit exactly where they did.
     "windup": dict(IDLE, neck=(28, 24), hip=(25, 38),
-                   sh_n=(25.5, 30), el_n=(20, 34), ha_n=(15, 33),
-                   sh_f=(30, 29.5), el_f=(35, 31), ha_f=(40, 29.5),
+                   sh_n=(25.5, 30), el_n=(20, 34), ha_n=(13, 31.5),
+                   sh_f=(30, 29.5), el_f=(35, 32), ha_f=(43, 28.5),
                    kn_n=(34, 46.5), an_n=(38, 54.5),
                    kn_f=(19.5, 45.5), an_f=(16, 54.5),
-                   paddle=(-160, "mid")),
+                   paddle=(-155, "mid")),
     "swing": dict(neck=(34, 24), hip=(29, 37.5),
-                  sh_n=(35, 29.5), el_n=(40.5, 32.5), ha_n=(46, 33),
-                  sh_f=(31, 29), el_f=(26, 32), ha_f=(22.5, 30),
+                  sh_n=(35, 29.5), el_n=(40.5, 34), ha_n=(48.5, 32.5),
+                  sh_f=(31, 29), el_f=(26, 33), ha_f=(19, 31),
                   kn_n=(40, 46.5), an_n=(42, 54.5), toe_n=(1, 0),
                   kn_f=(24, 47), an_f=(18, 53), toe_f=(1, 0.9),
                   paddle=(-10, "front"), pony="fly"),
     "follow": dict(neck=(34, 24), hip=(30, 37),
-                   sh_n=(35.5, 29), el_n=(42.5, 27), ha_n=(45.5, 21),
-                   sh_f=(32, 29), el_f=(29, 33.5), ha_f=(27.5, 37),
+                   sh_n=(35.5, 29), el_n=(43, 27), ha_n=(47, 18.5),
+                   sh_f=(32, 29), el_f=(27, 33), ha_f=(22, 36),
                    kn_n=(39, 46.5), an_n=(41, 54.5), toe_n=(1, 0),
                    kn_f=(28.5, 47), an_f=(24, 53), toe_f=(1, 1.6),
-                   paddle=(-68, "front"), pony="fly"),
+                   paddle=(-75, "front"), pony="fly"),
     "toss": dict(IDLE, neck=(30, 23), hip=(26, 37),
-                 sh_n=(30, 28), el_n=(26, 34), ha_n=(22, 38),
-                 sh_f=(28, 28), el_f=(32, 33), ha_f=(37, 33),
+                 sh_n=(30, 28), el_n=(26, 34), ha_n=(20, 38),
+                 sh_f=(28, 28), el_f=(32, 34), ha_f=(40, 31),
                  kn_n=(34, 46), an_n=(35, 54.5),
                  kn_f=(22, 46), an_f=(20, 54.5),
                  paddle=(148, "back")),
     "cheer": dict(IDLE, neck=(30, 24), hip=(27, 37),
-                  sh_n=(31, 29), el_n=(37, 24), ha_n=(41, 17),
-                  sh_f=(28, 29), el_f=(22, 25), ha_f=(18, 18),
+                  sh_n=(32, 29), el_n=(39, 24), ha_n=(44, 16.5),
+                  sh_f=(28, 29), el_f=(21, 25), ha_f=(17, 16),
                   kn_n=(33, 46), an_n=(34, 54.5),
                   kn_f=(22, 46), an_f=(20, 54.5),
-                  paddle=(-80, "front")),
-    # New poses (match the SNES reference set).
-    "overhead_windup": dict(neck=(29, 24), hip=(27, 37.5),
-                            sh_n=(29, 28), el_n=(23, 26), ha_n=(22, 19),
-                            sh_f=(28, 28), el_f=(32, 20), ha_f=(35, 10),
-                            kn_n=(35, 46), an_n=(37, 54.5), toe_n=(1, 0),
-                            kn_f=(21, 46), an_f=(17, 54.5), toe_f=(1, 0),
-                            paddle=(125, "back")),
-    "overhead_contact": dict(neck=(32, 23), hip=(28, 37),
-                             sh_n=(32, 27), el_n=(36, 20), ha_n=(39, 14),
-                             sh_f=(30, 27), el_f=(26, 33), ha_f=(23, 38),
-                             kn_n=(38, 46), an_n=(41, 54.5), toe_n=(1, 0),
-                             kn_f=(22, 46), an_f=(17, 53.5), toe_f=(1, 0.4),
-                             paddle=(-82, "front"), pony="fly"),
+                  paddle=(-72, "front")),
+    # The overhead smash. Windup, the trophy pose: knees loaded, the paddle
+    # cocked behind the head on a high back elbow, the free hand up at the
+    # ball. Contact: the arm at full stretch up and in front, the free arm
+    # pulled in, up on the toes. Follow: the paddle
+    # snaps down past the front knee and the body folds over it.
+    "overhead_windup": dict(neck=(29, 24), hip=(27, 38),
+                            sh_n=(27.5, 28.5), el_n=(20, 24), ha_n=(22, 16.5),
+                            sh_f=(30, 28), el_f=(36, 25), ha_f=(42, 17),
+                            kn_n=(35, 46.5), an_n=(37, 54.5), toe_n=(1, 0),
+                            kn_f=(21, 46.5), an_f=(17, 54.5), toe_f=(1, 0),
+                            paddle=(-112, "back")),
+    "overhead_contact": dict(neck=(31, 23), hip=(29, 36.5),
+                             sh_n=(35.5, 27.5), el_n=(40, 20), ha_n=(44, 13),
+                             sh_f=(30, 27), el_f=(25, 31), ha_f=(27, 35),
+                             kn_n=(36, 46), an_n=(38, 54), toe_n=(1, 0.5),
+                             kn_f=(23, 46.5), an_f=(19, 53.5), toe_f=(1, 0.8),
+                             paddle=(-58, "front"), pony="fly"),
+    "overhead_follow": dict(neck=(35, 26), hip=(29, 38),
+                            sh_n=(36, 31), el_n=(39, 37), ha_n=(47, 41),
+                            sh_f=(33, 30.5), el_f=(27, 30), ha_f=(21, 35),
+                            kn_n=(40, 46.5), an_n=(41, 54.5), toe_n=(1, 0),
+                            kn_f=(25, 47), an_f=(19, 53), toe_f=(1, 0.9),
+                            paddle=(60, "front"), pony="fly"),
     "reach": dict(neck=(33, 28), hip=(25, 40),
                   sh_n=(33, 32), el_n=(39, 37), ha_n=(44, 42),
                   sh_f=(30, 32), el_f=(24, 34), ha_f=(19, 33),
@@ -885,10 +896,24 @@ POSES = {
                   paddle=(35, "front"), pony="fly"),
     "scoop": dict(neck=(31, 30), hip=(25, 42.5),
                   sh_n=(31, 34), el_n=(35, 41), ha_n=(40, 47),
-                  sh_f=(29, 34), el_f=(31, 41), ha_f=(36, 46),
+                  sh_f=(29, 34), el_f=(24, 38), ha_f=(20, 41),
                   kn_n=(35, 47.5), an_n=(33, 54.5), toe_n=(1, 0),
                   kn_f=(19, 48), an_f=(17, 54.5), toe_f=(1, 0),
                   paddle=(5, "front")),
+    # The scoop's backswing (the paddle low behind the back knee) and the
+    # low swings' way out: half risen, the paddle lifted through the ball.
+    "scoop_windup": dict(neck=(30, 30), hip=(25, 42.5),
+                         sh_n=(29, 34), el_n=(22, 37), ha_n=(18, 43),
+                         sh_f=(31, 34), el_f=(35, 40), ha_f=(40, 38),
+                         kn_n=(35, 47.5), an_n=(33, 54.5), toe_n=(1, 0),
+                         kn_f=(19, 48), an_f=(17, 54.5), toe_f=(1, 0),
+                         paddle=(165, "mid")),
+    "lift": dict(neck=(32, 27), hip=(26, 40),
+                 sh_n=(33, 31.5), el_n=(40, 35), ha_n=(46, 29),
+                 sh_f=(30, 31), el_f=(25, 32), ha_f=(22, 37),
+                 kn_n=(37, 47), an_n=(38, 54.5), toe_n=(1, 0),
+                 kn_f=(20, 47.5), an_f=(15, 54.5), toe_f=(1, 0.3),
+                 paddle=(-35, "front"), pony="fly"),
     # SNES ADR-064 (port PORT-39): celebrations, the slump, the dive.
     "thumbs_up": dict(IDLE, sh_f=(28, 28), el_f=(35, 28), ha_f=(38, 20),
                       el_n=(33, 35), ha_n=(36, 40), paddle=(-110, "front")),
@@ -899,7 +924,7 @@ POSES = {
                  kn_f=(19, 46), an_f=(16, 54.5),
                  paddle=(-25, "front")),
     "en_garde": dict(neck=(33, 25), hip=(27, 38.5),
-                     sh_n=(33, 29), el_n=(39, 31), ha_n=(45, 30),
+                     sh_n=(33, 29), el_n=(39, 32), ha_n=(48, 29.5),
                      sh_f=(30, 29), el_f=(24, 26), ha_f=(21, 21),
                      kn_n=(39, 46), an_n=(42, 54.5), toe_n=(1, 0),
                      kn_f=(20, 47), an_f=(13, 54.5), toe_f=(1, 0),
@@ -926,16 +951,39 @@ POSES = {
 SLOTS = ["idle0", "idle1", "run0", "run1", "run2", "run3", "windup", "swing",
          "follow", "toss", "cheer", "overhead_windup", "overhead_contact",
          "reach", "scoop", "thumbs_up", "flex", "en_garde", "slump", "dive",
-         "scramble"]
+         "scramble", "overhead_follow", "scoop_windup", "lift"]
 ANIMS = {"idle": (["idle0", "idle1"], 300), "run": (["run0", "run1", "run2",
                                                     "run3"], 90),
          "swing": (["windup", "swing", "follow"], 70), "toss": (["toss"], 200),
          "cheer": (["cheer"], 200),
-         "overhead": (["overhead_windup", "overhead_contact"], 90),
-         "reach": (["reach"], 150), "scoop": (["scoop"], 150),
+         "overhead": (["overhead_windup", "overhead_contact",
+                       "overhead_follow"], 90),
+         "reach": (["windup", "reach", "lift"], 110),
+         "scoop": (["scoop_windup", "scoop", "lift"], 110),
          "thumbs_up": (["thumbs_up"], 200), "flex": (["flex"], 200),
          "en_garde": (["en_garde"], 200), "slump": (["slump"], 200),
          "dive": (["dive", "scramble"], 200)}
+
+
+UPPER_ARM = 7.5 * S                    # shoulder to elbow
+FOREARM = 7.5 * S                      # elbow to the fist's centre
+
+
+def solve_arm(shoulder, elbow_hint, hand):
+    """The (elbow, hand) of an arm of fixed length from the shoulder to the
+    hand, bent to the side the pose's elbow is on."""
+    dx, dy = hand[0] - shoulder[0], hand[1] - shoulder[1]
+    d = math.hypot(dx, dy) or 1e-6
+    reach = (UPPER_ARM + FOREARM) * 0.985
+    if d > reach:
+        hand = (shoulder[0] + dx * reach / d, shoulder[1] + dy * reach / d)
+        dx, dy, d = dx * reach / d, dy * reach / d, reach
+    a = (UPPER_ARM ** 2 - FOREARM ** 2 + d * d) / (2 * d)
+    h = math.sqrt(max(UPPER_ARM ** 2 - a * a, 0.0))
+    cross = dx * (elbow_hint[1] - shoulder[1]) - dy * (elbow_hint[0] - shoulder[0])
+    k = h if cross >= 0 else -h
+    elbow = (shoulder[0] + (a * dx - k * dy) / d, shoulder[1] + (a * dy + k * dx) / d)
+    return elbow, hand
 
 
 def scaled(pose):
@@ -951,6 +999,11 @@ def scaled(pose):
         P[k] = add(P[k], (0, -1.5 * S))
     # hips higher: a shorter torso and longer legs (art/sprites/hd/v2)
     P["hip"] = add(P["hip"], (0, -2 * S))
+    # one arm length in every pose: the pose's elbow only says which way
+    # the arm bends, and a hand past full reach comes in to it
+    for side in ("n", "f"):
+        P["el_" + side], P["ha_" + side] = solve_arm(
+            P["sh_" + side], P["el_" + side], P["ha_" + side])
     return P
 
 

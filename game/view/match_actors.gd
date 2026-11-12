@@ -182,20 +182,26 @@ func frame_for(i: int) -> String:
 		K.STATE_WINDUP:
 			if p.state_frames_remaining == K.PLAYER_WINDUP_FRAMES:
 				entry["choice"] = choose_swing(p)
-			return {"overhead": "overhead_windup", "scoop": "scoop",
+			return {"overhead": "overhead_windup", "scoop": "scoop_windup",
 				"reach": "windup"}.get(entry["choice"], "windup")
 		K.STATE_ACTIVE:
 			return {"overhead": "overhead_contact", "scoop": "scoop",
 				"reach": "reach"}.get(entry["choice"], "swing")
 		K.STATE_RECOVERY:
 			if entry["choice"] == "overhead":
-				return "follow"
-			if entry["choice"] in ["scoop", "reach"] and p.state_frames_remaining > 3:
-				return entry["choice"]
+				return "overhead_follow"     # the paddle snapped down
+			if entry["choice"] in ["scoop", "reach"]:
+				# held low, then lifted through the ball (not the forehand's
+				# high finish, which stood them up in a frame)
+				return entry["choice"] if p.state_frames_remaining > LOW_LIFT else "lift"
 			return "follow"
 		K.STATE_MOVE:
 			return "run%d" % (p.animation_frame % 4)
 	return "idle%d" % (p.animation_frame % 2)
+
+
+## A scoop or a reach rises into its lift for the last of the recovery.
+const LOW_LIFT := 4
 
 
 ## SMASH! over an overhead's contact (ADR-053): rises and fades in half a

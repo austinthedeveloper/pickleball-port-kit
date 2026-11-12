@@ -153,3 +153,38 @@ func test_the_view_shows_a_smash() -> void:
 	p.state = kept
 	eq(v.sim.snapshot(), before, "the view wrote nothing to the sim")
 	v.free()
+
+
+## Each swing has its own way in and out: the smash snaps down (not the
+## forehand's high finish), a scoop draws back low, and the low swings
+## lift out of their contact. The sheets hold every frame the view names.
+func test_each_swing_has_its_own_frames() -> void:
+	var v := MatchView.new()
+	runner.root.add_child(v)
+	v.setup(SimTypes.MatchConfig.singles(), "park", false)
+	eq(Array(v.manifest["sprites"]["players"]["frames"]), Array(MatchView.SLOTS),
+		"the sheets' frames are the view's, in order")
+	var p: SimTypes.Player = v.sim.players[0]
+	var kept := [p.state, p.state_frames_remaining]
+	var before := v.sim.snapshot()
+	var want := {
+		"overhead": ["overhead_windup", "overhead_contact", "overhead_follow", "overhead_follow"],
+		"scoop": ["scoop_windup", "scoop", "scoop", "lift"],
+		"reach": ["windup", "reach", "reach", "lift"],
+		"standard": ["windup", "swing", "follow", "follow"],
+	}
+	for choice: String in want:
+		var got := []
+		for step in [[K.STATE_WINDUP, 1], [K.STATE_ACTIVE, 1],
+				[K.STATE_RECOVERY, K.PLAYER_RECOVERY_FRAMES], [K.STATE_RECOVERY, 1]]:
+			p.state = step[0]
+			p.state_frames_remaining = step[1]
+			v._players[0]["choice"] = choice
+			got.append(v.actors.frame_for(0))
+		eq(got, want[choice], "%s: windup, contact, recovery, its end" % choice)
+		for f: String in got:
+			check(f in MatchView.SLOTS, "%s is on the sheet" % f)
+	p.state = kept[0]
+	p.state_frames_remaining = kept[1]
+	eq(v.sim.snapshot(), before, "the view wrote nothing to the sim")
+	v.free()
