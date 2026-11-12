@@ -14,7 +14,8 @@ const FRAME := 128
 const ANCHOR := Vector2(56, 116)
 const SLOTS := ["idle0", "idle1", "run0", "run1", "run2", "run3", "windup", "swing",
 	"follow", "toss", "cheer", "overhead_windup", "overhead_contact", "reach", "scoop",
-	"thumbs_up", "flex", "en_garde", "slump", "dive", "scramble"]
+	"thumbs_up", "flex", "en_garde", "slump", "dive", "scramble", "overhead_follow",
+	"scoop_windup", "lift"]
 ## Input is ignored this long after a match starts, so the press that
 ## started it can't also serve (playbook rule 9).
 const INPUT_LOCK_FRAMES := 12

@@ -196,6 +196,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-168 | Store pages and a trailer capture ([#58](https://github.com/austinthedeveloper/pickleball-port-kit/issues/58)) | | Planned |
 | PORT-169 | Release 1.0.0 ([#60](https://github.com/austinthedeveloper/pickleball-port-kit/issues/60)) | | Planned |
 | PORT-170 | Cleanup round 11 ([#61](https://github.com/austinthedeveloper/pickleball-port-kit/issues/61)) | | Planned |
+| PORT-171 | Longer arms and a real overhead ([#72](https://github.com/austinthedeveloper/pickleball-port-kit/issues/72)) | `feature/cld-player-arms` | Ready to test |
 
 ## Releases
 
@@ -651,6 +652,7 @@ The art debts paid, winter crowds, a new ROAD TRIP region.
 - `PORT-163` 2P walks the park ([#53](https://github.com/austinthedeveloper/pickleball-port-kit/issues/53))
 - `PORT-164` Winter crowds and per-venue crowds ([#54](https://github.com/austinthedeveloper/pickleball-port-kit/issues/54))
 - `PORT-165` ROAD TRIP: a new region ([#55](https://github.com/austinthedeveloper/pickleball-port-kit/issues/55))
+- `PORT-171` Longer arms and a real overhead ([#72](https://github.com/austinthedeveloper/pickleball-port-kit/issues/72))
 
 ### 2027-11 Version 1.0
 

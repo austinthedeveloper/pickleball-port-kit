@@ -103,7 +103,10 @@
     "en_garde",
     "slump",
     "dive",
-    "scramble"
+    "scramble",
+    "overhead_follow",
+    "scoop_windup",
+    "lift"
    ],
    "animations": {
     "idle": {
@@ -145,21 +148,26 @@
     "overhead": {
      "frames": [
       "overhead_windup",
-      "overhead_contact"
+      "overhead_contact",
+      "overhead_follow"
      ],
      "ms_per_frame": 90
     },
     "reach": {
      "frames": [
-      "reach"
+      "windup",
+      "reach",
+      "lift"
      ],
-     "ms_per_frame": 150
+     "ms_per_frame": 110
     },
     "scoop": {
      "frames": [
-      "scoop"
+      "scoop_windup",
+      "scoop",
+      "lift"
      ],
-     "ms_per_frame": 150
+     "ms_per_frame": 110
     },
     "thumbs_up": {
      "frames": [

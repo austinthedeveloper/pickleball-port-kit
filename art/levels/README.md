@@ -32,7 +32,7 @@ assets (HUD, players, crowd, ball) beside its mock.
 | `manifest.json` | The index: court geometry, layers, seats, sprites, animations, fonts, 9-slices, HUD layout |
 | `venues/<venue>/{sky,far,trees,ground,fence,stands,net,front}.png` | Parallax layers, 1056×588 each (48 px / 24 px overscan for the camera) |
 | `venues/<venue>/court_mask.png` | 8-bit role ids (surround, surface, kitchen, net shadow, lines) for recolouring the court |
-| `sprites/players/player_<male\|female>_<team>.png` | 21 frames, 128×128, per team (blue, red, green, gold): the 15 play frames and ADR-062's celebrations, slump, dive and scramble |
+| `sprites/players/player_<male\|female>_<team>.png` | 24 frames, 128×128, per team (blue, red, green, gold): the 15 play frames, ADR-062's celebrations, slump, dive and scramble, and port ADR-114's overhead_follow, scoop_windup and lift |
 | `sprites/players/player_<variant>_<team>_cap.png` | Cap overlay, same frames; draw after the body, or leave it off |
 | `sprites/players/roles/*.png` + `palettes.json` | Indexed role sheets for palette-swap shaders (any team, 4 skins, 4 hairs, 5 paddles): the body and a sheet per hat (13 with the cap, ADR-061); port ADR-099's headless bodies (`nohead`, `nohead_<pattern>`) and a sheet per generated head (`head_<id>`), composed in the game |
 | `sprites/crowd.png` | 16 spectators (12 sitting, 4 standing) × idle and cheer, 32×64 |
@@ -73,9 +73,11 @@ default colouring.
 
 ## Players
 
-The players are a 2× rebuild of the 48 px rig: the same poses and shading,
-plus the four new SNES poses (overhead_windup, overhead_contact, reach,
-scoop). The anchor is the feet at (56, 116), facing right; when flipped,
+The players are a 2× rebuild of the 48 px rig: the same shading, plus the
+four new SNES poses (overhead_windup, overhead_contact, reach, scoop).
+Port ADR-114 gave every pose one arm length (a pose sets the shoulder and
+the hand; `solve_arm` places the elbow), re-posed the swings to reach,
+and added overhead_follow, scoop_windup and lift. The anchor is the feet at (56, 116), facing right; when flipped,
 mirror it to 127 − x.
 
 Animations, with frame times, are in the manifest: idle, run, swing, toss,
