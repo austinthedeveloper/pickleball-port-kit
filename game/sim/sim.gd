@@ -285,8 +285,17 @@ static func in_sweet_spot(p: Player, b: Ball, grow: int = 0) -> bool:
 	return _within(b.x_fp - p.x_fp, K.to_fp(K.HIT_SWEET_X) + grow) \
 		and _within(b.y_fp - p.y_fp, K.to_fp(K.HIT_SWEET_Y) + grow)
 
+## Pixels past HIT_PUSH_START_X a push of `push` frames lands (SNES ADR-076);
+## the remaster's push slows past the old deep spot (port ADR-115).
+static func push_px(push: int, remaster := false) -> int:
+	if not remaster or push <= K.HIT_PUSH_DEEP:
+		return push >> K.HIT_PUSH_SHIFT
+	return (K.HIT_PUSH_DEEP >> K.HIT_PUSH_SHIFT) \
+		+ (push - K.HIT_PUSH_DEEP) / K.HIT_PUSH_LATE_FRAMES_PER_PX
+
 ## Target and flight for a rally shot (ADR-019).
-static func apply_targeted_shot(b: Ball, p: Player, intent: Intent, grow: int = 0) -> void:
+static func apply_targeted_shot(b: Ball, p: Player, intent: Intent, grow: int = 0,
+		remaster := false) -> void:
 	var tx: int
 	var ty := K.HIT_TARGET_LANE_CENTER
 	var pace: int
@@ -317,7 +326,7 @@ static func apply_targeted_shot(b: Ball, p: Player, intent: Intent, grow: int = 
 	else:
 		if depth > 0:
 			# The push (SNES ADR-076): held longer, deeper, then out.
-			tx = mini(K.HIT_PUSH_START_X + (intent.push >> K.HIT_PUSH_SHIFT), K.HIT_PUSH_MAX_X)
+			tx = mini(K.HIT_PUSH_START_X + push_px(intent.push, remaster), K.HIT_PUSH_MAX_X)
 			pace = K.HIT_PACE_DEEP_FP
 		elif depth < 0:
 			tx = K.HIT_TARGET_SHORT_RIGHT
@@ -425,7 +434,7 @@ func resolve_player_hits() -> int:
 				and ball.z_fp >= K.to_fp(K.HIT_OVERHEAD_Z):
 			p.shot_type = K.SHOT_OVERHEAD
 		apply_targeted_shot(ball, p, special_aim(i) if p.shot_type == K.SHOT_SPECIAL
-			else (pop_up_aim(i) if returned else intents[i]), grow)
+			else (pop_up_aim(i) if returned else intents[i]), grow, config.overhead != 0)
 		return i + 1
 	return 0
 

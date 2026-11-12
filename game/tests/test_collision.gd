@@ -5,10 +5,12 @@ var sim: Sim
 var paddle := Paddles.STANDARD
 var offset_y := 0
 var push := K.HIT_PUSH_DEEP      ## the CPU's push (SNES ADR-076)
+var overhead := 1                ## 0: the ROM's rules (the conformance traces')
 
 
 func _reset() -> void:
 	sim = Sim.new()
+	sim.config.overhead = overhead
 	for i in K.MAX_PLAYERS:
 		sim.players[i] = SimTypes.Player.new()
 		sim.players[i].contact_consumed = 0
@@ -169,8 +171,10 @@ func test_shot_types() -> void:   # ADR-019
 ## SNES ADR-076: aimed toward the net, a standard shot or drive lands
 ## deeper the longer the push, the old deep target at HIT_PUSH_DEEP, past
 ## the baseline from HIT_PUSH_OUT_FRAMES, never past HIT_PUSH_MAX_X; the
-## right team mirrors. A lob ignores it.
+## right team mirrors. A lob ignores it. The ROM's rules (the remaster's
+## slack is test_push_slack).
 func test_push_depth() -> void:
+	overhead = 0
 	eq(K.HIT_PUSH_START_X + (K.HIT_PUSH_DEEP >> K.HIT_PUSH_SHIFT), K.HIT_TARGET_DEEP_RIGHT)
 	eq([K.HIT_PUSH_START_X, K.HIT_PUSH_MAX_X, K.HIT_PUSH_DEEP, K.HIT_PUSH_OUT_FRAMES],
 		[212, 252, 32, 58], "tuning.json v5")
@@ -194,6 +198,31 @@ func test_push_depth() -> void:
 	check(sim.ball.x_fp < K.to_fp(K.COURT_BASELINE_LEFT), "right team pushes out")
 	_fly_shot(0, K.SHOT_SOFT, 1)     # a lob stays deep and in
 	check(absi(sim.ball.x_fp - K.to_fp(K.HIT_TARGET_DEEP_RIGHT)) < K.to_fp(3), "lob ignores it")
+	push = K.HIT_PUSH_DEEP
+	overhead = 1
+
+
+## Port ADR-115: the remaster's push matches the ROM's to the old deep spot,
+## then deepens a pixel per 3 frames, so a hold the ROM calls out (58 to 70
+## frames) still lands in; out from HIT_PUSH_OUT_FRAMES_REMASTER, capped.
+func test_push_slack() -> void:
+	eq(K.HIT_PUSH_OUT_FRAMES_REMASTER, 71)
+	for n in [0, 1, 20, K.HIT_PUSH_DEEP]:
+		eq(Sim.push_px(n, true), Sim.push_px(n), "push %d as the ROM" % n)
+	for shot in [K.SHOT_STANDARD, K.SHOT_DRIVE]:
+		var last := 0
+		for n in [K.HIT_PUSH_DEEP, K.HIT_PUSH_OUT_FRAMES, K.HIT_PUSH_OUT_FRAMES_REMASTER - 1,
+				K.HIT_PUSH_OUT_FRAMES_REMASTER, 255]:
+			push = n
+			_fly_shot(0, shot, 1)
+			var x := K.from_fp(sim.ball.x_fp)
+			check(sim.ball.x_fp >= last, "push %d deeper" % n)
+			last = sim.ball.x_fp
+			check(x <= K.HIT_PUSH_MAX_X + 2, "push %d capped (%d)" % [n, x])
+			if n < K.HIT_PUSH_OUT_FRAMES_REMASTER:
+				check(x <= K.COURT_BASELINE_RIGHT, "push %d in (%d)" % [n, x])
+			else:
+				check(x > K.COURT_BASELINE_RIGHT, "push %d out (%d)" % [n, x])
 	push = K.HIT_PUSH_DEEP
 
 
