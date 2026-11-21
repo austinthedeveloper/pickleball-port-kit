@@ -48,7 +48,8 @@ the Web zip is 21 MB from v0.35.0 to v0.44.0.
   budget with email alerts (deployed from the Mac so the address stays
   out of the public logs), the environment, and the AZURE_* repo
   variables. Until those variables exist, the `web` job is skipped, so
-  releases work as before.
+  releases work as before. Run 2026-11-21: the site is
+  https://happy-tree-06dcdd90f.4.azurestaticapps.net.
 
 ## Consequences
 
