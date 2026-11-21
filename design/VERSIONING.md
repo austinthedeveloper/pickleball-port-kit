@@ -70,7 +70,10 @@ By hand:
    `game/tools/export.sh` on the clean tagged tree (so the build ID is
    exactly `vX.Y.Z` and the title shows `V X.Y.Z` alone), packages
    `Pickleball94-X.Y.Z-{macos.zip,windows.zip,linux.tar.gz,web.zip}`, and
-   attaches them to the GitHub release for the tag.
+   attaches them to the GitHub release for the tag. Then it puts the
+   web zip up on the Web build's site (`.github/workflows/web.yml`, port
+   ADR-116; skipped until `infra/web/setup.sh` has run). Running that
+   workflow by hand puts up any release again.
 7. The release is created from the CHANGELOG entry plus a downloads list
    (`python3 game/tools/release_body.py X.Y.Z` prints it). If a release
    for the tag already exists, its text is kept and the builds are added
