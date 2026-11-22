@@ -4,6 +4,21 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.45.0] - 2026-11-22
+
+Longer arms and a real overhead, a little more room on a held push, and
+the Web build playable in a browser.
+
+### Added
+- **Play in your browser**: each release now goes up on the game's web
+  page, so the Web build needs no download.
+
+### Changed
+- **Arms and swings**: players reach further on every swing, and the
+  overhead has a proper windup, contact and follow-through.
+- **The push is more forgiving**: holding toward the net too long still
+  sends a shot out, but only after a little longer than before.
+
 ## [0.44.0] - 2026-11-11
 
 Doubles online with three friends, a club of your own, replays you can
