@@ -1,0 +1,102 @@
+# The Web build, playable in a browser: a release's web zip uploaded to the
+# Azure Static Web App (port ADR-116, infra/web). release.yml calls it once a
+# tag's builds are published; run it by hand to put up a given release again
+# (empty: the latest). Azure is signed in to through GitHub's OIDC, as the
+# `web` environment (infra/web/setup.sh made it and the AZURE_* variables);
+# the site's deployment token is read at run time, never stored.
+name: Web site
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (vX.Y.Z); empty for the latest"
+        type: string
+        required: false
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: web-site
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy the Web build
+    if: vars.AZURE_CLIENT_ID != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment:
+      name: web
+      url: ${{ steps.site.outputs.url }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: The release's web zip
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -eu
+          if [ -z "$TAG" ]; then
+            TAG=$(gh release view --json tagName --jq .tagName)
+          fi
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
+          gh release download "$TAG" --pattern '*-web.zip' --dir "$RUNNER_TEMP/dl"
+          mkdir site
+          unzip -q "$RUNNER_TEMP"/dl/*-web.zip -d site
+          cp infra/web/staticwebapp.config.json site/
+          test -f site/index.html && test -f site/index.pck && test -f site/index.wasm
+          ls -l site
+
+      - uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: The site (main.bicep) and its token
+        id: site
+        run: |
+          set -eu
+          out=$(az deployment group create --resource-group pickleball-web --name site \
+            --template-file infra/web/main.bicep \
+            --query "[properties.outputs.name.value, properties.outputs.url.value]" -o tsv)
+          name=$(sed -n 1p <<<"$out")
+          url=$(sed -n 2p <<<"$out")
+          token=$(az staticwebapp secrets list --name "$name" --resource-group pickleball-web \
+            --query properties.apiKey -o tsv)
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "SITE_URL=$url" >> "$GITHUB_ENV"
+
+      - uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ steps.site.outputs.token }}
+          action: upload
+          app_location: site
+          skip_app_build: true
+          skip_api_build: true
+
+      - name: The page and the pack are served
+        run: |
+          set -eu
+          for i in $(seq 1 12); do
+            if curl -fsS --max-time 20 -o /dev/null "$SITE_URL/index.html" \
+               && curl -fsS --max-time 60 -o "$RUNNER_TEMP/served.pck" "$SITE_URL/index.pck" \
+               && cmp -s "$RUNNER_TEMP/served.pck" site/index.pck; then
+              echo "### Web build $TAG: $SITE_URL" >> "$GITHUB_STEP_SUMMARY"
+              echo "ok: $SITE_URL serves $TAG"; exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::$SITE_URL isn't serving $TAG's index.pck"; exit 1

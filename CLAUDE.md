@@ -29,7 +29,8 @@ Releases are versioned (semver, tags `vX.Y.Z`, `game/CHANGELOG.md`); the
 steps are in `design/VERSIONING.md`. GitHub Actions runs `test.sh` on every
 push and pull request (`.github/workflows/ci.yml`); pushing a `vX.Y.Z` tag
 builds all four platforms and publishes them to the GitHub release
-(`release.yml`). Godot's version and SHA-512s are pinned in
+(`release.yml`), then puts the Web build up on its Azure Static Web App
+(`web.yml`, ADR-116, `infra/web`). Godot's version and SHA-512s are pinned in
 `.github/actions/setup-godot/action.yml`.
 
 `design/PORT_ROADMAP.md` is the milestone sheet (an index of every PORT
@@ -43,7 +44,7 @@ project lead's; the remaster is one of its artifacts and may not
 contradict it). `design/BIBLE_PLAN.md` lists what it asks of the port and
 the gaps (phase 5 in the roadmap). The SNES repo's decisions are cited as
 "SNES ADR-n": its numbers from 052 on are not this repo's. This repo keeps
-its own numbering (next: ADR-116; `decisions/README.md` indexes them).
+its own numbering (next: ADR-117; `decisions/README.md` indexes them).
 
 ## Rules of the code (game/)
 

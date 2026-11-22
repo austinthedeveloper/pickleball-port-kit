@@ -5,7 +5,8 @@
 # the same names as earlier releases and attached. The release is created
 # from the version's game/CHANGELOG.md entry if it doesn't exist yet; an
 # existing one keeps its text and gets the builds (replacing any of the
-# same name). Steps: design/VERSIONING.md.
+# same name). Then the Web build goes up on its site (web.yml, port ADR-116).
+# Steps: design/VERSIONING.md.
 name: Release
 
 on:
@@ -105,3 +106,14 @@ jobs:
               --title "Pickleball '94 (Godot port) $VERSION" \
               --notes-file "$RUNNER_TEMP/release_body.md"
           fi
+
+  web:
+    name: The Web build's site
+    needs: build
+    if: vars.AZURE_CLIENT_ID != ''
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/web.yml
+    with:
+      tag: ${{ github.ref_name }}

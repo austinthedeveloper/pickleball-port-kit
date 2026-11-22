@@ -198,6 +198,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-170 | Cleanup round 11 ([#61](https://github.com/austinthedeveloper/pickleball-port-kit/issues/61)) | | Planned |
 | PORT-171 | Longer arms and a real overhead ([#72](https://github.com/austinthedeveloper/pickleball-port-kit/issues/72)) | `feature/cld-player-arms` | Ready to test |
 | PORT-172 | The push's slack: a long hold goes out later (ADR-115) | `feature/cld-push-slack` | Ready to test |
+| PORT-173 | The Web build's site: each release goes up on an Azure Static Web App (ADR-116, infra/web) | `feature/cld-web-host` | Ready to test: set up 2026-11-21, first deploy after the merge |
 
 ## Releases
 
@@ -655,6 +656,7 @@ The art debts paid, winter crowds, a new ROAD TRIP region.
 - `PORT-165` ROAD TRIP: a new region ([#55](https://github.com/austinthedeveloper/pickleball-port-kit/issues/55))
 - `PORT-171` Longer arms and a real overhead ([#72](https://github.com/austinthedeveloper/pickleball-port-kit/issues/72))
 - `PORT-172` The push's slack: a long hold goes out later (ADR-115)
+- `PORT-173` The Web build's site (ADR-116)
 
 ### 2027-11 Version 1.0
 
@@ -667,6 +669,11 @@ Feature freeze, a full playtest, store pages, v1.0.0; cleanup round 11.
 - `PORT-169` Release 1.0.0 ([#60](https://github.com/austinthedeveloper/pickleball-port-kit/issues/60))
 - `PORT-170` Cleanup round 11 ([#61](https://github.com/austinthedeveloper/pickleball-port-kit/issues/61))
 ## For you
+
+- **PORT-173 the Web build's site:** `infra/web/setup.sh` ran 2026-11-21;
+  the site is https://happy-tree-06dcdd90f.4.azurestaticapps.net. Once this branch is on main, run the
+  Web site workflow from the Actions tab (empty tag) to put v0.44.0 up;
+  every release after goes up by itself. Then try it on a phone.
 
 - **Merged branches (PORT-141):** 136 remote branches are merged into
   `main`. `git branch -r --merged origin/main` lists them; delete the ones

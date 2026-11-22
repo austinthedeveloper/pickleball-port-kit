@@ -1,0 +1,11 @@
+{
+  "mimeTypes": {
+    ".pck": "application/octet-stream",
+    ".wasm": "application/wasm",
+    ".js": "text/javascript"
+  },
+  "globalHeaders": {
+    "Cache-Control": "no-cache",
+    "X-Content-Type-Options": "nosniff"
+  }
+}
