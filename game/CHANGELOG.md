@@ -4,6 +4,28 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.47.0] - 2026-11-22
+
+The phone pad you can reach, Player Select by tap, and a big keypad for
+room codes.
+
+### Added
+- **Room codes by tap**: on a touch screen, ROOM opens big keys for each
+  letter, with DELETE, BACK and JOIN.
+- **Phones**: the first tap goes full screen and turns to landscape where
+  the browser allows it. Held upright, a card asks you to turn the phone
+  (tap it to play upright anyway). The Web build can be added to your
+  home screen as an app.
+
+### Changed
+- **The touch pad's buttons**: weighted like a GameCube pad, a big B (HIT)
+  with X and A curved round it and a small Y. R sits over the buttons, and
+  L over the D-pad is a toggle: tap it on, tap it off.
+
+### Fixed
+- **Player Select on a phone**: tapping a shirt, the player or a paddle
+  now picks it, and PLAY and BACK are buttons.
+
 ## [0.46.0] - 2026-11-22
 
 Menus made for a finger: bigger rows, prompts you can tap, and room codes
