@@ -52,6 +52,17 @@ var grid: MenuPage
 var grid_cols: Array = []        ## each grid row's letter under the cursor
 var _grid_box: Node2D
 var _key_typed := false          ## a key typed this frame: HIT doesn't type too
+## Open: the room is being picked, on the grid (keys, a pad) or the keypad.
+var grid_open := false
+## The keypad (port ADR-118): on a touch screen the grid is big keys, each
+## tapped where it is: the letters five a row, DELETE, BACK and JOIN.
+var keys: Node2D
+var _key_texts := {}             ## key -> BitmapText
+var _key_down := ""              ## the key a finger is on ("": none)
+const KEYS_RECT := Rect2(150, 100, 660, 288)
+const KEY_W := 100.0
+const KEY_H := 62.0
+const KEY_GAP := 4.0
 const GRID_W := 5                ## letters a row
 const GRID_GAP := "   "
 
@@ -239,7 +250,7 @@ func _press_host() -> void:
 
 
 func _press_address() -> void:
-	if way == BY_ROOM and not grid.visible:
+	if way == BY_ROOM and not grid_open:
 		editing = true                   # a room is picked on the grid, never typed blind
 		_show_grid(true)
 		return
@@ -374,7 +385,7 @@ func _close_session() -> void:
 
 
 func _leave() -> void:
-	if grid and grid.visible:
+	if grid and grid_open:
 		_close_grid()
 		return
 	if editing:
@@ -421,6 +432,114 @@ func _build_grid() -> void:
 	_grid_box.draw.connect(_draw_grid_box)
 	grid.add_child(_grid_box)
 	grid.visible = false
+	keys = Node2D.new()
+	keys.visible = false
+	_ui.add_child(keys)
+	UiKit.panel(KEYS_RECT, keys)
+	var art := Node2D.new()
+	art.draw.connect(_draw_keys.bind(art))
+	keys.add_child(art)
+	for k in key_names():
+		var r := key_rect(k)
+		var font := "big" if k.length() == 1 else "small"
+		var t := UiKit.text(font, k, r.get_center(), 0.5, Color.WHITE, keys)
+		t.position.y = r.get_center().y - BitmapText.load_font(font)["line_height"] / 2.0
+		_key_texts[k] = t
+
+
+# --- The keypad (port ADR-118) ------------------------------------------------
+
+## The keypad's keys: the code's letters, then DELETE, BACK and JOIN.
+static func key_names() -> Array:
+	var out := []
+	for c in RelayLink.ALPHABET:
+		out.append(c)
+	out.append_array(["DELETE", "BACK", "JOIN"])
+	return out
+
+
+## A key's box on the screen: letters GRID_W a row, the actions down the
+## right (JOIN two keys tall).
+static func key_rect(k: String) -> Rect2:
+	var x0 := KEYS_RECT.position.x + (KEYS_RECT.size.x - 6 * KEY_W - 5 * KEY_GAP) / 2.0
+	var y0 := KEYS_RECT.position.y + 18.0
+	var col := 5
+	var row := 0
+	var tall := 1
+	match k:
+		"DELETE":
+			row = 0
+		"BACK":
+			row = 1
+		"JOIN":
+			row = 2
+			tall = 2
+		_:
+			var i := RelayLink.ALPHABET.find(k)
+			col = i % GRID_W
+			row = i / GRID_W
+	return Rect2(x0 + col * (KEY_W + KEY_GAP), y0 + row * (KEY_H + KEY_GAP),
+		KEY_W, KEY_H * tall + KEY_GAP * (tall - 1))
+
+
+## The key at `p` on the screen, or "".
+static func key_at(p: Vector2) -> String:
+	for k in key_names():
+		if key_rect(k).has_point(p):
+			return k
+	return ""
+
+
+## The keypad shows for a finger; the grid for keys and pads.
+func keypad() -> bool:
+	return GameControls.last_device == GameControls.TOUCH
+
+
+func _sync_grid() -> void:
+	var pad := grid_open and keypad()
+	if grid.visible != (grid_open and not pad):
+		grid.visible = grid_open and not pad
+		if grid.visible:
+			grid.appear()
+	keys.visible = pad
+	if not pad:
+		_key_down = ""
+
+
+func _draw_keys(art: Node2D) -> void:
+	for k in key_names():
+		var r := key_rect(k)
+		var off: bool = k == "JOIN" and room.length() < RelayLink.ROOM_LEN
+		var down: bool = k == _key_down
+		art.draw_rect(r, Color(0.98, 0.86, 0.36, 0.55) if down else Color(0.12, 0.15, 0.3, 0.95))
+		art.draw_rect(r, MenuPage.BAR_EDGE if down else Color(0.55, 0.6, 0.8, 0.6 if off else 1.0), false, 2.0)
+		var t: BitmapText = _key_texts.get(k)
+		if t:
+			t.tint = Color(1, 1, 1, 0.4) if off else (GOLD if k == "JOIN" else Color.WHITE)
+
+
+## A finger on the keypad: the key lights while held and types as it
+## lifts on the same key (sliding off cancels, as on a menu row).
+func _keys_mouse(e: InputEventMouseButton) -> void:
+	if e.button_index != MOUSE_BUTTON_LEFT:
+		return
+	var k := key_at(e.position)
+	if e.pressed:
+		_key_down = k
+	else:
+		if k != "" and k == _key_down and _lock <= 0:
+			_key(k)
+		_key_down = ""
+	keys.get_child(1).queue_redraw()
+
+
+## A key: a letter, DELETE, BACK or JOIN.
+func _key(k: String) -> void:
+	if k == "BACK":
+		_sfx.play("back")
+		_close_grid()
+		return
+	_grid_item(k)
 
 
 ## Where an item of a grid row starts and how wide it is, on screen.
@@ -443,7 +562,11 @@ func _draw_grid_box() -> void:
 
 ## HIT on a grid row: type its letter, or DELETE, or JOIN.
 func _grid_press(row: int) -> void:
-	var item := String(grid_items(row)[grid_cols[row]])
+	_grid_item(String(grid_items(row)[grid_cols[row]]))
+
+
+## A grid item or a key: type its letter, or DELETE, or JOIN.
+func _grid_item(item: String) -> void:
 	if item == "DELETE":
 		room = room.left(maxi(0, room.length() - 1))
 	elif item == "JOIN":
@@ -460,6 +583,7 @@ func _grid_press(row: int) -> void:
 			grid_cols[grid_rows() - 1] = 1
 	_sfx.play("blip")
 	_grid_box.queue_redraw()
+	keys.get_child(1).queue_redraw()
 	page.refresh()
 
 
@@ -485,18 +609,19 @@ func _grid_prompts() -> void:
 
 
 func _show_grid(on: bool) -> void:
-	grid.visible = on
+	grid_open = on
+	grid.visible = false
+	_sync_grid()
 	page.visible = not on
 	if on:
 		grid.select("g0")
-		grid.appear()
 		_lock = LOCK
 		GameControls.clear_latch()
 	_grid_box.queue_redraw()
 
 
 func _close_grid() -> void:
-	if not grid.visible:
+	if not grid_open:
 		return
 	editing = false
 	_show_grid(false)
@@ -607,7 +732,7 @@ func info() -> Array:
 	var st := _state()
 	if session and session.closed():
 		return [session.reason if session.reason != "" else "DISCONNECTED", "", ""]
-	if st == OnlineSession.IDLE and grid and grid.visible:
+	if st == OnlineSession.IDLE and grid and grid_open:
 		var shown := room
 		while shown.length() < RelayLink.ROOM_LEN:
 			shown += "-"
@@ -697,6 +822,11 @@ func refresh() -> void:
 ## Typing the address: a key press is a character (or Backspace, or a
 ## paste); Enter or Esc ends it. The keys don't reach the menu.
 func _input(event: InputEvent) -> void:
+	if grid and keys.visible and event is InputEventMouseButton:
+		_keys_mouse(event)
+		if is_inside_tree():
+			get_viewport().set_input_as_handled()
+		return
 	if grid and grid.visible and event is InputEventMouse:
 		_grid_mouse((event as InputEventMouse).position)
 	if not editing or not (event is InputEventKey) or not event.pressed:
@@ -710,7 +840,7 @@ func _input(event: InputEvent) -> void:
 	elif k.keycode in [KEY_ENTER, KEY_KP_ENTER, KEY_ESCAPE]:
 		editing = false
 		_store_address()
-		if grid.visible:
+		if grid_open:
 			_close_grid()
 		_lock = LOCK
 	elif k.keycode == KEY_V and (k.ctrl_pressed or k.meta_pressed):
@@ -759,7 +889,8 @@ func _process(_delta: float) -> void:
 			play.emit(session)               # the host started
 			return
 	refresh()
-	if grid.visible:
+	if grid_open:
+		_sync_grid()
 		_grid_box.queue_redraw()
 		var typed := _key_typed
 		_key_typed = false
@@ -768,6 +899,8 @@ func _process(_delta: float) -> void:
 			return
 		# the keyboard's HIT and back keys (J, K, L) are letters too: a
 		# letter typed is only a letter
+		if keys.visible:
+			return                       # the keypad is tapped, not driven
 		_grid_prompts()
 		var gnav := grid.drive(true, not typed, not typed)
 		if gnav & MenuPage.NAV_MOVED:

@@ -26,6 +26,14 @@ if [ -z "$1" ]; then
     echo "FAIL: script errors in the e2e run"; e2e=1
   fi
   [ $e2e -ne 0 ] && status=$e2e
+  echo "\nend-to-end touch smoke:"
+  godot --headless --path . -s res://tests/e2e_touch.gd >"$out" 2>&1
+  e2e=$?
+  filter "$out"
+  if grep -q "SCRIPT ERROR" "$out"; then
+    echo "FAIL: script errors in the e2e touch run"; e2e=1
+  fi
+  [ $e2e -ne 0 ] && status=$e2e
 fi
 rm -f "$out"
 exit $status

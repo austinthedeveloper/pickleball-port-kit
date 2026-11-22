@@ -100,7 +100,8 @@ func setup(s: PlayerSelect) -> SelectScreen:
 	_overlay.draw.connect(_draw_overlay)
 	_panel(Rect2(40, 476, 880, 50))
 	_prompts = PromptBar.new().setup(_prompt_items(), Vector2(480, 501))
-	_prompts.tappable = true             # CONFIRM, PLAY and BACK by tap on a touch screen
+	_prompts.tappable = true             # PLAY and BACK by tap on a touch screen
+	_prompts.own_taps = true             # this screen's: BACK leaves, whatever the row
 	add_child(_prompts)
 	_arrow = Sprite2D.new()
 	_arrow.texture = load("res://assets/levels/ui/icon_ball.png")
@@ -108,6 +109,7 @@ func setup(s: PlayerSelect) -> SelectScreen:
 	add_child(_arrow)
 	refresh()
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	size = Vector2(960, 540)             # the whole screen: a Control of no size gets no taps
 	for c in get_children():             # the taps are this screen's, not its pieces'
 		if c is Control:
 			(c as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -117,7 +119,7 @@ func setup(s: PlayerSelect) -> SelectScreen:
 ## On a touch screen the parts are tapped, so the D-pad's CHOOSE says so.
 func _prompt_items() -> Array:
 	if GameControls.last_device == GameControls.TOUCH:
-		return [["hit", "NEXT"], ["start", "PLAY"], ["back", "BACK"]]
+		return [["start", "PLAY"], ["back", "BACK"]]
 	return [["dpad", "CHOOSE"], ["hit", "CONFIRM"], ["start", "PLAY"], ["back", "BACK"]]
 
 
@@ -130,6 +132,14 @@ static func thumb_rect(c: int) -> Rect2:
 ## change (a thumbnail: its colour; the player: the other body; the
 ## paddle: left half back, right half on).
 func presses_for(p: Vector2) -> Array:
+	match _prompts.tap_at(p):
+		"start":
+			return [PlayerSelect.PAD_START]
+		"soft":                              # BACK: off this screen (2P: back to 1P)
+			var out: Array = []
+			for i in sel.row + 1:
+				out.append(PlayerSelect.PAD_Y)
+			return out
 	var target := -1
 	var steps: Array = []
 	var c: Dictionary = sel.current_choice()
