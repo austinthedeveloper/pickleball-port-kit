@@ -199,7 +199,8 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-171 | Longer arms and a real overhead ([#72](https://github.com/austinthedeveloper/pickleball-port-kit/issues/72)) | `feature/cld-player-arms` | Ready to test |
 | PORT-172 | The push's slack: a long hold goes out later (ADR-115) | `feature/cld-push-slack` | Ready to test |
 | PORT-173 | The Web build's site: each release goes up on an Azure Static Web App (ADR-116, infra/web) | `feature/cld-web-host` | Done: live since v0.45.0 (2026-11-22) |
-| PORT-174 | Menus for a finger: taps act on lifting, taller rows where there's room, tappable prompts, Player Select by tap, the room grid never left for keys (ADR-117) | `feature/cld-touch-menus` | Ready to test |
+| PORT-174 | Menus for a finger: taps act on lifting, taller rows where there's room, tappable prompts, Player Select by tap, the room grid never left for keys (ADR-117) | `feature/cld-touch-menus` | Released in v0.46.0 |
+| PORT-175 | Touch for real: Player Select's taps reach it, a big keypad for the room code, a fingers-only e2e (ADR-118) | `feature/cld-touch-fixes` | Ready to test |
 | PORT-176 | The Web build on phones: full screen and landscape, a TURN YOUR PHONE SIDEWAYS card, an installable app, the touch pad on any touch, the face buttons weighted round a big HIT, L (a toggle) and R by the thumbs (port ADR-119) | `feature/cld-web-mobile-merge` | Ready to test |
 
 ## Releases
@@ -354,6 +355,9 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.45.0** (2026-11-22): PORT-171 longer arms, PORT-172 the push's
   slack, PORT-173 the Web build's site (tag `v0.45.0`, on
   `feature/cld-release-0.45.0`).
+- **v0.46.0** (2026-11-22): PORT-174 menus for a finger (ADR-117): taller
+  touch rows, tappable prompts, Player Select by tap, the room-code grid
+  on phones (tag `v0.46.0`, on `feature/cld-release-0.46.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 
@@ -663,6 +667,7 @@ The art debts paid, winter crowds, a new ROAD TRIP region.
 - `PORT-172` The push's slack: a long hold goes out later (ADR-115)
 - `PORT-173` The Web build's site (ADR-116)
 - `PORT-174` Menus for a finger (ADR-117)
+- `PORT-175` Touch for real (ADR-118)
 - `PORT-176` The phone pad of PORT-114, merged (ADR-119)
 
 ### 2027-11 Version 1.0
@@ -676,6 +681,9 @@ Feature freeze, a full playtest, store pages, v1.0.0; cleanup round 11.
 - `PORT-169` Release 1.0.0 ([#60](https://github.com/austinthedeveloper/pickleball-port-kit/issues/60))
 - `PORT-170` Cleanup round 11 ([#61](https://github.com/austinthedeveloper/pickleball-port-kit/issues/61))
 ## For you
+
+- **PORT-175 touch for real:** on the phone, Player Select by tapping
+  a shirt and a paddle, PLAY and BACK; ONLINE > ROOM opens a big keypad.
 
 - **PORT-174 menus for a finger:** on a phone, try a few menus (rows
   should feel surer: a tap acts when you lift), the gold-framed prompts

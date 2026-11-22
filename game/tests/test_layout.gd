@@ -815,6 +815,13 @@ func test_online() -> void:
 				o.room = ["", "WW", "WWWW"][c % 3]
 				o.refresh()
 				check_layout(o, "online letter grid (device %d, row %d, item %d)" % [dev, r, c])
+	# the keypad (port ADR-118), every code length
+	GameControls.last_device = GameControls.TOUCH
+	o._sync_grid()
+	for code in ["", "WW", "WWWW"]:
+		o.room = code
+		o.refresh()
+		check_layout(o, "online keypad (%s)" % code)
 	GameControls.last_device = GameControls.KEYBOARD
 	o._close_grid()
 	o.room = ""

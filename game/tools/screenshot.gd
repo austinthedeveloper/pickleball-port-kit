@@ -176,6 +176,10 @@ func _initialize() -> void:
 			var rl := RelayLink.new()
 			rl.room = "BXKM"
 			o.session = OnlineSession.new(rl, true)
+		elif mode == "online_room_keys":
+			o.page.select("address")             # port ADR-118: the keypad, a code begun
+			o.page.press()
+			o.room = "BX"
 		elif mode != "online" and mode != "online_room":
 			o.page.select("host")
 			o.page.press()

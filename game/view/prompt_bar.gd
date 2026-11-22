@@ -32,6 +32,9 @@ var tappable := false:
 		elif not v:
 			_tappable.erase(get_instance_id())
 		queue_redraw()
+## Set: the bar's owner reads its taps itself (tap_at), not the touch pad
+## (Player Select: BACK leaves from any row, where the pad's Y steps up one).
+var own_taps := false
 var tint := Color(0.85, 0.88, 0.95)
 var _texts: Array = []
 var _layout: Array = []          ## per item: [glyph, glyph rect, its letters or null, label]
@@ -137,7 +140,7 @@ func tap_targets() -> Array:
 static func tapped_at(p: Vector2) -> String:
 	for id in _tappable:
 		var bar := instance_from_id(id) as PromptBar
-		if bar != null and bar.shown():
+		if bar != null and not bar.own_taps and bar.shown():
 			var a := bar.tap_at(p)
 			if a != "":
 				return a
