@@ -2,7 +2,8 @@
   "mimeTypes": {
     ".pck": "application/octet-stream",
     ".wasm": "application/wasm",
-    ".js": "text/javascript"
+    ".js": "text/javascript",
+    ".webmanifest": "application/manifest+json"
   },
   "globalHeaders": {
     "Cache-Control": "no-cache",
