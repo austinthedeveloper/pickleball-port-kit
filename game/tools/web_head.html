@@ -1,0 +1,76 @@
+<!-- The Web build's page additions (port ADR-119), its preset's
+html/head_include: tools/web_head.py copies this file in. A phone gets the
+whole screen: no notch margins, no zoom or text selection, full screen and
+landscape on the first tap where the browser allows it, a card asking for
+landscape when held upright, and home-screen app mode (iOS has no
+full-screen API for pages; a home-screen app has no browser bars). -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pickleball '94">
+<meta name="theme-color" content="#000000">
+<style>
+html, body { width: 100%; height: 100%; overscroll-behavior: none; }
+html, body, #canvas { touch-action: none; }
+body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+	-webkit-tap-highlight-color: transparent; }
+#pb-turn { display: none; position: fixed; inset: 0; z-index: 10; background: #0a0f1f;
+	color: #fbe46a; font: bold 22px/1.35 system-ui, -apple-system, sans-serif;
+	letter-spacing: 0.04em; text-align: center; flex-direction: column;
+	align-items: center; justify-content: center; gap: 22px; padding: 24px; }
+#pb-turn small { color: #9aa3c7; font-size: 15px; font-weight: normal; letter-spacing: 0; }
+#pb-turn svg { width: 96px; height: 96px; animation: pb-tip 2.4s ease-in-out infinite; }
+@keyframes pb-tip { 0%, 30% { transform: rotate(0deg); } 60%, 100% { transform: rotate(-90deg); } }
+@media (orientation: portrait) and (pointer: coarse) {
+	body:not(.pb-upright) #pb-turn { display: flex; }
+}
+</style>
+<script>
+(function () {
+	// Full screen on the first tap (a page may only ask from a tap), then
+	// landscape, where the browser can lock it (Android Chrome).
+	function landscape() {
+		if (screen.orientation && screen.orientation.lock) {
+			screen.orientation.lock("landscape").catch(function () {});
+		}
+	}
+	function full(turn) {
+		var el = document.documentElement;
+		var ask = el.requestFullscreen || el.webkitRequestFullscreen;
+		if (!ask || document.fullscreenElement || document.webkitFullscreenElement) {
+			return;
+		}
+		try {
+			var p = ask.call(el, { navigationUI: "hide" });
+			if (p && p.then) {
+				p.then(turn ? landscape : function () {}).catch(function () {});
+			}
+		} catch (e) {}
+	}
+	// the first tap: full screen and landscape, unless it's the upright
+	// card's own tap (play upright: full screen, not turned)
+	window.addEventListener("touchend", function (e) {
+		var card = document.getElementById("pb-turn");
+		if (!(card && card.contains(e.target))) {
+			full(true);
+		}
+	}, { once: true, capture: true });
+	// no long-press menu, pinch or double-tap zoom over the game
+	document.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+	document.addEventListener("gesturestart", function (e) { e.preventDefault(); });
+	document.addEventListener("dblclick", function (e) { e.preventDefault(); }, { passive: false });
+	document.addEventListener("DOMContentLoaded", function () {
+		var card = document.createElement("div");
+		card.id = "pb-turn";
+		card.innerHTML = '<svg viewBox="0 0 64 64" fill="none" stroke="#fbe46a" stroke-width="4">' +
+			'<rect x="18" y="4" width="28" height="56" rx="5"/><line x1="28" y1="52" x2="36" y2="52"/></svg>' +
+			"<div>TURN YOUR PHONE SIDEWAYS</div><small>Tap to play upright anyway</small>";
+		card.addEventListener("click", function () {
+			document.body.classList.add("pb-upright");
+			full(false);
+		});
+		document.body.appendChild(card);
+	});
+})();
+</script>

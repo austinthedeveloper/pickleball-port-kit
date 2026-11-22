@@ -23,6 +23,9 @@ const INDOOR := ["gym", "lab", "station", "mall", "drivein"]
 ## Tests set `lite` to play the Web build's game.
 const PAINTED := ["western", "rooftop", "pirate", "motel", "fair", "drivein", "mall"]
 static var lite := OS.has_feature("lite")
+## In a browser (port ADR-119): FULLSCREEN is the page's, asked for from a
+## tap (SCALE AUTO already fills a phone's screen). Tests set it.
+static var web := OS.has_feature("web")
 const DIFFICULTIES := ["KID", "EASY", "MEDIUM", "HARD"]
 const POINTS := [3, 5, 7, 9, 11, 15, 21]
 const CAMERAS := [0, 50, 75, 100]
@@ -283,6 +286,8 @@ static var _watched: Window
 ## Upright, the picture keeps its width and the space below it is the
 ## touch pad's (PORT-152); the window's size is watched so a turned phone
 ## or a resized window chooses again.
+## In a browser the page is full screen or not by the player's taps
+## (web_full), so only the scale applies.
 static func apply_window(win: Window) -> void:
 	if win == null or DisplayServer.get_name() == "headless":
 		return
@@ -293,9 +298,30 @@ static func apply_window(win: Window) -> void:
 		else Window.CONTENT_SCALE_STRETCH_FRACTIONAL
 	win.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_KEEP_WIDTH if portrait(win.size) \
 		else Window.CONTENT_SCALE_ASPECT_KEEP
+	if web:
+		return
 	var want := DisplayServer.WINDOW_MODE_FULLSCREEN if fullscreen else DisplayServer.WINDOW_MODE_WINDOWED
 	if DisplayServer.window_get_mode() != want:
 		DisplayServer.window_set_mode(want)
+
+
+## FULLSCREEN in a browser: the page's own state, since it can leave full
+## screen without the game (the browser's back, a swipe). Not every browser
+## has it (an iPhone's Safari doesn't: there, a home-screen app is).
+static func web_full_offered() -> bool:
+	return web and JavaScriptBridge.eval(
+		"!!(document.fullscreenEnabled || document.webkitFullscreenEnabled)", true) == true
+
+
+static func web_full() -> bool:
+	return DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
+
+
+## Asked from the row's tap or press: a page may only go full screen just
+## after one.
+static func set_web_full(on: bool) -> void:
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if on
+		else DisplayServer.WINDOW_MODE_WINDOWED)
 
 
 static func venue() -> String:

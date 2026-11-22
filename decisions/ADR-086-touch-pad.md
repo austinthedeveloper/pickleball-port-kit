@@ -47,7 +47,9 @@ What Godot 4.7 offers:
    colours (B hit, A drive, Y soft, X slice, by position as on a pad),
    START top left, L (SHORT, held) and R (SPECIAL) under the top corners,
    where a pad's shoulders are. A finger can slide from one face button
-   to the next. Translucent (72%).
+   to the next. Translucent (72%). (Port ADR-119 weights the face
+   buttons as a GameCube pad's: a big B HIT with the others round it,
+   and moves L, now a toggle, and R by the thumbs.)
 3. **Prompts follow it.** A finger makes `GameControls.TOUCH` the last
    device (as do the mouse events Godot makes of it); the prompts then
    draw the pad's buttons (`Prompts.touch_glyph`: B HIT, A DRIVE...),

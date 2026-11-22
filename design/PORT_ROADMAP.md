@@ -200,6 +200,7 @@ status in the same commit. The finished tasks, in full, are in
 | PORT-172 | The push's slack: a long hold goes out later (ADR-115) | `feature/cld-push-slack` | Ready to test |
 | PORT-173 | The Web build's site: each release goes up on an Azure Static Web App (ADR-116, infra/web) | `feature/cld-web-host` | Done: live since v0.45.0 (2026-11-22) |
 | PORT-174 | Menus for a finger: taps act on lifting, taller rows where there's room, tappable prompts, Player Select by tap, the room grid never left for keys (ADR-117) | `feature/cld-touch-menus` | Ready to test |
+| PORT-176 | The Web build on phones: full screen and landscape, a TURN YOUR PHONE SIDEWAYS card, an installable app, the touch pad on any touch, the face buttons weighted round a big HIT, L (a toggle) and R by the thumbs (port ADR-119) | `feature/cld-web-mobile-merge` | Ready to test |
 
 ## Releases
 
@@ -662,6 +663,7 @@ The art debts paid, winter crowds, a new ROAD TRIP region.
 - `PORT-172` The push's slack: a long hold goes out later (ADR-115)
 - `PORT-173` The Web build's site (ADR-116)
 - `PORT-174` Menus for a finger (ADR-117)
+- `PORT-176` The phone pad of PORT-114, merged (ADR-119)
 
 ### 2027-11 Version 1.0
 
@@ -771,6 +773,12 @@ the chain: each has a default I've gone with.
   few trips and say what to change: the difficulty, the length, prices
   and cash, the gear (which items are dull or too strong), the GARAGE's
   pace. The numbers are a first guess (KNOWN_ISSUES #82).
+
+- **PORT-176 the PORT-114 phone pad, merged (2026-11-22):** the
+  weighted buttons (a big B HIT, X and A kidneys round it, a small Y),
+  L over the D-pad as a toggle and R over the buttons, and the TURN YOUR
+  PHONE SIDEWAYS card (a tap on it plays upright, with 0.44's upright
+  layout). Say if the L toggle feels right, or if L should be held.
 
 - **PORT-81 touch:** the pad is a SNES pad (B A Y X, L R up top). Say if
   you'd rather have big labelled buttons (HIT, DRIVE...) or fewer of them
