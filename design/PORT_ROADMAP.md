@@ -353,6 +353,9 @@ status in the same commit. The finished tasks, in full, are in
 - **v0.45.0** (2026-11-22): PORT-171 longer arms, PORT-172 the push's
   slack, PORT-173 the Web build's site (tag `v0.45.0`, on
   `feature/cld-release-0.45.0`).
+- **v0.46.0** (2026-11-22): PORT-174 menus for a finger (ADR-117): taller
+  touch rows, tappable prompts, Player Select by tap, the room-code grid
+  on phones (tag `v0.46.0`, on `feature/cld-release-0.46.0`).
 
 ## Phase 5: the bible (planned 2026-10-18)
 
