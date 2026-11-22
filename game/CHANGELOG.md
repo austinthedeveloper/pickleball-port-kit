@@ -4,6 +4,22 @@ Pickleball '94, the Godot port. Versions follow
 [design/VERSIONING.md](../design/VERSIONING.md); the newest is first.
 `game/RELEASE_NOTES.md` has the per-task detail from the roadmap.
 
+## [0.46.0] - 2026-11-22
+
+Menus made for a finger: bigger rows, prompts you can tap, and room codes
+that open the letter grid on a phone.
+
+### Changed
+- **Menus on a touch screen**: rows are taller where the screen has room,
+  and a tap acts when you lift your finger, so sliding off a row cancels
+  it. The prompts under each menu (SELECT, BACK) are buttons you can tap.
+- **Player Select by tap**: tap a shirt, the player or a paddle to choose
+  it; NEXT, PLAY and BACK sit along the bottom.
+
+### Fixed
+- **Room codes on a phone**: JOIN and ROOM open the letter grid when no
+  keyboard is up, and the grid waits for all four letters before joining.
+
 ## [0.45.0] - 2026-11-22
 
 Longer arms and a real overhead, a little more room on a held push, and
