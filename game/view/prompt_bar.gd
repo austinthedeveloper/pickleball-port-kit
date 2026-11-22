@@ -13,7 +13,25 @@ const ROUND := ["face", "menu", "view", "dpad"]   ## glyphs H wide and tall; the
 const LIP := 2.0                 ## a key's dark front edge, under its top face
 const GAP := 18.0
 
+## A menu's prompts are buttons on a touch screen (port ADR-117): the
+## touch pad presses a tapped prompt's action, so BACK and CONFIRM work
+## though the pad's own buttons have stepped aside from the panel.
+static var _tappable: Array[int] = []   ## the instance ids of the bars that take taps
+## A prompt's action -> the input action a tap presses ("back" is Y).
+const TAP_ACTIONS := {"hit": "hit", "drive": "drive", "soft": "soft", "back": "soft",
+	"slice": "slice", "start": "start", "short": "short", "special": "special"}
+const TAP_PAD := Vector2(8, 9)   ## px around a prompt that still take its tap
+
 var items: Array = []            ## [[action, label], ...]
+## Set: its prompts take taps (MenuPage's, Player Select's).
+var tappable := false:
+	set(v):
+		tappable = v
+		if v and not get_instance_id() in _tappable:
+			_tappable.append(get_instance_id())
+		elif not v:
+			_tappable.erase(get_instance_id())
+		queue_redraw()
 var tint := Color(0.85, 0.88, 0.95)
 var _texts: Array = []
 var _layout: Array = []          ## per item: [glyph, glyph rect, its letters or null, label]
@@ -95,6 +113,62 @@ func key_faces() -> Array:
 	return out
 
 
+## Each tappable prompt's box on the screen and the action a tap presses:
+## [[Rect2, action], ...].
+func tap_targets() -> Array:
+	var out := []
+	if not tappable:
+		return out
+	var xf := get_global_transform()
+	for i in mini(_layout.size(), items.size()):
+		var action := String(items[i][0])
+		if not TAP_ACTIONS.has(action):
+			continue
+		var r: Rect2 = _layout[i][1]
+		var label: BitmapText = _layout[i][3]
+		var end := label.position.x + BitmapText.measure("small", label.text)
+		var box := Rect2(r.position.x, -KEY_H / 2.0, end - r.position.x, KEY_H)
+		box = box.grow_individual(TAP_PAD.x, TAP_PAD.y, TAP_PAD.x, TAP_PAD.y)
+		out.append([Rect2(xf * box.position, box.size * xf.get_scale()), TAP_ACTIONS[action]])
+	return out
+
+
+## The action a tappable prompt shown at `p` (on the screen) presses, or "".
+static func tapped_at(p: Vector2) -> String:
+	for id in _tappable:
+		var bar := instance_from_id(id) as PromptBar
+		if bar != null and bar.shown():
+			var a := bar.tap_at(p)
+			if a != "":
+				return a
+	return ""
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		_tappable.erase(get_instance_id())
+
+
+## Shown: it and every parent visible (in the tree or not).
+func shown() -> bool:
+	var n: Node = self
+	while n != null:
+		if n is CanvasItem and not (n as CanvasItem).visible:
+			return false
+		if n is CanvasLayer and not (n as CanvasLayer).visible:
+			return false
+		n = n.get_parent()
+	return true
+
+
+## The action a tap at `p` (on the screen) presses, or "".
+func tap_at(p: Vector2) -> String:
+	for t in tap_targets():
+		if (t[0] as Rect2).has_point(p):
+			return t[1]
+	return ""
+
+
 func _glyph_width(g: Dictionary) -> float:
 	if g["kind"] in ROUND:
 		return H
@@ -107,6 +181,16 @@ func _process(_delta: float) -> void:
 
 
 func _draw() -> void:
+	if tappable and GameControls.last_device == GameControls.TOUCH:
+		# on a touch screen a menu's prompts are buttons: framed as such
+		for i in mini(_layout.size(), items.size()):
+			if TAP_ACTIONS.has(String(items[i][0])):
+				var r: Rect2 = _layout[i][1]
+				var label: BitmapText = _layout[i][3]
+				var end := label.position.x + BitmapText.measure("small", label.text)
+				var box := Rect2(r.position.x - 5, -KEY_H / 2.0 - 3, end - r.position.x + 10, KEY_H + 6)
+				draw_rect(box, Color(0.98, 0.86, 0.36, 0.16))
+				draw_rect(box, Color(0.98, 0.86, 0.36, 0.7), false, 1.5)
 	for l in _layout:
 		var g: Dictionary = l[0]
 		var r: Rect2 = l[1]

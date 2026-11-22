@@ -5,6 +5,10 @@
 class_name SelectScreen
 extends Control
 
+## A tap or click on a part (port ADR-117), as the pad presses it takes:
+## the title feeds them to the PlayerSelect in order.
+signal tapped(presses: Array)
+
 const DIM := Color(0.7, 0.74, 0.85)
 const GOLD := Color("fbe46a")
 const LEFT := Rect2(40, 92, 540, 372)
@@ -27,6 +31,8 @@ var _who: BitmapText
 var _bars: Array = []            # per stat: [label, segs...]
 var _arrow: Sprite2D
 var _frame := 0
+var _prompts: PromptBar
+var _device := -1
 var _overlay: Control           ## the paddles and the cursor brackets, over the panels
 ## ADR-047: the active career player (null: none). 1P's portrait and
 ## thumbnails take their skin, hair and hat, and 1P's bars their hat's gear.
@@ -93,14 +99,94 @@ func setup(s: PlayerSelect) -> SelectScreen:
 	add_child(_overlay)
 	_overlay.draw.connect(_draw_overlay)
 	_panel(Rect2(40, 476, 880, 50))
-	add_child(PromptBar.new().setup([["dpad", "CHOOSE"], ["hit", "CONFIRM"], ["start", "PLAY"],
-		["back", "BACK"]], Vector2(480, 501)))
+	_prompts = PromptBar.new().setup(_prompt_items(), Vector2(480, 501))
+	_prompts.tappable = true             # CONFIRM, PLAY and BACK by tap on a touch screen
+	add_child(_prompts)
 	_arrow = Sprite2D.new()
 	_arrow.texture = load("res://assets/levels/ui/icon_ball.png")
 	_arrow.centered = false
 	add_child(_arrow)
 	refresh()
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	for c in get_children():             # the taps are this screen's, not its pieces'
+		if c is Control:
+			(c as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return self
+
+
+## On a touch screen the parts are tapped, so the D-pad's CHOOSE says so.
+func _prompt_items() -> Array:
+	if GameControls.last_device == GameControls.TOUCH:
+		return [["hit", "NEXT"], ["start", "PLAY"], ["back", "BACK"]]
+	return [["dpad", "CHOOSE"], ["hit", "CONFIRM"], ["start", "PLAY"], ["back", "BACK"]]
+
+
+## A colour thumbnail's box.
+static func thumb_rect(c: int) -> Rect2:
+	return Rect2(LEFT.position.x + 18 + c * (THUMB_W + 4), LEFT.position.y + 264, THUMB_W, 96)
+
+
+## The pad presses a tap at `p` stands for: the row it's on, then the
+## change (a thumbnail: its colour; the player: the other body; the
+## paddle: left half back, right half on).
+func presses_for(p: Vector2) -> Array:
+	var target := -1
+	var steps: Array = []
+	var c: Dictionary = sel.current_choice()
+	for i in PlayerSelect.PAL_COUNT:
+		if thumb_rect(i).has_point(p):
+			target = PlayerSelect.ROW_COLOUR
+			if sel.colour_taken(i):
+				break
+			var at: int = c["palette"]
+			var n := 0
+			while at != i and n < PlayerSelect.PAL_COUNT:
+				at = sel._step_colour(at, 1)
+				steps.append(PlayerSelect.PAD_RIGHT)
+				n += 1
+			break
+	if target < 0 and Rect2(LEFT.position, Vector2(LEFT.size.x, 250)).has_point(p):
+		target = PlayerSelect.ROW_VARIANT
+		steps = [PlayerSelect.PAD_LEFT if int(c["variant"]) == K.VARIANT_FEMALE else PlayerSelect.PAD_RIGHT]
+	if target < 0 and RIGHT.has_point(p):
+		target = PlayerSelect.ROW_PADDLE
+		var at := int(c["paddle"])
+		var n := Paddles.NAMES.size()
+		for i in n:
+			if _paddle_rect(i).has_point(p):        # a paddle: that one
+				for k in (i - at + n) % n:
+					steps.append(PlayerSelect.PAD_RIGHT)
+				return _to_row(target) + steps
+		# elsewhere on the panel: its left half back, its right half on
+		steps = [PlayerSelect.PAD_LEFT if p.x < RIGHT.get_center().x else PlayerSelect.PAD_RIGHT]
+	if target < 0:
+		return []
+	return _to_row(target) + steps
+
+
+## The presses that move the cursor to `target`'s row.
+func _to_row(target: int) -> Array:
+	var out: Array = []
+	var row := sel.row
+	while row < target:
+		out.append(PlayerSelect.PAD_DOWN)
+		row += 1
+	while row > target:
+		out.append(PlayerSelect.PAD_UP)
+		row -= 1
+	return out
+
+
+func _gui_input(event: InputEvent) -> void:
+	if not visible or not (event is InputEventMouseButton):
+		return
+	var e := event as InputEventMouseButton
+	if e.button_index != MOUSE_BUTTON_LEFT or e.pressed:
+		return
+	var presses := presses_for(e.position)
+	if not presses.is_empty():
+		tapped.emit(presses)
+	accept_event()
 
 
 func _panel(r: Rect2) -> NinePatchRect:
@@ -153,6 +239,9 @@ func _process(_delta: float) -> void:
 		s.region_rect = Rect2(idle * MatchView.FRAME, 0, MatchView.FRAME, MatchView.FRAME)
 	if sel and sel.changed:
 		refresh()
+	if _device != GameControls.last_device:
+		_device = GameControls.last_device
+		_prompts.set_items(_prompt_items())
 	_overlay.queue_redraw()
 
 

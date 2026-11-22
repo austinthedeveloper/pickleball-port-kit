@@ -57,6 +57,7 @@ var practice_page: PracticePage  ## the drill editor, over the menu while open
 var select := PlayerSelect.new()
 var select_screen: SelectScreen
 var _select_doubles := false
+var _keys: PromptBar
 var _header: Array = []          # the logo and record line (hidden on Player Select)
 var build_label: BitmapText
 ## MULTIPLAYER (PORT-16): the lobby and its screen.
@@ -149,6 +150,8 @@ func _ready() -> void:
 	build.tint = Color(0.75, 0.8, 0.9, 0.7)
 	_ui.add_child(build)
 	build_label = build
+	_keys = keys                         # on a touch screen the pad's buttons say this (ADR-117)
+	keys.visible = not MenuPage.touch_rows
 	_header = [logo, sub, _record, keys, build]
 	_build_pages()
 	lobby_screen = LobbyScreen.new().setup(lobby)
@@ -167,6 +170,9 @@ func _ready() -> void:
 	practice_page.visible = false
 	_ui.add_child(practice_page)
 	select_screen = SelectScreen.new().setup(select)
+	select_screen.tapped.connect(func(presses: Array):
+		for b in presses:
+			select_input(int(b)))
 	select_screen.visible = false
 	_ui.add_child(select_screen)
 	hat_museum = HatMuseum.new().setup(museum)
@@ -204,7 +210,10 @@ func _add_page(id: String, title: String, rows: Array, help: Array,
 	var h := 18 + rows.size() * MenuPage.ROW_H + (52 if not help.is_empty() else 12) \
 		+ (46 if title != "" else 0)
 	at.size.y = h if id in ["main", "play", "player", "pad", "notice"] else maxi(h, 300)     # the short ones fit their rows
-	var p := MenuPage.new().setup(id, title, rows, at, help)
+	# on a touch screen the rows may reach down to the key legend's place,
+	# which the touch pad's own buttons replace (ADR-117)
+	# (ACHIEVEMENTS keeps its rows: its description line sits under the panel)
+	var p := MenuPage.new().setup(id, title, rows, at, help, 0.0 if id == "achievements" else 530.0)
 	# the mouse: hover selects, click presses, wheel changes, right click backs
 	p.pressed.connect(func(row): _after_press(row))
 	p.changed.connect(func(_row):
@@ -336,7 +345,7 @@ func _show(id: String) -> void:
 	if pad_map_screen:
 		pad_map_screen.visible = id == "padmap"
 	for n in _header:
-		n.visible = not id in ["select", "setup", "records", "achievements", "replays", "controls", "options", "access", "modifiers", "rules", "lobby", "museum", "career_card", "career_edit",
+		n.visible = (n != _keys or not MenuPage.touch_rows) and not id in ["select", "setup", "records", "achievements", "replays", "controls", "options", "access", "modifiers", "rules", "lobby", "museum", "career_card", "career_edit",
 			"career_name", "pad", "padmap"]
 	if lobby_screen:
 		lobby_screen.visible = id == "lobby"

@@ -57,6 +57,7 @@ func _ready() -> void:
 	_chime.volume_db = -4.0
 	add_child(_chime)
 	save.load_game()
+	MenuPage.touch_rows = MenuPage.touch_screen()   # port ADR-117: rows for a finger
 	Updater.mark_good()                # PORT-32: an updated launch reached the title
 	if UpdateScreen.wanted():
 		show_update()                  # PORT-34: first, any update (it can't be skipped)
