@@ -20,6 +20,11 @@ signal hovered(id: String)        ## the mouse moved the selection
 signal back_requested             ## a right click
 
 const ROW_H := 28
+## On a touch screen (port ADR-117) rows are taller, for a finger: a page
+## built while `touch_rows` is set spreads its rows into its panel's spare
+## room, and down to the `floor` its screen allows, up to TOUCH_ROW_H.
+const TOUCH_ROW_H := 36
+static var touch_rows := false
 const DIM := Color(0.7, 0.74, 0.85)
 const VALUE := Color("fbe46a")
 const BAR := Color(0.98, 0.86, 0.36, 0.22)
@@ -30,6 +35,8 @@ const SLIDE := 36.0
 const POP_FRAMES := 8
 
 var page_id := ""
+var _rh := ROW_H                 ## this page's row pitch (taller on a touch screen, where there's room)
+var _tap_row := -1               ## the row a finger went down on (it acts on lifting)
 var rows: Array = []
 var cursor := 0
 var area := Rect2(300, 172, 360, 300)
@@ -48,10 +55,17 @@ var _panel: NinePatchRect
 
 
 func setup(id: String, title: String, page_rows: Array, rect := Rect2(300, 172, 360, 300),
-		help: Variant = "") -> MenuPage:
+		help: Variant = "", floor_y := 0.0) -> MenuPage:
 	page_id = id
 	rows = page_rows
 	area = rect
+	_rh = ROW_H
+	if touch_rows and not rows.is_empty():
+		var has_help: bool = (help is Array and not help.is_empty()) or (help is String and help != "")
+		var need := 18 + (46 if title != "" else 0) + rows.size() * ROW_H + (50 if has_help else 12)
+		var room := area.size.y - need + maxf(0.0, floor_y - area.end.y)
+		_rh = clampi(ROW_H + int(room / rows.size()), ROW_H, TOUCH_ROW_H)
+		area.size.y = maxf(area.size.y, need + rows.size() * (_rh - ROW_H))
 	size = Vector2(960, 540)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_panel = UiKit.panel(area, self)
@@ -72,13 +86,13 @@ func setup(id: String, title: String, page_rows: Array, rect := Rect2(300, 172, 
 		var label := BitmapText.new()
 		label.font = "small"
 		label.text = _label(i)
-		label.position = Vector2(area.position.x + 36, _top + i * ROW_H)
+		label.position = Vector2(area.position.x + 36, _row_y(i))
 		add_child(label)
 		_labels.append(label)
 		var value := BitmapText.new()
 		value.font = "small"
 		value.align = 1.0
-		value.position = Vector2(area.end.x - 40, _top + i * ROW_H)
+		value.position = Vector2(area.end.x - 40, _row_y(i))
 		value.tint = VALUE
 		add_child(value)
 		_values.append(value)
@@ -89,6 +103,7 @@ func setup(id: String, title: String, page_rows: Array, rect := Rect2(300, 172, 
 	var at := Vector2(area.get_center().x, area.end.y - 22)
 	if help is Array and not help.is_empty():
 		prompts = PromptBar.new().setup(help, at)
+		prompts.tappable = true
 		add_child(prompts)
 	elif help is String and help != "":
 		var h := BitmapText.new()
@@ -101,6 +116,18 @@ func setup(id: String, title: String, page_rows: Array, rect := Rect2(300, 172, 
 	refresh()
 	settle()
 	return self
+
+
+## This page's row pitch (taller on a touch screen, where there's room).
+func row_pitch() -> int:
+	return _rh
+
+
+## On a touch screen: TOUCH PAD not OFF and the screen takes touch, or ON.
+static func touch_screen() -> bool:
+	if Settings.touch_pad == TouchPad.OFF:
+		return false
+	return Settings.touch_pad == TouchPad.ON or DisplayServer.is_touchscreen_available()
 
 
 func _label(i: int) -> String:
@@ -256,7 +283,8 @@ func settle() -> void:
 
 
 func _row_y(i: int) -> float:
-	return _top + i * ROW_H
+	# a taller row keeps its text in the middle of its band
+	return _top + i * _rh + (_rh - ROW_H) / 2.0
 
 
 func _apply_anim() -> void:
@@ -292,7 +320,7 @@ func _step_visuals() -> void:
 
 ## The highlight bar behind the selected row, where it is drawn now.
 func bar_rect() -> Rect2:
-	return UiKit.bar_behind(area.position.x + 14, area.size.x - 28, _bar_y, ROW_H - 4)
+	return UiKit.bar_behind(area.position.x + 14, area.size.x - 28, _bar_y, _rh - 4)
 
 
 func _draw_bar() -> void:
@@ -315,13 +343,25 @@ func _draw_arrows() -> void:
 		Vector2(left, y + 5)]), VALUE)
 
 
+## A finger's tap on the current row at `x`: on a value's left arrow it
+## steps back, anywhere else it presses (a value row steps on).
+func _tap(x: float) -> bool:
+	var row: Dictionary = rows[cursor]
+	if row.has("change") and not row.has("press"):
+		var v: BitmapText = _values[cursor]
+		var left := v.position.x - BitmapText.measure("small", v.text) - 10
+		if x < left + 14 and x > left - 40:
+			return change(-1)
+	return press()
+
+
 ## The row under a point (page coordinates), or -1.
 func row_at(p: Vector2) -> int:
 	if p.x < area.position.x or p.x > area.end.x:
 		return -1
-	# each row's band is ROW_H tall, centred on its bar
-	var band := UiKit.bar_behind(0, 0, 0, ROW_H - 4).get_center().y - ROW_H / 2.0
-	var i := int(floor((p.y - (_top + band)) / ROW_H))
+	# each row's band is a row tall, centred on its bar
+	var band := UiKit.bar_behind(0, 0, _row_y(0) - _top, _rh - 4).get_center().y - _rh / 2.0
+	var i := int(floor((p.y - (_top + band)) / _rh))
 	return i if i >= 0 and i < rows.size() else -1
 
 
@@ -334,6 +374,24 @@ func _gui_input(event: InputEvent) -> void:
 			cursor = i
 			refresh()
 			hovered.emit(current_id())
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT \
+			and event.device == InputEvent.DEVICE_ID_EMULATION:
+		# a finger (port ADR-117): down shows the row, lifting on it acts,
+		# so a finger that lands on the wrong row can slide off and let go
+		var i := row_at(event.position)
+		if event.pressed:
+			_tap_row = i
+			if i >= 0 and i != cursor:
+				cursor = i
+				refresh()
+		elif i >= 0 and i == _tap_row:
+			_tap_row = -1
+			cursor = i
+			var id := current_id()
+			if _tap(event.position.x):
+				pressed.emit(id)
+		else:
+			_tap_row = -1
 	elif event is InputEventMouseButton and event.pressed:
 		var i := row_at(event.position)
 		match event.button_index:

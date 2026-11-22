@@ -238,7 +238,12 @@ func target_at(p: Vector2) -> String:
 	for a in pills:
 		if not a in _away and pills[a].grow(PILL_REACH * k).has_point(p):
 			return a
-	return ""
+	return prompt_at(p)
+
+
+## A menu's tappable prompt at `p` (port ADR-117): the action it presses.
+func prompt_at(p: Vector2) -> String:
+	return PromptBar.tapped_at(p)
 
 
 ## The D-pad's directions for a finger `v` from its centre: eight ways,

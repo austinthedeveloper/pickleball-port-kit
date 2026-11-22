@@ -107,3 +107,4 @@ first decisions, are rows in `design/07_DECISIONS_AND_RISKS.md`.
 | 114 | [Player Arms and Swings](ADR-114-player-arms-and-swings.md) | Accepted 2026-11-11 |
 | 115 | [The Push's Slack](ADR-115-push-slack.md) | Accepted 2026-11-12 |
 | 116 | [The Web Build's Site](ADR-116-web-site.md) | Accepted 2026-11-21 |
+| 117 | [Menus for a Finger](ADR-117-touch-menus.md) | Accepted 2026-11-22 |

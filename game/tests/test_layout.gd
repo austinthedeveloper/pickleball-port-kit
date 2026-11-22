@@ -2047,3 +2047,16 @@ func test_weekly_and_boards() -> void:
 	h._close_board()
 	check_layout(h, "ROAD TRIP home after the board")
 	h.free()
+
+
+## Port ADR-117: on a touch screen every menu row is taller
+## (MenuPage.TOUCH_ROW_H). The screens built from MenuPages, again with
+## those rows: nothing collides, leaves the screen or leaves its panel.
+func test_touch_rows() -> void:
+	MenuPage.touch_rows = true
+	for t in [test_title_pages, test_lite_title, test_online, test_pause_options, test_tuning,
+			test_course, test_club, test_story, test_replays, test_achievements, test_career_screens,
+			test_hud, test_park, test_tournament, test_trip_home, test_trip_pick_and_shop,
+			test_trip_scenes, test_trip_van, test_weekly_and_boards, test_text_centred]:
+		t.call()
+	MenuPage.touch_rows = false

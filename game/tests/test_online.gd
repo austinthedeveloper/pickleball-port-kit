@@ -722,3 +722,33 @@ func test_the_room_on_a_letter_grid() -> void:
 	check(not o.grid.visible and o.page.visible and not o.editing, "back closes the grid")
 	eq(o.page.current_id(), "join", "a full code: the cursor on JOIN")
 	o.free()
+
+
+## Port ADR-117: a phone has no keyboard, so a short room never leaves
+## you typing blind: JOIN opens the grid, the grid's JOIN waits for four
+## letters, and ROOM always opens the grid.
+func test_a_short_room_keeps_the_grid() -> void:
+	var o := OnlineScreen.new().setup(null)
+	runner.root.add_child(o)
+	if not o.is_node_ready():
+		o._ready()
+	o.page.select("join")
+	o.page.press()
+	check(o.grid.visible and o.editing, "JOIN with no room opens the grid")
+	o.grid_type("BX")
+	var last := OnlineScreen.grid_rows() - 1
+	o.grid.select("g%d" % last)
+	o.grid_cols[last] = 1                # JOIN
+	o.grid.press()
+	check(o.grid.visible, "the grid's JOIN waits for the rest")
+	eq(o.room, "BX", "the letters stay")
+	o._close_grid()
+	o.editing = true                     # typing by keys, grid closed
+	o.page.select("address")
+	o.page.press()
+	check(o.grid.visible and o.editing, "ROOM opens the grid, never closes typing blind")
+	var kept := GameControls.last_device
+	GameControls.last_device = GameControls.TOUCH
+	eq(o.info()[1], "TAP EACH LETTER, THEN JOIN.", "a finger is told to tap")
+	GameControls.last_device = kept
+	o.free()

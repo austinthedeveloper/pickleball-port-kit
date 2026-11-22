@@ -239,6 +239,10 @@ func _press_host() -> void:
 
 
 func _press_address() -> void:
+	if way == BY_ROOM and not grid.visible:
+		editing = true                   # a room is picked on the grid, never typed blind
+		_show_grid(true)
+		return
 	editing = not editing
 	if not editing:
 		_store_address()
@@ -257,6 +261,8 @@ func _press_join(watch := false) -> void:
 	if _typed().strip_edges().length() < need:
 		page.select("address")
 		editing = true
+		if way == BY_ROOM:
+			_show_grid(true)             # port ADR-117: the grid, so a phone can finish it
 		return
 	_close_session()
 	editing = false
@@ -407,7 +413,7 @@ func _build_grid() -> void:
 			"change": func(d): grid_cols[r] = (grid_cols[r] + d + grid_items(r).size()) % grid_items(r).size(); _grid_box.queue_redraw(),
 			"press": func(): _grid_press(r)})
 	grid = MenuPage.new().setup("room_grid", "", rows, Rect2(300, 96, 360, 18 + grid_rows() * MenuPage.ROW_H + 50),
-		[["hit", "TYPE"], ["back", "DONE"]])
+		[["hit", "TYPE"], ["back", "DONE"]], 386.0)
 	grid.back_requested.connect(func(): _close_grid())
 	grid.pressed.connect(func(_id): grid.refresh())
 	_ui.add_child(grid)
@@ -424,7 +430,8 @@ func grid_item_rect(row: int, col: int) -> Rect2:
 	for i in col:
 		x += BitmapText.measure("small", String(items[i]) + GRID_GAP)
 	var w := BitmapText.measure("small", String(items[col]))
-	return Rect2(x - 5, grid._row_y(row) - 3, w + 10, MenuPage.ROW_H - 4)
+	var bar := UiKit.bar_behind(x - 5, w + 10, grid._row_y(row), grid._rh - 4)
+	return Rect2(bar.position.x, bar.position.y + 1, bar.size.x, bar.size.y - 2)
 
 
 func _draw_grid_box() -> void:
@@ -440,6 +447,9 @@ func _grid_press(row: int) -> void:
 	if item == "DELETE":
 		room = room.left(maxi(0, room.length() - 1))
 	elif item == "JOIN":
+		if room.length() < RelayLink.ROOM_LEN:
+			_sfx.play("back")            # not yet: the grid stays for the rest
+			return
 		_close_grid()
 		_press_join()
 		return
@@ -603,6 +613,8 @@ func info() -> Array:
 			shown += "-"
 		if GameControls.last_device == GameControls.KEYBOARD:
 			return ["ROOM: " + shown, "TYPE THE LETTERS, OR PICK THEM", "WITH THE ARROWS AND SPACE."]
+		if GameControls.last_device == GameControls.TOUCH:
+			return ["ROOM: " + shown, "TAP EACH LETTER, THEN JOIN.", ""]
 		return ["ROOM: " + shown, "PICK EACH LETTER, THEN JOIN.", "OR TYPE IT ON A KEYBOARD."]
 	if st == OnlineSession.IDLE:
 		if last_reason != "":

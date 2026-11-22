@@ -87,6 +87,7 @@ func _initialize() -> void:
 		if arg == "touch":
 			Settings.touch_pad = TouchPad.ON
 			GameControls.last_device = GameControls.TOUCH
+			MenuPage.touch_rows = true          # port ADR-117: as main sets it on a touch screen
 		if arg.begins_with("update="):          # PORT-32: a stand-in updater in this state
 			var u := Updater.new()
 			Updater.instance = u

@@ -209,3 +209,110 @@ func test_setting_is_saved() -> void:
 	Settings.load_from(s)
 	eq(Settings.touch_pad, TouchPad.OFF, "kept")
 	Settings.touch_pad = kept
+
+
+func _finger(p: MenuPage, row: int, pressed: bool, x := -1.0) -> void:
+	var e := InputEventMouseButton.new()
+	e.device = InputEvent.DEVICE_ID_EMULATION
+	e.button_index = MOUSE_BUTTON_LEFT
+	e.pressed = pressed
+	e.position = Vector2(p.area.get_center().x if x < 0 else x, p._row_y(row) + 6)
+	p._gui_input(e)
+
+
+## Port ADR-117: a finger shows the row it lands on and acts on lifting
+## there; one that slides off lets go of nothing; the left arrow steps back.
+func test_a_finger_acts_on_lifting() -> void:
+	var log := []
+	var p := MenuPage.new().setup("t", "TEST", [
+		{"id": "a", "label": "A", "press": func(): log.append("a")},
+		{"id": "b", "label": "B", "value": func(): return "VALUE", "change": func(d): log.append("b %d" % d)},
+		{"id": "c", "label": "C", "press": func(): log.append("c")},
+	])
+	_finger(p, 2, true)
+	eq([p.current_id(), log], ["c", []], "down shows the row, does nothing yet")
+	_finger(p, 2, false)
+	eq(log, ["c"], "lifting on it presses")
+	_finger(p, 0, true)
+	_finger(p, 2, false)
+	eq(log, ["c"], "lifting on another row presses nothing")
+	_finger(p, 1, true)
+	_finger(p, 1, false)
+	eq(log, ["c", "b 1"], "a value row steps on")
+	var v: BitmapText = p._values[1]
+	var left := v.position.x - BitmapText.measure("small", v.text) - 10
+	_finger(p, 1, true, left)
+	_finger(p, 1, false, left)
+	eq(log, ["c", "b 1", "b -1"], "its left arrow steps back")
+	p.free()
+
+
+## Port ADR-117: rows grow into a page's spare room on a touch screen, and
+## down to the floor its screen allows, never past TOUCH_ROW_H.
+func test_touch_rows_fit_their_room() -> void:
+	var rows := [{"id": "a", "label": "A"}, {"id": "b", "label": "B"}]
+	var tight := Rect2(300, 100, 360, 18 + 2 * MenuPage.ROW_H + 12)
+	MenuPage.touch_rows = true
+	var a := MenuPage.new().setup("t", "", rows.duplicate(), tight)
+	eq(a.row_pitch(), MenuPage.ROW_H, "no room: rows as they were")
+	var b := MenuPage.new().setup("t", "", rows.duplicate(), tight, "", tight.end.y + 100)
+	eq(b.row_pitch(), MenuPage.TOUCH_ROW_H, "room below: as tall as a finger wants, no taller")
+	eq(b.area.size.y, tight.size.y + 2 * (MenuPage.TOUCH_ROW_H - MenuPage.ROW_H), "the panel grew to fit")
+	eq(b.row_at(Vector2(480, b._row_y(1) + 6)), 1, "a tap finds the taller row")
+	MenuPage.touch_rows = false
+	var c := MenuPage.new().setup("t", "", rows.duplicate(), tight, "", tight.end.y + 100)
+	eq(c.row_pitch(), MenuPage.ROW_H, "not a touch screen: rows as they were")
+	for p in [a, b, c]:
+		p.free()
+
+
+## Port ADR-117: a menu's prompts are buttons for a finger (BACK presses
+## Y), so a menu works though the pad's own buttons stepped aside.
+func test_menu_prompts_take_taps() -> void:
+	var pad := _new_pad()
+	runner.root.add_child(pad)
+	var p := MenuPage.new().setup("t", "TEST", [{"id": "a", "label": "A"}], Rect2(300, 172, 360, 200),
+		[["hit", "SELECT"], ["back", "BACK"]])
+	runner.root.add_child(p)
+	var targets := p.prompts.tap_targets()
+	eq(targets.map(func(t): return t[1]), ["hit", "soft"], "SELECT is B, BACK is Y")
+	var back: Rect2 = targets[1][0]
+	eq(pad.target_at(back.get_center()), "soft", "the pad presses BACK's action")
+	_touch(0, back.get_center())
+	eq(pad.held(), ["soft"], "held while the finger's on it")
+	_touch(0, back.get_center(), false)
+	eq(pad.held(), [], "let go")
+	p.visible = false
+	eq(pad.target_at(back.get_center()), "", "a hidden page's prompts take nothing")
+	runner.root.remove_child(p)
+	p.free()
+	runner.root.remove_child(pad)
+	_done(pad)
+
+
+## Port ADR-117: Player Select by tap: a thumbnail picks its colour, the
+## player the other body, the paddle panel's halves step it.
+func test_player_select_by_tap() -> void:
+	var sel := PlayerSelect.new()
+	sel.begin(K.MODE_SINGLES, 1)
+	var s := SelectScreen.new().setup(sel)
+	var c: Dictionary = sel.current_choice()
+	var want := (int(c["palette"]) + 2) % PlayerSelect.PAL_COUNT
+	for b in s.presses_for(SelectScreen.thumb_rect(want).get_center()):
+		sel.input(int(b))
+	eq([sel.row, int(sel.current_choice()["palette"])], [PlayerSelect.ROW_COLOUR, want], "a thumbnail picks its colour")
+	var body := int(sel.current_choice()["variant"])
+	for b in s.presses_for(SelectScreen.LEFT.position + Vector2(200, 100)):
+		sel.input(int(b))
+	eq([sel.row, int(sel.current_choice()["variant"]) != body], [PlayerSelect.ROW_VARIANT, true], "the player: the other body")
+	var paddle := int(sel.current_choice()["paddle"])
+	for b in s.presses_for(SelectScreen.RIGHT.position + Vector2(SelectScreen.RIGHT.size.x - 30, 300)):
+		sel.input(int(b))
+	eq([sel.row, int(sel.current_choice()["paddle"])],
+		[PlayerSelect.ROW_PADDLE, (paddle + 1) % Paddles.NAMES.size()], "the paddle's right half: the next")
+	var last := Paddles.NAMES.size() - 1
+	for b in s.presses_for(s._paddle_rect(last).get_center()):
+		sel.input(int(b))
+	eq(int(sel.current_choice()["paddle"]), last, "a paddle: that one")
+	eq(s.presses_for(Vector2(480, 20)), [], "the title: nothing")
+	s.free()
